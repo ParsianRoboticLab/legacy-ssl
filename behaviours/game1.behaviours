@@ -1,0 +1,6 @@
+chippass=0.5,-0.5
+chiptogoal=1,-0.1
+clear=0.6,-0.6
+kick=1,-0.05
+pass=0.05,-0.1
+passtodefense=0.0001,-0.6

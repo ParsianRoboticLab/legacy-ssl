@@ -1,0 +1,209 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VarXML>
+	<Var name="Formation" type="list">
+		<Var name="Strict Formation" type="bool">
+			false
+		</Var>
+		<Var name="Goalie ID" type="int" minval="" maxval="">
+			0
+		</Var>
+		<Var name="Defense Count" type="int" minval="" maxval="">
+			2
+		</Var>
+	</Var>
+	<Var name="Play Maker" type="list">
+		<Var name="Just Kick To Goal" type="bool">
+			true
+		</Var>
+		<Var name="Just Chip To Goal In Below Distance From Our Goal" type="bool">
+			false
+		</Var>
+		<Var name="X Dist From Our Goal" type="double" minval="0.000000" maxval="">
+			0.000000
+		</Var>
+		<Var name="Kick Threshold" type="double" minval="0.000000" maxval="">
+			0.500000
+		</Var>
+		<Var name="Onetouch Threshold" type="double" minval="0.000000" maxval="">
+			0.500000
+		</Var>
+		<Var name="Onetouch Angle" type="double" minval="0.000000" maxval="">
+			80.000000
+		</Var>
+		<Var name="Onetouchability Angle" type="double" minval="0.000000" maxval="">
+			100.000000
+		</Var>
+		<Var name="Opp Obstacle Factor in Chip" type="double" minval="0.000000" maxval="">
+			2.000000
+		</Var>
+		<Var name="Under estimate their goalie" type="double" minval="0.000000" maxval="">
+			0.500000
+		</Var>
+	</Var>
+	<Var name="OurKickOff" type="list">
+		<Var name="Chip to Goal" type="bool">
+			false
+		</Var>
+	</Var>
+	<Var name="OurIndirect" type="list">
+		<Var name="Chip to Goal" type="bool">
+			false
+		</Var>
+		<Var name="No pass" type="bool">
+			false
+		</Var>
+		<Var name="Chip to Goal in Our field" type="bool">
+			false
+		</Var>
+		<Var name="Shadowy position" type="bool">
+			false
+		</Var>
+		<Var name="Indirect Type" type="int" minval="" maxval="">
+			1
+		</Var>
+	</Var>
+	<Var name="OurDirect" type="list">
+		<Var name="Chip to Goal" type="bool">
+			false
+		</Var>
+		<Var name="Shadowy position" type="bool">
+			false
+		</Var>
+		<Var name="Chip to Goal in Our field" type="bool">
+			false
+		</Var>
+		<Var name="Corner chip" type="bool">
+			false
+		</Var>
+		<Var name="Corner kick" type="bool">
+			false
+		</Var>
+	</Var>
+	<Var name="Defense" type="list">
+		<Var name="No Clear" type="bool">
+			false
+		</Var>
+		<Var name="No Pass" type="bool">
+			false
+		</Var>
+		<Var name="Chip Clear" type="bool">
+			false
+		</Var>
+		<Var name="Swap Clearer" type="bool">
+			true
+		</Var>
+		<Var name="Opp Obstacle Factor in Chip" type="double" minval="0.000000" maxval="">
+			4.000000
+		</Var>
+		<Var name="Kick threshold" type="double" minval="0.000000" maxval="">
+			0.200000
+		</Var>
+		<Var name="Chip threshold" type="double" minval="0.000000" maxval="">
+			0.050000
+		</Var>
+		<Var name="Marking Defense" type="int" minval="" maxval="">
+			0
+		</Var>
+	</Var>
+	<Var name="PlayOn" type="list">
+		<Var name="SQL Directory" type="string">
+			/home/parsian-ai/Desktop/gameOff/trunk/plan.db3
+		</Var>
+		<Var name="Default Cycle" type="int" minval="" maxval="">
+			130
+		</Var>
+		<Var name="Pass Speed" type="int" minval="" maxval="">
+			500
+		</Var>
+		<Var name="Kick Speed" type="int" minval="" maxval="">
+			550
+		</Var>
+		<Var name="Chip Speed" type="int" minval="" maxval="">
+			550
+		</Var>
+		<Var name="Shot Speed" type="int" minval="" maxval="">
+			1023
+		</Var>
+		<Var name="Chip to Goal Speed" type="int" minval="" maxval="">
+			650
+		</Var>
+	</Var>
+	<Var name="PlayOff" type="list">
+		<Var name="SQL Directory" type="string">
+			/home/parsian-ai/Desktop/gameOff/trunk/poplan.db3
+		</Var>
+		<Var name="Symmetry" type="bool">
+			false
+		</Var>
+		<Var name="Use Def Robots" type="bool">
+			false
+		</Var>
+		<Var name="Distance Before Pass" type="double" minval="0.000000" maxval="">
+			1.000000
+		</Var>
+	</Var>
+	<Var name="DynamicPlay" type="list">
+		<Var name="Low Speed Pass" type="int" minval="" maxval="">
+			300
+		</Var>
+		<Var name="Medium Speed Pass" type="int" minval="" maxval="">
+			600
+		</Var>
+		<Var name="High Speed Pass" type="int" minval="" maxval="">
+			800
+		</Var>
+		<Var name="Low Speed Chip" type="int" minval="" maxval="">
+			300
+		</Var>
+		<Var name="Medium Speed Chip" type="int" minval="" maxval="">
+			300
+		</Var>
+		<Var name="High Speed Chip" type="int" minval="" maxval="">
+			300
+		</Var>
+		<Var name="Far Forward" type="bool">
+			true
+		</Var>
+		<Var name="Near Forward" type="bool">
+			true
+		</Var>
+		<Var name="Pass Area" type="double" minval="0.000000" maxval="">
+			0.300000
+		</Var>
+	</Var>
+	<Var name="Mark" type="list">
+		<Var name="PlayOff Man To Man" type="bool">
+			false
+		</Var>
+		<Var name="PlayOn Man To Man" type="bool">
+			false
+		</Var>
+		<Var name="Man To Man All Transiant" type="bool">
+			false
+		</Var>
+		<Var name="Man To man Some Transiant" type="bool">
+			false
+		</Var>
+		<Var name="Ommit Who Could Not Recieve Pass" type="bool">
+			false
+		</Var>
+		<Var name="Opponent Ommit Limit Playon" type="double" minval="0.000000" maxval="">
+			4.500000
+		</Var>
+		<Var name="Opponent Ommit Limit Playoff" type="double" minval="0.000000" maxval="">
+			10.000000
+		</Var>
+		<Var name="Opponent Ommit Limit KickOff" type="double" minval="0.000000" maxval="">
+			4.500000
+		</Var>
+		<Var name="Shoot Ratio Block" type="double" minval="0.000000" maxval="">
+			50.000000
+		</Var>
+		<Var name="Pass Ratio Block" type="double" minval="0.000000" maxval="">
+			10.000000
+		</Var>
+		<Var name="Ommit Nearest To ball Playon" type="bool">
+			true
+		</Var>
+	</Var>
+</VarXML>
