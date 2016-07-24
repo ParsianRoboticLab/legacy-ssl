@@ -1,0 +1,470 @@
+#include "ball.h"
+#include <mathtools.h>
+#include <logger.h>
+#include "varswidget.h"
+#include <QDebug>
+#include <QQueue>
+#include <QTime>
+//#include <knowledge.h>
+
+const double _ROBOT_RADIUS = 0.09;
+
+
+const double CBall::radius = 0.0215;
+
+CBall::CBall(bool noKalman) : CMovingObject()
+{
+    init();
+    if (!noKalman)
+    {
+                tracker = new BallTracker(0.0);
+//		kalmantracker = new BallTracker(1.0);
+        tracker->reset();
+//		kalmantracker->reset();
+    }
+        else
+        {
+                tracker = NULL;
+//		kalmantracker = NULL;
+        }
+
+        blindness = 8;
+    old = 0.0;
+}
+
+void CBall::resetKalman()
+{
+    if (tracker != NULL)
+    {
+        delete tracker;
+                tracker = new BallTracker(0.0);
+        tracker->reset();
+
+//		delete kalmantracker;
+//		kalmantracker = new BallTracker(1.0);
+//		kalmantracker->reset();
+    }
+}
+
+CBall::~CBall()
+{
+}
+
+void CBall::init()
+{
+    repl = false;
+    modelC2Sum = 0;
+    modelC2Count = 0;
+    modelC2Ave = 0;
+    modelSampleTime = 0.008;//0.016;
+    modelFrameCnt = 0;
+    vel.assign(0,0);
+    elementNotInSight = true;
+    float Margin = 0.2;
+    ballInsistanceCounter = 1;
+    fieldRect.assign(-_FIELD_WIDTH/2.0 - Margin,_FIELD_HEIGHT/2.0 + Margin,_FIELD_WIDTH+2*Margin,_FIELD_HEIGHT+2*Margin);
+}
+
+void CBall::setReplace(Vector2D newPos, Vector2D newVel)
+{
+    repl = true;
+    replPos = newPos;
+    replVel = newVel;
+}
+
+int CBall::replacementPacket(char* buf)
+{
+    if (repl) buf[0] = 100;
+    else buf[0] = 10;
+    float x;
+    x = replPos.x;
+    buf[1] = *((char*) (& (x)) );
+    buf[2] = *((char*) (& (x)) + 1);
+    buf[3] = *((char*) (& (x)) + 2);
+    buf[4] = *((char*) (& (x)) + 3);
+    x = replPos.y;
+    buf[5] = *((char*) (& (x)) );
+    buf[6] = *((char*) (& (x)) + 1);
+    buf[7] = *((char*) (& (x)) + 2);
+    buf[8] = *((char*) (& (x)) + 3);
+    x = replVel.x;
+    buf[9]  = *((char*) (& (x)) );
+    buf[10] = *((char*) (& (x)) + 1);
+    buf[11] = *((char*) (& (x)) + 2);
+    buf[12] = *((char*) (& (x)) + 3);
+    x = replVel.y;
+    buf[13]  = *((char*) (& (x)) );
+    buf[14] = *((char*) (& (x)) + 1);
+    buf[15] = *((char*) (& (x)) + 2);
+    buf[16] = *((char*) (& (x)) + 3);
+    repl = false;
+    return 17;
+}
+
+double CBall::getVel()
+{
+    if (modelObjStopped) return vel.length();
+    else return fabs(modelC1 / modelSampleTime);
+}
+Vector2D CBall::getPosInFuture(double _t)
+{
+    return pos + (-0.5*(0.23)*_t*_t + vel.length()*_t)*vel.norm();
+}
+
+double CBall::modelWhenIsObjAt(double dToObj)
+{
+    if (modelC2==0.0)
+    {
+        double r = -modelSampleTime * (modelC0 - dToObj) / modelC1;
+        return r;
+    }
+    else
+    {
+        double delta = modelC1*modelC1 - 4.0*(modelC0-dToObj)*modelC2;
+        if (delta>0)
+        {
+            delta = sqrt(delta);
+            double r1 = modelSampleTime * (-modelC1 - delta) / (2.0*modelC2);
+            double r2 = modelSampleTime * (-modelC1 + delta) / (2.0*modelC2);
+            if (r1<r2)
+            {
+                if (r1>0)
+                    return r1;
+                else
+                    return r2;
+            }
+            else
+            {
+                if (r2>0)
+                    return r2;
+                else
+                    return r1;
+            }
+        }
+        else
+        {
+            double tmax = -(modelC1) / (2.0*modelC2);
+            double dmax = modelC2*tmax*tmax + modelC1*tmax + modelC0;
+            tmax += tmax*fabs(dToObj-dmax)/dmax;
+            return modelSampleTime * tmax;
+        }
+    }
+}
+
+Vector2D CBall::getDir()
+{
+    return modelDir;
+}
+
+Vector2D CBall::getStopPos()
+{
+        return pos + vel.norm()*vel.r2() / (2.0*0.23);
+//    if (modelC2<0) return modelObjStopPos;
+//    return Vector2D();
+}
+
+Vector2D CBall::getProjectionOfPointOnBallVeclocityDirection(Vector2D point,bool usepath)
+{
+    if (usepath && modelDir.valid())
+    {
+       Line2D l(pos, modelDir + pos);
+       Vector2D proj = l.projection(point);
+       return proj;
+   }
+    else {
+       Line2D l(pos, vel + pos);
+       Vector2D proj = l.projection(point);
+       return proj;
+    }
+}
+
+bool CBall::isKicked()
+{
+    return (vel.length() > 1.0);
+}
+
+bool CBall::isPassed()
+{
+    return (vel.length() > 0.5);
+}
+
+
+
+void CBall::filter(int vanished)
+{
+    CRawObject ballLast;
+    if( hist.size() > 100 )
+        hist.pop_front();
+    ballLast.pos = pos;
+    ballLast.dir = dir;
+    hist.push_back(ballLast);
+    if (ballLinearHist.size() > 20)
+    {
+        ballLinearHist.pop_front();
+    }
+    ballLinearHist.push_back(ballLast.pos);
+    bool reflected = false;
+    for (int k=0;k<ballLinearHist.count();k++)
+    {
+        if (fabs(Vector2D::angleBetween((ballLinearHist.back() - ballLinearHist[k]), (ballLinearHist[0] - ballLinearHist[k])).degree()) < 120.0
+                                && (((ballLinearHist.back() - ballLinearHist[k]).length() > 0.07) && ((ballLinearHist[0] - ballLinearHist[k]).length() > 0.07))
+                )
+        {
+            reflected = true;
+        }
+        }
+    if (reflected)
+    {
+                resetKalman();
+//		qDebug()<<"Reflection";
+        ballLinearHist.clear();
+//        debug("RESET!!!", D_ERROR);
+    }
+
+//    if (vel.length()>0.01)
+//    {
+//        acc = -vel.norm() * Gravity * BallFriction();
+//    }
+
+    if (tracker == NULL)
+    {
+        CMovingObject::filter(vanished);
+        return;
+    }
+    if (vanished<=0)
+    {
+        vraw v;
+        v.angle = 0.0;
+        v.conf  = observation.confidence;
+        v.pos   = observation.pos;
+                v.timestamp = observation.time;
+
+//		kalmantracker->observeNew(v,0,0);
+//		acc = kalmantracker->acceleration(8*getFramePeriod());
+
+//		knowledge->plotWidgetCustom[5] = acc.y;
+//		knowledge->plotWidgetCustom[6] = sign(acc.y);
+
+//		tracker->observeNew(v,sign(acc.x),sign(acc.y));
+                tracker->observeNew(v,0,0);
+//		pos = tracker->position(1*getFramePeriod());
+                vel = tracker->velocity(8*getFramePeriod());
+
+//		knowledge->plotWidgetCustom[1] = vel.y;
+                pos = observation.pos;
+//		knowledge->plotWidgetCustom[0] = pos.y;
+
+
+
+                acc = tracker->acceleration(1*getFramePeriod());
+                dir = Vector2D(0,0);
+                angularVel = 0;
+
+        inSight = 1.0;
+//        qDebug() << "vel = " << vel.length() << " Time Stamp= " << v.timestamp;
+        old ++;
+    }
+    else {
+        if (vanished<blindness)
+        {
+            vraw v;
+            v.conf  = 1;
+            v.angle = observation.dir.th().degree();
+            v.pos   = observation.pos;
+            v.timestamp = observation.time;
+
+            pos = v.pos;
+
+//			pos = tracker->position((1+vanished)*getFramePeriod());
+                        vel = tracker->velocity((8+vanished)*getFramePeriod());
+                        acc = tracker->acceleration((1+vanished)*getFramePeriod());
+                        dir = Vector2D(0,0);
+                        angularVel = 0;
+
+            inSight = 0.5;
+
+#if 0
+            qDebug() << "vanished: " << vanished;
+            vraw v;
+            v.conf  = 1;//observation.confidence;
+//            v.angle = observation.dir.th().degree();// + angularVel*getFramePeriod();
+//            v.pos   = observation.pos;// + vel*getFramePeriod();
+            v.timestamp = observation.time;
+            v.pos = pos + vel * getFramePeriod();
+            v.angle = observation.dir.th().degree();/* + angularVel*getFramePeriod();*/
+
+//            tracker->observe(v, v.timestamp);
+            tracker->observeNew(v);
+            pos = tracker->position(getFramePeriod());
+            vel = tracker->velocity(getFramePeriod());
+//            tracker->reset();
+            vel *= 0.99;
+            angularVel *= 0.99;
+            dir = Vector2D::unitVector(v.angle);
+            inSight = 0.5;
+#endif
+        }
+        else {
+                        tracker->reset();
+//			kalmantracker->reset();
+            vel *= 0.8;
+            angularVel *= 0.8;
+            inSight = 0.0;
+        }
+        }
+
+#ifdef velProblem1
+vel *=2;
+#endif
+#ifdef velProblem2
+vel /=2;
+#endif
+}
+
+Vector2D CBall::whereBallSpeedIs(double speed)
+{
+    if (vel.length() < speed) return pos;
+        return pos + vel.norm()*(vel.r2() - speed*speed) / (2.0*acc.length());
+}
+
+Vector2D CBall::ballSpeedAt(double dist)
+{
+    if (dist<0) return Vector2D(0.0,0.0);
+        double v2 = vel.r2()-2.0*acc.length()*dist;
+    if (v2<0) return Vector2D(0.0,0.0);
+    return vel.norm()*sqrt(v2);
+}
+
+double CBall::getBallAcc(){
+//    return Gravity*BallFriction();
+        return this->acc.length();
+}
+
+
+/*
+void CBall::track(QList<TElementData> frameData)
+{
+    draw(fieldRect,"Black");
+    for (int i=0;i<frameData.count();i++)
+    {
+        draw(Circle2D(frameData[i].pos, radius), 0, 360, QColor("white"), false);
+        if(!fieldRect.contains(frameData[i].pos))
+        {
+            draw(Vector2D(frameData[i].pos),0,QColor("white"), false);
+            if(frameData[i].pos.x < fieldRect.left())
+            {
+                frameData[i].pos.x = fieldRect.left();
+            }
+            if(frameData[i].pos.x > fieldRect.right())
+            {
+                frameData[i].pos.x = fieldRect.right();
+            }
+
+            if(frameData[i].pos.y > fieldRect.top())
+            {
+                frameData[i].pos.y = fieldRect.top();
+            }
+            if(frameData[i].pos.y < fieldRect.bottom())
+            {
+                frameData[i].pos.y = fieldRect.bottom();
+            }
+        }
+    }
+    if(trackerForcing){
+        noisyData.confidence = 1;
+        noisyData.pos = trackerForcedPos;
+        trackerLastBestElementID = -1;
+        lastFrameData.clear();
+        lastFrameData.append(noisyData);
+        draw(Circle2D(noisyData.pos, radius*4.0), 0, 360, QColor("purple"), false);
+        return;
+    }
+    if(trackerOn){
+        int totalElementsCount = frameData.count();
+
+        if (totalElementsCount == 0){
+            noisyData.pos = pos;
+            noisyData.confidence= -1;
+            trackerInsistCounter++;
+            if(trackerInsistCounter % trackerElementInsistance == 0){
+                elementNotInSight = true;
+            }
+            if(elementNotInSight){
+                noisyData.pos.assign(0,0);
+                noisyData.confidence  = -1;
+            }
+            trackerLastBestElementID = -1;
+            return;
+        }else{
+            trackerInsistCounter = 0;
+            elementNotInSight = false;
+        }
+        int bestID = -1;
+        double bestDist = 1e10;
+        if((trackerLastBestElementID !=-1)){
+            //draw()
+            for(int i=0;i<frameData.count();i++){
+                if((frameData[i].pos - lastFrameData[trackerLastBestElementID].pos).length() < bestDist){
+                    bestID = i;
+                    bestDist = (frameData[i].pos - lastFrameData[trackerLastBestElementID].pos).length();
+                }
+            }
+        }else{
+            bestID = -1;
+            double bestInSight = 0;
+            for(int i=0;i<frameData.count();i++){
+                if(frameData[i].confidence > bestInSight){
+                    bestID = i;
+                    bestInSight = frameData[i].confidence;
+                }
+            }
+            bestDist = 0;
+        }
+        if(bestDist > observeTimeStep*15.0){//TODO:Shokhmian Number
+            bestID = -1;
+            double bestInSight = 0;
+            for(int i=0;i<frameData.count();i++)
+            {
+                if(frameData[i].confidence > bestInSight){
+                    bestID = i;
+                    bestInSight = frameData[i].confidence;
+                }
+            }
+        }
+        if(bestID == -1){
+            noisyData.pos = pos;
+            noisyData.confidence= 0.5;
+            trackerInsistCounter ++;
+            if(trackerInsistCounter % trackerElementInsistance == 0){
+                elementNotInSight = true;
+            }
+            if(elementNotInSight){
+                noisyData.pos.assign(0,0);
+                noisyData.confidence=-1;
+            }
+        }else{
+            trackerInsistCounter = 0;
+            elementNotInSight = false;
+            noisyData.pos = frameData[bestID].pos;
+            noisyData.confidence = frameData[bestID].confidence;
+        }
+
+        trackerLastBestElementID = bestID;
+    }else{
+        int totalElementsCount = frameData.count();
+        noisyData.pos.x = 0;
+        noisyData.pos.y = 0;
+        noisyData.confidence = 0;
+        for (int i=0;i<totalElementsCount;i++)
+        {
+            double l = frameData[i].confidence;
+            noisyData.pos.x += frameData[i].pos.x*l;
+            noisyData.pos.y += frameData[i].pos.y*l;
+            noisyData.confidence += l;
+        }
+        noisyData.pos.x      /= noisyData.confidence;
+        noisyData.pos.y      /= noisyData.confidence;
+        noisyData.confidence /= totalElementsCount;
+    }
+}
+ */

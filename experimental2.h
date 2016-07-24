@@ -1,0 +1,376 @@
+
+#ifndef EXPERIMENTAL2_H
+#define EXPERIMENTAL2_H
+#include "mainapplication.h"
+#include "trajectoryplanner.h"
+double dist=3,v=0;
+
+
+void CMainApplication::Experimental2()
+{
+
+    //debug(QString("Hamed %1").arg(policy()->Mark_Test()), D_MAHI);
+    return;
+
+    static CDefPos defPosTest;
+    Vector2D mousePos;
+
+    mousePos = knowledge->getMousePos();
+
+    draw(Circle2D(mousePos, wm->ball->radius), QColor(Qt::red));
+
+
+//    Circle2D tempCircle(wm->field->ourGoal()-Vector2D(0.2, 0), 1.33);
+//    draw(tempCircle, QColor(Qt::cyan));
+//    Vector2D tempVec = defPosTest.getXYByAngle(defAngle, defRadius);
+
+//    draw(QString::number(defPosTest.getRobotAngle(defRadius)), Vector2D(-1, _FIELD_HEIGHT/2 - 0.2));
+//    draw(tempVec);
+
+//    kk2Angles tempAngles = defPosTest.getIntersections(mousePos);
+
+//    draw(QString("a1:%1, a2: %2").arg(tempAngles.angle1).arg(tempAngles.angle2), Vector2D(-1, _FIELD_HEIGHT/2 - 0.4));
+
+
+    kkDefPos tempDefPos = defPosTest.getDefPositions(mousePos, 2, 1.43, 2.5);
+    draw(QString::number(tempDefPos.overDef), Vector2D(-1, _FIELD_HEIGHT/2 - 0.6));
+    for (int i = 0; i < tempDefPos.size; i++) {
+        draw(Circle2D(tempDefPos.pos[i], CRobot::robot_radius_old), QColor(Qt::blue));
+    }
+    return;
+    /////////////////////////////////////////////////////////
+//    static CSkillNEWKeep *keepBall = new CSkillNEWKeep( soccer->agents[0] );
+//    keepBall->execute();
+//    return;
+    for(int i = 0; i < 8; i++)
+        knowledge->SRSetAgentArg(i, i, (rand()%1023)/100, 2, 3, 4, 5);
+    return;
+    static CSkillReceivePass* RPA = new CSkillReceivePass(knowledge->getAgent(2));
+    RPA->setReceiveRadius(1);
+    RPA->setTarget(knowledge->getMousePos());
+    RPA->execute();
+
+    return;
+    static Vector2D lastPos = Vector2D(0,0);
+    static double speed = 0;
+
+    speed = wm->ball->pos.dist(lastPos)*1000/16;
+    if(speed > 0.1)
+    debug(QString("speed : (%1)").arg(speed),D_MAHI);
+    lastPos = wm->ball->pos;
+
+    return;
+
+    double r = 3.0;
+
+    CRolePlayOn tRole;
+    tRole.setAgent(knowledge->getAgent(0));
+    tRole.setIsActive(true);
+    tRole.setAgentID(0);
+    tRole.setTask(PassDefensive);
+    tRole.setTarget(Vector2D(2,2));
+    tRole.setTolerance(0.1);
+        tRole.setChip(true);
+            tRole.setKickSpeed(10);
+    tRole.setAvoidPenaltyArea(true);
+    tRole.setAvoidCenterCircle(false);
+    tRole.setIsGotoPointAvoid(true);
+    tRole.setSlow(true);
+    tRole.setSelectedSkill(SkillKick);
+    Vector2D kickerPos = knowledge->getAgent(0)->pos();
+    Vector2D targetPos = tRole.getTarget();
+    AngleDeg diff = AngleDeg(asin((r/2)/(kickerPos.dist(targetPos)))*(180/3.141593));
+    AngleDeg Dstans = (targetPos - kickerPos).norm().dir();
+    Segment2D seg1 = Segment2D(kickerPos,Vector2D().setPolar(5,diff + Dstans) + kickerPos);
+    Segment2D seg2 = Segment2D(kickerPos,Vector2D().setPolar(5,-diff + Dstans) + kickerPos);
+    draw(Circle2D(targetPos, r/2),QColor(Qt::cyan));
+    draw(seg1);
+    draw(seg2);
+    if(Triangle2D(seg1,Vector2D().setPolar(5,-diff + Dstans) + kickerPos).contains(wm->ball->pos))
+        debug(QString("mahi"),D_MAHI);
+    else
+        debug(QString("!mahi"),D_MAHI);
+
+    QList<Circle2D> Obstacles;
+    for(int i = 0;i<wm->opp.activeAgentsCount();i++){
+        Obstacles.append(Circle2D(wm->opp.active(i)->pos,0.20));
+        if(Obstacles.at(i).contains(wm->ball->pos)) debug(QString("!Mahi"),D_KK);
+    }
+
+
+    //tRole.execute();
+
+    return;
+    //draw(QString("sag is: %1").argf(knowledge->getAgent(0)->abilities.canChip),Vector2D(1,1));
+    CskillNewGotoPoint *agent = new CskillNewGotoPoint(NULL);
+    agent->setAgent(knowledge->getAgent(0));
+    agent->setFinalPos(Vector2D(0,0));
+    agent->setFinalVel(Vector2D(0,0));
+    agent->setSlowMode(true);
+
+    agent->execute();
+
+    return;
+    //CRolePlayOn agent;
+
+
+    return;
+    soccer->agents[0]->waitHere();
+    qDebug() << soccer->agents[0]->vforward;
+    return;
+#ifndef GAME_MODE
+    static CSkillGotoPointAvoid* gp = new CSkillGotoPointAvoid( soccer->agents[0]);
+    static CSkillTurn* turn = new CSkillTurn( soccer->agents[0]);
+    static int mode = 0;
+    static CSkillKick* kick = new CSkillKick( soccer->agents[6]);
+
+    //    draw(wm->field->getRegion("oppmidfieldbottom"),"black",true);
+    draw(Circle2D(Vector2D( 2.3, -1.0),CRobot::robot_radius_new),0,360,"orange",true);
+    draw(Circle2D(Vector2D( 2.16, -0.8),CRobot::robot_radius_new),0,360,"magenta",true);
+    draw(Circle2D(Vector2D( 2.5, 1.1),CRobot::robot_radius_new),0,360,"cyan",true);
+    if ( knowledge->joystick->getButton6())
+        mode = 1;
+    if ( knowledge->joystick->getButton8())
+        mode = 0;
+    if ( knowledge->joystick->getButton5())
+        mode = 2;
+
+    if ( mode )
+    {
+        kick->setTarget(wm->field->oppGoal());
+        kick->setInterceptMode(true);
+        kick->execute();
+    }
+
+
+    return;
+    //	draw(wm->ball->predict(1),0,"cyan");
+    //	draw(wm->ball->predict(0.5),0,"pink");
+    //	draw(wm->ball->predict(0.75),0,"brown");
+    //	debug(QString("TT 1 : %1").arg(simulator->timeNeededForGotoPoint(wm->ball->predict(1),Vector2D(0,0),0.06,10,0,0.016)),D_SEPEHR);
+    //	debug(QString("TT 0.5 : %1").arg(simulator->timeNeededForGotoPoint(wm->ball->predict(0.5),Vector2D(0,0),0.06,10,0,0.016)),D_SEPEHR);
+    //	debug(QString("TT 0.75 : %1").arg(simulator->timeNeededForGotoPoint(wm->ball->predict(0.75),Vector2D(0,0),0.06,10,0,0.016)),D_SEPEHR);
+
+    draw(wm->ballCatchTarget(soccer->agents[0]->self()),0,"purple");
+
+    //	Vector2D catchPoint = wm->ball->pos;
+
+    //	bool found = false;
+
+    //	double tt = 0;
+    //	while( !found)
+    //	{
+    //		if (simulator->timeNeededForGotoPoint(wm->ball->predict(tt),Vector2D(0,0),0.06,10,0,0.016) - tt < 0.3)
+    //		{
+    //			found = true;
+    //			catchPoint = wm->ball->predict(tt);
+    //		}
+    //		else
+    //			tt+=0.1;
+    //	}
+    //	draw(catchPoint,0,"cyan");
+
+    if ( mode == 1)
+    {
+        gp->setAgent(soccer->agents[0]);
+        Vector2D pointToGo;
+        Vector2D target = wm->field->oppGoal();
+        pointToGo = (wm->ball->pos - target ).norm() * 0.24 + wm->ball->pos;
+        gp->setTargetLook(pointToGo,wm->ball->pos);
+
+        double vx = 0, vy = 0, vxball = 0, vyball = 0;
+        soccer->agents[0]->setRobotAbsVel(wm->ball->vel.x,wm->ball->vel.y,0);
+        vxball = soccer->agents[0]->vforward;
+        vyball = soccer->agents[0]->vnormal;
+        soccer->agents[0]->setRobotVel(0,0,0);
+        debug(QString("ballVel : %1, %2").arg(vxball).arg(vyball),D_SEPEHR);
+        wm->ball->obstacleRadius = 0.15;
+
+        gp->execute();
+
+        Vector2D desiredVelGP(soccer->agents[0]->vforward,soccer->agents[0]->vnormal);
+        debug(QString("gp : %1, %2").arg(desiredVelGP.x).arg(desiredVelGP.y),D_SEPEHR);
+
+        Vector2D agent2ball = pointToGo - soccer->agents[0]->pos();
+        //	if ( desiredVelGP.innerProduct( Vector2D(vxball,vyball)) > 0)
+        //	if ( agent2ball.innerProduct( Vector2D(vxball,vyball)) > 0)
+        if ( agent2ball.length() > 0.3 && desiredVelGP.innerProduct( Vector2D(vxball,vyball)) > 0)
+        {
+            Vector2D tempV = desiredVelGP.norm()*(Vector2D(vxball,vyball).innerProduct(desiredVelGP.norm()));
+            //		Vector2D tempV( vxball,vyball);
+            //		Vector2D tempV = agent2ball.norm()*(Vector2D(vxball,vyball).innerProduct(agent2ball.norm()));
+            vx = tempV.x ;
+            vy = tempV.y;
+            debug(QString("image : %1, %2").arg(vx).arg(vy),D_SEPEHR);
+            //		turn->setDirection(desiredVelGP);
+        }
+        else if ( agent2ball.length() < 0.3)
+        {
+            Vector2D tempV( vxball,vyball);
+            vx = tempV.x ;
+            vy = tempV.y;
+            //		turn->setDirection(target - wm->ball->pos);
+        }
+
+        vx += desiredVelGP.x;
+        vy += desiredVelGP.y;
+
+        //	if( fabs(Vector2D::angleBetween((wm->ball->pos - soccer->agents[0]->pos()),(target-soccer->agents[0]->pos() )).degree()) < 1.0)
+        //		vx = 0;
+
+
+        soccer->agents[0]->setRoller(0);
+        soccer->agents[0]->setKick(0);
+
+        debug(QString("angle : %1").arg(fabs(Vector2D::angleBetween((wm->ball->pos - soccer->agents[0]->pos()),(target-soccer->agents[0]->pos() )).degree())),D_SEPEHR,"purple");
+        draw(Segment2D(target,soccer->agents[0]->pos()),"orange");
+        draw(Segment2D(wm->ball->pos,soccer->agents[0]->pos()),"purple");
+
+        double difAng;
+        if ( soccer->agents[0]->self()->getKickerPos().dist(wm->ball->pos) > 0.15)
+            difAng = 9.0;
+        else
+        {
+            difAng = ((0.15-soccer->agents[0]->self()->getKickerPos().dist(wm->ball->pos))*60)+9;
+        }
+
+        debug(QString("Dif angle : %1").arg(difAng),D_SEPEHR,"pink");
+
+        if( fabs(Vector2D::angleBetween((wm->ball->pos - soccer->agents[0]->pos()),(target-soccer->agents[0]->pos() )).degree()) < difAng && target.dist(wm->ball->pos) < target.dist(soccer->agents[0]->pos()))
+        {
+            vx+= min(0.6,0.6*(difAng/fabs(Vector2D::angleBetween((wm->ball->pos - soccer->agents[0]->pos()),(target-soccer->agents[0]->pos() )).degree())));
+
+            soccer->agents[0]->setRoller(7);
+            soccer->agents[0]->setKick(soccer->agents[0]->kickSpeedValue(6.0,true));
+        }
+
+        //	if ( fabs(Vector2D::angleBetween((soccer->agents[0]->dir()),(target-soccer->agents[0]->pos() )).degree()))
+        //		soccer->agents[0]->setKick(soccer->agents[0]->kickSpeedValue(6.0,true));
+
+        debug(QString("final : %1, %2").arg(vx).arg(vy),D_SEPEHR);
+
+        soccer->agents[0]->setRobotVel(vx, vy, 0);
+
+        turn->setDirection(target - wm->ball->pos);
+        turn->setAgent(soccer->agents[0]);
+        turn->setTurnMode(CSkillTurn::Intercept);
+        turn->execute();
+
+        Vector2D givenVel( vx,vy);
+        if ( givenVel.length() > 3.9)
+        {
+            givenVel = givenVel.norm()*3.9;
+            soccer->agents[0]->setRobotVel(givenVel.x, givenVel.y, 0);
+        }
+
+
+    }
+    else if ( mode == 2)
+    {
+        soccer->agents[0]->setRobotAbsVel(wm->ball->vel.x,wm->ball->vel.y,0);
+        Vector2D target = wm->field->oppGoal();
+        turn->setAgent(soccer->agents[0]);
+        turn->setDirection(target - wm->ball->pos);
+        turn->setTurnMode(CSkillTurn::Intercept);
+        turn->execute();
+    }
+    else
+        soccer->agents[0]->setRobotVel(0, 0, 0);
+
+    /*    double a,t,dt=0.05;
+    v = CTrajectoryPlanner::plan(fabs(dist),sign(dist)*v,0.0,8.0,6.0,3.0,dt,a,t);
+    dist -= sign(dist)*v*dt;
+    draw(Vector2D(0,0));
+    QColor color;
+    if (a==0.0) color=QColor("black");
+    if (a> 0.0) color=QColor("blue");
+    if (a< 0.0) color=QColor("red");
+    debug(QString("dist=%1").arg(dist), D_EXPERIMENT);
+    draw(Vector2D(dist,0),1);//,color);*/
+
+    /*draw(wm->field->getRegion(CField::OurMidFieldTop),"yellow",true);
+    draw(wm->field->getRegion(CField::OppMidFieldTop),"orange",true);
+    draw(wm->field->getRegion(CField::OurMidFieldBottom),"gray",true);
+    draw(wm->field->getRegion(CField::OppMidFieldBottom),"blue",true);
+
+    static CSkillKick* kick = new CSkillKick(soccer->agents[0]);
+
+    static int active = -1;
+    static int cntr = 50;
+    static int mode = 1;
+    static int age = 0;
+
+    if (knowledge->joystick->getButton5() && cntr > 50)
+    {
+        mode *= -1;
+        cntr = 0;
+    }
+    if ( knowledge->joystick->getButton6() && cntr > 50)
+    {
+        active *= -1;
+        cntr = 0;
+    }
+    cntr ++;
+    if ( knowledge->joystick->getButton7())
+        age = 0;
+    if ( knowledge->joystick->getButton1())
+        age = 1;
+    if ( knowledge->joystick->getButton2())
+        age = 2;
+    if ( knowledge->joystick->getButton4())
+        age = 4;
+    if ( knowledge->joystick->getButton3())
+        age = 3;
+    if ( knowledge->joystick->getButton5())
+        age = 5;
+
+    kick->setAgent(soccer->agents[age]);
+        kick->setTarget( wm->field->oppGoal());
+        kick->setKickSpeed(soccer->agents[age]->kickValueForDistance( (wm->ball->pos-wm->field->oppGoal()).length(), 5.0));
+        qDebug() << soccer->agents[age]->kickValueForDistance( (wm->ball->pos-wm->field->oppGoal()).length(), 5.0);
+        kick->setThroughMode(false);
+        kick->setSlow(true);
+        kick->setInterceptMode(false);
+        kick->setParallelMode(false);
+        kick->setWaitFrames( 0);
+        kick->setTolerance( 0.03);
+        kick->setDontKick(false);
+        kick->setSpin(0);
+        kick->setChip(false);
+        if ( active == 1)
+            kick->execute();
+        else
+            kick->getAgent()->waitHere();
+*/
+    //    soccer->agents[4]->setRobotVel(0.0, 0.0, 10);
+    //soccer->agents[0]->setRobotVel(0.4, 0.0, 0.0);
+    //debug(QString("vel=%1").arg(soccer->agents[2]->vel().length()), D_ERROR, "red");
+    //	static CSkillKick* kick = new CSkillKick(soccer->agents[0]);
+    //	kick->setTarget( wm->field->oppGoal());
+    //	kick->setKickSpeed(25);
+    ////	kick->setSlow(true);
+    //	kick->setInterceptMode(true);
+    //	kick->execute();
+
+    /*
+    static CSkillGotoPointAvoid* gp = new CSkillGotoPointAvoid( soccer->agents[2]);
+    gp->setNoAvoid(true);
+    gp->setTargetLook( Vector2D( soccer->agents[2]->pos() - wm->ball->pos).norm()*(soccer->agents[2]->self()->centerFromKicker()+CBall::radius)+wm->ball->pos, wm->ball->pos);
+    gp->execute();
+
+
+    draw(wm->field->getRegion(CField::OppCornerLineBottom),"orange",true);
+    draw(wm->field->getRegion(CField::OppCornerLineTop),"gray",true);
+*/
+
+    /*
+    knowledge->findFastest(0.01);
+    for ( int i = 0 ; i < knowledge->ourFastest.count(); i++)
+        debug(QString("Our %1 nearest agent is %2").arg(i).arg( knowledge->ourFastest.at(i)), D_SEPEHR, "blue");
+    for ( int i = 0 ; i < knowledge->oppFastest.count(); i++)
+        debug(QString("Opp %1 nearest agent is %2").arg(i).arg( knowledge->oppFastest.at(i)), D_SEPEHR, "red");
+*/
+#endif
+}
+
+#endif // EXPERIMENTAL2_H
