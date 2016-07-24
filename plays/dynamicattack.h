@@ -15,6 +15,8 @@ struct SDynamicAgent {
         region = _region;
     }
 
+
+
     inline Vector2D getTarget() {
         if(region >= 0)
             knowledge->getStaticPoses(region);
