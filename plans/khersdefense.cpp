@@ -33,7 +33,7 @@ void KhersDefense::execute()
 		else if (wm->opp.active(i)->role == "nearest_to_ball")
 			nearestOpp = wm->opp.active(i);
 	}
-	debug(QString("IO KIR DEBUG: %1").arg(nearestOpp==NULL), D_DEBUG);
+	debug(QString("IO case DEBUG: %1").arg(nearestOpp==NULL), D_DEBUG);
 	debug(QString("NEAR_POS: %1 , %2").arg(nearestOpp->pos.x).arg(nearestOpp->pos.y), D_DEBUG);
 //	vector<Vector2D> otherOpp;
 //	for (int i = 0 ; i < wm->opp.activeAgentsCount() ; i++)

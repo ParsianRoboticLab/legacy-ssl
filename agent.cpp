@@ -1494,10 +1494,10 @@ Vector2D CAgent::oneTouchCheck(Vector2D positioningPos, Vector2D* oneTouchDirect
     {
         Line2D l(wm->ball->pos, wm->ball->pos + wm->ball->vel.norm());
         q = l.projection(positioningPos);
-        debug("kir1",D_ERROR);
+        debug("case",D_ERROR);
         if (q.valid() && (q-positioningPos).length() < 1.0 )
         {
-            debug("kir2",D_ERROR);
+            debug("case2",D_ERROR);
             if ((wm->ball->pos - pos()).length() < 1.0) oneTouchKick = true;
             q -= (self()->centerFromKicker() + CBall::radius) * oneTouchDir;
         }
@@ -1506,10 +1506,10 @@ Vector2D CAgent::oneTouchCheck(Vector2D positioningPos, Vector2D* oneTouchDirect
     {
         if (fabs(Vector2D::angleBetween(self()->dir, wm->field->oppGoal() - self()->pos).degree()) < 45)
         {
-            debug("kir3",D_ERROR);
+            debug("case3",D_ERROR);
             setKick(chipDistanceValue(8 , false));
         }
-        debug("kir4",D_ERROR);
+        debug("case4",D_ERROR);
     }
     *oneTouchDirection = oneTouchDir;
     return q;
