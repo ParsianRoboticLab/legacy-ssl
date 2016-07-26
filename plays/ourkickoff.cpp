@@ -222,7 +222,7 @@ void COurKickOff::swapKickoff3(int symmetry)
         executedCycles++;
 
         if( oneToucherID == -1 && executedCycles >= waitBeforeExecution && knowledge->getGameMode() == CKnowledge::OurKickOff )
-        {                                       debug(QString("fuck"),D_MOHAMMED);
+        {                                       debug(QString("false"),D_MOHAMMED);
                 staticPoints.clear();
                 swapNearestDefAndMid(pointForPass,getNearestAgent(staticVec[0].first()));
                 staticPoints.append(holdingPoints(positionAgents.at(getNearestAgent(staticVec[1].first())),staticVec[1],cyclesToWait[1],escapeRadius[1],facePoints[1]));

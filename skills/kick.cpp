@@ -347,7 +347,7 @@ kkRPMode CSkillReceivePass::decideMode()
         {
             kickCirThresh = 0;
             velThresh = 0;
-            return RPKOSKHOL;
+            return RPNONE;
         }
         else if(tempKickCircle.contains(kkBallPos))
         {
@@ -446,7 +446,7 @@ void CSkillReceivePass::execute()
         debug("Intercept", D_KK);
 
         break;
-    case RPKOSKHOL:
+    case RPNONE:
         gotopointavoid->init(target,oneTouchDir);
         gotopointavoid->setSlowMode(false);
         gotopointavoid->execute();

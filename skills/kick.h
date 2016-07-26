@@ -111,7 +111,7 @@ enum kkRPMode {
     RPINTERSECT = 2,
     RPDAMP = 3,
     RPRECEIVE = 4,
-    RPKOSKHOL = 5
+    RPNONE = 5
 };
 
 class CSkillReceivePass : public CSkill

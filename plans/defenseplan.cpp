@@ -2942,7 +2942,7 @@ Vector2D DefensePlan::followBall(Vector2D _ballPos)
 int DefensePlan::predictMostDangrousOppToBall(){
     //////////////////////////////////////////////////////// GOALIE CHECK ONE TOUCHE
     // make it to a function ... oppRoles
-    // vector2D(-100,100)----> shows kossher Numbers
+    // vector2D(-100,100)----> shows Numbers
     // assign opponents in their positions. depends on values of opponents
     if(wm->opp.activeAgentsCount()>0){
         Vector2D OppPos[wm->opp.activeAgentsCount()];

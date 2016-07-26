@@ -1489,14 +1489,14 @@ void COurDirect::middleCenterAreaDefensive2(int symmetry)
 	lastPlayExeced = &COurDirect::middleCenterAreaDefensive2;
 }
 
-bool COurDirect::conditionFuckPlay(int symmetry)
+bool COurDirect::conditionfalsePlay(int symmetry)
 {
     return true;
 }
 
-void COurDirect::fuckPlay(int symmetry)
+void COurDirect::falsePlay(int symmetry)
 {
-    draw(QString("fuck"),Vector2D(-3,-2),"red");
+    draw(QString("false"),Vector2D(-3,-2),"red");
 
     choosePlayMaker();
 
@@ -1544,7 +1544,7 @@ void COurDirect::fuckPlay(int symmetry)
 
     setFormation("OurKickOff");
 
-    lastPlayExeced = &COurDirect::fuckPlay;
+    lastPlayExeced = &COurDirect::falsePlay;
 }
 
 bool COurDirect::conditionMiddleCenterAreaDefensive2(int symmetry)
@@ -2077,7 +2077,7 @@ void COurDirect::execute_3(){
 				}
 			}
 		} else {//check whether f collides with execute_2 function
-                    runWithSymmetry(fuckPlay);
+                    runWithSymmetry(falsePlay);
                     return;
 			if( fabs(wm->ball->pos.y) > 1.5 ){
 				if( lastPlayExeced == &COurDirect::middleFlankAreaOffensive2 )

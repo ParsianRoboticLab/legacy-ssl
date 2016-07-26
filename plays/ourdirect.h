@@ -57,7 +57,7 @@ public:
 	PLAY(middleCenterAreaDefensive1,MiddleCenterAreaDefensive1)
 
         PLAY(newMiddleCenterAreaOffensive3,NewMiddleCenterAreaOffensive3)
-        PLAY(fuckPlay,FuckPlay)
+        PLAY(falsePlay,falsePlay)
 
 	Vector2D pointForPass, onTheBallLine;
 	int oneToucherID;

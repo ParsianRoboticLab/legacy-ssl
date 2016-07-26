@@ -802,7 +802,7 @@ void CSoccer::run()
             double elapsedTime;
 
 
-            //////////////////////////////////////////////////fucked by mhmmd
+            //////////////////////////////////////////////////falseed by mhmmd
             runMainLoop();
             lastMainLoopRunTime = current_time;
 

@@ -1506,15 +1506,15 @@ void CCoach::execute()
 {
 
     draw(Circle2D(Vector2D(_PENALTY_AREA_CIRCLE_X , 0) , _PENALTY_AREA_CIRCLE_RAD) , 0 , 360 , "red");
-    bool fuckingNan = false;
+    bool falseingNan = false;
     for (int i=0;i<wm->our.activeAgentsCount();i++)
-        if (isNan(wm->our.active(i)->vel.length())) fuckingNan = true;
+        if (isNan(wm->our.active(i)->vel.length())) falseingNan = true;
     for (int i=0;i<wm->opp.activeAgentsCount();i++)
-        if (isNan(wm->opp.active(i)->vel.length())) fuckingNan = true;
-    if (isNan(wm->ball->vel.length())) fuckingNan = true;
-    if (fuckingNan)
+        if (isNan(wm->opp.active(i)->vel.length())) falseingNan = true;
+    if (isNan(wm->ball->vel.length())) falseingNan = true;
+    if (falseingNan)
     {
-        debug("Fucking Nan", D_ERROR);
+        debug("falseing Nan", D_ERROR);
     }
 
     // reset idle state!
