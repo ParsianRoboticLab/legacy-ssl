@@ -72,6 +72,9 @@ void CMainApplication::Experimental6()
     {
         draw(knowledge->getStaticPoses(i));
     }
+    //
+    //
+    //
     //    mgpa.init(wm->ball->pos + (soccer->agents[1]->pos() -wm->ball->pos).norm()*0.11,wm->ball->pos - soccer->agents[1]->pos());
     //    soccer->agents[1]->setRoller(5);
     ////    if(soccer->agents[1]->pos().dist(wm->ball->pos) >= 0.11)
