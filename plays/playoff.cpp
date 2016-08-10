@@ -34,9 +34,6 @@ CPlayOff::CPlayOff()
     setTimer = true;
     kickOffFirstTimeFlag = true;
     ////////////
-    ////////////
-    ////////////
-
 
     currentPlan = new SPlayOffPlan();
 
