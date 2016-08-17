@@ -27,11 +27,9 @@ struct STuneParams {
 };
 
 struct SPlanConfig {
-
     int         chance = 1;
     QString     name   = "mahi";
     STuneParams tuneParams;
-
 };
 
 struct SPlayOffPlan {
