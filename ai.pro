@@ -150,8 +150,8 @@ SOURCES += main.cpp \
     skillsthread.cpp \
     tools/planloader.cpp \
     tools/loadplayoffjson.cpp \
-    util/filewatcher.cpp
-
+    util/filewatcher.
+    skills/autoballplacement.cpp
 
 HEADERS += base.h \
     worldmodel.h \
@@ -313,7 +313,7 @@ HEADERS += base.h \
     tools/planloader.h \
     tools/loadplayoffjson.h \
     util/filewatcher.h
-
+    skills/autoballplacement.h
 
 unix:INCLUDEPATH += "/usr/local/include"
 unix:LIBS += -L/usr/local/include/qjson -lqjson
@@ -393,31 +393,3 @@ INCLUDEPATH += $$PWD/intentions/
 
 RESOURCES +=
 CONFIG += c++11
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
