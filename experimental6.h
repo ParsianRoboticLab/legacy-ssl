@@ -12,8 +12,110 @@ clock_t t;
 
 //#define kickTest
 QList <Vector2D> agentpath;
+
+struct VectorIndex {
+    Vector2D vec;
+    int index;
+};
+
 void CMainApplication::Experimental6()
 {
+
+
+    Vector2D ballpos = wm->ball->pos;
+    Vector2D ballvel = wm->ball->vel;
+    Vector2D btpos = Vector2D(wm->ball->pos.x,wm->ball->pos.y+0.4);
+    Vector2D bdpos = Vector2D(wm->ball->pos.x,wm->ball->pos.y-0.4);
+    Vector2D ftpos = Vector2D(wm->field->oppGoalL().x,wm->field->oppGoalL().y+0.4);
+    Vector2D fdpos = Vector2D(wm->field->oppGoalR().x,wm->field->oppGoalR().y-0.4);
+    Polygon2D poly;
+    QList <Circle2D > newopp;
+    QList <Segment2D> newline;
+
+    Segment2D upGoal = Segment2D(ballpos,wm->field->oppGoalL());
+    Segment2D downGoal = Segment2D(ballpos, wm->field->oppGoalR());
+    Circle2D  opprobots[6];
+    Vector2D  tangents[12];
+    Vector2D  filedin[12];
+    Ray2D     tan[12];
+    Segment2D ttan[12];
+
+
+
+    draw(upGoal,  QColor(Qt::blue));
+    draw(downGoal,QColor(Qt::red));
+
+
+    poly.addVertex(ballpos);
+    poly.addVertex(btpos);
+    poly.addVertex(ftpos);
+    poly.addVertex(fdpos);
+    poly.addVertex(bdpos);
+    poly.addVertex(ballpos);
+
+    draw(poly, QColor(Qt::yellow),false);
+
+
+    for(int i =0;i<6; i++){
+        if(poly.contains(wm->opp[i]->pos)){
+            //opprobots[i]= Circle2D(Vector2D(wm->opp[i]->pos),0,11);
+            //draw(opprobots[i],QColor(Qt::black));
+            //opprobots[i].tangent(ballpos, &tangents[2*i], &tangents[2*i +1]);
+            newopp.append(Circle2D(Vector2D(wm->opp[i]->pos),0.11));
+        }
+    }
+
+
+
+    for (int i=0;i<newopp.size();i++){
+        draw(newopp.at(i), QColor(Qt::black));
+        newopp[i].tangent(ballpos, &tangents[2*i], &tangents[2*i +1]);
+    }
+
+
+
+    Segment2D goalLine(wm->field->oppCornerL(), wm->field->oppCornerR());
+    Segment2D oppfiled(wm->field->oppGoalL(),wm->field->oppGoalR());
+    draw(oppfiled,QColor(Qt::black));
+    Vector2D zol1, zol2;
+    int x=0;
+    int name=0;
+
+    for(int i=0; i<newopp.size()*2;i++){
+        tan[i]= Ray2D(ballpos,tangents[i]);
+        ttan[i]= Segment2D(ballpos,goalLine.intersection(tan[i].line()));
+        for (int j=0;j<newopp.size();j++) {
+            if(newopp[j].intersection(ttan[i],&zol1,&zol2) == 2)
+               x=1;
+
+        }
+        if((x==0)&&(oppfiled.intersection(ttan[i]).valid()))
+            draw(ttan[i],QColor(Qt::black));
+        x=0;
+    }
+
+
+
+
+  /*
+
+       Circle2D centerCircle (Vector2D(0,0), 0.5);
+
+       Segment2D ballsegment(wm->ball->pos, -wm->ball->pos);
+
+       debug(QString("Intersection count : %1").arg(centerCircle.intersection(ballsegment, &zol1, &zol2)), D_MAHI);
+
+       draw(zol1, 0);
+       draw(zol2, 0);
+       draw(ballsegment);
+       draw(centerCircle, QColor(Qt::blue));
+   */
+
+
+
+
+
+        return ;
 #ifdef speedTest
     int agentNum = 4;
     soccer->agents[agentNum]->setRobotAbsVel(1,0,0);
