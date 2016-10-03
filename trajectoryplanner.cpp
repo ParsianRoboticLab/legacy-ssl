@@ -52,129 +52,129 @@ double CTrajectoryPlanner::plan(double _x, double _v1, double _v2, double _amax,
 
 void CTrajectoryPlanner::plan()
 {
-//    qDebug() << v2;
-    v = v1;
-    double amax1;
-    amax1 = amax;
-//    if (v2 > 0.3)
+////    qDebug() << v2;
+//    v = v1;
+//    double amax1;
+//    amax1 = amax;
+////    if (v2 > 0.3)
+////    {
+////        if ( x < 0.3)
+////        {
+////            amax1 = 3.0*( v2*v2 - v1*v1) / 2.0*x;
+////            dmax = 3.0*( v2*v2 - v1*v1) / 2.0*x;
+////        }
+////        if ( amax1 < 0 )
+////        {
+////            amax1 = fabs(amax1);
+////            dmax = fabs(dmax);
+////        }
+////    }
+//    double t0,at,st;
+//    if(dmax!=0 && amax1*(amax1+dmax)!=0)
+//        t0 = (sqrt((amax1+dmax)*(2*amax1*x*dmax+amax1*v2*v2+dmax*v1*v1))-amax1*v1-dmax*v1)/(amax1*(amax1+dmax));
+//    else {v = 0;return;}
+//    if (x < 0)
+//        at = -t0;
+//    else
+//        at = t0;
+//    st = (amax1 * at + v - v2) / dmax;
+//    if (v < 0)
 //    {
-//        if ( x < 0.3)
-//        {
-//            amax1 = 3.0*( v2*v2 - v1*v1) / 2.0*x;
-//            dmax = 3.0*( v2*v2 - v1*v1) / 2.0*x;
-//        }
-//        if ( amax1 < 0 )
-//        {
-//            amax1 = fabs(amax1);
-//            dmax = fabs(dmax);
-//        }
+//        swap(amax1,dmax);
 //    }
-    double t0,at,st;
-    if(dmax!=0 && amax1*(amax1+dmax)!=0)
-        t0 = (sqrt((amax1+dmax)*(2*amax1*x*dmax+amax1*v2*v2+dmax*v1*v1))-amax1*v1-dmax*v1)/(amax1*(amax1+dmax));
-    else {v = 0;return;}
-    if (x < 0)
-        at = -t0;
-    else
-        at = t0;
-    st = (amax1 * at + v - v2) / dmax;
-    if (v < 0)
-    {
-        swap(amax1,dmax);
-    }
-    if (st * at < 0)
-    {
-        if ( st < 0)
-            std::swap(at,st);
-        at = -at;
-        st += at;
-        if (dt < at)
-            v -= dt * amax1;
-        else
-            v -= at * amax1;
-        if (dt > st)
-            v += (dt - st) * dmax;
-        t = -st+at;
-    }
-    else
-    {
-        float badat = at,badst = st;
-        badat -= min (at,(vmax - v) / amax1);
-        badst -= min (st,(vmax - v2) / dmax);
-        float staticTime = ((((badat * amax1) / 2.0 + vmax) * badat) + (((badst * dmax) / 2.0) + vmax) * badst) / vmax;
-        float time = at + st + staticTime - badat - badst;
-        st = at;
-        at -= badat;
-        st += badst;
-        if (dt < at)
-            v += dt * amax1;
-        else
-            v += at * amax1;
-        if (dt > st)
-            v -= (dt - st) * dmax;
-        t = time;
-    }
+//    if (st * at < 0)
+//    {
+//        if ( st < 0)
+//            std::swap(at,st);
+//        at = -at;
+//        st += at;
+//        if (dt < at)
+//            v -= dt * amax1;
+//        else
+//            v -= at * amax1;
+//        if (dt > st)
+//            v += (dt - st) * dmax;
+//        t = -st+at;
+//    }
+//    else
+//    {
+//        float badat = at,badst = st;
+//        badat -= min (at,(vmax - v) / amax1);
+//        badst -= min (st,(vmax - v2) / dmax);
+//        float staticTime = ((((badat * amax1) / 2.0 + vmax) * badat) + (((badst * dmax) / 2.0) + vmax) * badst) / vmax;
+//        float time = at + st + staticTime - badat - badst;
+//        st = at;
+//        at -= badat;
+//        st += badst;
+//        if (dt < at)
+//            v += dt * amax1;
+//        else
+//            v += at * amax1;
+//        if (dt > st)
+//            v -= (dt - st) * dmax;
+//        t = time;
+//    }
 
-//    if (x < 0.5)
+////    if (x < 0.5)
+////    {
+////        v = sqrt(x * 2.0 * dmax);
+////    }
+////    return;
+//	if( v2 < 0.2 && x < 0.5 && !oneTouch && !noPid)
 //    {
-//        v = sqrt(x * 2.0 * dmax);
+//        double DT = conf()->Common_Command_Interval()/1000.0;
+//        sumErr += (x + lx)/2.0f * DT;
+//		diff = 0.5*diff+0.5*((x - lx) / DT);
+//		double kp = conf()->BangBang_KP();
+//		double kd = conf()->BangBang_KD();
+//		double ki = conf()->BangBang_KI();
+//		double gain = conf()->BangBang_Gain();
+//		v = x * kp + sumErr * ki + diff * kd +gain * v;//+ gain*v1/(v1+1);
+//        lx = x;
 //    }
-//    return;
-	if( v2 < 0.2 && x < 0.5 && !oneTouch && !noPid)
-    {
-        double DT = conf()->Common_Command_Interval()/1000.0;
-        sumErr += (x + lx)/2.0f * DT;
-		diff = 0.5*diff+0.5*((x - lx) / DT);
-		double kp = conf()->BangBang_KP();
-		double kd = conf()->BangBang_KD();
-		double ki = conf()->BangBang_KI();
-		double gain = conf()->BangBang_Gain();
-		v = x * kp + sumErr * ki + diff * kd +gain * v;//+ gain*v1/(v1+1);
-        lx = x;
-    }
-	else if( v2 < 0.2 && x < 0.5 && fastend && !noPid)
-	{
-		double DT = conf()->Common_Command_Interval()/1000.0;
-		sumErr += (x + lx)/2.0f * DT;
-		diff = 0.5*diff+0.5*((x - lx) / DT);
-		double kp = 6;
-		double kd = 0;
-		double ki = 0;
-		double gain = conf()->BangBang_Gain();
-		v = x * kp + sumErr * ki + diff * kd +gain * v;//+ gain*v1/(v1+1);
-		lx = x;
-	}
-    else if( v2 < 0.2 && x < 0.5 && oneTouch && !noPid)
-    {
-        double DT = conf()->Common_Command_Interval()/1000.0;
-        sumErr += (x + lx)/2.0f * DT;
-        double diff = (x - lx) / DT;
-		double kp = conf()->BangBang_OneKP();
-		double kd = conf()->BangBang_OneKD();
-		double ki = conf()->BangBang_OneKI();
-		double gain = conf()->BangBang_Gain();
-        v = x * kp + sumErr * ki + diff * kd +gain * v;//+ gain*v1/(v1+1);
-        lx = x;
-    }
-    else if( v2 < 0.2 && x < 0.5 && slow && !noPid)
-    {
-        double DT = conf()->Common_Command_Interval()/1000.0;
-        sumErr += (x + lx)/2.0f * DT;
-        double diff = (x - lx) / DT;
-		double kp = conf()->BangBang_KP();
-		double kd = conf()->BangBang_KD();
-		double ki = conf()->BangBang_KI();
-		double gain = conf()->BangBang_Gain();
-        double kp1,ki1,kd1,g1;
-        kp1 = kp * 0.6;
-        ki1 = ki * 0.6;
-        kd1 = kd * 0.6;
-        g1 = gain * 0.6;
-        v = x * kp1 + sumErr * ki1 + diff * kd1 +g1 * v;//+ gain*v1/(v1+1);
-        lx = x;
-    }
-    else
-        sumErr = 0.0;
+//	else if( v2 < 0.2 && x < 0.5 && fastend && !noPid)
+//	{
+//		double DT = conf()->Common_Command_Interval()/1000.0;
+//		sumErr += (x + lx)/2.0f * DT;
+//		diff = 0.5*diff+0.5*((x - lx) / DT);
+//		double kp = 6;
+//		double kd = 0;
+//		double ki = 0;
+//		double gain = conf()->BangBang_Gain();
+//		v = x * kp + sumErr * ki + diff * kd +gain * v;//+ gain*v1/(v1+1);
+//		lx = x;
+//	}
+//    else if( v2 < 0.2 && x < 0.5 && oneTouch && !noPid)
+//    {
+//        double DT = conf()->Common_Command_Interval()/1000.0;
+//        sumErr += (x + lx)/2.0f * DT;
+//        double diff = (x - lx) / DT;
+//		double kp = conf()->BangBang_OneKP();
+//		double kd = conf()->BangBang_OneKD();
+//		double ki = conf()->BangBang_OneKI();
+//		double gain = conf()->BangBang_Gain();
+//        v = x * kp + sumErr * ki + diff * kd +gain * v;//+ gain*v1/(v1+1);
+//        lx = x;
+//    }
+//    else if( v2 < 0.2 && x < 0.5 && slow && !noPid)
+//    {
+//        double DT = conf()->Common_Command_Interval()/1000.0;
+//        sumErr += (x + lx)/2.0f * DT;
+//        double diff = (x - lx) / DT;
+//		double kp = conf()->BangBang_KP();
+//		double kd = conf()->BangBang_KD();
+//		double ki = conf()->BangBang_KI();
+//		double gain = conf()->BangBang_Gain();
+//        double kp1,ki1,kd1,g1;
+//        kp1 = kp * 0.6;
+//        ki1 = ki * 0.6;
+//        kd1 = kd * 0.6;
+//        g1 = gain * 0.6;
+//        v = x * kp1 + sumErr * ki1 + diff * kd1 +g1 * v;//+ gain*v1/(v1+1);
+//        lx = x;
+//    }
+//    else
+//        sumErr = 0.0;
 
 
 
@@ -183,142 +183,142 @@ void CTrajectoryPlanner::plan()
 void CTrajectoryPlanner::plan2()
 {
 
-	if( v2 < 0.2 && x < 0.3 && !oneTouch && !noPid)
-	{
-		double DT = conf()->Common_Command_Interval()/1000.0;
-		sumErr += (x + lx)/2.0f * DT;
-		diff = 0.5*diff+0.5*((x - lx) / DT);
-		double kp = conf()->BangBang_KP();
-		double kd = conf()->BangBang_KD();
-		double ki = conf()->BangBang_KI();
-		double gain = conf()->BangBang_Gain();
-		v = x * kp + sumErr * ki + diff * kd +gain * v;//+ gain*v1/(v1+1);
-		lx = x;
-		return;
-	}
-	else if( v2 < 0.2 && x < 0.3 && fastend && !noPid)
-	{
-		double DT = conf()->Common_Command_Interval()/1000.0;
-		sumErr += (x + lx)/2.0f * DT;
-		diff = 0.5*diff+0.5*((x - lx) / DT);
-		double kp = 6;
-		double kd = 0;
-		double ki = 0;
-		double gain = conf()->BangBang_Gain();
-		v = x * kp + sumErr * ki + diff * kd +gain * v;//+ gain*v1/(v1+1);
-		lx = x;
-		return;
-	}
-	else if( v2 < 0.2 && x < 0.3 && oneTouch && !noPid)
-	{
-		double DT = conf()->Common_Command_Interval()/1000.0;
-		sumErr += (x + lx)/2.0f * DT;
-		double diff = (x - lx) / DT;
-		double kp = conf()->BangBang_OneKP();
-		double kd = conf()->BangBang_OneKD();
-		double ki = conf()->BangBang_OneKI();
-		double gain = conf()->BangBang_Gain();
-		v = x * kp + sumErr * ki + diff * kd +gain * v;//+ gain*v1/(v1+1);
-		lx = x;
-		return;
-	}
-	else if( v2 < 0.2 && x < 0.3 && slow && !noPid)
-	{
-		double DT = conf()->Common_Command_Interval()/1000.0;
-		sumErr += (x + lx)/2.0f * DT;
-		double diff = (x - lx) / DT;
-		double kp = conf()->BangBang_KP();
-		double kd = conf()->BangBang_KD();
-		double ki = conf()->BangBang_KI();
-		double gain = conf()->BangBang_Gain();
-		double kp1,ki1,kd1,g1;
-		kp1 = kp * 0.6;
-		ki1 = ki * 0.6;
-		kd1 = kd * 0.6;
-		g1 = gain * 0.6;
-		v = x * kp1 + sumErr * ki1 + diff * kd1 +g1 * v;//+ gain*v1/(v1+1);
-		lx = x;
-		return;
-	}
-	else
-		sumErr = 0.0;
+//	if( v2 < 0.2 && x < 0.3 && !oneTouch && !noPid)
+//	{
+//		double DT = conf()->Common_Command_Interval()/1000.0;
+//		sumErr += (x + lx)/2.0f * DT;
+//		diff = 0.5*diff+0.5*((x - lx) / DT);
+//		double kp = conf()->BangBang_KP();
+//		double kd = conf()->BangBang_KD();
+//		double ki = conf()->BangBang_KI();
+//		double gain = conf()->BangBang_Gain();
+//		v = x * kp + sumErr * ki + diff * kd +gain * v;//+ gain*v1/(v1+1);
+//		lx = x;
+//		return;
+//	}
+//	else if( v2 < 0.2 && x < 0.3 && fastend && !noPid)
+//	{
+//		double DT = conf()->Common_Command_Interval()/1000.0;
+//		sumErr += (x + lx)/2.0f * DT;
+//		diff = 0.5*diff+0.5*((x - lx) / DT);
+//		double kp = 6;
+//		double kd = 0;
+//		double ki = 0;
+//		double gain = conf()->BangBang_Gain();
+//		v = x * kp + sumErr * ki + diff * kd +gain * v;//+ gain*v1/(v1+1);
+//		lx = x;
+//		return;
+//	}
+//	else if( v2 < 0.2 && x < 0.3 && oneTouch && !noPid)
+//	{
+//		double DT = conf()->Common_Command_Interval()/1000.0;
+//		sumErr += (x + lx)/2.0f * DT;
+//		double diff = (x - lx) / DT;
+//		double kp = conf()->BangBang_OneKP();
+//		double kd = conf()->BangBang_OneKD();
+//		double ki = conf()->BangBang_OneKI();
+//		double gain = conf()->BangBang_Gain();
+//		v = x * kp + sumErr * ki + diff * kd +gain * v;//+ gain*v1/(v1+1);
+//		lx = x;
+//		return;
+//	}
+//	else if( v2 < 0.2 && x < 0.3 && slow && !noPid)
+//	{
+//		double DT = conf()->Common_Command_Interval()/1000.0;
+//		sumErr += (x + lx)/2.0f * DT;
+//		double diff = (x - lx) / DT;
+//		double kp = conf()->BangBang_KP();
+//		double kd = conf()->BangBang_KD();
+//		double ki = conf()->BangBang_KI();
+//		double gain = conf()->BangBang_Gain();
+//		double kp1,ki1,kd1,g1;
+//		kp1 = kp * 0.6;
+//		ki1 = ki * 0.6;
+//		kd1 = kd * 0.6;
+//		g1 = gain * 0.6;
+//		v = x * kp1 + sumErr * ki1 + diff * kd1 +g1 * v;//+ gain*v1/(v1+1);
+//		lx = x;
+//		return;
+//	}
+//	else
+//		sumErr = 0.0;
 
 
 
-	//kalman reset check :
+//	//kalman reset check :
 
-//	if ( fabs(lastV1 - v1) > 0.6)
-//		v1 = lastV1;
-	double tAcc = 0, tDec = 0, tCruise = 0;
-	double xAcc = 0, xDec = 0, xCruise = 0;
-	tAcc = fabs( vmax - v1) / amax;
-	xAcc = tAcc * ( v1 + vmax)/2.0;
-	tDec = fabs( v1 - v2) / dmax;
-	xDec = tDec * ( v1 + v2)/2.0;
-	double time_to_v1 = fabs(v1 - v2) / amax;
-	double x_to_v1 = fabs((v1 + v2) / 2.0) * time_to_v1;
-	x = x-lastV*0.2;
-	double tempDist = x - ( xAcc + xDec);
-//	debug(QString("tdec : %1 xdec : %2").arg(tDec).arg(xDec),D_SEPEHR,"blue");
-	if ( tempDist >= 0){
-		xCruise = tempDist;
-		tCruise = tempDist / vmax;
-	}
-	else{
-		xCruise = 0;
-		tCruise = -1;
-	}
-	if( v1 < 0)
-	{
-		v = sign(v1)*(fabs(v1) - dt * dmax);
-	}
-	else
-	{
-		if( tCruise >= 0){
-			if ( fabs(v1) < vmax)
-				v = v1 + dt * amax;
-			else
-				v = vmax;
-		}else if (xDec >= x){
-//			debug("decing !",D_SEPEHR,"red");
-			v = sign(v1)*(fabs(v1) - dt * dmax);
-		}else{
-//			debug("accing !",D_SEPEHR);
-			v = lastV;//v1 + dt * amax;
-		}/*
-		else{
-			double t_a, t_accel, t_decel;
+////	if ( fabs(lastV1 - v1) > 0.6)
+////		v1 = lastV1;
+//	double tAcc = 0, tDec = 0, tCruise = 0;
+//	double xAcc = 0, xDec = 0, xCruise = 0;
+//	tAcc = fabs( vmax - v1) / amax;
+//	xAcc = tAcc * ( v1 + vmax)/2.0;
+//	tDec = fabs( v1 - v2) / dmax;
+//	xDec = tDec * ( v1 + v2)/2.0;
+//	double time_to_v1 = fabs(v1 - v2) / amax;
+//	double x_to_v1 = fabs((v1 + v2) / 2.0) * time_to_v1;
+//	x = x-lastV*0.2;
+//	double tempDist = x - ( xAcc + xDec);
+////	debug(QString("tdec : %1 xdec : %2").arg(tDec).arg(xDec),D_SEPEHR,"blue");
+//	if ( tempDist >= 0){
+//		xCruise = tempDist;
+//		tCruise = tempDist / vmax;
+//	}
+//	else{
+//		xCruise = 0;
+//		tCruise = -1;
+//	}
+//	if( v1 < 0)
+//	{
+//		v = sign(v1)*(fabs(v1) - dt * dmax);
+//	}
+//	else
+//	{
+//		if( tCruise >= 0){
+//			if ( fabs(v1) < vmax)
+//				v = v1 + dt * amax;
+//			else
+//				v = vmax;
+//		}else if (xDec >= x){
+////			debug("decing !",D_SEPEHR,"red");
+//			v = sign(v1)*(fabs(v1) - dt * dmax);
+//		}else{
+////			debug("accing !",D_SEPEHR);
+//			v = lastV;//v1 + dt * amax;
+//		}/*
+//		else{
+//			double t_a, t_accel, t_decel;
 
-			if (fabs(v1) > fabs(v2)) {
-				t_a = (sqrt((v1 * v1 + v2 * v2) / 2.0 + fabs(x) * amax) - fabs(v1)) / amax;
-				if (t_a < 0.0) t_a = 0;
-				t_accel = t_a;
-				t_decel = t_a + time_to_v1;
-			} else if (x_to_v1 > fabs(x)) {
-				t_a = (sqrt(v1 * v1 + 2 * amax * fabs(x)) - fabs(v1)) / amax;
-				t_accel = t_a;
-				t_decel = 0.0;
-			} else {
-				t_a = (sqrt((v1 * v1 + v2 * v2) / 2.0 + fabs(x) * amax) - fabs(v2)) / amax;
-				if (t_a < 0.0) t_a = 0;
-				t_accel = t_a + time_to_v1;
-				t_decel = t_a;
-			}
-			if ( t_accel > 0)
-				v = v1 + dt * amax;
-			else
-				v = sign(v1)*(fabs(v1) - dt * dmax);
-		}*/
-	}
-//	if ( v1*v < 0 )
-//		v = 0;
+//			if (fabs(v1) > fabs(v2)) {
+//				t_a = (sqrt((v1 * v1 + v2 * v2) / 2.0 + fabs(x) * amax) - fabs(v1)) / amax;
+//				if (t_a < 0.0) t_a = 0;
+//				t_accel = t_a;
+//				t_decel = t_a + time_to_v1;
+//			} else if (x_to_v1 > fabs(x)) {
+//				t_a = (sqrt(v1 * v1 + 2 * amax * fabs(x)) - fabs(v1)) / amax;
+//				t_accel = t_a;
+//				t_decel = 0.0;
+//			} else {
+//				t_a = (sqrt((v1 * v1 + v2 * v2) / 2.0 + fabs(x) * amax) - fabs(v2)) / amax;
+//				if (t_a < 0.0) t_a = 0;
+//				t_accel = t_a + time_to_v1;
+//				t_decel = t_a;
+//			}
+//			if ( t_accel > 0)
+//				v = v1 + dt * amax;
+//			else
+//				v = sign(v1)*(fabs(v1) - dt * dmax);
+//		}*/
+//	}
+////	if ( v1*v < 0 )
+////		v = 0;
 
-	lastV = v;
-	lastV1 = v1;
-	v = v > vmax ? vmax : v ;
-	qDebug() << lastV << " " << v << "   " << lastV1 << " " << v1;
-//	qDebug() << "TC : " << tCruise << "TD : " << tDec << " XD : " << xDec << " Dist : " << x;
-//	debug(QString("TA: %1 TD: %2 TC:%3 V:%4 Xa:%5 Xd:%6 X:%7 XT:%8").arg(tAcc).arg(tDec).arg(tCruise).arg(v).arg(xAcc).arg(xDec).arg(x).arg(tempDist),D_SEPEHR);
+//	lastV = v;
+//	lastV1 = v1;
+//	v = v > vmax ? vmax : v ;
+//	qDebug() << lastV << " " << v << "   " << lastV1 << " " << v1;
+////	qDebug() << "TC : " << tCruise << "TD : " << tDec << " XD : " << xDec << " Dist : " << x;
+////	debug(QString("TA: %1 TD: %2 TC:%3 V:%4 Xa:%5 Xd:%6 X:%7 XT:%8").arg(tAcc).arg(tDec).arg(tCruise).arg(v).arg(xAcc).arg(xDec).arg(x).arg(tempDist),D_SEPEHR);
 
 
 

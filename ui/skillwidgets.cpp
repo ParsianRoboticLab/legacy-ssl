@@ -589,7 +589,7 @@ void CSkillKickOneTouch::generateFromConfig(CAgent *a)
     if (configWidget->checkBoxs[0]->isChecked())
     {
         if (configWidget->checkBoxs[1]->isChecked()) configWidget->checkBoxs[1]->setChecked(false);
-        setTarget(wm->field->oppGoal());
+        setTarget(wm->field->oppGoalL());
     }
     else if (configWidget->checkBoxs[1]->isChecked())
     {

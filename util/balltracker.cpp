@@ -345,8 +345,8 @@ Matrix& BallTracker::f(const Matrix &x, Matrix &I)
   f = x; // Copy Matrix
   double &_x = f.e(0,0), &_y = f.e(1,0), &_vx = f.e(2,0), &_vy = f.e(3,0), &_ax = f.e(4,0), &_ay = f.e(5,0);
   double _v = sqrt(_vx * _vx + _vy * _vy);
-
-  double _a = MIN(BallFriction()*Gravity, _v / stepsize);
+    //mhmmd
+  double _a =  MIN(BallFriction()*Gravity, _v / stepsize);
 //  double _a = BallFriction()*Gravity;
 //  double _a = 0;
 //  double _ax = (_v == 0.0) ? 0.0 : -_a * _vx / _v;
@@ -533,6 +533,6 @@ double BallFriction()
 //    return 0.013;// 0.19;
 /*	if (wm->getIsSimulMode())
 		return 0.07;*/
-	return 0.045;// 0.175;// 0.19;
+        return 0.19;// 0.175;// 0.19;
 
 }
