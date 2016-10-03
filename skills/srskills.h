@@ -20,28 +20,7 @@
 
 #include "navigation.h"
 
-class _PID{
-public:
-  double kp,kd,ki,_I,_P,_D,I_saturate,I_clear_error,error,pError;
-  _PID () : kp(0),kd(0),ki(0),_I(0),_P(0),_D(0),I_saturate(0),I_clear_error(0) {}
-  _PID (double _kp,double _kd,double _ki,double _I_sat,double _I_clear_error) : kp(_kp),kd(_kd),ki(_ki),_I(0),_P(0),_D(0),I_saturate(_I_sat),I_clear_error(_I_clear_error) {}
 
-  double PID_OUT()
-  {
-    _P=kp*error;
-
-    if(error <= I_clear_error)
-      _I = 0;
-    else if(_I<I_saturate)
-      _I += error;
-    else
-      _I = I_saturate;
-
-    _D = error-pError;
-
-    return _P + ki*_I + kd*_D;
-  }
-};
 
 enum kkGPMode {
     GPACC1 = 0,

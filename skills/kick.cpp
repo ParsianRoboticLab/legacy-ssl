@@ -1521,7 +1521,7 @@ double CSkillKickOneTouch::oneTouchAngle(Vector2D pos,
 
 kkOTMode CSkillKickOneTouch::decideMode()
 {
-    Circle2D tempCircle(waitpos, 0.2 + cirThresh);
+    Circle2D tempCircle(waitpos, 1 + cirThresh);
     Circle2D tempCircle2(waitpos, 1.2);
     draw(tempCircle, QColor(Qt::cyan));
 
@@ -1544,7 +1544,7 @@ void CSkillKickOneTouch::execute()
     oneTouchMode = decideMode();
 
     Segment2D ballPath;
-    double stopParam = 0.09;
+    double stopParam = 0.08;
     ballPath.assign(ballPos,ballPos + wm->ball->vel.norm()*(agentPos.dist(ballPos)-stopParam));
     draw(ballPath,"red");
 
@@ -1562,7 +1562,7 @@ void CSkillKickOneTouch::execute()
     Circle2D oneTouchArea;
 
     if(ballPos.dist(agentPos) <= onetouchRad)
-        onetouchRad = ballPos.dist(agentPos)-0.1;
+        onetouchRad = ballPos.dist(agentPos)-0.08;
     oneTouchArea.assign(agentPos,onetouchRad);
 
     if((wm->ball->vel.length() < 0.4 && agentPos.dist(ballPos) > onetouchKickRad) || (!oneTouchArea.intersection(ballPath,&sol1,&sol2) && wm->ball->vel.length() >= 0.4 && agentPos.dist(ballPos) > onetouchKickRad))
