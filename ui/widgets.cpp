@@ -2902,11 +2902,6 @@ void CInfoWidget::render(QPainter *p, const QSize& size){
     //    }
     //    p->drawEllipse(QPoint(200,15),7,7);
 
-    //Bang Bang
-    p->setBrush(QColor("black"));
-    p->setPen(QColor("black"));
-    p->drawText(200,40,QString("Normal: N(A,D) %1,%2 T(A,D) %3,%4 VM %5").arg(conf()->BangBang_AccNormal_Max()).arg(conf()->BangBang_DecNormal_Max()).arg(conf()->BangBang_AccTangent_Max()).arg(conf()->BangBang_DecTangent_Max()).arg(conf()->BangBang_VelTangent_Max()));
-    p->drawText(200,80,QString("Curve:  N      %1    T      %2    VM %3").arg(conf()->BangBang_AccCurve_Max()).arg(conf()->BangBang_DecCurve_Max()).arg(conf()->BangBang_VelCurve_Max()));
 
     //Side
     p->setBrush(QColor("black"));
@@ -4306,18 +4301,12 @@ void CAgentsWidget::update()
         pen.setWidth(2);
         painter->setPen(pen);
         int x = tempPix.width()/2 , y = tempPix.height()/2;
-        int x1 = 20*(agents[id]->vforward/conf()->BangBang_VelTangent_Max()) ;
-        int y1 = 20*(agents[id]->vnormal/conf()->BangBang_VelTangent_Max());
-        painter->drawLine(21 , 21 , 21-y1 , 21-x1);
 
         Vector2D actualVel = agents[id]->vel();
         actualVel.rotate(-1*agents[id]->dir().dir().degree());
         x = tempPix.width()/2 , y = tempPix.height()/2;
-        x1 = 20*(actualVel.x/conf()->BangBang_VelTangent_Max());
-        y1 = 20*(actualVel.y/conf()->BangBang_VelTangent_Max());
         pen.setColor("red");
         painter->setPen(pen);
-        painter->drawLine(21 , 21 , 21-y1 , 21-x1);
 
         QFont font;
         font.setPointSize(8);

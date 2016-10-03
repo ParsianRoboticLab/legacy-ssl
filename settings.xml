@@ -1,55 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <VarXML>
 	<Var name="Bang Bang" type="list">
-		<Var name="Acc Tan" type="double" minval="0.000000" maxval="">
-			7.000000
-		</Var>
-		<Var name="Dec Tan" type="double" minval="0.000000" maxval="">
-			1.800000
-		</Var>
-		<Var name="Acc Norm" type="double" minval="0.000000" maxval="">
+		<Var name="Acc" type="double" minval="0.000000" maxval="">
 			4.000000
 		</Var>
-		<Var name="Dec Norm" type="double" minval="0.000000" maxval="">
-			1.000000
+		<Var name="Dec" type="double" minval="0.000000" maxval="">
+			4.000000
 		</Var>
-		<Var name="Vel Max" type="double" minval="0.000000" maxval="">
-			3.600000
+		<Var name="Max Vel" type="double" minval="0.000000" maxval="">
+			4.000000
 		</Var>
-		<Var name="Vel Norm Max" type="double" minval="0.000000" maxval="">
+		<Var name="POS PID KP" type="double" minval="0.000000" maxval="">
+			3.500000
+		</Var>
+		<Var name="POS PID KI" type="double" minval="0.000000" maxval="">
+			0.000000
+		</Var>
+		<Var name="POS PID KD" type="double" minval="0.000000" maxval="">
 			2.000000
 		</Var>
-		<Var name="Acc Curve" type="double" minval="0.000000" maxval="">
-			1.000000
+		<Var name="TH PID KP" type="double" minval="0.000000" maxval="">
+			1.500000
 		</Var>
-		<Var name="Dec Curve" type="double" minval="0.000000" maxval="">
-			0.800000
-		</Var>
-		<Var name="Vel Curve" type="double" minval="0.000000" maxval="">
-			4.500000
-		</Var>
-		<Var name="Motors RPM" type="int" minval="" maxval="">
-			1240
-		</Var>
-		<Var name="Controler K P" type="double" minval="0.000000" maxval="">
+		<Var name="TH PID KI" type="double" minval="0.000000" maxval="">
 			0.000000
 		</Var>
-		<Var name="Controler K I" type="double" minval="0.000000" maxval="">
-			0.000000
-		</Var>
-		<Var name="Controler K D" type="double" minval="0.000000" maxval="">
-			0.000000
-		</Var>
-		<Var name="OneTouch K P" type="double" minval="0.000000" maxval="">
-			0.000000
-		</Var>
-		<Var name="OneTouch K I" type="double" minval="0.000000" maxval="">
-			0.000000
-		</Var>
-		<Var name="OneTouch K D" type="double" minval="0.000000" maxval="">
-			0.000000
-		</Var>
-		<Var name="Controler Gain" type="double" minval="0.000000" maxval="">
+		<Var name="TH PID KD" type="double" minval="0.000000" maxval="">
 			0.000000
 		</Var>
 	</Var>
@@ -127,6 +103,9 @@
 		</Var>
 	</Var>
 	<Var name="Ball Tracker &amp; Vision" type="list">
+		<Var name="active Cams" type="int" minval="" maxval="">
+			2
+		</Var>
 		<Var name="On / Off" type="bool">
 			false
 		</Var>
@@ -224,10 +203,10 @@
 		</Var>
 		<Var name="Kick one Touch" type="list">
 			<Var name="Landa" type="double" minval="0.000000" maxval="">
-				0.300000
+				0.200000
 			</Var>
 			<Var name="Gamma" type="double" minval="0.000000" maxval="">
-				0.500000
+				0.900000
 			</Var>
 			<Var name="Delay" type="double" minval="0.000000" maxval="">
 				0.020000
@@ -308,13 +287,13 @@
 		</Var>
 		<Var name="Debug" type="list">
 			<Var name="Game" type="bool">
-				false
+				true
 			</Var>
 			<Var name="Experiment" type="bool">
 				false
 			</Var>
 			<Var name="Debug" type="bool">
-				false
+				true
 			</Var>
 			<Var name="Temp" type="bool">
 				false
@@ -329,7 +308,7 @@
 				false
 			</Var>
 			<Var name="Mahi" type="bool">
-				true
+				false
 			</Var>
 			<Var name="Mani" type="bool">
 				false

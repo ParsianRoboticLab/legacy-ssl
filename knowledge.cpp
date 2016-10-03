@@ -3544,8 +3544,8 @@ NewFastestToBall CKnowledge::newFastestToBall(double timeStep, QList<int> ourLis
     }
 
     // use the correct Robot acceleration and maximum Velocity below :
-    double robotMaxVel = conf()->BangBang_VelTangent_Max();
-    double robotMAxAcc = conf()->BangBang_AccTangent_Max();
+    double robotMaxVel = conf()->BangBang_VelMax();
+    double robotMAxAcc = conf()->BangBang_AccMax();
 
     while ( t < 20 && (result.ourF.size() < ourList.size() || result.oppF.size() < oppList.size()) )
     {
