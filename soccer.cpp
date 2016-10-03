@@ -1385,7 +1385,7 @@ void CVisionThread::run()
         else
             packmax = 1;
 #else
-        packmax = 4;
+        packmax = conf()->BallTracker_activeCamNum();
 #endif
         bool flag = false;
         visionSocketMutex.lock();

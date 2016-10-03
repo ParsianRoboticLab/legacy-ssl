@@ -666,6 +666,22 @@ void CSkillGotoPoint::targetValidate()
     if (targetPos.y < wm->field->ourCornerR().y - 0.2) targetPos.y = wm->field->ourCornerR().y;
     if (targetPos.y > wm->field->ourCornerL().y + 0.2) targetPos.y = wm->field->ourCornerL().y;
 
+#ifdef PARSIANWORKSHOP
+    if(conf()->LocalSettings_OurTeamSide() == "Right")
+    {
+        if(targetPos.x < 0)
+        {
+            targetPos.x = 0;
+        }
+    }
+    else
+    {
+        if(targetPos.x > 4.5)
+        {
+            targetPos.x = 4.5;
+        }
+    }
+#endif
 
     if (lookat.valid())
     {
@@ -909,6 +925,7 @@ CSkillGotoPointAvoid::CSkillGotoPointAvoid(CAgent *_agent) : CSkillGotoPoint(_ag
     keeplooking = false;
     extendStep = -1.0;
     gotopoint = new CSkillGotoPoint(_agent);
+    bangBang = new CNewBangBang;
     dynamicStart = true;
     plan2 = false;
     prof = NULL;
@@ -918,6 +935,7 @@ CSkillGotoPointAvoid::CSkillGotoPointAvoid(CAgent *_agent) : CSkillGotoPoint(_ag
     stucked = -1;
     counting = 0;
     averageDir.assign(0 , 0);
+    addVel.assign(0,0);
 }
 
 CSkillGotoPointAvoid::~CSkillGotoPointAvoid()
@@ -946,7 +964,22 @@ CSkillGotoPointAvoid* CSkillGotoPointAvoid::oppRelax(int element)
 
 void CSkillGotoPointAvoid::execute()
 {
+    agentPos = agent->pos();
+    agentVel = agent->vel();
+    double dVx,dVy,dW;
+    bangBang->setAccMax(conf()->BangBang_AccMax()*10);
+    bangBang->setDecMax(conf()->BangBang_DecMax());
 
+    if(slowMode || slow)
+    {
+        bangBang->setVelMax(1.4);
+        bangBang->setSlow(true);
+    }
+    else
+    {
+        bangBang->setSlow(false);
+        bangBang->setVelMax(conf()->BangBang_VelMax());
+    }
     double maxAcc, maxDec, maxAccNormal, maxDecNormal, velMax, velMaxNorm;
     double slowDown = 1.0;
     if (!targetPos.valid())
@@ -958,7 +991,6 @@ void CSkillGotoPointAvoid::execute()
     }
     if (!targetVel.valid())
         vel2.assign(0,0);
-
 
 
     gotopoint->setAgent(agent);
@@ -990,28 +1022,29 @@ void CSkillGotoPointAvoid::execute()
     //    gotopoint->setPenaltyKick(penaltyKick);
 
 
-    if(noAvoid)
-    {
-        gotopoint->init(targetPos,targetDir);
-        gotopoint->execute();
-        return;
-    }
+    //    if(noAvoid)
+    //    {
+    //        gotopoint->init(targetPos,targetDir);
+    //        gotopoint->execute();
+    //        return;
+    //    }
 
-    if (!inited)
-    {
-        inited = true;
-    }
-    if( noAvoid ){
-        result.clear();
-        result.append(agent->pos());
-        result.append(targetPos);
-    }
-    else{
-        agent->initPlanner(agent->id() , targetPos , ourRelaxList , oppRelaxList , avoidPenaltyArea , avoidCenterCircle , ballObstacleRadius);
-        result.clear();
-        for( int i=0 ; i<agent->pathPlannerResult.size() ; i++ )
-            result.append(agent->pathPlannerResult[i]);
-    }
+    //    if (!inited)
+    //    {
+    //        inited = true;
+    //    }
+    //    if( noAvoid ){
+    //        result.clear();
+    //        result.append(agent->pos());
+    //        result.append(targetPos);
+    //    }
+    //    else{
+    targetValidate();
+    agent->initPlanner(agent->id() , targetPos , ourRelaxList , oppRelaxList , avoidPenaltyArea , avoidCenterCircle , 0.12);
+    result.clear();
+    for( int i=0 ; i<agent->pathPlannerResult.size() ; i++ )
+        result.append(agent->pathPlannerResult[i]);
+    // }
 
     double dist = 0.0;
     double distN = 0, distT = 0;
@@ -1020,95 +1053,99 @@ void CSkillGotoPointAvoid::execute()
     Vector2D mid(0,0);
     Vector2D dir(0,0);
     Vector2D tempD, firstTempD;
-    if (result.count() >= 1)
-    {
-        Vector2D q = result[0];
-        QVector<Vector2D> path;
-        for (int i=0;i<result.count();i++)
-        {
-            dist += (q-result[i]).length();
-            tempD = (result[i] - q);
-            tempD.rotate(-1.0*agent->dir().th().degree());
-            if (i == 1)
-                firstTempD = tempD;
-            distN += fabs(tempD.y);
-            distT += fabs(tempD.x);
-            q = result[i];
-            if ((q - agent->pos()).length() < 0.3)
-            {
-                path.append(q);
-                mid += path.back();
-            }
-        }
+//    if (result.count() >= 1)
+//    {
+//        Vector2D q = result[0];
+//        QVector<Vector2D> path;
+//        for (int i=0;i<result.count();i++)
+//        {
+//            dist += (q-result[i]).length();
+//            tempD = (result[i] - q);
 
-        if (path.count() > 2)
-        {
-            linefit(path,a,b);
-            mid /= path.count();
-            dir.assign(1.0, b);
-            dir.normalize();
-            flag = true;
-        }
-        debug(QString("a: %1 b:%2").arg(a).arg(b),D_MHMMD);
+//            tempD.rotate(-1.0*agent->dir().th().degree());
 
+//            if (i == 1)
+//                firstTempD = tempD;
+//            distN += fabs(tempD.y);
+//            distT += fabs(tempD.x);
+//            q = result[i];
+//            if ((q - agent->pos()).length() < 0.3)
+//            {
+//                path.append(q);
+//                mid += path.back();
+//            }
+//        }
 
-    }
+//        if (path.count() > 2)
+//        {
+//            linefit(path,a,b);
+//            mid /= path.count();
+//            dir.assign(1.0, b);
+//            dir.normalize();
+//            flag = true;
+//        }
 
-    if (!flag)
-    {
-        if( !result.isEmpty())
-            dir = (result.last() - agent->pos()).norm();
-        else
-            dir = (targetPos - agent->pos()).norm();
-    }
+//    }
 
-    if (flag)
-    {
-        if ((mid-agent->pos()) * dir < 0) dir *= -1;
-    }
+//    if (!flag)
+//    {
+//        if( !result.isEmpty())
+//            dir = (result.last() - agent->pos()).norm();
+//        else
+//            dir = (targetPos - agent->pos()).norm();
+//    }
+
+//    if (flag)
+//    {
+//        if ((mid-agent->pos()) * dir < 0) dir *= -1;
+//    }
 
     if( result.size() > 1 )
         dir = (result[1] - result[0]).norm();
 
 
-    if (getMaxAcceleration()<0)
-        maxAcc = conf()->BangBang_AccTangent_Max();
-    else
-        maxAcc = (getMaxAcceleration()*slowDown);
-    if (getMaxDeceleration()<0)
-        maxDec = conf()->BangBang_DecTangent_Max();
-    else
-        maxDec = (getMaxDeceleration()*slowDown);
-    if (getMaxAccelerationNormal()<0)
-        maxAccNormal = conf()->BangBang_AccNormal_Max();
-    else
-        maxAccNormal = (getMaxAccelerationNormal()*slowDown);
-    if (getMaxDecelerationNormal()<0)
-        maxDecNormal = conf()->BangBang_DecNormal_Max();
-    else
-        maxDecNormal = (getMaxDecelerationNormal()*slowDown);
+//    if (getMaxAcceleration()<0)
+//        maxAcc = conf()->BangBang_AccTangent_Max();
+//    else
+//        maxAcc = (getMaxAcceleration()*slowDown);
+//    if (getMaxDeceleration()<0)
+//        maxDec = conf()->BangBang_DecTangent_Max();
+//    else
+//        maxDec = (getMaxDeceleration()*slowDown);
+//    if (getMaxAccelerationNormal()<0)
+//        maxAccNormal = conf()->BangBang_AccNormal_Max();
+//    else
+//        maxAccNormal = (getMaxAccelerationNormal()*slowDown);
+//    if (getMaxDecelerationNormal()<0)
+//        maxDecNormal = conf()->BangBang_DecNormal_Max();
+//    else
+//        maxDecNormal = (getMaxDecelerationNormal()*slowDown);
 
-    if (getMaxVelocity() < 0)
-        velMax =conf()->BangBang_VelTangent_Max();
-    else
-        velMax = (getMaxVelocity()*slowDown);
-    if (getMaxVelocityNormal() < 0)
-        velMaxNorm =conf()->BangBang_VelNormal_Max();
-    else
-        velMaxNorm = (getMaxVelocityNormal()*slowDown);
+//    if (getMaxVelocity() < 0)
+//        velMax =conf()->BangBang_VelTangent_Max();
+//    else
+//        velMax = (getMaxVelocity()*slowDown);
+//    if (getMaxVelocityNormal() < 0)
+//        velMaxNorm =conf()->BangBang_VelNormal_Max();
+//    else
+//        velMaxNorm = (getMaxVelocityNormal()*slowDown);
 
-    double acc;
+//    double acc;
 
-    //-----------------
+//    //-----------------
 
-    if( result.size() <= 1 ){
-        agent->waitHere();
-        if (prof!=NULL)
-            prof->store();
-        return;
-    }
+//    if( result.size() <= 1 ){
+//        agent->waitHere();
+//        if (prof!=NULL)
+//            prof->store();
+//        return;
+//    }
     double D = 0 , alpha = 0 , d = 0 , vf = 0;
-    Vector2D lllll = result.last();
+    Vector2D lllll ;
+    if(result.count())
+    {
+        lllll= result.last();
+    }
     double amm=9 , dmm = 6;
     if (wm->getIsSimulMode())
     {
@@ -1122,42 +1159,45 @@ void CSkillGotoPointAvoid::execute()
         alpha = 0;
         if( i+1 == result.size() || fabs(Vector2D::angleBetween(result[i] - result[0] , result[i+1] - result[i]).degree()) > 3 ){
             if( i+1 == result.size() ){
-                vf = velMax;
+                vf = 0;
                 alpha = 0;
             }
             else{
                 alpha = fabs(Vector2D::angleBetween(result[i] - result[0] , result[i+1] - result[i]).degree());
-                vf = -1.0259280143 * log(alpha) + 5.370475303;
+                vf = -1.0259280143 * log(alpha) + 4.370475303;
+                vf = max(vf , 0.5);
+
             }
             D = result[i].dist(result[0]);
             lllll = result[i];
             d = dist - D;
 
-            double limit = asin(((D*dmm)/(4.2*4.2))>1 ? 1 : (D*dmm)/(4.2*4.2) )*180/_PI;
-            if( alpha > limit )
-                vf = sqrt((D/sin(fabs(alpha*_PI/180.0)))*dmm);
-            else{
-                vf = 4.2;
-            }
+//            double limit = asin(((D*dmm)/(4.2*4.2))>1 ? 1 : (D*dmm)/(4.2*4.2) )*180/_PI;
+//            if( alpha > limit )
+//                vf = sqrt((D/sin(fabs(alpha*_PI/180.0)))*dmm);
+//            else{
+//                vf = 4.2;
+//            }
 
             flag = false;
             break;
         }
     }
 
-    if( flag ){
+//    if( flag ){
 
-        if( getFinalPos().valid() )
-            vf = getFinalPos().length();
-        else
-            vf = 4.2;
-    }
-    vf = max(vf , 0.5);
+//        if( getFinalPos().valid() )
+//            vf = getFinalPos().length();
+//        else
+//            vf = 4.2;
+//    }
+
     if ( D > 2.0)
         vf = 4.2;
     if ( D < 0.5)
     {
         D = min(0.54 , dist);
+
     }
 
 
@@ -1180,9 +1220,12 @@ void CSkillGotoPointAvoid::execute()
 
     }
     /////////////////////
+    draw(QString("v : %1").arg(vf),Vector2D(2,2));
+    bangBang->bangBangSpeed(agentPos,agentVel,agent->dir(),lllll,targetDir,vf,0.016,dVx,dVy,dW);
+    agent->setRobotAbsVel(dVx + addVel.x,dVy + addVel.y,dW);
+    agent->_ACC = 0;
+    agent->_DEC = 0;
 
-    gotopoint->init(lllll,targetDir);
-    gotopoint->execute();
 
     counter ++;
 
@@ -1382,55 +1425,7 @@ double CSkillGoAcrossLine::progress()
 
 void CSkillGoAcrossLine::execute()
 {
-    Vector2D p0 = origin;
-    Vector2D pos = agent->pos();
-    Vector2D norm = dir.rotatedVector(90*(((pos - p0).outerProduct(dir)<0)?-1.0:1.0));
-    Vector2D vel = agent->vel();
-    p0-=norm.norm()*(aside);
-    p0+=(Line2D(origin,origin+dir).projection(targetPoint)-targetPoint).norm()*againstTarget;
-    double aMaxX;
-    if(maxacc>0)
-        aMaxX = maxacc;
-    else
-        aMaxX = conf()->BangBang_AccTangent_Max();
 
-    double dMaxX;
-    if(maxdec>0)
-        dMaxX = maxdec;
-    else
-        dMaxX = conf()->BangBang_DecTangent_Max();
-
-    double aMaxT = aMaxX;
-    double aMaxN = aMaxX;
-    double dMaxT = dMaxX;
-    double dMaxN = dMaxX;
-    Line2D l(p0,p0+dir);
-    double distNorm = l.dist(pos);
-    draw(Segment2D(p0*1.0,dir.norm()*3.0+p0*1.0),QColor("blue"));
-    draw(Segment2D(pos*1.0,norm.norm()*3.0+pos*1.0),QColor("blue"));
-    double a,t;
-    double v1 = CTrajectoryPlanner::plan(target, vel.innerProduct(dir.norm()), vTanFinal, aMaxT, dMaxT, vTanMax, DELTA_T, a, t);
-    double v2 = fabs(CTrajectoryPlanner::plan(distNorm, vel.innerProduct(norm.norm()), 0.0, aMaxN, dMaxN, vNormMax, DELTA_T, a, t));
-    Vector2D v = dir.norm()*fabs(v1) + norm.norm()*v2;
-    double dteta = AngleDeg::normalize_angle(agent->dir().th().degree() - (lookAt-pos).th().degree())*_RAD2DEG;
-    double sdt = (dteta<0) ? 1.0 : -1.0;
-    double w = 0;
-    double wLimit = agent->getwLimit();
-    if (fabs(dteta)<2*_DEG2RAD)
-        w = 0;
-    else if (fabs(dteta)<10*_DEG2RAD)
-        w= sdt*wLimit*1.0;
-    else if (fabs(dteta)<20*_DEG2RAD)
-        w= sdt*wLimit*2.0;
-    else if (fabs(dteta)<45*_DEG2RAD)
-        w= sdt*wLimit*2.0;
-    else if (fabs(dteta)<60*_DEG2RAD)
-        w= sdt*wLimit*2.0;
-    else if (fabs(dteta)<90*_DEG2RAD)
-        w= sdt*wLimit*3.0;
-    else w= sdt*wLimit*3.0;
-
-    agent->setRobotAbsVel(v.x, v.y,w);
 }
 
 //------------------------------------------------------------------------------
@@ -1466,129 +1461,12 @@ void CSkillThroughModeController::resetI()
 void CSkillThroughModeController::execute()
 {
 
-    double vMax = conf()->BangBang_VelTangent_Max();
-    double aMax = conf()->BangBang_AccTangent_Max();
-    double DT = conf()->Common_Command_Interval()/1000.0;
-    pidT.setDT(DT);
-    pidT.setOutputLimit(vMax*1.2);
-    //    pidT.setOutDiffLimit(aMax*DT);
-    pidT.setSumLimit(vMax/4.0);
-    pidT.setParams(5.0,0.6,0.05);
-    pidT.setTarget(0);
-
-    pidN.setDT(DT);
-    pidN.setOutputLimit(vMax);
-    //    pidN.setOutDiffLimit(aMax*DT);
-    pidN.setSumLimit(vMax);
-    pidN.setParams(3.0,0.6,0.0);
-    pidN.setTarget(0);
-
-    pidW.setDT(DT);
-    pidW.setOutputLimit(vMax);
-    //    pidW.setOutDiffLimit(aMax*DT);
-    pidW.setSumLimit(vMax);
-    pidW.setParams(3.0,0.8,0.0);
-    pidW.setTarget(0);
-
-
-    pos = agent->pos();//self()->getKickerPos();
-    vel = agent->vel();
-    dir = agent->dir();
-    posf = wm->ball->pos;
-    velf = wm->ball->vel;
-
-
-    Line2D ballL(posf,posf+velf);
-
-    Vector2D proj = ballL.projection(pos);
-
-    Vector2D NormalE  = proj-pos;
-    Vector2D TangentE = posf-proj;
-
-    Vector2D VF;
-
-    VF = pidT.step(TangentE.length())*TangentE.norm() + pidN.step(NormalE.length())*NormalE.norm();
-    VF*=-1;
-
-    double factorOnBallLine = VF * velf.norm();
-
-    if(factorOnBallLine < 0)
-    {
-        VF -= factorOnBallLine * velf.norm();
-    }
-
-    double W,eW;
-
-    if((pos-posf).length()  < 0.15)
-    {
-        wMode = true;
-        pidW.resetI();
-    }
-
-    if((pos-posf).length()  > 0.3)
-    {
-        wMode = false;
-        pidW.resetI();
-    }
-
-    if(velf.length() < 0.1)
-    {
-        wMode = true;
-    }
-
-    if(!wMode)
-    {
-        eW = Vector2D::angleBetween(velf,dir).radian();
-        draw(Segment2D(pos,pos+velf.norm()),"blue");
-        draw(Segment2D(pos,pos+dir.norm()),"red");
-    }
-    else
-    {
-        eW = Vector2D::angleBetween(tar-posf,dir).radian();
-        draw(Segment2D(pos,pos+(tar-posf).norm()),"white");
-        draw(Segment2D(pos,pos+dir.norm()),"pink");
-    }
-
-    draw(Segment2D(posf,tar),"cyan");
-
-    //qDebug()<<"demet garm "<<" "<<eW*_RAD2DEG<<" "<<(wMode?"W":"T");
-    //eW *= _DEG2RAD;
-
-
-    W = pidW.step(eW);
-
-    if(!wm->field->isInField(posf))
-    {
-        agent->setRobotAbsVel(0,0,0);
-        resetI();
-        return;
-    }
-
-    if(velf.length()<0.01)
-    {
-        agent->setRobotAbsVel(0,0,W);
-        resetI();
-        return;
-    }
-
-
-    agent->setRobotAbsVel(VF.x,VF.y,W);
 }
 
 double CSkillThroughModeController::progress()
 {
-    if(agent==NULL) return 0;
-    double d = (pos - posf).length();
-    if (d<0.04) return 1.0;
-    if (d<0.05) return 0.8;
-    if (d<0.10) return 0.7;
-    if (d<0.20) return 0.6;
     return 0;
 }
-
-
-
-
 
 INIT_SKILL(CSkillGotoPosMV, "gotoposmv");
 
@@ -1648,204 +1526,204 @@ void CSkillGotoPosMV::resetGotoPos(){
 
 
 void CSkillGotoPosMV::execute(){
-    targetVel.assign(0,0);
-    bool avoidPenaltyArea = true;
-    bool avoidCenterCircle = false;
-    if( agent != NULL && target.valid() == true ){
-        draw(Circle2D(target,0.1) , "blue" , true);
+//    targetVel.assign(0,0);
+//    bool avoidPenaltyArea = true;
+//    bool avoidCenterCircle = false;
+//    if( agent != NULL && target.valid() == true ){
+//        draw(Circle2D(target,0.1) , "blue" , true);
 
-        //agent->runPlanner(agent->id(), target, avoidPenaltyArea, avoidCenterCircle);
-        agent->initPlanner(agent->id() , target , QList<int>() , QList<int>() , true , true , 0);
-        result = agent->pathPlannerResult;
+//        //agent->runPlanner(agent->id(), target, avoidPenaltyArea, avoidCenterCircle);
+//        agent->initPlanner(agent->id() , target , QList<int>() , QList<int>() , true , true , 0);
+//        result = agent->pathPlannerResult;
 
-        if( result.size() > 1 ){
+//        if( result.size() > 1 ){
 
-            // theta_1 is the angle of robot velocity with respect to X
-            // theta_r is the angle of robot direction with respect to X
-            // theta_t is the angle of path direction with respect to X
-            // etha is the angle of robot velocity with respect to path direction
-            // beta is the angle of robot direction with respect to path direction
-            // d_n is the normalized vector of perpendicular vector to path direction
-            // d_t is the normalized vector of path direction vector
-            // d_r is the normalized vector of robot direction vector
+//            // theta_1 is the angle of robot velocity with respect to X
+//            // theta_r is the angle of robot direction with respect to X
+//            // theta_t is the angle of path direction with respect to X
+//            // etha is the angle of robot velocity with respect to path direction
+//            // beta is the angle of robot direction with respect to path direction
+//            // d_n is the normalized vector of perpendicular vector to path direction
+//            // d_t is the normalized vector of path direction vector
+//            // d_r is the normalized vector of robot direction vector
 
-            Vector2D d_t = (result[1] - result[0]).norm();
+//            Vector2D d_t = (result[1] - result[0]).norm();
 
-            if( issetTargetDir == false ){
-                targetDir = Vector2D(1,0);
-            }
+//            if( issetTargetDir == false ){
+//                targetDir = Vector2D(1,0);
+//            }
 
-            //Vector2D d_t = (target - agent->pos()).norm();
-            Vector2D d_n = d_t.rotatedVector(90);
+//            //Vector2D d_t = (target - agent->pos()).norm();
+//            Vector2D d_n = d_t.rotatedVector(90);
 
-            if( lastTarget != target )
-                sumErr = 0;
+//            if( lastTarget != target )
+//                sumErr = 0;
 
 
-            double distToTarget = 0;
-            for( int i=1 ; i<result.size() ; i++ ){
-                draw(Segment2D(result[i-1] , result[i]) , "black");
-                distToTarget += result[i-1].dist(result[i]);
-            }
+//            double distToTarget = 0;
+//            for( int i=1 ; i<result.size() ; i++ ){
+//                draw(Segment2D(result[i-1] , result[i]) , "black");
+//                distToTarget += result[i-1].dist(result[i]);
+//            }
 
 
-            //			draw(QString("%1 %2").arg(distanceX).arg(distanceY) , Vector2D(0,1.6) , );
+//            //			draw(QString("%1 %2").arg(distanceX).arg(distanceY) , Vector2D(0,1.6) , );
 
-            double etha = (d_t.dir() - agent->vel().dir()).radian();
-            double beta = (d_t.dir() - agent->dir().dir()).radian();
-            //			debug(QString("etha %1").arg(etha * 180 / 3.141592) , D_ERROR);
-            //			debug(QString("beta %1").arg(beta * 180 / 3.141592) , D_ERROR);
+//            double etha = (d_t.dir() - agent->vel().dir()).radian();
+//            double beta = (d_t.dir() - agent->dir().dir()).radian();
+//            //			debug(QString("etha %1").arg(etha * 180 / 3.141592) , D_ERROR);
+//            //			debug(QString("beta %1").arg(beta * 180 / 3.141592) , D_ERROR);
 
 
-            /* a_mxg= amyl + (amxl - amyl)*fabs(cos(B))*/
-            double a_MaxT = conf()->BangBang_AccNormal_Max() + (conf()->BangBang_AccTangent_Max() - conf()->BangBang_AccNormal_Max())*fabs(cos(beta));
+//            /* a_mxg= amyl + (amxl - amyl)*fabs(cos(B))*/
+//            double a_MaxT = conf()->BangBang_AccNormal_Max() + (conf()->BangBang_AccTangent_Max() - conf()->BangBang_AccNormal_Max())*fabs(cos(beta));
 
-            double d_MaxT = conf()->BangBang_DecNormal_Max() + (conf()->BangBang_DecTangent_Max() - conf()->BangBang_DecNormal_Max())*fabs(cos(beta));
+//            double d_MaxT = conf()->BangBang_DecNormal_Max() + (conf()->BangBang_DecTangent_Max() - conf()->BangBang_DecNormal_Max())*fabs(cos(beta));
 
 
-            /* a_myg= amyl + (amxl - amyl)*fabs(sin(B))*/
-            double a_MaxN = conf()->BangBang_AccNormal_Max() + (conf()->BangBang_AccTangent_Max() - conf()->BangBang_AccNormal_Max())*fabs(sin(beta));
+//            /* a_myg= amyl + (amxl - amyl)*fabs(sin(B))*/
+//            double a_MaxN = conf()->BangBang_AccNormal_Max() + (conf()->BangBang_AccTangent_Max() - conf()->BangBang_AccNormal_Max())*fabs(sin(beta));
 
-            double v_MaxT = conf()->BangBang_VelNormal_Max() + (conf()->BangBang_VelTangent_Max() - conf()->BangBang_VelNormal_Max())*fabs(cos(beta));
-            double v_MaxN = conf()->BangBang_VelNormal_Max() + (conf()->BangBang_VelTangent_Max() - conf()->BangBang_VelNormal_Max())*fabs(sin(beta));
+//            double v_MaxT = conf()->BangBang_VelNormal_Max() + (conf()->BangBang_VelTangent_Max() - conf()->BangBang_VelNormal_Max())*fabs(cos(beta));
+//            double v_MaxN = conf()->BangBang_VelNormal_Max() + (conf()->BangBang_VelTangent_Max() - conf()->BangBang_VelNormal_Max())*fabs(sin(beta));
 
 
 
-            Vector2D v_T = agent->vel() * cos(etha);
-            double vt_desired;
+//            Vector2D v_T = agent->vel() * cos(etha);
+//            double vt_desired;
 
-            double DT_C = fabs((targetVel.r2() - v_T.r2())/(2 * d_MaxT));
+//            double DT_C = fabs((targetVel.r2() - v_T.r2())/(2 * d_MaxT));
 
-            Vector2D desiredVel;
-            double disStepT = fabs(agent->pos().dist(result[1]));
-            double tt=(conf()->Common_Command_Interval() / 1000.0);
+//            Vector2D desiredVel;
+//            double disStepT = fabs(agent->pos().dist(result[1]));
+//            double tt=(conf()->Common_Command_Interval() / 1000.0);
 
-            if( cos(etha) < (0 ) && agent->vel().length() > 0.01 ){
-                vt_desired = -1*((conf()->Common_Command_Interval() / 1000.0) * (-d_MaxT)*5 + fabs(velHistory.back()));//agent->vel().length() * cos(etha) );
-                debug(QString("HIST %1 %2").arg(velHistory.back()).arg(etha) , D_ERROR);
-                debug(QString("STOPPING %1 %2").arg(vt_desired)  , D_ERROR);
-            }
-            else if( DT_C + .01 > distToTarget ){
-                vt_desired = (-1.0*d_MaxT*tt + velHistory.back());
-                debug(QString("HIST %1 %2").arg(velHistory.back()).arg(etha) , D_ERROR);
-                debug(QString("DEC %1 %2").arg(vt_desired) .arg(DT_C), D_ERROR);
+//            if( cos(etha) < (0 ) && agent->vel().length() > 0.01 ){
+//                vt_desired = -1*((conf()->Common_Command_Interval() / 1000.0) * (-d_MaxT)*5 + fabs(velHistory.back()));//agent->vel().length() * cos(etha) );
+//                debug(QString("HIST %1 %2").arg(velHistory.back()).arg(etha) , D_ERROR);
+//                debug(QString("STOPPING %1 %2").arg(vt_desired)  , D_ERROR);
+//            }
+//            else if( DT_C + .01 > distToTarget ){
+//                vt_desired = (-1.0*d_MaxT*tt + velHistory.back());
+//                debug(QString("HIST %1 %2").arg(velHistory.back()).arg(etha) , D_ERROR);
+//                debug(QString("DEC %1 %2").arg(vt_desired) .arg(DT_C), D_ERROR);
 
-            }
-            else{
-                tt = (conf()->Common_Command_Interval() / 1000.0);
-                vt_desired = (1.0*a_MaxT*tt + velHistory.back());
-                if( vt_desired > v_MaxT )
-                    vt_desired = v_MaxT;
-                debug(QString("ACC %1 %2").arg(vt_desired) .arg(DT_C) , D_ERROR);
-            }
+//            }
+//            else{
+//                tt = (conf()->Common_Command_Interval() / 1000.0);
+//                vt_desired = (1.0*a_MaxT*tt + velHistory.back());
+//                if( vt_desired > v_MaxT )
+//                    vt_desired = v_MaxT;
+//                debug(QString("ACC %1 %2").arg(vt_desired) .arg(DT_C) , D_ERROR);
+//            }
 
 
-            if( velHistory.count() > 100 )
-                velHistory.pop_front();
-            velHistory.push_back(vt_desired);
+//            if( velHistory.count() > 100 )
+//                velHistory.pop_front();
+//            velHistory.push_back(vt_desired);
 
 
 
 
-            double DT = conf()->Common_Command_Interval() / 1000.0;
+//            double DT = conf()->Common_Command_Interval() / 1000.0;
 
-            // this part is related to omitting point error
+//            // this part is related to omitting point error
 
 
-            if( distToTarget < 0.7 ){
+//            if( distToTarget < 0.7 ){
 
-                double distErr = (result[1] - agent->pos()).innerProduct(d_t);
-                targetSumErr += distErr * DT;
-                diffTarget = 0.5 * diffTarget + (1-0.5) * ( distErr - lastTargetErr) / DT;
-                lastTargetErr = distErr;
+//                double distErr = (result[1] - agent->pos()).innerProduct(d_t);
+//                targetSumErr += distErr * DT;
+//                diffTarget = 0.5 * diffTarget + (1-0.5) * ( distErr - lastTargetErr) / DT;
+//                lastTargetErr = distErr;
 
 
-                double kp = conf()->BangBang_KP();
-                double kd = conf()->BangBang_KD();
-                double ki = conf()->BangBang_KI();
-                double gain = conf()->BangBang_Gain();
+//                double kp = conf()->BangBang_KP();
+//                double kd = conf()->BangBang_KD();
+//                double ki = conf()->BangBang_KI();
+//                double gain = conf()->BangBang_Gain();
 
-                VT = kp * distErr + ki * targetSumErr + kd * diffTarget + gain * VT;
-                vt_desired = ((0.7 - distToTarget) * VT + distToTarget * vt_desired);
-                debug(QString("POINT %1 %2").arg(vt_desired) .arg(DT_C) , D_ERROR);
+//                VT = kp * distErr + ki * targetSumErr + kd * diffTarget + gain * VT;
+//                vt_desired = ((0.7 - distToTarget) * VT + distToTarget * vt_desired);
+//                debug(QString("POINT %1 %2").arg(vt_desired) .arg(DT_C) , D_ERROR);
 
-            }
+//            }
 
-            desiredVel = d_t * vt_desired;
-            LastVelHist=velHistory.back();
+//            desiredVel = d_t * vt_desired;
+//            LastVelHist=velHistory.back();
 
 
 
-            // this part is related to navigate the robot to the path
+//            // this part is related to navigate the robot to the path
 
 
-            double distNErr = (result[1] - agent->pos()).innerProduct(d_n);
+//            double distNErr = (result[1] - agent->pos()).innerProduct(d_n);
 
-            sumErr += (distNErr * DT);
-            diff = 0.5 * diff + (1 - 0.5)*(distNErr - lastNErr)/DT;
-            lastNErr = distNErr;
+//            sumErr += (distNErr * DT);
+//            diff = 0.5 * diff + (1 - 0.5)*(distNErr - lastNErr)/DT;
+//            lastNErr = distNErr;
 
-            double kp = conf()->BangBang_KP();
-            double kd = conf()->BangBang_KD();
-            double ki = conf()->BangBang_KI();
-            double gain = conf()->BangBang_Gain();
+//            double kp = conf()->BangBang_KP();
+//            double kd = conf()->BangBang_KD();
+//            double ki = conf()->BangBang_KI();
+//            double gain = conf()->BangBang_Gain();
 
-            VN = kp * distNErr + ki * sumErr + kd * diff + gain * VN;
-            double vn_desired = VN;
+//            VN = kp * distNErr + ki * sumErr + kd * diff + gain * VN;
+//            double vn_desired = VN;
 
-            desiredVel += d_n * vn_desired;
+//            desiredVel += d_n * vn_desired;
 
 
-            // this part is related to Turn the robot to the  desired direction
+//            // this part is related to Turn the robot to the  desired direction
 
-            DT = conf()->Common_Command_Interval() / 1000.0;
+//            DT = conf()->Common_Command_Interval() / 1000.0;
 
-            agent->setRobotAbsVel(desiredVel.x , desiredVel.y , 0);
+//            agent->setRobotAbsVel(desiredVel.x , desiredVel.y , 0);
 
 
-            if( distToTarget < 1 )
-                turn.setDirection(targetDir);
-            else
-                turn.setDirection(targetDir);
-            turn.setTurnMode(CSkillTurn::GoToPos);
-            turn.execute();
+//            if( distToTarget < 1 )
+//                turn.setDirection(targetDir);
+//            else
+//                turn.setDirection(targetDir);
+//            turn.setTurnMode(CSkillTurn::GoToPos);
+//            turn.execute();
 
 
 
-            // MOTION PROFILE
+//            // MOTION PROFILE
 
-            toProfile.clear();
-            toProfile.append(agent->vel().length() * cos(etha));
-            toProfile.append(VN);
-            profile->myStore(toProfile);
+//            toProfile.clear();
+//            toProfile.append(agent->vel().length() * cos(etha));
+//            toProfile.append(VN);
+//            profile->myStore(toProfile);
 
 
-            knowledge->plotWidgetCustom[0] = vt_desired;
+//            knowledge->plotWidgetCustom[0] = vt_desired;
 
-            //////////
-            /*
-                        double dirErr = agent()->dir;
+//            //////////
+//            /*
+//                        double dirErr = agent()->dir;
 
-                        sumErr += (distNErr * DT);
-                        diff = 0.5 * diff + (1 - 0.5)*(distNErr - lastNErr)/DT;
+//                        sumErr += (distNErr * DT);
+//                        diff = 0.5 * diff + (1 - 0.5)*(distNErr - lastNErr)/DT;
 
 
-                        double kp = conf()->BangBang_KP();
-                        double kd = conf()->BangBang_KD();
-                        double ki = conf()->BangBang_KI();
-                        double gain = conf()->BangBang_Gain();
+//                        double kp = conf()->BangBang_KP();
+//                        double kd = conf()->BangBang_KD();
+//                        double ki = conf()->BangBang_KI();
+//                        double gain = conf()->BangBang_Gain();
 
-                        VN = kp * distNErr + ki * sumErr + kd * diff + gain * VN;
-                        double vn_desired = VN;
+//                        VN = kp * distNErr + ki * sumErr + kd * diff + gain * VN;
+//                        double vn_desired = VN;
 
-                        desiredVel += d_n * vn_desired; */
+//                        desiredVel += d_n * vn_desired; */
 
 
-        }
+//        }
 
-    }
-    else
-        qDebug() << "NOT SET";
+//    }
+//    else
+//        qDebug() << "NOT SET";
 }
 
 double CSkillGotoPosMV::progress()

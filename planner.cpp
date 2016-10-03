@@ -745,6 +745,11 @@ void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelax
     obs.add_circle(_PENALTY_AREA_CIRCLE_X , 0 , _PENALTY_AREA_CIRCLE_RAD , 0 , 0);
 	}
 
+        ////////////////////test opPenalty
+        obs.add_circle(1*(_FIELD_WIDTH / 2) , 0.25,1,0,0);
+        obs.add_circle(1*(_FIELD_WIDTH / 2) , -0.25,1,0,0);
+        obs.add_rectangle(1*(_FIELD_WIDTH / 2),0,1,0.5);
+
 	if (avoidCenterCircle)
 	{
     obs.add_circle(0 , 0 , _CENTER_CIRCLE_RAD , 0 , 0);
