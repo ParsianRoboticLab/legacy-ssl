@@ -1124,7 +1124,8 @@ char CAgent::getRoller()
 
 float CAgent::getMotorMaxRadPerSec()
 {
-return 0;
+
+return 1000*2*M_PI/60.0f;
 }
 
 float CAgent::getvLimit()
