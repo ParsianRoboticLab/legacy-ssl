@@ -969,7 +969,7 @@ void CSkillGotoPointAvoid::execute()
     double dVx,dVy,dW;
     bangBang->setAccMax(conf()->BangBang_AccMax()*10);
     bangBang->setDecMax(conf()->BangBang_DecMax());
-    bangBang->setOneTouch(oneTouchMode);
+    bangBang->setOneTouch(oneTouchMode || diveMode);
     if(slowMode || slow)
     {
         bangBang->setVelMax(1.4);
@@ -1075,9 +1075,18 @@ void CSkillGotoPointAvoid::execute()
     targetValidate();
     agent->initPlanner(agent->id() , targetPos , ourRelaxList , oppRelaxList , avoidPenaltyArea , avoidCenterCircle , 0);
     result.clear();
-    for( int i=0 ; i<agent->pathPlannerResult.size() ; i++ )
+    for( int i=agent->pathPlannerResult.size()-1 ; i>=0 ; i-- )
+    {
         result.append(agent->pathPlannerResult[i]);
-    // }
+    }
+    if(result.size() <3)
+    {
+        noAvoid = true;
+    }
+    else
+    {
+        noAvoid = false;
+    }
 
     double dist = 0.0;
     double distN = 0, distT = 0;
