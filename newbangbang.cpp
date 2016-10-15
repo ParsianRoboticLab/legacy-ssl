@@ -118,7 +118,6 @@ bangBangMode CNewBangBang::decidePlan()
 
 void CNewBangBang::trajectoryPlanner()
 {
-    AngleDeg agentMovementTh = movementTh.th();
     velMax = vmax;
 
     if(smooth)
@@ -166,10 +165,24 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     movementTh = pos2 - agentPos;
     angPid->error = (dir2.th() -  agentDir.th()).radian();
     draw(QString("vel2 : %1").arg(Vel2),Vector2D(2,1.5));
+    agentMovementTh = movementTh.th();
+
+    if ( fabs((agentMovementTh - agentDir.th()).degree()) > 80 && fabs((agentMovementTh - agentDir.th()).degree()) < 100 )
+    {
+        amax = 60;
+    }
     if(slow)
     {
         posPid->kp = 2;
+        amax = 10;
         posPid->kd = conf()->BangBang_posKD();
+        posPid->ki = conf()->BangBang_posKI();
+    }
+    else if(oneTouch)
+    {
+        posPid->kp = 7;
+        amax = 60;
+        posPid->kd = 5;
         posPid->ki = conf()->BangBang_posKI();
     }
     else

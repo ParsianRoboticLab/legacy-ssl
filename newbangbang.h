@@ -94,6 +94,7 @@ private:
         _PID *posPid;
         _PID *angPid;
         _PID *thPid;
+        AngleDeg agentMovementTh;
         double appliedTh;
 };
 
