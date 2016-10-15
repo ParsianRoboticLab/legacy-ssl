@@ -1375,7 +1375,7 @@ bool CCoach::decideAttack()
         }
         else
         {
-            dynamicAttack->setDirectShot(false);
+            dynamicAttack->setDirectShot(true);
             shotToGoalthr = 0;
         }
         //////////////////////////////////////////////assign agents

@@ -713,8 +713,10 @@ void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelax
 				double ttt = 1;
 				if (mywma.our[j].vel.length() >= 0.5 )
 					ttt = ((mywma.our[j].vel.length()-vvv)/mywma.our[j].vel.length());
-				obs.add_circle(mywma.our[j].pos.x+mywma.our[j].vel.x*vvv*obstVelFactor , mywma.our[j].pos.y+mywma.our[j].vel.y*vvv*obstVelFactor , (CRobot::robot_radius_new+0.03)*ttt , mywma.our[j].vel.x , mywma.our[j].vel.y);
-			}
+                                //obs.add_circle(mywma.our[j].pos.x+mywma.our[j].vel.x*vvv*obstVelFactor , mywma.our[j].pos.y+mywma.our[j].vel.y*vvv*obstVelFactor , (CRobot::robot_radius_new+0.03)*ttt , mywma.our[j].vel.x , mywma.our[j].vel.y);
+                                obs.add_circle(mywma.our[j].pos.x , mywma.our[j].pos.y , (CRobot::robot_radius_new+0.03) , mywma.our[j].vel.x , mywma.our[j].vel.y);
+
+                        }
 		}
 	}
 
@@ -740,9 +742,9 @@ void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelax
 		obs.add_circle(mywma.ball.pos.x,mywma.ball.pos.y,ballObstacleRadius,mywma.ball.vel.x , mywma.ball.vel.y);
 
 	if( avoidPenaltyArea ){
-//		obs.add_circle(field->ourGoal().x , field->ourGoal().y+0.15 , 0.800+CRobot::robot_radius_new , 0 , 0);
-//		obs.add_circle(field->ourGoal().x , field->ourGoal().y-0.15 , 0.800+CRobot::robot_radius_new , 0 , 0);
-    obs.add_circle(_PENALTY_AREA_CIRCLE_X , 0 , _PENALTY_AREA_CIRCLE_RAD , 0 , 0);
+            obs.add_circle(-1*(_FIELD_WIDTH / 2) , 0.25,1,0,0);
+            obs.add_circle(-1*(_FIELD_WIDTH / 2) , -0.25,1,0,0);
+            obs.add_rectangle(-1*(_FIELD_WIDTH / 2),0,1,0.5);
 	}
 
         ////////////////////test opPenalty
