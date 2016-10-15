@@ -589,7 +589,7 @@ void CSkillKickOneTouch::generateFromConfig(CAgent *a)
     if (configWidget->checkBoxs[0]->isChecked())
     {
         if (configWidget->checkBoxs[1]->isChecked()) configWidget->checkBoxs[1]->setChecked(false);
-        setTarget(wm->field->oppGoalL());
+        setTarget(wm->field->oppGoal());
     }
     else if (configWidget->checkBoxs[1]->isChecked())
     {
@@ -648,71 +648,71 @@ void CSkillSpinBack::generateFromConfig(CAgent *a)
 CSkillConfigWidget* CSkillTrackCurve::generateConfigWidget(QWidget* parent)
 {
     CSkillConfigWidget* w = new CSkillConfigWidget(parent);
-    w->skill = new CSkillTrackCurve(NULL);
-    w->skill->configWidget = w;
-    //QDoubleValidator* v = new QDoubleValidator(parent);
-    w->checkBoxs.append(new QCheckBox("Look at oppGoal"));
-    w->checkBoxs.append(new QCheckBox("Spline"));
-    w->checkBoxs.append(new QCheckBox("Add points on each click"));
-    w->checkBoxs.append(new QCheckBox("Remove points on each click"));
-    w->checkBoxs.append(new QCheckBox("Heart"));
-    w->checkBoxs.append(new QCheckBox("Spiral"));
-    w->lineEdits.append(new QLineEdit("1",parent));
-    QVBoxLayout *layoutMain = new QVBoxLayout;
-    layoutMain->addWidget(w->checkBoxs[0]);
-    layoutMain->addWidget(w->checkBoxs[1]);
-    layoutMain->addWidget(w->checkBoxs[2]);
-    layoutMain->addWidget(w->checkBoxs[3]);
-    layoutMain->addWidget(w->checkBoxs[4]);
-    layoutMain->addWidget(w->checkBoxs[5]);
-    layoutMain->addWidget(w->lineEdits[0]);
-    w->setLayout(layoutMain);
+//    w->skill = new CSkillTrackCurve(NULL);
+//    w->skill->configWidget = w;
+//    //QDoubleValidator* v = new QDoubleValidator(parent);
+//    w->checkBoxs.append(new QCheckBox("Look at oppGoal"));
+//    w->checkBoxs.append(new QCheckBox("Spline"));
+//    w->checkBoxs.append(new QCheckBox("Add points on each click"));
+//    w->checkBoxs.append(new QCheckBox("Remove points on each click"));
+//    w->checkBoxs.append(new QCheckBox("Heart"));
+//    w->checkBoxs.append(new QCheckBox("Spiral"));
+//    w->lineEdits.append(new QLineEdit("1",parent));
+//    QVBoxLayout *layoutMain = new QVBoxLayout;
+//    layoutMain->addWidget(w->checkBoxs[0]);
+//    layoutMain->addWidget(w->checkBoxs[1]);
+//    layoutMain->addWidget(w->checkBoxs[2]);
+//    layoutMain->addWidget(w->checkBoxs[3]);
+//    layoutMain->addWidget(w->checkBoxs[4]);
+//    layoutMain->addWidget(w->checkBoxs[5]);
+//    layoutMain->addWidget(w->lineEdits[0]);
+//    w->setLayout(layoutMain);
     return w;
 }
 
 void CSkillTrackCurve::generateFromConfig(CAgent *a)
 {
-    agent = a;
-    r_max = configWidget->lineEdits[0]->text().toDouble();
-    if (configWidget->checkBoxs[1]->isChecked())
-    {
-        configWidget->checkBoxs[4]->setChecked(false);
-        configWidget->checkBoxs[5]->setChecked(false);
-        /*if (curve==NULL) */curve = new CCurveSpline();
-        if (lastMousePos != (*(configWidget->mousePos)))
-        {
-            lastMousePos = *(configWidget->mousePos);
-            if (configWidget->checkBoxs[2]->isChecked())
-            {
-                ((CCurveSpline*) curve)->knots.append(lastMousePos);
-                configWidget->checkBoxs[3]->setChecked(false);
-            }
-            else if (configWidget->checkBoxs[3]->isChecked()) {if (!((CCurveSpline*) curve)->knots.empty()) ((CCurveSpline*) curve)->knots.removeLast();}
-            for (int k=0;k<((CCurveSpline*) curve)->knots.count();k++)
-            {
-                draw(((CCurveSpline*) curve)->knots[k], 1, QColor("yellow"));
-            }
-        }
-        if (((CCurveSpline*) curve)->knots.count() > 3)
-            ((CCurveSpline*) curve)->init();
-        ((CCurveSpline*) curve)->last_t = 0.0;
-    }
-    if (configWidget->checkBoxs[4]->isChecked())
-    {
-        configWidget->checkBoxs[5]->setChecked(false);
-        curve = new CCurveHeart(.5, 1.0, 2.0, 1/(2.0*M_PI));
-        ((CCurveHeart*) curve)->last_t = 0.0;
-        ((CCurveHeart*) curve)->setTFinal(40);
-    }
-    if (configWidget->checkBoxs[5]->isChecked())
-    {
-        curve = new CCurveMarpich(0.05, 0.2, 50.0);
-        ((CCurveHeart*) curve)->last_t = 0.0;
-    }
-    if (configWidget->checkBoxs[0]->isChecked())
-    {
-        setLookAt(wm->field->oppGoal());
-    }
-    else setLookAt(Vector2D::INVALIDATED);
-    trackstarted = false;
+//    agent = a;
+//    r_max = configWidget->lineEdits[0]->text().toDouble();
+//    if (configWidget->checkBoxs[1]->isChecked())
+//    {
+//        configWidget->checkBoxs[4]->setChecked(false);
+//        configWidget->checkBoxs[5]->setChecked(false);
+//        /*if (curve==NULL) */curve = new CCurveSpline();
+//        if (lastMousePos != (*(configWidget->mousePos)))
+//        {
+//            lastMousePos = *(configWidget->mousePos);
+//            if (configWidget->checkBoxs[2]->isChecked())
+//            {
+//                ((CCurveSpline*) curve)->knots.append(lastMousePos);
+//                configWidget->checkBoxs[3]->setChecked(false);
+//            }
+//            else if (configWidget->checkBoxs[3]->isChecked()) {if (!((CCurveSpline*) curve)->knots.empty()) ((CCurveSpline*) curve)->knots.removeLast();}
+//            for (int k=0;k<((CCurveSpline*) curve)->knots.count();k++)
+//            {
+//                draw(((CCurveSpline*) curve)->knots[k], 1, QColor("yellow"));
+//            }
+//        }
+//        if (((CCurveSpline*) curve)->knots.count() > 3)
+//            ((CCurveSpline*) curve)->init();
+//        ((CCurveSpline*) curve)->last_t = 0.0;
+//    }
+//    if (configWidget->checkBoxs[4]->isChecked())
+//    {
+//        configWidget->checkBoxs[5]->setChecked(false);
+//        curve = new CCurveHeart(.5, 1.0, 2.0, 1/(2.0*M_PI));
+//        ((CCurveHeart*) curve)->last_t = 0.0;
+//        ((CCurveHeart*) curve)->setTFinal(40);
+//    }
+//    if (configWidget->checkBoxs[5]->isChecked())
+//    {
+//        curve = new CCurveMarpich(0.05, 0.2, 50.0);
+//        ((CCurveHeart*) curve)->last_t = 0.0;
+//    }
+//    if (configWidget->checkBoxs[0]->isChecked())
+//    {
+//        setLookAt(wm->field->oppGoal());
+//    }
+//    else setLookAt(Vector2D::INVALIDATED);
+//    trackstarted = false;
 }
