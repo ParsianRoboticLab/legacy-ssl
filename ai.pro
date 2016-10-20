@@ -147,7 +147,10 @@ SOURCES += main.cpp \
     plays/dynamicattack.cpp \
     roles/playoffrole.cpp \
     roles/dynamicrole.cpp \
-    skillsthread.cpp
+    skillsthread.cpp \
+    tools/planloader.cpp \
+    tools/loadplayoffjson.cpp \
+    util/filewatcher.cpp
 
 
 HEADERS += base.h \
@@ -306,7 +309,10 @@ HEADERS += base.h \
     plays/dynamicattack.h \
     roles/playoffrole.h \
     roles/dynamicrole.h \
-    skillsthread.h
+    skillsthread.h \
+    tools/planloader.h \
+    tools/loadplayoffjson.h \
+    util/filewatcher.h
 
 
 unix:INCLUDEPATH += "/usr/local/include"
@@ -381,6 +387,12 @@ INCLUDEPATH += $$PWD/intentions/
 
 RESOURCES +=
 CONFIG += c++11
+
+
+
+
+
+
 
 
 
