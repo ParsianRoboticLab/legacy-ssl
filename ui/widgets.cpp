@@ -815,13 +815,14 @@ void CProfilerWidget::startRecord() {
 CPlayOffWidget::CPlayOffWidget(CPlayOff *_playOff, QWidget *parent) : QWidget(parent){
 
     this->playOff = _playOff;
-    update  = new QPushButton("update");
+    update  = new QPushButton("update", this);
     add     = new QPushButton("Add Plans");
     remove  = new QPushButton("Remove");
-    loadBtn    = new QPushButton("Load");
-    saveBtn    = new QPushButton("Save");
+    loadBtn = new QPushButton("Load");
+    saveBtn = new QPushButton("Save");
     columns = new QColumnView();
     selection = columns->selectionModel();
+
 
 
     model   = new QStandardItemModel();
@@ -837,18 +838,39 @@ CPlayOffWidget::CPlayOffWidget(CPlayOff *_playOff, QWidget *parent) : QWidget(pa
     widthList.append(1);
     widthList.append(1);
     columns->setColumnWidths(widthList);
+
+    //*Details*//
+    QLabel *planMode = new QLabel("Plan Mode : ", this);
+    QLabel *agentSize = new QLabel("Agent Size : ", this);
+    QLabel *tags = new QLabel("Tags : ", this);
+    QLabel *chance = new QLabel("Chance : ", this);
+    QLabel *lastDist = new QLabel("Last Dist : ",this);
+
+    QFrame *line = new QFrame(this);
+    line->setFrameShape(QFrame::HLine);
+
+
     QHBoxLayout *buttons  = new QHBoxLayout;
-    QVBoxLayout *main       = new QVBoxLayout;
+    QVBoxLayout *main     = new QVBoxLayout(this);
+    QVBoxLayout *detail   = new QVBoxLayout;
 
     buttons->addWidget(add);
     buttons->addWidget(remove);
     buttons->addWidget(loadBtn);
     buttons->addWidget(saveBtn);
 
+
+    detail->addWidget(planMode);
+    detail->addWidget(agentSize);
+    detail->addWidget(tags);
+    detail->addWidget(chance);
+    detail->addWidget(lastDist);
+
     main->addWidget(update);
     main->addWidget(columns);
     main->addLayout(buttons);
-
+    main->addWidget(line); //  <-- Just A Line
+    main->addLayout(detail);
 
     connect(update, SIGNAL(clicked()), this, SLOT(slt_updatePlans()));
     connect(add   , SIGNAL(clicked()), this, SLOT(slt_add()));

@@ -78,6 +78,7 @@
 #include <QTreeView>
 #include <QScrollBar>
 #include <QMessageBox>
+#include <QFrame>
 
 #define CHANNELS_COUNT 11
 
@@ -342,6 +343,7 @@ protected:
     QPushButton *saveBtn;
     QPushButton *loadBtn;
     QColumnView *columns;
+
 
     QStandardItemModel *model;
     QItemSelectionModel *selection;
