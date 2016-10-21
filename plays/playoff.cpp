@@ -213,37 +213,37 @@ bool CPlayOff::loadSQLtoStruct(QSqlQuery _query,
                                playOffRobot &temp,
                                int _symmetry)
 {
-    if(_query.value(_rIndex*7 + 1).toString() == "na")
-        return false;
-    //playOffRobot temp;
-    temp.pos = convertPos(_query.value(_rIndex*7 + 1).toString().split("|").at(0).toInt(),
-                          _query.value(_rIndex*7 + 1).toString().split("|").at(1).toInt(), _symmetry);
+//    if(_query.value(_rIndex*7 + 1).toString() == "na")
+//        return false;
+//    //playOffRobot temp;
+//    temp.pos = convertPos(_query.value(_rIndex*7 + 1).toString().split("|").at(0).toInt(),
+//                          _query.value(_rIndex*7 + 1).toString().split("|").at(1).toInt(), _symmetry);
 
-    temp.angle = AngleDeg((_symmetry)*_query.value(_rIndex*7 + 1).toString().split("|").at(2).toInt());
+//    temp.angle = AngleDeg((_symmetry)*_query.value(_rIndex*7 + 1).toString().split("|").at(2).toInt());
 
-    temp.tolerance = _query.value(_rIndex*7 + 2).toDouble()/100;
-    temp.skillSize = _query.value(_rIndex*7 + 3).toInt();
+//    temp.tolerance = _query.value(_rIndex*7 + 2).toDouble()/100;
+////    temp.skillSize = _query.value(_rIndex*7 + 3).toInt();
 
-    for(int i = 0; i < 3; i++)
-    {
-        if(_query.value(_rIndex*7 + 4).toString() != "na")
-        {
-            temp.skill[i] = POffSkills(_query.value(_rIndex*7 + 4 + i).toString().split("|").at(0).toInt());
-            temp.skillData[i][0] = _query.value(_rIndex*7 + 4 + i).toString().split("|").at(1).toInt();
-            temp.skillData[i][1] = _query.value(_rIndex*7 + 4 + i).toString().split("|").at(2).toInt();
-        }
-        else
-        {
-            temp.skill[i] = NoSkill;
-            temp.skillData[i][0] = 1000;
-            temp.skillData[i][1] = 1000;
-        }
-    }
+//    for(int i = 0; i < 3; i++)
+//    {
+//        if(_query.value(_rIndex*7 + 4).toString() != "na")
+//        {
+//            temp.skill[i] = POffSkills(_query.value(_rIndex*7 + 4 + i).toString().split("|").at(0).toInt());
+//            temp.skillData[i][0] = _query.value(_rIndex*7 + 4 + i).toString().split("|").at(1).toInt();
+//            temp.skillData[i][1] = _query.value(_rIndex*7 + 4 + i).toString().split("|").at(2).toInt();
+//        }
+//        else
+//        {
+//            temp.skill[i] = NoSkill;
+//            temp.skillData[i][0] = 1000;
+//            temp.skillData[i][1] = 1000;
+//        }
+//    }
 
-    temp.targetAgent = _query.value(_rIndex*7 + 7).toString().split("|").at(0).toInt();
-    temp.targetIndex = _query.value(_rIndex*7 + 7).toString().split("|").at(1).toInt();
+//    temp.targetAgent = _query.value(_rIndex*7 + 7).toString().split("|").at(0).toInt();
+//    temp.targetIndex = _query.value(_rIndex*7 + 7).toString().split("|").at(1).toInt();
 
-    return true;
+//    return true;
 }
 
 bool CPlayOff::getMatchedPlan(POMODE _mode, int agentSize, bool _rand)
@@ -358,6 +358,7 @@ bool CPlayOff::getMatchedPlan(POMODE _mode, int agentSize, bool _rand)
     return true;
 }
 
+
 void CPlayOff::getPassTimeline(SPlayOffPlan *tCurrentPlan, QList<POOwnerReceive> &tList)
 {
     //QList<POOwnerReceive> tempPaRList;
@@ -378,11 +379,11 @@ void CPlayOff::getPassTimeline(SPlayOffPlan *tCurrentPlan, QList<POOwnerReceive>
         tempStruct.skill = NoSkill;
         for(int j = 0; j < tCurrentPlan->AgentPlan[i].count(); j++)
         {
-            for(int k = 0; k < tCurrentPlan->AgentPlan[i].at(j).skillSize; k++)
+            for(int k = 0; k < tCurrentPlan->AgentPlan[i].at(j).skill.size(); k++)
             {
-                if(tCurrentPlan->AgentPlan[i].at(j).skill[k] == PassSkill)
+                if(tCurrentPlan->AgentPlan[i].at(j).skill[k].name == PassSkill)
                 {
-                    tempStruct.skill = tCurrentPlan->AgentPlan[i].at(j).skill[k];
+                    tempStruct.skill = tCurrentPlan->AgentPlan[i].at(j).skill[k].name;
                     tempStruct.agent = i;
                     tempStruct.index = j;
                     temp.append(tempStruct);
@@ -394,8 +395,8 @@ void CPlayOff::getPassTimeline(SPlayOffPlan *tCurrentPlan, QList<POOwnerReceive>
                 }
                 else
                 {
-                    tempStruct.time += tCurrentPlan->AgentPlan[i].at(j).skillData[k][0];
-                    tempStruct.time += tCurrentPlan->AgentPlan[i].at(j).skillData[k][1];
+                    tempStruct.time += tCurrentPlan->AgentPlan[i].at(j).skill[k].Data[0];
+                    tempStruct.time += tCurrentPlan->AgentPlan[i].at(j).skill[k].Data[1];
                 }
             }
         }
@@ -1368,9 +1369,9 @@ void CPlayOff::setAgentSize(int _agentSize){
 bool CPlayOff::hasPassInSkills(int _agent, int _index)
 {
     bool check = false;
-    for(int k = 0;k < currentPlan->AgentPlan[_agent].at(_index).skillSize; k++)
+    for(int k = 0;k < currentPlan->AgentPlan[_agent].at(_index).skill.size(); k++)
     {
-        if(currentPlan->AgentPlan[_agent].at(_index).skill[k] == PassSkill)
+        if(currentPlan->AgentPlan[_agent].at(_index).skill[k].name == PassSkill)
         {
             check = true;
             break;
@@ -1398,10 +1399,10 @@ void CPlayOff::assignTasks()
             tempPosArg.staticAng.assign(tempPosArg.staticAng.x, -tempPosArg.staticAng.y);
             //            tempPosArg.staticEscapeRadius = currentPlan->AgentPlan[i].at(j).tolerance;
 
-            for(int k = 0;k < currentPlan->AgentPlan[i].at(j).skillSize;k++) {
-                tempPosArg.staticSkill = currentPlan->AgentPlan[i].at(j).skill[k];
-                tempPosArg.staticWait  = currentPlan->AgentPlan[i].at(j).skillData[k][1];
-                tempPosArg.staticTime  = currentPlan->AgentPlan[i].at(j).skillData[k][0];
+            for(int k = 0;k < currentPlan->AgentPlan[i].at(j).skill.size();k++) {
+                tempPosArg.staticSkill = currentPlan->AgentPlan[i].at(j).skill[k].name;
+                tempPosArg.staticWait  = currentPlan->AgentPlan[i].at(j).skill[k].Data[1];
+                tempPosArg.staticTime  = currentPlan->AgentPlan[i].at(j).skill[k].Data[0];
                 positionAgent[i].positionArg.append(tempPosArg);
             }
         }
