@@ -79,7 +79,7 @@ void CPlayOff::loadSQL()
                               "to build it.\n\n"\
                               "Click Cancel to exit.", QMessageBox::Cancel);
     }
-    qDebug()<<"PlayOff SQL Connected!";
+    qDebug() << "PlayOff SQL Connected!";
 }
 
 Vector2D CPlayOff::convertPos(int _x, int _y, int _symmetry)
