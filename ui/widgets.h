@@ -79,6 +79,8 @@
 #include <QScrollBar>
 #include <QMessageBox>
 
+#include<QMenuBar>
+
 #define CHANNELS_COUNT 11
 
 class CTabDockWidget : public QDockWidget
