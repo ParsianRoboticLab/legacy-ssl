@@ -6,6 +6,8 @@
 #include <exceptions.h>
 #include <geom/polygon_2d.h>
 
+#include <mathtools.h>
+
 #define _OBS_MARGIN 0.12
 #define _GOAL_STEP  35 //number of steps on goal (in FindEmptyPosOnGoal)
 
@@ -102,7 +104,25 @@ CKnowledge::CKnowledge(CAgent** _agents)
     }
 
 
-    profiler = new CNewProfiler();
+    //////////////////////////////fill ProfilerResult
+               profiler = new CNewProfiler();
+               profiler->load(JSON);
+
+               QVector< QVector<double> > *KickCoeff = new QVector< QVector<double> >();
+
+               CPolynomialRegression ProRes;
+
+               for(int q=0; q<16; q++)
+                   KickCoeff->append(ProRes.PolynomialRegression(profiler->robotsProfile[q].finalKickMap.values() , profiler->robotsProfile[q].finalKickMap.keys(),2));
+
+               //    ProfilerResult[robotID][0:kick , 1:chip , 2:SpinKick , 3:SpinChip][10*distance(0-80)] ---> contains needed voltage for this distance
+
+               for(int q=0; q<16; q++)
+                   for(double dis=0; dis<=8; dis+=0.1){
+                       if(KickCoeff->at(q).count()>0)
+                           ProfilerResult[q][0][(int)(dis*10)] =(double)
+                                   KickCoeff->at(q).at(0)+KickCoeff->at(q).at(1)*dis+KickCoeff->at(q).at(2)*dis*dis;
+                   }
 
 }
 
