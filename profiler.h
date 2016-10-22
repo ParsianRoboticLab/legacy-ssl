@@ -116,11 +116,21 @@ enum SaveFormat {
 class CProfile {
 public :
     CProfile();
-    QMap<int, double> kickMap;
+    QMap<int, double> finalKickMap;
+    QMap<int, QList<double> > kickMap;
     QMap<int, double> chipMap;
+
+    QMap<int,double> finalSpinKickMap;
+    QMap<int, QList<double> > SpinKickMap;
+    QMap<int,double> SpinChipMap;
+
+    QMap<QString,QString> ExtraDetail;
+
     robotExtraDetail extraDetail;
+
     QPair<int,double> kickArr[KICK_ARRAY_SIZE];
     QPair<int,double> chipArr[CHIP_ARRAY_SIZE];
+
 
     int fillArray(QMap<int,double> _map,QPair<int,double> array[],bool kickMap = 1);
     void sortPairArrByValue(QPair<int,double> arr[], int left, int right);
@@ -199,9 +209,13 @@ private:
     bool isValidChipValue();
 
     int AgentsID[16] = {-1};
-
-    QMap<int,double> kickMap;
+    QMap<int,double> finalKickMap;
+    QMap<int, QList<double> > kickMap;
     QMap<int,double> chipMap;
+
+    QMap<int,double> finalSpinKickMap;
+    QMap<int, QList<double> > SpinKickMap;
+    QMap<int,double> SpinChipMap;
 
     bool isRecordNeeded(int _speed,QMap<int,double> _map,ProfileMode _mode);
     void fillRcrdStrct(int _roboID,ProfileMode _mode,int _speed,recordStrct &record);
@@ -241,6 +255,7 @@ public :
     void write(QVariantMap &dataBase);
 
     void insertRecord(ProfileMode mode,int inputSpeed,double RealSpeed, int robotId);
+    void insertRecord(ProfileMode mode, int inputSpeed, QList<double> RealSpeed,int robotId);
 
     void kick(ProfileMode _mode);
     void record(ProfileMode _mode);
