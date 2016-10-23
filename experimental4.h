@@ -181,7 +181,7 @@ CNewProfiler mahi;
 static CNewProfiler mahi2;
 static bool f = true;
 
-
+/*
 mahi.robotsProfile[0].kickMap.insert(50,0.2);
 mahi.robotsProfile[0].kickMap.insert(100,0.5);
 mahi.robotsProfile[0].kickMap.insert(150,0.6);
@@ -231,7 +231,7 @@ if(f) {
     debug(QString("mahi"),D_MAHI);
     mahi2.load(JSON);
 }
-
+*/
 
 mahi.robotsProfile[0].drawProfile();
 
