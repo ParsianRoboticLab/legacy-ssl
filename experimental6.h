@@ -39,11 +39,10 @@ void CMainApplication::Experimental6()
     Vector2D  filedin[12];
     Ray2D     tan[12];
     Segment2D ttan[12];
+    VectorIndex vecc[12];
 
 
 
-    draw(upGoal,  QColor(Qt::blue));
-    draw(downGoal,QColor(Qt::red));
 
 
     poly.addVertex(ballpos);
@@ -70,7 +69,8 @@ void CMainApplication::Experimental6()
     for (int i=0;i<newopp.size();i++){
         draw(newopp.at(i), QColor(Qt::black));
         newopp[i].tangent(ballpos, &tangents[2*i], &tangents[2*i +1]);
-    }
+
+     }
 
 
 
@@ -90,11 +90,35 @@ void CMainApplication::Experimental6()
 
         }
         if((x==0)&&(oppfiled.intersection(ttan[i]).valid()))
-            draw(ttan[i],QColor(Qt::black));
+        {
+
+            vecc[i].vec = goalLine.intersection(tan[i].line());
+        }
         x=0;
+
+    }
+    for(int i=0;i<newopp.size()*2;i=i+2)
+    {
+        if(tangents[i].y>tangents[i+1].y)
+        {
+            vecc[i].index=1;
+            vecc[i+1].index=0;
+        }
+        else
+        {
+            vecc[i].index=0;
+            vecc[i+1].index=1;
+        }
     }
 
+    for(int i=0;i<newopp.size()*2;i++)
+    {
+        if(vecc[i].index==1)
+            draw(ttan[i],QColor(Qt::blue));
+        else if(vecc[i].index==0)
+            draw(ttan[i],QColor(Qt::red));
 
+    }
 
 
   /*

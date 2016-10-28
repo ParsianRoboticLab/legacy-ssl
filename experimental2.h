@@ -12,8 +12,19 @@ void CMainApplication::Experimental2()
 
 
     qDebug() << "Hello";
-    debug(QString("World %1").arg(mousePos.x), D_ALI);
-    draw(Circle2D(mousePos,1), QColor(Qt::red));
+    //static Circle2D *cir = new Circle2D(Vector2D(0,0),1);
+    //Vector2D newsol[2];
+    //draw(*cir, QColor(Qt::red));
+    //int s = cir->intersection(Segment2D(Vector2D(wm->field->oppGoal()), mousePos), &newsol[0], &newsol[1]);
+    //static CSkillGotoPointAvoid *gpa = new CSkillGotoPointAvoid(knowledge->getAgent(2));
+    //gpa->init(newsol[0], newsol[1]);
+    //gpa->execute();
+
+    //debug(QString("World %1").arg(s), D_ALI);
+
+
+
+
 
     return ;
 
