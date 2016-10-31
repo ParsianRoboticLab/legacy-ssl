@@ -9,6 +9,8 @@
 #include "stdio.h"
 #include "geom.h"
 
+double AvgWithoutOutliers(QList<double> data , double accuracy);
+
 //mat is 2x2 matrix
 double det2x2(double mat[2][2]);
 //mat is 3x3 matrix
@@ -68,6 +70,7 @@ class CPolynomialRegression : public CPolynomial
 public:
     CPolynomialRegression();
     ~CPolynomialRegression();
+    QVector<double> PolynomialRegression(QList<double> value, QList<int> key, int n/*order*/);
     void fitToDataSet(QList< QPair<double, double> > newDataSet, int _n=1);
 private:
     int n;
@@ -92,14 +95,14 @@ private:
 class MWBM //Maximum Weighted Bipartite Matching
 {
 private:
-	int n, cap;
+    int n, cap;
     int **W;
     int *U, *V, *Y; /* <-- weight variables */
     int *M, *N, *P, *Q, *R, *S, *T;
 public:
-	MWBM();
+    MWBM();
     MWBM(int _m, int _n);
-	void changeSize(int k, int r); //max(k,r) should be less than n (otherwise destroy() then create(...,...) )
+    void changeSize(int k, int r); //max(k,r) should be less than n (otherwise destroy() then create(...,...) )
     ~MWBM();
     void setWeight(int i, int j, int w);
     int getWeight(int i, int j);

@@ -51,6 +51,8 @@ enum robotExtraDetail {
 enum ProfileMode {
     PKICK,
     PCHIP,
+    SKICK,
+    SCHIP,
     PSHOOT,
     PPASS,
     PONETOUCH
@@ -120,8 +122,8 @@ enum EActionType
     _TURN_CCW,
     _STOP_NAVIGATION,
     _STOP_OTHER,
-        _KICK,
-        _CHIP,
+    _KICK,
+    _CHIP,
     _ROLLER,
     _STOP_ALL,
     _BEEP
@@ -224,13 +226,13 @@ struct GameStatePacket
 //#define LAST_PROTOCOL
 #define newProtocol
 #ifdef LAST_PROTOCOL
-    #define _BIT_RESOLUTION             31
-    #define _PACKET_SIZE                5
+#define _BIT_RESOLUTION             31
+#define _PACKET_SIZE                5
 #else
-        #define _BIT_RESOLUTION             127
-        #define _PACKET_SIZE                14
+#define _BIT_RESOLUTION             127
+#define _PACKET_SIZE                14
 
-        #define _NEW_PACKET_SIZE            14
+#define _NEW_PACKET_SIZE            14
 #define _NewProtocolRobot 4
 #endif
 #define _BANG_BANG_NONLINEAR_SWITCH 0.300
@@ -297,13 +299,13 @@ struct GameStatePacket
 #include "geom.h"
 
 #define Property(type,name,local) \
-        public: inline type& get##name() {return local;} \
-        public: inline void set##name(type val) {local = val;} \
-        protected: type local
+    public: inline type& get##name() {return local;} \
+    public: inline void set##name(type val) {local = val;} \
+    protected: type local
 
 #define PropertyGet(type,name,local) \
-        public: inline type& get##name() {return local;} \
-        protected: type local
+    public: inline type& get##name() {return local;} \
+    protected: type local
 #define InitVal(val) val = _##val
 
 #define foragents(i) for (int i=0;i<_NUM_PLAYERS;i++)
