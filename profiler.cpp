@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <agent.h>
+#include <mathtools.h>
 
 CProfiler::CProfiler()
 {
@@ -265,12 +266,28 @@ void CNewProfiler::write(QVariantMap &dataBase) {
     dataBase.insert("PROFILER",tempVariantList);
 }
 
+
 void CNewProfiler::insertRecord(ProfileMode mode, int inputSpeed, double RealSpeed,int robotId) {
     if(mode == PCHIP) {
-        robotsProfile[robotId].chipMap.insert(inputSpeed,RealSpeed);
+        robotsProfile[robotId].chipMap.insert(inputSpeed, RealSpeed);
     }
-    else {
-        robotsProfile[robotId].kickMap.insert(inputSpeed,RealSpeed);
+    else if(mode == PKICK) {
+        robotsProfile[robotId].finalKickMap.insert(inputSpeed, RealSpeed);
+    }
+    else if(mode == SCHIP){
+        robotsProfile[robotId].SpinChipMap.insert(inputSpeed, RealSpeed);
+    }
+    else if(mode == SKICK){
+        robotsProfile[robotId].finalSpinKickMap.insert(inputSpeed, RealSpeed);
+    }
+}
+
+void CNewProfiler::insertRecord(ProfileMode mode, int inputSpeed, QList<double> RealSpeed,int robotId) {
+    if(mode == PKICK) {
+        robotsProfile[robotId].kickMap.insert(inputSpeed , RealSpeed);
+    }
+    else if(mode == SKICK){
+        robotsProfile[robotId].SpinKickMap.insert(inputSpeed , RealSpeed);
     }
 }
 
@@ -378,7 +395,7 @@ void CDataStore::decideRecord() {
         switch(mode) {
         case PKICK:
             for(int j = MIN_KICK_PROFILER; j < MAX_KICK_PROFILER;j += STEP_KICK_PROFILER) {
-                if(isRecordNeeded(j,kickMap,PKICK)) {
+                if(isRecordNeeded(j,finalKickMap,PKICK)) {
                     fillRcrdStrct(i,PKICK,j,execRecord);
                     return;
                 }
@@ -394,7 +411,7 @@ void CDataStore::decideRecord() {
             break;
         case PSHOOT:
             for(int j = MIN_SHOOT_PROFILER; j < MAX_SHOOT_PROFILER;j += STEP_SHOOT_PROFILER) {
-                if(isRecordNeeded(j,kickMap,PSHOOT)) {
+                if(isRecordNeeded(j,finalKickMap,PSHOOT)) {
                     fillRcrdStrct(i,PSHOOT,j,execRecord);
                     return;
                 }
@@ -402,7 +419,7 @@ void CDataStore::decideRecord() {
             break;
         case PPASS:
             for(int j = MIN_PASS_PROFILER; j < MAX_PASS_PROFILER;j += STEP_PASS_PROFILER) {
-                if(isRecordNeeded(j,kickMap,PPASS)) {
+                if(isRecordNeeded(j,finalKickMap,PPASS)) {
                     fillRcrdStrct(i,PPASS,j,execRecord);
                     return;
                 }
@@ -410,7 +427,7 @@ void CDataStore::decideRecord() {
             break;
         case PONETOUCH:
             for(int j = MIN_ONETOUCH_PROFILER; j < MAX_ONETOUCH_PROFILER;j += STEP_ONETOUCH_PROFILER) {
-                if(isRecordNeeded(j,kickMap,PONETOUCH)) {
+                if(isRecordNeeded(j,finalKickMap,PONETOUCH)) {
                     fillRcrdStrct(i,PONETOUCH,j,execRecord);
                     return;
                 }
@@ -615,7 +632,7 @@ CProfile::CProfile() {
 }
 
 void CProfile::refresh() {
-    fillArray(kickMap, kickArr, true);
+    fillArray(finalKickMap, kickArr, true);
     sortPairArrByValue(kickArr,0,KICK_ARRAY_SIZE);
 }
 
@@ -741,12 +758,12 @@ int CProfile::keyOfLessImportantValues(QMap<int, double> _map) {
 void CProfile::getTheMean(QMap<int, double> _map) {
     QMap<int, double>::const_iterator i = _map.constBegin();
 
-//    while(i != _map)
+    //    while(i != _map)
 }
 
 int CProfile::getKickSpeed(double _firstVelocity) {
-//    fillArray(kickMap, kickArr, true);
-//    sortPairArrByValue(kickArr,0,KICK_ARRAY_SIZE);
+    //    fillArray(kickMap, kickArr, true);
+    //    sortPairArrByValue(kickArr,0,KICK_ARRAY_SIZE);
     return mahiBinarySearch(kickArr,_firstVelocity,0,KICK_ARRAY_SIZE);
     //return 0;
 }
@@ -781,50 +798,147 @@ int CProfile::midPoint(int _first, int _last) {
 
 /////////////////////////////////////////////JSON
 void CProfile::write(QVariantMap &profile) {
-    QVariantList tempVarientList;
-    QVariantMap tempVarientMap;
-    QMap<int,double>::const_iterator i = kickMap.constBegin();
+    QVariantList tempVariantList, innerList;
+    QVariantMap tempVariantMap;
+    QVariantMap keyValueMap;
+    QMap<int,double>::const_iterator i ;
+    QMap<int , QList<double> >::const_iterator ki ;
+
     ////////////////insert KICK
-    while(i != kickMap.constEnd()) {
-        tempVarientMap.clear();
-        tempVarientMap.insert(QString("kickSpeed"),i.key());
-        tempVarientMap.insert(QString("realSpeed"),i.value());
-        tempVarientList.append(tempVarientMap);
-        ++i;
+    ki = kickMap.constBegin();
+    while(ki != kickMap.constEnd()) {
+        tempVariantMap.clear();
+        innerList.clear();
+        keyValueMap.clear();
+        keyValueMap.insert(QString("kickSpeed"),ki.key());
+        innerList.clear();
+        for(int i=0; i<ki.value().constEnd()-ki.value().constBegin(); i++)
+            innerList.append(ki.value().at(i));
+        keyValueMap.insert(QString("realSpeed"),innerList);
+        tempVariantList.append(keyValueMap);
+        ++ki;
     }
-    profile.insert(QString("kick"),tempVarientList);
-    tempVarientList.clear();
+    profile.insert(QString("kick"),tempVariantList);
+    tempVariantList.clear();
+    ////////////////insert SPINKICK
+    ki = SpinKickMap.constBegin();
+    while(ki != SpinKickMap.constEnd()) {
+        tempVariantMap.clear();
+        innerList.clear();
+        keyValueMap.clear();
+        keyValueMap.insert(QString("SpinKickSpeed"),ki.key());
+
+        for(int i=0; i<ki.value().constEnd()-ki.value().constBegin(); i++)
+            innerList.append(ki.value().at(i));
+        keyValueMap.insert(QString("SpinRealSpeed"),innerList);
+        tempVariantList.append(keyValueMap);
+        ++ki;
+    }
+    profile.insert(QString("SpinKick"),tempVariantList);
+    tempVariantList.clear();
+
     ///////////////insert CHIP
     i = chipMap.constBegin();
     while(i != chipMap.constEnd()) {
-        tempVarientMap.clear();
-        tempVarientMap.insert(QString("chipSpeed"),i.key());
-        tempVarientMap.insert(QString("realDistance"),i.value());
-        tempVarientList.append(tempVarientMap);
+        tempVariantMap.clear();
+        tempVariantMap.insert(QString("chipSpeed"),i.key());
+        tempVariantMap.insert(QString("realDistance"),i.value());
+        tempVariantList.append(tempVariantMap);
         ++i;
     }
-    profile.insert(QString("chip"),tempVarientList);
-    tempVarientList.clear();
+    profile.insert(QString("chip"),tempVariantList);
+    tempVariantList.clear();
+
+    ///////////////insert SPINCHIP
+    i = SpinChipMap.constBegin();
+    while(i != SpinChipMap.constEnd()) {
+        tempVariantMap.clear();
+        tempVariantMap.insert(QString("SpinChipSpeed"),i.key());
+        tempVariantMap.insert(QString("SpinRealDistance"),i.value());
+        tempVariantList.append(tempVariantMap);
+        ++i;
+    }
+    profile.insert(QString("SpinChip"),tempVariantList);
+    tempVariantList.clear();
+
+    //////////////////insert extraDetail
+    //    profile.insert(QString("extraDetail"),getIntByEnum(extraDetail));
+    tempVariantMap.clear();
+    tempVariantMap.insert(QString("kick") , ExtraDetail.value("kick"));
+    tempVariantMap.insert(QString("chip") , ExtraDetail.value("chip"));
+    tempVariantMap.insert(QString("SpinKick") , ExtraDetail.value("SpinKick"));
+    tempVariantMap.insert(QString("SpinChip") , ExtraDetail.value("SpinChip"));
+    profile.insert(QString("extraDetail") , tempVariantMap);
+    tempVariantMap.clear();
+
     //////////////////insert extra data
-    profile.insert(QString("extraDetail"),getIntByEnum(extraDetail));
+    //    profile.insert(QString("extraDetail"),getIntByEnum(extraDetail));
 }
 
 void CProfile::read(QVariantMap &profile) {
     QVariantList tempVariantList;
-    extraDetail     = getEnumByInt(profile.value("extraDetail").toInt());
+    QList<double> innerList;
+    QVariantMap tempVariantMap;
+
+    //////////////////////////////KICK
+    tempVariantList.clear();
+    tempVariantList = profile.value("kick").toList();
+    kickMap.clear();
+    innerList.clear();
+
+    foreach(QVariant data, tempVariantList){
+        for(int i=0; i<data.toMap().value(QString("realSpeed")).toList().count(); i++)
+            innerList.append(data.toMap().value(QString("realSpeed")).toList().at(i).toDouble());
+        kickMap.insert(data.toMap().value(QString("kickSpeed")).toInt(), innerList);
+        innerList.clear();
+    }
+
+    for(int i=0; i<kickMap.count(); i++)
+        finalKickMap.insert(kickMap.keys().at(i), AvgWithoutOutliers(kickMap.values().at(i) , 0.9));
+    //////////////////////////////SPINKICK
+    tempVariantList.clear();
+    tempVariantList = profile.value("SpinKick").toList();
+    SpinKickMap.clear();
+    innerList.clear();
+
+    foreach(QVariant data, tempVariantList){
+        for(int i=0; i<data.toMap().value(QString("SpinRealSpeed")).toList().count(); i++)
+            innerList.append(data.toMap().value(QString("SpinRealSpeed")).toList().at(i).toDouble());
+        SpinKickMap.insert(data.toMap().value(QString("SpinKickSpeed")).toInt(), innerList);
+        innerList.clear();
+    }
+
+    for(int i=0; i<SpinKickMap.count(); i++)
+        finalSpinKickMap.insert(SpinKickMap.keys().at(i), AvgWithoutOutliers(SpinKickMap.values().at(i) , 0.9));
+    //////////////////////////////EXTRADETAIL
+    extraDetail = getEnumByInt(profile.value("extraDetail").toInt());
+
+    tempVariantMap = profile.value("extraDetail").toMap();
+    ExtraDetail.clear();
+
+    ExtraDetail.insert(QString("SpinChip") , tempVariantMap.value(QString("SpinChip")).toString());
+    ExtraDetail.insert(QString("SpinKick") , tempVariantMap.value(QString("SpinKick")).toString());
+    ExtraDetail.insert(QString("chip") , tempVariantMap.value(QString("chip")).toString());
+    ExtraDetail.insert(QString("kick") , tempVariantMap.value(QString("kick")).toString());
+
+    ////////////////////CHIP
+    tempVariantList.clear();
     tempVariantList = profile.value("chip").toList();
     chipMap.clear();
     foreach(QVariant data, tempVariantList)
         chipMap.insert(data.toMap().value(QString("chipSpeed")).toInt(),
                        data.toMap().value(QString("realDistance")).toDouble());
 
-    kickMap.clear();
+    ////////////////////SPINCHIP
+    SpinChipMap.clear();
     tempVariantList.clear();
-    tempVariantList = profile.value("kick").toList();
+    tempVariantList = profile.value("SpinChip").toList();
     foreach(QVariant data, tempVariantList)
-        kickMap.insert(data.toMap().value(QString ("kickSpeed")).toInt(),
-                       data.toMap().value(QString("realSpeed")).toDouble());
+        SpinChipMap.insert(data.toMap().value(QString ("SpinChipSpeed")).toInt(),
+                           data.toMap().value(QString("SpinRealDistance")).toDouble());
+
 }
+
 
 void CProfile::sortPairArrByValue(QPair<int, double> arr[],int left,int right) {
     int i = left, j = right;
@@ -854,8 +968,8 @@ void CProfile::sortPairArrByValue(QPair<int, double> arr[],int left,int right) {
 
 void CProfile::drawProfile() {
     Polygon2D tPolygon;
-    QMap<int,double>::const_iterator i = kickMap.constBegin();
-    while (i != kickMap.constEnd()) {
+    QMap<int,double>::const_iterator i = finalKickMap.constBegin();
+    while (i != finalKickMap.constEnd()) {
         tPolygon.addVertex(Vector2D(i.key()/100,i.value())/3.2);
         ++i;
     }
