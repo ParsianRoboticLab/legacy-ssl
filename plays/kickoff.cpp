@@ -1,5 +1,5 @@
 #include "kickoff.h"
 
-CKickoff::CKickoff()
+CKickoff::CKickoff() : CPlayOff()
 {
 }

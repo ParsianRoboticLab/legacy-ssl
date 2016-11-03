@@ -1,5 +1,5 @@
 #include "direct.h"
 
-CDirect::CDirect()
+CDirect::CDirect() : CPlayOff()
 {
 }
