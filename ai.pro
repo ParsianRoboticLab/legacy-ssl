@@ -319,10 +319,13 @@ unix:INCLUDEPATH += "/usr/local/include"
 unix:LIBS += -L/usr/local/include/qjson -lqjson
 
 unix:!macx:!contains(QMAKE_HOST.arch, x86_64) {
+message("Using libs")
+
 LIBS += -L$$PWD/libs \
     -L/usr/lib/nvidia-current \
     -lPredictor \
-    -lprotobuf-2.4.0 \
+    -lprotobuf \
+    -lprotobuf-lite \
     -lqextserialport \
     -lVarTypes \
     -lsvm \
@@ -363,9 +366,12 @@ INCLUDEPATH += $$PWD/plays/
 INCLUDEPATH += $$PWD/intentions/
 }
 contains(QMAKE_HOST.arch, x86_64):!macx {
+message("Using lib64")
 LIBS += -L$$PWD/lib64 \
     -L/usr/lib/nvidia-current \
-    -lprotobuf-2.4.0 \
+    -lprotobuf \
+    -lprotobuf-lite \
+    -lprotoc \
     -lqextserialport \
     -lplibjs \
     -lplibul \
