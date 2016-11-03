@@ -16,6 +16,48 @@
         public: inline skill* set##name(type val) {local = val;chflag = true;return this;} \
         protected: type local
 
+
+
+struct robotAttr {
+    int index;
+    int agent;
+    int skillNum;
+    bool isAng;
+};
+
+enum POffSkills {
+    NoSkill = 0,
+    PassSkill = 1,
+    ReceivePassSkill = 2,
+    ShotToGoalSkill = 3,
+    ChipToGoalSkill = 4,
+    OneTouchSkill = 5,
+    MoveSkill = 6,
+    ReceivePassIASkill = 7
+};
+
+struct playOffSkill {
+    POffSkills name;
+    int Data[2];
+};
+
+struct playOffRobot {
+    Vector2D pos;
+    AngleDeg angle;
+    double tolerance;
+    int targetIndex;
+    int targetAgent;
+    QList<playOffSkill> skill;
+//    POffSkills skill[3];
+//    int skillData[3][2];
+//    int skillSize;
+};
+
+struct POInitPos {
+    Vector2D ball;
+    Vector2D Agent[6];
+};
+
 enum POMODE {
     KICKOFF  = 1,
     DIRECT   = 2,
@@ -130,16 +172,11 @@ enum EType {
 
 
 struct SCommon {
-    double chance;
-    QStringList tags;
-    POMODE planMode;
     int agentSize;
-};
-
-struct SOperation {
-    QString directory;
-    long size;
-    EType type = None;
+    double chance;
+    double lastDist;
+    POMODE planMode;
+    QStringList tags;
 };
 
 struct SMatching {
@@ -156,7 +193,7 @@ struct SExecution {
 
     SExecution() = default;
 
-    SExecution(const SExecution &_toCopy) : config(_toCopy.config){
+    SExecution(const SExecution &_toCopy) {
         for(int i = 0;i < 6;i++) {
             this->AgentPlan[i].clear();
             for(int j = 0; j < _toCopy.AgentPlan[i].size(); j++) {
@@ -174,16 +211,18 @@ struct SExecution {
         }
     }
 
-    QList<playOffRobot> AgentPlan[6];
+    QList< QList<playOffRobot> > AgentPlan;
     SCommon *common;
 };
 
 struct SGUI {
 
-    QString name, planFile, package;
+    QString name;
+    QString planFile;
+    QString package;
     bool active = true;
     bool master = false;
-
+    unsigned int index[3]; // {package_index, file_index, plan_index}
     SCommon *common;
 };
 
@@ -199,7 +238,6 @@ struct SPlan {
     SGUI       gui;
     SCommon    common;
     SMatching  matching;
-    SOperation operation;
     SExecution execution;
 };
 
