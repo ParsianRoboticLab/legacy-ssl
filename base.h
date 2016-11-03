@@ -52,6 +52,8 @@ enum robotExtraDetail {
 enum ProfileMode {
     PKICK,
     PCHIP,
+    SKICK,
+    SCHIP,
     PSHOOT,
     PPASS,
     PONETOUCH
