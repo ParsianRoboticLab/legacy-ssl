@@ -11,6 +11,16 @@ CLoadPlayOffJson::CLoadPlayOffJson(const QString &_folderDirectory, QObject *par
     Q_FOREACH(QString dir, m_dirList) {
         load(dir);
     }
+
+    connect(watcher, SIGNAL(fileChanged(QString)), this, SLOT(slt_fileChanged(QString)));
+}
+
+bool CLoadPlayOffJson::loadAll() {
+    m_plans.clear();
+    updateDirectory();
+    Q_FOREACH(QString dir, m_dirList) {
+        load(dir);
+    }
 }
 
 bool CLoadPlayOffJson::load(QString _file) {
@@ -40,7 +50,6 @@ bool CLoadPlayOffJson::readPlan(const QVariantMap &_map, const QString& _file) {
     bool parsedOk = false;
 
     double mapVersion = _map.value("apiVersion").toDouble(&parsedOk);
-    qDebug() << mapVersion;
     if (!parsedOk) {
         qWarning() << "Can't Parse Version";
         return false;
@@ -52,16 +61,15 @@ bool CLoadPlayOffJson::readPlan(const QVariantMap &_map, const QString& _file) {
         return false;
     }
 
-    NGameOff::SPlan tempPlan;
+    NGameOff::SPlan* tempPlan = new NGameOff::SPlan();
 
-    NGameOff::SGUI      & tempGui       = tempPlan.gui;
-    NGameOff::SCommon   & tempCommon    = tempPlan.common;
-    NGameOff::SMatching & tempMatching  = tempPlan.matching;
-    NGameOff::SExecution& tempExecution = tempPlan.execution;
+    NGameOff::SGUI      & tempGui       = tempPlan->gui;
+    NGameOff::SCommon   & tempCommon    = tempPlan->common;
+    NGameOff::SMatching & tempMatching  = tempPlan->matching;
+    NGameOff::SExecution& tempExecution = tempPlan->execution;
 
 
     QVariantList plans = _map.value("plans").toList();
-    qDebug() << plans.size();
     Q_FOREACH(QVariant plan, plans) {
         QVariantMap planMap = plan.toMap();
         QFileInfo fileInfo(_file);
@@ -70,6 +78,7 @@ bool CLoadPlayOffJson::readPlan(const QVariantMap &_map, const QString& _file) {
         fillExecution(tempExecution, planMap, &parsedOk);
         fillGUI(tempGui, fileInfo, &parsedOk);
     }
+    m_plans.append(tempPlan);
 }
 
 void CLoadPlayOffJson::fillCommon(NGameOff::SCommon& _common, const QVariantMap& _plan, bool* _parsedOk) {
@@ -146,7 +155,7 @@ void CLoadPlayOffJson::fillGUI(NGameOff::SGUI &_gui, const QFileInfo& _fileInfo,
     _gui.active = true;
     _gui.planFile = _fileInfo.baseName();
     _gui.package = getPackageName(_fileInfo.absolutePath());
-
+    _gui.name = QString("Mahi");
 }
 
 
@@ -155,7 +164,7 @@ QString CLoadPlayOffJson::getPackageName(QString _path) {
     _path.remove(0, m_mainDirectory.length());
     _path.replace('/','.');
     packageName.append(_path);
-    qDebug() << packageName;
+//    qDebug() << packageName;
     return packageName;
 }
 
@@ -171,3 +180,24 @@ POffSkills CLoadPlayOffJson::strToEnum(const QString& _str) {
     else                                    return NoSkill;
 }
 
+QString CLoadPlayOffJson::getModeStr(POMODE _mode) {
+
+    if (_mode == KICKOFF) {
+        return "Kick Off";
+    }
+    else if (_mode == DIRECT) {
+        return "Direct";
+    }
+    else if (_mode == INDIRECT) {
+        return "Indirect";
+    }
+}
+
+//Public slots
+void CLoadPlayOffJson::slt_fileChanged(const QString &_file) {
+    if (autoUpdate) {
+        load(_file);
+        emit plansUpdated();
+    }
+    else qDebug() << "File Changed But not Updated";
+}

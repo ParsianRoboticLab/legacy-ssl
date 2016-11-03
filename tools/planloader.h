@@ -15,13 +15,6 @@
         public: inline void set##name(type val) {local = val;} \
         protected: type local
 
-
-struct SFile {
-    QString dir;
-    QFileInfo fileInfo;
-    QFile file;
-};
-
 class CPlanLoader : public QObject
 {
 
@@ -31,18 +24,12 @@ public:
     CPlanLoader(QObject* parent = 0);
     CPlanLoader(const QString& _folderDirectory, QObject * parent = 0);
 
-    bool load(int _index);
-    bool load(QString _directory);
-    bool save(int _index);
-    bool save(QString _directory);
+    void updateDirectory();
 
 protected:
     FileWatcher* watcher;
     QString m_mainDirectory;
-    QList<SFile> m_files;
     QStringList m_dirList;
-    QFileInfoList m_fileInfoList;
-    QList<QFile> m_fileList;
 
 
     Property(bool, AutoUpdate,autoUpdate);
@@ -50,7 +37,7 @@ protected:
 private:
 
 public slots:
-    void slt_fileChanged(const QString& _file);
+    virtual void slt_fileChanged(const QString& _file);
 };
 
 
