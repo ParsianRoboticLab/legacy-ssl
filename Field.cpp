@@ -19,19 +19,10 @@ CField::CField(void)
         fOppGoalR = Vector2D(  _FIELD_WIDTH/2.0, -_GOAL_WIDTH / 2.0);
         fFieldRect = Rect2D(fOurCornerR+Vector2D(-0.005,-0.005),fOppCornerL+Vector2D(+0.005,+0.005));
         fMarginedFieldRect = Rect2D(fOurCornerR+Vector2D(-0.25,-0.25),fOppCornerL+Vector2D(+0.25,+0.25));
-
-#ifndef LARGE_FIELD
-        fOurPenaltyRect  = Rect2D(Vector2D(ourGoal().x,ourGoal().y + 0.975),
-                             Vector2D(ourGoal().x + _GOAL_RAD,ourGoal().y - 0.975));
-        fOppPenaltyRect  = Rect2D(Vector2D(oppGoal().x - _GOAL_RAD,oppGoal().y + 0.975),
-                             Vector2D(oppGoal().x ,oppGoal().y - 0.975));
-#else
         fOurPenaltyRect  = Rect2D(Vector2D(ourGoal().x,ourGoal().y + 1.25),
                              Vector2D(ourGoal().x + _GOAL_RAD,ourGoal().y - 1.25));
         fOppPenaltyRect  = Rect2D(Vector2D(oppGoal().x - _GOAL_RAD,oppGoal().y + 1.25),
                              Vector2D(oppGoal().x ,oppGoal().y - 1.25));
-#endif
-
         fOurOneThirdL = Vector2D(-_FIELD_WIDTH / 2.0 + _FIELD_WIDTH / 3.0, _FIELD_HEIGHT / 2.0);
         fOurOneThirdR = Vector2D(-_FIELD_WIDTH / 2.0 + _FIELD_WIDTH / 3.0, -_FIELD_HEIGHT / 2.0);
         fOppOneThirdL = Vector2D(+_FIELD_WIDTH / 2.0 - _FIELD_WIDTH / 3.0, _FIELD_HEIGHT / 2.0);

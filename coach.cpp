@@ -76,11 +76,7 @@ CCoach::CCoach(CAgent**_agents)
 
     ourKickOff    = new COurKickOff;
     ourIndirect   = new COurIndirect;
-#ifndef LARGE_FIELD
-    ourDirect = new COurDirect;
-#else
     ourDirect     = new CDoubleSizeOurDirect;
-#endif
     ourPenalty    = new COurPenalty;
     theirKickOff  = new CTheirKickOff;
     theirIndirect = new CTheirIndirect;
