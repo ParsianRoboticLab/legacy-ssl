@@ -318,7 +318,8 @@ HEADERS += base.h \
     util/filewatcher.h \
     plays/indirect.h \
     plays/direct.h \
-    plays/kickoff.h
+    plays/kickoff.h \
+    plays/plays.h
 
 
 unix:INCLUDEPATH += "/usr/local/include"
@@ -399,37 +400,3 @@ INCLUDEPATH += $$PWD/intentions/
 
 RESOURCES +=
 CONFIG += c++11
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

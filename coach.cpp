@@ -85,6 +85,9 @@ CCoach::CCoach(CAgent**_agents)
     forceStart    = new CForceStart;
 
     ourPlayOff    = new CPlayOff();
+    kickoff       = new CKickoff();
+    direct        = new CDirect();
+    indirect      = new CIndirect();
     dynamicAttack = new CDynamicAttack();
 
     for( int i=0 ; i<_MAX_NUM_PLAYERS ; i++ ){
@@ -102,7 +105,7 @@ CCoach::CCoach(CAgent**_agents)
     exeptionPlayMakeThr = 0;
 
 
-    planLoader = new CLoadPlayOffJson(QDir::currentPath() + QString("/playoff"));
+    m_planLoader = new CLoadPlayOffJson(QDir::currentPath() + QString("/playoff"));
 
 }
 
@@ -1285,7 +1288,9 @@ bool CCoach::decideAttack()
         return true;
     }
     else if( knowledge->getGameState() == CKnowledge::OurKickOff || knowledge->getGameMode() == CKnowledge::OurKickOff ){
+        decidePlayOff(currentTags, KICKOFF);
         selectedPlay = ourPlayOff;
+        ourPlayOff = kickoff;
         debug(QString("ourplayers : %1").arg(ourPlayers.size()),D_MAHI);
     }
     else if( knowledge->getGameState() == CKnowledge::TheirKickOff ){
@@ -1294,8 +1299,9 @@ bool CCoach::decideAttack()
         selectedPlay = theirKickOff;
     }
     else if( knowledge->getGameState() == CKnowledge::OurDirectKick ){
-
+        decidePlayOff(currentTags, DIRECT);
         selectedPlay = ourPlayOff;
+        ourPlayOff = direct;
     }
     else if( knowledge->getGameState() == CKnowledge::TheirDirectKick ){
         selectedPlay = theirDirect;
@@ -1303,8 +1309,9 @@ bool CCoach::decideAttack()
         ourPlayOff->kickOffFirstTimeFlag = true;
     }
     else if( knowledge->getGameState() == CKnowledge::OurIndirectKick ){
-
+        decidePlayOff(currentTags, INDIRECT);
         selectedPlay = ourPlayOff;
+        ourPlayOff = indirect;
     }
     else if( knowledge->getGameState() == CKnowledge::OurPenaltyKick || knowledge->getGameMode() == CKnowledge::OurPenaltyKick ){
         selectedPlay = ourPenalty;
@@ -1502,6 +1509,73 @@ bool CCoach::decideAttack()
     return true;
 }
 
+void CCoach::decidePlayOff(const QStringList& _tags, POMODE _mode, int _agentSize) {
+
+    QList<NGameOff::SPlan*> validPlans;
+
+    if (firstTime) {
+        QList<NGameOff::SPlan*> plans = m_planLoader->getPlans();
+        Q_FOREACH(NGameOff::SPlan* plan, plans) {
+            NGameOff::SMatching& matching = plan->matching;
+            // Find Valid Plans
+            if (matching.common->planMode  >= _mode
+                    && matching.common->agentSize >= _agentSize
+                    && matching.common->chance >= 0
+                    && matching.common->lastDist >= 0
+                    && isTagsMatched(matching.common->tags, _tags)
+                    && isRegionMatched(matching.initPos.ball)) {
+
+                validPlans.append(plan);
+
+            }
+        }
+
+        if (validPlans.isEmpty()) {
+            debug("[Warning] playoff -> there's no valid Plan", D_ERROR, QColor(Qt::red));
+            return;
+        }
+
+        NGameOff::SPlan* thePlan = chooseMostSuccecfull(validPlans);
+        matchPlan(thePlan);
+
+        ourPlayOff->setMasterPlan(thePlan);
+
+    }
+}
+
+void CCoach::matchPlan(NGameOff::SPlan *_plan) {
+    //  TODO : Matching Function
+}
+
+bool CCoach::isTagsMatched(const QStringList& base, const QStringList& required) {
+    Q_FOREACH(QString tag, required)
+        if (!base.contains(tag))
+            return false;
+    return true;
+}
+
+bool CCoach::isRegionMatched(const Vector2D &_ball, const double& regionRadius) {
+    if (wm->ball->pos.dist(_ball) < regionRadius)
+        return true;
+    return false;
+}
+
+NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans) {
+    QList<NGameOff::SPlan*> bestPlans;
+    int bestScore = -1;
+    Q_FOREACH(NGameOff::SPlan* plan, plans) {
+        if (plan->common.succesRate > bestScore) {
+            bestPlans.clear();
+            bestPlans.append(plan);
+        }
+        else if (plan->common.succesRate == bestScore) {
+            bestPlans.append(plan);
+        }
+    }
+    // TODO : remove randomize
+    return bestPlans[rand()%bestPlans.size()];
+}
+
 void CCoach::execute()
 {
 
@@ -1658,5 +1732,5 @@ CPlayOff* CCoach::playOff() {
 }
 
 CLoadPlayOffJson* CCoach::getPlanLoader() {
-    return planLoader;
+    return m_planLoader;
 }

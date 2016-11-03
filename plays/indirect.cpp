@@ -1,5 +1,6 @@
 #include "indirect.h"
 
-CIndirect::CIndirect(){
+CIndirect::CIndirect() : CPlayOff()
+{
 
 }

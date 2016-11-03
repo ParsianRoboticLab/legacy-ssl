@@ -59,9 +59,9 @@ struct POInitPos {
 };
 
 enum POMODE {
-    KICKOFF  = 1,
-    DIRECT   = 2,
-    INDIRECT = 3
+    DIRECT   = 1,
+    INDIRECT = 2,
+    KICKOFF  = 3
 };
 
 struct STuneParams {
@@ -177,6 +177,8 @@ struct SCommon {
     double lastDist;
     POMODE planMode;
     QStringList tags;
+    int succesRate;
+    QMap<int, int> matchedID;
 };
 
 struct SMatching {
@@ -184,7 +186,6 @@ struct SMatching {
         Vector2D ball;
         QList<Vector2D> agents;
     };
-
     SInitPos initPos;
     SCommon *common;
 };
@@ -244,7 +245,7 @@ struct SPlan {
 }
 
 
-
+using namespace NGameOff;
 
 class CPlayOff : public CMasterPlay {
 
@@ -280,9 +281,11 @@ public:
 
     //////////
 
-
+    void setMasterPlan(const SPlan* _thePlan);
 private:
 
+    /////////////*NEW*/////////////
+    const SPlan* masterPlan;
 
     //////////Dynamic Plan////////////
 

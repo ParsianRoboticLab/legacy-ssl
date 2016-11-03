@@ -2093,3 +2093,9 @@ QString CPlayOff::getModeStr(POMODE _mode) {
         return "InD";
     }
 }
+
+////////////////////////////////
+
+void CPlayOff::setMasterPlan(const SPlan *_thePlan) {
+    masterPlan = _thePlan;
+}

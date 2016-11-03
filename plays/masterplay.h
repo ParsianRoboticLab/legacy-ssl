@@ -5,7 +5,6 @@
 #include "roles.h"
 #include "skills.h"
 #include "plans/plans.h"
-//#include "plays/playoff.h"
 
 #define MAX_POSITIONERS 4
 #define MAX_WEIGHT_CYCLES 600
