@@ -84,6 +84,10 @@ QList<double> graph, graph2;
 void CMainApplication::Experimental4()
 {
 
+//    static
+
+    return;
+
     static CLoadPlayOffJson loader(QDir::currentPath() + QString("/playoff"));
     loader.setAutoUpdate(true);
 
