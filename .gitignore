@@ -3,3 +3,5 @@ logs/*
 ai.pro.*
 ai
 Makefile
+posts
+*.xml
