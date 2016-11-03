@@ -104,6 +104,10 @@ CCoach::CCoach(CAgent**_agents)
     translationTimeOutTime =  1000;
     exeptionPlayMake = NULL;
     exeptionPlayMakeThr = 0;
+
+
+    planLoader = new CLoadPlayOffJson(QDir::currentPath() + QString("/playoff"));
+
 }
 
 CCoach::~CCoach()
@@ -1655,4 +1659,8 @@ void CCoach::loadPostAssignment()
 
 CPlayOff* CCoach::playOff() {
     return this->ourPlayOff;
+}
+
+CLoadPlayOffJson* CCoach::getPlanLoader() {
+    return planLoader;
 }
