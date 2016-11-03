@@ -844,279 +844,213 @@ void CProfilerWidget::startRecord() {
 
 /////////////////////PLAY OFF////////////////////////
 
+CPlayOffWidget::CPlayOffWidget(CLoadPlayOffJson* _loader, QWidget *parent) : QWidget(parent) {
 
-CPlayOffWidget::CPlayOffWidget(CPlayOff *_playOff, QWidget *parent) : QWidget(parent){
 
-    this->playOff = _playOff;
-    update  = new QPushButton("update");
-    add     = new QPushButton("Add Plans");
-    remove  = new QPushButton("Remove");
-    loadBtn    = new QPushButton("Load");
-    saveBtn    = new QPushButton("Save");
+    m_loader = _loader;
+    m_loader->setAutoUpdate(true);
+    m_plans.clear();
+    m_plans.append(_loader->getPlans());
+
+    m_choosen = NULL;
+
+    mode     = new QPushButton("Debug Mode", this);
+    update   = new QPushButton("Update (Don't Worry! it will work fine :)", this);
+    active   = new QPushButton("Active");
+    deactive = new QPushButton("Deactive");
+    master   = new QPushButton("Master");
+
     columns = new QColumnView();
-    selection = columns->selectionModel();
 
+    active->setEnabled(false);
+    update->setEnabled(false);
+    deactive->setEnabled(false);
+    master->setEnabled(false);
+
+//    selection = columns->selectionModel();
 
     model   = new QStandardItemModel();
-    load("PlansConfigs.json");
+    selection = new QItemSelectionModel(model);
+
+    updateModel();
 
     columns->setModel(model);
+    columns->setFont(QFont("Monospace"));
+    columns->setSelectionModel(selection);
+
     QList<int> widthList;
     widthList.append(300);
-    widthList.append(150);
-    widthList.append(150);
-    widthList.append(1);
-    widthList.append(1);
-    widthList.append(1);
-    widthList.append(1);
+    widthList.append(200);
+    widthList.append(100);
     columns->setColumnWidths(widthList);
+
+    //*Details*//
+
+
+    QFrame *line = new QFrame(this);
+    line->setFrameShape(QFrame::HLine);
+
+
     QHBoxLayout *buttons  = new QHBoxLayout;
-    QVBoxLayout *main       = new QVBoxLayout;
+    QVBoxLayout *main     = new QVBoxLayout(this);
+    QVBoxLayout *detail   = new QVBoxLayout;
 
-    buttons->addWidget(add);
-    buttons->addWidget(remove);
-    buttons->addWidget(loadBtn);
-    buttons->addWidget(saveBtn);
+    buttons->addWidget(deactive);
+    buttons->addWidget(active);
+    buttons->addWidget(master);
 
+    for(int i = 0; i < 8;i++) {
+        details[i] = new QLabel(this);
+        details[i]->setFont(QFont("Monospace"));
+        detail->addWidget(details[i]);
+    }
+
+
+    main->addWidget(mode);
     main->addWidget(update);
     main->addWidget(columns);
     main->addLayout(buttons);
+    main->addWidget(line); //  <-- Just A Line
+    main->addLayout(detail);
 
-
-    connect(update, SIGNAL(clicked()), this, SLOT(slt_updatePlans()));
-    connect(add   , SIGNAL(clicked()), this, SLOT(slt_add()));
-    connect(remove, SIGNAL(clicked()), this, SLOT(slt_remove()));
-    connect(loadBtn, SIGNAL(clicked()), this, SLOT(slt_load()));
-    connect(saveBtn, SIGNAL(clicked()), this, SLOT(slt_save()));
-    connect(model , SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slt_edit(QStandardItem*)));
+    connect(update   , SIGNAL(clicked()), this, SLOT(slt_updatePlans()));
+    connect(mode     , SIGNAL(clicked()), this, SLOT(slt_changeMode()));
+    connect(active   , SIGNAL(clicked()), this, SLOT(slt_active()));
+    connect(master   , SIGNAL(clicked()), this, SLOT(slt_load()));
+    connect(deactive , SIGNAL(clicked()), this, SLOT(slt_deactive()));
+    connect(model    , SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slt_edit(QStandardItem*)));
     connect(selection, SIGNAL(selectionChanged (const QItemSelection &, const QItemSelection &)),
-            this, SLOT(selectionChangedSlot(const QItemSelection &, const QItemSelection &)));
+            this, SLOT(slt_selectionChanged(QItemSelection,QItemSelection)));
+    connect(m_loader, SIGNAL(plansUpdated()), this, SLOT(updateModel()));
 
     setLayout(main);
-
 }
 
 CPlayOffWidget::~CPlayOffWidget() {
-    qDebug() << "Plans Configures Saved!";
-    save("PlansConfigs.json");
-}
-
-
-
-bool CPlayOffWidget::load(const QString& _dir) {
-    QFile loadFile(_dir);
-
-    if (!loadFile.open(QIODevice::ReadOnly)) {
-        debug(QString("Couldn't open Profiler file."),D_MAHI);
-        return false;
-    }
-
-    QByteArray input = loadFile.readAll();
-    QJson::Parser parser;
-    QVariantMap dataBase = parser.parse(input).toMap();
-    readMap(dataBase);
-    updateModel();
-    return true;
-}
-
-bool CPlayOffWidget::save(const QString& _dir) {
-    QFile saveFile(_dir);
-    if (!saveFile.open(QIODevice::WriteOnly)) {
-        debug("Couldn't Open save file.", D_MAHI);
-        return false;
-    }
-    QVariantMap tempDataBase;
-    writeMap(tempDataBase);
-    QJson::Serializer serializer;
-    serializer.setIndentMode(QJson::IndentFull);
-    QByteArray output = serializer.serialize(tempDataBase);
-    saveFile.write(output);
-    return true;
-}
-
-void CPlayOffWidget::writeMap(QVariantMap &_map) {
-    QVariantMap tempMap;
-    QVariantMap tempConfigMap;
-
-    _map.clear();
-    for (size_t i = 0;i < playOff->dirList.size();i++) {
-        tempMap.insert("Directory", playOff->dirList.at(i));
-        for (size_t j = 0;j < playOff->fullPlans[i].size();j++) {
-            tempConfigMap.insert("Chance" , playOff->fullPlans[i][j]->config.chance);
-            tempConfigMap.insert("LastDist", playOff->fullPlans[i][j]->config.tuneParams.lastDist);
-            if (j < 10) tempMap.insert(QString("Plan_0%1").arg(j), tempConfigMap);
-            else tempMap.insert(QString("Plan_%1").arg(j), tempConfigMap);
-            tempConfigMap.clear();
-        }
-        if (i < 10) _map.insert(QString("File_0%1").arg(i), tempMap);
-        else _map.insert(QString("File_%1").arg(i), tempMap);
-        tempMap.clear();
-    }
-}
-
-void CPlayOffWidget::readMap(const QVariantMap &_map) {
-    QList<QVariantMap> tempMapsList;
-    QStringList tempDirs;
-    for (size_t i = 0;i < _map.size();i++) {
-        QString tempKey = (i < 10) ? QString("File_0%1").arg(i) : QString("File_%1").arg(i);
-        tempMapsList.append(_map.value(tempKey).toMap());
-        tempDirs.append(tempMapsList.at(i).value("Directory").toString());
-    }
-
-    if (tempDirs.size()) {
-        if (tempDirs.at(0).length() > 3) {
-            plans = playOff->addSQLs(tempDirs);
-            playOff->debugDirs();
-        }
-    }
-
-    QVariantMap tempMap;
-    for (size_t i = 0;i < tempMapsList.size();i++) {
-        for (size_t j = 0;j < tempMapsList.at(i).size() - 1;j++) {
-            QString tempKey = (j < 10) ? QString("Plan_0%1").arg(j) : QString("Plan_%1").arg(j);
-            tempMap = tempMapsList.at(i).value(tempKey).toMap();
-            plans[i][j]->config.chance = tempMap.value("Chance").toInt();
-            plans[i][j]->config.tuneParams.lastDist = tempMap.value("LastDist").toDouble();
-            tempMap.clear();
-        }
-    }
 }
 
 void CPlayOffWidget::updateModel() {
 
     model->clear();
+    QStandardItem *pkg;
+    QStandardItem *file;
+    QStandardItem *plan;
+    int pkgCounter  = 0;
+    int fileCounter = 0;
+    int planCounter = 0;
+    NGameOff::SGUI* lastGui = new NGameOff::SGUI;
+    for (size_t i = 0;i < m_plans.size();i++) {
+        m_plans[i]->gui.index[0] = pkgCounter;
+        m_plans[i]->gui.index[1] = fileCounter;
+        m_plans[i]->gui.index[2] = planCounter;
 
-    for (size_t i = 0;i < plans.size();i++) {
-        QStandardItem *file = new QStandardItem(QString("File %1: ").arg(model->rowCount()) + playOff->dirList.at(i));
+        NGameOff::SGUI& guiPlan = m_plans.at(i)->gui;
+        if (lastGui->package != guiPlan.package) {
+            pkgCounter++;
+            fileCounter++;
+            qDebug() << "PKG";
+            pkg = new QStandardItem(guiPlan.package);
+            model->appendRow(pkg);
+            qDebug() << "FILE";
+            file = new QStandardItem(guiPlan.planFile);
+            pkg->appendRow(file);
+        }
+        else if (lastGui->planFile != guiPlan.planFile) {
+            fileCounter++;
+            qDebug() << "PLAN";
+            file = new QStandardItem(guiPlan.planFile);
+            pkg->appendRow(file);
+        }
+        planCounter++;
+        plan = new QStandardItem(QString("%1").arg(i));
+        file->appendRow(plan);
+
         file->setEditable(false);
-        for (size_t j = 0;j < plans.at(i).size();j++) {
-            QStandardItem *plan = new QStandardItem(plans[i][j]->config.name);
+        plan->setEditable(false);
+        pkg->setEditable(false);
+        lastGui = &m_plans.at(i)->gui;
+        qDebug() << guiPlan.package;
 
-            QStandardItem *tune   = new QStandardItem("Tune Params");
-            QStandardItem *param0 = new QStandardItem(QString("%1").arg(plans[i][j]->config.tuneParams.lastDist));
-            tune->appendRow(param0);
-            tune->setEditable(false);
-            QStandardItem *chance = new QStandardItem("Chance");
-            QStandardItem *chanceValue = new QStandardItem(QString("%1").arg(plans[i][j]->config.chance));
-            chance->appendRow(chanceValue);
-            chance->setEditable(false);
-
-            plan->appendRow(tune);
-            plan->appendRow(chance);
-            plan->setEditable(false);
-
-            file->appendRow(plan);
-            file->setEditable(false);
-        }
-        model->appendRow(file);
     }
 }
 
-void CPlayOffWidget::slt_updatePlans() {    
-    plans = playOff->updatePlans();
-    load();
-    //    updateModel();
+void CPlayOffWidget::slt_changeMode() {
+    debugMode = !debugMode;
+    mode->setText((debugMode) ? "Game Mode" : "Debug Mode");
+    updateBtn(debugMode);
+    qDebug() << "Mode Chaged to " << ((debugMode) ? "Debug" : "Game") << " Mode";
 }
 
-void CPlayOffWidget::slt_add() {
-    QStringList tempDirs;
-    tempDirs = QFileDialog::getOpenFileNames(this,
-                                             "Load a Plan",
-                                             "",
-                                             tr("SQL Files (*.db3 *.db);;All Files (*.*)"));
-
-    int cnt;
-    if (tempDirs.size()) {
-        if (tempDirs.at(0).length() > 3) {
-            cnt = plans.size();
-            plans = playOff->addSQLs(tempDirs);
-            playOff->debugDirs();
-        }
+void CPlayOffWidget::updateBtn(bool _debug) {
+    if (_debug) {
+        update   -> setEnabled(true);
+        columns  -> setEnabled(true);
+    } else {
+        active   ->setEnabled(false);
+        update   ->setEnabled(false);
+        deactive ->setEnabled(false);
+        master   ->setEnabled(false);
     }
-    //    if(cnt != plans.size())
-    for (size_t i = cnt;i < plans.size();i++) {
-        QStandardItem *file = new QStandardItem(QString("File %1: ").arg(model->rowCount()) + playOff->dirList.at(i));
-        file->setEditable(false);
-        for (size_t j = 0;j < plans.at(i).size();j++) {
-            QStandardItem *plan = new QStandardItem(plans[i][j]->config.name);
-
-            QStandardItem *tune   = new QStandardItem("Tune Params");
-            QStandardItem *param0 = new QStandardItem(QString("%1").arg(plans[i][j]->config.tuneParams.lastDist));
-            tune->appendRow(param0);
-            tune->setEditable(false);
-            QStandardItem *chance = new QStandardItem("Chance");
-            QStandardItem *chanceValue = new QStandardItem(QString("%1").arg(plans[i][j]->config.chance));
-            chance->appendRow(chanceValue);
-            chance->setEditable(false);
-
-            plan->appendRow(tune);
-            plan->appendRow(chance);
-            plan->setEditable(false);
-
-            file->appendRow(plan);
-            file->setEditable(false);
-        }
-        model->appendRow(file);
-
-    }
-
 }
-void CPlayOffWidget::slt_remove() {
 
+void CPlayOffWidget::slt_updatePlans() {
 
-    QModelIndex tempModel = columns->selectionModel()->currentIndex();
+    m_loader->loadAll();
+    m_plans.clear();
+    m_plans.append(m_loader->getPlans());
+    updateModel();
+}
 
+void CPlayOffWidget::slt_active() {
+    // TODO : make this plan/package/file active one/ones
+}
+void CPlayOffWidget::slt_deactive() {
+    // TODO : make this plan/package/file deactive one/ones
+}
 
-    if (tempModel.parent().column() == -1) {
-
-        int reply = QMessageBox::question(this, "Remove This Plans", "Are You Sure?",
-                                          QMessageBox::Yes,
-                                          QMessageBox::No);
-        if (reply == QMessageBox::Yes) {
-            playOff->dirList.removeAt(tempModel.row());
-            playOff->fullClear();
-            qDebug() << playOff->dirList.size() << "DIRS";
-            plans = playOff->updatePlans();
-            model->removeRow(tempModel.row());
-            save();
-            load();
-            //            updateModel();
-        }
-    }
-    else {
-        QMessageBox::information(this, "Wrong Selection", "Please Select a File to Delete");
-    }
+void CPlayOffWidget::slt_master() {
+    // TODO : Make this plan/package/file master
 }
 
 void CPlayOffWidget::slt_edit(QStandardItem *_item) {
-
-
-    int fileIndex, planIndex, dataIndex;
-    QModelIndex tempModel = columns->selectionModel()->currentIndex();
-
-    fileIndex = tempModel.parent().parent().parent().row();
-    planIndex = tempModel.parent().parent().row();
-    dataIndex = tempModel.parent().row();
-
-    //Tune Params
-    if (dataIndex == 0) {
-        plans[fileIndex][planIndex]->config.tuneParams.lastDist = columns->selectionModel()->currentIndex().data().toDouble();
-    }
-    //Chance
-    else if (dataIndex == 1) {
-        plans[fileIndex][planIndex]->config.chance = columns->selectionModel()->currentIndex().data().toInt();
-    }
-
-    qDebug() << playOff->fullPlans[fileIndex][planIndex]->config.tuneParams.lastDist   << "TUNE";
-    qDebug() << playOff->fullPlans[fileIndex][planIndex]->config.chance << "CHNC";
+    // TODO : Make it possible to edit plans via gui.
 }
 
-void CPlayOffWidget::slt_save() {
-    save("PlansConfigs.json");
-}
+void CPlayOffWidget::slt_selectionChanged(const QItemSelection & selected, const QItemSelection & deselected) {
 
-void CPlayOffWidget::slt_load() {
-    load("PlansConfigs.json");
+    for(int i = 0;i < 8;i++) details[i]->setText("");
+
+    m_choosen = NULL;
+
+    QModelIndexList modelList = selected.indexes();
+    Q_FOREACH(QModelIndex model, modelList) {
+
+        if (model.parent().row() == -1) {
+            details[0]->setText(QString("Type  : Package"));
+        }
+        else if (model.parent().parent().row() == -1) {
+            details[0]->setText(QString("Type : File"));
+        }
+        else if (model.parent().parent().parent().row() == -1) {
+
+            int planIndex = model.data().toInt();
+
+            m_choosen = m_plans.at(planIndex);
+
+            details[0]->setText(QString("Type       : Plan"));
+            details[1]->setText(QString("Agent Size : %1").arg(m_plans.at(planIndex)->common.agentSize));
+            details[2]->setText(QString("Plan Mode  : %1").arg(m_loader->getModeStr(m_plans.at(planIndex)->common.planMode)));
+            details[3]->setText(QString("Chance     : %1").arg(m_plans.at(planIndex)->common.chance));
+            details[4]->setText(QString("Last Dist  : %1").arg(m_plans.at(planIndex)->common.lastDist));
+            details[5]->setText(QString("Tags       : %1").arg(m_plans.at(planIndex)->common.tags.join(" - ")));
+        }
+        else {
+            details[0]->setText(QString("Type : SubPlan !!"));
+
+        }
+    }
+
+
 }
 
 

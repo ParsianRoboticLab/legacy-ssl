@@ -30,6 +30,9 @@
 #include "plays/playoff.h"
 #include "plays/dynamicattack.h"
 #include "roles.h"
+#include "tools/planloader.h"
+#include "tools/loadplayoffjson.h"
+
 
 class CCoach {
 
@@ -118,11 +121,12 @@ private:
     attackState ourAttackState;
     void updateAttackState();
 
+    CLoadPlayOffJson* planLoader;
 public:
     CKnowledge::ballPossesionState GlobalBallPState;
     ////////GUI Needed
     CPlayOff* playOff();
-
+    CLoadPlayOffJson* getPlanLoader();
 
     bool inited;
     double playOnTime;

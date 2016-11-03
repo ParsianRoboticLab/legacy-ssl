@@ -200,7 +200,8 @@ CMainApplication::CMainApplication(QWidget *parent)
     profilerWidget = new CProfilerWidget(soccer->agents, 0);
     profilerWidget->setWindowTitle("Profiler");
 
-    playOffWidget  = new CPlayOffWidget(soccer->coach->playOff(), 0);
+
+    playOffWidget = new CPlayOffWidget(soccer->coach->getPlanLoader(), 0);
     playOffWidget->setWindowTitle("Play Off Plans");
     //////////////////
 
