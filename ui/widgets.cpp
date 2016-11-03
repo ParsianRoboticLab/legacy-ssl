@@ -1493,15 +1493,6 @@ CMonitorWidget::CMonitorWidget(CDrawer *_drawerBuffer, QWidget *parent)
     fieldCenter.setRect(-_CENTER_CIRCLE_RAD, _CENTER_CIRCLE_RAD, 2*_CENTER_CIRCLE_RAD, 2*_CENTER_CIRCLE_RAD);
     leftPenalty.setRect(-_FIELD_WIDTH/2.0, - _PENALTY_WIDTH/2.0, _GOAL_RAD, _PENALTY_WIDTH);
     rightPenalty.setRect(_FIELD_WIDTH/2.0 - _GOAL_RAD, -_PENALTY_WIDTH/2.0, _GOAL_RAD, _PENALTY_WIDTH);
-    //#ifndef LARGE_FIELD
-    //	leftPenalty.setRect(-3.025, -0.975, 0.800, 1.950);
-    //    rightPenalty.setRect(2.225, -0.975, 0.800, 1.950);
-    //#else
-    //	leftPenalty.setRect(-_FIELD_WIDTH/2.0, -1.250, 1.000, 2.500);
-    //	rightPenalty.setRect(_FIELD_WIDTH/2.0-1, -1.250, 1.000, 2.500);
-
-    //      //  rightPenalty.setRect(wm->field->oppPenaltyRect().topLeft().x,wm->field->oppPenaltyRect().topLeft().y,wm->field->oppPenaltyRect().size().length(), wm->field->oppPenaltyRect().size().width());
-    //#endif
     this->setMouseTracking(true);
     //    this->setFixedSize((viewportSize.width()) , (viewportSize.height()));
     object = 0;
