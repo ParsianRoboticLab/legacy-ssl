@@ -16,6 +16,48 @@
         public: inline skill* set##name(type val) {local = val;chflag = true;return this;} \
         protected: type local
 
+
+
+struct robotAttr {
+    int index;
+    int agent;
+    int skillNum;
+    bool isAng;
+};
+
+enum POffSkills {
+    NoSkill = 0,
+    PassSkill = 1,
+    ReceivePassSkill = 2,
+    ShotToGoalSkill = 3,
+    ChipToGoalSkill = 4,
+    OneTouchSkill = 5,
+    MoveSkill = 6,
+    ReceivePassIASkill = 7
+};
+
+struct playOffSkill {
+    POffSkills name;
+    int Data[2];
+};
+
+struct playOffRobot {
+    Vector2D pos;
+    AngleDeg angle;
+    double tolerance;
+    int targetIndex;
+    int targetAgent;
+    QList<playOffSkill> skill;
+//    POffSkills skill[3];
+//    int skillData[3][2];
+//    int skillSize;
+};
+
+struct POInitPos {
+    Vector2D ball;
+    Vector2D Agent[6];
+};
+
 enum POMODE {
     KICKOFF  = 1,
     DIRECT   = 2,
@@ -115,6 +157,94 @@ struct kkTimeAndIndex {
     int agent;
     POffSkills skill;
 };
+
+
+
+////Play Off Plans
+namespace NGameOff {
+
+enum EType {
+    None   = 0,
+    File   = 1,
+    Link   = 2,
+    SubDir = 3
+};
+
+
+struct SCommon {
+    int agentSize;
+    double chance;
+    double lastDist;
+    POMODE planMode;
+    QStringList tags;
+};
+
+struct SMatching {
+    struct SInitPos {
+        Vector2D ball;
+        QList<Vector2D> agents;
+    };
+
+    SInitPos initPos;
+    SCommon *common;
+};
+
+struct SExecution {
+
+    SExecution() = default;
+
+    SExecution(const SExecution &_toCopy) {
+        for(int i = 0;i < 6;i++) {
+            this->AgentPlan[i].clear();
+            for(int j = 0; j < _toCopy.AgentPlan[i].size(); j++) {
+                this->AgentPlan[i].append(_toCopy.AgentPlan[i].at(j));
+            }
+        }
+    }
+
+    SExecution& operator =(const SExecution &_insert) {
+        for(int i = 0;i < 6;i++) {
+            this->AgentPlan[i].clear();
+            for(int j = 0;j < _insert.AgentPlan[i].size();j++) {
+                this->AgentPlan[i].append(_insert.AgentPlan[i].at(j));
+            }
+        }
+    }
+
+    QList< QList<playOffRobot> > AgentPlan;
+    SCommon *common;
+};
+
+struct SGUI {
+
+    QString name;
+    QString planFile;
+    QString package;
+    bool active = true;
+    bool master = false;
+    unsigned int index[3]; // {package_index, file_index, plan_index}
+    SCommon *common;
+};
+
+
+struct SPlan {
+
+    SPlan() {
+        gui.common       = &common;
+        matching.common  = &common;
+        execution.common = &common;
+    }
+
+    SGUI       gui;
+    SCommon    common;
+    SMatching  matching;
+    SExecution execution;
+};
+
+}
+
+
+
 
 class CPlayOff : public CMasterPlay {
 

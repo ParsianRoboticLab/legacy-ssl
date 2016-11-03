@@ -2,6 +2,8 @@
 #define EXPERIMENTAL4_H
 #include <mainapplication.h>
 
+#include "tools/loadplayoffjson.h"
+
 const int VEL_SAMPLES = 10;
 
 static const double FrameRate = 61.51;
@@ -81,6 +83,15 @@ QList<double> graph, graph2;
 
 void CMainApplication::Experimental4()
 {
+
+//    static
+
+    return;
+
+    static CLoadPlayOffJson loader(QDir::currentPath() + QString("/playoff"));
+    loader.setAutoUpdate(true);
+
+    return;
     C tempo;
     tempo.loc  = wm->ball->pos;
     tempo.time = knowledge->getCurrentKKTime();

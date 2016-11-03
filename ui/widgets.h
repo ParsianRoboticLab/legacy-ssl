@@ -19,6 +19,8 @@
 #include "util/MLP.h"
 #include "profiler.h"
 #include "recorder.h"
+#include "tools/loadplayoffjson.h"
+#include "tools/planloader.h"
 
 #include <QDockWidget>
 #include <QLabel>
@@ -78,6 +80,7 @@
 #include <QTreeView>
 #include <QScrollBar>
 #include <QMessageBox>
+#include <QFrame>
 
 #include<QMenuBar>
 
@@ -325,50 +328,52 @@ private:
 };
 
 
-
 class CPlayOffWidget : public QWidget {
 
     Q_OBJECT
 
 public:
-    CPlayOffWidget(CPlayOff *_playOff, QWidget *parent = 0);
+    CPlayOffWidget(CLoadPlayOffJson* _loader, QWidget *parent = 0);
     ~CPlayOffWidget();
 
 protected:
 
-    CPlayOff *playOff;
-
+    QPushButton *mode;
+    QPushButton *active;
     QPushButton *update;
-    QPushButton *add;
-    QPushButton *remove;
-    QPushButton *saveBtn;
-    QPushButton *loadBtn;
+    QPushButton *master;
+    QPushButton *deactive;
+
     QColumnView *columns;
+
+    bool debugMode = false;
 
     QStandardItemModel *model;
     QItemSelectionModel *selection;
 
     QList<QStandardItem> *fileList;
     QList<QStandardItem> *planList;
-//    QList<QStandardItem> *fileList;
 
+    QList<NGameOff::SPlan*> m_plans;
     QList< QList< SPlayOffPlan*> >plans;
+    CLoadPlayOffJson* m_loader;
 
-private:
+    QLabel *details[8];
 
-    bool load(const QString& _dir = "PlansConfigs.json");
-    bool save(const QString& _dir = "PlansConfigs.json");
-    void writeMap(QVariantMap& _list);
-    void readMap (const QVariantMap& _list);
+    NGameOff::SPlan* m_choosen;
+private slots:
+
     void updateModel();
+    void updateBtn(bool _debug);
 
 public slots:
+    void slt_changeMode();
     void slt_updatePlans();
-    void slt_add();
-    void slt_remove();
+    void slt_active();
+    void slt_deactive();
     void slt_edit(QStandardItem*);
-    void slt_load();
-    void slt_save();
+    void slt_master();
+    void slt_selectionChanged(const QItemSelection &, const QItemSelection &);
 
 };
 

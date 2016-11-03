@@ -18,6 +18,7 @@
 //#define velProblem1
 //#define velProblem2
 #include "geom.h"
+
 enum SKILLINITVAL{
     SKILLGOTOPOINT = 0,
     SKILLGOTOPOINTAVOID = 1,
@@ -100,8 +101,6 @@ enum DynamicRegion {
 };
 
 }
-
-
 ////////////////////////////////////</MAHI>
 
 
@@ -147,40 +146,6 @@ enum ETeamColorType
 {
     _COLOR_BLUE,
     _COLOR_YELLOW
-};
-
-struct robotAttr {
-    int index;
-    int agent;
-    int skillNum;
-    bool isAng;
-};
-
-enum POffSkills {
-    NoSkill = 0,
-    PassSkill = 1,
-    ReceivePassSkill = 2,
-    ShotToGoalSkill = 3,
-    ChipToGoalSkill = 4,
-    OneTouchSkill = 5,
-    MoveSkill = 6,
-    ReceivePassIASkill = 7
-};
-
-struct playOffRobot {
-    Vector2D pos;
-    AngleDeg angle;
-    double tolerance;
-    int targetIndex;
-    int targetAgent;
-    POffSkills skill[3];
-    int skillData[3][2];
-    int skillSize;
-};
-
-struct POInitPos {
-    Vector2D ball;
-    Vector2D Agent[6];
 };
 
 /////////////////forceStart & playOff
