@@ -4,8 +4,6 @@
 
 #define REVNUM "$Rev: 2484 $"
 
-#define LARGE_FIELD
-
 #define KK_PLAYON
 #define PARSIANWORKSHOP
 //#define SIMULATION_MODE
@@ -203,16 +201,9 @@ struct GameStatePacket
 #define _BANG_BANG_NONLINEAR_SWITCH 0.300
 
 
-#ifndef LARGE_FIELD
-/* Monitor Constants (m)*/
-#define _STADIUM_WIDTH   7.400
-#define _STADIUM_HEIGHT  5.400
-
-#else
 
 #define _STADIUM_WIDTH   10.90
 #define _STADIUM_HEIGHT  7.70
-#endif
 
 /* COM Port Constants */
 #define _SIM_COM_PORT   "/dev/ttyS6"
@@ -222,25 +213,6 @@ struct GameStatePacket
 /* Skills */
 #define _DEFENCE_DIST       0.110
 
-
-#ifndef LARGE_FIELD
-
-/* Field */                 //brasil
-#define _FIELD_WIDTH            6.05
-#define _FIELD_HEIGHT           4.050
-#define _FIELD_MARGIN_HEIGHT    0.250
-#define _FIELD_MARGIN_WIDTH     0.500
-#define _FIELD_PENALTY          0.750
-#define _GOAL_WIDTH             0.700
-#define _GOAL_RAD               0.800
-#define _GOAL_DEPTH             0.200
-#define _PENALTY_WIDTH          1.950
-#define _CENTER_CIRCLE_RAD      0.500
-#define _PENALTY_AREA_CIRCLE_X  -3.20
-#define _PENALTY_AREA_CIRCLE_RAD  1.100
-#define _MAX_DIST               sqrt(_FIELD_WIDTH * _FIELD_WIDTH + _FIELD_HEIGHT * _FIELD_HEIGHT)
-
-#else
 
 /* Field */
 #define _FIELD_WIDTH            9.0
@@ -258,7 +230,6 @@ struct GameStatePacket
 #define _PARSIAN_BOUNDRY         4.40
 #define _MAX_DIST               sqrt(_FIELD_WIDTH * _FIELD_WIDTH + _FIELD_HEIGHT * _FIELD_HEIGHT)
 
-#endif
 
 /* Common Includes */
 #include "geom.h"
