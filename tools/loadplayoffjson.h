@@ -11,6 +11,9 @@
 
 class CLoadPlayOffJson : public CPlanLoader
 {
+
+    Q_OBJECT
+
 public:
     CLoadPlayOffJson(QObject* = 0);
     CLoadPlayOffJson(const QString& _folderDirectory, QObject* parent = 0);
@@ -20,9 +23,12 @@ public:
     bool save(QString _file);
     bool saveAll();
 
+    QList<NGameOff::SPlan*> getPlans() {return m_plans;}
+
+    QString getModeStr(POMODE _mode);
 protected:
     //All of Them !
-    QList< QList< NGameOff::SPlan* > > m_plans;
+    QList<NGameOff::SPlan*> m_plans;
     bool readPlan(const QVariantMap& _map, const QString& _file);
     void fillMatching(NGameOff::SMatching& _matching, const QVariantMap& _plan, bool* _parsedOK = 0);
     void fillCommon(NGameOff::SCommon& _common, const QVariantMap& _plan, bool* _parsedOk = 0);
@@ -33,6 +39,11 @@ protected:
 
 private:
 
+signals:
+    void plansUpdated();
+
+public slots:
+    virtual void slt_fileChanged(const QString &_file) override;
 
 };
 
