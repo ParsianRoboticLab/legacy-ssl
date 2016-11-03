@@ -1,5 +1,5 @@
 // Protocol Buffers - Google's data interchange format
-// Copyright 2008 Google Inc.  All rights reserved.
+// Copyright 2012 Google Inc.  All rights reserved.
 // http://code.google.com/p/protobuf/
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,45 +28,35 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// Author: kenton@google.com (Kenton Varda)
-//  Based on original Protocol Buffers design by
-//  Sanjay Ghemawat, Jeff Dean, and others.
-//
-// Generates C++ code for a given .proto file.
+#ifndef GOOGLE_PROTOBUF_PLATFORM_MACROS_H_
+#define GOOGLE_PROTOBUF_PLATFORM_MACROS_H_
 
-#ifndef GOOGLE_PROTOBUF_COMPILER_CPP_GENERATOR_H__
-#define GOOGLE_PROTOBUF_COMPILER_CPP_GENERATOR_H__
+#include <google/protobuf/stubs/common.h>
 
-#include <string>
-#include <google/protobuf/compiler/code_generator.h>
+// Processor architecture detection.  For more info on what's defined, see:
+//   http://msdn.microsoft.com/en-us/library/b0084kay.aspx
+//   http://www.agner.org/optimize/calling_conventions.pdf
+//   or with gcc, run: "echo | gcc -E -dM -"
 
-namespace google {
-namespace protobuf {
-namespace compiler {
-namespace cpp {
+#if defined(__GNUC__)
+# if __LP64__
+#  define GOOGLE_PROTOBUF_ARCH_64_BIT 1
+# else
+#  define GOOGLE_PROTOBUF_ARCH_32_BIT 1
+# endif
+#else
+# error Host architecture was not detected as supported by protobuf
+#endif
 
-// CodeGenerator implementation which generates a C++ source file and
-// header.  If you create your own protocol compiler binary and you want
-// it to support C++ output, you can do so by registering an instance of this
-// CodeGenerator with the CommandLineInterface in your main() function.
-class LIBPROTOC_EXPORT CppGenerator : public CodeGenerator {
- public:
-  CppGenerator();
-  ~CppGenerator();
+#if defined(__x86_64__)
+# define GOOGLE_PROTOBUF_ARCH_X64 1
+#elif defined(__i386__)
+# define GOOGLE_PROTOBUF_ARCH_IA32 1
+#elif defined(__ARMEL__)
+# define GOOGLE_PROTOBUF_ARCH_ARM 1
+#elif defined(__mips__) || defined(__MIPSEL__)
+# define GOOGLE_PROTOBUF_ARCH_MIPS 1
+/* Else we fallback to generic GCC implementation in atomicops.h */
+#endif
 
-  // implements CodeGenerator ----------------------------------------
-  bool Generate(const FileDescriptor* file,
-                const string& parameter,
-                GeneratorContext* generator_context,
-                string* error) const;
-
- private:
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(CppGenerator);
-};
-
-}  // namespace cpp
-}  // namespace compiler
-}  // namespace protobuf
-
-}  // namespace google
-#endif  // GOOGLE_PROTOBUF_COMPILER_CPP_GENERATOR_H__
+#endif  // GOOGLE_PROTOBUF_PLATFORM_MACROS_H_
