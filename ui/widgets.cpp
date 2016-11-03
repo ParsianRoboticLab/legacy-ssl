@@ -32,6 +32,9 @@
 #include <algorithm>
 #include "simulation/simulator.h"
 
+#include<QMenu>
+#include<QAction>
+
 CTabDockWidget::CTabDockWidget(QWidget* parent , bool autoHide)
     : QDockWidget(parent) , autoHideBool(autoHide)
 {
@@ -481,6 +484,8 @@ CProfilerWidget::CProfilerWidget(CAgent **_agents, QWidget *parent) : QWidget(pa
     skillsCombo  = new QComboBox(this);
     skillsCombo->addItem("Kick");
     skillsCombo->addItem("Chip");
+    skillsCombo->addItem("SpinKick");
+    skillsCombo->addItem("SpinChip");
 
     QLabel *kickSpeedLable = new QLabel("Kick Speed :", this);
     kickSpeed = new QLineEdit(this);
@@ -547,6 +552,13 @@ CProfilerWidget::CProfilerWidget(CAgent **_agents, QWidget *parent) : QWidget(pa
     connect(clearButton  , SIGNAL(clicked())  , this, SLOT(slt_clear()));
     connect(insertButton , SIGNAL(clicked())  , this, SLOT(slt_insert()));
 
+    connect ( realSpeed, SIGNAL( returnPressed() ), this, SLOT( slt_add() ) );
+
+    QAction* InsertAct = new QAction(this);
+    InsertAct->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_I));
+    addAction(InsertAct);
+    connect(InsertAct, SIGNAL(triggered()), this, SLOT(slt_insert()));
+
     connect(agentsCombo  , SIGNAL(currentIndexChanged(int)),
             this         , SLOT  (slt_setCurrentAgent(int)));
 
@@ -579,13 +591,22 @@ CProfilerWidget::~CProfilerWidget() {
 
 void CProfilerWidget::slt_insert() {
     ProfileMode tempMode = getMode(skillsCombo->currentIndex());
-    knowledge->profiler->insertRecord(tempMode,
-                                      kickSpeed->text().toInt(),
-                                      theMean,
-                                      currentAgent);
+    if(tempMode == PCHIP || tempMode == SCHIP)
+        knowledge->profiler->insertRecord(tempMode,
+                                          kickSpeed->text().toInt(),
+                                          theMean,
+                                          currentAgent);
+    else
+        knowledge->profiler->insertRecord(tempMode,
+                                          kickSpeed->text().toInt(),
+                                          ballSpeedAddedList,
+                                          currentAgent);
     kickSpeed->setText("");
     realSpeed->setText("");
     theMeanLable->setText(QString("The Mean : "));
+    kickSpeed->setFocus();
+
+
 }
 
 void CProfilerWidget::slt_modeEdited(QString) {
@@ -704,12 +725,17 @@ void CProfilerWidget::slt_load() {
 }
 
 void CProfilerWidget::slt_add() {
+    //    ballSpeedAddedList.append(realSpeed->text().toDouble());
+    //    double temp;
+    //    for (size_t i = 0; i < ballSpeedAddedList.size();i++) {
+    //        temp += ballSpeedAddedList.at(i);
+    //    }
+    //    theMean = temp/ballSpeedAddedList.size();
+
+    theMean*=ballSpeedAddedList.size();
     ballSpeedAddedList.append(realSpeed->text().toDouble());
-    double temp;
-    for (size_t i = 0; i < ballSpeedAddedList.size();i++) {
-        temp += ballSpeedAddedList.at(i);
-    }
-    theMean = temp/ballSpeedAddedList.size();
+    theMean+=ballSpeedAddedList.last();
+    theMean/=ballSpeedAddedList.size();
     theMeanLable->setText(QString("The Mean : %1").arg(theMean));
     realSpeed->setText("");
 }
@@ -772,6 +798,13 @@ ProfileMode CProfilerWidget::getMode(int _index) {
         break;
     case 1:
         return PCHIP;
+        break;
+
+    case 2:
+        return SKICK;
+        break;
+    case 3:
+        return SCHIP;
         break;
     }
 }

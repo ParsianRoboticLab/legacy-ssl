@@ -393,6 +393,7 @@ private:
     QList<Vector2D> staticPoses;
 public:
 
+    double ProfilerResult[16][4][81];
     //added by Mahi
     CNewProfiler *profiler;
 

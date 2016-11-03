@@ -2,6 +2,40 @@
 #include <QtAlgorithms>
 #include <QDebug>
 
+
+double AvgWithoutOutliers(QList<double> data , double accuracy){
+    //calculate a number for each member of list, saved in isOutlier list.
+    //for non outlier members, most probable number to be produced is 1/2.
+    //if it becaomes greater than 1 (or than "accuracy" :D) we can omit the related member.
+    //output is the avrage of non outlier members.
+    QList<double> isOutlier;
+    double size = data.count() , n=0;
+    double avrg=0 , a=0 , b=0 , res=0;
+    for(int i=0; i<size; i++)
+        avrg+=data.at(i);
+
+    avrg/=size;
+
+    for(int i=0; i<size; i++){
+        a = (data.at(i)-avrg)*(data.at(i)-avrg);
+        for(int j=0; j<size; j++){
+            b+=(data.at(j)-avrg)*(data.at(j)-avrg);
+        }
+        b-=a;
+        isOutlier.append( (double)(a*(size-2)/(2*b)) + (double)((size-2)/(2*(size-1))) );
+        b=0;
+    }
+
+    for(int i=0; i<size; i++){
+        if(isOutlier.at(i) <= accuracy){
+            res+=data.at(i);
+            n++;
+        }
+    }
+    return res/n;
+}
+
+
 //fits a line to y array: y = bx + a
 void linefit(unsigned int n, double *x, double *y, double &a, double &b);
 
@@ -77,7 +111,7 @@ void fillmat2x2(
 void fillmat3x3(
         double mat[3][3],
         double m00, double m01, double m02,
-        double m10, double m11, double m12,        
+        double m10, double m11, double m12,
         double m20, double m21, double m22 )
 
 {
@@ -125,7 +159,7 @@ void linefit(unsigned int n, double *x, double *y, double &a, double &b)
     double sxi = 0.0;
     double sxi2 = 0.0;
     double syi = 0.0;
-    double sxiyi = 0.0;    
+    double sxiyi = 0.0;
     for (i = 0; i < n; i++)
     {
         sxi += x[i];
@@ -256,7 +290,7 @@ void trifit(unsigned int n, double *x, double *y, double &a, double &b, double &
     double syi = 0.0;
     double sxiyi = 0.0;
     double sxi2yi = 0.0;
-    double sxi3yi = 0.0;    
+    double sxi3yi = 0.0;
     double temp;
     for (i = 0; i < n; i++)
     {
@@ -413,7 +447,7 @@ void CPolynomialRegression::fitToDataSet(QList<QPair<double, double> > newDataSe
             if(k<n+1 && i-k<n+1)
             {
                 B.e(k,i-k)=sum;
-//                qDebug()<<i<<k<<i-k;
+                //                qDebug()<<i<<k<<i-k;
             }
         }
     }
@@ -429,21 +463,21 @@ void CPolynomialRegression::fitToDataSet(QList<QPair<double, double> > newDataSe
         A.e(i,0)=sum;
     }
 
-//    fprintf(stderr,"\r\nA:\r\n");
-//    A.print();
-//    fprintf(stderr,"\r\nB:\r\n");
-//    B.print();
-//    if(A.determinant()==0)
-//    {
-//        qWarning()<<"0 determinant";
-//        return;
-//    }
+    //    fprintf(stderr,"\r\nA:\r\n");
+    //    A.print();
+    //    fprintf(stderr,"\r\nB:\r\n");
+    //    B.print();
+    //    if(A.determinant()==0)
+    //    {
+    //        qWarning()<<"0 determinant";
+    //        return;
+    //    }
     initialized = true;
     B.inverse();
     C = B*A;
 
-//    fprintf(stderr,"\r\nC:\r\n");
-//    C.print();
+    //    fprintf(stderr,"\r\nC:\r\n");
+    //    C.print();
 
 
     coefs.clear();
@@ -452,6 +486,62 @@ void CPolynomialRegression::fitToDataSet(QList<QPair<double, double> > newDataSe
     {
         coefs.append(C.e(i,0));
     }
+}
+
+QVector<double> CPolynomialRegression::PolynomialRegression(QList<double> value, QList<int> key, int n/*order*/){
+    double X[2*n+1];
+    double B[n+1][n+2];
+    double Y[n+1];
+    int j , k, N=value.count();
+    QVector<double> coefs(QVector<double>(n+1));
+    if(value.count()>key.count())
+        N=key.count();
+    if( value.count()>0){
+        for(int j=0; j<N; j++){
+            double temp = value.at(j) , valj=value.at(j);
+            X[0] = N;
+            for(int i=1;i<2*n+1;i++){
+                X[i]+=temp;
+                temp*=valj;
+            }
+        }
+        for(j=0; j<N; j++){
+            Y[0]+=key.at(j);
+            double temp = value.at(j) , valj = value.at(j);
+            for(int i=1; i<n+1; i++){
+                Y[i]+=key.at(j)*temp;
+                temp*=valj;
+            }
+        }
+        for (int i=0;i<=n;i++)
+            for (j=0;j<=n;j++)
+                B[i][j]=X[i+j];
+        for (int i=0;i<=n;i++)
+            B[i][n+1]=Y[i];
+        n=n+1;
+        for (int i=0;i<n;i++)
+            for (k=i+1;k<n;k++)
+                if (B[i][i]<B[k][i])
+                    for (j=0;j<=n;j++){
+                        double temp=B[i][j];
+                        B[i][j]=B[k][j];
+                        B[k][j]=temp;
+                    }
+        for (int i=0;i<n-1;i++)
+            for (k=i+1;k<n;k++){
+                double t=B[k][i]/B[i][i];
+                for (j=0;j<=n;j++)
+                    B[k][j]=B[k][j]-t*B[i][j];
+            }
+        for (int i=n-1;i>=0;i--){
+            coefs[i]=B[i][n];
+            for (j=0;j<n;j++)
+                if (j!=i)
+                    coefs[i]=coefs[i]-B[i][j]*coefs[j];
+            coefs[i]=coefs[i]/B[i][i];
+        }
+    }
+    return coefs;
 }
 
 CHalfLogRegression::CHalfLogRegression()
@@ -495,14 +585,14 @@ double CHalfLogRegression::invval(double y)
 
 QList<QList<int> > comb(QList<int> l)
 {        
-    QList<QList<int> > r;    
+    QList<QList<int> > r;
     if (l.count()==1)
     {
         r.append(l);
         return r;
     }
     for (int i=0;i<l.count();i++)
-    {        
+    {
         bool flag = false;
         if (i>=1)
         {
@@ -535,7 +625,7 @@ void subs(QList<QList<int> >& res, QList<int> r, QList<int> l, int m, int k)
     if (r.length()==m) {
         res.append(r);
     }
-    else {        
+    else {
         for (int j=k;j<l.length();j++)
         {
             r.append(l[j]);
@@ -596,73 +686,73 @@ QList<QList<int> > generateSubsets(QList<int> l, int m)
 
 Circle2D circleFit(QVector<Vector2D> P)
 {
-  /* user-selected parameters */
-  const int maxIterations = 64;
-  const double tolerance = 1e-06;
+    /* user-selected parameters */
+    const int maxIterations = 64;
+    const double tolerance = 1e-06;
 
-  double a, b, r;
-  int N = P.count();
-  /* compute the average of the data points */
-  int i, j;
-  double xAvr = 0.0;
-  double yAvr = 0.0;
-
-  for (i = 0; i < N; i++) {
-    xAvr += P[i].x;
-    yAvr += P[i].y;
-  }
-  xAvr /= N;
-  yAvr /= N;
-
-  /* initial guess */
-  a = xAvr;
-  b = yAvr;
-
-  for (j = 0; j < maxIterations; j++) {
-    /* update the iterates */
-    double a0 = a;
-    double b0 = b;
-
-    /* compute average L, dL/da, dL/db */
-    double LAvr = 0.0;
-    double LaAvr = 0.0;
-    double LbAvr = 0.0;
+    double a, b, r;
+    int N = P.count();
+    /* compute the average of the data points */
+    int i, j;
+    double xAvr = 0.0;
+    double yAvr = 0.0;
 
     for (i = 0; i < N; i++) {
-      double dx = P[i].x - a;
-      double dy = P[i].y - b;
-      double L = sqrt(dx * dx + dy * dy);
-      if (fabs(L) > tolerance) {
-        LAvr += L;
-        LaAvr -= dx / L;
-        LbAvr -= dy / L;
-      }
+        xAvr += P[i].x;
+        yAvr += P[i].y;
     }
-    LAvr /= N;
-    LaAvr /= N;
-    LbAvr /= N;
+    xAvr /= N;
+    yAvr /= N;
 
-    a = xAvr + LAvr * LaAvr;
-    b = yAvr + LAvr * LbAvr;
-    r = LAvr;
+    /* initial guess */
+    a = xAvr;
+    b = yAvr;
 
-    if (fabs(a - a0) <= tolerance && fabs(b - b0) <= tolerance)
-      break;
-  }
+    for (j = 0; j < maxIterations; j++) {
+        /* update the iterates */
+        double a0 = a;
+        double b0 = b;
 
-  return Circle2D(Vector2D(a, b), r);
-//  return (j < maxIterations ? j : -1);
+        /* compute average L, dL/da, dL/db */
+        double LAvr = 0.0;
+        double LaAvr = 0.0;
+        double LbAvr = 0.0;
+
+        for (i = 0; i < N; i++) {
+            double dx = P[i].x - a;
+            double dy = P[i].y - b;
+            double L = sqrt(dx * dx + dy * dy);
+            if (fabs(L) > tolerance) {
+                LAvr += L;
+                LaAvr -= dx / L;
+                LbAvr -= dy / L;
+            }
+        }
+        LAvr /= N;
+        LaAvr /= N;
+        LbAvr /= N;
+
+        a = xAvr + LAvr * LaAvr;
+        b = yAvr + LAvr * LbAvr;
+        r = LAvr;
+
+        if (fabs(a - a0) <= tolerance && fabs(b - b0) <= tolerance)
+            break;
+    }
+
+    return Circle2D(Vector2D(a, b), r);
+    //  return (j < maxIterations ? j : -1);
 }
 
 MWBM::MWBM()
 {
-	W = NULL;
-	n = cap = 0;
+    W = NULL;
+    n = cap = 0;
 }
 
 MWBM::MWBM(int _m, int _n)
 {
-	W = NULL;
+    W = NULL;
     create(_m, _n);
 }
 
@@ -691,13 +781,13 @@ void MWBM::create(int _m, int _n)
     R = new int [n];
     S = new int [n];
     T = new int [n];
-	cap = n;
+    cap = n;
 }
 
 void MWBM::destroy()
 {
-	if (W == NULL) return;
-	for (int i=0;i<cap;i++)
+    if (W == NULL) return;
+    for (int i=0;i<cap;i++)
         delete [] W[i];
     delete [] W;
     delete [] U;
@@ -710,16 +800,16 @@ void MWBM::destroy()
     delete [] R;
     delete [] S;
     delete [] T;
-	W = NULL;n=0;cap=0;
+    W = NULL;n=0;cap=0;
 }
 
 void MWBM::changeSize(int k, int r) {
-	int pp = max(k,r);
-	if (pp > cap) return;
-	n = pp;
-	for (int i=0;i<n;i++)
-		for (int j=0;j<n;j++)
-			W[i][j] = 0;
+    int pp = max(k,r);
+    if (pp > cap) return;
+    n = pp;
+    for (int i=0;i<n;i++)
+        for (int j=0;j<n;j++)
+            W[i][j] = 0;
 }
 
 void MWBM::setWeight(int i, int j, int w)
@@ -769,107 +859,107 @@ int MWBM::getMatch(int i)
 /* Returns the maximum weight, with the perfect matching stored in M. */
 int MWBM::findMatching()
 {
-  int w, y; /* <-- weight variables */
-  int i, j, m, p, q, s, t, v;
+    int w, y; /* <-- weight variables */
+    int i, j, m, p, q, s, t, v;
 
-  for (i = 0; i < n; i++) {
-    M[i] = N[i] = -1;
-    U[i] = V[i] = 0;
+    for (i = 0; i < n; i++) {
+        M[i] = N[i] = -1;
+        U[i] = V[i] = 0;
 
-    for (j = 0; j < n; j++)
-      if (W[i][j] > U[i])
-        U[i] = W[i][j];
-  }
-
-  for (m = 0; m < n; m++) {
-    for (p = i = 0; i < n; i++) {
-      T[i] = 0;
-      Y[i] = -1;
-
-      if (M[i] == -1) {
-        S[i] = 1;
-        P[p++] = i;
-      }
-      else
-        S[i] = 0;
+        for (j = 0; j < n; j++)
+            if (W[i][j] > U[i])
+                U[i] = W[i][j];
     }
 
-    while (1) {
-      for (q = s = 0; s < p; s++) {
-        i = P[s];
+    for (m = 0; m < n; m++) {
+        for (p = i = 0; i < n; i++) {
+            T[i] = 0;
+            Y[i] = -1;
 
-        for (j = 0; j < n; j++)
-          if (!T[j]) {
-            y = U[i] + V[j] - W[i][j];
-
-            if (y == 0) {
-              R[j] = i;
-              if (N[j] == -1)
-                goto end_phase;
-              T[j] = 1;
-              Q[q++] = j;
+            if (M[i] == -1) {
+                S[i] = 1;
+                P[p++] = i;
             }
-            else if ((Y[j] == -1) || (y < Y[j])) {
-              Y[j] = y;
-              R[j] = i;
-            }
-          }
-      }
-
-      if (q == 0) {
-        y = -1;
-
-        for (j = 0; j < n; j++)
-          if (!T[j] && ((y == -1) || (Y[j] < y)))
-            y = Y[j];
-
-        for (j = 0; j < n; j++) {
-          if (T[j])
-            V[j] += y;
-
-          if (S[j])
-            U[j] -= y;
+            else
+                S[i] = 0;
         }
 
-        for (j = 0; j < n; j++)
-          if (!T[j]) {
-            Y[j] -= y;
+        while (1) {
+            for (q = s = 0; s < p; s++) {
+                i = P[s];
 
-            if (Y[j] == 0) {
-              if (N[j] == -1)
-                goto end_phase;
-              T[j] = 1;
-              Q[q++] = j;
+                for (j = 0; j < n; j++)
+                    if (!T[j]) {
+                        y = U[i] + V[j] - W[i][j];
+
+                        if (y == 0) {
+                            R[j] = i;
+                            if (N[j] == -1)
+                                goto end_phase;
+                            T[j] = 1;
+                            Q[q++] = j;
+                        }
+                        else if ((Y[j] == -1) || (y < Y[j])) {
+                            Y[j] = y;
+                            R[j] = i;
+                        }
+                    }
             }
-          }
-      }
 
-      for (p = t = 0; t < q; t++) {
-        i = N[Q[t]];
-        S[i] = 1;
-        P[p++] = i;
-      }
+            if (q == 0) {
+                y = -1;
+
+                for (j = 0; j < n; j++)
+                    if (!T[j] && ((y == -1) || (Y[j] < y)))
+                        y = Y[j];
+
+                for (j = 0; j < n; j++) {
+                    if (T[j])
+                        V[j] += y;
+
+                    if (S[j])
+                        U[j] -= y;
+                }
+
+                for (j = 0; j < n; j++)
+                    if (!T[j]) {
+                        Y[j] -= y;
+
+                        if (Y[j] == 0) {
+                            if (N[j] == -1)
+                                goto end_phase;
+                            T[j] = 1;
+                            Q[q++] = j;
+                        }
+                    }
+            }
+
+            for (p = t = 0; t < q; t++) {
+                i = N[Q[t]];
+                S[i] = 1;
+                P[p++] = i;
+            }
+        }
+
+end_phase:
+        i = R[j];
+        v = M[i];
+        M[i] = j;
+        N[j] = i;
+
+        while (v != -1) {
+            j = v;
+            i = R[j];
+            v = M[i];
+            M[i] = j;
+            N[j] = i;
+        }
     }
 
-  end_phase:
-    i = R[j];
-    v = M[i];
-    M[i] = j;
-    N[j] = i;
+    for (i = w = 0; i < n; i++)
+        w += W[i][M[i]];
 
-    while (v != -1) {
-      j = v;
-      i = R[j];
-      v = M[i];
-      M[i] = j;
-      N[j] = i;
-    }
-  }
-
-  for (i = w = 0; i < n; i++)
-    w += W[i][M[i]];
-
-  return w;
+    return w;
 }
 
 
