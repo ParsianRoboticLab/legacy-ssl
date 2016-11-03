@@ -41,16 +41,14 @@
 #define GOOGLE_PROTOBUF_WIRE_FORMAT_LITE_H__
 
 #include <string>
+#include <google/protobuf/stubs/common.h>
 #include <google/protobuf/message_lite.h>
+#include <google/protobuf/io/coded_stream.h>  // for CodedOutputStream::Varint32Size
 
 namespace google {
 
 namespace protobuf {
   template <typename T> class RepeatedField;  // repeated_field.h
-  namespace io {
-    class CodedInputStream;             // coded_stream.h
-    class CodedOutputStream;            // coded_stream.h
-  }
 }
 
 namespace protobuf {
@@ -222,7 +220,11 @@ class LIBPROTOBUF_EXPORT WireFormatLite {
   static uint32 ZigZagEncode32(int32 n);
   static int32  ZigZagDecode32(uint32 n);
   static uint64 ZigZagEncode64(int64 n);
-  static int64  ZigZagDecode64(uint64 n);
+  static int64  ZigZagDecode64(uint64 n)
+#ifdef __arm__
+    __attribute__((__optimize__(0)))
+#endif
+  ;
 
   // =================================================================
   // Methods for reading/writing individual field.  The implementations
@@ -476,6 +478,10 @@ class LIBPROTOBUF_EXPORT WireFormatLite {
   static inline int GroupSizeNoVirtual  (const MessageType& value);
   template<typename MessageType>
   static inline int MessageSizeNoVirtual(const MessageType& value);
+
+  // Given the length of data, calculate the byte size of the data on the
+  // wire if we encode the data as a length delimited field.
+  static inline int LengthDelimitedSize(int length);
 
  private:
   // A helper method for the repeated primitive reader. This method has
