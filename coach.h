@@ -15,13 +15,7 @@
 #include "plays/ourkickoff.h"
 #include "plays/ourpenalty.h"
 #include "plays/ourindirect.h"
-
-#ifndef LARGE_FIELD
-#include "plays/ourdirect.h"
-#else
 #include "plays/doublesizeourdirect.h"
-#endif
-
 #include "plays/theirkickoff.h"
 #include "plays/theirpenalty.h"
 #include "plays/theirindirect.h"
@@ -50,11 +44,7 @@ private:
     CMasterPlay *selectedPlay;
     COurKickOff *ourKickOff;
     COurIndirect *ourIndirect;
-#ifndef LARGE_FIELD
-    COurDirect *ourDirect;
-#else
     CDoubleSizeOurDirect *ourDirect;
-#endif
     QTime playOnExecTime;
     QTime intentionTimePossession;
     QTime playMakeIntention;

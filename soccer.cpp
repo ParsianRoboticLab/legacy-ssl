@@ -370,11 +370,6 @@ void CSoccer::primaryDraws(){
     QList<int> relaxIDS;
     knowledge->getEmptyPosOnGoal(wm->ball->pos, regionWidth,true,relaxIDS,relaxIDS,1.0, true);
     knowledge->getEmptyPosOnGoal(wm->ball->pos, regionWidth,false,relaxIDS,relaxIDS,1.0, true);
-
-
-#ifdef LARGE_FIELD
-    draw("Large Field" , Vector2D(-4 , 3.2) , "red");
-#endif
     ///////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -1370,14 +1365,7 @@ void CVisionThread::run()
     while (true)
     {
         usleep(1000);
-#ifndef LARGE_FIELD
-        if( conf()->LocalSettings_SSLVisionMulticastPort() == 10002 || conf()->LocalSettings_SSLVisionMulticastPort() == 10004 )
-            packmax = 2;
-        else
-            packmax = 1;
-#else
         packmax = conf()->BallTracker_activeCamNum();
-#endif
         bool flag = false;
         visionSocketMutex.lock();
         flag = closeVision;
