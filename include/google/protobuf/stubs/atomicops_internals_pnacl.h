@@ -1,5 +1,5 @@
 // Protocol Buffers - Google's data interchange format
-// Copyright 2008 Google Inc.  All rights reserved.
+// Copyright 2012 Google Inc.  All rights reserved.
 // http://code.google.com/p/protobuf/
 //
 // Redistribution and use in source and binary forms, with or without
@@ -28,45 +28,46 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// Author: kenton@google.com (Kenton Varda)
-//  Based on original Protocol Buffers design by
-//  Sanjay Ghemawat, Jeff Dean, and others.
-//
-// Generates Java code for a given .proto file.
+// This file is an internal atomic implementation, use atomicops.h instead.
 
-#ifndef GOOGLE_PROTOBUF_COMPILER_JAVA_GENERATOR_H__
-#define GOOGLE_PROTOBUF_COMPILER_JAVA_GENERATOR_H__
-
-#include <string>
-#include <google/protobuf/compiler/code_generator.h>
+#ifndef GOOGLE_PROTOBUF_ATOMICOPS_INTERNALS_PNACL_H_
+#define GOOGLE_PROTOBUF_ATOMICOPS_INTERNALS_PNACL_H_
 
 namespace google {
 namespace protobuf {
-namespace compiler {
-namespace java {
+namespace internal {
 
-// CodeGenerator implementation which generates Java code.  If you create your
-// own protocol compiler binary and you want it to support Java output, you
-// can do so by registering an instance of this CodeGenerator with the
-// CommandLineInterface in your main() function.
-class LIBPROTOC_EXPORT JavaGenerator : public CodeGenerator {
- public:
-  JavaGenerator();
-  ~JavaGenerator();
+inline Atomic32 NoBarrier_CompareAndSwap(volatile Atomic32* ptr,
+                                         Atomic32 old_value,
+                                         Atomic32 new_value) {
+  return __sync_val_compare_and_swap(ptr, old_value, new_value);
+}
 
-  // implements CodeGenerator ----------------------------------------
-  bool Generate(const FileDescriptor* file,
-                const string& parameter,
-                GeneratorContext* context,
-                string* error) const;
+inline void MemoryBarrier() {
+  __sync_synchronize();
+}
 
- private:
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(JavaGenerator);
-};
+inline Atomic32 Acquire_CompareAndSwap(volatile Atomic32* ptr,
+                                       Atomic32 old_value,
+                                       Atomic32 new_value) {
+  Atomic32 ret = NoBarrier_CompareAndSwap(ptr, old_value, new_value);
+  MemoryBarrier();
+  return ret;
+}
 
-}  // namespace java
-}  // namespace compiler
+inline void Release_Store(volatile Atomic32* ptr, Atomic32 value) {
+  MemoryBarrier();
+  *ptr = value;
+}
+
+inline Atomic32 Acquire_Load(volatile const Atomic32* ptr) {
+  Atomic32 value = *ptr;
+  MemoryBarrier();
+  return value;
+}
+
+}  // namespace internal
 }  // namespace protobuf
-
 }  // namespace google
-#endif  // GOOGLE_PROTOBUF_COMPILER_JAVA_GENERATOR_H__
+
+#endif  // GOOGLE_PROTOBUF_ATOMICOPS_INTERNALS_PNACL_H_
