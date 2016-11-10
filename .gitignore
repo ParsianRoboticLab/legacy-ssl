@@ -6,3 +6,9 @@ Makefile
 posts
 *.xml
 *~
+localsettings.xml
+playoff/*
+policy.xml
+posts
+robotsSetting.csv
+settings.xml
