@@ -1319,7 +1319,7 @@ bool CCoach::decideAttack()
 
     }
     else if( knowledge->getGameState() == CKnowledge::OurIndirectKick ){
-        decidePlayOff(currentTags, INDIRECT, 3);
+        decidePlayOff(currentTags, INDIRECT, ourPlayers.size());
         selectedPlay = ourPlayOff;
         ourPlayOff = indirect;
         firstTime = false;
@@ -1347,7 +1347,6 @@ bool CCoach::decideAttack()
         firstTime = true;
 
     }
-
     else if( knowledge->getGameState() == CKnowledge::TheirPenaltyKick ){
         selectedPlay = theirPenalty;
         ourPlayOff->firstTime = true;
@@ -1388,11 +1387,11 @@ void CCoach::decidePlayOff(const QStringList& _tags, POMODE _mode, int _agentSiz
 
     QList<NGameOff::SPlan*> validPlans;
 
+    //Decide Plan
     if (firstTime) {
-        QList<NGameOff::SPlan*> plans = m_planLoader->getPlans();
-        Q_FOREACH(NGameOff::SPlan* plan, plans) {
+        QList<NGameOff::SPlan*> plans = m_planLoader->getPlans(); // Get All of The Plans
+        Q_FOREACH(NGameOff::SPlan* plan, plans) { //Find Valid Plans
             NGameOff::SMatching& matching = plan->matching;
-            // Find Valid Plans
             if (matching.common->planMode  >= _mode
                     && matching.common->agentSize >= _agentSize
                     && matching.common->chance >= 0
@@ -1405,6 +1404,7 @@ void CCoach::decidePlayOff(const QStringList& _tags, POMODE _mode, int _agentSiz
             }
         }
 
+
         debug(QString("playoff -> there's %1 valid Plan").arg(validPlans.size()), D_DEBUG);
         if (validPlans.isEmpty()) {
             debug("[Warning] playoff -> there's no valid Plan", D_ERROR, QColor(Qt::red));
@@ -1412,14 +1412,16 @@ void CCoach::decidePlayOff(const QStringList& _tags, POMODE _mode, int _agentSiz
             return;
         }
 
-        NGameOff::SPlan* thePlan = chooseMostSuccecfull(validPlans);
-        matchPlan(thePlan);
+
+        NGameOff::SPlan* thePlan = chooseMostSuccecfull(validPlans); //Choose Best valid Plan
+        matchPlan(thePlan); //Match The Plan
         ourPlayOff->setMasterPlan(thePlan);
         lastPlan = thePlan;
-    }
-    ourPlayOff->setMasterPlan(lastPlan);
-}
 
+    } else {
+        ourPlayOff->setMasterPlan(lastPlan);
+    }
+}
 void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
 
     CKnowledge::ballPossesionState ballPState = isBallOurs();
