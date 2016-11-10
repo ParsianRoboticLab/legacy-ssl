@@ -420,11 +420,13 @@ void CPlayOff::getPassTimeline(SPlayOffPlan *tCurrentPlan, QList<POOwnerReceive>
 
 void CPlayOff::globalExecute(int agentCnt) {
 
-    if(masterPlan != NULL)
+    if(masterPlan != NULL) {
         qDebug() << *masterPlan;
-    else
-        qDebug() << "fuck";
-    return;
+    } else {
+        qDebug() << "master is null";
+        return;
+    }
+
     playOnFlag = false;
     if(!firstTime) {
         if(lastAgentCount != agentCnt) {
@@ -2089,6 +2091,14 @@ QString CPlayOff::getModeStr(POMODE _mode) {
 
 void CPlayOff::setMasterPlan(const SPlan *_thePlan) {
     masterPlan = _thePlan;
+}
+
+void CPlayOff::setMasterMode(const EMode &_mode) {
+    masterMode = _mode;
+}
+
+EMode CPlayOff::getMasterMode() {
+    return masterMode;
 }
 
 ///////////OverLoading Operators

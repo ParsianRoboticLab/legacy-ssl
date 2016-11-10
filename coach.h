@@ -109,7 +109,7 @@ private:
     void decidePreferedDefenseAgentsCountAndGoalieAgent();
     bool decideAttack();
     void decideDefense();
-    void decidePlayOff(const QStringList& _tags, POMODE _mode = INDIRECT, int _agentSize = 3);
+    void decidePlayOff(POMODE _mode = INDIRECT, int _agentSize = 3);
     void decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers);
     QTime defenseTimeForVisionProblem[2];
     double shotToGoalthr ;
@@ -137,6 +137,21 @@ private:
     attackState ourAttackState;
     void updateAttackState();
 
+
+    /////////////////////////New Play Off
+    void selectPlayOffMode(NGameOff::EMode& _mode);
+    void initPlayOffMode(const NGameOff::EMode& _mode,
+                         const POMODE _gameMode,
+                         const int _agentSize);
+    void checkPlayOff(const NGameOff::EMode& _mode);
+    void initStaticPlay(const POMODE _mode, const int __agentSize);
+    void initDynamicPlay();
+    void initFastPlay();
+    void initFirstPlay();
+    void checkStaticPlay();
+    void checkDynamicPlay();
+    void checkFirstPlay();
+    void checkFastPlay();
     CLoadPlayOffJson* m_planLoader;
     bool firstTime;
 
@@ -148,6 +163,9 @@ private:
     QStringList currentTags;
 
     NGameOff::SPlan* lastPlan;
+
+
+
 
 };
 

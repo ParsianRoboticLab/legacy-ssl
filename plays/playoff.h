@@ -170,6 +170,12 @@ enum EType {
     SubDir = 3
 };
 
+enum EMode {
+    FirstPlay   = 0,
+    FastPlay    = 1,
+    StaticPlay  = 2,
+    DynamicPlay = 3
+};
 
 struct SCommon {
     int agentSize;
@@ -282,11 +288,13 @@ public:
     //////////
 
     void setMasterPlan(const SPlan* _thePlan);
+    void setMasterMode(const EMode& _mode);
+    EMode getMasterMode();
 private:
 
     /////////////*NEW*/////////////
     const SPlan* masterPlan;
-
+    EMode masterMode;
     //////////Dynamic Plan////////////
 
     SPlayOffPlan* DynamicPlay();
