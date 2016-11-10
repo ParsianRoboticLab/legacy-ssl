@@ -110,6 +110,7 @@ private:
     bool decideAttack();
     void decideDefense();
     void decidePlayOff(const QStringList& _tags, POMODE _mode = INDIRECT, int _agentSize = 3);
+    void decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers);
     QTime defenseTimeForVisionProblem[2];
     double shotToGoalthr ;
     void virtualPlayOffState();

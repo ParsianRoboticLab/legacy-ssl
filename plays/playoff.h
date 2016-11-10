@@ -261,10 +261,9 @@ public:
     void execute_5();
     void execute_6();
     void init(QList <int> _agents , QMap<QString , EditData*> *_editData);
-
+    virtual QString whoami() {return "PlayOff";}
     bool firstTime;
     bool kickOffFirstTimeFlag;
-
     //GUI
 
     QList< QList<SPlayOffPlan*> > updatePlans();

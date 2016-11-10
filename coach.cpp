@@ -136,7 +136,7 @@ bool isNan(double x)
 void CCoach::checkGoalieInsight()
 {
     goalieTrappedUnderGoalNet = false;
-/////////////////////////////////////////////////// new method by Don Mhmmd
+    /////////////////////////////////////////////////// new method by Don Mhmmd
     if(goalieAgent != NULL)
     {
         if (goalieAgent->isVisible())
@@ -151,7 +151,7 @@ void CCoach::checkGoalieInsight()
         return;
     }
 
-/////////////////////////////////
+    /////////////////////////////////
     return;
     if (knowledge->goalie != NULL)
     {
@@ -1338,156 +1338,7 @@ bool CCoach::decideAttack()
     else if( knowledge->getGameState() == CKnowledge::Start ){
         ourPlayOff->firstTime = true;
         ourPlayOff->kickOffFirstTimeFlag = true;
-        if(playmakeId != -1)
-        {
-            dynamicAttack->setPlayMake(playmakeId);
-            ourPlayers.removeOne(playmakeId);
-            debug(QString("playmake : %1").arg(playmakeId),D_MHMMD);
-        }
-
-        double PosNum= 0;
-        double MarkNum = 0;
-
-
-#ifdef KK_PLAYON
-        if(kkLastState != knowledge->getGameState())
-            forceStart->setDecidePlan(true);
-#endif
-        selectedPlay = forceStart;
-
-        Circle2D ourDefenseArea(wm->field->ourGoal() + Vector2D(-0.2 , 0),1.6);
-
-        if(knowledge->variables["clearing"] == "true" || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length()
-                                                          < 1))
-        {
-            if(playmakeId != -1)
-            {
-                ourPlayers.append(playmakeId);
-                dynamicAttack->setPlayMake(-1);
-            }
-            dynamicAttack->setDefenseClear(true);
-        }
-        else
-        {
-            dynamicAttack->setDefenseClear(false);
-        }
-
-
-
-
-        if(findMostPossible(wm->ball->pos) > (0.7 - shotToGoalthr )  )
-        {
-            dynamicAttack->setDirectShot(true);
-            shotToGoalthr = 0.6;
-        }
-        else
-        {
-            dynamicAttack->setDirectShot(true);
-            shotToGoalthr = 0;
-        }
-        //////////////////////////////////////////////assign agents
-        GlobalBallPState = ballPState;
-        if(ballPState == CKnowledge::WEHAVETHEBALL) {
-            MarkNum = 0;
-        } else if(ballPState == CKnowledge::WEDONTHAVETHEBALL)
-        {
-            MarkNum = 2;
-        }
-        else if(ballPState == CKnowledge::SOSOOUR)
-        {
-            MarkNum = 0;
-        }
-        else if(ballPState == CKnowledge::SOSOTHEIR)
-        {
-            MarkNum = 1;
-        }
-
-        ////////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////////////
-        dynamicAttack->setPositions(findBestPoses(ourPlayers.count(),true));
-
-        dynamicAttack->setNoPlanException(true);
-        if(ballPState == CKnowledge::WEHAVETHEBALL)
-            dynamicAttack->setWeHaveBall(true);
-        else
-            dynamicAttack->setWeHaveBall(false);
-        if(ourAttackState == FAST) {
-            dynamicAttack->setFast(true);
-        }
-        else {
-            dynamicAttack->setFast(false);
-        }
-
-        if(ourAttackState == CRITICAL) {
-            dynamicAttack->setCritical(true);
-        }
-        else {
-            dynamicAttack->setCritical(false);
-        }
-        selectedPlay = dynamicAttack;
-
-
-        selectedPlay->markAgents.clear();
-        if(wm->ball->pos.x >= 0 && selectedPlay->lockAgents && lastPlayers.count() == ourPlayers.count())
-        {
-            ourPlayers.clear();
-            ourPlayers=lastPlayers;
-            selectedPlay->markAgents.clear();
-
-        }
-        else
-        {
-            selectedPlay->markAgents.clear();
-
-            if(ourPlayers.count())
-            {
-                if(MarkNum == 2)
-                {
-                    for(int i = ourPlayers.count()-1 ; i >=0 ;i--)
-                    {
-
-                        selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(i)));
-                        ourPlayers.removeAt(i);
-
-
-                    }
-                    ourPlayers.clear();
-                } else if(MarkNum == 1)
-                {
-                    if(ourPlayers.count() > 1)
-                    {
-                        int x= -1000;
-                        int bestX =-1;
-                        for(int i =0 ; i < ourPlayers.count() ; i++)
-                        {
-                            if(wm->our[ourPlayers.at(i)]->pos.x > x)
-                            {
-                                x = wm->our[ourPlayers.at(i)]->pos.x;
-                                bestX = ourPlayers.at(i);
-                            }
-                        }
-
-                        for(int i =0 ; i < ourPlayers.count() ; i++)
-                        {
-                            if(ourPlayers[i]  != bestX)
-                            {
-                                selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(i)));
-                                ourPlayers.removeAt(i);
-                            }
-                        }
-                        ourPlayers.clear();
-                        ourPlayers.append(bestX);
-                    }
-                    else
-                    {
-                        selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
-                        ourPlayers.clear();
-                    }
-                }
-            }
-
-        }
-
+        decidePlayOn(ourPlayers, lastPlayers);
     }
     else{
         selectedPlay->markAgents.clear();
@@ -1504,6 +1355,7 @@ bool CCoach::decideAttack()
 
     selectedPlay->init(ourPlayers , &editData);
     selectedPlay->execute();
+    debug(selectedPlay->whoami(), D_MAHI, QColor(Qt::blue));
     lastPlayers.clear();
     lastPlayers.append(ourPlayers);
     return true;
@@ -1540,6 +1392,161 @@ void CCoach::decidePlayOff(const QStringList& _tags, POMODE _mode, int _agentSiz
 
         ourPlayOff->setMasterPlan(thePlan);
 
+    }
+}
+
+void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
+
+    CKnowledge::ballPossesionState ballPState = isBallOurs();
+
+    if(playmakeId != -1)
+    {
+        dynamicAttack->setPlayMake(playmakeId);
+        ourPlayers.removeOne(playmakeId);
+        debug(QString("playmake : %1").arg(playmakeId),D_MHMMD);
+    }
+
+    double PosNum= 0;
+    double MarkNum = 0;
+
+
+#ifdef KK_PLAYON
+    if(kkLastState != knowledge->getGameState())
+        forceStart->setDecidePlan(true);
+#endif
+    selectedPlay = forceStart;
+
+    Circle2D ourDefenseArea(wm->field->ourGoal() + Vector2D(-0.2 , 0),1.6);
+
+    if(knowledge->variables["clearing"] == "true"
+            || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length()
+                                                      < 1))
+    {
+        if(playmakeId != -1)
+        {
+            ourPlayers.append(playmakeId);
+            dynamicAttack->setPlayMake(-1);
+        }
+        dynamicAttack->setDefenseClear(true);
+    }
+    else
+    {
+        dynamicAttack->setDefenseClear(false);
+    }
+
+    if(findMostPossible(wm->ball->pos) > (0.7 - shotToGoalthr )  )
+    {
+        dynamicAttack->setDirectShot(true);
+        shotToGoalthr = 0.6;
+    }
+    else
+    {
+        dynamicAttack->setDirectShot(true);
+        shotToGoalthr = 0;
+    }
+    //////////////////////////////////////////////assign agents
+    GlobalBallPState = ballPState;
+    if(ballPState == CKnowledge::WEHAVETHEBALL) {
+        MarkNum = 0;
+    } else if(ballPState == CKnowledge::WEDONTHAVETHEBALL)
+    {
+        MarkNum = 2;
+    }
+    else if(ballPState == CKnowledge::SOSOOUR)
+    {
+        MarkNum = 0;
+    }
+    else if(ballPState == CKnowledge::SOSOTHEIR)
+    {
+        MarkNum = 1;
+    }
+
+    ////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////
+    dynamicAttack->setPositions(findBestPoses(ourPlayers.count(), true));
+
+    dynamicAttack->setNoPlanException(true);
+    if(ballPState == CKnowledge::WEHAVETHEBALL)
+        dynamicAttack->setWeHaveBall(true);
+    else
+        dynamicAttack->setWeHaveBall(false);
+    if(ourAttackState == FAST) {
+        dynamicAttack->setFast(true);
+    }
+    else {
+        dynamicAttack->setFast(false);
+    }
+
+    if(ourAttackState == CRITICAL) {
+        dynamicAttack->setCritical(true);
+    }
+    else {
+        dynamicAttack->setCritical(false);
+    }
+    selectedPlay = dynamicAttack;
+
+
+    selectedPlay->markAgents.clear();
+    if(wm->ball->pos.x >= 0
+            && selectedPlay->lockAgents
+            && lastPlayers.count() == ourPlayers.count())
+    {
+        ourPlayers.clear();
+        ourPlayers = lastPlayers;
+        selectedPlay->markAgents.clear();
+
+    }
+    else
+    {
+        selectedPlay->markAgents.clear();
+
+        if(ourPlayers.count())
+        {
+            if(MarkNum == 2)
+            {
+                for(int i = ourPlayers.count()-1 ; i >=0 ;i--)
+                {
+
+                    selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(i)));
+                    ourPlayers.removeAt(i);
+
+
+                }
+                ourPlayers.clear();
+            }
+            else if(MarkNum == 1)
+            {
+                if(ourPlayers.count() > 1)
+                {
+                    int x= -1000;
+                    int bestX =-1;
+                    for(int i =0 ; i < ourPlayers.count() ; i++)
+                    {
+                        if(wm->our[ourPlayers.at(i)]->pos.x > x)
+                        {
+                            x = wm->our[ourPlayers.at(i)]->pos.x;
+                            bestX = ourPlayers.at(i);
+                        }
+                    }
+
+                    for(int i =0 ; i < ourPlayers.count() ; i++)
+                    {
+                        if(ourPlayers[i]  != bestX)
+                        {
+                            selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(i)));
+                            ourPlayers.removeAt(i);
+                        }
+                    }
+                    ourPlayers.clear();
+                    ourPlayers.append(bestX);
+                }
+                else
+                {
+                    selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
+                    ourPlayers.clear();
+                }
+            }
+        }
     }
 }
 
