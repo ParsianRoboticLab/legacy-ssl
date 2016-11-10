@@ -146,6 +146,9 @@ private:
     NGameOff::SPlan* chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans);
     void matchPlan(NGameOff::SPlan* _plan);
     QStringList currentTags;
+
+    NGameOff::SPlan* lastPlan;
+
 };
 
 #define GetRole(Role, number) static_cast<Role*> (getRole(Role::Name, number))

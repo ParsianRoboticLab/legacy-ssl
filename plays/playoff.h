@@ -178,7 +178,7 @@ struct SCommon {
     POMODE planMode;
     QStringList tags;
     int succesRate;
-    QMap<int, int> matchedID;
+//    QMap<int, int> matchedID;
 };
 
 struct SMatching {
@@ -194,23 +194,23 @@ struct SExecution {
 
     SExecution() = default;
 
-    SExecution(const SExecution &_toCopy) {
-        for(int i = 0;i < 6;i++) {
-            this->AgentPlan[i].clear();
-            for(int j = 0; j < _toCopy.AgentPlan[i].size(); j++) {
-                this->AgentPlan[i].append(_toCopy.AgentPlan[i].at(j));
-            }
-        }
-    }
+//    SExecution(const SExecution &_toCopy) {
+//        for(int i = 0;i < 6;i++) {
+//            this->AgentPlan[i].clear();
+//            for(int j = 0; j < _toCopy.AgentPlan[i].size(); j++) {
+//                this->AgentPlan[i].append(_toCopy.AgentPlan[i].at(j));
+//            }
+//        }
+//    }
 
-    SExecution& operator =(const SExecution &_insert) {
-        for(int i = 0;i < 6;i++) {
-            this->AgentPlan[i].clear();
-            for(int j = 0;j < _insert.AgentPlan[i].size();j++) {
-                this->AgentPlan[i].append(_insert.AgentPlan[i].at(j));
-            }
-        }
-    }
+//    SExecution& operator =(const SExecution &_insert) {
+//        for(int i = 0;i < 6;i++) {
+//            this->AgentPlan[i].clear();
+//            for(int j = 0;j < _insert.AgentPlan[i].size();j++) {
+//                this->AgentPlan[i].append(_insert.AgentPlan[i].at(j));
+//            }
+//        }
+//    }
 
     QList< QList<playOffRobot> > AgentPlan;
     SCommon *common;
@@ -240,10 +240,11 @@ struct SPlan {
     SCommon    common;
     SMatching  matching;
     SExecution execution;
+
+//    friend QDebug operator<< (QDebug d, const SPlan plan);
 };
 
 }
-
 
 using namespace NGameOff;
 
@@ -440,6 +441,16 @@ private:
 protected:
     void reset();
 };
+
+
+///////////OverLoading Operators
+QDebug operator<< (QDebug d, const NGameOff::SPlan _plan);
+
+
+
+
+
+
 
 
 #endif // CPLAYOFF_H

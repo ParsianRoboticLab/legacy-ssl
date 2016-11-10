@@ -1262,6 +1262,7 @@ bool CCoach::decideAttack()
     //selectedPlay = NULL;
 
     if( knowledge->getGameState() == CKnowledge::Halt ){
+        firstTime = true;
         ourPlayOff->firstTime = true;
         ourPlayOff->kickOffFirstTimeFlag = true;
         cyclesWaitAfterballMoved = 0;
@@ -1276,6 +1277,7 @@ bool CCoach::decideAttack()
         return true;
     }
     else if( knowledge->getGameState() == CKnowledge::Stop ){
+        firstTime = true;
         ourPlayOff->firstTime = true;
         ourPlayOff->kickOffFirstTimeFlag = true;
         cyclesWaitAfterballMoved = 0;
@@ -1288,61 +1290,82 @@ bool CCoach::decideAttack()
         return true;
     }
     else if( knowledge->getGameState() == CKnowledge::OurKickOff || knowledge->getGameMode() == CKnowledge::OurKickOff ){
-        decidePlayOff(currentTags, KICKOFF);
+        decidePlayOff(currentTags, KICKOFF, ourPlayers.size());
         selectedPlay = ourPlayOff;
         ourPlayOff = kickoff;
+        firstTime = false;
         debug(QString("ourplayers : %1").arg(ourPlayers.size()),D_MAHI);
+        firstTime = false;
     }
     else if( knowledge->getGameState() == CKnowledge::TheirKickOff ){
         ourPlayOff->firstTime = true;
         ourPlayOff->kickOffFirstTimeFlag = true;
         selectedPlay = theirKickOff;
+        firstTime = true;
+
     }
     else if( knowledge->getGameState() == CKnowledge::OurDirectKick ){
-        decidePlayOff(currentTags, DIRECT);
+        decidePlayOff(currentTags, DIRECT, ourPlayers.size());
         selectedPlay = ourPlayOff;
         ourPlayOff = direct;
+        firstTime = false;
+
     }
     else if( knowledge->getGameState() == CKnowledge::TheirDirectKick ){
         selectedPlay = theirDirect;
         ourPlayOff->firstTime = true;
         ourPlayOff->kickOffFirstTimeFlag = true;
+        firstTime = true;
+
     }
     else if( knowledge->getGameState() == CKnowledge::OurIndirectKick ){
-        decidePlayOff(currentTags, INDIRECT);
+        decidePlayOff(currentTags, INDIRECT, 3);
         selectedPlay = ourPlayOff;
         ourPlayOff = indirect;
+        firstTime = false;
+
     }
     else if( knowledge->getGameState() == CKnowledge::OurPenaltyKick || knowledge->getGameMode() == CKnowledge::OurPenaltyKick ){
         selectedPlay = ourPenalty;
         ourPlayOff->firstTime = true;
         ourPlayOff->kickOffFirstTimeFlag = true;
         debug("penalty",D_MHMMD);
+        firstTime = true;
+
     }
     else if( knowledge->getGameState() == CKnowledge::NormalStart) {
         selectedPlay = ourPlayOff;
         ourPlayOff->firstTime = true;
         ourPlayOff->kickOffFirstTimeFlag = true;
+        firstTime = true;
+
     }
     else if( knowledge->getGameState() == CKnowledge::TheirIndirectKick ){
         selectedPlay = theirIndirect;
         ourPlayOff->firstTime = true;
         ourPlayOff->kickOffFirstTimeFlag = true;
+        firstTime = true;
+
     }
 
     else if( knowledge->getGameState() == CKnowledge::TheirPenaltyKick ){
         selectedPlay = theirPenalty;
         ourPlayOff->firstTime = true;
         ourPlayOff->kickOffFirstTimeFlag = true;
+        firstTime = true;
+
     }
     else if( knowledge->getGameState() == CKnowledge::Start ){
         ourPlayOff->firstTime = true;
         ourPlayOff->kickOffFirstTimeFlag = true;
         decidePlayOn(ourPlayers, lastPlayers);
+        firstTime = true;
+
     }
     else{
         selectedPlay->markAgents.clear();
         ourPlayOff->firstTime = true;
+        firstTime = true;
 
         debug(QString("Unexpected Game State: %1 %2").arg(knowledge->stateToString(knowledge->getGameState())).arg(knowledge->getGameState()) , D_ERROR , "red");
         return false;
@@ -1382,17 +1405,19 @@ void CCoach::decidePlayOff(const QStringList& _tags, POMODE _mode, int _agentSiz
             }
         }
 
+        debug(QString("playoff -> there's %1 valid Plan").arg(validPlans.size()), D_DEBUG);
         if (validPlans.isEmpty()) {
             debug("[Warning] playoff -> there's no valid Plan", D_ERROR, QColor(Qt::red));
+            qWarning() << "[Warning] playoff -> there's no valid Plan from " << m_planLoader->getPlans().size() << "Plans";
             return;
         }
 
         NGameOff::SPlan* thePlan = chooseMostSuccecfull(validPlans);
         matchPlan(thePlan);
-
         ourPlayOff->setMasterPlan(thePlan);
-
+        lastPlan = thePlan;
     }
+    ourPlayOff->setMasterPlan(lastPlan);
 }
 
 void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
