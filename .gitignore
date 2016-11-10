@@ -3,3 +3,9 @@ logs/*
 ai.pro.*
 ai
 Makefile
+localsettings.xml
+playoff/*
+policy.xml
+posts
+robotsSetting.csv
+settings.xml
