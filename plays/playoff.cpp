@@ -4,13 +4,6 @@
 CPlayOff::CPlayOff()
 {
     radLimit = 2;
-    //    directory = QString::fromStdString(policy()->KKPlayOff_KKPOPlanSQL());
-    //    QString b = QString::fromStdString(policy()->KKPlayOn_KKPlanSQL());
-    //    a.append(b);
-    //    a.append(directory);
-    //    loadSQLs(a);
-    //    loadSQL();
-    //    loadPlan();
     decidePlan = true;
     firstTime = true;
     agentSize = 1;
@@ -36,7 +29,7 @@ CPlayOff::CPlayOff()
     ////////////
 
     currentPlan = new SPlayOffPlan();
-
+    masterPlan = NULL;
     kickOffPos[0] = Vector2D(wm->ball->pos.x - 0.3,wm->ball->pos.y);
     kickOffPos[1] = Vector2D(-0.3,2);
     kickOffPos[2] = Vector2D(-0.3,-2);
@@ -426,6 +419,12 @@ void CPlayOff::getPassTimeline(SPlayOffPlan *tCurrentPlan, QList<POOwnerReceive>
 }
 
 void CPlayOff::globalExecute(int agentCnt) {
+
+    if(masterPlan != NULL)
+        qDebug() << *masterPlan;
+    else
+        qDebug() << "fuck";
+    return;
     playOnFlag = false;
     if(!firstTime) {
         if(lastAgentCount != agentCnt) {
@@ -452,17 +451,9 @@ bool CPlayOff::isBallMoved() {
 //////////////////////////////////////////////////
 void CPlayOff::mainPlanner(int _agentSize) {
 
-    Polygon2D tPoly;
-    playOffRobot tRobot;
-
-    tPoly.addVertex(Vector2D( _FIELD_WIDTH/2, _FIELD_HEIGHT/2));
-    tPoly.addVertex(Vector2D(-_FIELD_WIDTH/2, _FIELD_HEIGHT/2));
-    tPoly.addVertex(Vector2D(-_FIELD_WIDTH/2,-_FIELD_HEIGHT/2));
-    tPoly.addVertex(Vector2D( _FIELD_WIDTH/2,-_FIELD_HEIGHT/2));
-    tPoly.addVertex(Vector2D( _FIELD_WIDTH/2, _FIELD_HEIGHT/2));
 
     if(!wm->ball->pos.isValid()) return;
-    if(!tPoly.contains(wm->ball->pos)) return;
+    if(!wm->field->fieldRect().contains(wm->ball->pos)) return;
 
     setAgentSize(_agentSize);
 
@@ -2098,4 +2089,29 @@ QString CPlayOff::getModeStr(POMODE _mode) {
 
 void CPlayOff::setMasterPlan(const SPlan *_thePlan) {
     masterPlan = _thePlan;
+}
+
+///////////OverLoading Operators
+QDebug operator<< (QDebug d, const NGameOff::SPlan _plan) {
+
+    QString mode;
+    if (_plan.common.planMode == KICKOFF)
+        mode = "KickOff";
+    else if (_plan.common.planMode == DIRECT)
+        mode = "Direct";
+    else if (_plan.common.planMode == INDIRECT)
+        mode = "InDirect";
+
+
+    d << "------------------->>>";
+    d << "<Common>" ;
+    d << "Agent Size" << _plan.common.agentSize;
+    d << "Chance" << _plan.common.chance;
+    d << "Last Dist" << _plan.common.lastDist;
+    d << "Plan Mode" << mode;
+    d << "Succes Rate" << _plan.common.succesRate;
+    d << "Tags" << _plan.common.tags;
+    d << "</Common>";
+    d << "<<<-------------------";
+    return d;
 }

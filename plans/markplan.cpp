@@ -1969,7 +1969,7 @@ void CMarkPlan::findOppAgentsToMark()
 
     }
 
-    debug(QString("NOW%").arg(oppAgentsToMark.count()),D_MAHI);
+//    debug(QString("NOW%").arg(oppAgentsToMark.count()),D_MAHI);
     if(policy()->Mark_OmmitNearestToBallPlayon())
     {
         debug(QString("Ommit nearest to ball"),D_MAHI);

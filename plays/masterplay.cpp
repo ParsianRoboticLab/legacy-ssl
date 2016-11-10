@@ -274,46 +274,34 @@ double CMasterPlay::coveredArea( std::priority_queue < QPair< edgeMode , double 
         return coveredArea( obstacles );
 }
 
-void CMasterPlay::execute(){
-    //	foreach(int i,agentsID)
-    //		debug(QString("%1").arg(i),D_MOHAMMED);
-    //	debug(QString("//////"),D_MOHAMMED);
-    //defenseN = 2;
-    if( agentsID.count() == 0 ){
-        debug(QString("0"),D_HOSSEIN);
+void CMasterPlay::execute() {
+
+    switch(agentsID.count()) {
+    case 0:
         execute_0();
-    }
-    else if( agentsID.count() == 1 ){
-        debug(QString("1"),D_HOSSEIN);
+        break;
+    case 1:
         execute_1();
-    }
-    else if( agentsID.count() == 2 ){
-        debug(QString("2"),D_HOSSEIN);
+        break;
+    case 2:
         execute_2();
-    }
-    else if( agentsID.count() == 3 ){
-
-        debug(QString("3"),D_HOSSEIN);
+        break;
+    case 3:
         execute_3();
-    }
-    else if( agentsID.count() == 4 ){
-
-        debug(QString("4"),D_HOSSEIN);
+        break;
+    case 4:
         execute_4();
-    }
-    else if( agentsID.count() == 5 ){
-
-        debug(QString("5"),D_HOSSEIN);
+        break;
+    case 5:
         execute_5();
-    }
-    else if( agentsID.count() == 6 ){
-        debug(QString("6"),D_HOSSEIN);
+        break;
+    case 6:
         execute_6();
-    }
-    else{
+        break;
+    default:
         debug(QString("MasterPlay agentsID invalid size: %1!").arg(agentsID.count()) , D_ERROR);
     }
-
+    debug(QString("Master Play : %1").arg(agentsID.count()), D_DEBUG);
     execPlay();
 }
 
