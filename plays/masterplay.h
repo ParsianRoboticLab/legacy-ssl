@@ -74,6 +74,7 @@ public:
     virtual void execute_6() = 0;
     void execute();
     int playOffLocation();
+    virtual QString whoami() {return "MasterPlay";}
     int choosePlayoffAgent(int ballState);
     bool canScore();
     QList <CAgent *> markAgents;
