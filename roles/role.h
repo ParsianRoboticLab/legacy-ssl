@@ -82,7 +82,7 @@ public:
     const char* Role::Name = name
 
 #define ClassProperty(skill,type,name,local,chflag) \
-        public: inline type get##name() {return local;} \
+        public: inline type get##name() const {return local;} \
         public: inline skill* set##name(type val) {local = val;chflag = true;return this;} \
         protected: type local
 

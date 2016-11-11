@@ -140,8 +140,8 @@ void CLoadPlayOffJson::fillExecution(NGameOff::SExecution &_execution, const QVa
                 QVariantMap skillMap = skill.toMap();
                 playOffSkill tempSkill;
                 tempSkill.name = strToEnum(skillMap.value("name").toString());
-                tempSkill.Data[0] = skillMap.value("primary").toInt(_parsedOk);
-                tempSkill.Data[1] = skillMap.value("secondary").toInt(_parsedOk);
+                tempSkill.data[0] = skillMap.value("primary").toInt(_parsedOk);
+                tempSkill.data[1] = skillMap.value("secondary").toInt(_parsedOk);
                 tempRobot.skill.append(tempSkill);
             }
             tempRobots.append(tempRobot);

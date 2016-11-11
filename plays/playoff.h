@@ -38,7 +38,7 @@ enum POffSkills {
 
 struct playOffSkill {
     POffSkills name;
-    int Data[2];
+    int data[2];
 };
 
 struct playOffRobot {
@@ -48,9 +48,6 @@ struct playOffRobot {
     int targetIndex;
     int targetAgent;
     QList<playOffSkill> skill;
-//    POffSkills skill[3];
-//    int skillData[3][2];
-//    int skillSize;
 };
 
 struct POInitPos {
@@ -118,27 +115,31 @@ struct distAndId {
 };
 
 
-struct positioningArg {
+struct SPositioningArg {
+
     Vector2D staticPos;
     Vector2D staticAng;
-    long staticWait;
-    long staticTime;
+    long rightData;
+    long leftData;
     double staticEscapeRadius;
     POffSkills staticSkill;
     int PassToId;
     int PassToState;
-    int currentIndex;
 
+    // TODO : Have Reciver Pointer
 };
 
-struct positioningAgent {
-    QList<positioningArg> positionArg;
+struct SPositioningAgent {
+
+    // TODO : Make positionArg a List of Pointers
+
+    QList<SPositioningArg> positionArg;
     long mahiLastTime;
     int stateNumber;
     bool flag;
 
-    positioningArg getArgs(int _state = 0) {
-        return this->positionArg.at(stateNumber + _state);
+    SPositioningArg getArgs(int _state = 0) const {
+        return positionArg.at(stateNumber + _state);
     }
 
 };
@@ -184,7 +185,7 @@ struct SCommon {
     POMODE planMode;
     QStringList tags;
     int succesRate;
-//    QMap<int, int> matchedID;
+    QMap<int, int> matchedID;
 };
 
 struct SMatching {
@@ -290,6 +291,8 @@ public:
     void setMasterPlan(const SPlan* _thePlan);
     void setMasterMode(const EMode& _mode);
     EMode getMasterMode();
+
+    Property(bool, Initial, initial);
 private:
 
     /////////////*NEW*/////////////
@@ -316,7 +319,7 @@ private:
     bool isTaskFaild(int agent);
     bool isTasksDone();
 
-    positioningAgent positionAgent[6];
+    SPositioningAgent positionAgent[6];
 
     int agentSize;
     bool ballEnteredKickerFlag;
@@ -355,6 +358,11 @@ private:
     /////////////////////////MAHI PLANNER////////////////////////////////
     /////////////////////////////////////////////////////////////////////
     void mainPlanner(int tAgentSize);
+    void mainExecute();
+    void staticExecute();
+    void dynamicExecute();
+    void fastExecute();
+    void firstExecute();
     void kickOffStopModePlay(int tagentSize);
     POMODE getPlayOffMode();
     void assinID();
@@ -364,13 +372,17 @@ private:
     void assignTasks();
     void fillRolesProperties();
     void findPasserIndex();
-    void initilizePositions(QList<positioningArg> _posArg[]);
+    void initilizePositions(QList<SPositioningArg> _posArg[]);
     void assignTask(int agentID,POffSkills agentSkill);
     bool chipOrNot(int passerID,int ReceiverID,int ReceiverState);
+    bool chipOrNot(const SPositioningArg& _posArg);
     bool kkCheckIntersectWithAgents(Segment2D tSeg);
     Vector2D getGoalTarget(int shoterID,int shoterState);
+    Vector2D getGoalTarget(const long& _posArg);
     double getMaxVel(int agentID,int agentState);
+    double getMaxVel(const CRolePlayOff* _roleAgent, const SPositioningArg& _posArg);
     Vector2D getMoveTarget(int agentID,int agentState);
+    Vector2D getMoveTarget(const SPositioningArg& _posArg);
     void checkEndState();
     bool isTaskDone(int agentID);
     bool isKickDone(CAgent* _agent, int agentID);
@@ -443,8 +455,20 @@ private:
     long tempStart;
     ////////////////////////////
 
+    //////////////////////////
+    //////////NEW ONE/////////
+    //////////////////////////
+    void newAssignTasks();
+    void connectPasserAndReciever();
+    void newFillRoleProperties();
+    void newAssignTask(CRolePlayOff* _roleAgent, const SPositioningAgent& _positionAgent);
 
-
+    void assignPass(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent);
+    void assignReceive(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent, bool _ignoreAngle);
+    void assignMove(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent);
+    void assignOneTouch(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent);
+    void assignKick(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent, bool _chip);
+    void assignAfterLife(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent);
 
 protected:
     void reset();

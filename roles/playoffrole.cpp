@@ -58,7 +58,7 @@ void CRolePlayOff::execute() {
             receivePassSkill->setAvoidOppPenaltyArea(avoidPenaltyArea);
             receivePassSkill->setReceiveRadius(receiveRadius);
             receivePassSkill->setAgent(agent);
-            if(noIA)
+            if(ignoreAngle)
             {
                 receivePassSkill->setIATargetDir(targetDir);
                 receivePassSkill->setIgnoreAngle(false);
