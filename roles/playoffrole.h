@@ -36,7 +36,7 @@ public:
     ClassProperty(CRolePlayOff, double, MaxVelocity, maxVelocity, updated);
     ClassProperty(CRolePlayOff, bool, Intercept, intercept, updated);
     ClassProperty(CRolePlayOff, bool, AvoidBall,avoidBall, updated);
-    ClassProperty(CRolePlayOff, bool, NoIA, noIA, updated);
+    ClassProperty(CRolePlayOff, bool, IgnoreAngle, ignoreAngle, updated);
 
     ClassProperty(CRolePlayOff, bool, DoPass, doPass, updated);
 

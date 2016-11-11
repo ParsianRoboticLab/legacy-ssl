@@ -1656,6 +1656,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const int _agentSize) {
     NGameOff::SPlan* thePlan = chooseMostSuccecfull(validPlans); //Choose Best valid Plan
     matchPlan(thePlan); //Match The Plan
     ourPlayOff->setMasterPlan(thePlan);
+    ourPlayOff->setInitial(true);
     lastPlan = thePlan;
 }
 
@@ -1674,7 +1675,7 @@ void CCoach::initFirstPlay() {
 void CCoach::checkStaticPlay() {
     // TODO : Complete staticPlay checker
     ourPlayOff->setMasterPlan(lastPlan);
-
+    ourPlayOff->setInitial(false);
 }
 
 void CCoach::checkDynamicPlay() {

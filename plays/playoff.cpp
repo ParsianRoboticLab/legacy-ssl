@@ -206,37 +206,37 @@ bool CPlayOff::loadSQLtoStruct(QSqlQuery _query,
                                playOffRobot &temp,
                                int _symmetry)
 {
-//    if(_query.value(_rIndex*7 + 1).toString() == "na")
-//        return false;
-//    //playOffRobot temp;
-//    temp.pos = convertPos(_query.value(_rIndex*7 + 1).toString().split("|").at(0).toInt(),
-//                          _query.value(_rIndex*7 + 1).toString().split("|").at(1).toInt(), _symmetry);
+    //    if(_query.value(_rIndex*7 + 1).toString() == "na")
+    //        return false;
+    //    //playOffRobot temp;
+    //    temp.pos = convertPos(_query.value(_rIndex*7 + 1).toString().split("|").at(0).toInt(),
+    //                          _query.value(_rIndex*7 + 1).toString().split("|").at(1).toInt(), _symmetry);
 
-//    temp.angle = AngleDeg((_symmetry)*_query.value(_rIndex*7 + 1).toString().split("|").at(2).toInt());
+    //    temp.angle = AngleDeg((_symmetry)*_query.value(_rIndex*7 + 1).toString().split("|").at(2).toInt());
 
-//    temp.tolerance = _query.value(_rIndex*7 + 2).toDouble()/100;
-////    temp.skillSize = _query.value(_rIndex*7 + 3).toInt();
+    //    temp.tolerance = _query.value(_rIndex*7 + 2).toDouble()/100;
+    ////    temp.skillSize = _query.value(_rIndex*7 + 3).toInt();
 
-//    for(int i = 0; i < 3; i++)
-//    {
-//        if(_query.value(_rIndex*7 + 4).toString() != "na")
-//        {
-//            temp.skill[i] = POffSkills(_query.value(_rIndex*7 + 4 + i).toString().split("|").at(0).toInt());
-//            temp.skillData[i][0] = _query.value(_rIndex*7 + 4 + i).toString().split("|").at(1).toInt();
-//            temp.skillData[i][1] = _query.value(_rIndex*7 + 4 + i).toString().split("|").at(2).toInt();
-//        }
-//        else
-//        {
-//            temp.skill[i] = NoSkill;
-//            temp.skillData[i][0] = 1000;
-//            temp.skillData[i][1] = 1000;
-//        }
-//    }
+    //    for(int i = 0; i < 3; i++)
+    //    {
+    //        if(_query.value(_rIndex*7 + 4).toString() != "na")
+    //        {
+    //            temp.skill[i] = POffSkills(_query.value(_rIndex*7 + 4 + i).toString().split("|").at(0).toInt());
+    //            temp.skillData[i][0] = _query.value(_rIndex*7 + 4 + i).toString().split("|").at(1).toInt();
+    //            temp.skillData[i][1] = _query.value(_rIndex*7 + 4 + i).toString().split("|").at(2).toInt();
+    //        }
+    //        else
+    //        {
+    //            temp.skill[i] = NoSkill;
+    //            temp.skillData[i][0] = 1000;
+    //            temp.skillData[i][1] = 1000;
+    //        }
+    //    }
 
-//    temp.targetAgent = _query.value(_rIndex*7 + 7).toString().split("|").at(0).toInt();
-//    temp.targetIndex = _query.value(_rIndex*7 + 7).toString().split("|").at(1).toInt();
+    //    temp.targetAgent = _query.value(_rIndex*7 + 7).toString().split("|").at(0).toInt();
+    //    temp.targetIndex = _query.value(_rIndex*7 + 7).toString().split("|").at(1).toInt();
 
-//    return true;
+    //    return true;
 }
 
 bool CPlayOff::getMatchedPlan(POMODE _mode, int agentSize, bool _rand)
@@ -388,8 +388,8 @@ void CPlayOff::getPassTimeline(SPlayOffPlan *tCurrentPlan, QList<POOwnerReceive>
                 }
                 else
                 {
-                    tempStruct.time += tCurrentPlan->AgentPlan[i].at(j).skill[k].Data[0];
-                    tempStruct.time += tCurrentPlan->AgentPlan[i].at(j).skill[k].Data[1];
+                    tempStruct.time += tCurrentPlan->AgentPlan[i].at(j).skill[k].data[0];
+                    tempStruct.time += tCurrentPlan->AgentPlan[i].at(j).skill[k].data[1];
                 }
             }
         }
@@ -427,20 +427,20 @@ void CPlayOff::globalExecute(int agentCnt) {
         return;
     }
 
-    playOnFlag = false;
-    if(!firstTime) {
-        if(lastAgentCount != agentCnt) {
-            playOnFlag = true;
-            decidePlan = true;
-            kickOffFirstTimeFlag = true;
-        }
-    }
-    else {
-        decidePlan = true;
-        firstTime = false;
-        lastBallPos = wm->ball->pos;
-    }
-    lastAgentCount = agentCnt;
+    //    playOnFlag = false;
+    //    if(!firstTime) {
+    //        if(lastAgentCount != agentCnt) {
+    //            playOnFlag = true;
+    //            decidePlan = true;
+    //            kickOffFirstTimeFlag = true;
+    //        }
+    //    }
+    //    else {
+    //        decidePlan = true;
+    //        firstTime = false;
+    //        lastBallPos = wm->ball->pos;
+    //    }
+    //    lastAgentCount = agentCnt;
     mainPlanner(agentCnt);
 }
 
@@ -556,7 +556,7 @@ void CPlayOff::mainPlanner(int _agentSize) {
 
             //            initilizePositions(positionArg);
             decidePlan = false;
-            fillRolesProperties();
+            fillRolesProperties( );
         }
         else {
 
@@ -626,6 +626,57 @@ void CPlayOff::mainPlanner(int _agentSize) {
     }
 }
 
+void CPlayOff::mainExecute() {
+    switch(masterMode) {
+    case NGameOff::StaticPlay:
+        staticExecute();
+        break;
+    case NGameOff::DynamicPlay:
+        dynamicExecute();
+        break;
+    case NGameOff::FirstPlay:
+        firstExecute();
+        break;
+    case NGameOff::FastPlay:
+        fastExecute();
+        break;
+    default:
+        break;
+    }
+}
+
+
+void CPlayOff::staticExecute() {
+    if (initial) {
+        newAssignTasks();
+        connectPasserAndReciever();
+    } else {
+        newFillRoleProperties();
+        posExecute();
+        checkEndState();
+        if(agentSize > 1)
+            passManager();
+
+        if(isPlanEnd()) {
+
+        }
+    }
+}
+
+
+void CPlayOff::dynamicExecute() {
+    // TODO : Write Dynamic Execution (playoff)
+}
+
+void CPlayOff::fastExecute() {
+    // TODO : Write fast Execution (playoff)
+
+}
+
+void CPlayOff::firstExecute() {
+    // TODO : Write first Execution (playoff)
+
+}
 
 void CPlayOff::mahiDebug(int limit) {
     for(size_t i = 0; i < limit;i++) {
@@ -973,7 +1024,7 @@ bool CPlayOff::isReceiveFaild(int agent) {
         return true;
     }
     if(knowledge->getCurrentKKTime() - positionAgent[agent].mahiLastTime
-            > positionAgent[agent].positionArg.at(positionAgent[agent].stateNumber).staticWait + 500) {
+            > positionAgent[agent].positionArg.at(positionAgent[agent].stateNumber).rightData + 500) {
         debug(QString("SECOND FAILD : %1").arg(agent),D_MAHI);
         return true;
     }
@@ -1022,8 +1073,8 @@ long CPlayOff::timeTillPass() {
         tempOnwerIndex = ownerReceiveList.at(0).ballOwnerIndex;
         tempTime = 0;
         for(int i = positionAgent[tempBallOwner].stateNumber;i < ownerReceiveList.at(0).ballOwnerIndex;i++) {
-            tempTime += positionAgent[tempBallOwner].positionArg.at(i + 1).staticWait;
-            tempTime += positionAgent[tempBallOwner].positionArg.at(i + 1).staticTime;
+            tempTime += positionAgent[tempBallOwner].positionArg.at(i + 1).rightData;
+            tempTime += positionAgent[tempBallOwner].positionArg.at(i + 1).leftData;
             tempTime -= knowledge->getCurrentKKTime() - positionAgent[tempBallOwner].mahiLastTime;
         }
     }
@@ -1038,8 +1089,8 @@ long CPlayOff::timeTillReceive() {
         tempReceiverState = ownerReceiveList.at(0).receiveIndex;
         for(int i = positionAgent[tempReceiver].stateNumber;i < ownerReceiveList.at(0).receiveIndex;i++) {
 
-            tempTime += positionAgent[tempReceiver].positionArg.at(i).staticWait;
-            tempTime += positionAgent[tempReceiver].positionArg.at(i).staticTime;
+            tempTime += positionAgent[tempReceiver].positionArg.at(i).rightData;
+            tempTime += positionAgent[tempReceiver].positionArg.at(i).leftData;
             tempTime -= knowledge->getCurrentKKTime() - positionAgent[tempReceiver].mahiLastTime;
         }
     }
@@ -1058,7 +1109,7 @@ void CPlayOff::terminateReceiverTasks() {
 
 ///////////////////////////////////////////
 void CPlayOff::checkEndState() {
-    positioningArg tempPA;
+    SPositioningArg tempPA;
     for(int i = 0;i < agentSize;i++) {
         if(isTaskDone(i)) {
             if(positionAgent[i].stateNumber + 1 < positionAgent[i].positionArg.size())
@@ -1121,8 +1172,8 @@ bool CPlayOff::isMoveDone(int agentID) {
     tempDiffTime = knowledge->getCurrentKKTime() - positionAgent[agentID].mahiLastTime;
     debug(QString("nuTimer : %1").arg(positionAgent[agentID].mahiLastTime),D_MAHI);
     debug(QString("nuTimer2 : %1").arg(tempDiffTime),D_MAHI);
-    if(tempDiffTime > positionAgent[agentID].positionArg.at(positionAgent[agentID].stateNumber).staticWait/10 +
-            positionAgent[agentID].positionArg.at(positionAgent[agentID].stateNumber).staticTime/10)
+    if(tempDiffTime > positionAgent[agentID].positionArg.at(positionAgent[agentID].stateNumber).rightData/10 +
+            positionAgent[agentID].positionArg.at(positionAgent[agentID].stateNumber).leftData/10)
         return true;
     return false;
 }
@@ -1178,6 +1229,21 @@ void CPlayOff::fillRolesProperties(){
     }
 }
 
+void CPlayOff::newFillRoleProperties() {
+    for(size_t i = 0;i < masterPlan->common.agentSize; i++) {
+        if (masterPlan->common.matchedID.contains(i)) {
+            roleAgent[i]->setAgent(knowledge->getAgent(masterPlan->common.matchedID.value(i)));
+            newAssignTask(roleAgent[i], positionAgent[i]);
+
+        } else {
+
+            qWarning() << "[Warning] coach -> Match function doesn't work :( ";
+            return;
+        }
+    }
+}
+
+
 void CPlayOff::assignTask(int agentID, POffSkills agentSkill) {
     Vector2D tempVec = (wm->ball->pos - knowledge->getAgent(kkAgentsID[agentID])->pos()).norm();
     roleAgent[agentID]->setSlow(false);
@@ -1188,10 +1254,10 @@ void CPlayOff::assignTask(int agentID, POffSkills agentSkill) {
         roleAgent[agentID]->setChip(chipOrNot(agentID,positionAgent[agentID].getArgs().PassToId,
                                               positionAgent[agentID].getArgs().PassToState));
         if (roleAgent[agentID]->getChip()) {
-            roleAgent[agentID]->setKickSpeed(positionAgent[agentID].getArgs().staticWait);
+            roleAgent[agentID]->setKickSpeed(positionAgent[agentID].getArgs().rightData);
         }
         else {
-            roleAgent[agentID]->setKickSpeed(positionAgent[agentID].getArgs().staticTime);
+            roleAgent[agentID]->setKickSpeed(positionAgent[agentID].getArgs().leftData);
         }
         roleAgent[agentID]->setTarget(positionAgent[positionAgent[agentID].getArgs().PassToId]. \
                                       positionArg[positionAgent[agentID].getArgs().PassToState].staticPos);
@@ -1207,28 +1273,28 @@ void CPlayOff::assignTask(int agentID, POffSkills agentSkill) {
         roleAgent[agentID]->setAvoidPenaltyArea(true);
         roleAgent[agentID]->setTarget(positionAgent[agentID].getArgs().staticPos);
         roleAgent[agentID]->setReceiveRadius(positionAgent[agentID].getArgs().staticEscapeRadius);
-        roleAgent[agentID]->setNoIA(false);
+        roleAgent[agentID]->setIgnoreAngle(false);
         roleAgent[agentID]->setSelectedSkill(SkillReceivePass);
         break;
     case ReceivePassIASkill:
         roleAgent[agentID]->setAvoidPenaltyArea(true);
         roleAgent[agentID]->setTarget(positionAgent[agentID].getArgs().staticPos);
         roleAgent[agentID]->setReceiveRadius(positionAgent[agentID].getArgs().staticEscapeRadius);
-        roleAgent[agentID]->setNoIA(true);
+        roleAgent[agentID]->setIgnoreAngle(true);
         roleAgent[agentID]->setTargetDir(positionAgent[agentID].getArgs().staticAng);
         roleAgent[agentID]->setSelectedSkill(SkillReceivePass);
         break;
     case ShotToGoalSkill:
         //        roleAgent[agentID]->setChip(false);
         roleAgent[agentID]->setChip(isPathClear(wm->ball->pos,wm->field->oppGoal(),0.5,0.1));
-        roleAgent[agentID]->setKickSpeed(positionAgent[agentID].getArgs().staticTime);
+        roleAgent[agentID]->setKickSpeed(positionAgent[agentID].getArgs().leftData);
         roleAgent[agentID]->setTarget(getGoalTarget(agentID,positionAgent[agentID].stateNumber));
         roleAgent[agentID]->setIntercept(false);
         roleAgent[agentID]->setSelectedSkill(SkillKick);
         break;
     case ChipToGoalSkill:
         roleAgent[agentID]->setChip(true);
-        roleAgent[agentID]->setKickSpeed(positionAgent[agentID].getArgs().staticTime);
+        roleAgent[agentID]->setKickSpeed(positionAgent[agentID].getArgs().leftData);
         roleAgent[agentID]->setTarget(getGoalTarget(agentID,positionAgent[agentID].stateNumber));
         roleAgent[agentID]->setIntercept(false);
         roleAgent[agentID]->setSelectedSkill(SkillKick);
@@ -1237,7 +1303,7 @@ void CPlayOff::assignTask(int agentID, POffSkills agentSkill) {
         //        roleAgent[agentID]->setAvoidPenaltyArea(true);
         //        roleAgent[agentID]->setChip(false);
         roleAgent[agentID]->setWaitPos(positionAgent[agentID].getArgs().staticPos);
-        roleAgent[agentID]->setKickSpeed(positionAgent[agentID].getArgs().staticTime);
+        roleAgent[agentID]->setKickSpeed(positionAgent[agentID].getArgs().leftData);
         roleAgent[agentID]->setTarget(getGoalTarget(agentID, positionAgent[agentID].stateNumber));
         roleAgent[agentID]->setSelectedSkill(SkillOneTouch);
         break;
@@ -1261,6 +1327,106 @@ void CPlayOff::assignTask(int agentID, POffSkills agentSkill) {
         break;
     }
 }
+
+void CPlayOff::newAssignTask(CRolePlayOff* _roleAgent, const SPositioningAgent& _positionAgent) {
+
+    switch(_positionAgent.getArgs().staticSkill) {
+    case PassSkill:
+        assignPass(_roleAgent, _positionAgent);
+        break;
+    case ReceivePassSkill:
+        assignReceive(_roleAgent, _positionAgent, false);
+        break;
+    case ReceivePassIASkill:
+        assignReceive(_roleAgent, _positionAgent, true);
+        break;
+    case ShotToGoalSkill:
+        assignKick(_roleAgent, _positionAgent, false);
+        break;
+    case ChipToGoalSkill:
+        assignKick(_roleAgent, _positionAgent, true);
+        break;
+    case OneTouchSkill:
+        assignOneTouch(_roleAgent, _positionAgent);
+        break;
+    case MoveSkill:
+        assignMove(_roleAgent, _positionAgent);
+        break;
+    case NoSkill:
+        assignAfterLife(_roleAgent, _positionAgent);
+        break;
+    }
+}
+
+void CPlayOff::assignPass(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent) {
+    _roleAgent->setAvoidCenterCircle(false);
+    _roleAgent->setAvoidPenaltyArea(true);
+    _roleAgent->setChip(chipOrNot(_posAgent.getArgs()));
+    if (_roleAgent->getChip())
+        _roleAgent->setKickSpeed(_posAgent.getArgs().rightData);
+    else
+        _roleAgent->setKickSpeed(_posAgent.getArgs().leftData);
+
+    _roleAgent->setTarget(positionAgent[_posAgent.getArgs().PassToId].getArgs(_posAgent.getArgs().PassToState).staticPos);
+    _roleAgent->setDoPass(doPass);
+    _roleAgent->setIntercept(false);
+    _roleAgent->setSelectedSkill(SkillKick);
+}
+
+void CPlayOff::assignReceive(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent, bool _ignoreAngle) {
+
+    _roleAgent->setAvoidPenaltyArea(true);
+    _roleAgent->setIgnoreAngle(_ignoreAngle);
+    _roleAgent->setTarget(_posAgent.getArgs().staticPos);
+    _roleAgent->setTargetDir(_posAgent.getArgs().staticAng); /** Just Matter when we use Ignore mode **/
+    _roleAgent->setReceiveRadius(_posAgent.getArgs().staticEscapeRadius);
+    _roleAgent->setSelectedSkill(SkillReceivePass);
+}
+
+void CPlayOff::assignKick(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent, bool _chip) {
+
+        _roleAgent->setChip(_chip);
+        _roleAgent->setKickSpeed(_posAgent.getArgs().leftData);
+        _roleAgent->setTarget(getGoalTarget(_posAgent.getArgs().rightData));
+        _roleAgent->setIntercept(false);
+        _roleAgent->setSelectedSkill(SkillKick);
+}
+
+void CPlayOff::assignOneTouch(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent) {
+
+    _roleAgent->setAvoidPenaltyArea(true);
+    _roleAgent->setWaitPos(_posAgent.getArgs().staticPos);
+    _roleAgent->setKickSpeed(_posAgent.getArgs().leftData);
+    _roleAgent->setTarget(getGoalTarget(_posAgent.getArgs().rightData));
+    _roleAgent->setSelectedSkill(SkillOneTouch);
+}
+
+void CPlayOff::assignMove(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent) {
+    _roleAgent->setAvoidPenaltyArea(true);
+
+    if(_posAgent.getArgs().staticPos == POBALLPOS)
+    {
+        _roleAgent->setTarget(wm->ball->pos - (wm->ball->pos - _roleAgent->getTarget()).norm()*0.14);
+        _roleAgent->setTargetDir((wm->ball->pos - _roleAgent->getAgent()->pos()).norm());
+        _roleAgent->setSlow(true);
+        _roleAgent->setMaxVelocity(1);
+
+    } else {
+
+        _roleAgent->setTarget(getMoveTarget(_posAgent.getArgs()));
+        _roleAgent->setTargetDir(_posAgent.getArgs().staticAng);
+        _roleAgent->setSlow(false);
+        _roleAgent->setMaxVelocity(getMaxVel(_roleAgent, _posAgent.getArgs()));
+    }
+    _roleAgent->setSelectedSkill(SkillGotopointAvoid);
+}
+
+void CPlayOff::assignAfterLife(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent) {
+    // TODO : Write Ineteligence AfterLife Program
+
+    _roleAgent->setSelectedSkill(SkillMark);
+}
+
 
 Vector2D CPlayOff::getMoveTarget(int agentID,int agentState) {
     Vector2D tempTarget,finalTarget,position;
@@ -1288,20 +1454,72 @@ Vector2D CPlayOff::getMoveTarget(int agentID,int agentState) {
     return finalTarget;
 }
 
+Vector2D CPlayOff::getMoveTarget(const SPositioningArg& _posArg) {
+    Vector2D tempTarget,finalTarget,position;
+    double escapeRad;
+    int oppCnt = 0;
+    bool posFound;
+    escapeRad = _posArg.staticEscapeRadius;
+    position  = _posArg.staticPos;
+    finalTarget = position;
+    for(double dist=0.0 ; dist<=escapeRad ; dist+=0.2 ) {
+        for(double ang=-180.0 ; ang<=180.0 ; ang+=60.0 ) {
+            tempTarget = position + Vector2D::polar2vector(dist,ang);
+            for(int i = 0; i < wm->opp.activeAgentsCount();i++) {
+                if(Circle2D(wm->opp.active(i)->pos,0.02).contains(tempTarget)) oppCnt++;
+            }
+            if(!oppCnt) {
+                finalTarget = tempTarget;
+                posFound = true;
+                break;
+            }
+        }
+        if(posFound) break;
+    }
+    return finalTarget;
+}
+
 double CPlayOff::getMaxVel(int agentID,int agentState) {
     double tempVel,tDist;
     Vector2D tAgentPos;
     tAgentPos = knowledge->getAgent(kkAgentsID[agentID])->pos();
     tDist = tAgentPos.dist(positionAgent[agentID].positionArg.at(positionAgent[agentID].stateNumber).staticPos);
-    tempVel = tDist/positionAgent[agentID].positionArg.at(positionAgent[agentID].stateNumber).staticTime;
+    tempVel = tDist/positionAgent[agentID].positionArg.at(positionAgent[agentID].stateNumber).leftData;
     if(tempVel >= 4) tempVel = 4;
     else if(tempVel <= 1.5) tempVel = 1.5;
     return tempVel;
 }
 
+
+double CPlayOff::getMaxVel(const CRolePlayOff* _roleAgent, const SPositioningArg& _posArg) {
+    double tempVel,tDist;
+    Vector2D tAgentPos;
+    tAgentPos = _roleAgent->getAgent()->pos();
+    tDist = tAgentPos.dist(_posArg.staticPos);
+    tempVel = tDist/_posArg.leftData;
+
+    if(tempVel >= 4)
+        tempVel = 4;
+    else if(tempVel <= 1.5)
+        tempVel = 1.5;
+
+    return tempVel;
+}
+
+
 Vector2D CPlayOff::getGoalTarget(int shoterID,int shoterState) {
     Vector2D tempPos;
-    double tempYPos = (double)(positionAgent[shoterID].positionArg.at(shoterState).staticWait)/1000 + wm->field->oppGoalR().y;
+    double tempYPos = (double)(positionAgent[shoterID].positionArg.at(shoterState).rightData)/1000 + wm->field->oppGoalR().y;
+    draw(QString("%1").arg(tempYPos), Vector2D(-2,-2));
+    if(tempYPos < wm->field->oppGoalR().y) tempYPos = wm->field->oppGoalR().y;
+    if(tempYPos > wm->field->oppGoalL().y) tempYPos = wm->field->oppGoalL().y;
+    tempPos.assign(wm->field->oppGoal().x,tempYPos);
+    return tempPos;
+}
+
+Vector2D CPlayOff::getGoalTarget(const long& _y) {
+    Vector2D tempPos;
+    double tempYPos = (double)(_y)/1000 + wm->field->oppGoalR().y;
     draw(QString("%1").arg(tempYPos), Vector2D(-2,-2));
     if(tempYPos < wm->field->oppGoalR().y) tempYPos = wm->field->oppGoalR().y;
     if(tempYPos > wm->field->oppGoalL().y) tempYPos = wm->field->oppGoalL().y;
@@ -1323,25 +1541,47 @@ bool CPlayOff::kkCheckIntersectWithAgents(Segment2D tSeg)
     return false;
 }
 
-bool CPlayOff::chipOrNot(int passerID,int ReceiverID, int ReceiverState){
+bool CPlayOff::chipOrNot(int passerID, int ReceiverID, int ReceiverState){
 
-    if(positionAgent[passerID].positionArg.at(positionAgent[passerID].stateNumber).staticTime < 0) return true;
-    else if(positionAgent[passerID].positionArg.at(positionAgent[passerID].stateNumber).staticWait < 0) return false;
-    else return !isPathClear(wm->ball->pos,positionAgent[ReceiverID].positionArg.at(ReceiverState).staticPos,0.5,0.1);
+    if(positionAgent[passerID].positionArg.at(positionAgent[passerID].stateNumber).leftData < 0) return true;
+    else if(positionAgent[passerID].positionArg.at(positionAgent[passerID].stateNumber).rightData < 0) return false;
+    else return !isPathClear(wm->ball->pos,
+                             positionAgent[ReceiverID].positionArg.at(ReceiverState).staticPos,
+                             0.5,
+                             0.1);
 }
 
-bool CPlayOff::isPathClear(Vector2D _pos1,Vector2D _pos2, double _radius,double treshold) {
-    Vector2D sol1,sol2,sol3;
-    Line2D _path(_pos1,_pos2);
+bool CPlayOff::chipOrNot(const SPositioningArg& _posArg) {
+
+    if(_posArg.leftData < 0)
+        return true;
+    else if(_posArg.rightData < 0)
+        return false;
+    else
+        return !isPathClear(wm->ball->pos,
+                            positionAgent[_posArg.PassToId].getArgs(_posArg.PassToState).staticPos,
+                            0.5,   // Radius
+                            0.1);  // Tereshold
+}
+
+bool CPlayOff::isPathClear(Vector2D _pos1,
+                           Vector2D _pos2,
+                           double _radius,
+                           double treshold) {
+
+    Vector2D sol1, sol2, sol3;
+    Line2D _path(_pos1, _pos2);
     Polygon2D _poly;
-    Circle2D(_pos2,_radius + treshold).
-            intersection(_path.perpendicular(_pos2),&sol1,&sol2);
+    Circle2D(_pos2,_radius + treshold).intersection(_path.perpendicular(_pos2),
+                                                    &sol1,
+                                                    &sol2);
 
     _poly.addVertex(sol1);
     sol3 = sol1;
     _poly.addVertex(sol2);
-    Circle2D(_pos1,CRobot::robot_radius_new + treshold).
-            intersection(_path.perpendicular(_pos1),&sol1,&sol2);
+    Circle2D(_pos1,CRobot::robot_radius_new + treshold).intersection(_path.perpendicular(_pos1),
+                                                                     &sol1,
+                                                                     &sol2);
 
     _poly.addVertex(sol2);
     _poly.addVertex(sol1);
@@ -1374,7 +1614,7 @@ bool CPlayOff::hasPassInSkills(int _agent, int _index)
 
 void CPlayOff::assignTasks()
 {
-    positioningArg tempPosArg;
+    SPositioningArg tempPosArg;
     for(int i = 0; i < currentPlan->agentSize;i++) {
         positionAgent[i].positionArg.clear();
         for(int j = 0;j < currentPlan->AgentPlan[i].size();j++) {
@@ -1383,7 +1623,6 @@ void CPlayOff::assignTasks()
             tempPosArg.staticEscapeRadius = currentPlan->AgentPlan[i].at(j).tolerance;
             tempPosArg.PassToId           = currentPlan->AgentPlan[i].at(j).targetAgent;
             tempPosArg.PassToState        = currentPlan->AgentPlan[i].at(j).targetIndex;
-            tempPosArg.currentIndex       = j;
 
             if(hasPassInSkills(i, j)) tempPosArg.staticPos = POBALLPOS;
             else tempPosArg.staticPos = currentPlan->AgentPlan[i].at(j).pos;
@@ -1394,10 +1633,45 @@ void CPlayOff::assignTasks()
 
             for(int k = 0;k < currentPlan->AgentPlan[i].at(j).skill.size();k++) {
                 tempPosArg.staticSkill = currentPlan->AgentPlan[i].at(j).skill[k].name;
-                tempPosArg.staticWait  = currentPlan->AgentPlan[i].at(j).skill[k].Data[1];
-                tempPosArg.staticTime  = currentPlan->AgentPlan[i].at(j).skill[k].Data[0];
+                tempPosArg.rightData  = currentPlan->AgentPlan[i].at(j).skill[k].data[1];
+                tempPosArg.leftData  = currentPlan->AgentPlan[i].at(j).skill[k].data[0];
                 positionAgent[i].positionArg.append(tempPosArg);
             }
+        }
+    }
+}
+
+void CPlayOff::newAssignTasks() {
+    for(size_t i = 0;i < masterPlan->common.agentSize; i++) {
+        Q_FOREACH(playOffRobot agentPlan, masterPlan->execution.AgentPlan[i]) {
+            SPositioningArg tempPosArg;
+            tempPosArg.staticPos          = agentPlan.pos;
+            tempPosArg.staticAng          = Vector2D::polar2vector(1, agentPlan.angle);
+            tempPosArg.PassToId           = agentPlan.targetAgent;
+            tempPosArg.PassToState        = agentPlan.targetIndex;
+            tempPosArg.staticEscapeRadius = agentPlan.tolerance;
+            tempPosArg.staticAng.assign(tempPosArg.staticAng.x, -tempPosArg.staticAng.y);
+
+            Q_FOREACH(playOffSkill skill, agentPlan.skill) {
+                if (skill.name == PassSkill)
+                    tempPosArg.staticPos = POBALLPOS;
+
+                tempPosArg.leftData  = skill.data[0];
+                tempPosArg.rightData  = skill.data[1];
+                tempPosArg.staticSkill = skill.name;
+
+                positionAgent[i].positionArg.append(tempPosArg);
+            }
+        }
+    }
+}
+
+void CPlayOff::connectPasserAndReciever() {
+    for(size_t i = 0; i < masterPlan->common.agentSize; i++) {
+        Q_FOREACH(SPositioningArg posArg, positionAgent[i].positionArg) {
+            if (posArg.staticSkill == PassSkill)
+                // TODO : Fill Position Arg Reciver Part
+                return;
         }
     }
 }
@@ -1539,7 +1813,7 @@ POMODE CPlayOff::getPlayOffMode() {
     else if(knowledge->getGameState() == knowledge->OurDirectKick || knowledge->getGameMode() == knowledge->OurDirectKick) return DIRECT;
 }
 
-void CPlayOff::initilizePositions(QList<positioningArg> _posArg[]){
+void CPlayOff::initilizePositions(QList<SPositioningArg> _posArg[]){
     for(int i = 0;i < agentSize;i++) {
         positionAgent[i].positionArg.clear();
         for(int j = 0;j < _posArg[i].size();j++) {
