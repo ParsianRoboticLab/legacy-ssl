@@ -40,8 +40,7 @@ void CMainApplication::Experimental6()
     Ray2D     tan[12];
     Segment2D ttan[12];
     VectorIndex vecc[12];
-
-
+    Vector2D opppps[6];
 
 
 
@@ -54,13 +53,14 @@ void CMainApplication::Experimental6()
 
     draw(poly, QColor(Qt::yellow),false);
 
-
+   double s=1;
     for(int i =0;i<6; i++){
         if(poly.contains(wm->opp[i]->pos)){
             //opprobots[i]= Circle2D(Vector2D(wm->opp[i]->pos),0,11);
             //draw(opprobots[i],QColor(Qt::black));
             //opprobots[i].tangent(ballpos, &tangents[2*i], &tangents[2*i +1]);
-            newopp.append(Circle2D(Vector2D(wm->opp[i]->pos),0.11));
+            Vector2D newpos = Vector2D(wm->opp[i]->pos)+ s*Vector2D(wm->opp[i]->vel);
+            newopp.append(Circle2D(newpos,0.11));
         }
     }
 
@@ -119,6 +119,7 @@ void CMainApplication::Experimental6()
             draw(ttan[i],QColor(Qt::red));
 
     }
+
 
 
   /*
