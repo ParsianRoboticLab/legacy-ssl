@@ -652,7 +652,7 @@ void CPlayOff::staticExecute() {
         connectPasserAndReciever();
     } else {
         newFillRoleProperties();
-        posExecute();
+        newPosExecute();
         checkEndState();
         if(agentSize > 1)
             passManager();
@@ -1218,6 +1218,31 @@ void CPlayOff::posExecute() {
 }
 
 
+void CPlayOff::newPosExecute() {
+    for(int i = 0;i < masterPlan->common.agentSize; i++) {
+        // TODO : Check First Time
+        roleAgent[i]->execute();
+    }
+}
+
+void CPlayOff::newCheckEndState() {
+    SPositioningArg tempPA;
+    for(int i = 0;i < agentSize;i++) {
+        if(isTaskDone(i)) {
+            if(positionAgent[i].stateNumber + 1 < positionAgent[i].positionArg.size())
+            {
+                positionAgent[i].stateNumber++;
+                isFirstTime[i] = true;
+            }
+            else {
+                //                tempPA = positionAgent[i].positionArg.at(positionAgent[i].stateNumber);
+                //                tempPA.staticSkill = NoSkill;
+                //                positionAgent[i].positionArg.replace(positionAgent[i].stateNumber,tempPA);
+                //                markAgents.append(knowledge->getAgent(kkAgentsID[i]));
+            }
+        }
+    }
+}
 
 ///////////////////////////////////////////////
 //////////////////////////////////////////////
