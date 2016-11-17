@@ -385,6 +385,7 @@ private:
     Vector2D getMoveTarget(const SPositioningArg& _posArg);
     void checkEndState();
     bool isTaskDone(int agentID);
+    bool isTaskDone(const CRolePlayOff*);
     bool isKickDone(CAgent* _agent, int agentID);
     bool isReceiveDone(CAgent* _agent);
     bool isMoveDone(int agentID);
@@ -461,6 +462,8 @@ private:
     void newAssignTasks();
     void connectPasserAndReciever();
     void newFillRoleProperties();
+    void newPosExecute();
+    void newCheckEndState();
     void newAssignTask  (CRolePlayOff*, const SPositioningAgent&);
     void assignPass     (CRolePlayOff*, const SPositioningAgent&);
     void assignMove     (CRolePlayOff*, const SPositioningAgent&);

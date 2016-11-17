@@ -441,7 +441,8 @@ void CPlayOff::globalExecute(int agentCnt) {
     //        lastBallPos = wm->ball->pos;
     //    }
     //    lastAgentCount = agentCnt;
-    mainPlanner(agentCnt);
+//    mainPlanner(agentCnt);
+    mainExecute();
 }
 
 bool CPlayOff::isBallMoved() {
@@ -653,7 +654,7 @@ void CPlayOff::staticExecute() {
     } else {
         newFillRoleProperties();
         newPosExecute();
-        checkEndState();
+        newCheckEndState();
         if(agentSize > 1)
             passManager();
 
@@ -700,7 +701,7 @@ void CPlayOff::kickOffStopModePlay(int tAgentsize) {
     for(int i =0; i < agentSize;i++) {
         newRoleAgent[i]->setAvoidBall(true);
         newRoleAgent[i]->setAvoidPenaltyArea(true);
-        newRoleAgent[i]->setSelectedSkill(SkillGotopointAvoid);
+        newRoleAgent[i]->setSelectedSkill(roleSkill::GotopointAvoid);
     }
     switch(tAgentsize) {
     /*case 0:
@@ -1131,15 +1132,16 @@ bool CPlayOff::isTaskDone(int agentID){
     CAgent* tAgent;
     tAgent = knowledge->getAgent(kkAgentsID[agentID]);
 
-    if(roleAgent[agentID]->getSelectedSkill() == SkillGotopointAvoid) {
+
+    if(roleAgent[agentID]->getSelectedSkill() == roleSkill::GotopointAvoid) {
         if(isMoveDone(agentID))
             return true;
     }
-    else if(roleAgent[agentID]->getSelectedSkill() == SkillKick) {
+    else if(roleAgent[agentID]->getSelectedSkill() == roleSkill::Kick) {
         if(isKickDone(tAgent,agentID))
             return true;
     }
-    else if(roleAgent[agentID]->getSelectedSkill() == SkillReceivePass) {
+    else if(roleAgent[agentID]->getSelectedSkill() == roleSkill::ReceivePass) {
         if(isReceiveDone(tAgent))  {
             draw(Circle2D(Vector2D(0,0),1),QColor(Qt::black),true);
             if(ownerReceiveList.size())
@@ -1151,11 +1153,11 @@ bool CPlayOff::isTaskDone(int agentID){
             return false;
         }
     }
-    else if(roleAgent[agentID]->getSelectedSkill() == SkillOneTouch) {
+    else if(roleAgent[agentID]->getSelectedSkill() == roleSkill::OneTouch) {
         if(isKickDone(tAgent,agentID))
             return true;
     }
-    else if(roleAgent[agentID]->getSelectedSkill() == SkillMark) {
+    else if(roleAgent[agentID]->getSelectedSkill() == roleSkill::Mark) {
         return true;
     }
     else {
@@ -1163,7 +1165,45 @@ bool CPlayOff::isTaskDone(int agentID){
     }
 }
 
+bool CPlayOff::isTaskDone(const CRolePlayOff* _roleAgent){
+//    CAgent* tAgent;
+//    tAgent = knowledge->getAgent(kkAgentsID[agentID]);
 
+//    switch (_roleAgent.getSelectedSkill()) {
+//    case SkillG
+//    }
+
+//    if(roleAgent[agentID]->getSelectedSkill() == roleSkill::GotopointAvoid) {
+//        if(isMoveDone(agentID))
+//            return true;
+//    }
+//    else if(roleAgent[agentID]->getSelectedSkill() == roleSkill::Kick) {
+//        if(isKickDone(tAgent,agentID))
+//            return true;
+//    }
+//    else if(roleAgent[agentID]->getSelectedSkill() == roleSkill::ReceivePass) {
+//        if(isReceiveDone(tAgent))  {
+//            draw(Circle2D(Vector2D(0,0),1),QColor(Qt::black),true);
+//            if(ownerReceiveList.size())
+//                ownerReceiveList.removeFirst();
+//            return true;
+//        }
+//        else {
+//            draw(Circle2D(Vector2D(0,0),1),QColor(Qt::blue),true);
+//            return false;
+//        }
+//    }
+//    else if(roleAgent[agentID]->getSelectedSkill() == roleSkill::OneTouch) {
+//        if(isKickDone(tAgent,agentID))
+//            return true;
+//    }
+//    else if(roleAgent[agentID]->getSelectedSkill() == roleSkill::Mark) {
+//        return true;
+//    }
+//    else {
+//        return false;
+//    }
+}
 
 ////////////////////////////////////////////
 ///////////////////////////////////////////
@@ -1226,19 +1266,19 @@ void CPlayOff::newPosExecute() {
 }
 
 void CPlayOff::newCheckEndState() {
-    SPositioningArg tempPA;
-    for(int i = 0;i < agentSize;i++) {
-        if(isTaskDone(i)) {
-            if(positionAgent[i].stateNumber + 1 < positionAgent[i].positionArg.size())
-            {
-                positionAgent[i].stateNumber++;
+
+
+    for(int i = 0;i < masterPlan->common.agentSize;i++) {
+        if(isTaskDone(roleAgent[i])) {
+            roleAgent[i]->setRoleUpdate(false);
+            positionAgent[i].stateNumber++;
+            if(positionAgent[i].stateNumber < positionAgent[i].positionArg.size()) {
                 isFirstTime[i] = true;
-            }
-            else {
-                //                tempPA = positionAgent[i].positionArg.at(positionAgent[i].stateNumber);
-                //                tempPA.staticSkill = NoSkill;
-                //                positionAgent[i].positionArg.replace(positionAgent[i].stateNumber,tempPA);
-                //                markAgents.append(knowledge->getAgent(kkAgentsID[i]));
+            } else {
+                SPositioningArg tempPA;
+                tempPA = positionAgent[i].positionArg.at(positionAgent[i].stateNumber);
+                tempPA.staticSkill = NoSkill;
+                positionAgent[i].positionArg.append(tempPA);
             }
         }
     }
@@ -1257,9 +1297,11 @@ void CPlayOff::fillRolesProperties(){
 void CPlayOff::newFillRoleProperties() {
     for(size_t i = 0;i < masterPlan->common.agentSize; i++) {
         if (masterPlan->common.matchedID.contains(i)) {
-            roleAgent[i]->setAgent(knowledge->getAgent(masterPlan->common.matchedID.value(i)));
-            newAssignTask(roleAgent[i], positionAgent[i]);
-
+            if (roleAgent[i]->getRoleUpdate() == false) {
+                roleAgent[i]->setAgent(knowledge->getAgent(masterPlan->common.matchedID.value(i)));
+                newAssignTask(roleAgent[i], positionAgent[i]);
+                roleAgent[i]->setRoleUpdate(true);
+            }
         } else {
 
             qWarning() << "[Warning] coach -> Match function doesn't work :( ";
@@ -1292,14 +1334,14 @@ void CPlayOff::assignTask(int agentID, POffSkills agentSkill) {
         //                                                      .positionArg.at(positionAgent[agentID].stateNumber).PassToId] \
         //                                                      .stateNumber).staticPos);
         roleAgent[agentID]->setIntercept(false);
-        roleAgent[agentID]->setSelectedSkill(SkillKick);
+        roleAgent[agentID]->setSelectedSkill(roleSkill::Kick);
         break;
     case ReceivePassSkill:
         roleAgent[agentID]->setAvoidPenaltyArea(true);
         roleAgent[agentID]->setTarget(positionAgent[agentID].getArgs().staticPos);
         roleAgent[agentID]->setReceiveRadius(positionAgent[agentID].getArgs().staticEscapeRadius);
         roleAgent[agentID]->setIgnoreAngle(false);
-        roleAgent[agentID]->setSelectedSkill(SkillReceivePass);
+        roleAgent[agentID]->setSelectedSkill(roleSkill::ReceivePass);
         break;
     case ReceivePassIASkill:
         roleAgent[agentID]->setAvoidPenaltyArea(true);
@@ -1307,7 +1349,7 @@ void CPlayOff::assignTask(int agentID, POffSkills agentSkill) {
         roleAgent[agentID]->setReceiveRadius(positionAgent[agentID].getArgs().staticEscapeRadius);
         roleAgent[agentID]->setIgnoreAngle(true);
         roleAgent[agentID]->setTargetDir(positionAgent[agentID].getArgs().staticAng);
-        roleAgent[agentID]->setSelectedSkill(SkillReceivePass);
+        roleAgent[agentID]->setSelectedSkill(roleSkill::ReceivePass);
         break;
     case ShotToGoalSkill:
         //        roleAgent[agentID]->setChip(false);
@@ -1315,14 +1357,14 @@ void CPlayOff::assignTask(int agentID, POffSkills agentSkill) {
         roleAgent[agentID]->setKickSpeed(positionAgent[agentID].getArgs().leftData);
         roleAgent[agentID]->setTarget(getGoalTarget(agentID,positionAgent[agentID].stateNumber));
         roleAgent[agentID]->setIntercept(false);
-        roleAgent[agentID]->setSelectedSkill(SkillKick);
+        roleAgent[agentID]->setSelectedSkill(roleSkill::Kick);
         break;
     case ChipToGoalSkill:
         roleAgent[agentID]->setChip(true);
         roleAgent[agentID]->setKickSpeed(positionAgent[agentID].getArgs().leftData);
         roleAgent[agentID]->setTarget(getGoalTarget(agentID,positionAgent[agentID].stateNumber));
         roleAgent[agentID]->setIntercept(false);
-        roleAgent[agentID]->setSelectedSkill(SkillKick);
+        roleAgent[agentID]->setSelectedSkill(roleSkill::Kick);
         break;
     case OneTouchSkill:
         //        roleAgent[agentID]->setAvoidPenaltyArea(true);
@@ -1330,7 +1372,7 @@ void CPlayOff::assignTask(int agentID, POffSkills agentSkill) {
         roleAgent[agentID]->setWaitPos(positionAgent[agentID].getArgs().staticPos);
         roleAgent[agentID]->setKickSpeed(positionAgent[agentID].getArgs().leftData);
         roleAgent[agentID]->setTarget(getGoalTarget(agentID, positionAgent[agentID].stateNumber));
-        roleAgent[agentID]->setSelectedSkill(SkillOneTouch);
+        roleAgent[agentID]->setSelectedSkill(roleSkill::OneTouch);
         break;
     case MoveSkill:
         roleAgent[agentID]->setAvoidPenaltyArea(true);
@@ -1345,10 +1387,10 @@ void CPlayOff::assignTask(int agentID, POffSkills agentSkill) {
         }
         else
             roleAgent[agentID]->setTarget(getMoveTarget(agentID, positionAgent[agentID].stateNumber));
-        roleAgent[agentID]->setSelectedSkill(SkillGotopointAvoid);
+        roleAgent[agentID]->setSelectedSkill(roleSkill::GotopointAvoid);
         break;
     case NoSkill:
-        roleAgent[agentID]->setSelectedSkill(SkillMark);
+        roleAgent[agentID]->setSelectedSkill(roleSkill::Mark);
         break;
     }
 }
@@ -1395,7 +1437,7 @@ void CPlayOff::assignPass(CRolePlayOff* _roleAgent, const SPositioningAgent& _po
     _roleAgent->setTarget(positionAgent[_posAgent.getArgs().PassToId].getArgs(_posAgent.getArgs().PassToState).staticPos);
     _roleAgent->setDoPass(doPass);
     _roleAgent->setIntercept(false);
-    _roleAgent->setSelectedSkill(SkillKick);
+    _roleAgent->setSelectedSkill(roleSkill::Kick);
 }
 
 void CPlayOff::assignReceive(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent, bool _ignoreAngle) {
@@ -1405,16 +1447,16 @@ void CPlayOff::assignReceive(CRolePlayOff* _roleAgent, const SPositioningAgent& 
     _roleAgent->setTarget(_posAgent.getArgs().staticPos);
     _roleAgent->setTargetDir(_posAgent.getArgs().staticAng); /** Just Matter when we use Ignore mode **/
     _roleAgent->setReceiveRadius(_posAgent.getArgs().staticEscapeRadius);
-    _roleAgent->setSelectedSkill(SkillReceivePass);
+    _roleAgent->setSelectedSkill(roleSkill::ReceivePass);
 }
 
 void CPlayOff::assignKick(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent, bool _chip) {
 
-        _roleAgent->setChip(_chip);
-        _roleAgent->setKickSpeed(_posAgent.getArgs().leftData);
-        _roleAgent->setTarget(getGoalTarget(_posAgent.getArgs().rightData));
-        _roleAgent->setIntercept(false);
-        _roleAgent->setSelectedSkill(SkillKick);
+    _roleAgent->setChip(_chip);
+    _roleAgent->setKickSpeed(_posAgent.getArgs().leftData);
+    _roleAgent->setTarget(getGoalTarget(_posAgent.getArgs().rightData));
+    _roleAgent->setIntercept(false);
+    _roleAgent->setSelectedSkill(roleSkill::Kick);
 }
 
 void CPlayOff::assignOneTouch(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent) {
@@ -1423,7 +1465,7 @@ void CPlayOff::assignOneTouch(CRolePlayOff* _roleAgent, const SPositioningAgent&
     _roleAgent->setWaitPos(_posAgent.getArgs().staticPos);
     _roleAgent->setKickSpeed(_posAgent.getArgs().leftData);
     _roleAgent->setTarget(getGoalTarget(_posAgent.getArgs().rightData));
-    _roleAgent->setSelectedSkill(SkillOneTouch);
+    _roleAgent->setSelectedSkill(roleSkill::OneTouch);
 }
 
 void CPlayOff::assignMove(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent) {
@@ -1443,13 +1485,13 @@ void CPlayOff::assignMove(CRolePlayOff* _roleAgent, const SPositioningAgent& _po
         _roleAgent->setSlow(false);
         _roleAgent->setMaxVelocity(getMaxVel(_roleAgent, _posAgent.getArgs()));
     }
-    _roleAgent->setSelectedSkill(SkillGotopointAvoid);
+    _roleAgent->setSelectedSkill(roleSkill::GotopointAvoid);
 }
 
 void CPlayOff::assignAfterLife(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent) {
     // TODO : Write Ineteligence AfterLife Program
 
-    _roleAgent->setSelectedSkill(SkillMark);
+    _roleAgent->setSelectedSkill(roleSkill::Mark);
 }
 
 

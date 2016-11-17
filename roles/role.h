@@ -5,6 +5,19 @@
 #include <knowledge.h>
 #include <behaviours/behaviour.h>
 
+namespace roleSkill {
+
+enum ESkill {
+    Gotopoint = 0,
+    GotopointAvoid = 1,
+    Kick = 2,
+    ReceivePass = 3,
+    OneTouch = 4,
+    Mark = 5
+};
+
+}
+
 class CRoleInfo;
 
 class CRole : public CSkill

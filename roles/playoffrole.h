@@ -5,8 +5,9 @@
 
 class CRolePlayOff{
 private:
+    void update();
     bool updated;
-    QList<int> kkMarkAgents;
+    bool roleUpdate;
 
 public:
 
@@ -21,7 +22,7 @@ public:
 
     ClassProperty(CRolePlayOff, int, AgentID, agentID, updated);
     ClassProperty(CRolePlayOff, CAgent*, Agent, agent, updated);
-    ClassProperty(CRolePlayOff, kkSkill, SelectedSkill, selectedSkill, updated);
+    ClassProperty(CRolePlayOff, roleSkill::ESkill, SelectedSkill, selectedSkill, updated);
     ClassProperty(CRolePlayOff, Vector2D, Target, target, updated);
     ClassProperty(CRolePlayOff, Vector2D, TargetDir, targetDir, updated);
     ClassProperty(CRolePlayOff, Vector2D, TargetVel, targetVel, updated);
@@ -43,6 +44,8 @@ public:
 public:
     void setUpdated(bool _updated);
     bool getUpdated();
+    inline void setRoleUpdate (bool _updated) {roleUpdate = _updated;}
+    inline bool getRoleUpdate () {return roleUpdate;}
 protected:
 };
 

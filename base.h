@@ -25,15 +25,6 @@ enum SKILLINITVAL{
     SKILLRECEIVEPASS = 4
 };
 
-enum kkSkill {
-    SkillGotopoint = 0,
-    SkillGotopointAvoid = 1,
-    SkillKick = 2,
-    SkillReceivePass = 3,
-    SkillOneTouch = 4,
-    SkillMark = 5
-};
-
 ////////////////////////////////////<MAHI>
 enum robotExtraDetail {
     MNOTHING,
