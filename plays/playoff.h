@@ -461,14 +461,13 @@ private:
     void newAssignTasks();
     void connectPasserAndReciever();
     void newFillRoleProperties();
-    void newAssignTask(CRolePlayOff* _roleAgent, const SPositioningAgent& _positionAgent);
-
-    void assignPass(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent);
-    void assignReceive(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent, bool _ignoreAngle);
-    void assignMove(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent);
-    void assignOneTouch(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent);
-    void assignKick(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent, bool _chip);
-    void assignAfterLife(CRolePlayOff* _roleAgent, const SPositioningAgent& _posAgent);
+    void newAssignTask  (CRolePlayOff*, const SPositioningAgent&);
+    void assignPass     (CRolePlayOff*, const SPositioningAgent&);
+    void assignMove     (CRolePlayOff*, const SPositioningAgent&);
+    void assignOneTouch (CRolePlayOff*, const SPositioningAgent&);
+    void assignAfterLife(CRolePlayOff*, const SPositioningAgent&);
+    void assignKick     (CRolePlayOff*, const SPositioningAgent&, bool _chip);
+    void assignReceive  (CRolePlayOff*, const SPositioningAgent&, bool _ignoreAngle);
 
 protected:
     void reset();
@@ -477,10 +476,6 @@ protected:
 
 ///////////OverLoading Operators
 QDebug operator<< (QDebug d, const NGameOff::SPlan _plan);
-
-
-
-
 
 
 

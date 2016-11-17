@@ -3,6 +3,9 @@ logs/*
 ai.pro.*
 ai
 Makefile
+posts
+*.xml
+*~
 localsettings.xml
 playoff/*
 policy.xml
