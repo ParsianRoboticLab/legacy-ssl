@@ -654,7 +654,11 @@ void CPlayOff::staticExecute() {
     } else {
         newFillRoleProperties();
         newPosExecute();
+<<<<<<< HEAD
         newCheckEndState();
+=======
+        checkEndState();
+>>>>>>> 3145ce375a5e99754c7699a193dd63bae2721673
         if(agentSize > 1)
             passManager();
 

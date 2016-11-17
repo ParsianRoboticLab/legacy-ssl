@@ -462,8 +462,11 @@ private:
     void newAssignTasks();
     void connectPasserAndReciever();
     void newFillRoleProperties();
+<<<<<<< HEAD
     void newPosExecute();
     void newCheckEndState();
+=======
+>>>>>>> 3145ce375a5e99754c7699a193dd63bae2721673
     void newAssignTask  (CRolePlayOff*, const SPositioningAgent&);
     void assignPass     (CRolePlayOff*, const SPositioningAgent&);
     void assignMove     (CRolePlayOff*, const SPositioningAgent&);
