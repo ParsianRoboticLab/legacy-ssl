@@ -3142,6 +3142,9 @@ CLoggerWidget::CLoggerWidget(){
     chbxDebug[9] = new QCheckBox("DON_MHMMD" , this);
     chbxDebug[10] = new QCheckBox("Erfan" , this);
     chbxDebug[11] = new QCheckBox("Mahi" , this);
+    tcolor.insert(D_ERROR,QColor(Qt::red));
+    tcolor.insert(D_MAHI,QColor(Qt::green));
+    // TODO:insert color for other Types
     txtFPS = new QLineEdit("60" , this);
     lblFPS = new QLabel("FPS" , this);
 
@@ -3175,7 +3178,7 @@ CLoggerWidget::CLoggerWidget(){
     l->addWidget(btnNextFrame , 4 , 7);
     l->addWidget(lblRefCmd , 4 , 8);
     l->addWidget(debugTexts , 5 , 0 , 7 , 8);
-    for( int i=0 ; i<8 ; i++ )
+    for( int i=0 ; i<12 ; i++ )
         l->addWidget(chbxDebug[i] , 5+i , 8);
     l->addWidget(btnClear , 12 , 0 , 1 , 3);
 
@@ -3406,9 +3409,13 @@ void CLoggerWidget::cursorIncrement(){
 
     if( chbxDebugs->isChecked() ){
         loggerMutex->lock();
+
+
         for( int i=0 ; i<gameLogger->debugList.size() ; i++ ){
-            if( (gameLogger->debugList.at(i).type & type) || gameLogger->debugList.at(i).type == 0)
+            if( (gameLogger->debugList.at(i).type & type) || gameLogger->debugList.at(i).type == 0){
+                debugTexts->setTextColor(tcolor.value(gameLogger->debugList.at(i).type));
                 debugTexts->append(QString("%1 --> ").arg(gameLogger->counter) + gameLogger->debugList.at(i).debug);
+            }
         }
         loggerMutex->unlock();
     }
