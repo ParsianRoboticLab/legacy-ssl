@@ -18,6 +18,9 @@ struct VectorIndex {
     int index;
 };
 
+int points[12];
+
+
 void CMainApplication::Experimental6()
 {
 
@@ -39,9 +42,8 @@ void CMainApplication::Experimental6()
     Vector2D  filedin[12];
     Ray2D     tan[12];
     Segment2D ttan[12];
-    VectorIndex vecc[12];
+    VectorIndex vecc[12],temp;
     Vector2D opppps[6];
-
 
 
     poly.addVertex(ballpos);
@@ -53,13 +55,13 @@ void CMainApplication::Experimental6()
 
     draw(poly, QColor(Qt::yellow),false);
 
-   double s=1;
+   double ss=1;
     for(int i =0;i<6; i++){
         if(poly.contains(wm->opp[i]->pos)){
             //opprobots[i]= Circle2D(Vector2D(wm->opp[i]->pos),0,11);
             //draw(opprobots[i],QColor(Qt::black));
             //opprobots[i].tangent(ballpos, &tangents[2*i], &tangents[2*i +1]);
-            Vector2D newpos = Vector2D(wm->opp[i]->pos)+ s*Vector2D(wm->opp[i]->vel);
+            Vector2D newpos = Vector2D(wm->opp[i]->pos)+ ss*Vector2D(wm->opp[i]->vel);
             newopp.append(Circle2D(newpos,0.11));
         }
     }
@@ -79,9 +81,9 @@ void CMainApplication::Experimental6()
     draw(oppfiled,QColor(Qt::black));
     Vector2D zol1, zol2;
     int x=0;
-    int name=0;
+    int km=0;
 
-    for(int i=0; i<newopp.size()*2;i++){
+    for(int i=0; i<newopp.size()*2;i++,km++){
         tan[i]= Ray2D(ballpos,tangents[i]);
         ttan[i]= Segment2D(ballpos,goalLine.intersection(tan[i].line()));
         for (int j=0;j<newopp.size();j++) {
@@ -90,13 +92,14 @@ void CMainApplication::Experimental6()
 
         }
         if((x==0)&&(oppfiled.intersection(ttan[i]).valid()))
-        {
-
             vecc[i].vec = goalLine.intersection(tan[i].line());
-        }
+//        else vecc[i].vec = Vector2D(4.5,-i-5);
+
         x=0;
 
     }
+//    vecc[km].vec = Vector2D(wm->field->oppGoalL());
+
     for(int i=0;i<newopp.size()*2;i=i+2)
     {
         if(tangents[i].y>tangents[i+1].y)
@@ -122,6 +125,79 @@ void CMainApplication::Experimental6()
 
 
 
+    for(int x=0;x<newopp.size()*2 ;x++)
+    {
+        for(int z=0;z< newopp.size()*2;z++)
+        {
+            //temp = z;
+            if(vecc[z].vec.y < vecc[z+1].vec.y)
+            {
+                temp = vecc[z];
+                vecc[z] = vecc[z+1];
+                vecc[z+1] = temp;
+            }
+        }
+     }
+
+    int y1,y2;
+    int f,s;
+    for(int i=0;i<newopp.size()*12;i++)
+    {
+        if(vecc[i].vec.y>wm->field->oppGoalR().y && vecc[i].vec.y<wm->field->oppGoalL().y)
+        {
+            if(vecc[i].index==1 )
+            {
+                f =wm->field->oppGoalR().y;
+                s = vecc[i].vec.y;
+                y1=f; y2=s;
+            }
+            else
+            {
+                f = vecc[i].vec.y;
+                if(vecc[i+1].vec.y>wm->field->oppGoalR().y && vecc[i+1].vec.y<wm->field->oppGoalL().y)
+                s= vecc[i+1].vec.y;
+                else s=wm->field->oppGoalL().y;
+
+                if(y2-y1<s-f)
+                {
+                    y2=s;
+                    y1=f;
+                }
+                i++;
+            }
+        }
+    }
+
+   // Segment2D freeS1=Segment2D(wm->field->oppGoal().x,y1,wm->field->ourGoal().x,y1);
+  //  Segment2D freeS2=Segment2D(wm->field->oppGoal().x,y2,wm->field->ourGoal().x,y2);
+//
+   // draw(freeS1, QColor(Qt::cyan));
+   // draw(freeS2, QColor(Qt::cyan));
+//
+   // debug(QString("y2 %1").arg(y2), D_ALI);
+
+   /*         for (int i=0; i < n-1; i++)
+            {
+                pos_min = i;//set pos_min to the current index of array
+
+                    for (int j=i+1; j < n; j++)
+                    {
+
+                    if (arr[j] < arr[pos_min])
+                       pos_min=j;
+            //pos_min will keep track of the index that min is in, this is needed when a swap happens
+                    }
+
+            //if pos_min no longer equals i than a smaller value must have been found, so a swap must occur
+                if (pos_min != i)
+                {
+                     temp = arr[i];
+                     arr[i] = arr[pos_min];
+                     arr[pos_min] = temp;
+                }
+            }
+
+ */
   /*
 
        Circle2D centerCircle (Vector2D(0,0), 0.5);
