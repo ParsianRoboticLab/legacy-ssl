@@ -140,18 +140,18 @@ private:
 
     /////////////////////////New Play Off
     void selectPlayOffMode(NGameOff::EMode& _mode);
-    void initPlayOffMode(const NGameOff::EMode& _mode,
+    void initPlayOffMode(const NGameOff::EMode _mode,
                          const POMODE _gameMode,
                          const int _agentSize);
-    void checkPlayOff(const NGameOff::EMode& _mode);
-    void initStaticPlay(const POMODE _mode, const int __agentSize);
+    void setPlayOff(NGameOff::SPlan* _plan, NGameOff::EMode _mode);
+    void initStaticPlay(const POMODE _mode, const int _agentSize);
     void initDynamicPlay();
     void initFastPlay();
     void initFirstPlay();
-    void checkStaticPlay();
-    void checkDynamicPlay();
-    void checkFirstPlay();
-    void checkFastPlay();
+    void setStaticPlay(NGameOff::SPlan* _plan);
+    void setDynamicPlay();
+    void setFirstPlay();
+    void setFastPlay();
     CLoadPlayOffJson* m_planLoader;
     bool firstTime;
 

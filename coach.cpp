@@ -1290,9 +1290,9 @@ bool CCoach::decideAttack()
         return true;
     }
     else if( knowledge->getGameState() == CKnowledge::OurKickOff || knowledge->getGameMode() == CKnowledge::OurKickOff ){
-        decidePlayOff(KICKOFF, ourPlayers.size());
         selectedPlay = ourPlayOff;
         ourPlayOff = kickoff;
+        decidePlayOff(KICKOFF, ourPlayers.size());
         debug(QString("ourplayers : %1").arg(ourPlayers.size()),D_MAHI);
     }
     else if( knowledge->getGameState() == CKnowledge::TheirKickOff ){
@@ -1303,9 +1303,9 @@ bool CCoach::decideAttack()
 
     }
     else if( knowledge->getGameState() == CKnowledge::OurDirectKick ){
-        decidePlayOff(DIRECT, ourPlayers.size());
         selectedPlay = ourPlayOff;
         ourPlayOff = direct;
+        decidePlayOff(DIRECT, ourPlayers.size());
 
     }
     else if( knowledge->getGameState() == CKnowledge::TheirDirectKick ){
@@ -1316,9 +1316,10 @@ bool CCoach::decideAttack()
 
     }
     else if( knowledge->getGameState() == CKnowledge::OurIndirectKick ){
-        decidePlayOff(INDIRECT, ourPlayers.size());
+        if (firstTime) qDebug() << "debug";
         selectedPlay = ourPlayOff;
         ourPlayOff = indirect;
+        decidePlayOff(INDIRECT, ourPlayers.size());
 
     }
     else if( knowledge->getGameState() == CKnowledge::OurPenaltyKick || knowledge->getGameMode() == CKnowledge::OurPenaltyKick ){
@@ -1365,11 +1366,6 @@ bool CCoach::decideAttack()
         debug(QString("Unexpected Game State: %1 %2").arg(knowledge->stateToString(knowledge->getGameState())).arg(knowledge->getGameState()) , D_ERROR , "red");
         return false;
     }
-    //selectedPlay->markAgents.clear();
-    debug(QString("num of marks: %1").arg(selectedPlay->markAgents.count()),D_MHMMD);
-    kkLastState = knowledge->getGameState();
-
-    dynamicAttack->setDirectShot(false);
 
     selectedPlay->init(ourPlayers , &editData);
     selectedPlay->execute();
@@ -1389,8 +1385,11 @@ void CCoach::decidePlayOff(POMODE _mode, int _agentSize) {
         initPlayOffMode(tempMode, _mode, _agentSize);
         ourPlayOff->setMasterMode(tempMode);
         firstTime = false;
+        qDebug() << "[Coach] first time config done";
     } else {
-        checkPlayOff(ourPlayOff->getMasterMode());
+
+        setPlayOff(lastPlan, ourPlayOff->getMasterMode());
+
     }
 }
 void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
@@ -1560,6 +1559,7 @@ bool CCoach::isTagsMatched(const QStringList& base, const QStringList& required)
 }
 
 bool CCoach::isRegionMatched(const Vector2D &_ball, const double& regionRadius) {
+    qDebug() << _ball.x << _ball.y;
     if (wm->ball->pos.dist(_ball) < regionRadius)
         return true;
     return false;
@@ -1586,7 +1586,7 @@ void CCoach::selectPlayOffMode(NGameOff::EMode &_mode) {
     _mode = NGameOff::StaticPlay;
 }
 
-void CCoach::initPlayOffMode(const NGameOff::EMode &_mode,
+void CCoach::initPlayOffMode(const NGameOff::EMode _mode,
                              const POMODE _gameMode,
                              const int _agentSize) {
     switch(_mode) {
@@ -1607,22 +1607,22 @@ void CCoach::initPlayOffMode(const NGameOff::EMode &_mode,
     }
 }
 
-void CCoach::checkPlayOff(const NGameOff::EMode& _mode) {
+void CCoach::setPlayOff(NGameOff::SPlan* _plan, NGameOff::EMode _mode) {
     switch(_mode) {
     case NGameOff::StaticPlay:
-        checkStaticPlay();
+        setStaticPlay(_plan);
         break;
     case NGameOff::DynamicPlay:
-        checkDynamicPlay();
+        setDynamicPlay();
         break;
     case NGameOff::FastPlay:
-        checkFastPlay();
+        setFastPlay();
         break;
     case NGameOff::FirstPlay:
-        checkFirstPlay();
+        setFirstPlay();
         break;
     default:
-        checkStaticPlay();
+        setStaticPlay(_plan);
     }
 }
 
@@ -1633,6 +1633,24 @@ void CCoach::initStaticPlay(const POMODE _mode, const int _agentSize) {
     QList<NGameOff::SPlan*> plans = m_planLoader->getPlans(); // Get All of The Plans
     Q_FOREACH(NGameOff::SPlan* plan, plans) { //Find Valid Plans
         NGameOff::SMatching& matching = plan->matching;
+
+        if (1) {
+            qDebug() << "-----------> plan name" << plan->gui.name;
+            if (matching.common->planMode  >= _mode)
+                qDebug() << "[Coach] Mode is Valid";
+            if (matching.common->agentSize >= _agentSize)
+                qDebug() << "[Coach] AgentSize is Valid";
+            if (matching.common->chance >= 0)
+                qDebug() << "[Coach] Chance is Valid";
+            if (matching.common->lastDist >= 0)
+                qDebug() << "[Coach] LastDist is Valid";
+            if (isTagsMatched(matching.common->tags, currentTags))
+                qDebug() << "[Coach] Tags is Valid";
+            if (isRegionMatched(matching.initPos.ball))
+                qDebug() << "[Coach] Ball is Valid";
+            qDebug() << "<----------- plan END.";
+        }
+
         if (matching.common->planMode  >= _mode
                 && matching.common->agentSize >= _agentSize
                 && matching.common->chance >= 0
@@ -1654,7 +1672,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const int _agentSize) {
     }
 
     NGameOff::SPlan* thePlan = chooseMostSuccecfull(validPlans); //Choose Best valid Plan
-    matchPlan(thePlan); //Match The Plan
+//    matchPlan(thePlan); //Match The Plan
     ourPlayOff->setMasterPlan(thePlan);
     ourPlayOff->setInitial(true);
     lastPlan = thePlan;
@@ -1672,23 +1690,23 @@ void CCoach::initFirstPlay() {
     // TODO : Initial First Play
 }
 
-void CCoach::checkStaticPlay() {
+void CCoach::setStaticPlay(NGameOff::SPlan* _plan) {
     // TODO : Complete staticPlay checker
-    ourPlayOff->setMasterPlan(lastPlan);
+    ourPlayOff->setMasterPlan(_plan);
     ourPlayOff->setInitial(false);
 }
 
-void CCoach::checkDynamicPlay() {
+void CCoach::setDynamicPlay() {
     // TODO : Write Dynamic Play checker
 
 }
 
-void CCoach::checkFirstPlay() {
+void CCoach::setFirstPlay() {
     // TODO : Write First Play checker
 
 }
 
-void CCoach::checkFastPlay() {
+void CCoach::setFastPlay() {
     // TODO : Write Fast Play checker
 
 }

@@ -35,6 +35,8 @@ CPlayOff::CPlayOff()
     kickOffPos[2] = Vector2D(-0.3,-2);
     kickOffPos[3] = Vector2D(-3.3,0);
 
+    initial = true;
+
 }
 
 CPlayOff::~CPlayOff()
@@ -420,13 +422,6 @@ void CPlayOff::getPassTimeline(SPlayOffPlan *tCurrentPlan, QList<POOwnerReceive>
 
 void CPlayOff::globalExecute(int agentCnt) {
 
-    if(masterPlan != NULL) {
-        qDebug() << *masterPlan;
-    } else {
-        qDebug() << "master is null";
-        return;
-    }
-
     //    playOnFlag = false;
     //    if(!firstTime) {
     //        if(lastAgentCount != agentCnt) {
@@ -442,7 +437,20 @@ void CPlayOff::globalExecute(int agentCnt) {
     //    }
     //    lastAgentCount = agentCnt;
     //    mainPlanner(agentCnt);
-    mainExecute();
+
+
+    if(masterPlan != NULL) {
+        initial = localInit;
+        if (initial) {
+            qDebug() << *masterPlan;
+            mainExecute();
+        }
+        localInit = false;
+    } else {
+        qDebug() << "master is null";
+        localInit = true;
+        return;
+    }
 }
 
 bool CPlayOff::isBallMoved() {
@@ -1324,6 +1332,7 @@ void CPlayOff::newPosExecute() {
 void CPlayOff::newCheckEndState() {
 
     for(int i = 0;i < masterPlan->common.agentSize;i++) {
+
         if(isTaskDone(roleAgent[i])) {
             roleAgent[i]->setRoleUpdate(false);
             roleAgent[i]->resetTime();
@@ -1360,8 +1369,12 @@ void CPlayOff::newFillRoleProperties() {
                 roleAgent[i]->setRoleUpdate(true);
             }
         } else {
-
             qWarning() << "[Warning] coach -> Match function doesn't work :( ";
+            if (roleAgent[i]->getRoleUpdate() == false) {
+                roleAgent[i]->setAgent(knowledge->getAgent(agentsID.at(i)));
+                newAssignTask(roleAgent[i], positionAgent[i]);
+                roleAgent[i]->setRoleUpdate(true);
+            }
             return;
         }
     }
@@ -2491,7 +2504,7 @@ void CPlayOff::setMasterPlan(SPlan *_thePlan) {
     masterPlan = _thePlan;
 }
 
-void CPlayOff::setMasterMode(const EMode &_mode) {
+void CPlayOff::setMasterMode(EMode _mode) {
     masterMode = _mode;
 }
 
@@ -2560,7 +2573,7 @@ bool CPlayOff::isMoveDone(const CRolePlayOff * _roleAgent) {
 
 
 ///////////OverLoading Operators
-QDebug operator<< (QDebug d, const NGameOff::SPlan _plan) {
+QDebug operator<< (QDebug d, NGameOff::SPlan _plan) {
 
     QString mode;
     if (_plan.common.planMode == KICKOFF)
@@ -2582,4 +2595,8 @@ QDebug operator<< (QDebug d, const NGameOff::SPlan _plan) {
     d << "</Common>";
     d << "<<<-------------------";
     return d;
+}
+
+void CPlayOff::setInitial(bool _init) {
+    initial = _init;
 }

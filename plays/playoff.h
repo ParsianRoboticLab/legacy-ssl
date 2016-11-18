@@ -307,11 +307,13 @@ public:
     //////////
 
     void setMasterPlan(SPlan* _thePlan);
-    void setMasterMode(const EMode& _mode);
+    void setMasterMode(EMode _mode);
     EMode getMasterMode();
 
-    Property(bool, Initial, initial);
+    void setInitial(bool _init);
 private:
+    bool initial;
+    bool localInit;
 
     /////////////*NEW*/////////////
     SPlan* masterPlan;
