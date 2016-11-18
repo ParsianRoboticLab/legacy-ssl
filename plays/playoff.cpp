@@ -441,7 +441,7 @@ void CPlayOff::globalExecute(int agentCnt) {
     //        lastBallPos = wm->ball->pos;
     //    }
     //    lastAgentCount = agentCnt;
-//    mainPlanner(agentCnt);
+    //    mainPlanner(agentCnt);
     mainExecute();
 }
 
@@ -654,13 +654,11 @@ void CPlayOff::staticExecute() {
     } else {
         newFillRoleProperties();
         newPosExecute();
-<<<<<<< HEAD
         newCheckEndState();
-=======
-        checkEndState();
->>>>>>> 3145ce375a5e99754c7699a193dd63bae2721673
-        if(agentSize > 1)
-            passManager();
+
+        // TODO : Useful and stable Pass Manager
+//        if(agentSize > 1)
+//            passManager();
 
         if(isPlanEnd()) {
 
@@ -838,6 +836,76 @@ bool CPlayOff::isPlanEnd() {
         draw("Final Shot Done!", Vector2D(1, -0.6));
         return true;
     }
+    return false;
+}
+
+bool CPlayOff::newIsPlanEnd() {
+
+    if (isPlanDone()) {
+        debug("Plan Succeded", D_MAHI);
+
+        return true;
+
+    } else if (isPlanFaild()) {
+        if (lastBallPos.dist(wm->ball->pos) > 0.06) {
+            debug("Plan Fully Failed", D_MAHI);
+        } else {
+            debug("rePlaning", D_MAHI);
+        }
+        return true;
+    }
+
+    return false;
+}
+
+bool CPlayOff::isPlanDone() {
+    if (isFinalShotDone()) {
+        debug ("Done By Final Shot !", D_MAHI);
+        masterPlan->common.addHistory(10); //FULL
+        return true;
+    } else if (isAllTasksDone()) {
+        debug ("Done By Fully Tasks Done", D_MAHI);
+        masterPlan->common.addHistory(10); //FULL
+        return true;
+    }
+    return false;
+}
+
+bool CPlayOff::isPlanFaild() {
+    if (isTimeOver()) {
+        debug ("Faild By Time Over", D_MAHI);
+//        masterPlan->common.addHistory(); // Don't Change
+        return true;
+    }
+    else if (isBallDirChanged()) {
+        debug ("Faild By Ball Dir Changed", D_MAHI);
+        masterPlan->common.addHistory(0); // MIN
+        return true;
+    }
+    else if (isAnyTaskFaild().fail) {
+        SFail fail = isAnyTaskFaild();
+        debug(QString("Task Fail : TaskID %1").arg(fail.taskID), D_MAHI);
+        debug(QString("Task Fail : AgentID %1").arg(fail.agentID), D_MAHI);
+        debug(QString("Task Fail : PlanID %1").arg(fail.planID), D_MAHI);
+        debug(QString("Task Fail : RoleID %1").arg(fail.roleID), D_MAHI);
+        debug(QString("Task Fail : Mode %1").arg(fail.mode), D_MAHI);
+        debug(QString("Task Fail : Skill %1").arg(fail.skill), D_MAHI);
+        masterPlan->common.addHistory(fail.succesRate);
+        return true;
+    }
+    return false;
+}
+
+SFail CPlayOff::isAnyTaskFaild() {
+    SFail faliure;
+    faliure.fail = false;
+    // TODO : complete function
+    // TODO : calculate succes rate
+    return faliure;
+}
+
+bool CPlayOff::isAllTasksDone() {
+    // TODO : complete function
     return false;
 }
 
@@ -1169,44 +1237,28 @@ bool CPlayOff::isTaskDone(int agentID){
     }
 }
 
-bool CPlayOff::isTaskDone(const CRolePlayOff* _roleAgent){
-//    CAgent* tAgent;
-//    tAgent = knowledge->getAgent(kkAgentsID[agentID]);
+bool CPlayOff::isTaskDone(CRolePlayOff* _roleAgent){
 
-//    switch (_roleAgent.getSelectedSkill()) {
-//    case SkillG
-//    }
-
-//    if(roleAgent[agentID]->getSelectedSkill() == roleSkill::GotopointAvoid) {
-//        if(isMoveDone(agentID))
-//            return true;
-//    }
-//    else if(roleAgent[agentID]->getSelectedSkill() == roleSkill::Kick) {
-//        if(isKickDone(tAgent,agentID))
-//            return true;
-//    }
-//    else if(roleAgent[agentID]->getSelectedSkill() == roleSkill::ReceivePass) {
-//        if(isReceiveDone(tAgent))  {
-//            draw(Circle2D(Vector2D(0,0),1),QColor(Qt::black),true);
-//            if(ownerReceiveList.size())
-//                ownerReceiveList.removeFirst();
-//            return true;
-//        }
-//        else {
-//            draw(Circle2D(Vector2D(0,0),1),QColor(Qt::blue),true);
-//            return false;
-//        }
-//    }
-//    else if(roleAgent[agentID]->getSelectedSkill() == roleSkill::OneTouch) {
-//        if(isKickDone(tAgent,agentID))
-//            return true;
-//    }
-//    else if(roleAgent[agentID]->getSelectedSkill() == roleSkill::Mark) {
-//        return true;
-//    }
-//    else {
-//        return false;
-//    }
+    switch (_roleAgent->getSelectedSkill()) {
+    case roleSkill::Gotopoint:
+    case roleSkill::GotopointAvoid:
+        return isMoveDone(_roleAgent);
+        break;
+    case roleSkill::Kick:
+        return isKickDone(_roleAgent);
+        break;
+    case roleSkill::Mark:
+        return false;
+        break;
+    case roleSkill::OneTouch:
+        return isKickDone(_roleAgent);
+        break;
+    case roleSkill::ReceivePass:
+        return isReceiveDone(_roleAgent);
+        break;
+    default:
+        return false;
+    }
 }
 
 ////////////////////////////////////////////
@@ -1271,13 +1323,14 @@ void CPlayOff::newPosExecute() {
 
 void CPlayOff::newCheckEndState() {
 
-
     for(int i = 0;i < masterPlan->common.agentSize;i++) {
         if(isTaskDone(roleAgent[i])) {
             roleAgent[i]->setRoleUpdate(false);
+            roleAgent[i]->resetTime();
             positionAgent[i].stateNumber++;
             if(positionAgent[i].stateNumber < positionAgent[i].positionArg.size()) {
                 isFirstTime[i] = true;
+
             } else {
                 SPositioningArg tempPA;
                 tempPA = positionAgent[i].positionArg.at(positionAgent[i].stateNumber);
@@ -1483,7 +1536,7 @@ void CPlayOff::assignMove(CRolePlayOff* _roleAgent, const SPositioningAgent& _po
         _roleAgent->setMaxVelocity(1);
 
     } else {
-
+        _roleAgent->setTime(_posAgent.getArgs().leftData + _posAgent.getArgs().rightData);
         _roleAgent->setTarget(getMoveTarget(_posAgent.getArgs()));
         _roleAgent->setTargetDir(_posAgent.getArgs().staticAng);
         _roleAgent->setSlow(false);
@@ -2434,7 +2487,7 @@ QString CPlayOff::getModeStr(POMODE _mode) {
 
 ////////////////////////////////
 
-void CPlayOff::setMasterPlan(const SPlan *_thePlan) {
+void CPlayOff::setMasterPlan(SPlan *_thePlan) {
     masterPlan = _thePlan;
 }
 
@@ -2445,6 +2498,66 @@ void CPlayOff::setMasterMode(const EMode &_mode) {
 EMode CPlayOff::getMasterMode() {
     return masterMode;
 }
+///////////////////////////////////////
+/////////////Check Execution///////////
+
+/*!
+*   \brief check if ball get distance from robot, and in a case that it's direct shoot
+*          also check that ball is in right direction or not.
+*
+*
+*/
+bool CPlayOff::isKickDone(CRolePlayOff * _roleAgent) {
+
+    if (Circle2D(_roleAgent->getAgent()->pos(), 0.4).contains(wm->ball->pos)) {
+        _roleAgent->setBallIsNear(true);
+    } else if ( !Circle2D(_roleAgent->getAgent()->pos(), 0.6).contains(wm->ball->pos)
+               && _roleAgent->getBallIsNear() ) {
+        _roleAgent->setBallIsNear(false);
+        if (_roleAgent->getChip()) {
+            return true;
+        } else {
+            /** Ball gonna touch the target point **/
+
+            // check ball speed
+            if ((wm->ball->vel.length() / (_roleAgent->getAgent()->pos() - _roleAgent->getTarget()).length()) > 4) {
+
+                // check ball direction
+                Vector2D sol1,sol2;
+                if (Circle2D(_roleAgent->getTarget(), 0.5).intersection(Ray2D(wm->ball->pos, wm->ball->pos + wm->ball->vel), &sol1, &sol2)) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+bool CPlayOff::isReceiveDone(const CRolePlayOff * _roleAgent) {
+    if(Circle2D(_roleAgent->getAgent()->pos(), 0.3).contains(wm->ball->pos)) {
+        if (wm->ball->vel.length() < 0.3)
+            return true;
+    }
+    return false;
+}
+
+bool CPlayOff::isOneTouchDone(CRolePlayOff * _roleAgent) {
+    return isKickDone(_roleAgent);
+}
+
+bool CPlayOff::isMoveDone(const CRolePlayOff * _roleAgent) {
+    if (_roleAgent->getTimeBased()) {
+        if (_roleAgent->getElapsed() > _roleAgent->getTime()) {
+            return true;
+        }
+    } else {
+        if (_roleAgent->getAgent()->pos().dist(_roleAgent->getTarget()) < 0.3) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 ///////////OverLoading Operators
 QDebug operator<< (QDebug d, const NGameOff::SPlan _plan) {

@@ -8,6 +8,7 @@ CRolePlayOff::CRolePlayOff() {
     receivePassSkill = new CSkillReceivePass(NULL);
     updated = true;
     roleUpdate = false;
+    timer.start();
 }
 
 CRolePlayOff::~CRolePlayOff() {
@@ -110,4 +111,12 @@ void CRolePlayOff::setUpdated(bool _updated) {
 }
 bool CRolePlayOff::getUpdated() {
     return updated;
+}
+
+int CRolePlayOff::resetTime() {
+    return timer.restart();
+}
+
+int CRolePlayOff::getElapsed() const{
+    return timer.elapsed();
 }

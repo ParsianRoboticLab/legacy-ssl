@@ -2,18 +2,21 @@
 #define PLAYOFFROLE_H
 
 #include "role.h"
-
+#include <QTime>
 class CRolePlayOff{
 private:
     void update();
     bool updated;
     bool roleUpdate;
-
+    bool dont;
+    QTime timer;
 public:
 
     CRolePlayOff();
     ~CRolePlayOff();
     void execute();
+    int resetTime();
+    int getElapsed() const;
 
     CSkillKick *kickSkill;
     CSkillReceivePass *receivePassSkill;
@@ -40,6 +43,12 @@ public:
     ClassProperty(CRolePlayOff, bool, IgnoreAngle, ignoreAngle, updated);
 
     ClassProperty(CRolePlayOff, bool, DoPass, doPass, updated);
+
+    ////////Not Executive Property
+    ClassProperty(CRolePlayOff, int, Time, time, dont);
+    ClassProperty(CRolePlayOff, bool, BallIsNear, ballIsNear, dont);
+    ClassProperty(CRolePlayOff, bool, TimeBased, timeBased, dont);
+
 
 public:
     void setUpdated(bool _updated);

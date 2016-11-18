@@ -178,14 +178,32 @@ enum EMode {
     DynamicPlay = 3
 };
 
+struct SFail {
+    bool fail;
+    int agentID, roleID, planID, taskID;
+    EMode mode;
+    roleSkill::ESkill skill;
+    int succesRate;
+};
+
 struct SCommon {
     int agentSize;
     double chance;
     double lastDist;
     POMODE planMode;
     QStringList tags;
-    int succesRate;
+    int succesRate; // {},{},{},{},{},{},{}
     QMap<int, int> matchedID;
+
+    void addHistory(const int _story) {
+        int tempSucces = _story - succesRate;
+        history.append(_story);
+        succesRate += tempSucces/history.size();
+    }
+
+private:
+    QList<int> history;
+
 };
 
 struct SMatching {
@@ -288,7 +306,7 @@ public:
 
     //////////
 
-    void setMasterPlan(const SPlan* _thePlan);
+    void setMasterPlan(SPlan* _thePlan);
     void setMasterMode(const EMode& _mode);
     EMode getMasterMode();
 
@@ -296,7 +314,7 @@ public:
 private:
 
     /////////////*NEW*/////////////
-    const SPlan* masterPlan;
+    SPlan* masterPlan;
     EMode masterMode;
     //////////Dynamic Plan////////////
 
@@ -385,7 +403,7 @@ private:
     Vector2D getMoveTarget(const SPositioningArg& _posArg);
     void checkEndState();
     bool isTaskDone(int agentID);
-    bool isTaskDone(const CRolePlayOff*);
+    bool isTaskDone(CRolePlayOff*);
     bool isKickDone(CAgent* _agent, int agentID);
     bool isReceiveDone(CAgent* _agent);
     bool isMoveDone(int agentID);
@@ -452,21 +470,27 @@ private:
     bool isFinalShotDone1();
     bool isPassChiped();
 
+    SFail isAnyTaskFaild();
+    bool isAllTasksDone();
+    bool isPlanDone();
+    bool isPlanFaild();
     bool setTimer;
     long tempStart;
     ////////////////////////////
 
+    bool isKickDone    (CRolePlayOff*);
+    bool isOneTouchDone(CRolePlayOff*);
+    bool isMoveDone    (const CRolePlayOff*);
+    bool isReceiveDone (const CRolePlayOff*);
     //////////////////////////
     //////////NEW ONE/////////
     //////////////////////////
     void newAssignTasks();
     void connectPasserAndReciever();
     void newFillRoleProperties();
-<<<<<<< HEAD
     void newPosExecute();
     void newCheckEndState();
-=======
->>>>>>> 3145ce375a5e99754c7699a193dd63bae2721673
+    bool newIsPlanEnd();
     void newAssignTask  (CRolePlayOff*, const SPositioningAgent&);
     void assignPass     (CRolePlayOff*, const SPositioningAgent&);
     void assignMove     (CRolePlayOff*, const SPositioningAgent&);
