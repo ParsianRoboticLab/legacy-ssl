@@ -4,3 +4,8 @@ CIndirect::CIndirect() : CPlayOff()
 {
 
 }
+
+
+CIndirect::~CIndirect() {
+
+}

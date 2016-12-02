@@ -109,7 +109,7 @@ private:
     void decidePreferedDefenseAgentsCountAndGoalieAgent();
     bool decideAttack();
     void decideDefense();
-    void decidePlayOff(POMODE _mode = INDIRECT, int _agentSize = 3);
+    void decidePlayOff(QList<int>& _ourplayers, POMODE _mode = INDIRECT);
     void decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers);
     QTime defenseTimeForVisionProblem[2];
     double shotToGoalthr ;
@@ -142,13 +142,13 @@ private:
     void selectPlayOffMode(NGameOff::EMode& _mode);
     void initPlayOffMode(const NGameOff::EMode _mode,
                          const POMODE _gameMode,
-                         const int _agentSize);
-    void setPlayOff(NGameOff::SPlan* _plan, NGameOff::EMode _mode);
-    void initStaticPlay(const POMODE _mode, const int _agentSize);
+                         const QList<int>& _agentSize);
+    void setPlayOff(NGameOff::EMode _mode);
+    void initStaticPlay(const POMODE _mode, const QList<int>& _agentSize);
     void initDynamicPlay();
     void initFastPlay();
     void initFirstPlay();
-    void setStaticPlay(NGameOff::SPlan* _plan);
+    void setStaticPlay();
     void setDynamicPlay();
     void setFirstPlay();
     void setFastPlay();
@@ -159,7 +159,7 @@ private:
     bool isRegionMatched(const Vector2D& _ball, const double& _radius = 1.0); //circular Matching
     //TODO : squere or Liner matching
     NGameOff::SPlan* chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans);
-    void matchPlan(NGameOff::SPlan* _plan);
+    void matchPlan(NGameOff::SPlan* _plan, const QList<int>& _ourplayers);
     QStringList currentTags;
 
     NGameOff::SPlan* lastPlan;

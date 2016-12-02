@@ -277,7 +277,7 @@ class CPlayOff : public CMasterPlay {
 
 public:
     CPlayOff();
-    ~CPlayOff();
+    virtual ~CPlayOff();
 
     void execute_0();
     void execute_1();
@@ -313,7 +313,6 @@ public:
     void setInitial(bool _init);
 private:
     bool initial;
-    bool localInit;
 
     /////////////*NEW*/////////////
     SPlan* masterPlan;
@@ -488,6 +487,7 @@ private:
     //////////NEW ONE/////////
     //////////////////////////
     void newAssignTasks();
+    void newAssignID();
     void connectPasserAndReciever();
     void newFillRoleProperties();
     void newPosExecute();

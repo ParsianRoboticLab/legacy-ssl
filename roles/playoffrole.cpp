@@ -9,13 +9,14 @@ CRolePlayOff::CRolePlayOff() {
     updated = true;
     roleUpdate = false;
     timer.start();
+    agentID = -1;
 }
 
 CRolePlayOff::~CRolePlayOff() {
-    delete gotoPointAvoidSkill;
-    delete kickSkill;
-    delete oneTouchSkill;
-    delete receivePassSkill;
+//    delete gotoPointAvoidSkill;
+//    delete kickSkill;
+//    delete oneTouchSkill;
+//    delete receivePassSkill;
 }
 
 void CRolePlayOff::update() {

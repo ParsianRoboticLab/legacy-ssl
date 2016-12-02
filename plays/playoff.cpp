@@ -7,7 +7,7 @@ CPlayOff::CPlayOff()
     decidePlan = true;
     firstTime = true;
     agentSize = 1;
-    for(int i = 0;i < agentSize;i++) positionAgent[i].stateNumber = 0;
+    for(int i = 0;i < 6;i++) positionAgent[i].stateNumber = 0;
     ballEnteredKickerFlag = false;
     ballEnteredKickerChipFlag = false;
     passReceivedFlag = false;
@@ -36,23 +36,24 @@ CPlayOff::CPlayOff()
     kickOffPos[3] = Vector2D(-3.3,0);
 
     initial = true;
+    playOnFlag = false;
 
 }
 
 CPlayOff::~CPlayOff()
 {
-    for(int i = 0;i < 6;i++) {
-        delete roleAgent[i];
-        delete newRoleAgent[i];
+    //    for(int i = 0;i < 6;i++) {
+    //        delete roleAgent[i];
+    //        delete newRoleAgent[i];
 
-    }
-    delete tempAgent;
+    //    }
+    //    delete tempAgent;
 
-    for (size_t i = 0; i < fullPlans.size();i++) {
-        for (size_t j = 0;j < fullPlans[i].size();j++) {
-            delete fullPlans[i][j];
-        }
-    }
+    //    for (size_t i = 0; i < fullPlans.size();i++) {
+    //        for (size_t j = 0;j < fullPlans[i].size();j++) {
+    //            delete fullPlans[i][j];
+    //        }
+    //    }
 
 }
 
@@ -440,15 +441,14 @@ void CPlayOff::globalExecute(int agentCnt) {
 
 
     if(masterPlan != NULL) {
-        initial = localInit;
+        qDebug() << "hey";
         if (initial) {
             qDebug() << *masterPlan;
-            mainExecute();
         }
-        localInit = false;
+        mainExecute();
     } else {
         qDebug() << "master is null";
-        localInit = true;
+        initial = true;
         return;
     }
 }
@@ -656,20 +656,25 @@ void CPlayOff::mainExecute() {
 
 
 void CPlayOff::staticExecute() {
+    //    playOnFlag = false;
     if (initial) {
+        debug("{if}", D_MAHI);
         newAssignTasks();
+        newAssignID();
         connectPasserAndReciever();
     } else {
+        debug("{else}", D_MAHI);
         newFillRoleProperties();
         newPosExecute();
         newCheckEndState();
 
         // TODO : Useful and stable Pass Manager
-//        if(agentSize > 1)
-//            passManager();
+        //        if(agentSize > 1)
+        //            passManager();
+
 
         if(isPlanEnd()) {
-
+            playOnFlag = true;
         }
     }
 }
@@ -882,7 +887,7 @@ bool CPlayOff::isPlanDone() {
 bool CPlayOff::isPlanFaild() {
     if (isTimeOver()) {
         debug ("Faild By Time Over", D_MAHI);
-//        masterPlan->common.addHistory(); // Don't Change
+        //        masterPlan->common.addHistory(); // Not Changeing History
         return true;
     }
     else if (isBallDirChanged()) {
@@ -1336,8 +1341,9 @@ void CPlayOff::newCheckEndState() {
         if(isTaskDone(roleAgent[i])) {
             roleAgent[i]->setRoleUpdate(false);
             roleAgent[i]->resetTime();
-            positionAgent[i].stateNumber++;
-            if(positionAgent[i].stateNumber < positionAgent[i].positionArg.size()) {
+
+            if(positionAgent[i].stateNumber  + 1 < positionAgent[i].positionArg.size()) {
+                positionAgent[i].stateNumber++;
                 isFirstTime[i] = true;
 
             } else {
@@ -1375,7 +1381,6 @@ void CPlayOff::newFillRoleProperties() {
                 newAssignTask(roleAgent[i], positionAgent[i]);
                 roleAgent[i]->setRoleUpdate(true);
             }
-            return;
         }
     }
 }
@@ -1780,6 +1785,7 @@ void CPlayOff::assignTasks()
 
 void CPlayOff::newAssignTasks() {
     for(size_t i = 0;i < masterPlan->common.agentSize; i++) {
+        positionAgent[i].positionArg.clear();
         Q_FOREACH(playOffRobot agentPlan, masterPlan->execution.AgentPlan[i]) {
             SPositioningArg tempPosArg;
             tempPosArg.staticPos          = agentPlan.pos;
@@ -1796,7 +1802,7 @@ void CPlayOff::newAssignTasks() {
                 tempPosArg.leftData  = skill.data[0];
                 tempPosArg.rightData  = skill.data[1];
                 tempPosArg.staticSkill = skill.name;
-
+                qDebug() << skill.name << skill.data[0] << skill.data[1] << i;
                 positionAgent[i].positionArg.append(tempPosArg);
             }
         }
@@ -2525,7 +2531,7 @@ bool CPlayOff::isKickDone(CRolePlayOff * _roleAgent) {
     if (Circle2D(_roleAgent->getAgent()->pos(), 0.4).contains(wm->ball->pos)) {
         _roleAgent->setBallIsNear(true);
     } else if ( !Circle2D(_roleAgent->getAgent()->pos(), 0.6).contains(wm->ball->pos)
-               && _roleAgent->getBallIsNear() ) {
+                && _roleAgent->getBallIsNear() ) {
         _roleAgent->setBallIsNear(false);
         if (_roleAgent->getChip()) {
             return true;
@@ -2599,4 +2605,8 @@ QDebug operator<< (QDebug d, NGameOff::SPlan _plan) {
 
 void CPlayOff::setInitial(bool _init) {
     initial = _init;
+}
+
+void CPlayOff::newAssignID(){
+
 }

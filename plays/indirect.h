@@ -6,6 +6,7 @@
 class CIndirect : public CPlayOff {
 public:
     CIndirect();
+    virtual ~CIndirect();
     virtual QString whoami() {return "InDirect";}
 };
 

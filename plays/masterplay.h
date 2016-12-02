@@ -62,7 +62,7 @@ public:
     bool playOnFlag;
     bool lockAgents;
     CMasterPlay();
-    ~CMasterPlay();
+    virtual ~CMasterPlay();
     int getDefenseNum();
     virtual void init(QList <int> _agents , QMap<QString , EditData*> *_editData) = 0;
     virtual void execute_0() = 0;

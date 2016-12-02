@@ -103,9 +103,11 @@ void CLoadPlayOffJson::fillMatching(NGameOff::SMatching& _matching, const QVaria
         return;
     }
 
-    _matching.initPos.agents.append(Vector2D(_plan.value("agentInitPos").toMap().value("x").toDouble(_parsedOk),
-                                             _plan.value("agentInitPos").toMap().value("y").toDouble(_parsedOk)));
-
+    Q_FOREACH(QVariant initPos, _plan.value("agentInitPos").toList()) {
+        QVariantMap initPosMap = initPos.toMap();
+        _matching.initPos.agents.append(Vector2D(initPosMap.value("x").toDouble(_parsedOk),
+                                                 initPosMap.value("y").toDouble(_parsedOk)));
+    }
     if (!_parsedOk) {
         qWarning() << "Agent Init Pos did NOT parsed okey!";
         return;
@@ -164,7 +166,7 @@ QString CLoadPlayOffJson::getPackageName(QString _path) {
     _path.remove(0, m_mainDirectory.length());
     _path.replace('/','.');
     packageName.append(_path);
-//    qDebug() << packageName;
+    //    qDebug() << packageName;
     return packageName;
 }
 

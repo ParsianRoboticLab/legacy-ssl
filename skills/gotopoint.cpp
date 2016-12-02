@@ -565,13 +565,13 @@ CSkillGotoPoint::CSkillGotoPoint(CAgent *_agent) : CSkill(_agent)
 
 CSkillGotoPoint::~CSkillGotoPoint()
 {
-    delete speedPidX;
-    delete speedPidY;
-    delete posPid;
-    delete angPid;
-    delete posXpid;
-    delete posYpid;
-    delete thPid;
+//    delete speedPidX;
+//    delete speedPidY;
+//    delete posPid;
+//    delete angPid;
+//    delete posXpid;
+//    delete posYpid;
+//    delete thPid;
 }
 
 void CSkillGotoPoint::init(Vector2D target, Vector2D _targetDir, Vector2D _targetVel, bool dynamicStart)
