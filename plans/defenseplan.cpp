@@ -3998,10 +3998,10 @@ QList<Vector2D> DefensePlan::ShootBlockRatio(double ratio, Vector2D opp){
     tempQlist.clear();
     tempMarkSeg.assign(opp, wm->field->ourGoal());
 
-    if((opp + (wm->field->ourGoal() - opp) * ratio).x  < 0 )
+    //if((opp + (wm->field->ourGoal() - opp) * ratio).x  < 0 )
         tempQlist.append(opp + (wm->field->ourGoal() - opp) * ratio);
-    else
-        tempQlist.append( tempMarkSeg.intersection(Segment2D(Vector2D(0,-_FIELD_HEIGHT/2), Vector2D(0,_FIELD_HEIGHT/2))));
+    //else
+     //   tempQlist.append( tempMarkSeg.intersection(Segment2D(Vector2D(0,-_FIELD_HEIGHT/2), Vector2D(0,_FIELD_HEIGHT/2))));
 
     tempQlist.append(opp - wm->field->ourGoal());
     return tempQlist;
