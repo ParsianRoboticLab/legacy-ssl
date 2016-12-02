@@ -13,3 +13,4 @@ posts
 robotsSetting.csv
 settings.xml
 
+*.autosave
