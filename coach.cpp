@@ -1603,6 +1603,9 @@ NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& pla
         }
     }
     // TODO : remove randomize
+    if (bestPlans.isEmpty()) {
+        bestPlans.append(plans);
+    }
     return bestPlans[rand()%bestPlans.size()];
 }
 

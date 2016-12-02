@@ -131,12 +131,6 @@ void CLoadPlayOffJson::fillExecution(NGameOff::SExecution &_execution, const QVa
                 return;
             }
 
-            tempRobot.targetAgent = positionMap.value("target").toMap().value("agent").toInt(_parsedOk);
-            tempRobot.targetIndex = positionMap.value("target").toMap().value("index").toInt(_parsedOk);
-            if (!_parsedOk) {
-                tempRobot.targetAgent = -1;
-                tempRobot.targetIndex = -1;
-            }
 
             Q_FOREACH(QVariant skill, positionMap.value("skills").toList()) {
                 QVariantMap skillMap = skill.toMap();
@@ -144,6 +138,13 @@ void CLoadPlayOffJson::fillExecution(NGameOff::SExecution &_execution, const QVa
                 tempSkill.name = strToEnum(skillMap.value("name").toString());
                 tempSkill.data[0] = skillMap.value("primary").toInt(_parsedOk);
                 tempSkill.data[1] = skillMap.value("secondary").toInt(_parsedOk);
+                tempSkill.targetAgent = skillMap.value("target").toMap().value("agent").toInt(_parsedOk);
+                tempSkill.targetIndex = skillMap.value("target").toMap().value("index").toInt(_parsedOk);
+                if (!_parsedOk) {
+                    tempSkill.targetAgent = -1;
+                    tempSkill.targetIndex = -1;
+                }
+
                 tempRobot.skill.append(tempSkill);
             }
             tempRobots.append(tempRobot);

@@ -39,14 +39,14 @@ enum POffSkills {
 struct playOffSkill {
     POffSkills name;
     int data[2];
+    int targetIndex;
+    int targetAgent;
 };
 
 struct playOffRobot {
     Vector2D pos;
     AngleDeg angle;
     double tolerance;
-    int targetIndex;
-    int targetAgent;
     QList<playOffSkill> skill;
 };
 
@@ -123,8 +123,8 @@ struct SPositioningArg {
     long leftData;
     double staticEscapeRadius;
     POffSkills staticSkill;
-    int PassToId;
-    int PassToState;
+    int PassToId = -1;
+    int PassToState = -1;
 
     // TODO : Have Reciver Pointer
 };
@@ -150,6 +150,11 @@ struct POOwnerReceive {
     int receiveAgent;
     int receiveIndex;
     POffSkills skill;
+};
+
+struct SBallOwner {
+    int id;
+    int state;
 };
 
 struct kkTimeAndIndex {
@@ -192,7 +197,7 @@ struct SCommon {
     double lastDist;
     POMODE planMode;
     QStringList tags;
-    int succesRate; // {},{},{},{},{},{},{}
+    int succesRate = 0; // {},{},{},{},{},{},{}
     QMap<int, int> matchedID;
 
     void addHistory(const int _story) {
@@ -480,6 +485,10 @@ private:
     void assignAfterLife(CRolePlayOff*, const SPositioningAgent&);
     void assignKick     (CRolePlayOff*, const SPositioningAgent&, bool _chip);
     void assignReceive  (CRolePlayOff*, const SPositioningAgent&, bool _ignoreAngle);
+    int findFirstPasser();
+    int findReciver(int _passer, int _state);
+    QList<SBallOwner> ownerList;
+
 
 protected:
     void reset();

@@ -414,8 +414,8 @@ void CPlayOff::getPassTimeline(SPlayOffPlan *tCurrentPlan, QList<POOwnerReceive>
     {
         tempOaR.ballOwnerAgent = temp.at(i).agent;
         tempOaR.ballOwnerIndex = temp.at(i).index;
-        tempOaR.receiveAgent = tCurrentPlan->AgentPlan[tempOaR.ballOwnerAgent].at(tempOaR.ballOwnerIndex).targetAgent;
-        tempOaR.receiveIndex = tCurrentPlan->AgentPlan[tempOaR.ballOwnerAgent].at(tempOaR.ballOwnerIndex).targetIndex;
+//        tempOaR.receiveAgent = tCurrentPlan->AgentPlan[tempOaR.ballOwnerAgent].at(tempOaR.ballOwnerIndex).targetAgent;
+//        tempOaR.receiveIndex = tCurrentPlan->AgentPlan[tempOaR.ballOwnerAgent].at(tempOaR.ballOwnerIndex).targetIndex;
         tempOaR.skill = temp.at(i).skill;
         tList.append(tempOaR);
     }
@@ -423,25 +423,7 @@ void CPlayOff::getPassTimeline(SPlayOffPlan *tCurrentPlan, QList<POOwnerReceive>
 
 void CPlayOff::globalExecute(int agentCnt) {
 
-    //    playOnFlag = false;
-    //    if(!firstTime) {
-    //        if(lastAgentCount != agentCnt) {
-    //            playOnFlag = true;
-    //            decidePlan = true;
-    //            kickOffFirstTimeFlag = true;
-    //        }
-    //    }
-    //    else {
-    //        decidePlan = true;
-    //        firstTime = false;
-    //        lastBallPos = wm->ball->pos;
-    //    }
-    //    lastAgentCount = agentCnt;
-    //    mainPlanner(agentCnt);
-
-
     if(masterPlan != NULL) {
-        qDebug() << "hey";
         if (initial) {
             qDebug() << *masterPlan;
         }
@@ -661,19 +643,22 @@ void CPlayOff::staticExecute() {
         debug("{if}", D_MAHI);
         newAssignTasks();
         connectPasserAndReciever();
+        Q_FOREACH(SBallOwner s, ownerList) {
+            qDebug() << s.id << s.state;
+        }
     } else {
         debug("{else}", D_MAHI);
         newFillRoleProperties();
         newPosExecute();
         newCheckEndState();
-
+        doPass = true;
         // TODO : Useful and stable Pass Manager
-        //        if(agentSize > 1)
-        //            passManager();
+//        if(agentSize > 1)
+//            passManager();
 
 
         if(isPlanEnd()) {
-            playOnFlag = true;
+            playOnFlag = false;
         }
     }
 }
@@ -1134,12 +1119,12 @@ bool CPlayOff::isTasksDone() {
 }
 ///////////////PassManager///////////////////
 void CPlayOff::passManager() {
-    if (ownerReceiveList.size()) {
-        int tReciverAgent = ownerReceiveList.at(0).receiveAgent;
-        int tReciverIndex = ownerReceiveList.at(0).receiveIndex;
+    if (ownerList.size()) {
+        int tReciverAgent = positionAgent[ownerList.front().id].positionArg.at(ownerList.front().state + 1).PassToId;
+        int tReciverIndex = positionAgent[ownerList.front().id].positionArg.at(ownerList.front().state + 1).PassToState;
 
         if (positionAgent[tReciverAgent].stateNumber >= tReciverIndex) {
-            if (positionAgent[tReciverAgent].getArgs().staticPos.dist(knowledge->getAgent(kkAgentsID[tReciverAgent])->pos()) > currentPlan->config.tuneParams.lastDist) {
+            if (positionAgent[tReciverAgent].getArgs().staticPos.dist(knowledge->getAgent(masterPlan->common.matchedID.value(tReciverAgent))->pos()) > 2 || doPass) {
                 doPass = false;
             }
             else {
@@ -1511,6 +1496,7 @@ void CPlayOff::assignPass(CRolePlayOff* _roleAgent, const SPositioningAgent& _po
     _roleAgent->setTarget(positionAgent[_posAgent.getArgs().PassToId].getArgs(_posAgent.getArgs().PassToState).staticPos);
     _roleAgent->setDoPass(doPass);
     _roleAgent->setIntercept(false);
+    _roleAgent->setTargetDir(_posAgent.getArgs().staticAng);
     _roleAgent->setSelectedSkill(roleSkill::Kick);
 }
 
@@ -1762,8 +1748,8 @@ void CPlayOff::assignTasks()
             tempPosArg.staticPos          = currentPlan->AgentPlan[i].at(j).pos;
             tempPosArg.staticAng          = Vector2D::polar2vector(1, currentPlan->AgentPlan[i].at(j).angle);
             tempPosArg.staticEscapeRadius = currentPlan->AgentPlan[i].at(j).tolerance;
-            tempPosArg.PassToId           = currentPlan->AgentPlan[i].at(j).targetAgent;
-            tempPosArg.PassToState        = currentPlan->AgentPlan[i].at(j).targetIndex;
+//            tempPosArg.PassToId           = currentPlan->AgentPlan[i].at(j).targetAgent;
+//            tempPosArg.PassToState        = currentPlan->AgentPlan[i].at(j).targetIndex;
 
             if(hasPassInSkills(i, j)) tempPosArg.staticPos = POBALLPOS;
             else tempPosArg.staticPos = currentPlan->AgentPlan[i].at(j).pos;
@@ -1790,21 +1776,22 @@ void CPlayOff::newAssignTasks() {
             SPositioningArg tempPosArg;
             tempPosArg.staticPos          = agentPlan.pos;
             tempPosArg.staticAng          = Vector2D::polar2vector(1, agentPlan.angle);
-            tempPosArg.PassToId           = agentPlan.targetAgent;
-            tempPosArg.PassToState        = agentPlan.targetIndex;
-            tempPosArg.staticEscapeRadius = agentPlan.tolerance;
             tempPosArg.staticAng.assign(tempPosArg.staticAng.x, -1*sym*tempPosArg.staticAng.y);
             tempPosArg.staticPos.assign(tempPosArg.staticPos.x, sym*tempPosArg.staticPos.y);
+            tempPosArg.staticEscapeRadius = agentPlan.tolerance;
+
             Q_FOREACH(playOffSkill skill, agentPlan.skill) {
                 tempPosArg.leftData  = skill.data[0];
                 tempPosArg.rightData  = skill.data[1];
                 tempPosArg.staticSkill = skill.name;
+                tempPosArg.PassToId        = skill.targetAgent;
+                tempPosArg.PassToState        = skill.targetIndex;
 
                 if (skill.name == PassSkill) {
                     positionAgent[i].positionArg.back().staticPos = POBALLPOS;
                 } else if (skill.name == ShotToGoalSkill
-                        || skill.name == ChipToGoalSkill
-                        || skill.name == OneTouchSkill) {
+                           || skill.name == ChipToGoalSkill
+                           || skill.name == OneTouchSkill) {
                     if (sym < 0) {
                         tempPosArg.rightData = 1000 - tempPosArg.rightData;
                     }
@@ -1816,18 +1803,35 @@ void CPlayOff::newAssignTasks() {
 }
 
 void CPlayOff::connectPasserAndReciever() {
-    for(size_t i = 0; i < masterPlan->common.agentSize; i++) {
-        Q_FOREACH(SPositioningArg posArg, positionAgent[i].positionArg) {
-            if (posArg.staticSkill == PassSkill)
-                // TODO : Fill Position Arg Reciver Part
-                return;
+    int firstPasser = findFirstPasser();
+    if (firstPasser != -1) {
+        SBallOwner temp;
+        temp.id = firstPasser;
+        temp.state = 0;
+        ownerList.append(temp);
+        findReciver(positionAgent[firstPasser].getArgs(1).PassToId, 1); // it should be passer state but it's a little bit bugy in Visual-planner TODO <---
+    }
+}
+
+int CPlayOff::findReciver(int _passer, int _state) {
+    if (_state == 0) {
+        return 0;
+    }
+
+    for (size_t i = _state; i < positionAgent[_passer].positionArg.size(); i++) {
+        if (positionAgent[_passer].getArgs(i).staticSkill == PassSkill) {
+            SBallOwner temp;
+            temp.id = _passer;
+            temp.state = i;
+            ownerList.append(temp);
+            findReciver(positionAgent[_passer].getArgs(i).PassToId,
+                        positionAgent[_passer].getArgs(i).PassToState);
         }
     }
 }
 
 void CPlayOff::findPasserIndex() {
     firstPasserID = -1;
-    //    debug(QString("current size : %1 , agentplansize %2").arg(currentPlan->agentSize).arg(currentPlan->AgentPlan[0].size()),D_KK);
     for(int i = 0;i < currentPlan->agentSize;i++) {
         if(currentPlan->AgentPlan[i].size())
         {
@@ -2613,3 +2617,18 @@ void CPlayOff::setInitial(bool _init) {
     initial = _init;
 }
 
+int CPlayOff::findFirstPasser() {
+    int first = -1;
+    if (masterPlan->matching.initPos.ball.x != -100) {
+        for (size_t i = 0; i < masterPlan->matching.initPos.agents.size(); i++) {
+            if (masterPlan->matching.initPos.agents.at(i).x == -100) {
+                first = i;
+                break;
+            }
+        }
+    }
+
+    // TODO : Check that pass wasn't in first positions
+
+    return first;
+}
