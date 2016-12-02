@@ -1680,10 +1680,18 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
                 && matching.common->agentSize >= _ourplayers.size()
                 && matching.common->chance >= 0
                 && matching.common->lastDist >= 0
-                && isTagsMatched(matching.common->tags, currentTags)
-                && isRegionMatched(matching.initPos.ball)) {
+                && isTagsMatched(matching.common->tags, currentTags)) {
 
-            validPlans.append(plan);
+            //check Ball matchig with symmetry
+            Vector2D symBall = Vector2D(matching.initPos.ball.x,
+                                        -matching.initPos.ball.y);
+            if (isRegionMatched(matching.initPos.ball)) {
+                plan->execution.symmetry = 1;
+                validPlans.append(plan);
+            } else if (isRegionMatched(symBall)) {
+                plan->execution.symmetry = -1;
+                validPlans.append(plan);
+            }
 
         }
     }

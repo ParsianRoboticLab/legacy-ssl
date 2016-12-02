@@ -217,28 +217,9 @@ struct SMatching {
 
 struct SExecution {
 
-    SExecution() = default;
-
-//    SExecution(const SExecution &_toCopy) {
-//        for(int i = 0;i < 6;i++) {
-//            this->AgentPlan[i].clear();
-//            for(int j = 0; j < _toCopy.AgentPlan[i].size(); j++) {
-//                this->AgentPlan[i].append(_toCopy.AgentPlan[i].at(j));
-//            }
-//        }
-//    }
-
-//    SExecution& operator =(const SExecution &_insert) {
-//        for(int i = 0;i < 6;i++) {
-//            this->AgentPlan[i].clear();
-//            for(int j = 0;j < _insert.AgentPlan[i].size();j++) {
-//                this->AgentPlan[i].append(_insert.AgentPlan[i].at(j));
-//            }
-//        }
-//    }
-
     QList< QList<playOffRobot> > AgentPlan;
     SCommon *common;
+    int symmetry = 1;
 };
 
 struct SGUI {
@@ -487,7 +468,6 @@ private:
     //////////NEW ONE/////////
     //////////////////////////
     void newAssignTasks();
-    void newAssignID();
     void connectPasserAndReciever();
     void newFillRoleProperties();
     void newPosExecute();

@@ -660,7 +660,6 @@ void CPlayOff::staticExecute() {
     if (initial) {
         debug("{if}", D_MAHI);
         newAssignTasks();
-        newAssignID();
         connectPasserAndReciever();
     } else {
         debug("{else}", D_MAHI);
@@ -1784,6 +1783,7 @@ void CPlayOff::assignTasks()
 }
 
 void CPlayOff::newAssignTasks() {
+    int& sym = masterPlan->execution.symmetry;
     for(size_t i = 0;i < masterPlan->common.agentSize; i++) {
         positionAgent[i].positionArg.clear();
         Q_FOREACH(playOffRobot agentPlan, masterPlan->execution.AgentPlan[i]) {
@@ -1793,16 +1793,22 @@ void CPlayOff::newAssignTasks() {
             tempPosArg.PassToId           = agentPlan.targetAgent;
             tempPosArg.PassToState        = agentPlan.targetIndex;
             tempPosArg.staticEscapeRadius = agentPlan.tolerance;
-            tempPosArg.staticAng.assign(tempPosArg.staticAng.x, -tempPosArg.staticAng.y);
-
+            tempPosArg.staticAng.assign(tempPosArg.staticAng.x, -1*sym*tempPosArg.staticAng.y);
+            tempPosArg.staticPos.assign(tempPosArg.staticPos.x, sym*tempPosArg.staticPos.y);
             Q_FOREACH(playOffSkill skill, agentPlan.skill) {
-                if (skill.name == PassSkill)
-                    tempPosArg.staticPos = POBALLPOS;
-
                 tempPosArg.leftData  = skill.data[0];
                 tempPosArg.rightData  = skill.data[1];
                 tempPosArg.staticSkill = skill.name;
-                qDebug() << skill.name << skill.data[0] << skill.data[1] << i;
+
+                if (skill.name == PassSkill) {
+                    positionAgent[i].positionArg.back().staticPos = POBALLPOS;
+                } else if (skill.name == ShotToGoalSkill
+                        || skill.name == ChipToGoalSkill
+                        || skill.name == OneTouchSkill) {
+                    if (sym < 0) {
+                        tempPosArg.rightData = 1000 - tempPosArg.rightData;
+                    }
+                }
                 positionAgent[i].positionArg.append(tempPosArg);
             }
         }
@@ -2607,6 +2613,3 @@ void CPlayOff::setInitial(bool _init) {
     initial = _init;
 }
 
-void CPlayOff::newAssignID(){
-
-}
