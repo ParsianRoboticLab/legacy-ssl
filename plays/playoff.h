@@ -138,8 +138,12 @@ struct SPositioningAgent {
     int stateNumber;
     bool flag;
 
-    SPositioningArg getArgs(int _state = 0) const {
+    SPositioningArg getArgs(const int& _state = 0) const {
         return positionArg.at(stateNumber + _state);
+    }
+
+    SPositioningArg getAbsArgs(const int& _state = 0) const {
+        return positionArg.at(_state);
     }
 
 };
@@ -224,7 +228,9 @@ struct SExecution {
 
     QList< QList<playOffRobot> > AgentPlan;
     SCommon *common;
-    int symmetry = 1;
+    int symmetry     =  1;
+    int theLastAgent = -1;
+    int theLastState = -1;
 };
 
 struct SGUI {
@@ -308,7 +314,7 @@ private:
     SPlayOffPlan* DynamicPlay();
 
     //////////////////////////////////
-    void globalExecute(int agentCnt);
+    void globalExecute();
 
     ///////////////////////////////////////////////////////////////
     /////////////////////////MAHI POSITIONING//////////////////////
@@ -486,6 +492,7 @@ private:
     void assignKick     (CRolePlayOff*, const SPositioningAgent&, bool _chip);
     void assignReceive  (CRolePlayOff*, const SPositioningAgent&, bool _ignoreAngle);
     int findFirstPasser();
+    QPair<int, int> findTheLast(const SExecution& _plan);
     int findReciver(int _passer, int _state);
     QList<SBallOwner> ownerList;
 

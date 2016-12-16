@@ -1681,7 +1681,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
 
         if (matching.common->planMode  >= _mode
                 && matching.common->agentSize >= _ourplayers.size()
-                && matching.common->chance >= 0
+                && matching.common->chance > 0
                 && matching.common->lastDist >= 0
                 && isTagsMatched(matching.common->tags, currentTags)) {
 

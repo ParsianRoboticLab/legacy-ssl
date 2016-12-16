@@ -61,24 +61,25 @@ bool CLoadPlayOffJson::readPlan(const QVariantMap &_map, const QString& _file) {
         return false;
     }
 
-    NGameOff::SPlan* tempPlan = new NGameOff::SPlan();
-
-    NGameOff::SGUI      & tempGui       = tempPlan->gui;
-    NGameOff::SCommon   & tempCommon    = tempPlan->common;
-    NGameOff::SMatching & tempMatching  = tempPlan->matching;
-    NGameOff::SExecution& tempExecution = tempPlan->execution;
 
 
     QVariantList plans = _map.value("plans").toList();
     Q_FOREACH(QVariant plan, plans) {
+        NGameOff::SPlan* tempPlan = new NGameOff::SPlan();
+
+        NGameOff::SGUI      & tempGui       = tempPlan->gui;
+        NGameOff::SCommon   & tempCommon    = tempPlan->common;
+        NGameOff::SMatching & tempMatching  = tempPlan->matching;
+        NGameOff::SExecution& tempExecution = tempPlan->execution;
+
         QVariantMap planMap = plan.toMap();
         QFileInfo fileInfo(_file);
         fillCommon(tempCommon, planMap, &parsedOk);
         fillMatching(tempMatching, planMap, &parsedOk);
         fillExecution(tempExecution, planMap, &parsedOk);
         fillGUI(tempGui, fileInfo, &parsedOk);
+        m_plans.append(tempPlan);
     }
-    m_plans.append(tempPlan);
 }
 
 void CLoadPlayOffJson::fillCommon(NGameOff::SCommon& _common, const QVariantMap& _plan, bool* _parsedOk) {
@@ -116,6 +117,7 @@ void CLoadPlayOffJson::fillMatching(NGameOff::SMatching& _matching, const QVaria
 
 void CLoadPlayOffJson::fillExecution(NGameOff::SExecution &_execution, const QVariantMap &_plan, bool *_parsedOk) {
 
+    qDebug() << "PLAN" << _plan.value("agents").toList().size();
     Q_FOREACH(QVariant agent, _plan.value("agents").toList()) {
         QList<playOffRobot> tempRobots;
         QVariantList positionList = agent.toMap().value("positions").toList();
