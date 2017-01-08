@@ -31,6 +31,7 @@ just some standard and hint to start :
 4. Weights
 > 1. just give weight more than 5 to a issue that is a bug also
 > 2. How weight issues :
+>
 >    Weight     | Value
 >    ---------- | ---------
 >   0           | Not important at all just a fun code :D
