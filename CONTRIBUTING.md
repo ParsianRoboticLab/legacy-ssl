@@ -25,7 +25,24 @@ just some standard and hint to start :
 
 3. Milestones & due dates
 > 1. PM should handle all tasks milestones and due dates.
-> 2. we have to add milestone like version of code for each competition.
+> 2. we have to add milestone like version of code for each competition
+
+
+4. Weights
+> 1. just give weight more than 5 to a issue that is a bug also
+> 2. How weight issues :
+>    Weight     | Value
+>    ----------- | ---------
+>   0 | Not important at all just a fun code :D
+>   1 | It's a feature or a documentation but not needed
+>   2 | This feature, doc or operation task is needed in close future
+>   3 | This feature is needed but not in this milestone
+>   4 | The feature that is for this milestone
+>   5 | Most important feature lots of tasks Are depend on this guy
+>   6 | Just a simple Bug that founded
+>   7 | Bug that is not for this milestone
+>   8 | Bad Bug should fix this for milestone
+>   9 | Critical bug and should be fix ASAP
 
 
 ----------
