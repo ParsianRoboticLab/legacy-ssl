@@ -9,7 +9,7 @@ No bug plz... fix bugs before write any new one.
 Issuing
 -----------
     
-It's so important that insert any task and bug into issue first and documenting problem, feature or any improvement or change that you want to make before start.
+It's so important that insert any task and bug into issue any documenting, problem, feature or any improvement or change that you want to make before start.
 
 just some standard and hint to start :
 
