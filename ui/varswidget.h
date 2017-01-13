@@ -169,7 +169,7 @@ public:
         DEF_VALUE(Performance_Debug, bool, Bool, debugGame)
         DEF_VALUE(Performance_Debug, bool, Bool, debugExperiment)
         DEF_VALUE(Performance_Debug, bool, Bool, debugDebug)
-        DEF_VALUE(Performance_Debug, bool, Bool, debugTemp)
+        DEF_VALUE(Performance_Debug, bool, Bool, debugNadia)
         DEF_VALUE(Performance_Debug, bool, Bool, debugKK)
         DEF_VALUE(Performance_Debug, bool, Bool, debugDONMHMMD)
         DEF_VALUE(Performance_Debug, bool, Bool, debugERF)

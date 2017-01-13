@@ -5,7 +5,7 @@
 #define D_GAME  1
 #define D_EXPERIMENT  2
 #define D_DEBUG  4
-#define D_TEMP  8
+#define D_NADIA  8
 #define D_MANI  16
 #define D_ARASH  32
 #define D_ALI  64

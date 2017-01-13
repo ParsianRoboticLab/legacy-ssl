@@ -62,7 +62,7 @@ void debug(QString text, long type, QColor color)
     if (conf()->Performance_Debug_debugGame()) mask = mask | 1;
     if (conf()->Performance_Debug_debugExperiment()) mask = mask | 2;
     if (conf()->Performance_Debug_debugDebug()) mask = mask | 4;
-    if (conf()->Performance_Debug_debugTemp()) mask = mask | 8;
+    if (conf()->Performance_Debug_debugNadia()) mask = mask | 8;
     if (conf()->Performance_Debug_debugMani()) mask = mask | 16;
     if (conf()->Performance_Debug_debugArash()) mask = mask | 32;
     if (conf()->Performance_Debug_debugAli()) mask = mask | 64;
@@ -103,7 +103,7 @@ void debug0(QString text, int type, QColor color)
 	if (conf()->Performance_Debug_debugGame()) mask = mask | 1;
 	if (conf()->Performance_Debug_debugExperiment()) mask = mask | 2;
 	if (conf()->Performance_Debug_debugDebug()) mask = mask | 4;
-	if (conf()->Performance_Debug_debugTemp()) mask = mask | 8;
+        if (conf()->Performance_Debug_debugNadia()) mask = mask | 8;
 	if (conf()->Performance_Debug_debugMani()) mask = mask | 16;
 	if (conf()->Performance_Debug_debugArash()) mask = mask | 32;
 	if (conf()->Performance_Debug_debugAli()) mask = mask | 64;
