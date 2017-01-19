@@ -1556,8 +1556,8 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
 void CCoach::matchPlan(NGameOff::SPlan *_plan, const QList<int>& _ourplayers) {
     //  TODO : Matching Function [DONE]
     MWBM matcher;
-    matcher.create(_plan->common.agentSize, _ourplayers.size());
-    for (size_t i = 0; i < _plan->common.agentSize; i++) {
+    matcher.create(_plan->common.currentSize, _ourplayers.size());
+    for (size_t i = 0; i < _plan->common.currentSize; i++) {
         for (size_t j = 0; j < _ourplayers.size(); j++) {
 
             double weight;
@@ -1570,8 +1570,10 @@ void CCoach::matchPlan(NGameOff::SPlan *_plan, const QList<int>& _ourplayers) {
         }
     }
     qDebug() << "[Coach] matched plan with : " << matcher.findMatching();
-    for (size_t i = 0; i < _plan->common.agentSize;i++) {
-        _plan->common.matchedID.insert(i, _ourplayers.at(matcher.getMatch(i)));
+    for (size_t i = 0; i < _plan->common.currentSize;i++) {
+        int matchedID = matcher.getMatch(i);
+        _plan->common.matchedID.insert(i, _ourplayers.at(matchedID));
+
     }
     qDebug() << "[Coach] mathched by" << _plan->common.matchedID;
 }
@@ -1690,11 +1692,12 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
                                         -matching.initPos.ball.y);
             if (isRegionMatched(matching.initPos.ball)) {
                 plan->execution.symmetry = 1;
-                validPlans.append(plan);
             } else if (isRegionMatched(symBall)) {
                 plan->execution.symmetry = -1;
-                validPlans.append(plan);
             }
+
+            plan->common.currentSize = _ourplayers.size();
+            validPlans.append(plan);
 
         }
     }

@@ -106,13 +106,13 @@ CSoccer::CSoccer()
 
 
     /////////////////////////////////////////////////////////////////////mhmmd thread
-    for (int i = 0; i < 6; i++) {
-            thSkill[i] = new skillsThread(this, i);
-            thSkill[i]->setPriority(QThread::HighestPriority);
-            thSkill[i]->run();
-            connect(thSkill[i],SIGNAL(robotVel(int,double,double,double)), this, SLOT(getRobotVel(int,double,double,double)));
-    tempTime[i].start();
-    }
+//    for (int i = 0; i < 6; i++) {
+//            thSkill[i] = new skillsThread(this, i);
+//            thSkill[i]->run();
+//            thSkill[i]->setPriority(QThread::HighestPriority);
+//            connect(thSkill[i],SIGNAL(robotVel(int,double,double,double)), this, SLOT(getRobotVel(int,double,double,double)));
+//    tempTime[i].start();
+//    }
 
     mainLoopTimer = new QTimer;
     mainLoopTimer->setInterval(16);

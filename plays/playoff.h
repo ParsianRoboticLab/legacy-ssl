@@ -12,9 +12,9 @@
 #define POBALLPOS Vector2D(1234, 8456)
 
 #define ClassProperty(skill,type,name,local,chflag) \
-        public: inline type get##name() {return local;} \
-        public: inline skill* set##name(type val) {local = val;chflag = true;return this;} \
-        protected: type local
+    public: inline type get##name() {return local;} \
+    public: inline skill* set##name(type val) {local = val;chflag = true;return this;} \
+    protected: type local
 
 
 
@@ -139,11 +139,25 @@ struct SPositioningAgent {
     bool flag;
 
     SPositioningArg getArgs(const int& _state = 0) const {
-        return positionArg.at(stateNumber + _state);
+        if (_state + stateNumber < positionArg.size()) {
+            return positionArg.at(stateNumber + _state);
+        } else {
+            debug(QString("getArgs : wrong arg %1 < %2").arg(positionArg.size()).arg(_state + stateNumber), D_ERROR);
+            qWarning() << QString("getArgs : wrong arg %1 < %2").arg(positionArg.size()).arg(_state + stateNumber);
+            SPositioningArg null;
+            return null;
+        }
     }
 
     SPositioningArg getAbsArgs(const int& _state = 0) const {
-        return positionArg.at(_state);
+        if (_state + stateNumber < positionArg.size()) {
+            return positionArg.at(_state);
+        } else {
+            debug(QString("getArgs : wrong arg %1 < %2").arg(positionArg.size()).arg(_state), D_ERROR);
+            qWarning() << QString("getArgs : wrong arg %1 < %2").arg(positionArg.size()).arg(_state);
+            SPositioningArg null;
+            return null;
+        }
     }
 
 };
@@ -197,6 +211,7 @@ struct SFail {
 
 struct SCommon {
     int agentSize;
+    int currentSize;
     double chance;
     double lastDist;
     POMODE planMode;
@@ -258,7 +273,7 @@ struct SPlan {
     SMatching  matching;
     SExecution execution;
 
-//    friend QDebug operator<< (QDebug d, const SPlan plan);
+    //    friend QDebug operator<< (QDebug d, const SPlan plan);
 };
 
 }
@@ -422,7 +437,7 @@ private:
     Vector2D lastBallPos;
     bool decidePlan;
     int kkAgentsID[6];
-//    QList<positioningArg> positionArg[6];
+    //    QList<positioningArg> positionArg[6];
     int taskDoneCnt;
     int cnt;
 

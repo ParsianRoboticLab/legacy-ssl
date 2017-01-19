@@ -1300,7 +1300,7 @@ void CPlayOff::posExecute() {
 
 
 void CPlayOff::newPosExecute() {
-    for(int i = 0;i < masterPlan->common.agentSize; i++) {
+    for(int i = 0;i < masterPlan->common.currentSize; i++) {
         // TODO : Check First Time
         roleAgent[i]->execute();
     }
@@ -1308,7 +1308,7 @@ void CPlayOff::newPosExecute() {
 
 void CPlayOff::newCheckEndState() {
 
-    for(int i = 0;i < masterPlan->common.agentSize;i++) {
+    for(int i = 0;i < masterPlan->common.currentSize;i++) {
 
         if(isTaskDone(roleAgent[i])) {
             roleAgent[i]->setRoleUpdate(false);
@@ -1339,7 +1339,7 @@ void CPlayOff::fillRolesProperties(){
 }
 
 void CPlayOff::newFillRoleProperties() {
-    for(size_t i = 0;i < masterPlan->common.agentSize; i++) {
+    for(size_t i = 0;i < agentsID.size(); i++) {
         if (masterPlan->common.matchedID.contains(i)) {
             if (roleAgent[i]->getRoleUpdate() == false) {
                 roleAgent[i]->setAgent(knowledge->getAgent(masterPlan->common.matchedID.value(i)));
@@ -1770,7 +1770,7 @@ void CPlayOff::assignTasks()
 
 void CPlayOff::newAssignTasks() {
     int& sym = masterPlan->execution.symmetry;
-    for(size_t i = 0;i < masterPlan->common.agentSize; i++) {
+    for(size_t i = 0;i < masterPlan->common.currentSize; i++) {
         positionAgent[i].positionArg.clear();
         Q_FOREACH(playOffRobot agentPlan, masterPlan->execution.AgentPlan[i]) {
             SPositioningArg tempPosArg;
@@ -2537,7 +2537,9 @@ EMode CPlayOff::getMasterMode() {
 /////////////Check Execution///////////
 
 /*!
-*   \brief check if ball get distance from robot, and in a case that it's direct shoot
+*   \brief check if ball get distance from robot,
+*
+*          in case that it's direct shoot
 *          also check that ball is in right direction or not.
 *
 *
