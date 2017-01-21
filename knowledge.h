@@ -123,6 +123,9 @@ public:
         TheirPenaltyKick = 9,
         Start = 10,
         NormalStart = 11
+        //added
+        OurBallPlacement = 12,
+        TheirBallPlacement = 13
     };
     enum Support
     {

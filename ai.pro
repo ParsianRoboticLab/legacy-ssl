@@ -150,7 +150,8 @@ SOURCES += main.cpp \
     skillsthread.cpp \
     tools/planloader.cpp \
     tools/loadplayoffjson.cpp \
-    util/filewatcher.cpp
+    util/filewatcher.cpp \
+    proto/referee.pb.cc
 
 
 HEADERS += base.h \
@@ -312,7 +313,8 @@ HEADERS += base.h \
     skillsthread.h \
     tools/planloader.h \
     tools/loadplayoffjson.h \
-    util/filewatcher.h
+    util/filewatcher.h \
+    proto/referee.pb.h
 
 
 unix:INCLUDEPATH += "/usr/local/include"
