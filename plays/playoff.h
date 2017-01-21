@@ -139,7 +139,7 @@ struct SPositioningAgent {
     bool flag;
 
     SPositioningArg getArgs(const int& _state = 0) const {
-        if (_state + stateNumber < positionArg.size()) {
+        if ((_state + stateNumber) < positionArg.size()) {
             return positionArg.at(stateNumber + _state);
         } else {
             debug(QString("getArgs : wrong arg %1 < %2").arg(positionArg.size()).arg(_state + stateNumber), D_ERROR);
@@ -150,11 +150,11 @@ struct SPositioningAgent {
     }
 
     SPositioningArg getAbsArgs(const int& _state = 0) const {
-        if (_state + stateNumber < positionArg.size()) {
+        if (_state < positionArg.size()) {
             return positionArg.at(_state);
         } else {
-            debug(QString("getArgs : wrong arg %1 < %2").arg(positionArg.size()).arg(_state), D_ERROR);
-            qWarning() << QString("getArgs : wrong arg %1 < %2").arg(positionArg.size()).arg(_state);
+            debug(QString("getArgs : wrong absarg %1 < %2").arg(positionArg.size()).arg(_state), D_ERROR);
+            qWarning() << QString("getArgs : wrong absarg %1 < %2").arg(positionArg.size()).arg(_state);
             SPositioningArg null;
             return null;
         }

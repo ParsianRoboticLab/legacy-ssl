@@ -42,11 +42,11 @@ CPlayOff::CPlayOff()
 
 CPlayOff::~CPlayOff()
 {
-    //    for(int i = 0;i < 6;i++) {
-    //        delete roleAgent[i];
+        for(int i = 0;i < 6;i++) {
+            delete roleAgent[i];
     //        delete newRoleAgent[i];
 
-    //    }
+        }
     //    delete tempAgent;
 
     //    for (size_t i = 0; i < fullPlans.size();i++) {
@@ -426,6 +426,7 @@ void CPlayOff::globalExecute() {
     if(masterPlan != NULL) {
         if (initial) {
             qDebug() << *masterPlan;
+            lastBallPos = wm->ball->pos;
         }
         mainExecute();
     } else {
@@ -644,7 +645,7 @@ void CPlayOff::staticExecute() {
         newAssignTasks();
         connectPasserAndReciever();
         Q_FOREACH(SBallOwner s, ownerList) {
-            qDebug() << s.id << s.state;
+            qDebug() << "SO" << s.id << s.state;
         }
     } else {
         debug("{else}", D_MAHI);
@@ -1054,8 +1055,7 @@ bool CPlayOff::isPassFaild(int agent) {
     if(roleAgent[agent]->getChip() == true) {
         debug("IT'S A CHIP", D_MAHI);
         return false;
-    }
-    else {
+    } else {
         draw(Circle2D(roleAgent[agent]->getTarget(),1.0), QColor(Qt::black));
         draw(Segment2D(wm->ball->pos,wm->ball->pos + wm->ball->vel * 10), QColor(Qt::black));
         if(Circle2D(roleAgent[agent]->getTarget(),1.0).intersection(Segment2D(wm->ball->pos,wm->ball->pos + wm->ball->vel * 10), &sol1, &sol2)) {
@@ -1481,7 +1481,7 @@ void CPlayOff::assignPass(CRolePlayOff* _roleAgent, const SPositioningAgent& _po
     else
         _roleAgent->setKickSpeed(_posAgent.getArgs().leftData);
 
-    _roleAgent->setTarget(positionAgent[_posAgent.getArgs().PassToId].getArgs(_posAgent.getArgs().PassToState).staticPos);
+    _roleAgent->setTarget(positionAgent[_posAgent.getArgs().PassToId].getAbsArgs(_posAgent.getArgs().PassToState).staticPos);
     _roleAgent->setDoPass(doPass);
     _roleAgent->setIntercept(false);
     _roleAgent->setTargetDir(_posAgent.getArgs().staticAng);
@@ -1521,10 +1521,11 @@ void CPlayOff::assignOneTouch(CRolePlayOff* _roleAgent,
 void CPlayOff::assignMove(CRolePlayOff* _roleAgent,
                           const SPositioningAgent& _posAgent) {
     _roleAgent->setAvoidPenaltyArea(true);
-
+    _roleAgent->setTime(_posAgent.getArgs().leftData + _posAgent.getArgs().rightData);
+    _roleAgent->setAvoidBall(true);
     if(_posAgent.getArgs().staticPos == POBALLPOS)
     {
-        _roleAgent->setAvoidBall(true);
+        _roleAgent->setTimeBased(true);
         _roleAgent->setTarget(wm->ball->pos - Vector2D(0.30, 0));
         //(wm->ball->pos - _roleAgent->getAgent()->pos()).norm()
         _roleAgent->setTargetDir(Vector2D(1, 0));
@@ -1532,7 +1533,7 @@ void CPlayOff::assignMove(CRolePlayOff* _roleAgent,
         _roleAgent->setMaxVelocity(1);
 
     } else {
-        _roleAgent->setTime(_posAgent.getArgs().leftData + _posAgent.getArgs().rightData);
+        _roleAgent->setTimeBased(false);
         _roleAgent->setTarget(getMoveTarget(_posAgent.getArgs()));
         _roleAgent->setTargetDir(_posAgent.getArgs().staticAng);
         _roleAgent->setSlow(false);
@@ -1678,7 +1679,7 @@ bool CPlayOff::chipOrNot(int passerID, int ReceiverID, int ReceiverState){
 bool CPlayOff::chipOrNot(const SPositioningArg& _posArg) {
 
     if (_posArg.leftData < 0) {
-        return true;  
+        return true;
     } else if(_posArg.rightData < 0) {
         return false;
     } else {
@@ -2584,11 +2585,15 @@ bool CPlayOff::isOneTouchDone(CRolePlayOff * _roleAgent) {
 
 bool CPlayOff::isMoveDone(const CRolePlayOff * _roleAgent) {
     if (_roleAgent->getTimeBased()) {
+        debug(QString("EL : %1").arg(_roleAgent->getElapsed()), D_HOSSEIN);
+        debug(QString("GT : %1").arg(_roleAgent->getTime()), D_HOSSEIN);
         if (_roleAgent->getElapsed() > _roleAgent->getTime()) {
+            debug("D------------------", D_HOSSEIN);
             return true;
         }
     } else {
         if (_roleAgent->getAgent()->pos().dist(_roleAgent->getTarget()) < 0.3) {
+            debug("DOOOOOOOOOOOOOOOOON", D_HOSSEIN);
             return true;
         }
     }
@@ -2637,7 +2642,7 @@ int CPlayOff::findFirstPasser() {
     }
 
     // TODO : Check that pass wasn't in first positions
-
+    debug(QString("FFF : %1").arg(first), D_HOSSEIN);
     return first;
 }
 
