@@ -45,7 +45,7 @@ public:
     ClassProperty(CRolePlayOff, bool, DoPass, doPass, updated);
 
     ////////Not Executive Property
-    ClassProperty(CRolePlayOff, int, Time, time, dont);
+    ClassProperty(CRolePlayOff, long long, Time, time, dont);
     ClassProperty(CRolePlayOff, bool, BallIsNear, ballIsNear, dont);
     ClassProperty(CRolePlayOff, bool, TimeBased, timeBased, dont);
 
