@@ -1249,11 +1249,7 @@ void DefensePlan::initVars(float goalCircleRad)
     downGoal = wm->field->ourGoalR();
     midGoal = (topGoal + downGoal) / 2.0;
     ourAgentsRad = 0.09;
-    ourGoalAreaCircleRad = goalCircleRad + ourAgentsRad * 1.5;
-
-#ifdef LARGE_FIELD
-    ourGoalAreaCircleRad += 0.3;
-#endif
+    ourGoalAreaCircleRad = goalCircleRad + ourAgentsRad * 1.5 + 0.3;
 
     knowledge->defenseClearer = -1;
 
@@ -1262,13 +1258,8 @@ void DefensePlan::initVars(float goalCircleRad)
     Vector2D bottomGoalForCircle = downGoal;
     bottomGoalForCircle.y = -(_GOAL_WIDTH/2.0) / 2.f;
 
-    goalieCircleRadius = 0.75;
-    goalieCircleX = 0.5;
-
-#ifdef LARGE_FIELD
-    goalieCircleX += 0.2;
-    goalieCircleRadius += 0.3;
-#endif
+    goalieCircleRadius = 0.75 + 0.2;
+    goalieCircleX = 0.5 + 0.3;
 
     defenseAreaBottomCircle = Circle2D(upperGoalForCircle, ourGoalAreaCircleRad);
     defenseAreaTopCircle = Circle2D(bottomGoalForCircle, ourGoalAreaCircleRad);
@@ -1710,11 +1701,7 @@ Vector2D* DefensePlan::getIntersectWithDefenseArea(const Circle2D& circle, bool 
 Vector2D DefensePlan::checkDefensePoint(CAgent* agent, const Vector2D& point)
 {
     Vector2D agentPos = agent->pos();
-#ifndef LARGE_FIELD
-    double distFromGoal = 1.3;//defenseAreaTopCircle.radius() + defenseAreaTopCircle.center().absX();
-#else
     double distFromGoal = 1.6;
-#endif
     if (agentPos.dist(midGoal) < distFromGoal) {
         agentPos = midGoal + Vector2D().setPolar(distFromGoal, (agentPos - midGoal).th().degree());
         Vector2D* inter = getIntersectWithDefenseArea(Segment2D(agentPos, midGoal), agentPos);

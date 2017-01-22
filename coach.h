@@ -12,29 +12,37 @@
 #include "role.h"
 #include "conditions.h"
 #include "plans/plans.h"
-#include "plays/ourkickoff.h"
-#include "plays/ourpenalty.h"
-#include "plays/ourindirect.h"
-
-#ifndef LARGE_FIELD
-#include "plays/ourdirect.h"
-#else
-#include "plays/doublesizeourdirect.h"
-#endif
-
-#include "plays/theirkickoff.h"
-#include "plays/theirpenalty.h"
-#include "plays/theirindirect.h"
-#include "plays/theirdirect.h"
-#include "plays/forcestart.h"
-#include "plays/playoff.h"
-#include "plays/dynamicattack.h"
+#include "plays/plays.h"
 #include "roles.h"
 #include "tools/planloader.h"
 #include "tools/loadplayoffjson.h"
 
 
 class CCoach {
+
+public:
+
+    CKnowledge::ballPossesionState GlobalBallPState;
+    ////////GUI Needed
+    CPlayOff* playOff();
+    CLoadPlayOffJson* getPlanLoader();
+
+    bool inited;
+    double playOnTime;
+    CCoach(CAgent** _agents);
+    ~CCoach();
+    void execute();
+    void saveGoalie();
+    DefensePlan& getDefense();
+    void swapAgents();   //refer to selectedId in knowledge
+    bool swapAgents(int i, int j);
+    void setOpponents();
+    int mostSupporterNumber(int num);
+    QList<int> findBestPoses(int numberOfPositionAgents,bool semiDynamic);
+    CKnowledge::ballPossesionState lastBallPossesionState;
+    CKnowledge::ballPossesionState isBallOurs();
+    CKnowledge::ballPossesionState ballPStateIntented;
+    static QMap<QString, EditData*> editData; //Contains Formations
 
 private:
     double findMostPossible(Vector2D agentPos);
@@ -47,28 +55,34 @@ private:
     int preferedDefenseCounts , lastPreferredDefenseCounts;
     int preferedGoalieAgent;
     Vector2D defenseTargets[12];
-    CMasterPlay *selectedPlay;
-    COurKickOff *ourKickOff;
-    COurIndirect *ourIndirect;
-#ifndef LARGE_FIELD
-    COurDirect *ourDirect;
-#else
-    CDoubleSizeOurDirect *ourDirect;
-#endif
-    QTime playOnExecTime;
     QTime intentionTimePossession;
     QTime playMakeIntention;
+    QTime playOnExecTime;
     double playMakeIntentionInterval;
     double possessionIntentionInterval;
     double playMakeIntended;
+
+    CMasterPlay *selectedPlay;
+
+    CPlayOff *ourPlayOff;
+
+    CDirect *direct;
+    CKickoff *kickoff;
+    CIndirect *indirect;
+
     COurPenalty *ourPenalty;
+    COurKickOff *ourKickOff;
+    CTheirDirect *theirDirect;
+    COurIndirect *ourIndirect;
+    CTheirPenalty *theirPenalty;
     CTheirKickOff *theirKickOff;
     CTheirIndirect *theirIndirect;
-    CTheirDirect *theirDirect;
-    CTheirPenalty *theirPenalty;
+    CDoubleSizeOurDirect *ourDirect;
+
     CForceStart *forceStart;
-    CPlayOff *ourPlayOff;
     CDynamicAttack *dynamicAttack;
+
+
     CRoleStop *stopRoles[_MAX_NUM_PLAYERS];
     QTime goalieTimer;
     bool goalieTrappedUnderGoalNet;
@@ -95,6 +109,8 @@ private:
     void decidePreferedDefenseAgentsCountAndGoalieAgent();
     bool decideAttack();
     void decideDefense();
+    void decidePlayOff(QList<int>& _ourplayers, POMODE _mode = INDIRECT);
+    void decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers);
     QTime defenseTimeForVisionProblem[2];
     double shotToGoalthr ;
     void virtualPlayOffState();
@@ -121,29 +137,36 @@ private:
     attackState ourAttackState;
     void updateAttackState();
 
-    CLoadPlayOffJson* planLoader;
-public:
-    CKnowledge::ballPossesionState GlobalBallPState;
-    ////////GUI Needed
-    CPlayOff* playOff();
-    CLoadPlayOffJson* getPlanLoader();
 
-    bool inited;
-    double playOnTime;
-    CCoach(CAgent** _agents);
-    ~CCoach();
-    void execute();
-    void saveGoalie();
-    DefensePlan& getDefense();
-    void swapAgents();   //refer to selectedId in knowledge
-    bool swapAgents(int i, int j);
-    void setOpponents();
-    int mostSupporterNumber(int num);
-    QList<int> findBestPoses(int numberOfPositionAgents,bool semiDynamic);
-    CKnowledge::ballPossesionState lastBallPossesionState;
-    CKnowledge::ballPossesionState isBallOurs();
-    CKnowledge::ballPossesionState ballPStateIntented;
-    static QMap<QString, EditData*> editData; //Contains Formations
+    /////////////////////////New Play Off
+    void selectPlayOffMode(NGameOff::EMode& _mode);
+    void initPlayOffMode(const NGameOff::EMode _mode,
+                         const POMODE _gameMode,
+                         const QList<int>& _agentSize);
+    void setPlayOff(NGameOff::EMode _mode);
+    void initStaticPlay(const POMODE _mode, const QList<int>& _agentSize);
+    void initDynamicPlay();
+    void initFastPlay();
+    void initFirstPlay();
+    void setStaticPlay();
+    void setDynamicPlay();
+    void setFirstPlay();
+    void setFastPlay();
+    CLoadPlayOffJson* m_planLoader;
+    bool firstTime;
+
+    bool isTagsMatched(const QStringList& base, const QStringList& required);
+    bool isRegionMatched(const Vector2D& _ball, const double& _radius = 1.0); //circular Matching
+    //TODO : squere or Liner matching
+    NGameOff::SPlan* chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans);
+    void matchPlan(NGameOff::SPlan* _plan, const QList<int>& _ourplayers);
+    QStringList currentTags;
+
+    NGameOff::SPlan* lastPlan;
+
+
+
+
 };
 
 #define GetRole(Role, number) static_cast<Role*> (getRole(Role::Name, number))

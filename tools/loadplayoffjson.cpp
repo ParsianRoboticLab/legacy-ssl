@@ -61,24 +61,25 @@ bool CLoadPlayOffJson::readPlan(const QVariantMap &_map, const QString& _file) {
         return false;
     }
 
-    NGameOff::SPlan* tempPlan = new NGameOff::SPlan();
-
-    NGameOff::SGUI      & tempGui       = tempPlan->gui;
-    NGameOff::SCommon   & tempCommon    = tempPlan->common;
-    NGameOff::SMatching & tempMatching  = tempPlan->matching;
-    NGameOff::SExecution& tempExecution = tempPlan->execution;
 
 
     QVariantList plans = _map.value("plans").toList();
     Q_FOREACH(QVariant plan, plans) {
+        NGameOff::SPlan* tempPlan = new NGameOff::SPlan();
+
+        NGameOff::SGUI      & tempGui       = tempPlan->gui;
+        NGameOff::SCommon   & tempCommon    = tempPlan->common;
+        NGameOff::SMatching & tempMatching  = tempPlan->matching;
+        NGameOff::SExecution& tempExecution = tempPlan->execution;
+
         QVariantMap planMap = plan.toMap();
         QFileInfo fileInfo(_file);
         fillCommon(tempCommon, planMap, &parsedOk);
         fillMatching(tempMatching, planMap, &parsedOk);
         fillExecution(tempExecution, planMap, &parsedOk);
         fillGUI(tempGui, fileInfo, &parsedOk);
+        m_plans.append(tempPlan);
     }
-    m_plans.append(tempPlan);
 }
 
 void CLoadPlayOffJson::fillCommon(NGameOff::SCommon& _common, const QVariantMap& _plan, bool* _parsedOk) {
@@ -103,9 +104,11 @@ void CLoadPlayOffJson::fillMatching(NGameOff::SMatching& _matching, const QVaria
         return;
     }
 
-    _matching.initPos.agents.append(Vector2D(_plan.value("agentInitPos").toMap().value("x").toDouble(_parsedOk),
-                                             _plan.value("agentInitPos").toMap().value("y").toDouble(_parsedOk)));
-
+    Q_FOREACH(QVariant initPos, _plan.value("agentInitPos").toList()) {
+        QVariantMap initPosMap = initPos.toMap();
+        _matching.initPos.agents.append(Vector2D(initPosMap.value("x").toDouble(_parsedOk),
+                                                 initPosMap.value("y").toDouble(_parsedOk)));
+    }
     if (!_parsedOk) {
         qWarning() << "Agent Init Pos did NOT parsed okey!";
         return;
@@ -114,6 +117,7 @@ void CLoadPlayOffJson::fillMatching(NGameOff::SMatching& _matching, const QVaria
 
 void CLoadPlayOffJson::fillExecution(NGameOff::SExecution &_execution, const QVariantMap &_plan, bool *_parsedOk) {
 
+    qDebug() << "PLAN" << _plan.value("agents").toList().size();
     Q_FOREACH(QVariant agent, _plan.value("agents").toList()) {
         QList<playOffRobot> tempRobots;
         QVariantList positionList = agent.toMap().value("positions").toList();
@@ -129,19 +133,20 @@ void CLoadPlayOffJson::fillExecution(NGameOff::SExecution &_execution, const QVa
                 return;
             }
 
-            tempRobot.targetAgent = positionMap.value("target").toMap().value("agent").toInt(_parsedOk);
-            tempRobot.targetIndex = positionMap.value("target").toMap().value("index").toInt(_parsedOk);
-            if (!_parsedOk) {
-                tempRobot.targetAgent = -1;
-                tempRobot.targetIndex = -1;
-            }
 
             Q_FOREACH(QVariant skill, positionMap.value("skills").toList()) {
                 QVariantMap skillMap = skill.toMap();
                 playOffSkill tempSkill;
                 tempSkill.name = strToEnum(skillMap.value("name").toString());
-                tempSkill.Data[0] = skillMap.value("primary").toInt(_parsedOk);
-                tempSkill.Data[1] = skillMap.value("secondary").toInt(_parsedOk);
+                tempSkill.data[0] = skillMap.value("primary").toInt(_parsedOk);
+                tempSkill.data[1] = skillMap.value("secondary").toInt(_parsedOk);
+                tempSkill.targetAgent = skillMap.value("target").toMap().value("agent").toInt(_parsedOk);
+                tempSkill.targetIndex = skillMap.value("target").toMap().value("index").toInt(_parsedOk);
+                if (!_parsedOk) {
+                    tempSkill.targetAgent = -1;
+                    tempSkill.targetIndex = -1;
+                }
+
                 tempRobot.skill.append(tempSkill);
             }
             tempRobots.append(tempRobot);
@@ -164,7 +169,7 @@ QString CLoadPlayOffJson::getPackageName(QString _path) {
     _path.remove(0, m_mainDirectory.length());
     _path.replace('/','.');
     packageName.append(_path);
-//    qDebug() << packageName;
+    //    qDebug() << packageName;
     return packageName;
 }
 

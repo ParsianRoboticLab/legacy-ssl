@@ -565,13 +565,13 @@ CSkillGotoPoint::CSkillGotoPoint(CAgent *_agent) : CSkill(_agent)
 
 CSkillGotoPoint::~CSkillGotoPoint()
 {
-    delete speedPidX;
-    delete speedPidY;
-    delete posPid;
-    delete angPid;
-    delete posXpid;
-    delete posYpid;
-    delete thPid;
+//    delete speedPidX;
+//    delete speedPidY;
+//    delete posPid;
+//    delete angPid;
+//    delete posXpid;
+//    delete posYpid;
+//    delete thPid;
 }
 
 void CSkillGotoPoint::init(Vector2D target, Vector2D _targetDir, Vector2D _targetVel, bool dynamicStart)
@@ -1083,10 +1083,6 @@ void CSkillGotoPointAvoid::execute()
     {
         noAvoid = true;
     }
-    else
-    {
-        noAvoid = false;
-    }
 
     double dist = 0.0;
     double distN = 0, distT = 0;
@@ -1263,7 +1259,7 @@ void CSkillGotoPointAvoid::execute()
     }
     /////////////////////
 
-    if( noAvoid  ){
+    if( noAvoid ){
         lllll = targetPos;
         vf = 0;
     }
