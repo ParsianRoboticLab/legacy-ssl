@@ -1,0 +1,33 @@
+2016-11-18
+----------
+- profiler use regression for find correct data
+- new profiler gui and shortcuts
+- now code use protobuf 2.5 for network connections
+- read ssl-vision in a new way
+- fix replay debugs for new developers
+- play off use new plan loader
+
+2016-07-24
+----------------
+- Initial new Git
+
+
+Pre-new-gitLab migration Changelog
+==============================
+
+2016-07-02 (RoboCup 2016, Leipzig) <Parsian 2016 AI team>
+------------
+- make a gui for playoff plans
+- fix kickoff and direct shoots
+- switch to playOn from playOff if it takes so much time 
+- improve ball possestion
+- improve play make choosing
+- improve skill (motion and kick behavior)
+- goali have predict
+- goali not going to goal anymore !
+- man to man mark for playon/playoff
+- use vartypes for mark properties
+
+ 2016-06-23
+ ----------
+- Initial in old GitLab Reop.

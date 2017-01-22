@@ -818,6 +818,7 @@ private:
     QStringList fileNames;
     QCheckBox *chbxDraws , *chbxDebugs;
     QCheckBox *chbxDebug[12];
+    QMap<int16_t,QColor> tcolor;
     bool pause;
     qint16 loggerFPS;
     qint16 type;
