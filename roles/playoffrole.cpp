@@ -85,6 +85,12 @@ void CRolePlayOff::execute() {
         update();
     }
 
+//    debug(QString("%1 %2 %3 %4 %5").arg(this->agent->id())
+//          .arg(selectedSkill)
+//          .arg(this->target.x)
+//          .arg(this->target.y)
+//          .arg(this->updated), D_HOSSEIN);
+
     switch (selectedSkill) {
     case roleSkill::Gotopoint:
         break;
