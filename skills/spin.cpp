@@ -7,6 +7,31 @@
 #include <QLineEdit>
 #include <QGridLayout>
 
+
+INIT_SKILL(CSkillDribble, "dribble");
+CSkillDribble::CSkillDribble(CAgent *_agent) : CSkill (_agent)
+{
+    kick = new CSkillKick;
+    bangBang = new CNewBangBang;
+    catchedBall = false;
+}
+
+void CSkillDribble::execute()
+{
+    //dribblerArea.assign(0,0);
+}
+
+double CSkillDribble::progress()
+{
+    return 0;
+}
+
+CSkillDribble::~CSkillDribble()
+{
+    delete kick;
+    delete bangBang;
+}
+
 INIT_SKILL(CSkillSpinBack, "spinback");  
 
 CSkillSpinBack::CSkillSpinBack(CAgent *_agent) : CSkill(_agent)
