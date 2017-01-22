@@ -12,11 +12,8 @@
 #include "movingobject.h"
 
 
-#ifndef LARGE_FIELD
-#define CAMERA_NUM 2
-#else
+
 #define CAMERA_NUM 4
-#endif
 #define OUT_OF_SIGHT_THRESHOLD 40
 
 class QTime;
@@ -54,13 +51,6 @@ public:
     int lastCamera;
     int activeCameras;
 	int frameCnt;
-
-#ifndef LARGE_FIELD
-  bool isOnMergeCamerasExperiment, lastMergeState;
-  void saveMergeData(SSL_WrapperPacket& packet);
-  void setBoundaries();
-  void findBoundaries();
-#endif
 
 	vector<Vector2D> boundaries[CAMERA_NUM];
 

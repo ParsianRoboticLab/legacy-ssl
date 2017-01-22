@@ -12,9 +12,9 @@
 #define POBALLPOS Vector2D(1234, 8456)
 
 #define ClassProperty(skill,type,name,local,chflag) \
-        public: inline type get##name() {return local;} \
-        public: inline skill* set##name(type val) {local = val;chflag = true;return this;} \
-        protected: type local
+    public: inline type get##name() {return local;} \
+    public: inline skill* set##name(type val) {local = val;chflag = true;return this;} \
+    protected: type local
 
 
 
@@ -38,19 +38,16 @@ enum POffSkills {
 
 struct playOffSkill {
     POffSkills name;
-    int Data[2];
+    int data[2];
+    int targetIndex;
+    int targetAgent;
 };
 
 struct playOffRobot {
     Vector2D pos;
     AngleDeg angle;
     double tolerance;
-    int targetIndex;
-    int targetAgent;
     QList<playOffSkill> skill;
-//    POffSkills skill[3];
-//    int skillData[3][2];
-//    int skillSize;
 };
 
 struct POInitPos {
@@ -59,9 +56,9 @@ struct POInitPos {
 };
 
 enum POMODE {
-    KICKOFF  = 1,
-    DIRECT   = 2,
-    INDIRECT = 3
+    DIRECT   = 1,
+    INDIRECT = 2,
+    KICKOFF  = 3
 };
 
 struct STuneParams {
@@ -118,27 +115,49 @@ struct distAndId {
 };
 
 
-struct positioningArg {
+struct SPositioningArg {
+
     Vector2D staticPos;
     Vector2D staticAng;
-    long staticWait;
-    long staticTime;
+    long rightData;
+    long leftData;
     double staticEscapeRadius;
     POffSkills staticSkill;
-    int PassToId;
-    int PassToState;
-    int currentIndex;
+    int PassToId = -1;
+    int PassToState = -1;
 
+    // TODO : Have Reciver Pointer
 };
 
-struct positioningAgent {
-    QList<positioningArg> positionArg;
+struct SPositioningAgent {
+
+    // TODO : Make positionArg a List of Pointers
+
+    QList<SPositioningArg> positionArg;
     long mahiLastTime;
     int stateNumber;
     bool flag;
 
-    positioningArg getArgs(int _state = 0) {
-        return this->positionArg.at(stateNumber + _state);
+    SPositioningArg getArgs(const int& _state = 0) const {
+        if ((_state + stateNumber) < positionArg.size()) {
+            return positionArg.at(stateNumber + _state);
+        } else {
+            debug(QString("getArgs : wrong arg %1 < %2").arg(positionArg.size()).arg(_state + stateNumber), D_ERROR);
+            qWarning() << QString("getArgs : wrong arg %1 < %2").arg(positionArg.size()).arg(_state + stateNumber);
+            SPositioningArg null;
+            return null;
+        }
+    }
+
+    SPositioningArg getAbsArgs(const int& _state = 0) const {
+        if (_state < positionArg.size()) {
+            return positionArg.at(_state);
+        } else {
+            debug(QString("getArgs : wrong absarg %1 < %2").arg(positionArg.size()).arg(_state), D_ERROR);
+            qWarning() << QString("getArgs : wrong absarg %1 < %2").arg(positionArg.size()).arg(_state);
+            SPositioningArg null;
+            return null;
+        }
     }
 
 };
@@ -149,6 +168,11 @@ struct POOwnerReceive {
     int receiveAgent;
     int receiveIndex;
     POffSkills skill;
+};
+
+struct SBallOwner {
+    int id;
+    int state;
 };
 
 struct kkTimeAndIndex {
@@ -170,13 +194,40 @@ enum EType {
     SubDir = 3
 };
 
+enum EMode {
+    FirstPlay   = 0,
+    FastPlay    = 1,
+    StaticPlay  = 2,
+    DynamicPlay = 3
+};
+
+struct SFail {
+    bool fail;
+    int agentID, roleID, planID, taskID;
+    EMode mode;
+    roleSkill::ESkill skill;
+    int succesRate;
+};
 
 struct SCommon {
     int agentSize;
+    int currentSize;
     double chance;
     double lastDist;
     POMODE planMode;
     QStringList tags;
+    int succesRate = 0; // {},{},{},{},{},{},{}
+    QMap<int, int> matchedID;
+
+    void addHistory(const int _story) {
+        int tempSucces = _story - succesRate;
+        history.append(_story);
+        succesRate += tempSucces/history.size();
+    }
+
+private:
+    QList<int> history;
+
 };
 
 struct SMatching {
@@ -184,35 +235,17 @@ struct SMatching {
         Vector2D ball;
         QList<Vector2D> agents;
     };
-
     SInitPos initPos;
     SCommon *common;
 };
 
 struct SExecution {
 
-    SExecution() = default;
-
-    SExecution(const SExecution &_toCopy) {
-        for(int i = 0;i < 6;i++) {
-            this->AgentPlan[i].clear();
-            for(int j = 0; j < _toCopy.AgentPlan[i].size(); j++) {
-                this->AgentPlan[i].append(_toCopy.AgentPlan[i].at(j));
-            }
-        }
-    }
-
-    SExecution& operator =(const SExecution &_insert) {
-        for(int i = 0;i < 6;i++) {
-            this->AgentPlan[i].clear();
-            for(int j = 0;j < _insert.AgentPlan[i].size();j++) {
-                this->AgentPlan[i].append(_insert.AgentPlan[i].at(j));
-            }
-        }
-    }
-
     QList< QList<playOffRobot> > AgentPlan;
     SCommon *common;
+    int symmetry     =  1;
+    int theLastAgent = -1;
+    int theLastState = -1;
 };
 
 struct SGUI {
@@ -239,18 +272,19 @@ struct SPlan {
     SCommon    common;
     SMatching  matching;
     SExecution execution;
+
+    //    friend QDebug operator<< (QDebug d, const SPlan plan);
 };
 
 }
 
-
-
+using namespace NGameOff;
 
 class CPlayOff : public CMasterPlay {
 
 public:
     CPlayOff();
-    ~CPlayOff();
+    virtual ~CPlayOff();
 
     void execute_0();
     void execute_1();
@@ -260,10 +294,9 @@ public:
     void execute_5();
     void execute_6();
     void init(QList <int> _agents , QMap<QString , EditData*> *_editData);
-
+    virtual QString whoami() {return "PlayOff";}
     bool firstTime;
     bool kickOffFirstTimeFlag;
-
     //GUI
 
     QList< QList<SPlayOffPlan*> > updatePlans();
@@ -280,16 +313,23 @@ public:
 
     //////////
 
+    void setMasterPlan(SPlan* _thePlan);
+    void setMasterMode(EMode _mode);
+    EMode getMasterMode();
 
+    void setInitial(bool _init);
 private:
+    bool initial;
 
-
+    /////////////*NEW*/////////////
+    SPlan* masterPlan;
+    EMode masterMode;
     //////////Dynamic Plan////////////
 
     SPlayOffPlan* DynamicPlay();
 
     //////////////////////////////////
-    void globalExecute(int agentCnt);
+    void globalExecute();
 
     ///////////////////////////////////////////////////////////////
     /////////////////////////MAHI POSITIONING//////////////////////
@@ -305,7 +345,7 @@ private:
     bool isTaskFaild(int agent);
     bool isTasksDone();
 
-    positioningAgent positionAgent[6];
+    SPositioningAgent positionAgent[6];
 
     int agentSize;
     bool ballEnteredKickerFlag;
@@ -344,6 +384,11 @@ private:
     /////////////////////////MAHI PLANNER////////////////////////////////
     /////////////////////////////////////////////////////////////////////
     void mainPlanner(int tAgentSize);
+    void mainExecute();
+    void staticExecute();
+    void dynamicExecute();
+    void fastExecute();
+    void firstExecute();
     void kickOffStopModePlay(int tagentSize);
     POMODE getPlayOffMode();
     void assinID();
@@ -353,15 +398,20 @@ private:
     void assignTasks();
     void fillRolesProperties();
     void findPasserIndex();
-    void initilizePositions(QList<positioningArg> _posArg[]);
+    void initilizePositions(QList<SPositioningArg> _posArg[]);
     void assignTask(int agentID,POffSkills agentSkill);
     bool chipOrNot(int passerID,int ReceiverID,int ReceiverState);
+    bool chipOrNot(const SPositioningArg& _posArg);
     bool kkCheckIntersectWithAgents(Segment2D tSeg);
     Vector2D getGoalTarget(int shoterID,int shoterState);
+    Vector2D getGoalTarget(const long& _posArg);
     double getMaxVel(int agentID,int agentState);
+    double getMaxVel(const CRolePlayOff* _roleAgent, const SPositioningArg& _posArg);
     Vector2D getMoveTarget(int agentID,int agentState);
+    Vector2D getMoveTarget(const SPositioningArg& _posArg);
     void checkEndState();
     bool isTaskDone(int agentID);
+    bool isTaskDone(CRolePlayOff*);
     bool isKickDone(CAgent* _agent, int agentID);
     bool isReceiveDone(CAgent* _agent);
     bool isMoveDone(int agentID);
@@ -387,7 +437,7 @@ private:
     Vector2D lastBallPos;
     bool decidePlan;
     int kkAgentsID[6];
-//    QList<positioningArg> positionArg[6];
+    //    QList<positioningArg> positionArg[6];
     int taskDoneCnt;
     int cnt;
 
@@ -428,16 +478,49 @@ private:
     bool isFinalShotDone1();
     bool isPassChiped();
 
+    SFail isAnyTaskFaild();
+    bool isAllTasksDone();
+    bool isPlanDone();
+    bool isPlanFaild();
     bool setTimer;
     long tempStart;
     ////////////////////////////
 
-
+    bool isKickDone    (CRolePlayOff*);
+    bool isOneTouchDone(CRolePlayOff*);
+    bool isMoveDone    (const CRolePlayOff*);
+    bool isReceiveDone (const CRolePlayOff*);
+    //////////////////////////
+    //////////NEW ONE/////////
+    //////////////////////////
+    void newAssignTasks();
+    void connectPasserAndReciever();
+    void newFillRoleProperties();
+    void newPosExecute();
+    void newCheckEndState();
+    bool newIsPlanEnd();
+    void newAssignTask  (CRolePlayOff*, const SPositioningAgent&);
+    void assignPass     (CRolePlayOff*, const SPositioningAgent&);
+    void assignMove     (CRolePlayOff*, const SPositioningAgent&);
+    void assignOneTouch (CRolePlayOff*, const SPositioningAgent&);
+    void assignAfterLife(CRolePlayOff*, const SPositioningAgent&);
+    void assignKick     (CRolePlayOff*, const SPositioningAgent&, bool _chip);
+    void assignReceive  (CRolePlayOff*, const SPositioningAgent&, bool _ignoreAngle);
+    int findFirstPasser();
+    QPair<int, int> findTheLast(const SExecution& _plan);
+    int findReciver(int _passer, int _state);
+    QList<SBallOwner> ownerList;
 
 
 protected:
     void reset();
 };
+
+
+///////////OverLoading Operators
+QDebug operator<< (QDebug d, const NGameOff::SPlan _plan);
+
+
 
 
 #endif // CPLAYOFF_H
