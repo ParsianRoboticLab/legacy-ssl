@@ -22,6 +22,7 @@ CNewBangBang::CNewBangBang()
         lastV1.append(0.f);
     }
     vmax = 4;
+    angPath = false;
 }
 
 /*
@@ -113,7 +114,6 @@ bangBangMode CNewBangBang::decidePlan()
 
 
     }
-
 }
 
 void CNewBangBang::trajectoryPlanner()
@@ -163,7 +163,18 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     currentVel = agentVel.length();
     agentDir =_agentDir;
     movementTh = pos2 - agentPos;
+    if(angPath) {
+        if(angKp)
+            angPid->kp = angKp;
+        else
+            angPid->kp = 1;
+    }
+    else
+    {
+        angPid->kp = 3;
+    }
     angPid->error = (dir2.th() -  agentDir.th()).radian();
+
     draw(QString("vel2 : %1").arg(Vel2),Vector2D(2,1.5));
     agentMovementTh = movementTh.th();
 
@@ -207,7 +218,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     {
     case _bangBangPosPID:
         posPid->error = agentPos.dist(pos2);
-        vDes = posPid->PID_OUT();
+        vDes = min(posPid->PID_OUT(),velMax);
         break;
     case _bangBangConst:
         vDes = vmax;
