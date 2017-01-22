@@ -1083,10 +1083,6 @@ void CSkillGotoPointAvoid::execute()
     {
         noAvoid = true;
     }
-    else
-    {
-        noAvoid = false;
-    }
 
     double dist = 0.0;
     double distN = 0, distT = 0;
@@ -1263,7 +1259,7 @@ void CSkillGotoPointAvoid::execute()
     }
     /////////////////////
 
-    if( noAvoid  ){
+    if( noAvoid ){
         lllll = targetPos;
         vf = 0;
     }
