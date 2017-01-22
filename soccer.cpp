@@ -254,6 +254,9 @@ setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 */
 }
 
+
+
+
 void CSoccer::connectSharedRadio()
 {
     if (sharedRadioSocket !=NULL)
@@ -896,16 +899,39 @@ void CSoccer::refUpdate()
         datagram.resize(refSocket->pendingDatagramSize());
         refSocket->readDatagram(datagram.data(), datagram.size(), &refSender, &senderPort);
     }
-    gsp.cmd = datagram[0];
-    gsp.cmd_counter = datagram[1];
-    gsp.goals_blue = datagram[2];
-    gsp.goals_yellow = datagram[3];
-    gsp.time_remaining = (datagram[4] << 8) + datagram[5];
+
+
+    SSL_Referee referee;
+    if( !referee.ParseFromArray(datagram, datagram.size())){
+        debug("error parsing protobuf", D_GAME);
+        return;
+    }
+
+    gsp.cmd = compute_command(referee);
+    gsp.cmd_counter = referee.command_counter();
+    gsp.goals_blue = referee.blue().score();
+    gsp.goals_yellow = referee.yellow().score();
+    gsp.time_remaining = referee.stage_time_left();
     cmdCnt = gsp.cmd_counter;
+
+
+    //gets goalie id for both teams
+    if( wm->getTeamColor() == _COLOR_BLUE){
+        wm->our.updateGoaliID((int)referee.blue().goalie());
+        wm->opp.updateGoaliID((int)referee.yellow().goalie());
+    }
+    else{
+        wm->our.updateGoaliID((int)referee.yellow().goalie());
+        wm->opp.updateGoaliID((int)referee.blue().goalie());
+    }
+
     if( cmdCnt == lastCmdCnt )
         return;
     lastCmdCnt = cmdCnt;
     refCommand = gsp.cmd;
+
+    qDebug() << "ref: " << refCommand;
+
     wm->gs->transition(refCommand);
     debug(( "Referee : " + QString("%1 (%2)").arg(refCommand).arg((int) refCommand) + "  " + QString::number(wm->gs->get())), D_GAME);
     debug(("***** STATE *****"), D_GAME);
@@ -1036,6 +1062,103 @@ void CSoccer::refUpdate()
         }
     }
 }
+
+
+///////////////////MAPPING COMMAND AND STAGE//////////////
+char CSoccer::map_stage(SSL_Referee::Stage stage){
+    switch(stage){
+        case SSL_Referee::NORMAL_FIRST_HALF_PRE: return '1';
+        case SSL_Referee::NORMAL_FIRST_HALF: return ' ';
+        case SSL_Referee::NORMAL_HALF_TIME: return 'h';
+        case SSL_Referee::NORMAL_SECOND_HALF_PRE: return '2';
+        case SSL_Referee::NORMAL_SECOND_HALF: return ' ';
+        case SSL_Referee::EXTRA_TIME_BREAK: return 'h';
+        case SSL_Referee::EXTRA_FIRST_HALF_PRE: return 'o';
+        case SSL_Referee::EXTRA_FIRST_HALF: return ' ';
+        case SSL_Referee::EXTRA_HALF_TIME: return 'h';
+        case SSL_Referee::EXTRA_SECOND_HALF_PRE: return 'O';
+        case SSL_Referee::EXTRA_SECOND_HALF: return ' ';
+        case SSL_Referee::PENALTY_SHOOTOUT_BREAK: return 'h';
+        case SSL_Referee::PENALTY_SHOOTOUT: return 'a';
+        case SSL_Referee::POST_GAME: return 'H';
+    }
+    //return error
+}
+
+char CSoccer::map_command(SSL_Referee::Command command){
+    switch(command){
+        case SSL_Referee::HALT: return 'H';
+        case SSL_Referee::STOP: return 'S';
+        case SSL_Referee::NORMAL_START: return ' ';
+        case SSL_Referee::FORCE_START: return 's';
+        case SSL_Referee::PREPARE_KICKOFF_YELLOW: return 'k';
+        case SSL_Referee::PREPARE_KICKOFF_BLUE: return 'K';
+        case SSL_Referee::PREPARE_PENALTY_YELLOW: return 'p';
+        case SSL_Referee::PREPARE_PENALTY_BLUE: return 'P';
+        case SSL_Referee::DIRECT_FREE_YELLOW: return 'f';
+        case SSL_Referee::DIRECT_FREE_BLUE: return 'F';
+        case SSL_Referee::INDIRECT_FREE_YELLOW: return 'i';
+        case SSL_Referee::INDIRECT_FREE_BLUE: return 'I';
+        case SSL_Referee::TIMEOUT_YELLOW: return 't';
+        case SSL_Referee::TIMEOUT_BLUE: return 'T';
+        case SSL_Referee::GOAL_YELLOW: return 'g';
+        case SSL_Referee::GOAL_BLUE: return 'G';
+        case SSL_Referee::BALL_PLACEMENT_YELLOW: return 'b';
+        case SSL_Referee::BALL_PLACEMENT_BLUE: return 'B';
+    }
+    //return error
+}
+char CSoccer::compute_command(SSL_Referee refSC){
+    enum Disposition{
+        STAGE,
+        COMMAND,
+        YELLOW_YCARD,
+        BLUE_YCARD,
+        YELLOW_RCARD,
+        BLUE_RCARD,
+        CACHE
+    };
+
+    Disposition disposition;
+
+    if (refSC.stage() != last_stage) {
+            disposition = STAGE;
+    } else if (refSC.command() != last_command) {
+            disposition = COMMAND;
+    } else if (refSC.yellow().yellow_card_times_size() > last_yellow_ycards) {
+            disposition = YELLOW_YCARD;
+    } else if (refSC.blue().yellow_card_times_size() > last_blue_ycards) {
+            disposition = BLUE_YCARD;
+    } else if (refSC.yellow().red_cards() > last_yellow_rcards) {
+            disposition = YELLOW_RCARD;
+    } else if (refSC.blue().red_cards() > last_blue_rcards) {
+            disposition = BLUE_RCARD;
+    } else {
+            disposition = CACHE;
+    }
+
+    last_stage = refSC.stage();
+    last_command = refSC.command();
+    last_yellow_ycards = refSC.yellow().yellow_card_times_size();
+    last_blue_ycards = refSC.blue().yellow_card_times_size();
+    last_yellow_rcards = refSC.yellow().red_cards();
+    last_blue_ycards = refSC.blue().red_cards();
+
+    switch (disposition) {
+            case STAGE: return cached_command_char = map_stage(refSC.stage());
+            case COMMAND: return cached_command_char = map_command(refSC.command());
+            case YELLOW_YCARD: return cached_command_char = 'y';
+            case BLUE_YCARD: return cached_command_char = 'Y';
+            case YELLOW_RCARD: return cached_command_char = 'r';
+            case BLUE_RCARD: return cached_command_char = 'R';
+            case CACHE: return cached_command_char;
+    }
+    //return error
+    return '!';
+}
+///////////////////////END MAPING////////////////////
+
+
 
 void CSoccer::sharedRadioUpdate()
 {

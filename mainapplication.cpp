@@ -1132,9 +1132,16 @@ void CMainApplication::getMousePos(Vector2D _pos, int mouseClick)
 void CMainApplication::changeTeamColor(VarType*) {   
     if(conf()->LocalSettings_OurTeamColor()=="Blue"){
         soccer->setTeamColor(_COLOR_BLUE);
+        //added
+        wm->our.setColor(_COLOR_BLUE);
+        wm->opp.setColor(_COLOR_YELLOW);
+
     }
     if (conf()->LocalSettings_OurTeamColor()=="Yellow") {
         soccer->setTeamColor(_COLOR_YELLOW);
+        //added
+        wm->our.setColor(_COLOR_YELLOW);
+        wm->opp.setColor(_COLOR_BLUE);
     }
     wm->gs->init((wm->getTeamColor() == _COLOR_YELLOW) ? TEAM_YELLOW : TEAM_BLUE );
 }
