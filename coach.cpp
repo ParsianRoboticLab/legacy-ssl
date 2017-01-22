@@ -1586,10 +1586,9 @@ bool CCoach::isTagsMatched(const QStringList& base, const QStringList& required)
 }
 
 bool CCoach::isRegionMatched(const Vector2D &_ball, const double& regionRadius) {
-    qDebug() << _ball.x << _ball.y;
-    if (wm->ball->pos.dist(_ball) < regionRadius)
-        return true;
-    return false;
+
+    return (wm->ball->pos.dist(_ball) < regionRadius);
+
 }
 
 NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans) {
@@ -1664,6 +1663,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     Q_FOREACH(NGameOff::SPlan* plan, plans) { //Find Valid Plans
         NGameOff::SMatching& matching = plan->matching;
 
+        // Just For Debugging
         if (1) {
             qDebug() << "-----------> plan name" << plan->gui.name;
             if (matching.common->planMode  >= _mode)
