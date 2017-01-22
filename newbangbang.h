@@ -53,26 +53,28 @@ public:
 
 
 
-	Property(double, Distance, x);
-	Property(double, LastDistance, lx);
-	Property(double, DistanceError, sumErr);
-	Property(double, CurrentVelocity, v1);
-	Property(double, FinalVelocity, v2);
-	Property(double, AccMax, amax);
-	Property(double, DecMax, dmax);
-	Property(double, VelMax, vmax);
-	Property(double, DesiredTime, tDesired);
-	Property(double, TimeStep, dt);
-	Property(bool, FastEnd, fastend);
-	Property(bool, EndPoint, endPoint);
-	Property(bool, OneTouch, oneTouch);
-	Property(bool, Slow, slow);
-	Property(bool, NoPid, noPid);
-	Property(bool, NewRobots, newRobots);
-	PropertyGet(double, Velocity, v);
-	PropertyGet(double, Acceleration, a);
-	PropertyGet(double, TimeNeeded, t);
+        Property(double, Distance, x);
+        Property(double, AngKp, angKp);
+        Property(double, LastDistance, lx);
+        Property(double, DistanceError, sumErr);
+        Property(double, CurrentVelocity, v1);
+        Property(double, FinalVelocity, v2);
+        Property(double, AccMax, amax);
+        Property(double, DecMax, dmax);
+        Property(double, VelMax, vmax);
+        Property(double, DesiredTime, tDesired);
+        Property(double, TimeStep, dt);
+        Property(bool, FastEnd, fastend);
+        Property(bool, EndPoint, endPoint);
+        Property(bool, OneTouch, oneTouch);
+        Property(bool, Slow, slow);
+        Property(bool, NoPid, noPid);
+        Property(bool, NewRobots, newRobots);
+        PropertyGet(double, Velocity, v);
+        PropertyGet(double, Acceleration, a);
+        PropertyGet(double, TimeNeeded, t);
         PropertyGet(bool, Smooth, smooth);
+        Property(bool, AngInPath, angPath);
 
 private:
         //void optimalAccOrDec(double agentDir, bool dec);

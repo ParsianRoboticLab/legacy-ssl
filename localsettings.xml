@@ -5,7 +5,7 @@
 			224.5.23.2
 		</Var>
 		<Var name="SSL-Vision Multicast Port" type="int" minval="" maxval="">
-			10005
+			10006
 		</Var>
 		<Var name="Referee-box Multicast IP" type="string">
 			224.5.23.1

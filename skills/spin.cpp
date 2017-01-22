@@ -11,14 +11,95 @@
 INIT_SKILL(CSkillDribble, "dribble");
 CSkillDribble::CSkillDribble(CAgent *_agent) : CSkill (_agent)
 {
-    kick = new CSkillKick;
-    bangBang = new CNewBangBang;
+    kick = new CSkillKick(_agent);
+    bangBang = new CNewBangBang();
     catchedBall = false;
+    agent = _agent;
+    catchedCounter = 0;
+    readyForPass = false;
+    doPass = false;
+    kickSpeed = 200;
+}
+
+void CSkillDribble::setAgent(CAgent *val)
+{
+    agent = val;
+    kick->setAgent(val);
+}
+
+void CSkillDribble::spinDribble()
+{
+    kick->setChip(chip);
+    kick->setTarget(initLook);
+    if(catchedBall == false)
+    {
+        kick->execute();
+        kick->setSpin(1);
+    }
+    else if(!(readyForPass&&doPass))
+    {
+        double vx,vy,vw;
+        agent->setRoller(5);
+        bangBang->setAngKp(1.1);
+        bangBang->setAngInPath(true);
+        bangBang->bangBangSpeed(agentPos,agent->vel(),agentDir,agentPos - (agentDir).norm()*0.01,target-agentPos,0,0.016,vx,vy,vw);
+        agent->setRobotAbsVel(vx,vy,vw);
+    }
+    else
+    {
+        kick->setTarget(target);
+        kick->execute();
+        kick->setSpin(1);
+    }
+
+    if(fabs((agentDir.th() - (target- agentPos).th()).degree()) < tol )
+        readyForPass = true;
+    else
+        readyForPass = false;
+
+    debug(QString("readyForPass : %1").arg(readyForPass),D_MHMMD);
+    if(readyForPass && doPass)
+        kick->setKickSpeed(kickSpeed);
+    else
+        kick->setKickSpeed(0);
+}
+
+void CSkillDribble::checkState()
+{
+    if((agentDir.th() - (target- agentPos).th()).degree() < tol )
+        readyForPass = true;
+    else
+        readyForPass = false;
 }
 
 void CSkillDribble::execute()
 {
-    //dribblerArea.assign(0,0);
+    agentPos = agent->pos();
+    agentDir = agent->dir();
+    ballPos = wm->ball->pos;
+    ballVel = wm->ball->vel;
+    dribblerArea.assign(agentPos + agentDir.norm()*0.09,0.08);
+    draw(dribblerArea,QColor(Qt::blue));
+    if(dribblerArea.contains(ballPos))
+    {
+        catchedCounter++;
+    }
+    else
+    {
+        catchedCounter = 0;
+    }
+
+    if(catchedCounter > 50)
+    {
+        catchedBall = true;
+    }
+    else
+    {
+        catchedBall = false;
+    }
+
+    ///////////////////////now here we go
+    spinDribble();
 }
 
 double CSkillDribble::progress()

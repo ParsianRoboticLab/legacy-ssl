@@ -302,7 +302,7 @@
 				false
 			</Var>
 			<Var name="DON_MHMMD" type="bool">
-				false
+				true
 			</Var>
 			<Var name="Erfan" type="bool">
 				false
