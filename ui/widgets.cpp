@@ -1493,15 +1493,6 @@ CMonitorWidget::CMonitorWidget(CDrawer *_drawerBuffer, QWidget *parent)
     fieldCenter.setRect(-_CENTER_CIRCLE_RAD, _CENTER_CIRCLE_RAD, 2*_CENTER_CIRCLE_RAD, 2*_CENTER_CIRCLE_RAD);
     leftPenalty.setRect(-_FIELD_WIDTH/2.0, - _PENALTY_WIDTH/2.0, _GOAL_RAD, _PENALTY_WIDTH);
     rightPenalty.setRect(_FIELD_WIDTH/2.0 - _GOAL_RAD, -_PENALTY_WIDTH/2.0, _GOAL_RAD, _PENALTY_WIDTH);
-    //#ifndef LARGE_FIELD
-    //	leftPenalty.setRect(-3.025, -0.975, 0.800, 1.950);
-    //    rightPenalty.setRect(2.225, -0.975, 0.800, 1.950);
-    //#else
-    //	leftPenalty.setRect(-_FIELD_WIDTH/2.0, -1.250, 1.000, 2.500);
-    //	rightPenalty.setRect(_FIELD_WIDTH/2.0-1, -1.250, 1.000, 2.500);
-
-    //      //  rightPenalty.setRect(wm->field->oppPenaltyRect().topLeft().x,wm->field->oppPenaltyRect().topLeft().y,wm->field->oppPenaltyRect().size().length(), wm->field->oppPenaltyRect().size().width());
-    //#endif
     this->setMouseTracking(true);
     //    this->setFixedSize((viewportSize.width()) , (viewportSize.height()));
     object = 0;
@@ -3142,6 +3133,9 @@ CLoggerWidget::CLoggerWidget(){
     chbxDebug[9] = new QCheckBox("DON_MHMMD" , this);
     chbxDebug[10] = new QCheckBox("Erfan" , this);
     chbxDebug[11] = new QCheckBox("Mahi" , this);
+    tcolor.insert(D_ERROR,QColor(Qt::red));
+    tcolor.insert(D_MAHI,QColor(Qt::green));
+    // TODO:insert color for other Types
     txtFPS = new QLineEdit("60" , this);
     lblFPS = new QLabel("FPS" , this);
 
@@ -3175,7 +3169,7 @@ CLoggerWidget::CLoggerWidget(){
     l->addWidget(btnNextFrame , 4 , 7);
     l->addWidget(lblRefCmd , 4 , 8);
     l->addWidget(debugTexts , 5 , 0 , 7 , 8);
-    for( int i=0 ; i<8 ; i++ )
+    for( int i=0 ; i<12 ; i++ )
         l->addWidget(chbxDebug[i] , 5+i , 8);
     l->addWidget(btnClear , 12 , 0 , 1 , 3);
 
@@ -3406,9 +3400,13 @@ void CLoggerWidget::cursorIncrement(){
 
     if( chbxDebugs->isChecked() ){
         loggerMutex->lock();
+
+
         for( int i=0 ; i<gameLogger->debugList.size() ; i++ ){
-            if( (gameLogger->debugList.at(i).type & type) || gameLogger->debugList.at(i).type == 0)
+            if( (gameLogger->debugList.at(i).type & type) || gameLogger->debugList.at(i).type == 0){
+                debugTexts->setTextColor(tcolor.value(gameLogger->debugList.at(i).type));
                 debugTexts->append(QString("%1 --> ").arg(gameLogger->counter) + gameLogger->debugList.at(i).debug);
+            }
         }
         loggerMutex->unlock();
     }

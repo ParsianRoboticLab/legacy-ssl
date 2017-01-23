@@ -5,7 +5,6 @@
 #include "roles.h"
 #include "skills.h"
 #include "plans/plans.h"
-//#include "plays/playoff.h"
 
 #define MAX_POSITIONERS 4
 #define MAX_WEIGHT_CYCLES 600
@@ -63,7 +62,7 @@ public:
     bool playOnFlag;
     bool lockAgents;
     CMasterPlay();
-    ~CMasterPlay();
+    virtual ~CMasterPlay();
     int getDefenseNum();
     virtual void init(QList <int> _agents , QMap<QString , EditData*> *_editData) = 0;
     virtual void execute_0() = 0;
@@ -75,6 +74,7 @@ public:
     virtual void execute_6() = 0;
     void execute();
     int playOffLocation();
+    virtual QString whoami() {return "MasterPlay";}
     int choosePlayoffAgent(int ballState);
     bool canScore();
     QList <CAgent *> markAgents;

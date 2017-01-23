@@ -869,7 +869,7 @@ void CForceStart::kkFixPasserPos()
                 agentSkill[i]->setTarget(knowledge->getAgent(kkAgentsId[agentSkill[i]->getAgentID()])->pos());
                 agentSkill[i]->setTargetDir(wm->ball->pos);
                 agentSkill[i]->setTargetVel(Vector2D(0, 0));
-                agentSkill[i]->setSelectedSkill(SkillGotopoint);
+                agentSkill[i]->setSelectedSkill(roleSkill::Gotopoint);
                 FPPballEnteredKickerFlag = false;
                 debug(QString("SAGSAG"),D_KK);
             }
@@ -3036,14 +3036,14 @@ void CForceStart::kkAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill, i
         tRole->setTarget(tempB);
         tRole->setTargetVel(wm->ball->pos);
         tRole->setTargetVel(Vector2D(0, 0));
-        tRole->setSelectedSkill(SkillGotopointAvoid);
+        tRole->setSelectedSkill(roleSkill::GotopointAvoid);
         break;
     case MoveDefensive:
         tempB = kkFindBestPosForMove(tAgent, tB, false);
         tRole->setTarget(tempB);
         tRole->setTargetVel(wm->ball->pos);
         tRole->setTargetVel(Vector2D(0, 0));
-        tRole->setSelectedSkill(SkillGotopointAvoid);
+        tRole->setSelectedSkill(roleSkill::GotopointAvoid);
         break;
     case PassOffensive:
         tempB = kkFindBestPosForPass(tAgent, tB, true, 1, kkPassReceiverAgent);
@@ -3071,7 +3071,7 @@ void CForceStart::kkAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill, i
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(true);
         tRole->setSlow(true);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case PassDefensive:
         tempB = kkFindBestPosForPass(tAgent, tB, false, 0, kkPassReceiverAgent);
@@ -3099,7 +3099,7 @@ void CForceStart::kkAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill, i
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(true);
         tRole->setSlow(true);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case KickOffensive:
         tempB = kkFindBestPosForPass(tAgent, tB, true, 0.0);
@@ -3115,7 +3115,7 @@ void CForceStart::kkAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill, i
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(true);
         tRole->setSlow(false);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case KickDefensive:
         tempB = kkFindBestPosForPass(tAgent, tB, false, 0.0);
@@ -3131,7 +3131,7 @@ void CForceStart::kkAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill, i
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(true);
         tRole->setSlow(false);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case ChipOffensive:
         tempB = kkFindBestPosForPass(tAgent, tB, true, 0.0);
@@ -3147,7 +3147,7 @@ void CForceStart::kkAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill, i
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(true);
         tRole->setSlow(false);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case ChipDefensive:
         tempB = kkFindBestPosForPass(tAgent, tB, false, 0.0);
@@ -3163,13 +3163,13 @@ void CForceStart::kkAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill, i
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(true);
         tRole->setSlow(false);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case MarkOffensive:
-        tRole->setSelectedSkill(SkillMark);
+        tRole->setSelectedSkill(roleSkill::Mark);
         break;
     case MarkDefensive:
-        tRole->setSelectedSkill(SkillMark);
+        tRole->setSelectedSkill(roleSkill::Mark);
         break;
     case CatchBall:
         tempB = wm->field->oppGoal();
@@ -3181,7 +3181,7 @@ void CForceStart::kkAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill, i
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(false);
         tRole->setSlow(false);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case Shot:
         tempB = wm->field->oppGoal();
@@ -3196,7 +3196,7 @@ void CForceStart::kkAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill, i
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(false);
         tRole->setSlow(false);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case ChipToGoal:
         tempB = wm->field->oppGoal();
@@ -3211,7 +3211,7 @@ void CForceStart::kkAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill, i
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(false);
         tRole->setSlow(false);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case ReceivePass:
         tempA = kkPointToPass;
@@ -3220,7 +3220,7 @@ void CForceStart::kkAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill, i
         tRole->setReceiveRadius(1.75);
         tRole->setAvoidPenaltyArea(true);
         tRole->setAvoidCenterCircle(false);
-        tRole->setSelectedSkill(SkillReceivePass);
+        tRole->setSelectedSkill(roleSkill::ReceivePass);
         break;
     case OneTouch:
         tempA = kkPointToPass - Vector2D(0.1, 0);
@@ -3233,7 +3233,7 @@ void CForceStart::kkAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill, i
             tRole->setKickSpeed(currentSpeeds.chip);
         tRole->setChip(false);
         tRole->setAvoidPenaltyArea(true);
-        tRole->setSelectedSkill(SkillOneTouch);
+        tRole->setSelectedSkill(roleSkill::OneTouch);
         break;
     }
 
@@ -3258,13 +3258,13 @@ void CForceStart::kkNewAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill
         tempB = kkFindBestPosForMove(tAgent, tB, true);
         tRole->setTarget(tempB);
         tRole->setTargetVel(wm->ball->pos);
-        tRole->setSelectedSkill(SkillGotopointAvoid);
+        tRole->setSelectedSkill(roleSkill::GotopointAvoid);
         break;
     case MoveDefensive:
         tempB = kkFindBestPosForMove(tAgent, tB, false);
         tRole->setTarget(tempB);
         tRole->setTargetVel(wm->ball->pos);
-        tRole->setSelectedSkill(SkillGotopointAvoid);
+        tRole->setSelectedSkill(roleSkill::GotopointAvoid);
         break;
     case PassOffensive:
         tempB = kkNewFindBestPosForPass(tAgent, tB, true, 1, kkPassReceiverAgent);
@@ -3292,7 +3292,7 @@ void CForceStart::kkNewAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(true);
         tRole->setSlow(true);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case PassDefensive:
         tempB = kkNewFindBestPosForPass(tAgent, tB, false, 0, kkPassReceiverAgent);
@@ -3320,7 +3320,7 @@ void CForceStart::kkNewAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(true);
         tRole->setSlow(true);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case KickOffensive:
         tempB = kkNewFindBestPosForPass(tAgent, tB, tA, true, 0.0);
@@ -3336,7 +3336,7 @@ void CForceStart::kkNewAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(true);
         tRole->setSlow(false);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case KickDefensive:
         tempB = kkNewFindBestPosForPass(tAgent, tB, tA, false, 0.0);
@@ -3352,7 +3352,7 @@ void CForceStart::kkNewAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(true);
         tRole->setSlow(false);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case ChipOffensive:
         tempB = kkNewFindBestPosForPass(tAgent, tB, tA, true, 0.0);
@@ -3368,7 +3368,7 @@ void CForceStart::kkNewAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(true);
         tRole->setSlow(false);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case ChipDefensive:
         tempB = kkNewFindBestPosForPass(tAgent, tB, tA, false, 0.0);
@@ -3384,7 +3384,7 @@ void CForceStart::kkNewAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(true);
         tRole->setSlow(false);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case MarkOffensive:
         //        tRole->setSelectedSkill(SkillMark);
@@ -3406,7 +3406,7 @@ void CForceStart::kkNewAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(false);
         tRole->setSlow(false);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case Shot:
         tempB = wm->field->oppGoal();
@@ -3421,7 +3421,7 @@ void CForceStart::kkNewAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(false);
         tRole->setSlow(false);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case ChipToGoal:
         tempB = wm->field->oppGoal();
@@ -3437,7 +3437,7 @@ void CForceStart::kkNewAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill
         tRole->setAvoidCenterCircle(false);
         tRole->setIsGotoPointAvoid(false);
         tRole->setSlow(false);
-        tRole->setSelectedSkill(SkillKick);
+        tRole->setSelectedSkill(roleSkill::Kick);
         break;
     case ReceivePass:
         tempA = kkPointToPass;
@@ -3446,7 +3446,7 @@ void CForceStart::kkNewAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill
         tRole->setReceiveRadius(1.75);
         tRole->setAvoidPenaltyArea(true);
         tRole->setAvoidCenterCircle(false);
-        tRole->setSelectedSkill(SkillReceivePass);
+        tRole->setSelectedSkill(roleSkill::ReceivePass);
         break;
     case OneTouch:
         tempA = kkPointToPass - Vector2D(0.1, 0);
@@ -3462,7 +3462,7 @@ void CForceStart::kkNewAssignTask(int tAgent, CRolePlayOn *tRole, PSkills tSkill
             tRole->setKickSpeed(currentSpeeds.shot);
         tRole->setChip(false);
         tRole->setAvoidPenaltyArea(true);
-        tRole->setSelectedSkill(SkillOneTouch);
+        tRole->setSelectedSkill(roleSkill::OneTouch);
         break;
     }
 
@@ -3872,7 +3872,7 @@ void CForceStart::kkNewAssignTasks()
 
 void CForceStart::kkMoveManager(CAgent *_agent,CRolePlayOn &_skill)
 {
-    if(_skill.getSelectedSkill() == SkillGotopoint) {
+    if(_skill.getSelectedSkill() == roleSkill::Gotopoint) {
         CSkillGotoPoint gotoPointSkill(_agent);
         gotoPointSkill.setFinalPos(_skill.getTarget());
         gotoPointSkill.setFinalDir(_skill.getTargetDir());
@@ -3881,7 +3881,7 @@ void CForceStart::kkMoveManager(CAgent *_agent,CRolePlayOn &_skill)
 
 
     }
-    else if(_skill.getSelectedSkill() == SkillGotopointAvoid) {
+    else if(_skill.getSelectedSkill() == roleSkill::GotopointAvoid) {
         CSkillGotoPointAvoid gotoPointAvoidSkill(_agent);
         gotoPointAvoidSkill.setFinalPos(_skill.getTarget());
         gotoPointAvoidSkill.setFinalDir(_skill.getTargetDir());
@@ -3893,7 +3893,7 @@ void CForceStart::kkMoveManager(CAgent *_agent,CRolePlayOn &_skill)
         gotoPointAvoidSkill.execute();
 
     }
-    else if(_skill.getSelectedSkill() == SkillKick){
+    else if(_skill.getSelectedSkill() == roleSkill::Kick){
         //        debug("KICK",D_KK);
         CSkillKick kickSkill(_agent);
         kickSkill.setTarget(_skill.getTarget());
@@ -3915,7 +3915,7 @@ void CForceStart::kkMoveManager(CAgent *_agent,CRolePlayOn &_skill)
         kickSkill.execute();
 
     }
-    else if(_skill.getSelectedSkill() == SkillReceivePass){
+    else if(_skill.getSelectedSkill() == roleSkill::ReceivePass){
         CSkillReceivePass receivePassSkill(_agent);
         receivePassSkill.setTarget(_skill.getWaitPos());
         receivePassSkill.setSlow(_skill.getSlow());
@@ -3926,7 +3926,7 @@ void CForceStart::kkMoveManager(CAgent *_agent,CRolePlayOn &_skill)
         receivePassSkill.execute();
 
     }
-    else if(_skill.getSelectedSkill() == SkillOneTouch){
+    else if(_skill.getSelectedSkill() == roleSkill::OneTouch){
         CSkillKickOneTouch oneTouchSkill(_agent);
         oneTouchSkill.setWaitPos(_skill.getWaitPos());
         oneTouchSkill.setTarget(_skill.getTarget());
@@ -3936,7 +3936,7 @@ void CForceStart::kkMoveManager(CAgent *_agent,CRolePlayOn &_skill)
         oneTouchSkill.execute();
 
     }
-    else if(_skill.getSelectedSkill() == SkillMark)
+    else if(_skill.getSelectedSkill() == roleSkill::Mark)
     {
         //            debug("MARK APPEND",D_KK);
         markAgents.append(_agent);

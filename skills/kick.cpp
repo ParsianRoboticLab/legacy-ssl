@@ -1337,7 +1337,7 @@ void CSkillKick::execute()
     {
         if(Circle2D(agentPos,1).contains(ballPos) && fabs((agent->dir().th() - oneTouchDir.th()).degree()) < 3)
         {
-            agent->setRoller(5);
+            agent->setRoller(spin);
             if(chip)
                 agent->setChip(kickSpeed);
             else
