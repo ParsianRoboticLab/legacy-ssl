@@ -497,7 +497,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
                     || (knowledge->getGameState() == CKnowledge::TheirKickOff)
                     || (knowledge->getGameState() == CKnowledge::TheirIndirectKick)
                     );
-    debug(QString(" Mark"), D_MAHI);
+    //debug(QString(" Mark"), D_MAHI);
     //    sortdangerpass(oppAgentsToMarkPos);
 
     Circle2D MarkArea(wm->field->ourGoal(),markRadius);
@@ -592,8 +592,6 @@ void DefensePlan::tempFindPos(int _markAgentSize){
 
 
                 }
-
-
                 //
                 MarkArea.assign(wm->field->ourGoal(), markRadius);
                 //
@@ -3667,7 +3665,8 @@ void DefensePlan::findPos(int _markAgentSize)
         segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
     }
     ///////////// Man To Man PlayOff Mode for Mark//////////////////////////////
-    if(policy()->Mark_PlayOffManToMan()){
+    double xLimitForblockingPass = 1;
+    if(policy()->Mark_PlayOffManToMan() || wm->ball->pos.x > xLimitForblockingPass){
         if(playOff){
             manToManMarkInPlayOffBlockPass(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
         }
@@ -4092,7 +4091,6 @@ Vector2D DefensePlan::ballPrediction(bool _isGoalie)
     else {
         predictedBall = BallPos;
         draw(QString("Def follow"), Vector2D(0,2),"red");
-
     }
     draw(predictedBall);
     return predictedBall;
