@@ -35,6 +35,7 @@
 #include<QMenu>
 #include<QAction>
 
+
 CTabDockWidget::CTabDockWidget(QWidget* parent , bool autoHide)
     : QDockWidget(parent) , autoHideBool(autoHide)
 {
@@ -3142,6 +3143,13 @@ CLoggerWidget::CLoggerWidget(){
     chbxDebug[9] = new QCheckBox("DON_MHMMD" , this);
     chbxDebug[10] = new QCheckBox("Erfan" , this);
     chbxDebug[11] = new QCheckBox("Mahi" , this);
+    chbxDebug[12] = new QCheckBox("Nadia" , this);
+    chbxDebug[13] = new QCheckBox("Fatemeh" , this);
+    chbxDebug[14] = new QCheckBox("Atousa" , this);
+    chbxDebug[15] = new QCheckBox("Mahmood" , this);
+    chbxDebug[16] = new QCheckBox("AHZ" , this);
+    chbxDebug[17] = new QCheckBox("Amin" , this);
+    chbxDebug[18] = new QCheckBox("AmiR" , this);
     tcolor.insert(D_ERROR,QColor(Qt::red));
     tcolor.insert(D_MAHI,QColor(Qt::green));
     // TODO:insert color for other Types
@@ -3178,10 +3186,18 @@ CLoggerWidget::CLoggerWidget(){
     l->addWidget(btnNextFrame , 4 , 7);
     l->addWidget(lblRefCmd , 4 , 8);
     l->addWidget(debugTexts , 5 , 0 , 7 , 8);
-    for( int i=0 ; i<12 ; i++ )
-        l->addWidget(chbxDebug[i] , 5+i , 8);
-    l->addWidget(btnClear , 12 , 0 , 1 , 3);
+    QWidget* DebugNames=new QWidget();
+    QVBoxLayout *DebugNamesLayout=new QVBoxLayout;
+    QScrollArea *scrollArea=new QScrollArea;
+    for( int i=0 ; i<19 ; i++ )
+        DebugNamesLayout->addWidget(chbxDebug[i]);
 
+    DebugNames->setLayout(DebugNamesLayout);
+
+    scrollArea->setWidget(DebugNames);
+    l->addWidget(scrollArea,6,8);
+
+    l->addWidget(btnClear , 12 , 0 , 1 , 3);
     reBuildWidget();
 
     connect(btnBrowse , SIGNAL(pressed()) , this , SLOT(browseDialog()));
@@ -3194,7 +3210,7 @@ CLoggerWidget::CLoggerWidget(){
     connect(cmbList , SIGNAL(currentIndexChanged(int)) , this , SLOT(playThisFile(int)));
     connect(chbxDraws , SIGNAL(clicked(bool)) , this , SLOT(showHideDraws(bool)));
     connect(chbxDebugs , SIGNAL(clicked(bool)) , this , SLOT(showHideDebugs(bool)));
-    for( int i=0 ; i<8 ; i++ )
+    for( int i=0 ; i<19 ; i++ )
         connect(chbxDebug[i] , SIGNAL(clicked()) , this , SLOT(debugTypeChanged()));
     connect(txtFPS , SIGNAL(editingFinished()) , this , SLOT(replayFPSChanged()));
     debugTypeChanged();
@@ -3209,7 +3225,7 @@ CLoggerWidget::CLoggerWidget(){
 CLoggerWidget::~CLoggerWidget(){
     delete lblFPS;
     delete txtFPS;
-    for( int i=7 ; i>=0 ; i-- )
+    for( int i=18 ; i>=0 ; i-- )
         delete chbxDebug[i];
     delete chbxDebugs;
     delete chbxDraws;
@@ -3485,6 +3501,28 @@ void CLoggerWidget::debugTypeChanged(){
     if( chbxDebug[11]->isChecked() ){
         type |= D_MAHI;
     }
+    if( chbxDebug[12]->isChecked() ){
+        type |= D_NADIA;
+    }
+    if( chbxDebug[13]->isChecked() ){
+        type |= D_FATEMEH;
+    }
+    if( chbxDebug[14]->isChecked() ){
+        type |= D_ATOUSA;
+    }
+    if( chbxDebug[15]->isChecked() ){
+        type |= D_Mahmood;
+    }
+    if( chbxDebug[16]->isChecked() ){
+        type |= D_AHZ;
+    }
+    if( chbxDebug[17]->isChecked() ){
+        type |= D_AMIN;
+    }
+    if( chbxDebug[18]->isChecked() ){
+        type |= D_AMIR;
+    }
+
 }
 
 void CLoggerWidget::replayFPSChanged(){

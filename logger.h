@@ -16,7 +16,14 @@
 #define D_KK 2048
 #define D_MHMMD 4096
 #define D_ERF 8192
-#define D_MAHI 16386
+#define D_MAHI 16384
+#define D_Mahmood 32768
+#define D_FATEMEH 65536
+#define D_ATOUSA 131072
+#define D_AHZ 262144
+#define D_AMIN 524288
+#define D_AMIR 1048576
+
 
 
 #include <QString>

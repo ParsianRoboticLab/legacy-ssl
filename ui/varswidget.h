@@ -181,6 +181,13 @@ public:
         DEF_VALUE(Performance_Debug, bool, Bool, debugMasood)
         DEF_VALUE(Performance_Debug, bool, Bool, debugMohammed)
         DEF_VALUE(Performance_Debug, bool, Bool, debugHossein)
+        DEF_VALUE(Performance_Debug, bool, Bool, debugMahmood)
+        DEF_VALUE(Performance_Debug, bool, Bool, debugAHZ)
+        DEF_VALUE(Performance_Debug, bool, Bool, debugFatemeh)
+        DEF_VALUE(Performance_Debug, bool, Bool, debugAtousa)
+        DEF_VALUE(Performance_Debug, bool, Bool, debugAmiR)
+        DEF_VALUE(Performance_Debug, bool, Bool, debugAmin)
+
   DEF_TREE(Experiments)
     DEF_PTREE(Experiments, AutoReferee)
         DEF_VALUE(Experiments_AutoReferee, std::string, String, autorefereefMulticastAddr)

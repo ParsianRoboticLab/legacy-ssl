@@ -293,9 +293,9 @@
 				false
 			</Var>
 			<Var name="Debug" type="bool">
-				true
+				false
 			</Var>
-			<Var name="Temp" type="bool">
+			<Var name="Nadia" type="bool">
 				false
 			</Var>
 			<Var name="KK" type="bool">
@@ -329,6 +329,30 @@
 				false
 			</Var>
 			<Var name="Hossein" type="bool">
+				false
+			</Var>
+			<Var name="Fatemeh" type="bool">
+				false
+			</Var>
+			<Var name="AHZ" type="bool">
+				false
+			</Var>
+			<Var name="Mahmood" type="bool">
+				false
+			</Var>
+			<Var name="Atousa" type="bool">
+				true
+			</Var>
+			<Var name="Amin" type="bool">
+				false
+			</Var>
+			<Var name="AmiR" type="bool">
+				false
+			</Var>
+			<Var name="Sample" type="bool">
+				false
+			</Var>
+			<Var name="Temp" type="bool">
 				false
 			</Var>
 		</Var>
