@@ -1073,16 +1073,19 @@ void CSkillGotoPointAvoid::execute()
 
     ///////////
     targetValidate();
-    agent->initPlanner(agent->id() , targetPos , ourRelaxList , oppRelaxList , avoidPenaltyArea , avoidCenterCircle , 0);
+    agent->initPlanner(agent->id() , targetPos , ourRelaxList , oppRelaxList , avoidPenaltyArea , avoidCenterCircle , ballObstacleRadius);
     result.clear();
     for( int i=agent->pathPlannerResult.size()-1 ; i>=0 ; i-- )
     {
         result.append(agent->pathPlannerResult[i]);
     }
-    if(result.size() <3)
+
+    debug(QString("no avoid : %1 size :%2").arg(noAvoid).arg(result.size()),D_MHMMD);
+    if(noAvoid)
     {
-        noAvoid = true;
+        result.clear();
     }
+
 
     double dist = 0.0;
     double distN = 0, distT = 0;
@@ -1091,93 +1094,10 @@ void CSkillGotoPointAvoid::execute()
     Vector2D mid(0,0);
     Vector2D dir(0,0);
     Vector2D tempD, firstTempD;
-    //    if (result.count() >= 1)
-    //    {
-    //        Vector2D q = result[0];
-    //        QVector<Vector2D> path;
-    //        for (int i=0;i<result.count();i++)
-    //        {
-    //            dist += (q-result[i]).length();
-    //            tempD = (result[i] - q);
-
-    //            tempD.rotate(-1.0*agent->dir().th().degree());
-
-    //            if (i == 1)
-    //                firstTempD = tempD;
-    //            distN += fabs(tempD.y);
-    //            distT += fabs(tempD.x);
-    //            q = result[i];
-    //            if ((q - agent->pos()).length() < 0.3)
-    //            {
-    //                path.append(q);
-    //                mid += path.back();
-    //            }
-    //        }
-
-    //        if (path.count() > 2)
-    //        {
-    //            linefit(path,a,b);
-    //            mid /= path.count();
-    //            dir.assign(1.0, b);
-    //            dir.normalize();
-    //            flag = true;
-    //        }
-
-    //    }
-
-    //    if (!flag)
-    //    {
-    //        if( !result.isEmpty())
-    //            dir = (result.last() - agent->pos()).norm();
-    //        else
-    //            dir = (targetPos - agent->pos()).norm();
-    //    }
-
-    //    if (flag)
-    //    {
-    //        if ((mid-agent->pos()) * dir < 0) dir *= -1;
-    //    }
 
     if( result.size() > 1 )
         dir = (result[1] - result[0]).norm();
 
-
-    //    if (getMaxAcceleration()<0)
-    //        maxAcc = conf()->BangBang_AccTangent_Max();
-    //    else
-    //        maxAcc = (getMaxAcceleration()*slowDown);
-    //    if (getMaxDeceleration()<0)
-    //        maxDec = conf()->BangBang_DecTangent_Max();
-    //    else
-    //        maxDec = (getMaxDeceleration()*slowDown);
-    //    if (getMaxAccelerationNormal()<0)
-    //        maxAccNormal = conf()->BangBang_AccNormal_Max();
-    //    else
-    //        maxAccNormal = (getMaxAccelerationNormal()*slowDown);
-    //    if (getMaxDecelerationNormal()<0)
-    //        maxDecNormal = conf()->BangBang_DecNormal_Max();
-    //    else
-    //        maxDecNormal = (getMaxDecelerationNormal()*slowDown);
-
-    //    if (getMaxVelocity() < 0)
-    //        velMax =conf()->BangBang_VelTangent_Max();
-    //    else
-    //        velMax = (getMaxVelocity()*slowDown);
-    //    if (getMaxVelocityNormal() < 0)
-    //        velMaxNorm =conf()->BangBang_VelNormal_Max();
-    //    else
-    //        velMaxNorm = (getMaxVelocityNormal()*slowDown);
-
-    //    double acc;
-
-    //    //-----------------
-
-    //    if( result.size() <= 1 ){
-    //        agent->waitHere();
-    //        if (prof!=NULL)
-    //            prof->store();
-    //        return;
-    //    }
     double D = 0 , alpha = 0 , d = 0 , vf = 0;
     Vector2D lllll ;
     if(result.count())
@@ -1210,25 +1130,11 @@ void CSkillGotoPointAvoid::execute()
             lllll = result[i];
             d = dist - D;
 
-            //            double limit = asin(((D*dmm)/(4.2*4.2))>1 ? 1 : (D*dmm)/(4.2*4.2) )*180/_PI;
-            //            if( alpha > limit )
-            //                vf = sqrt((D/sin(fabs(alpha*_PI/180.0)))*dmm);
-            //            else{
-            //                vf = 4.2;
-            //            }
 
             flag = false;
             break;
         }
     }
-
-    //    if( flag ){
-
-    //        if( getFinalPos().valid() )
-    //            vf = getFinalPos().length();
-    //        else
-    //            vf = 4.2;
-    //    }
 
     if ( D > 2.0)
         vf = 4.2;
@@ -1259,7 +1165,7 @@ void CSkillGotoPointAvoid::execute()
     }
     /////////////////////
 
-    if( noAvoid ){
+    if( noAvoid || result.size() < 3){
         lllll = targetPos;
         vf = 0;
     }

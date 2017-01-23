@@ -10,7 +10,7 @@
 clock_t t;
 //#define speedTest
 
-//#define kickTest
+#define kickTest
 QList <Vector2D> agentpath;
 void CMainApplication::Experimental6()
 {
@@ -26,7 +26,7 @@ void CMainApplication::Experimental6()
         stopFlag = false;
     if(knowledge->joystick->getButton4())
         stopFlag = true;
-    int skillAgent = 6;
+    int skillAgent = 0;
 
 
 
