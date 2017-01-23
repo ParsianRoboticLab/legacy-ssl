@@ -193,6 +193,7 @@ public:
       double markRadius;
       double markRadiusStrict;
       double segmentpershoot;
+      double segmentperpass;
     ///////////////////////////////////
 
 
@@ -203,10 +204,11 @@ private:
        QList<CRobot*> sortdanger(const QList<CRobot*> oppagent);
 
        void markExecute(int _markAgentSize);
-       bool checkIndirectArea(Vector2D);
+       bool checkIndirectAreaShoot(Vector2D);
+       bool checkIndirectAreaPass(Vector2D, Vector2D);
        void markPosRefinePlayoff();
        QList<Vector2D> ShootBlockRatio(double, Vector2D);
-       QList<Vector2D> PassBlockRatio(double, Vector2D);
+       QList<Vector2D> PassBlockRatio(double, Vector2D, Vector2D);
 
        QList<Vector2D> indirectAvoidShoot(Vector2D);
 
