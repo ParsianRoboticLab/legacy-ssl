@@ -5,7 +5,7 @@
 			false
 		</Var>
 		<Var name="Goalie ID" type="int" minval="" maxval="">
-			0
+			1
 		</Var>
 		<Var name="Defense Count" type="int" minval="" maxval="">
 			2
@@ -191,16 +191,16 @@
 			4.500000
 		</Var>
 		<Var name="Opponent Ommit Limit Playoff" type="double" minval="0.000000" maxval="">
-			10.000000
+			1.000000
 		</Var>
 		<Var name="Opponent Ommit Limit KickOff" type="double" minval="0.000000" maxval="">
 			4.500000
 		</Var>
 		<Var name="Shoot Ratio Block" type="double" minval="0.000000" maxval="">
-			50.000000
+			10.000000
 		</Var>
 		<Var name="Pass Ratio Block" type="double" minval="0.000000" maxval="">
-			10.000000
+			20.000000
 		</Var>
 		<Var name="Ommit Nearest To ball Playon" type="bool">
 			true

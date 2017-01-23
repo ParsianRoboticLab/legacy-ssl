@@ -104,7 +104,7 @@
 	</Var>
 	<Var name="Ball Tracker &amp; Vision" type="list">
 		<Var name="active Cams" type="int" minval="" maxval="">
-			2
+			4
 		</Var>
 		<Var name="On / Off" type="bool">
 			false
