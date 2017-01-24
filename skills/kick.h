@@ -11,7 +11,6 @@ class CSkillKick;
 
 
 
-
 #define penaltyAreaAvoidanceRadius (0.9)
 
 class CSkillIntercept : public CSkill

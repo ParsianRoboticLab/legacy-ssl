@@ -229,6 +229,8 @@ void CKnowledge::updateGameState()
     else if (wm->gs->theirIndirectKick()) gamestate = TheirIndirectKick;
     else if (wm->gs->ourPenaltyKick()) {gamestate = OurPenaltyKick;if (wm->gs->canKickBall()) gamestate = NormalStart;}
     else if (wm->gs->theirPenaltyKick()) gamestate = TheirPenaltyKick;
+    else if (wm->gs->ourBallPlacement()) gamestate = OurBallPlacement;//added
+    else if (wm->gs->theirBallPlacement()) gamestate = TheirBallPlacement;//added
     else gamestate = Stop;
     gamestatechanged = (lastgamestate != gamestate);
     if (gamestatechanged) lasttimegschanged = currentTime();
@@ -4009,5 +4011,7 @@ bool CKnowledge::getNecessaryDefKick() {
 }
 
 
+Vector2D CKnowledge::getBest() {
 
+}
 

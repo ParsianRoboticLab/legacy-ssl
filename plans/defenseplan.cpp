@@ -497,9 +497,6 @@ void DefensePlan::tempFindPos(int _markAgentSize){
                     || (knowledge->getGameState() == CKnowledge::TheirKickOff)
                     || (knowledge->getGameState() == CKnowledge::TheirIndirectKick)
                     );
-    debug(QString(" Mark"), D_MAHI);
-    //    sortdangerpass(oppAgentsToMarkPos);
-
     Circle2D MarkArea(wm->field->ourGoal(),markRadius);
     Circle2D MarkAreaStrict(wm->field->ourGoal(), markRadiusStrict);
     Vector2D sol1,sol2;
@@ -527,7 +524,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
         {
 
 
-            if(!checkIndirectArea(oppAgentsToMarkPos[i]))
+            if(!checkIndirectAreaShoot(oppAgentsToMarkPos[i]))
             {
                 markPoses.append(ShootBlockRatio(segmentpershoot, oppAgentsToMarkPos[i]).first());
                 markAngs.append(ShootBlockRatio(segmentpershoot, oppAgentsToMarkPos[i]).last());
@@ -546,7 +543,6 @@ void DefensePlan::tempFindPos(int _markAgentSize){
     else if(_markAgentSize > oppAgentsToMarkPos.count() && (_markAgentSize - oppAgentsToMarkPos.count()) <= oppAgentsToMarkPos.count())
     {
         draw(QString("second if"), Vector2D(0,0),QColor(Qt::red));
-
 
 
         //blocking pass
@@ -592,8 +588,6 @@ void DefensePlan::tempFindPos(int _markAgentSize){
 
 
                 }
-
-
                 //
                 MarkArea.assign(wm->field->ourGoal(), markRadius);
                 //
@@ -605,7 +599,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
         for(int i =0;i < oppAgentsToMarkPos.count();i++)
         {
 
-            if(!checkIndirectArea(oppAgentsToMarkPos[i]))
+            if(!checkIndirectAreaShoot(oppAgentsToMarkPos[i]))
             {
                 markPoses.append(ShootBlockRatio(segmentpershoot, oppAgentsToMarkPos[i]).first());
                 markAngs.append(ShootBlockRatio(segmentpershoot, oppAgentsToMarkPos[i]).last());
@@ -684,7 +678,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
         {
 
 
-            if(!checkIndirectArea(oppAgentsToMarkPos[i]))
+            if(!checkIndirectAreaShoot(oppAgentsToMarkPos[i]))
             {
                 markPoses.append(ShootBlockRatio(segmentpershoot, oppAgentsToMarkPos[i]).first());
                 markAngs.append(ShootBlockRatio(segmentpershoot, oppAgentsToMarkPos[i]).last());
@@ -846,7 +840,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
             for(int i = 0; i<_markAgentSize; i++)
             {
 
-                if(!checkIndirectArea(tempsorted[i].first))
+                if(!checkIndirectAreaShoot(tempsorted[i].first))
                 {
                     markPoses.append(ShootBlockRatio(segmentpershoot, tempsorted[i].first).first());
                     markAngs.append(ShootBlockRatio(segmentpershoot, tempsorted[i].first).last());
@@ -865,7 +859,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
             for(int i = 0; i<_markAgentSize; i++)
             {
 
-                if(!checkIndirectArea(tempsorted[i].first))
+                if(!checkIndirectAreaShoot(tempsorted[i].first))
                 {
                     markPoses.append(ShootBlockRatio(segmentpershoot, tempsorted[i].first).first());
                     markAngs.append(ShootBlockRatio(segmentpershoot, tempsorted[i].first).last());
@@ -1249,11 +1243,7 @@ void DefensePlan::initVars(float goalCircleRad)
     downGoal = wm->field->ourGoalR();
     midGoal = (topGoal + downGoal) / 2.0;
     ourAgentsRad = 0.09;
-    ourGoalAreaCircleRad = goalCircleRad + ourAgentsRad * 1.5;
-
-#ifdef LARGE_FIELD
-    ourGoalAreaCircleRad += 0.3;
-#endif
+    ourGoalAreaCircleRad = goalCircleRad + ourAgentsRad * 1.5 + 0.3;
 
     knowledge->defenseClearer = -1;
 
@@ -1262,13 +1252,8 @@ void DefensePlan::initVars(float goalCircleRad)
     Vector2D bottomGoalForCircle = downGoal;
     bottomGoalForCircle.y = -(_GOAL_WIDTH/2.0) / 2.f;
 
-    goalieCircleRadius = 0.75;
-    goalieCircleX = 0.5;
-
-#ifdef LARGE_FIELD
-    goalieCircleX += 0.2;
-    goalieCircleRadius += 0.3;
-#endif
+    goalieCircleRadius = 0.75 + 0.2;
+    goalieCircleX = 0.5 + 0.3;
 
     defenseAreaBottomCircle = Circle2D(upperGoalForCircle, ourGoalAreaCircleRad);
     defenseAreaTopCircle = Circle2D(bottomGoalForCircle, ourGoalAreaCircleRad);
@@ -1454,6 +1439,7 @@ DefensePlan::DefensePlan()
     markRadius = 1.6;
     markRadiusStrict = 1.43;
     segmentpershoot = policy()->Mark_ShootRatioBlock() / 100.0;
+    segmentperpass = policy()->Mark_PassRatioBlock() / 100.0;
     /////
     //added by KK
     predictThresh = 0;
@@ -1710,11 +1696,7 @@ Vector2D* DefensePlan::getIntersectWithDefenseArea(const Circle2D& circle, bool 
 Vector2D DefensePlan::checkDefensePoint(CAgent* agent, const Vector2D& point)
 {
     Vector2D agentPos = agent->pos();
-#ifndef LARGE_FIELD
-    double distFromGoal = 1.3;//defenseAreaTopCircle.radius() + defenseAreaTopCircle.center().absX();
-#else
     double distFromGoal = 1.6;
-#endif
     if (agentPos.dist(midGoal) < distFromGoal) {
         agentPos = midGoal + Vector2D().setPolar(distFromGoal, (agentPos - midGoal).th().degree());
         Vector2D* inter = getIntersectWithDefenseArea(Segment2D(agentPos, midGoal), agentPos);
@@ -3621,8 +3603,19 @@ void DefensePlan::markPosRefinePlayoff()
 
 }
 
+bool DefensePlan::checkIndirectAreaPass(Vector2D opp1, Vector2D opp2){
+    double indirectAvoidRadius = 0.5 + 0.1;
+    Circle2D indirectAvoidCircle(wm->ball->pos, indirectAvoidRadius);
 
-bool DefensePlan::checkIndirectArea(Vector2D opp) {
+    if (indirectAvoidCircle.contains(PassBlockRatio(segmentperpass, opp1, opp2).first()) && !knowledge->translationFlag)
+        return 1;
+    else
+    {
+        return 0;
+    }
+}
+
+bool DefensePlan::checkIndirectAreaShoot(Vector2D opp) {
     //if that point be in Indirect Area we will return 1
 
 
@@ -3680,7 +3673,8 @@ void DefensePlan::findPos(int _markAgentSize)
         segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
     }
     ///////////// Man To Man PlayOff Mode for Mark//////////////////////////////
-    if(policy()->Mark_PlayOffManToMan()){
+    double xLimitForblockingPass = 1;
+    if(policy()->Mark_PlayOffManToMan() || wm->ball->pos.x > xLimitForblockingPass){
         if(playOff){
             manToManMarkInPlayOffBlockPass(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
         }
@@ -3688,7 +3682,7 @@ void DefensePlan::findPos(int _markAgentSize)
             tempFindPos(_markAgentSize);
         }
     }
-    ////////////////// no Mode ////////////////////////////////////////////////
+    ////////////////// BlockShoot //////////////////////////////////////////////
     else{
         tempFindPos(_markAgentSize);
     }
@@ -3998,22 +3992,22 @@ QList<Vector2D> DefensePlan::ShootBlockRatio(double ratio, Vector2D opp){
     tempQlist.clear();
     tempMarkSeg.assign(opp, wm->field->ourGoal());
 
-    if((opp + (wm->field->ourGoal() - opp) * ratio).x  < 0 )
+    //if((opp + (wm->field->ourGoal() - opp) * ratio).x  < 0 )
         tempQlist.append(opp + (wm->field->ourGoal() - opp) * ratio);
-    else
-        tempQlist.append( tempMarkSeg.intersection(Segment2D(Vector2D(0,-_FIELD_HEIGHT/2), Vector2D(0,_FIELD_HEIGHT/2))));
+    //else
+     //   tempQlist.append( tempMarkSeg.intersection(Segment2D(Vector2D(0,-_FIELD_HEIGHT/2), Vector2D(0,_FIELD_HEIGHT/2))));
 
     tempQlist.append(opp - wm->field->ourGoal());
     return tempQlist;
 }
 
-QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
+QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp1, Vector2D opp2){
     Segment2D tempMarkSeg;
     QList<Vector2D> tempQlist;
     tempQlist.clear();
-    tempMarkSeg.assign(opp, wm->field->ourGoal());
-    tempQlist.append(opp + (wm->field->ourGoal() - opp) * ratio);
-    tempQlist.append(opp - wm->field->ourGoal());
+    tempMarkSeg.assign(opp1, opp2);
+    tempQlist.append(opp1 + (opp2 - opp1) * ratio);
+    tempQlist.append(opp1 + (opp2 - opp1) * ratio);
     return tempQlist;
 }
 bool DefensePlan::lookat(){
@@ -4105,7 +4099,6 @@ Vector2D DefensePlan::ballPrediction(bool _isGoalie)
     else {
         predictedBall = BallPos;
         draw(QString("Def follow"), Vector2D(0,2),"red");
-
     }
     draw(predictedBall);
     return predictedBall;

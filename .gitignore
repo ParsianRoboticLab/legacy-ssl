@@ -6,3 +6,10 @@ Makefile
 posts
 *.xml
 *~
+localsettings.xml
+policy.xml
+posts
+robotsSetting.csv
+settings.xml
+
+*.autosave

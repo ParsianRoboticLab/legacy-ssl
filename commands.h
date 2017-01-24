@@ -78,6 +78,10 @@
 #define COMM_INDIRECT_YELLOW	  'i'
 #define COMM_INDIRECT_BLUE	  'I'
 
+// ball placements (added)
+#define COMM_BALLPLACEMENT_YELLOW 'b'
+#define COMM_BALLPLACEMENT_BLUE   'B'
+
 
 // acceptable referee commands
 #define COMM_CMD_STRING      "iIfFpPkKnrRyYdDgGcztTaoO2h1 HsS"

@@ -10,13 +10,9 @@
 #include <QThread>
 #include <QMetaType>
 
-#ifndef LARGE_FIELD
-  #define _PLANNER_EXTEND_POINT_LIMIT 150
-  #define _PLANNER_EXTEND_MAX_ATTEMPT 200
-#else
-  #define _PLANNER_EXTEND_POINT_LIMIT 150
-  #define _PLANNER_EXTEND_MAX_ATTEMPT 200
-#endif
+
+#define _PLANNER_EXTEND_POINT_LIMIT 150
+#define _PLANNER_EXTEND_MAX_ATTEMPT 200
 
 using namespace std;
 

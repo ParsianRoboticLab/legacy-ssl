@@ -266,7 +266,8 @@ void CGameLogger::writeDebugs(){
     for( ite ; ite != debugs.end() ; ite++ ){
         sz = 4;
         for( int i=0 ; i<ite.value().size() ; i++ ){
-            sz += 6+ite.value().at(i).debug.toStdString().size();
+            sz += 8+ite.value().at(i).debug.toStdString().size();
+            qDebug()<<sz;
         }
         if( sz >= 4 && sz <= 1048576 ){
             debugDS << sz;

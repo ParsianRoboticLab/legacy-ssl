@@ -3,11 +3,7 @@
 INIT_ROLE(CRoleStop, "stop");  
 
 
-#ifndef LARGE_FIELD
-const double StopRadius = 0.5;
-#else
 const double StopRadius = 0.55;//0.70;//1.02;//0.78;
-#endif
 CRoleStopInfo::CRoleStopInfo(QString _roleName)
 	: CRoleInfo(_roleName)
 {

@@ -59,7 +59,7 @@ public:
     ClassProperty(CRolePlayOn, bool, IsActive, isActive, updated);
     ClassProperty(CRolePlayOn, int, AgentID, agentID, updated);
 //    ClassProperty(CRolePlayOn, CAgent ,Agent, agent,  updated);
-    ClassProperty(CRolePlayOn, kkSkill, SelectedSkill, selectedSkill, updated);
+    ClassProperty(CRolePlayOn, roleSkill::ESkill, SelectedSkill, selectedSkill, updated);
 
 
     ClassProperty(CRolePlayOn, Vector2D, Target, target, updated);

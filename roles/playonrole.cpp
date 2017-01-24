@@ -25,13 +25,13 @@ void CRolePlayOn::initTask()
     updated = false;
     switch(selectedSkill)
     {
-        case SkillGotopoint:
+        case roleSkill::Gotopoint:
             gotoPointSkill->setAgent(agent);
             gotoPointSkill->setFinalPos(target);
             gotoPointSkill->setFinalDir(targetDir);
             gotoPointSkill->setFinalVel(targetVel);
         break;
-        case SkillGotopointAvoid:
+        case roleSkill::GotopointAvoid:
             gotoPointAvoidSkill->setAgent(agent);
             gotoPointAvoidSkill->setFinalPos(target);
             gotoPointAvoidSkill->setFinalDir(targetDir);
@@ -42,7 +42,7 @@ void CRolePlayOn::initTask()
             gotoPointAvoidSkill->setAvoidPenaltyArea(avoidPenaltyArea);
             gotoPointAvoidSkill->setMaxVelocity(3.0);
         break;
-        case SkillKick:
+        case roleSkill::Kick:
             kickSkill->setAgent(agent);
             kickSkill->setTarget(target);
             kickSkill->setTolerance(tolerance);
@@ -52,7 +52,7 @@ void CRolePlayOn::initTask()
             kickSkill->setAvoidPenaltyArea(avoidPenaltyArea);
             kickSkill->setIsGotoPointAvoid(isGotoPointAvoid);
         break;
-        case SkillReceivePass:
+        case roleSkill::ReceivePass:
             receivePassSkill->setAgent(agent);
             receivePassSkill->setTarget(waitPos);
             receivePassSkill->setSlow(slow);
@@ -60,7 +60,7 @@ void CRolePlayOn::initTask()
             receivePassSkill->setAvoidOppPenaltyArea(avoidPenaltyArea);
             receivePassSkill->setAvoidOurPenaltyArea(avoidPenaltyArea);
         break;
-        case SkillOneTouch:
+        case roleSkill::OneTouch:
             oneTouchSkill->setAgent(agent);
             oneTouchSkill->setWaitPos(waitPos);
             oneTouchSkill->setTarget(target);
@@ -75,27 +75,27 @@ void CRolePlayOn::execute()
 {
     if(updated)
         initTask();
-    if(selectedSkill ==  SkillGotopoint)
+    if(selectedSkill ==  roleSkill::Gotopoint)
     {
             gotoPointSkill->execute();
     }
-    else if(selectedSkill == SkillGotopointAvoid)
+    else if(selectedSkill == roleSkill::GotopointAvoid)
     {
             gotoPointAvoidSkill->execute();
     }
-    else if(selectedSkill == SkillKick)
+    else if(selectedSkill == roleSkill::Kick)
     {
             kickSkill->execute();
      }
-     else if(selectedSkill == SkillReceivePass)
+     else if(selectedSkill == roleSkill::ReceivePass)
      {
             receivePassSkill->execute();
      }
-    else if(selectedSkill == SkillOneTouch)
+    else if(selectedSkill == roleSkill::OneTouch)
     {
             oneTouchSkill->execute();
     }
-    else if(selectedSkill == SkillMark) {
+    else if(selectedSkill == roleSkill::Mark) {
 
     }
 }
