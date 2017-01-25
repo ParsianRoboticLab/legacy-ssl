@@ -10,7 +10,7 @@
 clock_t t;
 //#define speedTest
 
-#define kickTest
+//#define kickTest
 QList <Vector2D> agentpath;
 void CMainApplication::Experimental6()
 {
@@ -42,6 +42,7 @@ void CMainApplication::Experimental6()
         mmkick.execute();
     return;
 #endif
+
 
     static CSkillDribble mD(soccer->agents[skillAgent]);
     mD.setInitialLook(Vector2D(10000000,0));
