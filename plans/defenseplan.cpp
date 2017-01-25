@@ -1659,6 +1659,7 @@ void DefensePlan::matchingDefPos(int _defenseNum)
     if(matchPoints.count() == ourAgents.count())
     {
         knowledge->Matching(ourAgents,matchPoints,matchResult);
+        debug(QString("matchpoints %1: matchresult %2 : markangles %3 : defensenum %4 ").arg(matchPoints.count()).arg(matchResult.count()).arg(markAngs.count()) .arg(_defenseNum), D_MAHI);
         for(int i =0; i < defenseCount  ; i++)
             defensePoints[i] = matchPoints[i];
         for(int i =0 ; i < matchPoints.count() && i < matchResult.count() ; i++)
@@ -1671,21 +1672,30 @@ void DefensePlan::matchingDefPos(int _defenseNum)
             gpa[ourAgents[i]->id()]->setSlowMode(false);
             gpa[ourAgents[i]->id()]->setAvoidPenaltyArea(false);
             gpa[ourAgents[i]->id()]->setAvoidBall(false);
+            //gpa[ourAgents[i]->id()]->setLookAt(wm->ball->pos);
+
+
+        QList<Vector2D> matchang;
+            for(int i = 0 ; i < _defenseNum ; i++) {
+                draw(tempDefPos.pos[i],0,QColor(Qt::blue));
+                matchang.append(matchPoints[i] - wm->field->ourGoal());
+            }
+            matchang.append(markAngs);
 
             if(matchResult[i] < _defenseNum){
-
-                gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , matchPoints[matchResult[i]] - wm->field->ourGoal() );
+                gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , /*matchPoints[matchResult[i]] - wm->field->ourGoal()*/matchang[i] );
             }
             else
             {
-                gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , matchPoints[matchResult[i]] - wm->field->ourGoal());
+                gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , /*matchPoints[matchResult[i]] - wm->field->ourGoal()*/matchang[i]);
             }
-
+            for(int i; i < matchResult.count();i++)
+            {
+                debug(QString("matchresult are : %1:").arg(matchResult[i]), D_MAHI);
+            }
 
         }
     }
-
-
 
 }
 
@@ -3912,7 +3922,7 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
     tempQlist.clear();
     tempMarkSeg.assign(wm->ball->pos, opp);
     tempQlist.append(wm->ball->pos + (opp - wm->ball->pos) * ratio);
-    tempQlist.append(wm->ball->pos + (opp - wm->ball->pos));
+    tempQlist.append( wm->ball->pos - opp);
     return tempQlist;
 }
 bool DefensePlan::lookat(){
