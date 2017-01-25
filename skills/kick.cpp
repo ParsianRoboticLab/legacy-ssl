@@ -1534,11 +1534,11 @@ void CSkillKickOneTouch::execute()
 {
     ballRealVel = knowledge->getRealBallVel();
     gotopointavoid->setAgent(agent);
-    //gotopointavoid->setADiveMode(true);
     gotopointavoid->setOneTouchMode(false);
     gotopointavoid->setNoAvoid(true);
 
     if (!target.valid()) target = wm->field->oppGoal();
+
 
     Vector2D ballPos = wm->ball->pos;
     Vector2D agentPos = agent->pos();
@@ -1547,6 +1547,8 @@ void CSkillKickOneTouch::execute()
     Segment2D ballPath;
     double stopParam = 0.09;
     ballPath.assign(ballPos,ballPos + wm->ball->vel.norm()*(agentPos.dist(ballPos) - stopParam + 0.01));
+    Segment2D ballLine;
+    ballLine.assign(ballPos,ballPos + wm->ball->vel.norm()*(15));
     draw(ballPath,"red");
 
 
@@ -1561,6 +1563,9 @@ void CSkillKickOneTouch::execute()
     double onetouchRad =1.5;
     double onetouchKickRad = 0.5;
     Circle2D oneTouchArea;
+    Circle2D oppPenaltyArea(wm->field->oppGoal() + Vector2D(0.15,0),1.30);
+///temp
+    draw(oppPenaltyArea,QColor(Qt::red));
 
     if(ballPos.dist(agentPos) <= onetouchRad)
         onetouchRad = ballPos.dist(agentPos)-0.08;
@@ -1578,6 +1583,18 @@ void CSkillKickOneTouch::execute()
     else if(oneTouchArea.intersection(ballPath,&sol1,&sol2) && wm->ball->vel.length() > 0.4)
     {
         intersectPos = ballPath.nearestPoint(agentPos);
+        if(wm->field->isInOppPenaltyArea(intersectPos))
+        {
+            if(oppPenaltyArea.intersection(ballLine,&sol1,&sol2))
+            {
+                if(sol1.dist(waitpos) > sol2.dist(waitpos))
+                {
+                    sol1 = sol2;
+                }
+                intersectPos = sol1;
+            }
+
+        }
         gotopointavoid->init(intersectPos +addVec,oneTouchDir);
         gotopointavoid->setADiveMode(true);
         gotopointavoid->setOneTouchMode(true);
