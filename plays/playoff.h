@@ -134,29 +134,33 @@ struct SPositioningAgent {
     // TODO : Make positionArg a List of Pointers
 
     QList<SPositioningArg> positionArg;
-    long mahiLastTime;
-    int stateNumber;
-    bool flag;
+    int stateNumber = 0;
 
     SPositioningArg getArgs(const int& _state = 0) const {
         if ((_state + stateNumber) < positionArg.size()) {
             return positionArg.at(stateNumber + _state);
+
         } else {
+
             debug(QString("getArgs : wrong arg %1 < %2").arg(positionArg.size()).arg(_state + stateNumber), D_ERROR);
             qWarning() << QString("getArgs : wrong arg %1 < %2").arg(positionArg.size()).arg(_state + stateNumber);
             SPositioningArg null;
             return null;
+
         }
     }
 
     SPositioningArg getAbsArgs(const int& _state = 0) const {
         if (_state < positionArg.size()) {
             return positionArg.at(_state);
-        } else {
+
+       } else {
+
             debug(QString("getArgs : wrong absarg %1 < %2").arg(positionArg.size()).arg(_state), D_ERROR);
             qWarning() << QString("getArgs : wrong absarg %1 < %2").arg(positionArg.size()).arg(_state);
             SPositioningArg null;
             return null;
+
         }
     }
 
@@ -295,8 +299,8 @@ public:
     void execute_6();
     void init(QList <int> _agents , QMap<QString , EditData*> *_editData);
     virtual QString whoami() {return "PlayOff";}
-    bool firstTime;
-    bool kickOffFirstTimeFlag;
+    bool firstTime = true;
+    bool kickOffFirstTimeFlag = true;
     //GUI
 
     QList< QList<SPlayOffPlan*> > updatePlans();
@@ -319,10 +323,10 @@ public:
 
     void setInitial(bool _init);
 private:
-    bool initial;
+    bool initial = true;
 
     /////////////*NEW*/////////////
-    SPlan* masterPlan;
+    SPlan* masterPlan = NULL;
     EMode masterMode;
     //////////Dynamic Plan////////////
 
