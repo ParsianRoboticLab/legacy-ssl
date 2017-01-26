@@ -26,7 +26,7 @@ void CMainApplication::Experimental6()
         stopFlag = false;
     if(knowledge->joystick->getButton4())
         stopFlag = true;
-    int skillAgent = 6;
+    int skillAgent = 0;
 
 
 
@@ -42,6 +42,7 @@ void CMainApplication::Experimental6()
         mmkick.execute();
     return;
 #endif
+
 
     static CSkillDribble mD(soccer->agents[skillAgent]);
     mD.setInitialLook(Vector2D(10000000,0));

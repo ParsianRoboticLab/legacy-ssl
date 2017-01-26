@@ -122,7 +122,7 @@ public:
         OurPenaltyKick = 8,
         TheirPenaltyKick = 9,
         Start = 10,
-        NormalStart = 11
+        NormalStart = 11,
         //added
         OurBallPlacement = 12,
         TheirBallPlacement = 13
