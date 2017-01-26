@@ -14,6 +14,12 @@ clock_t t;
 QList <Vector2D> agentpath;
 void CMainApplication::Experimental6()
 {
+
+///comment!
+
+
+return;
+
 #ifdef speedTest
     int agentNum = 4;
     soccer->agents[agentNum]->setRobotAbsVel(1,0,0);
@@ -21,6 +27,8 @@ void CMainApplication::Experimental6()
     draw(QString("speed2 :%1").arg(knowledge->mainLoopTime),Vector2D(1,1));
     return;
 #endif
+
+
     static bool stopFlag = true;
     if(knowledge->joystick->getButton3())
         stopFlag = false;
