@@ -26,9 +26,15 @@ void CSkillAutoBallPlacement::gotoBall()
     finalPos = ballPos + (ballPos - target).norm() * 0.12;
     GPA->init(finalPos,ballPos - finalPos);
     GPA->setAvoidBall(true);
-    GPA->setBallObstacleRadius(0.2);
+    GPA->setBallObstacleRadius(0.2);//0.2
     GPA->setSlowMode(true);
     GPA->setVerySlow(true);
+    if(agent->pos().dist(ballPos)>2) {
+        agent->setRoller(7);
+
+    } else {
+      agent->setRoller(0);
+      }
     GPA->execute();
 }
 void CSkillAutoBallPlacement::gotoTarget()
@@ -41,14 +47,26 @@ void CSkillAutoBallPlacement::gotoTarget()
     GPA->setSlowMode(true);
     GPA->setVerySlow(false);
     GPA->execute();
-    if(1||target.dist(ballPos)< 0.5)
-        agent->setRoller(1);
-    else
-        agent->setRoller(0);
-    if(target.dist(ballPos)>1.5)
+    if(target.dist(ballPos)< 0.5) {
+        agent->setRoller(0);///1
+    } else {
+      agent->setRoller(0);
+      }
+
+    if(target.dist(ballPos)>1) {
+        agent->setRoller(2);
+
+    } else {
+      agent->setRoller(0);
+      }
+    if(target.dist(ballPos)>1.5) {
+
         agent->setChip(300);
-    else
-        agent->setChip(0);
+
+    } else {
+      agent->setChip(0);
+
+      }
 }
 
 void CSkillAutoBallPlacement::execute()
@@ -68,7 +86,7 @@ void CSkillAutoBallPlacement::execute()
     }
     else
     {
-        agent->setRoller(1);
+        agent->setRoller(0);
         agent->setRobotAbsVel(0,0,0);
         isFinished = true;
     }

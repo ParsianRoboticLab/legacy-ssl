@@ -7,6 +7,7 @@
 #include <callibration.h>
 #include <defensepositioning.h>
 #include <time.h>
+#include <autoballplacement.h>
 clock_t t;
 //#define speedTest
 
@@ -15,8 +16,12 @@ QList <Vector2D> agentpath;
 void CMainApplication::Experimental6()
 {
 
-///comment!
-///nn
+    static CSkillAutoBallPlacement *BP = new CSkillAutoBallPlacement(knowledge->getAgent(2));
+  //  BP->gotoBall();
+    BP->setTarget(knowledge->getMousePos());
+  //  BP->gotoTarget();
+  //  BP->setKickSpeed(0);
+    BP->execute();
 
 return;
 
