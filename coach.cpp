@@ -1303,6 +1303,7 @@ bool CCoach::decideAttack()
         ourPlayOff = kickoff;
         selectedPlay = ourPlayOff;
         decidePlayOff(ourPlayers, KICKOFF);
+        lastPlayers.append(ourPlayers);
         debug(QString("ourplayers : %1").arg(ourPlayers.size()),D_MAHI);
     } else if( knowledge->getGameState() == CKnowledge::TheirKickOff ){
         selectedPlay = theirKickOff;
@@ -1385,7 +1386,6 @@ bool CCoach::decideAttack()
 
 void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
 
-
     //Decide Plan
     if (firstTime) {
         NGameOff::EMode tempMode;
@@ -1395,7 +1395,8 @@ void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
         firstTime = false;
         qDebug() << "[Coach] first time config done";
     } else {
-        setPlayOff(ourPlayOff->getMasterMode());
+        setPlayOff( ourPlayOff->getMasterMode() );
+
     }
 }
 void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
