@@ -154,7 +154,9 @@ SOURCES += main.cpp \
     proto/referee.pb.cc \
     plays/indirect.cpp \
     plays/direct.cpp \
-    plays/kickoff.cpp
+    plays/kickoff.cpp \
+    plays/ourballplacement.cpp \
+    plays/theirballplacement.cpp
 
 
 HEADERS += base.h \
@@ -321,7 +323,9 @@ HEADERS += base.h \
     plays/indirect.h \
     plays/direct.h \
     plays/kickoff.h \
-    plays/plays.h
+    plays/plays.h \
+    plays/ourballplacement.h \
+    plays/theirballplacement.h
 
 
 unix:INCLUDEPATH += "/usr/local/include"
@@ -402,3 +406,7 @@ INCLUDEPATH += $$PWD/intentions/
 
 RESOURCES +=
 CONFIG += c++11
+
+
+
+

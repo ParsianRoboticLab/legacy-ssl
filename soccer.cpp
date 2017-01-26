@@ -907,6 +907,11 @@ void CSoccer::refUpdate()
         return;
     }
 
+
+    SSL_Referee_Point desPos;
+    desPos = referee.designated_position();
+    knowledge->setBPPosition(desPos.x(), desPos.y());
+
     gsp.cmd = compute_command(referee);
     gsp.cmd_counter = referee.command_counter();
     gsp.goals_blue = referee.blue().score();
@@ -1055,6 +1060,16 @@ void CSoccer::refUpdate()
             {
                 wm->refCommand.enqueue("Their Penalty");
             }
+            //added
+            else if (wm->gs->ourBallPlacement())
+            {
+                wm->refCommand.enqueue("Our BallPlacement");
+            }
+            else if (wm->gs->theirBallPlacement())
+            {
+                wm->refCommand.enqueue("Their BallPlacement");
+            }
+
             else
             {
                 wm->refCommand.enqueue("Make Circle");

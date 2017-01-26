@@ -7,6 +7,7 @@
 #include <joystick.h>
 #include <QMap>
 #include <QDebug>
+#include <QVector2D>
 
 //#include "simulation/simulator.h"
 //#include <widgets.h>
@@ -102,6 +103,13 @@ struct SRAgentArgs {
 
 class CKnowledge
 {
+
+
+private:
+    //added
+    QVector2D bpPosition;
+
+
 protected:
     CAgent** agents;
     int m_ballOwner;
@@ -122,7 +130,7 @@ public:
         OurPenaltyKick = 8,
         TheirPenaltyKick = 9,
         Start = 10,
-        NormalStart = 11
+        NormalStart = 11,
         //added
         OurBallPlacement = 12,
         TheirBallPlacement = 13
@@ -142,6 +150,13 @@ public:
     };
 
     ballPossesionState ballPossesion;
+
+
+    //added
+    QVector2D getBPPosition();
+    void setBPPosition(float x, float y);
+
+
     class PlaymakerSelector
     {
     private:
@@ -154,6 +169,7 @@ public:
         double distance;
         QList<CAgent*> agents;
         QList<CAgent*> lastAgents;
+
     public:
 
         PlaymakerSelector();

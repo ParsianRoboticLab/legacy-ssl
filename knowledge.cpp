@@ -83,6 +83,9 @@ CKnowledge::CKnowledge(CAgent** _agents)
     necessaryDefKick = false;
 
 
+
+
+
     staticPoses.clear();
     for(int _i = 0 ; _i < 5 ; _i++)
     {
@@ -166,6 +169,11 @@ QString CKnowledge::stateToString(State s)
     if (s==TheirIndirectKick) return "their indirect";
     if (s==OurPenaltyKick) return "our penalty";
     if (s==TheirPenaltyKick) return "their penalty";
+
+    //added
+    if (s==OurBallPlacement) return "our ballplacement";
+    if (s==TheirBallPlacement) return "their ballplacement";
+
     if (s==Start) return "start";
     if (s==NormalStart) return "normal start";
     return "";
@@ -4015,3 +4023,12 @@ Vector2D CKnowledge::getBest() {
 
 }
 
+
+//added
+QVector2D CKnowledge::getBPPosition(){
+    return bpPosition;
+}
+void CKnowledge::setBPPosition(float x, float y){
+    bpPosition.setX(x);
+    bpPosition.setY(y);
+}

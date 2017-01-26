@@ -15,10 +15,12 @@ enum PlaysEnum{
     OurIndirectPlay,
     OurDirectPlay,
     OurPenaltyPlay,
+    OurBallPlacement,//added
     TheirKickOffPlay,
     TheirIndirectPlay,
     TheirDirectPlay,
     TheirPenaltyPlay,
+    TheirBallPlacement,//added
     StartPlay,
     StopPlay,
     HaltPlay
