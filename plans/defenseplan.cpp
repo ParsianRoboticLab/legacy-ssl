@@ -1689,10 +1689,6 @@ void DefensePlan::matchingDefPos(int _defenseNum)
             {
                 gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , /*matchPoints[matchResult[i]] - wm->field->ourGoal()*/matchang[i]);
             }
-            for(int i; i < matchResult.count();i++)
-            {
-                debug(QString("matchresult are : %1:").arg(matchResult[i]), D_MAHI);
-            }
 
         }
     }
