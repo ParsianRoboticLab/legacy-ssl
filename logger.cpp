@@ -57,23 +57,29 @@ void debug(QString text, long type, QColor color)
 #ifdef GAME_MODE
     return;
 #endif
-    int mask = 0;
+ long mask = 0;
     if (conf() == NULL) return;
     if (conf()->Performance_Debug_debugGame()) mask = mask | 1;
     if (conf()->Performance_Debug_debugExperiment()) mask = mask | 2;
     if (conf()->Performance_Debug_debugDebug()) mask = mask | 4;
-    if (conf()->Performance_Debug_debugTemp()) mask = mask | 8;
+    if (conf()->Performance_Debug_debugNadia()) mask = mask | 8;
     if (conf()->Performance_Debug_debugMani()) mask = mask | 16;
     if (conf()->Performance_Debug_debugArash()) mask = mask | 32;
     if (conf()->Performance_Debug_debugAli()) mask = mask | 64;
     if (conf()->Performance_Debug_debugSepehr()) mask = mask | 128;
     if (conf()->Performance_Debug_debugMasood()) mask = mask | 256;
-	if (conf()->Performance_Debug_debugMohammed()) mask = mask | 512;
-	if (conf()->Performance_Debug_debugHossein()) mask = mask | 1024;
+    if (conf()->Performance_Debug_debugMohammed()) mask = mask | 512;
+    if (conf()->Performance_Debug_debugHossein()) mask = mask | 1024;
     if (conf()->Performance_Debug_debugKK()) mask = mask | 2048;
     if (conf()->Performance_Debug_debugDONMHMMD()) mask = mask | 4096;
     if (conf()->Performance_Debug_debugERF()) mask = mask | 8192;
     if (conf()->Performance_Debug_debugMAHI()) mask = mask | 16384;
+    if (conf()->Performance_Debug_debugMahmood()) mask = mask | 32768;
+    if (conf()->Performance_Debug_debugFatemeh()) mask = mask | 65536;
+    if (conf()->Performance_Debug_debugAtousa()) mask = mask | 131072;
+    if (conf()->Performance_Debug_debugAHZ()) mask = mask | 262144;
+    if (conf()->Performance_Debug_debugAmin()) mask = mask | 524288;
+    if (conf()->Performance_Debug_debugAmiR()) mask = mask | 1048576;
 
     if ((type & mask) != 0 || (type==D_ERROR))
     {
@@ -98,12 +104,12 @@ void debug0(QString text, int type, QColor color)
 #ifdef GAME_MODE
 	return;
 #endif
-	int mask = 0;
+        long mask = 0;
 	if (conf() == NULL) return;
 	if (conf()->Performance_Debug_debugGame()) mask = mask | 1;
 	if (conf()->Performance_Debug_debugExperiment()) mask = mask | 2;
 	if (conf()->Performance_Debug_debugDebug()) mask = mask | 4;
-	if (conf()->Performance_Debug_debugTemp()) mask = mask | 8;
+        if (conf()->Performance_Debug_debugNadia()) mask = mask | 8;
 	if (conf()->Performance_Debug_debugMani()) mask = mask | 16;
 	if (conf()->Performance_Debug_debugArash()) mask = mask | 32;
 	if (conf()->Performance_Debug_debugAli()) mask = mask | 64;
@@ -111,8 +117,17 @@ void debug0(QString text, int type, QColor color)
 	if (conf()->Performance_Debug_debugMasood()) mask = mask | 256;
 	if (conf()->Performance_Debug_debugMohammed()) mask = mask | 512;
 	if (conf()->Performance_Debug_debugHossein()) mask = mask | 1024;
-    if (conf()->Performance_Debug_debugKK()) mask = mask | 2048;
-    if (conf()->Performance_Debug_debugDONMHMMD()) mask = mask | 4096;
+        if (conf()->Performance_Debug_debugKK()) mask = mask | 2048;
+        if (conf()->Performance_Debug_debugDONMHMMD()) mask = mask | 4096;
+        if (conf()->Performance_Debug_debugERF()) mask = mask | 8192;
+        if (conf()->Performance_Debug_debugMAHI()) mask = mask | 16384;
+        if (conf()->Performance_Debug_debugMahmood()) mask = mask | 32768;
+        if (conf()->Performance_Debug_debugFatemeh()) mask = mask | 65536;
+        if (conf()->Performance_Debug_debugAtousa()) mask = mask | 131072;
+        if (conf()->Performance_Debug_debugAHZ()) mask = mask | 262144;
+        if (conf()->Performance_Debug_debugAmin()) mask = mask | 524288;
+        if (conf()->Performance_Debug_debugAmiR()) mask = mask | 1048576;
+
 
 	if ((type & mask) != 0 || (type==D_ERROR))
 	{

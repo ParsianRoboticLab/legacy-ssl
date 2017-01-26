@@ -190,7 +190,7 @@ void CSkillGotoPointAvoid::generateFromConfig(CAgent *a)
     }
     timeStarted = CProfiler::getTime();
     timeEstimated = simulator->timeNeededForGotoPoint(targetPos,targetDir,0.05,10,a->id());
-
+    noAvoid = false;
     avoidPenaltyArea = true;
     this->setADiveMode(false);
     //	setFinalVel(Vector2D(1,0.5));
@@ -494,7 +494,7 @@ CSkillConfigWidget* CSkillKick::generateConfigWidget(QWidget* parent)
     w->lineEdits.append(new QLineEdit("500"));
     w->lineEdits.append(new QLineEdit("-1"));
     QGridLayout *layoutMain = new QGridLayout();
-    QIntValidator* intValidator = new QIntValidator(1,512,parent);
+    QIntValidator* intValidator = new QIntValidator(1,1023,parent);
     w->lineEdits[0]->setValidator(intValidator);
     layoutMain->addWidget(w->lineEdits[0],0,0,1,2);
     layoutMain->addWidget(w->checkBoxs[0],1,0);
