@@ -1245,8 +1245,14 @@ bool CCoach::decideAttack()
 
     // find unused agents!
 
+
+
     QList<int> ourPlayers = wm->our.t->activeAgents;
     static QList<int> lastPlayers;
+
+
+
+
     if( goalieAgent != NULL ){
         ourPlayers.removeOne(goalieAgent->self()->id);
     }
@@ -1255,6 +1261,8 @@ bool CCoach::decideAttack()
             ourPlayers.removeOne(defenseAgents.at(i)->self()->id);
         }
     }
+
+
 
     //selectedPlay = NULL;
 
@@ -1709,6 +1717,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     matchPlan(thePlan, _ourplayers); //Match The Plan
     ourPlayOff->setMasterPlan(thePlan);
     ourPlayOff->setInitial(true);
+    ourPlayOff->lockAgents = true;
     lastPlan = thePlan;
 }
 

@@ -1587,19 +1587,33 @@ Vector2D CPlayOff::getMoveTarget(const SPositioningArg& _posArg) {
     position  = _posArg.staticPos;
     finalTarget = position;
     for(double dist=0.0 ; dist<=escapeRad ; dist+=0.2 ) {
+
         for(double ang=-180.0 ; ang<=180.0 ; ang+=60.0 ) {
+
             tempTarget = position + Vector2D::polar2vector(dist,ang);
+
             for(int i = 0; i < wm->opp.activeAgentsCount();i++) {
-                if(Circle2D(wm->opp.active(i)->pos,0.02).contains(tempTarget)) oppCnt++;
+                if(Circle2D(wm->opp.active(i)->pos,0.02).contains(tempTarget)) {
+                    oppCnt = 1;
+                    break;
+                }
+
             }
+
             if(!oppCnt) {
                 finalTarget = tempTarget;
                 posFound = true;
                 break;
+
             }
         }
-        if(posFound) break;
+
+        if(posFound) {
+            break;
+
+        }
     }
+
     return finalTarget;
 }
 

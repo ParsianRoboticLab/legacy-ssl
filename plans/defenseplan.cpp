@@ -3087,7 +3087,7 @@ CDefPos::CDefPos()
 {
     penaltyAreaOffset = 0.2;
     penaltyAreaRadius = 1.33;
-    penaltyAreaCircle.assign(wm->field->ourGoal()-Vector2D(penaltyAreaOffset, 0), penaltyAreaRadius);
+    penaltyAreaCircle.assign(wm->field->ourGoal()-Vector2D(penaltyAreaOffset, 0.001), penaltyAreaRadius);
     oneDefThr = 0;
     isNearPenaltyArea = false;
 }
