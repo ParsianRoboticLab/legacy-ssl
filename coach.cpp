@@ -1231,7 +1231,7 @@ void CCoach::choosePlaymakeAndSupporter(bool needSupporter,bool defenseFirst)
         }
 
     }
-    lastPlayMake = playmakeId;
+    lastPlayMake = 11;//playmakeId;
 
 }
 bool CCoach::decideAttack()
