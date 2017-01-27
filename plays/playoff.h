@@ -243,6 +243,11 @@ struct SMatching {
     SCommon *common;
 };
 
+struct AgentPoint {
+    int id    = -1;
+    int state = -1;
+};
+
 struct SExecution {
 
     QList< QList<playOffRobot> > AgentPlan;
@@ -250,6 +255,8 @@ struct SExecution {
     int symmetry     =  1;
     int theLastAgent = -1;
     int theLastState = -1;
+    AgentPoint passer;
+    AgentPoint reciver;
 };
 
 struct SGUI {
@@ -318,6 +325,9 @@ public:
     //////////
 
     void setMasterPlan(SPlan* _thePlan);
+    void analyseShoot();
+    void analysePass();
+
     void setMasterMode(EMode _mode);
     EMode getMasterMode();
 
@@ -511,10 +521,11 @@ private:
     void assignKick     (CRolePlayOff*, const SPositioningAgent&, bool _chip);
     void assignReceive  (CRolePlayOff*, const SPositioningAgent&, bool _ignoreAngle);
     int findFirstPasser();
-    QPair<int, int> findTheLast(const SExecution& _plan);
+    QPair<int, int> findTheLastShoot(const SExecution& _plan);
+    QPair<AgentPoint, AgentPoint> findThePasserandReciver(const SExecution&);
     int findReciver(int _passer, int _state);
     QList<SBallOwner> ownerList;
-
+    bool havePassInPlan;
 
 protected:
     void reset();

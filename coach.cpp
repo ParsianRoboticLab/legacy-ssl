@@ -1716,6 +1716,8 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     NGameOff::SPlan* thePlan = chooseMostSuccecfull(validPlans); //Choose Best valid Plan
     matchPlan(thePlan, _ourplayers); //Match The Plan
     ourPlayOff->setMasterPlan(thePlan);
+    ourPlayOff->analyseShoot(); // should call after setmasterplan
+    ourPlayOff->analysePass(); // should call after setmasterplan
     ourPlayOff->setInitial(true);
     ourPlayOff->lockAgents = true;
     lastPlan = thePlan;

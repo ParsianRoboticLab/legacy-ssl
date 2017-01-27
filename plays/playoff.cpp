@@ -39,6 +39,7 @@ CPlayOff::CPlayOff()
 
     initial    = true;
     playOnFlag = false;
+    havePassInPlan = false;
 
 }
 
@@ -652,8 +653,9 @@ void CPlayOff::staticExecute() {
         newCheckEndState();
         doPass = true;
         // TODO : Useful and stable Pass Manager
-        //        if(agentSize > 1)
-        //            passManager();
+        if(masterPlan->common.currentSize > 1 && havePassInPlan) {
+            passManager();
+        }
 
 
         if(newIsPlanEnd()) {
@@ -1107,19 +1109,28 @@ bool CPlayOff::isTasksDone() {
 }
 ///////////////PassManager///////////////////
 void CPlayOff::passManager() {
-    if (ownerList.size()) {
-        int tReciverAgent = positionAgent[ownerList.front().id].positionArg.at(ownerList.front().state + 1).PassToId;
-        int tReciverIndex = positionAgent[ownerList.front().id].positionArg.at(ownerList.front().state + 1).PassToState;
+    // TODO : FOR MORE THAN ONE PASS
+    debug("don't worry ... pass have a manager", D_MAHI);
 
-        if (positionAgent[tReciverAgent].stateNumber >= tReciverIndex) {
-            if (positionAgent[tReciverAgent].getArgs().staticPos.dist(knowledge->getAgent(masterPlan->common.matchedID.value(tReciverAgent))->pos()) > 2 || doPass) {
-                doPass = false;
-            }
-            else {
-                doPass = true;
-            }
-        }
-    }
+
+
+//    if (positionAgent[masterPlan->execution.theLastAgent].getAbsArgs(masterPlan->execution.theLastState).staticPos) {
+
+//    }
+
+//    if (ownerList.size()) {
+//        int tReciverAgent = positionAgent[ownerList.front().id].positionArg.at(ownerList.front().state + 1).PassToId;
+//        int tReciverIndex = positionAgent[ownerList.front().id].positionArg.at(ownerList.front().state + 1).PassToState;
+
+//        if (positionAgent[tReciverAgent].stateNumber >= tReciverIndex) {
+//            if (positionAgent[tReciverAgent].getArgs().staticPos.dist(knowledge->getAgent(masterPlan->common.matchedID.value(tReciverAgent))->pos()) > 2 || doPass) {
+//                doPass = false;
+//            }
+//            else {
+//                doPass = true;
+//            }
+//        }
+//    }
 }
 
 ///////////////////////////////////////////////
@@ -2533,13 +2544,7 @@ QString CPlayOff::getModeStr(POMODE _mode) {
 ////////////////////////////////
 
 void CPlayOff::setMasterPlan(SPlan *_thePlan) {
-    QPair<int, int> last;
     masterPlan = _thePlan;
-
-    last = findTheLast(masterPlan->execution);
-    masterPlan->execution.theLastAgent = last.first;
-    masterPlan->execution.theLastState = last.second;
-    qDebug() << "Last" << last.first << last.second;
 }
 
 void CPlayOff::setMasterMode(EMode _mode) {
@@ -2661,7 +2666,7 @@ int CPlayOff::findFirstPasser() {
     return first;
 }
 
-QPair<int, int> CPlayOff::findTheLast(const SExecution &_plan) {
+QPair<int, int> CPlayOff::findTheLastShoot(const SExecution &_plan) {
     QPair<int, int> last;
     last.first = last.second = -1;
 
@@ -2688,4 +2693,36 @@ QPair<int, int> CPlayOff::findTheLast(const SExecution &_plan) {
     }
 
     return last;
+}
+
+void CPlayOff::analyseShoot()
+{
+    if (masterPlan != NULL) {
+        QPair<int, int> last;
+        last = findTheLastShoot(masterPlan->execution);
+        masterPlan->execution.theLastAgent = last.first;
+        masterPlan->execution.theLastState = last.second;
+        qDebug() << "Last" << last.first << last.second;
+        havePassInPlan = (last.first != -1  && last.second != -1);
+    }
+}
+
+void CPlayOff::analysePass() {
+    // TODO : need edit for mulitiple pass
+    if (masterPlan != NULL) {
+        // first : passer second : reciver
+        QPair<AgentPoint, AgentPoint> tPass;
+        tPass = findThePasserandReciver(masterPlan->execution);
+        masterPlan->execution.passer .id     = tPass.first.id;
+        masterPlan->execution.passer .state  = tPass.first.state;
+        masterPlan->execution.reciver.id     = tPass.second.id;
+        masterPlan->execution.reciver.state  = tPass.second.state;
+
+    }
+}
+
+QPair<NGameOff::AgentPoint, NGameOff::AgentPoint>
+CPlayOff::findThePasserandReciver(const NGameOff::SExecution & _plan) {
+    QPair<NGameOff::AgentPoint, NGameOff::AgentPoint> tPass;
+    return tPass;
 }
