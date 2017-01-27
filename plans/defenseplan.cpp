@@ -992,6 +992,7 @@ void DefensePlan::runGoalie()
             return;
         }
         else {
+            dangerForGoalieClear = false;
             draw(QString("strict follow"), Vector2D(0,1),"red");
             predictedBall = ballPrediction(true);
             if(predictedBall.x - 0.02 < goaliePos.x){
@@ -1881,8 +1882,7 @@ void DefensePlan::penaltyGoalie()
     targetDir.setLength(1);
 
     assignSkill(goalieAgent , gpa[goalieAgent->id()]);
-    gpa[goalieAgent->id()]->init(target, targetDir);
-
+    gpa[goalieAgent->id()]->init(target, targetDir); // in Ejdeha code : gpa[goalieAgent->id()]->init(target, wm->ball->pos - goalieTarget);
     if( executeSkill[0] ){
         defenseTargets[0] = checkDefensePoint(defenseAgents.at(0), defenseTargets[0]);
         assignSkill( defenseAgents.at(0) , gpa[defenseAgents.at(0)->id()]);
@@ -2675,6 +2675,12 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
         //else{
         dangerFlag = 0;
         /////changes for RoboCup 2016////////in one def, goalie dont move to nearest point///////
+#ifdef THEIR_DIRECT_CENTER
+        if(knowledge->getGameState() == CKnowledge::TheirIndirectKick) {
+            target = AZBisecOpenSeg.intersection(goalLine) + Vector2D(0.1,0.0);
+            return target;
+        }
+#endif
         if(knowledge->goalie->pos().dist(AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos())) > 0.2 + thr && defenseAgents.size() > 1){
             debug(QString("1"),D_SEPEHR);
             target = AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos());
@@ -3959,10 +3965,13 @@ Vector2D DefensePlan::ballPrediction(bool _isGoalie)
     Vector2D solu[2];
     Rect2D fieldRect(Vector2D(- _FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0)+Vector2D(-0.005,-0.005),Vector2D(_FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0)+Vector2D(+0.005,+0.005));
     double dist2Ball = 1000;
+    if(BallVel.x > 0 && BallPos.x > 0) {// in ejdeha code
+        return BallPos;
+    }
     if(wm->opp.activeAgentsCount() > 0) {
         for(int i=0 ; i < wm->opp.activeAgentsCount() ; i++){
             Circle2D oppCircle(wm->opp.active(i)->pos,0.1);
-            if(oppCircle.intersection(ballPosVel,&solu[0],&solu[1]) > 0){
+            if(oppCircle.intersection(ballPosVel,&solu[0],&solu[1]) > 0 && BallVel.length() > 0.5){ //in ejdeha code
                 if(wm->opp.active(i)->pos.dist(BallPos) < dist2Ball){
                     dist2Ball = wm->opp.active(i)->pos.dist(BallPos);
                     predictedBall = wm->opp.active(i)->pos;
@@ -3975,7 +3984,7 @@ Vector2D DefensePlan::ballPrediction(bool _isGoalie)
         draw(predictedBall);
         return predictedBall;
     }
-    else if(wm->field->isInField(BallPos + BallVel) && BallVel.length() > 0.2) {
+    else if(wm->field->isInField(BallPos + BallVel) && BallVel.length() > 0.5) {
         if((BallVel.x <= 0.2 || _isGoalie)) {
             predictedBall = BallPos + BallVel;
         }
@@ -3988,10 +3997,10 @@ Vector2D DefensePlan::ballPrediction(bool _isGoalie)
         return predictedBall;
 
     }
-    else if(BallVel.length() > 0.2){
+    else if(BallVel.length() > 0.5){// in ejdeha code 
         fieldRect.intersection(ballPosVel, &solu[0], &solu[1]);
         if(BallVel.x <= 0 || _isGoalie) {
-            predictedBall = (BallPos.dist(solu[0]) < BallPos.dist(solu[1])) ? (solu[0]):(solu[1]);
+            predictedBall = (BallPos.dist(solu[0] ) < BallPos.dist(solu[1]) && solu[0].isValid()) ? (solu[0]):(solu[1]);//// in ejdeha code 
         }
         else {
             draw(QString("Def Predicted Level 2"), Vector2D(0,2),"red");

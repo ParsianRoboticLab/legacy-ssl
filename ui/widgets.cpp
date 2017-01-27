@@ -43,7 +43,6 @@ CTabDockWidget::CTabDockWidget(QWidget* parent , bool autoHide)
     tabs = new QTabWidget(w);
     QGridLayout *layout = new QGridLayout(w);
     tabs->setTabPosition(QTabWidget::West);
-
     if( autoHide ){
         isHide = hideable = false;
         btnAutoHide = new QPushButton(this);
