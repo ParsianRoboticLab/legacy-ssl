@@ -606,8 +606,8 @@ void CPlayOff::mainPlanner(int _agentSize) {
         draw(currentPlan->initPos.ball,0,QColor(Qt::blue));
         debug(QString("CHIP : %1").arg(roleAgent[0]->getChip()),D_MAHI);
         debug(QString("CHIP : %1").arg(roleAgent[0]->getKickSpeed()),D_MAHI);
-//        debug(QString("Time0 : %1").arg(knowledge->getCurrentKKTime() - positionAgent[0].mahiLastTime),D_MAHI); //removed!
-//        debug(QString("Time1 : %1").arg(knowledge->getCurrentKKTime() - positionAgent[1].mahiLastTime),D_MAHI); //removed!
+        //        debug(QString("Time0 : %1").arg(knowledge->getCurrentKKTime() - positionAgent[0].mahiLastTime),D_MAHI); //removed!
+        //        debug(QString("Time1 : %1").arg(knowledge->getCurrentKKTime() - positionAgent[1].mahiLastTime),D_MAHI); //removed!
         debug(QString("ballOwnerState : %1").arg(activeAgents.size()),D_KK);
 
         mahiDebug(5);
@@ -651,7 +651,7 @@ void CPlayOff::staticExecute() {
         newFillRoleProperties();
         newPosExecute();
         newCheckEndState();
-        doPass = true;
+        //        doPass = true;
         // TODO : Useful and stable Pass Manager
         if(masterPlan->common.currentSize > 1 && havePassInPlan) {
             passManager();
@@ -1083,11 +1083,11 @@ bool CPlayOff::isReceiveFaild(int agent) {
     }
 
     //removed!
-//    if(knowledge->getCurrentKKTime() - positionAgent[agent].mahiLastTime
-//            > positionAgent[agent].positionArg.at(positionAgent[agent].stateNumber).rightData + 500) {
-//        debug(QString("SECOND FAILD : %1").arg(agent),D_MAHI);
-//        return true;
-//    }
+    //    if(knowledge->getCurrentKKTime() - positionAgent[agent].mahiLastTime
+    //            > positionAgent[agent].positionArg.at(positionAgent[agent].stateNumber).rightData + 500) {
+    //        debug(QString("SECOND FAILD : %1").arg(agent),D_MAHI);
+    //        return true;
+    //    }
     return false;
 }
 
@@ -1113,24 +1113,31 @@ void CPlayOff::passManager() {
     debug("don't worry ... pass have a manager", D_MAHI);
 
 
+    const AgentPoint& p = masterPlan->execution.passer;
+    const AgentPoint& r = masterPlan->execution.reciver;
 
-//    if (positionAgent[masterPlan->execution.theLastAgent].getAbsArgs(masterPlan->execution.theLastState).staticPos) {
+    const int& i = masterPlan->common.matchedID.value(r.id);
+    const int& j = masterPlan->common.matchedID.value(p.id);
 
-//    }
+    CAgent* c    = knowledge->getAgent(i);
+    if (/*positionAgent[p.id].stateNumber == p.state*/
+            /*&& */ positionAgent[r.id].stateNumber == r.state) {
 
-//    if (ownerList.size()) {
-//        int tReciverAgent = positionAgent[ownerList.front().id].positionArg.at(ownerList.front().state + 1).PassToId;
-//        int tReciverIndex = positionAgent[ownerList.front().id].positionArg.at(ownerList.front().state + 1).PassToState;
 
-//        if (positionAgent[tReciverAgent].stateNumber >= tReciverIndex) {
-//            if (positionAgent[tReciverAgent].getArgs().staticPos.dist(knowledge->getAgent(masterPlan->common.matchedID.value(tReciverAgent))->pos()) > 2 || doPass) {
-//                doPass = false;
-//            }
-//            else {
-//                doPass = true;
-//            }
-//        }
-//    }
+        if (positionAgent[r.id].getAbsArgs(r.state).staticPos.dist(c -> pos()) >
+                masterPlan->common.lastDist) {
+            doPass = false;
+            debug ("FALSE", D_ERROR, QColor(Qt::red));
+
+        } else {
+            debug ("TRUE", D_ERROR, QColor(Qt::red));
+            doPass = true;
+        }
+//        debug(QString("ID : %1").arg(p.id), D_ERROR);
+        roleAgent[p.id]->setDoPass(doPass);
+
+    }
+
 }
 
 ///////////////////////////////////////////////
@@ -1144,7 +1151,7 @@ long CPlayOff::timeTillPass() {
         for(int i = positionAgent[tempBallOwner].stateNumber;i < ownerReceiveList.at(0).ballOwnerIndex;i++) {
             tempTime += positionAgent[tempBallOwner].positionArg.at(i + 1).rightData;
             tempTime += positionAgent[tempBallOwner].positionArg.at(i + 1).leftData;
-//            tempTime -= knowledge->getCurrentKKTime() - positionAgent[tempBallOwner].mahiLastTime; // //removed!
+            //            tempTime -= knowledge->getCurrentKKTime() - positionAgent[tempBallOwner].mahiLastTime; // //removed!
         }
     }
     return tempTime;
@@ -1160,7 +1167,7 @@ long CPlayOff::timeTillReceive() {
 
             tempTime += positionAgent[tempReceiver].positionArg.at(i).rightData;
             tempTime += positionAgent[tempReceiver].positionArg.at(i).leftData;
-//            tempTime -= knowledge->getCurrentKKTime() - positionAgent[tempReceiver].mahiLastTime; //removed!
+            //            tempTime -= knowledge->getCurrentKKTime() - positionAgent[tempReceiver].mahiLastTime; //removed!
         }
     }
     return tempTime;
@@ -1261,8 +1268,8 @@ bool CPlayOff::isTaskDone(CRolePlayOff* _roleAgent){
 ///////////////////////////////////////////
 bool CPlayOff::isMoveDone(int agentID) {
     long tempDiffTime;
-//    tempDiffTime = knowledge->getCurrentKKTime() - positionAgent[agentID].mahiLastTime;//removed!
-//    debug(QString("nuTimer : %1").arg(positionAgent[agentID].mahiLastTime),D_MAHI);//removed!
+    //    tempDiffTime = knowledge->getCurrentKKTime() - positionAgent[agentID].mahiLastTime;//removed!
+    //    debug(QString("nuTimer : %1").arg(positionAgent[agentID].mahiLastTime),D_MAHI);//removed!
     debug(QString("nuTimer2 : %1").arg(tempDiffTime),D_MAHI);
     if(tempDiffTime > positionAgent[agentID].positionArg.at(positionAgent[agentID].stateNumber).rightData/10 +
             positionAgent[agentID].positionArg.at(positionAgent[agentID].stateNumber).leftData/10)
@@ -1302,7 +1309,7 @@ void CPlayOff::posExecute() {
     for(int i = 0;i < agentSize;i++) {
         if(isFirstTime[i]) {
             debug(QString("done"),D_MAHI);
-//            positionAgent[i].mahiLastTime = knowledge->getCurrentKKTime();//removed!
+            //            positionAgent[i].mahiLastTime = knowledge->getCurrentKKTime();//removed!
             isFirstTime[i] = false;
         }
         roleAgent[i]->execute();
@@ -1353,11 +1360,11 @@ void CPlayOff::newFillRoleProperties() {
     for(size_t i = 0;i < agentsID.size(); i++) {
         if (masterPlan->common.matchedID.contains(i)) {
             if (roleAgent[i]->getRoleUpdate() == false) {
-                //                debug(QString("%1 is set").arg(i), D_HOSSEIN);
                 roleAgent[i]->setAgent(knowledge->getAgent(masterPlan->common.matchedID.value(i)));
                 newAssignTask(roleAgent[i], positionAgent[i]);
                 roleAgent[i]->setRoleUpdate(true);
             }
+
         } else {
             qWarning() << "[Warning] coach -> Match function doesn't work :( ";
             if (roleAgent[i]->getRoleUpdate() == false) {
@@ -1365,6 +1372,7 @@ void CPlayOff::newFillRoleProperties() {
                 newAssignTask(roleAgent[i], positionAgent[i]);
                 roleAgent[i]->setRoleUpdate(true);
             }
+
         }
     }
 }
@@ -1488,10 +1496,13 @@ void CPlayOff::assignPass(CRolePlayOff* _roleAgent, const SPositioningAgent& _po
     _roleAgent->setAvoidCenterCircle(false);
     _roleAgent->setAvoidPenaltyArea(true);
     _roleAgent->setChip(chipOrNot(_posAgent.getArgs()));
-    if (_roleAgent->getChip())
+    if (_roleAgent->getChip()) {
         _roleAgent->setKickSpeed(_posAgent.getArgs().rightData);
-    else
+
+    } else {
         _roleAgent->setKickSpeed(_posAgent.getArgs().leftData);
+
+    }
 
     _roleAgent->setTarget(positionAgent[_posAgent.getArgs().PassToId].getAbsArgs(_posAgent.getArgs().PassToState).staticPos);
     _roleAgent->setDoPass(doPass);
@@ -2009,7 +2020,7 @@ void CPlayOff::resetP(){
     debug(QString("reset Plan"),D_MAHI);
     for(int i = 0;i < 6;i++) {
         positionAgent[i].stateNumber = 0;
-//        positionAgent[i].mahiLastTime = knowledge->getCurrentKKTime(); //removed!
+        //        positionAgent[i].mahiLastTime = knowledge->getCurrentKKTime(); //removed!
         isFirstTime[i] = 0;
         currentPlan = NULL;
         //        currentPlan->AgentPlan[i].clear();
@@ -2027,7 +2038,7 @@ void CPlayOff::reset(){
     debug(QString("reset Plan"),D_MAHI);
     for(int i = 0;i < 6;i++) {
         positionAgent[i].stateNumber = 0;
-//        positionAgent[i].mahiLastTime = knowledge->getCurrentKKTime(); // removed !
+        //        positionAgent[i].mahiLastTime = knowledge->getCurrentKKTime(); // removed !
         isFirstTime[i] = 0;
         //        currentPlan->AgentPlan[i].clear();
         currentPlan = NULL;
@@ -2712,17 +2723,68 @@ void CPlayOff::analysePass() {
     if (masterPlan != NULL) {
         // first : passer second : reciver
         QPair<AgentPoint, AgentPoint> tPass;
-        tPass = findThePasserandReciver(masterPlan->execution);
+        findThePasserandReciver(masterPlan->execution, tPass);
         masterPlan->execution.passer .id     = tPass.first.id;
         masterPlan->execution.passer .state  = tPass.first.state;
         masterPlan->execution.reciver.id     = tPass.second.id;
         masterPlan->execution.reciver.state  = tPass.second.state;
 
     }
+
+    qDebug() << "PI : " << masterPlan->execution.passer .id;
+    qDebug() << "PS : " << masterPlan->execution.passer .state;
+    qDebug() << "RI : " << masterPlan->execution.reciver.id;
+    qDebug() << "RS : " << masterPlan->execution.reciver.state;
 }
 
-QPair<NGameOff::AgentPoint, NGameOff::AgentPoint>
-CPlayOff::findThePasserandReciver(const NGameOff::SExecution & _plan) {
-    QPair<NGameOff::AgentPoint, NGameOff::AgentPoint> tPass;
-    return tPass;
+void CPlayOff::findThePasserandReciver(const NGameOff::SExecution & _plan,
+                                       AgentPair& _pair) {
+
+    int counter = 0;
+    Q_FOREACH(QList<playOffRobot> agent, _plan.AgentPlan) {
+        int counter2 = 0;
+        Q_FOREACH(playOffRobot node, agent) {
+            Q_FOREACH(playOffSkill skill, node.skill) {
+                if (skill.name == PassSkill) {
+                    _pair.first.id    = counter;
+                    _pair.first.state = counter2;
+                    break;
+                }
+            }
+
+            if (_pair.first.id != -1) {
+                break;
+            }
+
+            counter2++;
+        }
+
+        if (_pair.first.id != -1) {
+            break;
+        }
+
+        counter++;
+    }
+
+    int &id = _pair.first.id;
+    int &st = _pair.first.state;
+
+    if (id >= 0 && id < _plan.AgentPlan.size()) {
+        if (st >= 0 && st < _plan.AgentPlan.at(id).size()) {
+
+            int si = (_plan.AgentPlan[id][st].skill[1].name) ? 1 : 2;
+
+
+            _pair.second.id    = _plan.AgentPlan[_pair.first.id]
+                    [_pair.first.state].
+                    skill[si].targetAgent;
+
+            _pair.second.state = _plan.AgentPlan[_pair.first.id]
+                    [_pair.first.state].
+                    skill[si].targetIndex;
+
+        }
+    }
+
+
 }

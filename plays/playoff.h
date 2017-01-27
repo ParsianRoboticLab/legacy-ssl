@@ -17,7 +17,6 @@
     protected: type local
 
 
-
 struct robotAttr {
     int index;
     int agent;
@@ -289,6 +288,9 @@ struct SPlan {
 
 }
 
+typedef QPair<NGameOff::AgentPoint, NGameOff::AgentPoint> AgentPair;
+
+
 using namespace NGameOff;
 
 class CPlayOff : public CMasterPlay {
@@ -522,7 +524,7 @@ private:
     void assignReceive  (CRolePlayOff*, const SPositioningAgent&, bool _ignoreAngle);
     int findFirstPasser();
     QPair<int, int> findTheLastShoot(const SExecution& _plan);
-    QPair<AgentPoint, AgentPoint> findThePasserandReciver(const SExecution&);
+    void findThePasserandReciver(const SExecution&, AgentPair&);
     int findReciver(int _passer, int _state);
     QList<SBallOwner> ownerList;
     bool havePassInPlan;
