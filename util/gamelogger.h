@@ -53,7 +53,7 @@ struct SPacketData{
 };
 
 struct SDebugData{
-    qint32 type;
+    qint16 type;
     QString debug;
 };
 
