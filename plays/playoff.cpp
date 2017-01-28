@@ -356,7 +356,6 @@ bool CPlayOff::getMatchedPlan(POMODE _mode, int agentSize, bool _rand)
 
 void CPlayOff::getPassTimeline(SPlayOffPlan *tCurrentPlan, QList<POOwnerReceive> &tList)
 {
-    //QList<POOwnerReceive> tempPaRList;
     tList.clear();
     QList<kkTimeAndIndex> temp;
     kkTimeAndIndex tempStruct;
@@ -413,8 +412,6 @@ void CPlayOff::getPassTimeline(SPlayOffPlan *tCurrentPlan, QList<POOwnerReceive>
     {
         tempOaR.ballOwnerAgent = temp.at(i).agent;
         tempOaR.ballOwnerIndex = temp.at(i).index;
-        //        tempOaR.receiveAgent = tCurrentPlan->AgentPlan[tempOaR.ballOwnerAgent].at(tempOaR.ballOwnerIndex).targetAgent;
-        //        tempOaR.receiveIndex = tCurrentPlan->AgentPlan[tempOaR.ballOwnerAgent].at(tempOaR.ballOwnerIndex).targetIndex;
         tempOaR.skill = temp.at(i).skill;
         tList.append(tempOaR);
     }
@@ -642,9 +639,10 @@ void CPlayOff::staticExecute() {
     if (initial) {
         newAssignTasks();
         //        connectPasserAndReciever();
-        Q_FOREACH(SBallOwner s, ownerList) {
-            qDebug() << "SO" << s.id << s.state;
-        }
+//        Q_FOREACH(SBallOwner s, ownerList) {
+//            qDebug() << "SO" << s.id << s.state;
+//        }
+
     } else {
         newFillRoleProperties();
         newPosExecute();
@@ -1332,9 +1330,10 @@ void CPlayOff::posExecute() {
 
 void CPlayOff::newPosExecute() {
     for(int i = 0;i < masterPlan->common.currentSize; i++) {
-        // TODO : Check First Time
         roleAgent[i]->execute();
+
     }
+
 }
 
 void CPlayOff::newCheckEndState() {
@@ -1583,6 +1582,17 @@ void CPlayOff::assignMove(CRolePlayOff* _roleAgent,
 void CPlayOff::assignAfterLife(CRolePlayOff* _roleAgent,
                                const SPositioningAgent& _posAgent) {
     // TODO : Write Ineteligence AfterLife Program
+    roleSkill::ESkill tSkill = chooseBestAfterLifeRole();
+    switch (tSkill) {
+    case roleSkill::Mark:
+        break;
+    case roleSkill::Defense:
+        break;
+    case roleSkill::Support:
+        break;
+
+    }
+
 
     _roleAgent->setSelectedSkill(roleSkill::Mark);
 }
