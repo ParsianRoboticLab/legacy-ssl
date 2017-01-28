@@ -639,9 +639,9 @@ void CPlayOff::staticExecute() {
     if (initial) {
         newAssignTasks();
         //        connectPasserAndReciever();
-//        Q_FOREACH(SBallOwner s, ownerList) {
-//            qDebug() << "SO" << s.id << s.state;
-//        }
+        //        Q_FOREACH(SBallOwner s, ownerList) {
+        //            qDebug() << "SO" << s.id << s.state;
+        //        }
 
     } else {
         newFillRoleProperties();
@@ -1261,7 +1261,12 @@ bool CPlayOff::isTaskDone(CRolePlayOff* _roleAgent){
     case roleSkill::Kick:
         return isKickDone(_roleAgent);
         break;
+    // After Life
     case roleSkill::Mark:
+    case roleSkill::Support:
+    case roleSkill::Defense:
+        qDebug() << "got it";
+        _roleAgent->setRoleUpdate(false);
         return false;
         break;
     case roleSkill::OneTouch:
@@ -1341,11 +1346,12 @@ void CPlayOff::newCheckEndState() {
     for(int i = 0;i < masterPlan->common.currentSize;i++) {
 
         if(isTaskDone(roleAgent[i])) {
+
             roleAgent[i]->setRoleUpdate(false);
             roleAgent[i]->resetTime();
-            positionAgent[i].stateNumber++;
 
-            if(positionAgent[i].stateNumber < positionAgent[i].positionArg.size()) {
+            if(positionAgent[i].stateNumber + 1  < positionAgent[i].positionArg.size()) {
+                positionAgent[i].stateNumber++;
                 isFirstTime[i] = true;
 
             } else {
@@ -1353,7 +1359,7 @@ void CPlayOff::newCheckEndState() {
                 /////Temp
                 SPositioningArg tempPA;
                 tempPA = positionAgent[i].getAbsArgs(positionAgent[i].positionArg.size() - 1);
-                tempPA.staticSkill = NoSkill;
+                tempPA.staticSkill = MoveSkill;
                 positionAgent[i].positionArg.append(tempPA);
             }
         }
@@ -1581,20 +1587,47 @@ void CPlayOff::assignMove(CRolePlayOff* _roleAgent,
 
 void CPlayOff::assignAfterLife(CRolePlayOff* _roleAgent,
                                const SPositioningAgent& _posAgent) {
-    // TODO : Write Ineteligence AfterLife Program
-    roleSkill::ESkill tSkill = chooseBestAfterLifeRole();
+    // TODO : Complete Ineteligence AfterLife Program
+    qDebug() << "Gotcha";
+    roleSkill::ESkill tSkill = chooseBestAfterLifeRoleSkill(_roleAgent,
+                                                            _posAgent);
     switch (tSkill) {
     case roleSkill::Mark:
+        _roleAgent->setAvoidPenaltyArea(true);
+        _roleAgent->setAvoidBall(false);
+        _roleAgent->setSlow(false);
+        _roleAgent->setTargetDir(Vector2D(0, 1));
+        _roleAgent->setTarget(Vector2D(0,0)); /*getMarkTarget(_posAgent.getArgs()*/
+        _roleAgent->setSelectedSkill(roleSkill::Mark); //GPA
         break;
     case roleSkill::Defense:
+        _roleAgent->setAvoidPenaltyArea(true);
+        _roleAgent->setAvoidBall(false);
+        _roleAgent->setTargetDir(Vector2D(0, 1));
+        _roleAgent->setSlow(false);
+        _roleAgent->setTarget(getDefenseTarget(_posAgent.getArgs()));
+        _roleAgent->setSelectedSkill(roleSkill::Defense); //GPA
         break;
     case roleSkill::Support:
+        _roleAgent->setAvoidPenaltyArea(true);
+        _roleAgent->setAvoidBall(false);
+        _roleAgent->setSlow(false);
+        _roleAgent->setTargetDir(_roleAgent->getAgent()->pos() - wm->ball->pos);
+        _roleAgent->setTarget(getSupportTarget(_posAgent.getArgs()));
+        _roleAgent->setSelectedSkill(roleSkill::Support); //GPA
+        break;
+    default:
+        _roleAgent->setAvoidPenaltyArea(true);
+        _roleAgent->setAvoidBall(false);
+        _roleAgent->setTargetDir(Vector2D(0, 1));
+        _roleAgent->setSlow(false);
+        _roleAgent->setTarget(getMarkTarget(_posAgent.getArgs()));
+        _roleAgent->setSelectedSkill(roleSkill::Mark);
         break;
 
     }
 
 
-    _roleAgent->setSelectedSkill(roleSkill::Mark);
 }
 
 
@@ -2811,5 +2844,58 @@ void CPlayOff::findThePasserandReciver(const NGameOff::SExecution & _plan,
         }
     }
 
+
+}
+
+roleSkill::ESkill
+CPlayOff::chooseBestAfterLifeRoleSkill(CRolePlayOff *,
+                                       const SPositioningAgent &_posAgent) {
+
+    // TODO : complete the usage then remove this return
+    return roleSkill::Mark;
+
+
+    QList<POffSkills> mark;
+    QList<POffSkills> support;
+    QList<POffSkills> defense;
+
+    mark   .append(MoveSkill);
+    support.append(PassSkill);
+    defense.append(NoSkill);
+
+    roleSkill::ESkill tempRole  = roleSkill::Mark;
+    POffSkills        tempSkill = _posAgent.getArgs().staticSkill;
+
+
+    if (mark.contains(tempSkill)) {
+        tempRole = roleSkill::Mark;
+
+    } else if (support.contains(tempSkill)) {
+        tempRole = roleSkill::Support;
+
+    } else if (defense.contains(tempSkill)) {
+        tempRole = roleSkill::Defense;
+
+    } else {
+        tempRole = roleSkill::Mark;
+
+    }
+
+}
+
+Vector2D CPlayOff::getMarkTarget(const SPositioningArg &_posArg) {
+    // TODO : find best point
+    return _posArg.staticPos - Vector2D(1, 0);
+}
+
+Vector2D CPlayOff::getDefenseTarget(const SPositioningArg &_posArg) {
+    // TODO : find best point
+    return _posArg.staticPos - Vector2D(1, 0);
+
+}
+
+Vector2D CPlayOff::getSupportTarget(const SPositioningArg &_posArg) {
+    // TODO : find best point
+    return _posArg.staticPos - Vector2D(1, 0);
 
 }

@@ -430,6 +430,13 @@ private:
     double getMaxVel(const CRolePlayOff* _roleAgent, const SPositioningArg& _posArg);
     Vector2D getMoveTarget(int agentID,int agentState);
     Vector2D getMoveTarget(const SPositioningArg& _posArg);
+    /// After life points
+    Vector2D getMarkTarget   (const SPositioningArg&);
+    Vector2D getDefenseTarget(const SPositioningArg&);
+    Vector2D getSupportTarget(const SPositioningArg&);
+    ///
+
+
     void checkEndState();
     bool isTaskDone(int agentID);
     bool isTaskDone(CRolePlayOff*);
@@ -528,6 +535,9 @@ private:
     void assignKick     (CRolePlayOff*, const SPositioningAgent&, bool _chip);
     void assignReceive  (CRolePlayOff*, const SPositioningAgent&, bool _ignoreAngle);
     int findFirstPasser();
+    roleSkill::ESkill chooseBestAfterLifeRoleSkill(CRolePlayOff*,
+                                                   const SPositioningAgent&);
+
     QPair<int, int> findTheLastShoot(const SExecution& _plan);
     void findThePasserandReciver(const SExecution&, AgentPair&);
     int findReciver(int _passer, int _state);
