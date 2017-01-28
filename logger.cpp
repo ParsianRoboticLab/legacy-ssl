@@ -4,7 +4,6 @@
 #include "gamelogger.h"
 #include "base.h"
 
-
 QMutex drawMutex;
 CDrawer* drawer;  
 CInfoWidget* info;  
@@ -58,6 +57,8 @@ void debug(QString text, long type, QColor color)
     return;
 #endif
  long mask = 0;
+ long mask1 =0;
+ bool typeState=0;
     if (conf() == NULL) return;
     if (conf()->Performance_Debug_debugGame()) mask = mask | 1;
     if (conf()->Performance_Debug_debugExperiment()) mask = mask | 2;
@@ -75,15 +76,20 @@ void debug(QString text, long type, QColor color)
     if (conf()->Performance_Debug_debugERF()) mask = mask | 8192;
     if (conf()->Performance_Debug_debugMAHI()) mask = mask | 16384;
     if (conf()->Performance_Debug_debugMahmood()) mask = mask | 32768;
-    if (conf()->Performance_Debug_debugFatemeh()) mask = mask | 65536;
-    if (conf()->Performance_Debug_debugAtousa()) mask = mask | 131072;
-    if (conf()->Performance_Debug_debugAHZ()) mask = mask | 262144;
-    if (conf()->Performance_Debug_debugAmin()) mask = mask | 524288;
-    if (conf()->Performance_Debug_debugAmiR()) mask = mask | 1048576;
-
-    if ((type & mask) != 0 || (type==D_ERROR))
+    if (conf()->Performance_Debug_debugFatemeh()) mask1 = mask1 | 32769;
+    if (conf()->Performance_Debug_debugAtousa()) mask1 = mask1 | 32770;
+    if (conf()->Performance_Debug_debugAHZ()) mask1 = mask1 | 32772;
+    if (conf()->Performance_Debug_debugAmin()) mask1 = mask1 | 32776;
+    if (conf()->Performance_Debug_debugAmiR()) mask1 = mask1 | 32784;
+    if (conf()->Performance_Debug_debugHamed()) mask1 = mask1 | 32800;
+    if(type>32768 && ((type & mask1) >32768)){
+        typeState=true;
+    }
+    else if(type<32768 && ((type & (mask-32768)) >0)){
+        typeState=true;
+    }
+    if (typeState || (type==D_ERROR))
     {
-
         logger->enqueue(CStatusText(text,color));
     }
     loggerMutex->lock();
@@ -93,7 +99,7 @@ void debug(QString text, long type, QColor color)
     loggerMutex->unlock();
 }
 
-void debug0(QString text, int type, QColor color)
+void debug0(QString text, long type, QColor color)
 {
 	static int cycleCnt = 0;
 	cycleCnt++;
@@ -127,6 +133,7 @@ void debug0(QString text, int type, QColor color)
         if (conf()->Performance_Debug_debugAHZ()) mask = mask | 262144;
         if (conf()->Performance_Debug_debugAmin()) mask = mask | 524288;
         if (conf()->Performance_Debug_debugAmiR()) mask = mask | 1048576;
+        if (conf()->Performance_Debug_debugHamed()) mask = mask | 2097152;
 
 
 	if ((type & mask) != 0 || (type==D_ERROR))

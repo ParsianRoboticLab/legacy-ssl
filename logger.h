@@ -18,11 +18,14 @@
 #define D_ERF 8192
 #define D_MAHI 16384
 #define D_Mahmood 32768
-#define D_FATEMEH 65536
-#define D_ATOUSA 131072
-#define D_AHZ 262144
-#define D_AMIN 524288
-#define D_AMIR 1048576
+#define D_FATEMEH 32769
+#define D_ATOUSA 32770
+#define D_AHZ 32772
+#define D_AMIN 32776
+#define D_AMIR 32784
+#define D_HAMED 32800
+#define D_MAHMOO 32832
+
 
 
 

@@ -200,6 +200,7 @@ CVarsWidget::CVarsWidget()
             ADD_VALUE(Performance_Debug, Bool, debugAtousa, false, "Atousa")
             ADD_VALUE(Performance_Debug, Bool, debugAmin, false, "Amin")
             ADD_VALUE(Performance_Debug, Bool, debugAmiR, false, "AmiR")
+            ADD_VALUE(Performance_Debug, Bool, debugHamed, false, "Hamed")
             ADD_TREE(Experiments,"Experiments",false)
             ADD_PTREE(Experiments, AutoReferee, "Automated Referee")
             ADD_VALUE(Experiments_AutoReferee, String, autorefereefMulticastAddr, "224.5.23.1", "Multicast Addr")
@@ -491,6 +492,7 @@ IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugFatemeh)
 IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugAtousa)
 IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugAmin)
 IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugAmiR)
+IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugHamed)
 
 
 

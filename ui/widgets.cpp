@@ -3141,6 +3141,7 @@ CLoggerWidget::CLoggerWidget(){
     chbxDebug[16] = new QCheckBox("AHZ" , this);
     chbxDebug[17] = new QCheckBox("Amin" , this);
     chbxDebug[18] = new QCheckBox("AmiR" , this);
+    chbxDebug[19] = new QCheckBox("Hamed" , this);
     tcolor.insert(D_ERROR,QColor(Qt::red));
     tcolor.insert(D_MAHI,QColor(Qt::green));
     // TODO:insert color for other Types
@@ -3180,7 +3181,7 @@ CLoggerWidget::CLoggerWidget(){
     QWidget* DebugNames=new QWidget();
     QVBoxLayout *DebugNamesLayout=new QVBoxLayout;
     QScrollArea *scrollArea=new QScrollArea;
-    for( int i=0 ; i<19 ; i++ )
+    for( int i=0 ; i<20 ; i++ )
         DebugNamesLayout->addWidget(chbxDebug[i]);
 
     DebugNames->setLayout(DebugNamesLayout);
@@ -3201,7 +3202,7 @@ CLoggerWidget::CLoggerWidget(){
     connect(cmbList , SIGNAL(currentIndexChanged(int)) , this , SLOT(playThisFile(int)));
     connect(chbxDraws , SIGNAL(clicked(bool)) , this , SLOT(showHideDraws(bool)));
     connect(chbxDebugs , SIGNAL(clicked(bool)) , this , SLOT(showHideDebugs(bool)));
-    for( int i=0 ; i<19 ; i++ )
+    for( int i=0 ; i<20 ; i++ )
         connect(chbxDebug[i] , SIGNAL(clicked()) , this , SLOT(debugTypeChanged()));
     connect(txtFPS , SIGNAL(editingFinished()) , this , SLOT(replayFPSChanged()));
     debugTypeChanged();
@@ -3216,7 +3217,7 @@ CLoggerWidget::CLoggerWidget(){
 CLoggerWidget::~CLoggerWidget(){
     delete lblFPS;
     delete txtFPS;
-    for( int i=18 ; i>=0 ; i-- )
+    for( int i=20 ; i>=0 ; i-- )
         delete chbxDebug[i];
     delete chbxDebugs;
     delete chbxDraws;
@@ -3413,16 +3414,29 @@ void CLoggerWidget::cursorIncrement(){
 
 
     loggerMutex->unlock();
-
+    bool typeState=false;
+    qint16 DType;
     if( chbxDebugs->isChecked() ){
         loggerMutex->lock();
 
 
+
         for( int i=0 ; i<gameLogger->debugList.size() ; i++ ){
-            if( (gameLogger->debugList.at(i).type & type) || gameLogger->debugList.at(i).type == 0){
-                debugTexts->setTextColor(tcolor.value(gameLogger->debugList.at(i).type));
+            DType=gameLogger->debugList.at(i).type;
+            if(DType<0){
+                DType+=65536;
+                if((DType & type1) > 32768)
+                typeState=true;
+
+            }
+            else if(DType<32768 && ((DType & (type-32768)) >0)){
+                typeState=true;
+            }
+            if( typeState || DType == 0){
+                debugTexts->setTextColor(tcolor.value(DType));
                 debugTexts->append(QString("%1 --> ").arg(gameLogger->counter) + gameLogger->debugList.at(i).debug);
             }
+            typeState=false;
         }
         loggerMutex->unlock();
     }
@@ -3456,6 +3470,7 @@ void CLoggerWidget::showHideDebugs(bool state){
 
 void CLoggerWidget::debugTypeChanged(){
     type = 0;
+    type1=0;
     if( chbxDebug[0]->isChecked() ){
         type |= D_GAME;
     }
@@ -3496,22 +3511,25 @@ void CLoggerWidget::debugTypeChanged(){
         type |= D_NADIA;
     }
     if( chbxDebug[13]->isChecked() ){
-        type |= D_FATEMEH;
+        type1 |= D_FATEMEH;
     }
     if( chbxDebug[14]->isChecked() ){
-        type |= D_ATOUSA;
+        type1 |= D_ATOUSA;
     }
     if( chbxDebug[15]->isChecked() ){
-        type |= D_Mahmood;
+        type1 |= D_Mahmood;
     }
     if( chbxDebug[16]->isChecked() ){
-        type |= D_AHZ;
+        type1 |= D_AHZ;
     }
     if( chbxDebug[17]->isChecked() ){
-        type |= D_AMIN;
+        type1 |= D_AMIN;
     }
     if( chbxDebug[18]->isChecked() ){
-        type |= D_AMIR;
+        type1 |= D_AMIR;
+    }
+    if( chbxDebug[19]->isChecked() ){
+        type1 |= D_HAMED;
     }
 
 }
