@@ -76,16 +76,16 @@ void debug(QString text, long type, QColor color)
     if (conf()->Performance_Debug_debugERF()) mask = mask | 8192;
     if (conf()->Performance_Debug_debugMAHI()) mask = mask | 16384;
     if (conf()->Performance_Debug_debugMahmood()) mask = mask | 32768;
-    if (conf()->Performance_Debug_debugFatemeh()) mask1 = mask1 | 32769;
-    if (conf()->Performance_Debug_debugAtousa()) mask1 = mask1 | 32770;
-    if (conf()->Performance_Debug_debugAHZ()) mask1 = mask1 | 32772;
-    if (conf()->Performance_Debug_debugAmin()) mask1 = mask1 | 32776;
-    if (conf()->Performance_Debug_debugAmiR()) mask1 = mask1 | 32784;
-    if (conf()->Performance_Debug_debugHamed()) mask1 = mask1 | 32800;
-    if(type>32768 && ((type & mask1) >32768)){
+    if (conf()->Performance_Debug_debugFatemeh()) mask1 = mask1 | 1;
+    if (conf()->Performance_Debug_debugAtousa()) mask1 = mask1 | 2;
+    if (conf()->Performance_Debug_debugAHZ()) mask1 = mask1 | 4;
+    if (conf()->Performance_Debug_debugAmin()) mask1 = mask1 | 8;
+    if (conf()->Performance_Debug_debugAmiR()) mask1 = mask1 | 16;
+    if (conf()->Performance_Debug_debugHamed()) mask1 = mask1 | 32;
+    if(type>32768 && (type & mask1)){
         typeState=true;
     }
-    else if(type<32768 && ((type & (mask-32768)) >0)){
+    else if(type<=32768 && (type & mask)){
         typeState=true;
     }
     if (typeState || (type==D_ERROR))
