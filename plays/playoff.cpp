@@ -640,19 +640,16 @@ void CPlayOff::mainExecute() {
 void CPlayOff::staticExecute() {
     //    playOnFlag = false;
     if (initial) {
-        debug("{if}", D_MAHI);
         newAssignTasks();
         //        connectPasserAndReciever();
         Q_FOREACH(SBallOwner s, ownerList) {
             qDebug() << "SO" << s.id << s.state;
         }
     } else {
-        debug("{else}", D_MAHI);
         newFillRoleProperties();
         newPosExecute();
         newCheckEndState();
-        //        doPass = true;
-        // TODO : Useful and stable Pass Manager
+
         if(masterPlan->common.currentSize > 1 && havePassInPlan) {
             passManager();
         }
@@ -847,10 +844,13 @@ bool CPlayOff::newIsPlanEnd() {
     } else if (isPlanFaild()) {
         if (lastBallPos.dist(wm->ball->pos) > 0.06) {
             debug("Plan Fully Failed", D_MAHI);
+
         } else {
             debug("rePlaning", D_MAHI);
+
         }
         return false;
+
     }
 
     return false;
@@ -862,11 +862,14 @@ bool CPlayOff::isPlanDone() {
         // TODO : IF GOAL THEN 10 ELSE 9
         masterPlan->common.addHistory(10); //FULL
         return true;
+
     } else if (isAllTasksDone()) {
         debug ("Done By Fully Tasks Done", D_MAHI);
         masterPlan->common.addHistory(10); //FULL
         return true;
+
     }
+
     return false;
 }
 
@@ -904,8 +907,15 @@ SFail CPlayOff::isAnyTaskFaild() {
 }
 
 bool CPlayOff::isAllTasksDone() {
-    // TODO : complete function
-    return false;
+
+    // if there's a agent that is not zombie
+    for (size_t i = 0; i < masterPlan->common.currentSize; i++) {
+        if (!positionAgent[i].zombie) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool CPlayOff::isTimeOver() {
@@ -940,26 +950,32 @@ bool CPlayOff::isBallDirChanged() {
 }
 
 bool CPlayOff::isFinalShotDone() {
+
     const int& tLastAgent = masterPlan->execution.theLastAgent;
     const int& tLastState = masterPlan->execution.theLastState;
+
+    // Plan doesn't include a final shoot
     if (tLastState == -1 || tLastState == -1) return false;
 
-    CAgent* tAgent = knowledge ->
-            getAgent(masterPlan->common.matchedID[tLastAgent]);
+    CAgent* tAgent = knowledge  ->
+            getAgent(masterPlan -> common.matchedID[tLastAgent]);
 
     Circle2D cir (tAgent->pos() + tAgent->dir().norm()*0.08, 0.16);
     Circle2D cir2(tAgent->pos() + tAgent->dir().norm()*0.20, 0.40);
 
     draw(cir , QColor(Qt::blue));
     draw(cir2, QColor(Qt::blue));
-    draw(QString("LAST %1, %2").arg(tLastAgent).arg(tLastState), Vector2D(1,-3));
 
     if (positionAgent[tLastAgent].stateNumber == tLastState) {
         if (cir.contains(wm->ball->pos)) {
+
             isBallIn = true;
+
         } else if (isBallIn && !cir2.contains(wm->ball->pos)) {
+
             isBallIn = false;
             return true;
+
         }
     }
 
@@ -1127,13 +1143,10 @@ void CPlayOff::passManager() {
         if (positionAgent[r.id].getAbsArgs(r.state).staticPos.dist(c -> pos()) >
                 masterPlan->common.lastDist) {
             doPass = false;
-            debug ("FALSE", D_ERROR, QColor(Qt::red));
 
         } else {
-            debug ("TRUE", D_ERROR, QColor(Qt::red));
             doPass = true;
         }
-//        debug(QString("ID : %1").arg(p.id), D_ERROR);
         roleAgent[p.id]->setDoPass(doPass);
 
     }
@@ -1331,14 +1344,16 @@ void CPlayOff::newCheckEndState() {
         if(isTaskDone(roleAgent[i])) {
             roleAgent[i]->setRoleUpdate(false);
             roleAgent[i]->resetTime();
+            positionAgent[i].stateNumber++;
 
-            if(positionAgent[i].stateNumber  + 1 < positionAgent[i].positionArg.size()) {
-                positionAgent[i].stateNumber++;
+            if(positionAgent[i].stateNumber < positionAgent[i].positionArg.size()) {
                 isFirstTime[i] = true;
 
             } else {
+                positionAgent[i].zombie = true;
+                /////Temp
                 SPositioningArg tempPA;
-                tempPA = positionAgent[i].positionArg.at(positionAgent[i].stateNumber);
+                tempPA = positionAgent[i].getAbsArgs(positionAgent[i].positionArg.size() - 1);
                 tempPA.staticSkill = NoSkill;
                 positionAgent[i].positionArg.append(tempPA);
             }

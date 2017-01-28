@@ -134,7 +134,12 @@ struct SPositioningAgent {
 
     QList<SPositioningArg> positionArg;
     int stateNumber = 0;
+    bool zombie = false;
 
+
+
+
+    //////////////Methods
     SPositioningArg getArgs(const int& _state = 0) const {
         if ((_state + stateNumber) < positionArg.size()) {
             return positionArg.at(stateNumber + _state);
