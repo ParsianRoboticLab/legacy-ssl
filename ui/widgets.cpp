@@ -3505,7 +3505,7 @@ void CLoggerWidget::debugTypeChanged(){
         type |= D_ERF;
     }
     if( chbxDebug[6]->isChecked() ){
-        type |= D_Mahmood;
+        type |= D_MAHMOOD;
     }
     if( chbxDebug[0]->isChecked() ){
         type |= D_MHMMD;

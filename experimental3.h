@@ -298,7 +298,7 @@ public:
 void CMainApplication::Experimental3()
 {
     long i;
-    debug("mahmood",D_Mahmood);
+    debug("mahmood",D_MAHMOOD);
     debug("MHMMD",D_MHMMD);
     debug("atousa",D_ATOUSA);
     debug("fatemeh",D_FATEMEH);

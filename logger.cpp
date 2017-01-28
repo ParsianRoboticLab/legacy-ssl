@@ -60,42 +60,49 @@ void debug(QString text, long type, QColor color)
  long mask1 =0;
  bool typeState=0;
     if (conf() == NULL) return;
-    if (conf()->Performance_Debug_debugGame()) mask = mask | 1;
-    if (conf()->Performance_Debug_debugExperiment()) mask = mask | 2;
-    if (conf()->Performance_Debug_debugDebug()) mask = mask | 4;
-    if (conf()->Performance_Debug_debugNadia()) mask = mask | 8;
-    if (conf()->Performance_Debug_debugMani()) mask = mask | 16;
-    if (conf()->Performance_Debug_debugArash()) mask = mask | 32;
-    if (conf()->Performance_Debug_debugAli()) mask = mask | 64;
-    if (conf()->Performance_Debug_debugSepehr()) mask = mask | 128;
-    if (conf()->Performance_Debug_debugMasood()) mask = mask | 256;
-    if (conf()->Performance_Debug_debugMohammed()) mask = mask | 512;
-    if (conf()->Performance_Debug_debugHossein()) mask = mask | 1024;
-    if (conf()->Performance_Debug_debugKK()) mask = mask | 2048;
-    if (conf()->Performance_Debug_debugDONMHMMD()) mask = mask | 4096;
-    if (conf()->Performance_Debug_debugERF()) mask = mask | 8192;
-    if (conf()->Performance_Debug_debugMAHI()) mask = mask | 16384;
-    if (conf()->Performance_Debug_debugMahmood()) mask = mask | 32768;
-    if (conf()->Performance_Debug_debugFatemeh()) mask1 = mask1 | 1;
-    if (conf()->Performance_Debug_debugAtousa()) mask1 = mask1 | 2;
-    if (conf()->Performance_Debug_debugAHZ()) mask1 = mask1 | 4;
-    if (conf()->Performance_Debug_debugAmin()) mask1 = mask1 | 8;
-    if (conf()->Performance_Debug_debugAmiR()) mask1 = mask1 | 16;
-    if (conf()->Performance_Debug_debugHamed()) mask1 = mask1 | 32;
-    if(type>32768 && (type & mask1)){
+    if (conf()->Performance_Debug_debugGame())       mask  = mask  | 1;
+    if (conf()->Performance_Debug_debugExperiment()) mask  = mask  | 2;
+    if (conf()->Performance_Debug_debugDebug())      mask  = mask  | 4;
+    if (conf()->Performance_Debug_debugNadia())      mask  = mask  | 8;
+    if (conf()->Performance_Debug_debugMani())       mask  = mask  | 16;
+    if (conf()->Performance_Debug_debugArash())      mask  = mask  | 32;
+    if (conf()->Performance_Debug_debugAli())        mask  = mask  | 64;
+    if (conf()->Performance_Debug_debugSepehr())     mask  = mask  | 128;
+    if (conf()->Performance_Debug_debugMasood())     mask  = mask  | 256;
+    if (conf()->Performance_Debug_debugMohammed())   mask  = mask  | 512;
+    if (conf()->Performance_Debug_debugHossein())    mask  = mask  | 1024;
+    if (conf()->Performance_Debug_debugKK())         mask  = mask  | 2048;
+    if (conf()->Performance_Debug_debugDONMHMMD())   mask  = mask  | 4096;
+    if (conf()->Performance_Debug_debugERF())        mask  = mask  | 8192;
+    if (conf()->Performance_Debug_debugMAHI())       mask  = mask  | 16384;
+    if (conf()->Performance_Debug_debugMahmood())    mask  = mask  | 32768;
+    if (conf()->Performance_Debug_debugFatemeh())    mask1 = mask1 | 1;
+    if (conf()->Performance_Debug_debugAtousa())     mask1 = mask1 | 2;
+    if (conf()->Performance_Debug_debugAHZ())        mask1 = mask1 | 4;
+    if (conf()->Performance_Debug_debugAmin())       mask1 = mask1 | 8;
+    if (conf()->Performance_Debug_debugAmiR())       mask1 = mask1 | 16;
+    if (conf()->Performance_Debug_debugHamed())      mask1 = mask1 | 32;
+
+    if(type>32768 && (type & mask1)) {
         typeState=true;
-    }
-    else if(type<=32768 && (type & mask)){
+
+    } else if(type<=32768 && (type & mask)) {
         typeState=true;
+
     }
-    if (typeState || (type==D_ERROR))
-    {
+
+    if (typeState || (type==D_ERROR)) {
         logger->enqueue(CStatusText(text,color));
+
     }
+
     loggerMutex->lock();
+
     if( gameLogger->getIsLogMode() ){
         gameLogger->addToDebugs(text , type);
+
     }
+
     loggerMutex->unlock();
 }
 
