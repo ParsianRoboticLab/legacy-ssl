@@ -1,0 +1,3 @@
+[submodule "logs"]
+	path = logs
+	url = git@gitlab.com:ParsianRobotics/logs.git
