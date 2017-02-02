@@ -10,8 +10,9 @@ class CSkillAutoBallPlacement : public CSkill
 {
 private:
     CSkillGotoPointAvoid *GPA;
-    CNewBangBang *bangBang;
     CSkillKick *kick;
+    CNewBangBang *bangBang;
+
     void gotoBall();
     void gotoTarget();
     Vector2D ballPos;
@@ -20,7 +21,6 @@ private:
     bool ballCatchFlag = false;
 public:
     DEF_SKILL(CSkillAutoBallPlacement);
-
 
     SkillProperty(CSkillAutoBallPlacement, bool, IsFinished, isFinished);
     SkillProperty(CSkillAutoBallPlacement, Vector2D, Target, target);
