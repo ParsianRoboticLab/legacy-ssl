@@ -187,6 +187,7 @@ public:
         DEF_VALUE(Performance_Debug, bool, Bool, debugAtousa)
         DEF_VALUE(Performance_Debug, bool, Bool, debugAmiR)
         DEF_VALUE(Performance_Debug, bool, Bool, debugAmin)
+        DEF_VALUE(Performance_Debug, bool, Bool, debugHamed)
 
   DEF_TREE(Experiments)
     DEF_PTREE(Experiments, AutoReferee)
