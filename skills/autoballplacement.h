@@ -5,15 +5,19 @@
 #include "trackcurve.h"
 #include "knowledge.h"
 #include "pid.h"
-
+#include "kick.h"
 class CSkillAutoBallPlacement : public CSkill
 {
 private:
     CSkillGotoPointAvoid *GPA;
+    CNewBangBang *bangBang;
+    CSkillKick *kick;
     void gotoBall();
     void gotoTarget();
     Vector2D ballPos;
     Vector2D agentPos;
+    int ballCounter = 0;
+    bool ballCatchFlag = false;
 public:
     DEF_SKILL(CSkillAutoBallPlacement);
 

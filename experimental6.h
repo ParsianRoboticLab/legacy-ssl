@@ -16,11 +16,9 @@ QList <Vector2D> agentpath;
 void CMainApplication::Experimental6()
 {
 
-    static CSkillAutoBallPlacement *BP = new CSkillAutoBallPlacement(knowledge->getAgent(2));
-  //  BP->gotoBall();
-    BP->setTarget(knowledge->getMousePos());
-  //  BP->gotoTarget();
-  //  BP->setKickSpeed(0);
+
+    static CSkillAutoBallPlacement *BP = new CSkillAutoBallPlacement(knowledge->getAgent(0));
+    BP->setTarget(mousePos);
     BP->execute();
 
 return;
