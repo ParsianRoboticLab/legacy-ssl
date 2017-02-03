@@ -1261,7 +1261,9 @@ bool CCoach::decideAttack()
 
     //selectedPlay = NULL;
 
-    if( knowledge->getGameState() == CKnowledge::Halt ){
+    switch (knowledge->getGameState()) { // GAMESTATE
+
+    case CKnowledge::Halt:
         firstTime = true;
         cyclesWaitAfterballMoved = 0;
         clearIntentions();
@@ -1279,7 +1281,8 @@ bool CCoach::decideAttack()
         direct = NULL;
         kickoff = NULL;
         return true;
-    } else if( knowledge->getGameState() == CKnowledge::Stop ){
+        break;
+    case CKnowledge::Stop:
         firstTime = true;
         cyclesWaitAfterballMoved = 0;
         clearIntentions();
@@ -1296,7 +1299,8 @@ bool CCoach::decideAttack()
         kickoff = NULL;
 
         return true;
-    } else if( knowledge->getGameState() == CKnowledge::OurKickOff || knowledge->getGameMode() == CKnowledge::OurKickOff ){
+        break;
+    case CKnowledge::OurKickOff:
         if (kickoff == NULL) {
             kickoff = new CKickoff();
         }
@@ -1304,11 +1308,13 @@ bool CCoach::decideAttack()
         selectedPlay = ourPlayOff;
         decidePlayOff(ourPlayers, KICKOFF);
         debug(QString("ourplayers : %1").arg(ourPlayers.size()),D_MAHI);
-    } else if( knowledge->getGameState() == CKnowledge::TheirKickOff ){
+
+        break;
+    case CKnowledge::TheirKickOff:
         selectedPlay = theirKickOff;
         firstTime = true;
-
-    } else if( knowledge->getGameState() == CKnowledge::OurDirectKick ){
+        break;
+    case CKnowledge::OurDirectKick:
         if (direct == NULL) {
             direct = new CDirect();
         }
@@ -1316,11 +1322,13 @@ bool CCoach::decideAttack()
         selectedPlay = ourPlayOff;
         decidePlayOff(ourPlayers, DIRECT);
 
-    } else if( knowledge->getGameState() == CKnowledge::TheirDirectKick ){
+
+        break;
+    case CKnowledge::TheirDirectKick:
         selectedPlay = theirDirect;
         firstTime = true;
-
-    } else if( knowledge->getGameState() == CKnowledge::OurIndirectKick ){
+        break;
+    case CKnowledge::OurIndirectKick:
         if (indirect == NULL) {
             indirect = new CIndirect();
         }
@@ -1329,30 +1337,22 @@ bool CCoach::decideAttack()
         selectedPlay = ourPlayOff;
         decidePlayOff(ourPlayers, INDIRECT);
 
-    } else if( knowledge->getGameState() == CKnowledge::OurPenaltyKick || knowledge->getGameMode() == CKnowledge::OurPenaltyKick ){
+        break;
+    case CKnowledge::TheirIndirectKick:
+        selectedPlay = theirIndirect;
+        firstTime = true;
+        break;
+    case CKnowledge::OurPenaltyKick:
         selectedPlay = ourPenalty;
         debug("penalty",D_MHMMD);
         firstTime = true;
-
-    } else if( knowledge->getGameState() == CKnowledge::NormalStart) {
-        selectedPlay = ourPlayOff;
-        firstTime = true;
-        if (ourPlayOff != NULL)
-            delete ourPlayOff;
-        ourPlayOff = NULL;
-        indirect = NULL;
-        direct = NULL;
-        kickoff = NULL;
-
-    } else if( knowledge->getGameState() == CKnowledge::TheirIndirectKick ){
-        selectedPlay = theirIndirect;
-        firstTime = true;
-
-    } else if( knowledge->getGameState() == CKnowledge::TheirPenaltyKick ){
+        break;
+    case CKnowledge::TheirPenaltyKick:
         selectedPlay = theirPenalty;
         firstTime = true;
 
-    } else if( knowledge->getGameState() == CKnowledge::Start ){
+        break;
+    case CKnowledge::Start:
         decidePlayOn(ourPlayers, lastPlayers);
         firstTime = true;
         if (ourPlayOff != NULL)
@@ -1362,7 +1362,24 @@ bool CCoach::decideAttack()
         direct = NULL;
         kickoff = NULL;
 
-    } else {
+
+        break;
+    case CKnowledge::NormalStart:
+        selectedPlay = ourPlayOff;
+        firstTime = true;
+        if (ourPlayOff != NULL)
+            delete ourPlayOff;
+        ourPlayOff = NULL;
+        indirect = NULL;
+        direct = NULL;
+        kickoff = NULL;
+
+        break;
+    case CKnowledge::OurBallPlacement:
+        break;
+    case CKnowledge::TheirBallPlacement:
+        break;
+    default:
         selectedPlay->markAgents.clear();
         firstTime = true;
         if (ourPlayOff != NULL)
@@ -1373,7 +1390,18 @@ bool CCoach::decideAttack()
         kickoff = NULL;
         debug(QString("Unexpected Game State: %1 %2").arg(knowledge->stateToString(knowledge->getGameState())).arg(knowledge->getGameState()) , D_ERROR , "red");
         return false;
+
+        break;
     }
+
+
+//    if( knowledge->getGameState() == CKnowledge::OurKickOff || knowledge->getGameMode() == CKnowledge::OurKickOff ){
+
+//    } else if( knowledge->getGameState() == CKnowledge::OurPenaltyKick || knowledge->getGameMode() == CKnowledge::OurPenaltyKick ){
+
+
+//    }
+
 
     selectedPlay->init(ourPlayers , &editData);
     selectedPlay->execute();
