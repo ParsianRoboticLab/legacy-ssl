@@ -1,6 +1,6 @@
 objs/*
-logs/*
 ai.pro.*
+logs/*
 ai
 Makefile
 posts
@@ -14,3 +14,6 @@ settings.xml
 
 *.autosave
 potts
+*.icloud
+.idea/*
+3rdParty/*
