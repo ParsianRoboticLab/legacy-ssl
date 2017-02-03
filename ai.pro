@@ -150,11 +150,12 @@ SOURCES += main.cpp \
     skillsthread.cpp \
     tools/planloader.cpp \
     tools/loadplayoffjson.cpp \
-    util/filewatcher.cpp \
     proto/referee.pb.cc \
     plays/indirect.cpp \
     plays/direct.cpp \
     plays/kickoff.cpp \
+    util/filewatcher.cpp \
+    skills/autoballplacement.cpp \
     plays/ourballplacement.cpp \
     plays/theirballplacement.cpp
 
@@ -318,12 +319,13 @@ HEADERS += base.h \
     skillsthread.h \
     tools/planloader.h \
     tools/loadplayoffjson.h \
-    util/filewatcher.h \
     proto/referee.pb.h \
     plays/indirect.h \
     plays/direct.h \
     plays/kickoff.h \
     plays/plays.h \
+    util/filewatcher.h \
+    skills/autoballplacement.h \
     plays/ourballplacement.h \
     plays/theirballplacement.h
 
