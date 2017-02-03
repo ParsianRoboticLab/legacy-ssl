@@ -1234,12 +1234,14 @@ void CCoach::choosePlaymakeAndSupporter(bool needSupporter,bool defenseFirst)
 bool CCoach::decideAttack()
 {
 
-    CKnowledge::ballPossesionState ballPState = isBallOurs();
+    bool toReturn = false;
+
+    ballPState = isBallOurs();
     updateAttackState();
     knowledge->ballPossesion = ballPState;
 
-    double dummyDist = 25400;
-    int nearestId = 0;
+//    double dummyDist = 25400;
+//    int nearestId = 0;
 
     lastBallPossesionState = ballPState;
 
@@ -1248,7 +1250,6 @@ bool CCoach::decideAttack()
 
 
     QList<int> ourPlayers = wm->our.t->activeAgents;
-    static QList<int> lastPlayers;
 
 
 
@@ -1266,123 +1267,88 @@ bool CCoach::decideAttack()
 
     //selectedPlay = NULL;
 
-    if( knowledge->getGameState() == CKnowledge::Halt ){
-        firstTime = true;
-        cyclesWaitAfterballMoved = 0;
-        clearIntentions();
-        ourPlayers.clear();
-        ourPlayers.append(wm->our.t->activeAgents);
-        for( int i = 0 ; i < ourPlayers.count() ; i++ )
-        {
-            agents[ourPlayers[i]]->waitHere();
-        }
-        knowledge->setLastPlayExecuted(HaltPlay);
+    switch (knowledge->getGameState()) { // GAMESTATE
 
-        if (ourPlayOff != NULL) {
-            delete ourPlayOff;
-            ourPlayOff = NULL;
-        }
+    case CKnowledge::Halt:
+        return decideHalt(ourPlayers);
+        break;
 
-        return true;
-    } else if( knowledge->getGameState() == CKnowledge::Stop ){
-        firstTime = true;
-        cyclesWaitAfterballMoved = 0;
-        clearIntentions();
-        CMasterPlay::position.reset();
-        for( int i=0 ; i<ourPlayers.size() ; i++ ){
-            stopRoles[i]->assign(knowledge->getAgent(ourPlayers.at(i)));
-        }
-        knowledge->setLastPlayExecuted(StopPlay);
+    case CKnowledge::Stop:
+        return decideStop(ourPlayers);
+        break;
 
-        if (ourPlayOff != NULL) {
+    case CKnowledge::OurKickOff:
+        toReturn = decideOurKickOff(ourPlayers);
+        break;
 
-            delete ourPlayOff;
-            ourPlayOff = NULL;
+    case CKnowledge::TheirKickOff:
+        toReturn = decideTheirKickOff(ourPlayers);
+        break;
 
-        }
+    case CKnowledge::OurDirectKick:
+        toReturn = decideOurDirect(ourPlayers);
+        break;
 
-        return true;
+    case CKnowledge::TheirDirectKick:
+        toReturn = decideTheirDirect(ourPlayers);
+        break;
 
-    } else if( knowledge->getGameState() == CKnowledge::OurKickOff || knowledge->getGameMode() == CKnowledge::OurKickOff ){
-        if (ourPlayOff == NULL) {
-            ourPlayOff = new CPlayOff();
-        }
-        selectedPlay = ourPlayOff;
-        decidePlayOff(ourPlayers, KICKOFF);
-        lastPlayers.append(ourPlayers); // WHY ??
-        debug(QString("ourplayers : %1").arg(ourPlayers.size()), D_MAHI);
+    case CKnowledge::OurIndirectKick:
+        toReturn = decideOurIndirect(ourPlayers);
+        break;
 
-    } else if( knowledge->getGameState() == CKnowledge::TheirKickOff ){
-        selectedPlay = theirKickOff;
-        firstTime = true;
+    case CKnowledge::TheirIndirectKick:
+        toReturn = decideTheirIndirect(ourPlayers);
+        break;
 
-    } else if( knowledge->getGameState() == CKnowledge::OurDirectKick ){
-        if (ourPlayOff == NULL) {
-            ourPlayOff = new CPlayOff();
-        }
-        selectedPlay = ourPlayOff;
-        decidePlayOff(ourPlayers, DIRECT);
-        debug(QString("ourplayers : %1").arg(ourPlayers.size()), D_MAHI);
+    case CKnowledge::OurPenaltyKick:
+        toReturn = decideOurPenalty(ourPlayers);
+        break;
 
-    } else if( knowledge->getGameState() == CKnowledge::TheirDirectKick ){
-        selectedPlay = theirDirect;
-        firstTime = true;
+    case CKnowledge::TheirPenaltyKick:
+        toReturn = decideTheirPenalty(ourPlayers);
+        break;
+    case CKnowledge::Start:
+        decideStart(ourPlayers);
+        break;
 
-    } else if( knowledge->getGameState() == CKnowledge::OurIndirectKick ){
-        if (ourPlayOff == NULL) {
-            ourPlayOff = new CPlayOff();
-        }
-        selectedPlay = ourPlayOff;
-        decidePlayOff(ourPlayers, INDIRECT);
-        debug(QString("ourplayers : %1").arg(ourPlayers.size()),D_MAHI);
-
-    } else if( knowledge->getGameState() == CKnowledge::OurPenaltyKick || knowledge->getGameMode() == CKnowledge::OurPenaltyKick ){
-        selectedPlay = ourPenalty;
-        debug("penalty",D_MHMMD);
-        firstTime = true;
-
-    } else if( knowledge->getGameState() == CKnowledge::NormalStart) {
-        selectedPlay = ourPlayOff;
-        firstTime = true;
-        if (ourPlayOff != NULL) {
-
-            delete ourPlayOff;
-            ourPlayOff = NULL;
+    case CKnowledge::NormalStart:
+        switch (knowledge->getGameMode()) {
+        case CKnowledge::OurKickOff:
+            toReturn = decideOurKickOff(ourPlayers);
+            break;
+        case CKnowledge::TheirKickOff:
+            toReturn = decideTheirKickOff(ourPlayers);
+            break;
+        case CKnowledge::OurPenaltyKick:
+            toReturn = decideOurPenalty(ourPlayers);
+            break;
+        case CKnowledge::TheirPenaltyKick:
+            toReturn = decideTheirPenalty(ourPlayers);
+            break;
+        default:
+            toReturn = decideNormalStart(ourPlayers);
+            break;
 
         }
-
-    } else if( knowledge->getGameState() == CKnowledge::TheirIndirectKick ){
-        selectedPlay = theirIndirect;
-        firstTime = true;
-
-    } else if( knowledge->getGameState() == CKnowledge::TheirPenaltyKick ){
-        selectedPlay = theirPenalty;
-        firstTime = true;
-
-    } else if( knowledge->getGameState() == CKnowledge::Start ){
-        decidePlayOn(ourPlayers, lastPlayers);
-        firstTime = true;
-        if (ourPlayOff != NULL) {
-            delete ourPlayOff;
-            ourPlayOff = NULL;
-        }
-
-    } else {
-        selectedPlay->markAgents.clear();
-        firstTime = true;
-        if (ourPlayOff != NULL) {
-            delete ourPlayOff;
-            ourPlayOff = NULL;
-        }
-        debug(QString("Unexpected Game State: %1 %2").arg(knowledge->stateToString(knowledge->getGameState())).arg(knowledge->getGameState()) , D_ERROR , "red");
-        return false;
+        break;
+    case CKnowledge::OurBallPlacement:
+        toReturn = decideOurBallPlacement(ourPlayers);
+        break;
+    case CKnowledge::TheirBallPlacement:
+        toReturn = decideTheirBallPlacement(ourPlayers);
+        break;
+    default:
+        return decideNull(ourPlayers);
+        break;
     }
 
-    selectedPlay->init(ourPlayers , &editData);
+    selectedPlay->init(ourPlayers, &editData);
     selectedPlay->execute();
     debug(selectedPlay->whoami(), D_MAHI, QColor(Qt::blue));
     lastPlayers.clear();
     lastPlayers.append(ourPlayers);
+    //return toReturn;
     return true;
 }
 
@@ -1914,3 +1880,143 @@ CPlayOff* CCoach::playOff() {
 CLoadPlayOffJson* CCoach::getPlanLoader() {
     return m_planLoader;
 }
+
+bool CCoach::decideHalt(QList<int>& _ourPlayers) {
+    firstTime = true;
+    cyclesWaitAfterballMoved = 0;
+    clearIntentions();
+    _ourPlayers.clear();
+    _ourPlayers.append(wm->our.t->activeAgents);
+    for( int i = 0 ; i < _ourPlayers.count() ; i++ )
+    {
+        agents[_ourPlayers[i]]->waitHere();
+    }
+    knowledge->setLastPlayExecuted(HaltPlay);
+
+    if (ourPlayOff != NULL) {
+        delete ourPlayOff;
+        ourPlayOff = NULL;
+    }
+
+    return true;
+}
+
+bool CCoach::decideStop(QList<int> & _ourPlayers) {
+    firstTime = true;
+    cyclesWaitAfterballMoved = 0;
+    clearIntentions();
+    CMasterPlay::position.reset();
+    for( int i=0 ; i < _ourPlayers.size() ; i++ ){
+        stopRoles[i]->assign(knowledge->getAgent(_ourPlayers.at(i)));
+    }
+    knowledge->setLastPlayExecuted(StopPlay);
+
+    if (ourPlayOff != NULL) {
+
+        delete ourPlayOff;
+        ourPlayOff = NULL;
+
+    }
+
+    return true;
+}
+
+bool CCoach::decideOurKickOff(QList<int> &_ourPlayers) {
+    if (ourPlayOff == NULL) {
+        ourPlayOff = new CPlayOff();
+    }
+    selectedPlay = ourPlayOff;
+    decidePlayOff(_ourPlayers, KICKOFF);
+//      lastPlayers.append(ourPlayers); // WHY ??
+    debug(QString("ourplayers : %1").arg(_ourPlayers.size()),D_MAHI);
+
+}
+
+bool CCoach::decideTheirKickOff(QList<int> &_ourPlayers) {
+    selectedPlay = theirKickOff;
+    firstTime = true;
+}
+
+bool CCoach::decideOurDirect(QList<int> &_ourPlayers) {
+    if (ourPlayOff == NULL) {
+        ourPlayOff = new CPlayOff();
+    }
+    selectedPlay = ourPlayOff;
+    decidePlayOff(_ourPlayers, DIRECT);
+    debug(QString("ourplayers : %1").arg(_ourPlayers.size()), D_MAHI);
+
+}
+
+bool CCoach::decideTheirDirect(QList<int> &_ourPlayers) {
+    selectedPlay = theirDirect;
+    firstTime = true;
+}
+
+bool CCoach::decideOurIndirect(QList<int> &_ourPlayers) {
+    if (ourPlayOff == NULL) {
+        ourPlayOff = new CPlayOff();
+
+    }
+    selectedPlay = ourPlayOff;
+    decidePlayOff(_ourPlayers, INDIRECT);
+    debug(QString("ourplayers : %1").arg(_ourPlayers.size()),D_MAHI);
+
+}
+
+bool CCoach::decideTheirIndirect(QList<int> &_ourPlayers) {
+    selectedPlay = theirIndirect;
+    firstTime = true;
+}
+
+bool CCoach::decideOurPenalty(QList<int> &_ourPlayers) {
+    selectedPlay = ourPenalty;
+    debug("penalty",D_MHMMD);
+    firstTime = true;
+}
+
+bool CCoach::decideTheirPenalty(QList<int> &_ourPlayers) {
+    selectedPlay = theirPenalty;
+    firstTime = true;
+
+}
+
+bool CCoach::decideStart(QList<int> &_ourPlayers) {
+    decidePlayOn(_ourPlayers, lastPlayers);
+    firstTime = true;
+    if (ourPlayOff != NULL) {
+
+        delete ourPlayOff;
+        ourPlayOff = NULL;
+
+    }
+}
+
+bool CCoach::decideNormalStart(QList<int> &_ourPlayers) {
+    selectedPlay = ourPlayOff;
+    firstTime = true;
+    if (ourPlayOff != NULL) {
+        delete ourPlayOff;
+        ourPlayOff = NULL;
+    }
+}
+
+bool CCoach::decideOurBallPlacement(QList<int> &_ourPlayers) {
+
+}
+
+bool CCoach::decideTheirBallPlacement(QList<int> &_ourPlayers) {
+
+}
+
+bool CCoach::decideNull(QList<int> &_ourPlayers) {
+    selectedPlay->markAgents.clear();
+    firstTime = true;
+    if (ourPlayOff != NULL) {
+        delete ourPlayOff;
+        ourPlayOff = NULL;
+    }
+    debug(QString("Unexpected Game State: %1 %2").arg(knowledge->stateToString(knowledge->getGameState())).arg(knowledge->getGameState()) , D_ERROR , "red");
+    return false;
+}
+
+

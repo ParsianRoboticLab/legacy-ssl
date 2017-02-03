@@ -158,8 +158,25 @@ private:
     QStringList currentTags;
 
     NGameOff::SPlan* lastPlan;
-
-
+    QList<int> lastPlayers;
+    CKnowledge::ballPossesionState ballPState;
+    //////////////Decide Attack functions
+    bool decideHalt               (QList<int>&);
+    bool decideStop               (QList<int>&);
+    bool decideOurKickOff         (QList<int>&);
+    bool decideTheirKickOff       (QList<int>&);
+    bool decideOurIndirect        (QList<int>&);
+    bool decideTheirIndirect      (QList<int>&);
+    bool decideOurDirect          (QList<int>&);
+    bool decideTheirDirect        (QList<int>&);
+    bool decideOurPenalty         (QList<int>&);
+    bool decideTheirPenalty       (QList<int>&);
+    bool decideStart              (QList<int>&);
+    bool decideNormalStart        (QList<int>&);
+    bool decideOurBallPlacement   (QList<int>&);
+    bool decideTheirBallPlacement (QList<int>&);
+    bool decideNull               (QList<int>&);
+    /////////////////////////////////////
 
 
 };
