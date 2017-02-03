@@ -13,7 +13,7 @@ cecho () {
 
 if [ ! -d "$DIRECTORY" ]; then
 	mkdir "$DIRECTORY"
-	cecho "logs Folder Created"	
+	cecho "logs Folder Created"
 fi
 
 cd "$DIRECTORY"
