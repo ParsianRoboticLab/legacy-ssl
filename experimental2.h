@@ -76,7 +76,7 @@ void CMainApplication::Experimental2()
     tRole.setAvoidCenterCircle(false);
     tRole.setIsGotoPointAvoid(true);
     tRole.setSlow(true);
-    tRole.setSelectedSkill(SkillKick);
+    tRole.setSelectedSkill(roleSkill::Kick);
     Vector2D kickerPos = knowledge->getAgent(0)->pos();
     Vector2D targetPos = tRole.getTarget();
     AngleDeg diff = AngleDeg(asin((r/2)/(kickerPos.dist(targetPos)))*(180/3.141593));

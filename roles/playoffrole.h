@@ -2,17 +2,21 @@
 #define PLAYOFFROLE_H
 
 #include "role.h"
-
+#include <QTime>
 class CRolePlayOff{
 private:
+    void update();
     bool updated;
-    QList<int> kkMarkAgents;
-
+    bool roleUpdate;
+    bool dont;
+    QTime timer;
 public:
 
     CRolePlayOff();
     ~CRolePlayOff();
     void execute();
+    int resetTime();
+    int getElapsed() const;
 
     CSkillKick *kickSkill;
     CSkillReceivePass *receivePassSkill;
@@ -21,7 +25,7 @@ public:
 
     ClassProperty(CRolePlayOff, int, AgentID, agentID, updated);
     ClassProperty(CRolePlayOff, CAgent*, Agent, agent, updated);
-    ClassProperty(CRolePlayOff, kkSkill, SelectedSkill, selectedSkill, updated);
+    ClassProperty(CRolePlayOff, roleSkill::ESkill, SelectedSkill, selectedSkill, updated);
     ClassProperty(CRolePlayOff, Vector2D, Target, target, updated);
     ClassProperty(CRolePlayOff, Vector2D, TargetDir, targetDir, updated);
     ClassProperty(CRolePlayOff, Vector2D, TargetVel, targetVel, updated);
@@ -36,13 +40,21 @@ public:
     ClassProperty(CRolePlayOff, double, MaxVelocity, maxVelocity, updated);
     ClassProperty(CRolePlayOff, bool, Intercept, intercept, updated);
     ClassProperty(CRolePlayOff, bool, AvoidBall,avoidBall, updated);
-    ClassProperty(CRolePlayOff, bool, NoIA, noIA, updated);
+    ClassProperty(CRolePlayOff, bool, IgnoreAngle, ignoreAngle, updated);
 
     ClassProperty(CRolePlayOff, bool, DoPass, doPass, updated);
+
+    ////////Not Executive Property
+    ClassProperty(CRolePlayOff, long long, Time, time, dont);
+    ClassProperty(CRolePlayOff, bool, BallIsNear, ballIsNear, dont);
+    ClassProperty(CRolePlayOff, bool, TimeBased, timeBased, dont);
+
 
 public:
     void setUpdated(bool _updated);
     bool getUpdated();
+    inline void setRoleUpdate (bool _updated) {roleUpdate = _updated;}
+    inline bool getRoleUpdate () {return roleUpdate;}
 protected:
 };
 

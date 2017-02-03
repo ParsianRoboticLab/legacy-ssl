@@ -297,11 +297,17 @@ public:
 
 void CMainApplication::Experimental3()
 {
-
-    debug("hello",D_MAHI);
-    return;
-
-
+    long i;
+    debug("mahmood",D_MAHMOOD);
+    debug("MHMMD",D_MHMMD);
+    debug("atousa",D_ATOUSA);
+    debug("fatemeh",D_FATEMEH);
+    debug("mahi",D_MAHI);
+    debug("amin",D_AMIN);
+    debug("amiR",D_AMIR);
+    debug("AHZ",D_AHZ);
+    debug("hamed",D_HAMED);
+return;
 //    Segment2D segToOppGoali[5];
 //    Vector2D tempMousePos = tPoint;
 //    int tCnt = 0;

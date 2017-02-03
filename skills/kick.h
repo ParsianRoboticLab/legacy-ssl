@@ -11,7 +11,6 @@ class CSkillKick;
 
 
 
-
 #define penaltyAreaAvoidanceRadius (0.9)
 
 class CSkillIntercept : public CSkill
@@ -409,7 +408,7 @@ private:
     double velThresh;
 public:
     double ballRealVel;
-
+    static Vector2D newOneTouchAng(CAgent *oneTouchAgent,Vector2D target,double kickSpeed,double alpha,double beta,double gama);
     static double oneTouchAngle(Vector2D pos, Vector2D vel, Vector2D ballVel, Vector2D ballDir, Vector2D goal, double landa, double gamma);
     static double oneTouchAngle(Vector2D pos, Vector2D dir, Vector2D vel, Vector2D ballVel, Vector2D ballDir, Vector2D goal, double landa, double gamma);
     DEF_SKILL(CSkillKickOneTouch);

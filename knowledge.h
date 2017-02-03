@@ -122,7 +122,10 @@ public:
         OurPenaltyKick = 8,
         TheirPenaltyKick = 9,
         Start = 10,
-        NormalStart = 11
+        NormalStart = 11,
+        //added
+        OurBallPlacement = 12,
+        TheirBallPlacement = 13
     };
     enum Support
     {
@@ -198,6 +201,9 @@ public:
     int lastFrameShirjeBlock;
     bool isSimulMode;
     void updateGameState();
+    ///////////////AMIN
+    Vector2D getBest();
+    //////////////Mahmoud
     Vector2D getBestPosToShootToGoal(Vector2D from, double &regionWidth, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, bool oppGaol);
     Vector2D getBestPosForPassReciever(Rect2D searchRegion, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, Rect2D avoidRect);
     Vector2D getBestPosForPassReciever(QList<Rect2D> searchRegions, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, QList<Rect2D> avoidRects,int passRecieverID, int passSenderID,double angleFactor,double angle0);

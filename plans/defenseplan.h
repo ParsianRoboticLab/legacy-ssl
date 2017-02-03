@@ -63,6 +63,7 @@ protected:
     bool isDefenseUpperThanGoalie;
     float tooFarDiffAngle;
     int defenseCount;
+    int chipGKCounter;
 #ifndef OLD_FASTEST
     NewFastestToBall fastestToBall;
 #else
@@ -110,6 +111,7 @@ protected:
     Vector2D getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion);
     Line2D getBisectorLine(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
     Segment2D getBisectorSegment(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
+    void manToManMarkInPlayOn(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void tempFindPos(int _markAgentSize);
     int angleDegreeThr = 0;
@@ -193,6 +195,7 @@ public:
       double markRadius;
       double markRadiusStrict;
       double segmentpershoot;
+      double segmentperpass;
     ///////////////////////////////////
 
 
@@ -203,13 +206,14 @@ private:
        QList<CRobot*> sortdanger(const QList<CRobot*> oppagent);
 
        void markExecute(int _markAgentSize);
-       bool checkIndirectArea(Vector2D);
+       bool checkIndirectAreaShoot(Vector2D);
+       bool checkIndirectAreaPass(Vector2D);
        void markPosRefinePlayoff();
        QList<Vector2D> ShootBlockRatio(double, Vector2D);
-       QList<Vector2D> PassBlockRatio(double, Vector2D);
+       QList<Vector2D> PassBlockRatio(double,Vector2D);
 
        QList<Vector2D> indirectAvoidShoot(Vector2D);
-
+       QList<Vector2D> indirectAvoidPass(Vector2D);
        int numberOfMarkers;
        QList<Vector2D> oppAgentsToMarkPos;
        QList<Vector2D> obspos;

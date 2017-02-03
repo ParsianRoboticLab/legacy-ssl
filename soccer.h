@@ -13,6 +13,7 @@
 
 #include "proto/radio_protocol_command.pb.h"
 #include "proto/radio_protocol_wrapper.pb.h"
+#include "proto/referee.pb.h"
 #include "time.h"
 class CSoccer : public QObject
 {
@@ -49,6 +50,12 @@ public:
     virtual void monitorUpdate()=0;
     virtual void customControl(bool& custom)=0;
 
+    ///////////////////////////////////////
+    char map_stage(SSL_Referee::Stage stage);
+    char map_command(SSL_Referee::Command command);
+    char compute_command(SSL_Referee refSC);
+    ///////////////////////////////////////
+
     CAgent **agents;
     CCoach *coach;
     CCommunicator *robotCom;
@@ -62,6 +69,13 @@ public:
     clock_t realTimeTime;
     struct timeval t1, t2;
 private:
+
+    /****lasts****/
+    char cached_command_char;
+    SSL_Referee::Stage last_stage;
+    SSL_Referee::Command last_command;
+    int last_yellow_ycards, last_blue_ycards;
+    unsigned int last_yellow_rcards, last_blue_rcards;
 
     /////////////////mhmmd thread
     skillsThread *thSkill[6];

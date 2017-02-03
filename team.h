@@ -9,6 +9,7 @@ struct CTeamData
     QQueue<int> activeAgents;
     ETeamColorType color;
     ETeamSideType side;
+    int goalieID;
 };
 
 class CTeam
@@ -22,6 +23,10 @@ public:
     int activeAgentsCount();
     int activeAgentID(int i);
 	void update();
+
+        void setColor(ETeamColorType c);
+        void updateGoaliID(int id);
+
 };
 
 #endif // TEAM_H

@@ -646,9 +646,6 @@ void CMainApplication::customControl(bool &custom)
         if (experimental==7) TechnicalChallenge();
         if (experimental==9) JsHandy();
         if (experimental==10) kickProfiler();
-#ifndef LARGE_FIELD
-        if (experimental==8) visionThread->vc->isOnMergeCamerasExperiment = MergeCamerasExperiment();
-#endif
     }
     else {
         custom = false;
@@ -874,15 +871,9 @@ void CMainApplication::setQuiescentMode(QAction *action)
         if (setMergeCamerasExperimentAct->isChecked())
         {
             setMergeCamerasExperimentAct->setChecked(true);
-#ifndef LARGE_FIELD
-            visionThread->vc->isOnMergeCamerasExperiment = true;
-#endif
         }
         else {
             setMergeCamerasExperimentAct->setChecked(false);experimental=0;
-#ifndef LARGE_FIELD
-            visionThread->vc->isOnMergeCamerasExperiment = false;
-#endif
         }
         setExp1Act->setChecked(false);
         setExp2Act->setChecked(false);
@@ -1148,9 +1139,16 @@ void CMainApplication::getMousePos(Vector2D _pos, int mouseClick)
 void CMainApplication::changeTeamColor(VarType*) {   
     if(conf()->LocalSettings_OurTeamColor()=="Blue"){
         soccer->setTeamColor(_COLOR_BLUE);
+        //added
+        wm->our.setColor(_COLOR_BLUE);
+        wm->opp.setColor(_COLOR_YELLOW);
+
     }
     if (conf()->LocalSettings_OurTeamColor()=="Yellow") {
         soccer->setTeamColor(_COLOR_YELLOW);
+        //added
+        wm->our.setColor(_COLOR_YELLOW);
+        wm->opp.setColor(_COLOR_BLUE);
     }
     wm->gs->init((wm->getTeamColor() == _COLOR_YELLOW) ? TEAM_YELLOW : TEAM_BLUE );
 }
@@ -1637,9 +1635,6 @@ void CMainApplication::loadFormationConfigs(){
     CCoach::editData["TheirPenaltyKick"]->openConf(prefix+"their_penalty_kick.conf");
     CCoach::editData["OurPenaltyKick"] = new EditData;
     CCoach::editData["OurPenaltyKick"]->openConf(prefix+"our_penalty_kick.conf");
-#ifdef LARGE_FIELD
-    //defaultConfigFileName = "large5";
-#endif
 }
 
 

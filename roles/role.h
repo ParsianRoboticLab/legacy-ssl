@@ -5,6 +5,19 @@
 #include <knowledge.h>
 #include <behaviours/behaviour.h>
 
+namespace roleSkill {
+
+enum ESkill {
+    Gotopoint = 0,
+    GotopointAvoid = 1,
+    Kick = 2,
+    ReceivePass = 3,
+    OneTouch = 4,
+    Mark = 5
+};
+
+}
+
 class CRoleInfo;
 
 class CRole : public CSkill
@@ -82,7 +95,7 @@ public:
     const char* Role::Name = name
 
 #define ClassProperty(skill,type,name,local,chflag) \
-        public: inline type get##name() {return local;} \
+        public: inline type get##name() const {return local;} \
         public: inline skill* set##name(type val) {local = val;chflag = true;return this;} \
         protected: type local
 

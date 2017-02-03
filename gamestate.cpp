@@ -17,6 +17,9 @@ const int GameState::YELLOW =   (1 << 9);
 const int GameState::READY =    (1 << 10);
 const int GameState::NOTREADY = (1 << 11);
 
+//added
+const int GameState::BALLPLACEMENT = (1 << 12);
+
 GameState::GameState()
 {
   color = BLUE; state = GAME_OFF;
@@ -84,6 +87,12 @@ if (state == GAME_OFF) {
   case COMM_INDIRECT_YELLOW:
     state = INDIRECT | YELLOW | READY; return;
 
+//added
+  case COMM_BALLPLACEMENT_BLUE:
+    state = BALLPLACEMENT | BLUE | READY; return;
+  case COMM_BALLPLACEMENT_YELLOW:
+    state = BALLPLACEMENT | YELLOW | READY; return;
+
   default: break;
   }
 }
@@ -114,6 +123,12 @@ bool GameState::theirIndirectKick() { return indirectKick() && ! (state & color)
 bool GameState::freeKick() { return directKick() || indirectKick(); }
 bool GameState::ourFreeKick() { return ourDirectKick() || ourIndirectKick(); }
 bool GameState::theirFreeKick() { return theirDirectKick() || theirIndirectKick(); }
+
+//added
+bool GameState::ballPlacement() { return (state & BALLPLACEMENT); }
+bool GameState::ourBallPlacement() { return ballPlacement() && (state & color); }
+bool GameState::theirBallPlacement() { return ballPlacement() && ! (state & color); }
+
 
 bool GameState::canMove() { return (state != HALTED); }
 
