@@ -40,10 +40,12 @@ void CRolePlayOff::update() {
         kickSkill->setInterceptMode(intercept);
         if(wm->getIsSimulMode()) {
             kickSkill->setKickSpeed(static_cast<int>(kickSpeed/170));
-        }
-        else {
+
+        } else {
             kickSkill->setKickSpeed(kickSpeed);
+
         }
+
         kickSkill->setChip(chip);
         kickSkill->setAgent(agent);
         kickSkill->setDontKick(!doPass);

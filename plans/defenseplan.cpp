@@ -112,6 +112,7 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
                     goalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
                                                       Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first).length() ? sol3 : sol4).perpendicularBisector() , &sol5 , &sol6);
 
+
                     tempMarkPoses.removeAt(i);
                     tempMarkPoses.append(wm->field->isInField(sol5) ? sol5 : sol6);
                 }
@@ -500,6 +501,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
                     || (knowledge->getGameState() == CKnowledge::TheirKickOff)
                     || (knowledge->getGameState() == CKnowledge::TheirIndirectKick)
                     );
+
     Circle2D MarkArea(wm->field->ourGoal(),markRadius);
     Circle2D MarkAreaStrict(wm->field->ourGoal(), markRadiusStrict);
     Vector2D sol1,sol2;
@@ -3062,7 +3064,7 @@ CDefPos::CDefPos()
 {
     penaltyAreaOffset = 0.2;
     penaltyAreaRadius = 1.33;
-    penaltyAreaCircle.assign(wm->field->ourGoal()-Vector2D(penaltyAreaOffset, 0), penaltyAreaRadius);
+    penaltyAreaCircle.assign(wm->field->ourGoal()-Vector2D(penaltyAreaOffset, 0.001), penaltyAreaRadius);
     oneDefThr = 0;
     isNearPenaltyArea = false;
 }
