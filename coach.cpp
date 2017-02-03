@@ -85,9 +85,6 @@ CCoach::CCoach(CAgent**_agents)
     forceStart    = new CForceStart;
 
     ourPlayOff    = NULL;
-    kickoff       = NULL;
-    direct        = NULL;
-    indirect      = NULL;
     dynamicAttack = new CDynamicAttack();
 
     for( int i=0 ; i<_MAX_NUM_PLAYERS ; i++ ){
@@ -1248,8 +1245,14 @@ bool CCoach::decideAttack()
 
     // find unused agents!
 
+
+
     QList<int> ourPlayers = wm->our.t->activeAgents;
     static QList<int> lastPlayers;
+
+
+
+
     if( goalieAgent != NULL ){
         ourPlayers.removeOne(goalieAgent->self()->id);
     }
@@ -1258,6 +1261,8 @@ bool CCoach::decideAttack()
             ourPlayers.removeOne(defenseAgents.at(i)->self()->id);
         }
     }
+
+
 
     //selectedPlay = NULL;
 
@@ -1272,12 +1277,12 @@ bool CCoach::decideAttack()
             agents[ourPlayers[i]]->waitHere();
         }
         knowledge->setLastPlayExecuted(HaltPlay);
-        if (ourPlayOff != NULL)
+
+        if (ourPlayOff != NULL) {
             delete ourPlayOff;
-        ourPlayOff = NULL;
-        indirect = NULL;
-        direct = NULL;
-        kickoff = NULL;
+            ourPlayOff = NULL;
+        }
+
         return true;
     } else if( knowledge->getGameState() == CKnowledge::Stop ){
         firstTime = true;
@@ -1288,46 +1293,48 @@ bool CCoach::decideAttack()
             stopRoles[i]->assign(knowledge->getAgent(ourPlayers.at(i)));
         }
         knowledge->setLastPlayExecuted(StopPlay);
-        if (ourPlayOff != NULL)
+
+        if (ourPlayOff != NULL) {
+
             delete ourPlayOff;
-        ourPlayOff = NULL;
-        indirect = NULL;
-        direct = NULL;
-        kickoff = NULL;
+            ourPlayOff = NULL;
+
+        }
 
         return true;
+
     } else if( knowledge->getGameState() == CKnowledge::OurKickOff || knowledge->getGameMode() == CKnowledge::OurKickOff ){
-        if (kickoff == NULL) {
-            kickoff = new CKickoff();
+        if (ourPlayOff == NULL) {
+            ourPlayOff = new CPlayOff();
         }
-        ourPlayOff = kickoff;
         selectedPlay = ourPlayOff;
         decidePlayOff(ourPlayers, KICKOFF);
-        debug(QString("ourplayers : %1").arg(ourPlayers.size()),D_MAHI);
+        lastPlayers.append(ourPlayers); // WHY ??
+        debug(QString("ourplayers : %1").arg(ourPlayers.size()), D_MAHI);
+
     } else if( knowledge->getGameState() == CKnowledge::TheirKickOff ){
         selectedPlay = theirKickOff;
         firstTime = true;
 
     } else if( knowledge->getGameState() == CKnowledge::OurDirectKick ){
-        if (direct == NULL) {
-            direct = new CDirect();
+        if (ourPlayOff == NULL) {
+            ourPlayOff = new CPlayOff();
         }
-        ourPlayOff = direct;
         selectedPlay = ourPlayOff;
         decidePlayOff(ourPlayers, DIRECT);
+        debug(QString("ourplayers : %1").arg(ourPlayers.size()), D_MAHI);
 
     } else if( knowledge->getGameState() == CKnowledge::TheirDirectKick ){
         selectedPlay = theirDirect;
         firstTime = true;
 
     } else if( knowledge->getGameState() == CKnowledge::OurIndirectKick ){
-        if (indirect == NULL) {
-            indirect = new CIndirect();
+        if (ourPlayOff == NULL) {
+            ourPlayOff = new CPlayOff();
         }
-        if (firstTime) qDebug() << "debug";
-        ourPlayOff = indirect;
         selectedPlay = ourPlayOff;
         decidePlayOff(ourPlayers, INDIRECT);
+        debug(QString("ourplayers : %1").arg(ourPlayers.size()),D_MAHI);
 
     } else if( knowledge->getGameState() == CKnowledge::OurPenaltyKick || knowledge->getGameMode() == CKnowledge::OurPenaltyKick ){
         selectedPlay = ourPenalty;
@@ -1337,12 +1344,12 @@ bool CCoach::decideAttack()
     } else if( knowledge->getGameState() == CKnowledge::NormalStart) {
         selectedPlay = ourPlayOff;
         firstTime = true;
-        if (ourPlayOff != NULL)
+        if (ourPlayOff != NULL) {
+
             delete ourPlayOff;
-        ourPlayOff = NULL;
-        indirect = NULL;
-        direct = NULL;
-        kickoff = NULL;
+            ourPlayOff = NULL;
+
+        }
 
     } else if( knowledge->getGameState() == CKnowledge::TheirIndirectKick ){
         selectedPlay = theirIndirect;
@@ -1355,22 +1362,18 @@ bool CCoach::decideAttack()
     } else if( knowledge->getGameState() == CKnowledge::Start ){
         decidePlayOn(ourPlayers, lastPlayers);
         firstTime = true;
-        if (ourPlayOff != NULL)
+        if (ourPlayOff != NULL) {
             delete ourPlayOff;
-        ourPlayOff = NULL;
-        indirect = NULL;
-        direct = NULL;
-        kickoff = NULL;
+            ourPlayOff = NULL;
+        }
 
     } else {
         selectedPlay->markAgents.clear();
         firstTime = true;
-        if (ourPlayOff != NULL)
+        if (ourPlayOff != NULL) {
             delete ourPlayOff;
-        ourPlayOff = NULL;
-        indirect = NULL;
-        direct = NULL;
-        kickoff = NULL;
+            ourPlayOff = NULL;
+        }
         debug(QString("Unexpected Game State: %1 %2").arg(knowledge->stateToString(knowledge->getGameState())).arg(knowledge->getGameState()) , D_ERROR , "red");
         return false;
     }
@@ -1385,7 +1388,6 @@ bool CCoach::decideAttack()
 
 void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
 
-
     //Decide Plan
     if (firstTime) {
         NGameOff::EMode tempMode;
@@ -1395,7 +1397,8 @@ void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
         firstTime = false;
         qDebug() << "[Coach] first time config done";
     } else {
-        setPlayOff(ourPlayOff->getMasterMode());
+        setPlayOff( ourPlayOff->getMasterMode() );
+
     }
 }
 void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
@@ -1713,7 +1716,10 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     NGameOff::SPlan* thePlan = chooseMostSuccecfull(validPlans); //Choose Best valid Plan
     matchPlan(thePlan, _ourplayers); //Match The Plan
     ourPlayOff->setMasterPlan(thePlan);
+    ourPlayOff->analyseShoot(); // should call after setmasterplan
+    ourPlayOff->analysePass(); // should call after setmasterplan
     ourPlayOff->setInitial(true);
+    ourPlayOff->lockAgents = true;
     lastPlan = thePlan;
 }
 

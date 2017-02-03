@@ -12,8 +12,5 @@
 #include "plays/forcestart.h"
 #include "plays/playoff.h"
 #include "plays/dynamicattack.h"
-#include "plays/indirect.h"
-#include "plays/direct.h"
-#include "plays/kickoff.h"
 
 #endif // PLAYS_H

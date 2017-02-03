@@ -62,25 +62,20 @@ private:
     double possessionIntentionInterval;
     double playMakeIntended;
 
-    CMasterPlay *selectedPlay;
+    CMasterPlay          *selectedPlay;
 
-    CPlayOff *ourPlayOff;
-
-    CDirect *direct;
-    CKickoff *kickoff;
-    CIndirect *indirect;
-
-    COurPenalty *ourPenalty;
-    COurKickOff *ourKickOff;
-    CTheirDirect *theirDirect;
-    COurIndirect *ourIndirect;
-    CTheirPenalty *theirPenalty;
-    CTheirKickOff *theirKickOff;
-    CTheirIndirect *theirIndirect;
+    CPlayOff             *ourPlayOff;
+    COurPenalty          *ourPenalty;
+    COurKickOff          *ourKickOff;
+    COurIndirect         *ourIndirect;
+    CTheirDirect         *theirDirect;
+    CTheirPenalty        *theirPenalty;
+    CTheirKickOff        *theirKickOff;
+    CTheirIndirect       *theirIndirect;
     CDoubleSizeOurDirect *ourDirect;
 
-    CForceStart *forceStart;
-    CDynamicAttack *dynamicAttack;
+    CForceStart          *forceStart;
+    CDynamicAttack       *dynamicAttack;
 
 
     CRoleStop *stopRoles[_MAX_NUM_PLAYERS];
