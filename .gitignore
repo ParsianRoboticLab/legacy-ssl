@@ -1,5 +1,4 @@
 objs/*
-logs/*
 ai.pro.*
 ai
 Makefile
