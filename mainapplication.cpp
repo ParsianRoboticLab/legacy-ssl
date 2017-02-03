@@ -346,10 +346,16 @@ CMainApplication::CMainApplication(QWidget *parent)
     setLogMode->setChecked(false);
     setLogMode->setShortcut(QKeySequence(tr("Ctrl+L" , "Log")));
 
+
     setReplayMode = new QAction(tr("Replay") , this);
     setReplayMode->setCheckable(true);
     setReplayMode->setChecked(false);
     setReplayMode->setShortcut(QKeySequence(tr("Ctrl+R" , "Replay")));
+
+    setLogTagMode = new QAction(tr("LogTag") , this);
+    setLogTagMode->setCheckable(true);
+    setLogTagMode->setChecked(false);
+    setLogTagMode->setShortcut(QKeySequence(tr("Ctrl+Shift+L" , "LogTag")));
 
 
 
@@ -385,6 +391,7 @@ CMainApplication::CMainApplication(QWidget *parent)
     loggerMenu = menuBar()->addMenu(tr("&Logger"));
     loggerMenu->addAction(setLogMode);
     loggerMenu->addAction(setReplayMode);
+    loggerMenu->addAction(setLogTagMode);
 
     /* Final */
     this->showMaximized();
@@ -1458,7 +1465,10 @@ void CMainApplication::logBtnPressed()
 }
 
 void CMainApplication::setLoggerReplayMode(QAction *action ){
-    if( action->text() == "Log" ){
+    if( action->text() == "LogTag"){
+        qDebug("LogTag");
+    }
+    else if( action->text() == "Log" ){
         if( setReplayMode->isChecked() ){
             terminateLogOrReplay(false); // terminate Replay
         }

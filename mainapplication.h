@@ -226,6 +226,7 @@ public:
     QAction *setMixedAct;
     QAction *setLogMode;
     QAction *setReplayMode;
+    QAction *setLogTagMode;
 
     //Game Related
 

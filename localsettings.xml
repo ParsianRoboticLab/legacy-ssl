@@ -2,7 +2,7 @@
 <VarXML>
 	<Var name="Local Settings" type="list">
 		<Var name="SSL-Vision Multicast IP" type="string">
-			224.5.23.2
+			127.0.0.1
 		</Var>
 		<Var name="SSL-Vision Multicast Port" type="int" minval="" maxval="">
 			10005
@@ -17,7 +17,7 @@
 			127.0.0.1
 		</Var>
 		<Var name="Simulator Port" type="int" minval="" maxval="">
-			10020
+			10025
 		</Var>
 		<Var name="Serial Send Device" type="string">
 			/dev/ttyUSB0

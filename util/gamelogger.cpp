@@ -44,6 +44,7 @@ void CGameLogger::setDrawer(CDrawer *_drawer ){
 }
 
 void CGameLogger::openFilesToLog(QString baseFileName){
+
 #ifndef Q_OS_MACX
     baseFileName = "logs/" + baseFileName;
 #else
@@ -52,13 +53,15 @@ void CGameLogger::openFilesToLog(QString baseFileName){
     logFile.setFileName(baseFileName + ".log");
     debugFile.setFileName(baseFileName + ".debug");
     drawFile.setFileName(baseFileName + ".draw");
+    infoFile.setFileName(baseFileName + ".info");
 
-    if( !logFile.open(QIODevice::WriteOnly) || !debugFile.open(QIODevice::WriteOnly) || !drawFile.open(QIODevice::WriteOnly) ){
+    if( !logFile.open(QIODevice::WriteOnly) || !debugFile.open(QIODevice::WriteOnly) || !drawFile.open(QIODevice::WriteOnly) || !infoFile.open(QIODevice::WriteOnly) ){
         qDebug() << "Log: open log files failed";
 		closeLogFiles(true);
         fileLogError = true;
     }
     else{
+
         logDS.setDevice(&logFile);
         logDS << LOGGER_MAGIC;
         logDS << LOGGER_VERSION;
@@ -70,6 +73,11 @@ void CGameLogger::openFilesToLog(QString baseFileName){
         drawDS.setDevice(&drawFile);
         drawDS << LOGGER_MAGIC;
         drawDS << LOGGER_VERSION;
+
+        infoDS.setDevice(&infoFile);
+        infoDS << LOGGER_MAGIC;
+        infoDS << LOGGER_VERSION;
+
 
         counter = 0;
         draws.clear();
@@ -90,12 +98,13 @@ void CGameLogger::closeLogFiles(bool force){
         writePackets();
         writeDebugs();
         writeDraws();
+        writeInfo();
         logFile.close();
         debugFile.close();
         drawFile.close();
+        infoFile.close();
     }
 }
-
 void CGameLogger::openFileToReplay(QString fileName){
     qint32 magic , version , magic2 , version2 , magic3 , version3;
     qint32 sz;
@@ -285,6 +294,27 @@ void CGameLogger::writeDebugs(){
         }
     }
     debugs.clear();
+}
+
+void CGameLogger::writeInfo(){
+
+
+
+
+    for( int i=0 ; i<infos.size() ; i++ ){
+
+        infoDS << infos.at(i).canChip;
+        infoDS << infos.at(i).canKick;
+        infoDS << infos.at(i).spinLoad;
+        infoDS << infos.at(i).shootSens;
+        infoDS << infos.at(i).shootBoard;
+    }
+    infos.clear();
+
+
+
+
+
 }
 
 void CGameLogger::writeDraws(){

@@ -37,6 +37,15 @@ struct SRobotInfo{
 	qint8 id;
 };
 
+struct SInfoData{
+    bool shootSens;
+    bool spinLoad;
+    bool canKick;
+    bool canChip;
+    qint8 shootBoard;
+    qint8 Battery;
+};
+
 struct SPacketData{
     qint32 size;
     double time;
@@ -81,11 +90,12 @@ class CGameLogger;
 //CreateSmartPointer(CGameLogger);
 
 class CGameLogger: public QThread{
-    QFile logFile , debugFile , drawFile;
+    QFile logFile , debugFile , drawFile , infoFile;
     QFile readLog , readDebug , readDraw;
-    QDataStream logDS , debugDS , drawDS;
-    QDataStream readLogDS , readDebugDS , readDrawDS;
+    QDataStream logDS , debugDS , drawDS ,infoDS;
+    QDataStream readLogDS , readDebugDS , readDrawDS , readInfoDS;
     QList <SPacketData> packets;
+    QList <SInfoData> infos;
     QMap <qint32 , QList<SDebugData> > debugs;
     QMap <qint32 , QList<SDrawData> > draws;
     QList <qint32> logSeekList , drawSeekList , debugSeekList;
@@ -106,6 +116,7 @@ class CGameLogger: public QThread{
     void writePackets();
     void writeDebugs();
     void writeDraws();
+    void writeInfo();
     void readLogPacket();
     void readDebugPacket();
     void readDrawPacket();

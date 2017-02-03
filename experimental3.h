@@ -298,6 +298,9 @@ public:
 void CMainApplication::Experimental3()
 {
 
+    debug("hello",D_MAHI);
+    return;
+
 
 //    Segment2D segToOppGoali[5];
 //    Vector2D tempMousePos = tPoint;
