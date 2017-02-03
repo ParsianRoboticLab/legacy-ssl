@@ -43,7 +43,6 @@ CTabDockWidget::CTabDockWidget(QWidget* parent , bool autoHide)
     tabs = new QTabWidget(w);
     QGridLayout *layout = new QGridLayout(w);
     tabs->setTabPosition(QTabWidget::West);
-
     if( autoHide ){
         isHide = hideable = false;
         btnAutoHide = new QPushButton(this);
@@ -3122,25 +3121,28 @@ CLoggerWidget::CLoggerWidget(){
     btnClear = new QPushButton("Clear" , this);
     chbxDraws = new QCheckBox("Draws" , this);
     chbxDebugs = new QCheckBox("Debugs" , this);
-    chbxDebug[0] = new QCheckBox("Game" , this);
-    chbxDebug[1] = new QCheckBox("Ali" , this);
-    chbxDebug[2] = new QCheckBox("Arash" , this);
-    chbxDebug[3] = new QCheckBox("Mani" , this);
-    chbxDebug[4] = new QCheckBox("Masoud" , this);
-    chbxDebug[5] = new QCheckBox("Sepehr" , this);
-    chbxDebug[6] = new QCheckBox("Mohammed" , this);
-    chbxDebug[7] = new QCheckBox("Hossein" , this);
-    chbxDebug[8] = new QCheckBox("KK" , this);
-    chbxDebug[9] = new QCheckBox("DON_MHMMD" , this);
-    chbxDebug[10] = new QCheckBox("Erfan" , this);
-    chbxDebug[11] = new QCheckBox("Mahi" , this);
-    chbxDebug[12] = new QCheckBox("Nadia" , this);
-    chbxDebug[13] = new QCheckBox("Fatemeh" , this);
-    chbxDebug[14] = new QCheckBox("Atousa" , this);
-    chbxDebug[15] = new QCheckBox("Mahmood" , this);
-    chbxDebug[16] = new QCheckBox("AHZ" , this);
-    chbxDebug[17] = new QCheckBox("Amin" , this);
-    chbxDebug[18] = new QCheckBox("AmiR" , this);
+
+    chbxDebug[0] = new QCheckBox("DON_MHMMD" , this);
+    chbxDebug[1] = new QCheckBox("Mahi" , this);
+    chbxDebug[2] = new QCheckBox("Hamed" , this);
+    chbxDebug[3] = new QCheckBox("Nadia" , this);
+    chbxDebug[4] = new QCheckBox("Fatemeh" , this);
+    chbxDebug[5] = new QCheckBox("Atousa" , this);
+    chbxDebug[6] = new QCheckBox("Mahmood" , this);
+    chbxDebug[7] = new QCheckBox("AHZ" , this);
+    chbxDebug[8] = new QCheckBox("Amin" , this);
+    chbxDebug[9] = new QCheckBox("AmiR" , this);
+    chbxDebug[10] = new QCheckBox("Game" , this);
+    chbxDebug[11] = new QCheckBox("Ali" , this);
+    chbxDebug[12] = new QCheckBox("Arash" , this);
+    chbxDebug[13] = new QCheckBox("Mani" , this);
+    chbxDebug[14] = new QCheckBox("Masoud" , this);
+    chbxDebug[15] = new QCheckBox("Sepehr" , this);
+    chbxDebug[16] = new QCheckBox("Mohammed" , this);
+    chbxDebug[17] = new QCheckBox("Hossein" , this);
+    chbxDebug[18] = new QCheckBox("KK" , this);
+    chbxDebug[19] = new QCheckBox("Erfan" , this);
+
     tcolor.insert(D_ERROR,QColor(Qt::red));
     tcolor.insert(D_MAHI,QColor(Qt::green));
     // TODO:insert color for other Types
@@ -3180,7 +3182,7 @@ CLoggerWidget::CLoggerWidget(){
     QWidget* DebugNames=new QWidget();
     QVBoxLayout *DebugNamesLayout=new QVBoxLayout;
     QScrollArea *scrollArea=new QScrollArea;
-    for( int i=0 ; i<19 ; i++ )
+    for( int i=0 ; i<20 ; i++ )
         DebugNamesLayout->addWidget(chbxDebug[i]);
 
     DebugNames->setLayout(DebugNamesLayout);
@@ -3201,7 +3203,7 @@ CLoggerWidget::CLoggerWidget(){
     connect(cmbList , SIGNAL(currentIndexChanged(int)) , this , SLOT(playThisFile(int)));
     connect(chbxDraws , SIGNAL(clicked(bool)) , this , SLOT(showHideDraws(bool)));
     connect(chbxDebugs , SIGNAL(clicked(bool)) , this , SLOT(showHideDebugs(bool)));
-    for( int i=0 ; i<19 ; i++ )
+    for( int i=0 ; i<20 ; i++ )
         connect(chbxDebug[i] , SIGNAL(clicked()) , this , SLOT(debugTypeChanged()));
     connect(txtFPS , SIGNAL(editingFinished()) , this , SLOT(replayFPSChanged()));
     debugTypeChanged();
@@ -3216,7 +3218,7 @@ CLoggerWidget::CLoggerWidget(){
 CLoggerWidget::~CLoggerWidget(){
     delete lblFPS;
     delete txtFPS;
-    for( int i=18 ; i>=0 ; i-- )
+    for( int i=20 ; i>=0 ; i-- )
         delete chbxDebug[i];
     delete chbxDebugs;
     delete chbxDraws;
@@ -3413,16 +3415,30 @@ void CLoggerWidget::cursorIncrement(){
 
 
     loggerMutex->unlock();
-
+    bool typeState=false;
+    qint16 DType;
     if( chbxDebugs->isChecked() ){
         loggerMutex->lock();
 
 
+
         for( int i=0 ; i<gameLogger->debugList.size() ; i++ ){
-            if( (gameLogger->debugList.at(i).type & type) || gameLogger->debugList.at(i).type == 0){
-                debugTexts->setTextColor(tcolor.value(gameLogger->debugList.at(i).type));
+            DType=gameLogger->debugList.at(i).type;
+            qDebug()<< DType;
+            if(DType<0 && DType>-32768){
+                DType+=65536;
+                if((DType & type1) > 32768)
+                typeState=true;
+
+            }
+            else if(DType<32768 && (DType & type)){
+                typeState=true;
+            }
+            if( typeState || DType == 0){
+                debugTexts->setTextColor(tcolor.value(DType));
                 debugTexts->append(QString("%1 --> ").arg(gameLogger->counter) + gameLogger->debugList.at(i).debug);
             }
+            typeState=false;
         }
         loggerMutex->unlock();
     }
@@ -3456,63 +3472,68 @@ void CLoggerWidget::showHideDebugs(bool state){
 
 void CLoggerWidget::debugTypeChanged(){
     type = 0;
-    if( chbxDebug[0]->isChecked() ){
+    type1=0;
+    if( chbxDebug[10]->isChecked() ){
         type |= D_GAME;
     }
-    if( chbxDebug[1]->isChecked() ){
+    if( chbxDebug[11]->isChecked() ){
         type |= D_ALI;
     }
-    if( chbxDebug[2]->isChecked() ){
+    if( chbxDebug[12]->isChecked() ){
         type |= D_ARASH;
     }
-    if( chbxDebug[3]->isChecked() ){
+    if( chbxDebug[13]->isChecked() ){
         type |= D_MANI;
     }
-    if( chbxDebug[4]->isChecked() ){
+    if( chbxDebug[14]->isChecked() ){
         type |= D_MASOOD;
     }
-    if( chbxDebug[5]->isChecked() ){
+    if( chbxDebug[15]->isChecked() ){
         type |= D_SEPEHR;
     }
-    if( chbxDebug[6]->isChecked() ){
+    if( chbxDebug[16]->isChecked() ){
         type |= D_MOHAMMED;
     }
-    if( chbxDebug[7]->isChecked() ){
+    if( chbxDebug[17]->isChecked() ){
         type |= D_HOSSEIN;
     }
-    if( chbxDebug[8]->isChecked() ){
+    if( chbxDebug[18]->isChecked() ){
         type |= D_KK;
     }
-    if( chbxDebug[9]->isChecked() ){
-        type |= D_MHMMD;
-    }
-    if( chbxDebug[10]->isChecked() ){
+    if( chbxDebug[19]->isChecked() ){
         type |= D_ERF;
     }
-    if( chbxDebug[11]->isChecked() ){
+    if( chbxDebug[6]->isChecked() ){
+        type |= D_MAHMOOD;
+    }
+    if( chbxDebug[0]->isChecked() ){
+        type |= D_MHMMD;
+    }
+    if( chbxDebug[1]->isChecked() ){
         type |= D_MAHI;
     }
-    if( chbxDebug[12]->isChecked() ){
+    if( chbxDebug[2]->isChecked() ){
+        type1 |= D_HAMED;
+    }
+    if( chbxDebug[3]->isChecked() ){
         type |= D_NADIA;
     }
-    if( chbxDebug[13]->isChecked() ){
-        type |= D_FATEMEH;
+    if( chbxDebug[4]->isChecked() ){
+        type1 |= D_FATEMEH;
     }
-    if( chbxDebug[14]->isChecked() ){
-        type |= D_ATOUSA;
+    if( chbxDebug[5]->isChecked() ){
+        type1 |= D_ATOUSA;
     }
-    if( chbxDebug[15]->isChecked() ){
-        type |= D_Mahmood;
+    if( chbxDebug[7]->isChecked() ){
+        type1 |= D_AHZ;
     }
-    if( chbxDebug[16]->isChecked() ){
-        type |= D_AHZ;
+    if( chbxDebug[8]->isChecked() ){
+        type1 |= D_AMIN;
     }
-    if( chbxDebug[17]->isChecked() ){
-        type |= D_AMIN;
+    if( chbxDebug[9]->isChecked() ){
+        type1 |= D_AMIR;
     }
-    if( chbxDebug[18]->isChecked() ){
-        type |= D_AMIR;
-    }
+
 
 }
 

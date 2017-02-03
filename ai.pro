@@ -155,7 +155,10 @@ SOURCES += main.cpp \
     plays/direct.cpp \
     plays/kickoff.cpp \
     util/filewatcher.cpp \
-    skills/autoballplacement.cpp
+    skills/autoballplacement.cpp \
+    plays/ourballplacement.cpp \
+    plays/theirballplacement.cpp
+
 
 HEADERS += base.h \
     worldmodel.h \
@@ -322,7 +325,10 @@ HEADERS += base.h \
     plays/kickoff.h \
     plays/plays.h \
     util/filewatcher.h \
-    skills/autoballplacement.h
+    skills/autoballplacement.h \
+    plays/ourballplacement.h \
+    plays/theirballplacement.h
+
 
 unix:INCLUDEPATH += "/usr/local/include"
 unix:LIBS += -L/usr/local/include/qjson -lqjson
@@ -402,3 +408,7 @@ INCLUDEPATH += $$PWD/intentions/
 
 RESOURCES +=
 CONFIG += c++11
+
+
+
+
