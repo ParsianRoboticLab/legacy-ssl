@@ -9,25 +9,15 @@ double dist=3,v=0;
 void CMainApplication::Experimental2()
 {
 
+    //debug(QString("Hamed %1").arg(policy()->Mark_Test()), D_MAHI);
+    return;
 
+    static CDefPos defPosTest;
+    Vector2D mousePos;
 
-    qDebug() << "Hello";
-    //static Circle2D *cir = new Circle2D(Vector2D(0,0),1);
-    //Vector2D newsol[2];
-    //draw(*cir, QColor(Qt::red));
-    //int s = cir->intersection(Segment2D(Vector2D(wm->field->oppGoal()), mousePos), &newsol[0], &newsol[1]);
-    //static CSkillGotoPointAvoid *gpa = new CSkillGotoPointAvoid(knowledge->getAgent(2));
-    //gpa->init(newsol[0], newsol[1]);
-    //gpa->execute();
+    mousePos = knowledge->getMousePos();
 
-    //debug(QString("World %1").arg(s), D_ALI);
-
-
-
-
-
-    return ;
-
+    draw(Circle2D(mousePos, wm->ball->radius), QColor(Qt::red));
 
 
 //    Circle2D tempCircle(wm->field->ourGoal()-Vector2D(0.2, 0), 1.33);
@@ -41,6 +31,33 @@ void CMainApplication::Experimental2()
 
 //    draw(QString("a1:%1, a2: %2").arg(tempAngles.angle1).arg(tempAngles.angle2), Vector2D(-1, _FIELD_HEIGHT/2 - 0.4));
 
+
+    kkDefPos tempDefPos = defPosTest.getDefPositions(mousePos, 2, 1.43, 2.5);
+    draw(QString::number(tempDefPos.overDef), Vector2D(-1, _FIELD_HEIGHT/2 - 0.6));
+    for (int i = 0; i < tempDefPos.size; i++) {
+        draw(Circle2D(tempDefPos.pos[i], CRobot::robot_radius_old), QColor(Qt::blue));
+    }
+    return;
+    /////////////////////////////////////////////////////////
+//    static CSkillNEWKeep *keepBall = new CSkillNEWKeep( soccer->agents[0] );
+//    keepBall->execute();
+//    return;
+    for(int i = 0; i < 8; i++)
+        knowledge->SRSetAgentArg(i, i, (rand()%1023)/100, 2, 3, 4, 5);
+    return;
+    static CSkillReceivePass* RPA = new CSkillReceivePass(knowledge->getAgent(2));
+    RPA->setReceiveRadius(1);
+    RPA->setTarget(knowledge->getMousePos());
+    RPA->execute();
+
+    return;
+    static Vector2D lastPos = Vector2D(0,0);
+    static double speed = 0;
+
+    speed = wm->ball->pos.dist(lastPos)*1000/16;
+    if(speed > 0.1)
+    debug(QString("speed : (%1)").arg(speed),D_MAHI);
+    lastPos = wm->ball->pos;
 
     return;
 
