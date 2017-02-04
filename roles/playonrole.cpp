@@ -51,6 +51,8 @@ void CRolePlayOn::initTask()
             kickSkill->setKickSpeed(kickSpeed);
             kickSkill->setAvoidPenaltyArea(avoidPenaltyArea);
             kickSkill->setIsGotoPointAvoid(isGotoPointAvoid);
+            //fateme
+            kickSkill->setDontKick(dontKick);
         break;
         case roleSkill::ReceivePass:
             receivePassSkill->setAgent(agent);
