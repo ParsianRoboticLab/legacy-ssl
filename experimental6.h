@@ -22,21 +22,21 @@ void CMainApplication::Experimental6()
 {
 
     QList <Circle2D > newopp;
-    VectorIndex vecc[12],temp;
-    Vector2D tangents[12];
-    Segment2D ttan[12];
-    Ray2D     tan[12];
-    Vector2D zol1, zol2;
+//    VectorIndex vecc[12],temp;
+//    Vector2D tangents[12];
+//    Segment2D ttan[12];
+//    Ray2D     tan[12];
+//    Vector2D zol1, zol2;
 
     Vector2D ballpos = wm->ball->pos;
     Vector2D btpos = Vector2D(wm->ball->pos.x,wm->ball->pos.y+0.4);
     Vector2D bdpos = Vector2D(wm->ball->pos.x,wm->ball->pos.y-0.4);
     Vector2D ftpos = Vector2D(wm->field->oppGoalL().x,wm->field->oppGoalL().y+0.4);
     Vector2D fdpos = Vector2D(wm->field->oppGoalR().x,wm->field->oppGoalR().y-0.4);
-    Segment2D oppgoalLine(wm->field->oppCornerL(), wm->field->oppCornerR());
-    Segment2D oppfiledLine(wm->field->oppGoalL(),wm->field->oppGoalR());
+//    Segment2D oppgoalLine(wm->field->oppCornerL(), wm->field->oppCornerR());
+//    Segment2D oppfiledLine(wm->field->oppGoalL(),wm->field->oppGoalR());
     Polygon2D poly;
-    draw(oppfiledLine, QColor(Qt::black));
+//    draw(oppfiledLine, QColor(Qt::black));
 
     poly.addVertex(ballpos);
     poly.addVertex(btpos);
@@ -45,14 +45,16 @@ void CMainApplication::Experimental6()
     poly.addVertex(bdpos);
     poly.addVertex(ballpos);
 
-    draw(poly, QColor(Qt::yellow),false);
+//    draw(poly, QColor(Qt::yellow),false);
 
-    for(int i=0;i<12;i++)
-    {
-        vecc[i].vec= Vector2D(0, -10);
-    }
+//    for(int i=0;i<12;i++)
+//    {
+//        vecc[i].vec= Vector2D(0, -10);
+//    }
 
     double VF=1;
+
+
     for(int i =0;i<6; i++){
         if(poly.contains(wm->opp[i]->pos)){
 
@@ -61,184 +63,191 @@ void CMainApplication::Experimental6()
         }
     }
 
-    for (int i=0;i<newopp.size();i++){
-        draw(newopp.at(i), QColor(Qt::black));
-        newopp[i].tangent(ballpos, &tangents[2*i], &tangents[2*i +1]);
-
-     }
-
-    int x=0,km=0;
-    for(int i=0; i<newopp.size()*2;i++,km++)
-    {
-        tan[i]= Ray2D(ballpos,tangents[i]);
-        ttan[i]= Segment2D(ballpos,oppgoalLine.intersection(tan[i].line()));
-        for (int j=0;j<newopp.size();j++) {
-            if(newopp[j].intersection(ttan[i],&zol1,&zol2) == 2)
-               x=1;
-
-        }
-        if((x==0)&&(oppfiledLine.intersection(ttan[i]).valid()))
-        {
-            vecc[i].vec = oppgoalLine.intersection(tan[i].line());
-        }
-        else vecc[i].vec = Vector2D(wm->field->oppGoal().x,-i-5);
-       x=0;
-
-    }
-
-    for(int i=0;i<newopp.size()*2;i=i+2)
-    {
-        if(tangents[i].y>tangents[i+1].y)
-        {
-            vecc[i].index=1;
-            vecc[i+1].index=0;
-        }
-        else
-        {
-            vecc[i].index=0;
-            vecc[i+1].index=1;
-        }
-    }
-
-
-    for(int i=0;i<newopp.size()*2;i++)
-    {
-        if(vecc[i].index==1)
-        {
-            Segment2D blue = Segment2D(wm->ball->pos,vecc[i].vec);
-            draw(blue,QColor(Qt::blue));
-        }
-        else if(vecc[i].index==0)
-        {
-            Segment2D red = Segment2D(wm->ball->pos,vecc[i].vec);
-            draw(red,QColor(Qt::red));
-        }
-
-    }
-    //debug(QString("%1  %2  %3  %4  %5").arg(vecc[0].vec.y).arg(vecc[1].vec.y).arg(vecc[2].vec.y).arg(vecc[3].vec.y).arg(vecc[4].vec.y), D_ALI);
-
-    for(int x=0;x<newopp.size()*2 ;x++)
-    {
-        for(int z=0;z< newopp.size()*2;z++)
-        {
-            if(vecc[z].vec.y < vecc[z+1].vec.y)
-            {
-                temp = vecc[z];
-                vecc[z] = vecc[z+1];
-                vecc[z+1] = temp;
-            }
-        }
-     }
-
-
-//    Segment2D aa =Segment2D(vecc[0].vec.x+0.2,vecc[0].vec.y,vecc[0].vec.x+0.3,vecc[0].vec.y);
-//    draw(aa,QColor(Qt::red));
-//    Segment2D bb =Segment2D(vecc[1].vec.x+0.2,vecc[1].vec.y,vecc[1].vec.x+0.3,vecc[1].vec.y);
-//    draw(bb,QColor(Qt::blue));
-
-    Vector2D f  = Vector2D(wm->field->center());
-    Vector2D s  = Vector2D(wm->field->center());
-    Vector2D y1 = Vector2D(wm->field->center());
-    Vector2D y2 = Vector2D(wm->field->center());
-    Vector2D best = Vector2D(wm->field->center());
-    Vector2D length = Vector2D(wm->field->center());
-
-   if(vecc[0].vec.y > wm->field->oppGoalR().y && vecc[0].vec.y < wm->field->oppGoalL().y)
-   {
-       if(vecc[0].index==1 )
-       {
-           f = Vector2D(wm->field->oppGoalL().x,wm->field->oppGoalL().y-.05);
-           s = vecc[0].vec;
-           y1=f; y2=s;
-
-       }
-       else {
-           f = vecc[0].vec;
-           if(vecc[1].vec.y > wm->field->oppGoalR().y && vecc[1].vec.y < wm->field->oppGoalL().y)
-               s= vecc[1].vec;
-           else
-               s=Vector2D(wm->field->oppGoalR().x,wm->field->oppGoalR().y+.05);
-           if(fabs(y2.y-y1.y) < fabs(s.y-f.y))
-           {
-               y2=s;
-               y1=f;
-           }
-
-       }
-   }
-
-    for(int i=1;i<newopp.size()*2;i++)
-    {
-
-        if(vecc[i].index==1)
-            continue;
-
-        if(vecc[i].vec.y>wm->field->oppGoalR().y && vecc[i].vec.y<wm->field->oppGoalL().y)
-        {
-                f = vecc[i].vec;
-                if(vecc[i+1].vec.y>wm->field->oppGoalR().y && vecc[i+1].vec.y<wm->field->oppGoalL().y)
-                    s= vecc[i+1].vec;
-                else
-                    s=Vector2D(wm->field->oppGoalR().x,wm->field->oppGoalR().y+.05);
-
-
-                if( fabs(y2.y-y1.y) < fabs(s.y-f.y))
-                {
-                    y2=s;
-                    y1=f;
-
-                }
-                i++;
-
-        }
-
-
-}
-
-
-
-    // Line2D bisectorLine (originPoint , AngleDeg::bisect((firstPoint - originPoint).th() , (thirdPoint - originPoint).th()));
-    draw(y2);
-    draw(y1);
-    length = y1-y2;
-
-    if((y1==wm->field->center() && y2 == wm->field->center()) && newopp.isEmpty())
-    {
-        Line2D bisectorLine (wm->ball->pos , AngleDeg::bisect((wm->field->oppGoalL() - wm->ball->pos).th() , (wm->field->oppGoalR() - wm->ball->pos).th()));
-        best = oppgoalLine.intersection(bisectorLine);
-        draw(best,0,QColor(Qt::red));
-         debug(QString("%1  %2").arg("we have the best point").arg(wm->field->oppGoalL().y-wm->field->oppGoalR().y), D_ALI);
-    }
-
-    if((y1.y-y2.y)>0.05)
-    {
-
-        debug(QString("%1  %2").arg("we have the best point").arg(length.y), D_ALI);
-
-       if (y1.y==wm->field->oppGoalL().y-.05)
-        {
-            best= y1;
-        }
-        else if(y2.y==wm->field->oppGoalR().y+.05)
-        {
-            best=y2;
-        }
-        else
-        {
-            Line2D bisectorLine (wm->ball->pos , AngleDeg::bisect((y1 - wm->ball->pos).th() , (y2 - wm->ball->pos).th()));
-            best= oppgoalLine.intersection(bisectorLine);
-        }
-        draw(best,0,QColor(Qt::red));
-    }
-    else
-    {
-        debug(QString("%1").arg("there isnt any point"), D_ALI);
-    }
-
+    Vector2D best = wm->field->oppGoal();
+    double empty =0;
+    knowledge->Aminshoot(wm->ball->pos,newopp,empty,best);
 
     static CSkillKick kick3(knowledge->getAgent(0));
     kick3.setTarget(best);
-    kick3.execute();
+    if (empty > 0.2)
+        kick3.execute();
+
+
+//    for (int i=0;i<newopp.size();i++){
+//        draw(newopp.at(i), QColor(Qt::black));
+//        newopp[i].tangent(ballpos, &tangents[2*i], &tangents[2*i +1]);
+
+//     }
+
+//    int x=0,km=0;
+//    for(int i=0; i<newopp.size()*2;i++,km++)
+//    {
+//        tan[i]= Ray2D(ballpos,tangents[i]);
+//        ttan[i]= Segment2D(ballpos,oppgoalLine.intersection(tan[i].line()));
+//        for (int j=0;j<newopp.size();j++) {
+//            if(newopp[j].intersection(ttan[i],&zol1,&zol2) == 2)
+//               x=1;
+
+//        }
+//        if((x==0)&&(oppfiledLine.intersection(ttan[i]).valid()))
+//        {
+//            vecc[i].vec = oppgoalLine.intersection(tan[i].line());
+//        }
+//        else vecc[i].vec = Vector2D(wm->field->oppGoal().x,-i-5);
+//       x=0;
+
+//    }
+
+//    for(int i=0;i<newopp.size()*2;i=i+2)
+//    {
+//        if(tangents[i].y>tangents[i+1].y)
+//        {
+//            vecc[i].index=1;
+//            vecc[i+1].index=0;
+//        }
+//        else
+//        {
+//            vecc[i].index=0;
+//            vecc[i+1].index=1;
+//        }
+//    }
+
+
+//    for(int i=0;i<newopp.size()*2;i++)
+//    {
+//        if(vecc[i].index==1)
+//        {
+//            Segment2D blue = Segment2D(wm->ball->pos,vecc[i].vec);
+//            draw(blue,QColor(Qt::blue));
+//        }
+//        else if(vecc[i].index==0)
+//        {
+//            Segment2D red = Segment2D(wm->ball->pos,vecc[i].vec);
+//            draw(red,QColor(Qt::red));
+//        }
+
+//    }
+//    //debug(QString("%1  %2  %3  %4  %5").arg(vecc[0].vec.y).arg(vecc[1].vec.y).arg(vecc[2].vec.y).arg(vecc[3].vec.y).arg(vecc[4].vec.y), D_ALI);
+
+//    for(int x=0;x<newopp.size()*2 ;x++)
+//    {
+//        for(int z=0;z< newopp.size()*2;z++)
+//        {
+//            if(vecc[z].vec.y < vecc[z+1].vec.y)
+//            {
+//                temp = vecc[z];
+//                vecc[z] = vecc[z+1];
+//                vecc[z+1] = temp;
+//            }
+//        }
+//     }
+
+
+////    Segment2D aa =Segment2D(vecc[0].vec.x+0.2,vecc[0].vec.y,vecc[0].vec.x+0.3,vecc[0].vec.y);
+////    draw(aa,QColor(Qt::red));
+////    Segment2D bb =Segment2D(vecc[1].vec.x+0.2,vecc[1].vec.y,vecc[1].vec.x+0.3,vecc[1].vec.y);
+////    draw(bb,QColor(Qt::blue));
+
+//    Vector2D f  = Vector2D(wm->field->center());
+//    Vector2D s  = Vector2D(wm->field->center());
+//    Vector2D y1 = Vector2D(wm->field->center());
+//    Vector2D y2 = Vector2D(wm->field->center());
+//    Vector2D best = Vector2D(wm->field->center());
+//    Vector2D length = Vector2D(wm->field->center());
+
+//   if(vecc[0].vec.y > wm->field->oppGoalR().y && vecc[0].vec.y < wm->field->oppGoalL().y)
+//   {
+//       if(vecc[0].index==1 )
+//       {
+//           f = Vector2D(wm->field->oppGoalL().x,wm->field->oppGoalL().y-.05);
+//           s = vecc[0].vec;
+//           y1=f; y2=s;
+
+//       }
+//       else {
+//           f = vecc[0].vec;
+//           if(vecc[1].vec.y > wm->field->oppGoalR().y && vecc[1].vec.y < wm->field->oppGoalL().y)
+//               s= vecc[1].vec;
+//           else
+//               s=Vector2D(wm->field->oppGoalR().x,wm->field->oppGoalR().y+.05);
+//           if(fabs(y2.y-y1.y) < fabs(s.y-f.y))
+//           {
+//               y2=s;
+//               y1=f;
+//           }
+
+//       }
+//   }
+
+//    for(int i=1;i<newopp.size()*2;i++)
+//    {
+
+//        if(vecc[i].index==1)
+//            continue;
+
+//        if(vecc[i].vec.y>wm->field->oppGoalR().y && vecc[i].vec.y<wm->field->oppGoalL().y)
+//        {
+//                f = vecc[i].vec;
+//                if(vecc[i+1].vec.y>wm->field->oppGoalR().y && vecc[i+1].vec.y<wm->field->oppGoalL().y)
+//                    s= vecc[i+1].vec;
+//                else
+//                    s=Vector2D(wm->field->oppGoalR().x,wm->field->oppGoalR().y+.05);
+
+
+//                if( fabs(y2.y-y1.y) < fabs(s.y-f.y))
+//                {
+//                    y2=s;
+//                    y1=f;
+
+//                }
+//                i++;
+
+//        }
+
+
+//}
+
+
+
+//    // Line2D bisectorLine (originPoint , AngleDeg::bisect((firstPoint - originPoint).th() , (thirdPoint - originPoint).th()));
+//    draw(y2);
+//    draw(y1);
+//    length = y1-y2;
+
+//    if((y1==wm->field->center() && y2 == wm->field->center()) && newopp.isEmpty())
+//    {
+//        Line2D bisectorLine (wm->ball->pos , AngleDeg::bisect((wm->field->oppGoalL() - wm->ball->pos).th() , (wm->field->oppGoalR() - wm->ball->pos).th()));
+//        best = oppgoalLine.intersection(bisectorLine);
+//        draw(best,0,QColor(Qt::red));
+//         debug(QString("%1  %2").arg("we have the best point").arg(wm->field->oppGoalL().y-wm->field->oppGoalR().y), D_ALI);
+//    }
+
+//    if((y1.y-y2.y)>0.05)
+//    {
+
+//        debug(QString("%1  %2").arg("we have the best point").arg(length.y), D_ALI);
+
+//       if (y1.y==wm->field->oppGoalL().y-.05)
+//        {
+//            best= y1;
+//        }
+//        else if(y2.y==wm->field->oppGoalR().y+.05)
+//        {
+//            best=y2;
+//        }
+//        else
+//        {
+//            Line2D bisectorLine (wm->ball->pos , AngleDeg::bisect((y1 - wm->ball->pos).th() , (y2 - wm->ball->pos).th()));
+//            best= oppgoalLine.intersection(bisectorLine);
+//        }
+//        draw(best,0,QColor(Qt::red));
+//    }
+//    else
+//    {
+//        debug(QString("%1").arg("there isnt any point"), D_ALI);
+//    }
+
+
 
         return;
 #ifdef speedTest
