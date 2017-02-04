@@ -17,7 +17,7 @@ void CMainApplication::Experimental6()
 {
 
 
-    static CSkillAutoBallPlacement *BP = new CSkillAutoBallPlacement(knowledge->getAgent(0));
+    static CSkillAutoBallPlacement *BP = new CSkillAutoBallPlacement(knowledge->getAgent(6));
     BP->setTarget(mousePos);
     BP->execute();
 

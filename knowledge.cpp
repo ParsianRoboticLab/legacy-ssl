@@ -22,7 +22,6 @@ CKnowledge::CKnowledge(CAgent** _agents)
 {
     //ABBAS
     refShortcuts = false;
-
     shirjeBlocking = false;
     lastFrameShirjeBlock = -1;
     ourShirjeBlocker = -1;

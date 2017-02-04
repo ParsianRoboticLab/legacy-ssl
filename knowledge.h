@@ -427,6 +427,10 @@ public:
     void SRSetAgentAbsArg(int _id, double _Vx, double _Vy, double _Vr, double _KickSpeed = 0, double _ChipSpeed = 0, double _SpinSpeed = 0);
     bool SRIsUpdated(int _id);
 
+    //ABP....................ROBO:{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11}
+    int agentSetRollerABPbB[12] = { 4, 4, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4};
+    //completed with profiler
+
 
 
 };
