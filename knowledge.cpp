@@ -22,7 +22,6 @@ CKnowledge::CKnowledge(CAgent** _agents)
 {
     //ABBAS
     refShortcuts = false;
-
     shirjeBlocking = false;
     lastFrameShirjeBlock = -1;
     ourShirjeBlocker = -1;
@@ -81,6 +80,9 @@ CKnowledge::CKnowledge(CAgent** _agents)
     //    variables["khafanmarked"]="false";
     lastPlayExecuted = Stop;
     necessaryDefKick = false;
+
+
+
 
 
     staticPoses.clear();
@@ -166,6 +168,11 @@ QString CKnowledge::stateToString(State s)
     if (s==TheirIndirectKick) return "their indirect";
     if (s==OurPenaltyKick) return "our penalty";
     if (s==TheirPenaltyKick) return "their penalty";
+
+    //added
+    if (s==OurBallPlacement) return "our ballplacement";
+    if (s==TheirBallPlacement) return "their ballplacement";
+
     if (s==Start) return "start";
     if (s==NormalStart) return "normal start";
     return "";
@@ -4192,3 +4199,12 @@ void CKnowledge::Aminshoot(rcsc::Vector2D ball, QList<rcsc::Circle2D> obstacles,
 
 }
 
+
+//added
+QVector2D CKnowledge::getBPPosition(){
+    return bpPosition;
+}
+void CKnowledge::setBPPosition(float x, float y){
+    bpPosition.setX(x);
+    bpPosition.setY(y);
+}

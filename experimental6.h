@@ -7,6 +7,7 @@
 #include <callibration.h>
 #include <defensepositioning.h>
 #include <time.h>
+#include <autoballplacement.h>
 clock_t t;
 //#define speedTest
 
@@ -20,6 +21,14 @@ struct VectorIndex {
 
 void CMainApplication::Experimental6()
 {
+
+
+    static CSkillAutoBallPlacement *BP = new CSkillAutoBallPlacement(knowledge->getAgent(6));
+    BP->setTarget(mousePos);
+    BP->execute();
+
+return;
+
 
     QList <Circle2D > newopp;
 //    VectorIndex vecc[12],temp;
@@ -257,6 +266,8 @@ void CMainApplication::Experimental6()
     draw(QString("speed2 :%1").arg(knowledge->mainLoopTime),Vector2D(1,1));
     return;
 #endif
+
+
     static bool stopFlag = true;
     if(knowledge->joystick->getButton3())
         stopFlag = false;
