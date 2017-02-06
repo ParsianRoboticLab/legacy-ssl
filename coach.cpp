@@ -78,10 +78,12 @@ CCoach::CCoach(CAgent**_agents)
     ourIndirect   = new COurIndirect;
     ourDirect     = new CDoubleSizeOurDirect;
     ourPenalty    = new COurPenalty;
+    ourBallPlacement = new COurBallPlacement;
     theirKickOff  = new CTheirKickOff;
     theirIndirect = new CTheirIndirect;
     theirDirect   = new CTheirDirect;
     theirPenalty  = new CTheirPenalty;
+    theirBallPlacement = new CTheirBallPlacement;
     forceStart    = new CForceStart;
 
     ourPlayOff    = NULL;
@@ -2002,11 +2004,11 @@ bool CCoach::decideNormalStart(QList<int> &_ourPlayers) {
 }
 
 bool CCoach::decideOurBallPlacement(QList<int> &_ourPlayers) {
-
+    selectedPlay = ourBallPlacement;
 }
 
 bool CCoach::decideTheirBallPlacement(QList<int> &_ourPlayers) {
-
+    selectedPlay = theirBallPlacement;
 }
 
 bool CCoach::decideNull(QList<int> &_ourPlayers) {

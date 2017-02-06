@@ -133,10 +133,11 @@ void CSkillAutoBallPlacement::execute()
 
     //added
     target = Vector2D(knowledge->getBPPosition().x, knowledge->getBPPosition().y);
+    debug(QString("tar : %1 , %2").arg(knowledge->getBPPosition().x).arg(knowledge->getBPPosition().y), D_MAHMOOD);
     draw(Circle2D(target, 0.10), QColor(Qt::cyan));
 
     gotoBall();
-//    debug(QString("tar : %1 , %2").arg(target.x).arg(target.y), D_MAHMOOD);
+
     debug(QString("isFinished : %1 ").arg(isFinished), D_MAHMOOD);
 
     ballPos = wm->ball->pos;

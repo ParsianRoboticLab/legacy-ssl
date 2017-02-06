@@ -8,12 +8,6 @@ double dist=3,v=0;
 
 void CMainApplication::Experimental2()
 {
-
-    Vector2D v = knowledge->getMousePos();
-    debug(QString("x = %1, y = %2").arg(v.x).arg(v.y), D_ATOUSA);
-
-
-    return;
     static COurBallPlacement *obp = new COurBallPlacement();
     QList<int> ag;
 //    ag.append(0);
@@ -24,7 +18,6 @@ void CMainApplication::Experimental2()
     ag.append(5);
     obp->init(ag, NULL);
     obp->execute();
-
 
 /*
     static CSkillAutoBallPlacement *abp = new CSkillAutoBallPlacement(knowledge->getAgent(0));
