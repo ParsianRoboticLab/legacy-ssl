@@ -92,7 +92,7 @@ void CMainApplication::Experimental4()
       ////////////////////
 
     static int rcvID = 5 , passID = 1 , tmp , kickSpeed = 4;
-    static bool flag = false , BallIsNear = false;
+    static bool flag = false , ballIsNear = false;
 
 //    static CRolePlayOff
     CSkillReceivePass* rcv = new CSkillReceivePass(knowledge->getAgent(rcvID));
@@ -120,9 +120,9 @@ void CMainApplication::Experimental4()
         rcv->execute();
 
     if (Circle2D(pass->getAgent()->pos(), 0.3).contains(wm->ball->pos)) {
-        BallIsNear = true;
-    } else if ( !Circle2D(pass->getAgent()->pos(), 0.1*kickSpeed).contains(wm->ball->pos) && BallIsNear) {
-        BallIsNear = false;
+        ballIsNear = true;
+    } else if ( !Circle2D(pass->getAgent()->pos(), 0.1*kickSpeed).contains(wm->ball->pos) && ballIsNear) {
+        ballIsNear = false;
         flag = true;
     }
 
@@ -144,21 +144,20 @@ void CMainApplication::Experimental4()
 
 
 
-    ////////////////////////////////////
-    //////// have some bugs ////////////
-    // robot in ReceivePass doesn't move
-    ///////////////////////////////////
+    //////////////////////////////////
+    //////// changing position problem
+    //////// almost fine /////////////
+    //////////////////////////////////
 
-    static int p2 = 5 , p1 = 1 , kickSpeed = 5;
+    static int p2 = 0 , p1 = 1 , kickSpeed = 4 , MaxSpeed = 100;
+    static double xpos2 = 0 , ypos2 = 0 , xpos1 = 3 , ypos1 = 2;
 
     static CRolePlayOn * rcvr , *pss;
-    static bool kicked = false , BallIsNear = false , first = true;
-
+    static bool ballIsNear = false , first = true;
 
     static CRolePlayOn * prfl1 = new CRolePlayOn();
     prfl1->setAgent(knowledge->getAgent(p1));
     prfl1->setAgentID(p1);
-//    prfl1->setTarget(knowledge->getMousePos());
     prfl1->setKickSpeed(kickSpeed);
     prfl1->setReceiveRadius(1);
     prfl1->setTolerance(0.01);
@@ -171,7 +170,6 @@ void CMainApplication::Experimental4()
     static CRolePlayOn * prfl2 = new CRolePlayOn();
     prfl2->setAgent(knowledge->getAgent(p2));
     prfl2->setAgentID(p2);
-//    prfl2->setTarget(knowledge->getMousePos());
     prfl2->setKickSpeed(kickSpeed);
     prfl2->setReceiveRadius(1);
     prfl2->setTolerance(0.01);
@@ -180,75 +178,81 @@ void CMainApplication::Experimental4()
     prfl2->setSlow(true);
     prfl2->execute();
 
-
-    prfl1->setTarget(Vector2D(0,0));
-    prfl2->setTarget(Vector2D(0,0));
-
     if(first){
         prfl1->setSelectedSkill(roleSkill::ReceivePass);
         prfl2->setSelectedSkill(roleSkill::Kick);
-
-        prfl1->setTarget(Vector2D(0,0));
-        prfl2->setTarget(Vector2D(0,0));
-
         first = false;
     }
 
     if(prfl1->getSelectedSkill() == roleSkill::ReceivePass){
         rcvr = prfl1;
         pss = prfl2;
+
+        rcvr->setWaitPos(Vector2D(xpos1,ypos1));
+        rcvr->setTarget(Vector2D(xpos1,ypos1));
+
+        pss->setWaitPos(Vector2D(xpos1,ypos1));
+        pss->setTarget(Vector2D(xpos1,ypos1));
+
     }
     else{
         rcvr = prfl2;
         pss = prfl1;
+
+        rcvr->setWaitPos(Vector2D(xpos2,ypos2));
+        rcvr->setTarget(Vector2D(xpos2,ypos2));
+
+        pss->setWaitPos(Vector2D(xpos2,ypos2));
+        pss->setTarget(Vector2D(xpos2,ypos2));
+
     }
 
-    // kicker wait until receiver is in it's right position
-    if( !Circle2D(rcvr->getTarget() , 0.25).contains(knowledge->getAgent(rcvr->getAgentID())->pos()) )
+    draw(Circle2D( knowledge->getAgent(pss->getAgentID())->pos() , 0.25 ) , QColor(Qt::blue));
+    draw(Circle2D( knowledge->getAgent(pss->getAgentID())->pos() , 0.4 ) , QColor(Qt::black));
+
+    //////////////////// kicker wait until receiver is in it's right position
+    if( !Circle2D(rcvr->getTarget() , 0.07).contains(knowledge->getAgent(rcvr->getAgentID())->pos()) )
         pss->setDontKick(true);
     else
         pss->setDontKick(false);
 
 
-    // check if robot kicked the ball
-    if ( Circle2D( knowledge->getAgent(pss->getAgentID())->pos() , 0.3 ).contains(wm->ball->pos) ) {
-        BallIsNear = true;
-    } else if ( !Circle2D( knowledge->getAgent(pss->getAgentID())->pos() , 0.1*kickSpeed ).contains(wm->ball->pos)
-                && BallIsNear && (wm->ball->vel.length() / (knowledge->getAgent(pss->getAgentID())->pos() - pss->getTarget()).length()) > 4) {
-        BallIsNear = false;
-        kicked = true;
-//        pss->setSelectedSkill(roleSkill::Gotopoint);
-//        pss->setTarget(Vector2D(0,50));
+    //////////////////// check if robot kicked the ball
+    if ( Circle2D( knowledge->getAgent(pss->getAgentID())->pos() , 0.25 ).contains(wm->ball->pos) ){
+        ballIsNear = true;
     }
 
+    //////////////////// changing roles
+    if(ballIsNear)
+        if ( !Circle2D( knowledge->getAgent(pss->getAgentID())->pos() , 0.4 ).contains(wm->ball->pos))
+        {
+            rcvr->setSelectedSkill(roleSkill::Kick);
+            if(!Circle2D(pss->getTarget() , 0.1).contains(knowledge->getAgent(pss->getAgentID())->pos()))
+                pss->setSelectedSkill(roleSkill::Gotopoint);
+            pss->setSelectedSkill(roleSkill::ReceivePass);
 
-    // change roles and increase kickSpeed
-    if(kicked){
-        debug(QString("speed: %3  ,  robot 1: %1 , robot 5: %2").
-              arg(prfl1->getSelectedSkill()).arg(prfl2->getSelectedSkill()).arg(pss->getKickSpeed()) , D_MAHI);
+            if(kickSpeed < MaxSpeed){
+                xpos1 += kickSpeed/13;
+                ypos1 += kickSpeed/13;
 
-        kicked = false;
+                kickSpeed++;
+            }
+            else{
+                kickSpeed = 4;
+                if(p2 != 5){
+                    p1 += 2;
+                    p2 += 2;
+                }
+            }
 
-        if(kickSpeed < 1023)
-            kickSpeed++;
-        else
-            kickSpeed = 1;
-
-        rcvr->setSelectedSkill(roleSkill::Kick);
-        pss->setSelectedSkill(roleSkill::ReceivePass);
-
-        debug(QString("role changed! robot 1: %1 , robot 5: %2")
-              .arg(prfl1->getSelectedSkill()).arg(prfl2->getSelectedSkill()) , D_MAHI);
-//        Kick = 2,
-//        ReceivePass = 3,
-    }
-
-//    rcvr->setTarget(Vector2D(3,3));
-//    pss->setTarget(knowledge->getAgent(rcvr->getAgentID())->pos());
+            ballIsNear = false;
+        }
 
 
 
     return;
+
+
 
 
 
@@ -376,6 +380,7 @@ void CMainApplication::Experimental4()
 */
 
 
+    /*
 
     //ball max velocity
 
@@ -417,6 +422,9 @@ void CMainApplication::Experimental4()
         avg2=0;
         avg1=0;
     }
+
+
+    */
 
     return;
 
@@ -788,3 +796,36 @@ if(f) {
 }
 
 #endif // EXPERIMENTAL4_H
+
+
+double CMainApplication::maxBallSpeed(){
+
+//    static CSkillKick* test3 = new CSkillKick(knowledge->getAgent(agentID));
+//    test3->setTarget(mousePos);
+//    test3->setKickSpeed(6);
+//    test3->setChip(false);
+//    test3->execute();
+
+    static double maxBallVel , avg1=0, avg2=0;
+    static int cnt = 1;
+
+    if(avg2 >= avg1){
+        cnt++;
+        avg1 = avg2;
+        avg2 += (avg1*(cnt-1)+wm->ball->vel.length())/cnt;
+
+        if(maxBallVel <  wm->ball->vel.length())
+            maxBallVel =  wm->ball->vel.length();
+    }
+    else
+
+        return maxBallVel;
+    //    if(wm->ball->vel.length() < 0.2){
+    //        maxBallVel = 0;
+    //        avg2=0;
+    //        avg1=0;
+    //    }
+
+    return 0;
+
+}
