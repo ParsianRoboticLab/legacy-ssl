@@ -80,7 +80,7 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
     Vector2D ballVelocity;
     Vector2D secondPos;
     Segment2D tempSegment;
-    double ballCircleR = 0.1;
+    double ballCircleR = 0.09;
     double opponentAgentsCircleR = 0.2;
     QList<Circle2D> opponentAgentsToBeMarkedCircle;
     QList<Circle2D> tempOpponentAgentsToBeMarkedCircle;

@@ -63,3 +63,14 @@ CRobot* CTeam::active(const int i)
             return NULL;
         }
 }
+
+
+void CTeam::setColor(ETeamColorType c)
+{
+    t->color = c;
+}
+
+void CTeam::updateGoaliID(int id)
+{
+    t->goalieID = id;
+}

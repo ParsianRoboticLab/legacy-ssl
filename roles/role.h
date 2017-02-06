@@ -8,12 +8,14 @@
 namespace roleSkill {
 
 enum ESkill {
-    Gotopoint = 0,
+    Gotopoint      = 0,
     GotopointAvoid = 1,
-    Kick = 2,
-    ReceivePass = 3,
-    OneTouch = 4,
-    Mark = 5
+    Kick           = 2,
+    ReceivePass    = 3,
+    OneTouch       = 4,
+    Mark           = 5,  // After Life (Steady)
+    Support        = 6,  // After Life (Move for ball)
+    Defense        = 7   // After Life (Move back to our field)
 };
 
 }

@@ -1,6 +1,6 @@
 objs/*
-logs/*
 ai.pro.*
+logs/*
 ai
 Makefile
 posts
@@ -13,3 +13,8 @@ robotsSetting.csv
 settings.xml
 
 *.autosave
+potts
+*.icloud
+.idea/*
+3rdParty/*
+motion/*

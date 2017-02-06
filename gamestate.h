@@ -52,6 +52,9 @@ public:
   static const int READY;
   static const int NOTREADY;
 
+  //added
+  static const int BALLPLACEMENT;
+
   int state;
 
   // The set of possible states are:
@@ -98,6 +101,12 @@ public:
   bool canKickBall();
   int ourScore();
   int oppScore();
+  //added
+  bool ballPlacement();
+  bool ourBallPlacement();
+  bool theirBallPlacement();
+
+
 };
 
 #endif
