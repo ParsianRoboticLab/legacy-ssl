@@ -59,20 +59,20 @@ CMainApplication::CMainApplication(QWidget *parent)
 
     //mini referee
     QButtonGroup *btnRefGroup = new QButtonGroup();
-    strRefNames << "H" << "FS" << "S" << "NS" << "FK" << "IK" << "KO" << "PK" << "FK" << "IK" << "KO" << "PK";
-    strRefCommands << "H" << "s" << "S" << " " << "F" << "I" << "K" << "P" << "f" << "i" << "k" << "p";
-    for(int i=0 ; i<12 ; i++ )
+    strRefNames << "H" << "FS" << "S" << "NS" << "FK" << "IK" << "KO" << "PK" << "BP" << "FK" << "IK" << "KO" << "PK" << "BP";
+    strRefCommands << "H" << "s" << "S" << " " << "F" << "I" << "K" << "P" << "B" << "f" << "i" << "k" << "p" << "b";
+    for(int i=0 ; i<14 ; i++ )
     {
         btnRefs[i] = new QPushButton(strRefNames[i],this);
         QString strType = "n";
         if( i >=4 )
             strType = "b";
-        if( i >= 8 )
+        if( i >=9 )
             strType = "y";
         btnRefs[i]->setProperty("refType" , strType);
         btnRefGroup->addButton(btnRefs[i] , i);
     }
-    for( int i=0 ; i<12 ; i++ )
+    for( int i=0 ; i<14 ; i++ )
     {
         statusBar()->addWidget(btnRefs[i]);
     }
@@ -544,8 +544,12 @@ void CMainApplication::refShortcutsChanged(bool val)
 }
 
 void CMainApplication::SetManualGS( int id ){
+    //added
+    if( strRefCommands.at(id).toAscii().at(0) == 'b'){
+        knowledge->setBPPosition(knowledge->getMousePos().x, knowledge->getMousePos().y);
+        qDebug() << "pos : " << knowledge->getBPPosition().x << "," << knowledge->getBPPosition().y << endl;
+    }
     wm->gs->transition(strRefCommands.at(id).toAscii().at(0));
-    //qDebug() << "Command : " <<strRefCommands.at(id).toAscii().at(0);
 }
 
 

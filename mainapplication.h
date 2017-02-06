@@ -193,7 +193,7 @@ public:
     QToolBar *toolbar;
     QLabel* statusbarLabel;
     QCheckBox *refShortcuts;
-    QPushButton *btnRefs[12];
+    QPushButton *btnRefs[14];
     QStringList strRefNames , strRefCommands;
 
     QTime displayTimer;

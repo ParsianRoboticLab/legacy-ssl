@@ -68,10 +68,12 @@ private:
     COurPenalty          *ourPenalty;
     COurKickOff          *ourKickOff;
     COurIndirect         *ourIndirect;
+    COurBallPlacement    *ourBallPlacement;
     CTheirDirect         *theirDirect;
     CTheirPenalty        *theirPenalty;
     CTheirKickOff        *theirKickOff;
     CTheirIndirect       *theirIndirect;
+    CTheirBallPlacement  *theirBallPlacement;
     CDoubleSizeOurDirect *ourDirect;
 
     CForceStart          *forceStart;
