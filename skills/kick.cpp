@@ -611,6 +611,7 @@ CSkillKick::CSkillKick(CAgent *_agent) : CSkill(_agent)
     interceptMode = false;
     kkShotEmpySpot = false;
     alternateMode = false;
+    kickAngTol = 50;
 
 }
 
@@ -651,7 +652,7 @@ kckMode CSkillKick::decideMode()
 
     Vector2D tempVec1, tempVec2;
     Circle2D ballArea(ballPos,0.13);
-    Circle2D dribblerArea(agentPos+agent->dir().norm()*0.1,0.1);
+    Circle2D dribblerArea(agentPos+agent->dir().norm()*0.1,0.06);
 
     Circle2D robotArea(agentPos,0.6);
 
@@ -697,14 +698,14 @@ kckMode CSkillKick::decideMode()
             else
                 return KWAITFORTURN;
         }
-        else if( (agentPos.dist(ballPos) >= 0.4 + jTurnThr && (fabs(((ballPos - agentPos).th() - kkFinalDir).degree()) > 60)) || (agentPos.dist(ballPos) >= 0.6 + jTurnThr && (fabs(((ballPos - agentPos).th() - kkFinalDir).degree()) <= 60)))
+        else if( (agentPos.dist(ballPos) >= 0.4 + jTurnThr && (fabs(((ballPos - agentPos).th() - kickFinalDir).degree()) > 60)) || (agentPos.dist(ballPos) >= 0.6 + jTurnThr && (fabs(((ballPos - agentPos).th() - kickFinalDir).degree()) <= 60)))
         {
             return KDIRECT;
             jTurnThr = 0;
         }
         else
         {
-            if(fabs((kkFinalDir - agent->dir().th()).degree()) > 30 && dribblerArea.contains(ballPos)) {
+            if(!alternateMode && fabs((kickFinalDir - agent->dir().th()).degree()) > 30 && dribblerArea.contains(ballPos)) {
                 return KTURN;
                 jTurnThr = 0;
             }
@@ -733,9 +734,9 @@ void CSkillKick::kgoalie()
         target = findMostPossible();
     angPid->kp = 4;
 
-    if( ((ballPos - agentPos).th() - kkFinalDir).degree()  > 110  )
+    if( ((ballPos - agentPos).th() - kickFinalDir).degree()  > 110  )
         kkMovementTheta = ((ballPos - agentPos).th().radian() + 1.2+1.5*(0.45-agentPos.dist(ballPos))- agent->dir().th().radian());
-    else if(((ballPos - agentPos).th() - kkFinalDir).degree() <- 110)
+    else if(((ballPos - agentPos).th() - kickFinalDir).degree() <- 110)
         kkMovementTheta = ((ballPos- agentPos).th().radian() - 1.2- 1.5*(0.45-agentPos.dist(ballPos))- agent->dir().th().radian());
     //    else if(((ballPos - agentPos).th() - kkFinalDir).degree() >45)
     //        kkMovementTheta = ((ballPos- agentPos).th().radian() +1.2 + 1.5*(0.42-agentPos.dist(ballPos)) - agent->dir().th().radian());
@@ -749,7 +750,7 @@ void CSkillKick::kgoalie()
         kkMovementTheta =((ballPos- agentPos).th().radian() - agent->dir().th().radian());
 
 
-    angPid->error = (kkFinalDir - agent->dir().th()).radian();
+    angPid->error = (kickFinalDir - agent->dir().th()).radian();
     double reduce = 2;
 
 
@@ -862,7 +863,7 @@ void CSkillKick::kDontKick()
         gpa->setVerySlow(true);
     Vector2D finalPos;
     finalPos=ballPos-(target-ballPos).norm()*0.15;
-    if(fabs((kkFinalDir - agent->dir().th()).degree()) < 20)
+    if(fabs((kickFinalDir - agent->dir().th()).degree()) < 20)
         finalPos=ballPos-(target-ballPos).norm()*0.11;
     gpa->setADiveMode(false);
     gpa->init(finalPos, ballPos - agentPos);
@@ -998,17 +999,17 @@ void CSkillKick::jTurn()
         target = findMostPossible();
     angPid->kp = 4;
 
-    if( ((ballPos - agentPos).th() - kkFinalDir).degree()  > 90  )
+    if( ((ballPos - agentPos).th() - kickFinalDir).degree()  > 90  )
         kkMovementTheta = ((ballPos - agentPos).th().radian() + 0.9+1.5*(0.2-agentPos.dist(ballPos))- agent->dir().th().radian());
-    else if(((ballPos - agentPos).th() - kkFinalDir).degree() <- 90)
+    else if(((ballPos - agentPos).th() - kickFinalDir).degree() <- 90)
         kkMovementTheta = ((ballPos- agentPos).th().radian() - 0.9- 1.5*(0.2-agentPos.dist(ballPos))- agent->dir().th().radian());
-    else if(((ballPos - agentPos).th() - kkFinalDir).degree() >45)
+    else if(((ballPos - agentPos).th() - kickFinalDir).degree() >45)
         kkMovementTheta = ((ballPos- agentPos).th().radian() +0.9 + 1.5*(0.2-agentPos.dist(ballPos)) - agent->dir().th().radian());
-    else if(((ballPos - agentPos).th() - kkFinalDir).degree() < -45)
+    else if(((ballPos - agentPos).th() - kickFinalDir).degree() < -45)
         kkMovementTheta = ((ballPos- agentPos).th().radian() - 0.9 - 1.5*(0.2-agentPos.dist(ballPos))- agent->dir().th().radian());
-    else if(((ballPos - agentPos).th() - kkFinalDir).degree() >15)
+    else if(((ballPos - agentPos).th() - kickFinalDir).degree() >15)
         kkMovementTheta = ((ballPos- agentPos).th().radian() + 0.4 + 1*(0.2-agentPos.dist(ballPos)) - agent->dir().th().radian());
-    else if(((ballPos - agentPos).th() - kkFinalDir).degree() < -15)
+    else if(((ballPos - agentPos).th() - kickFinalDir).degree() < -15)
         kkMovementTheta = ((ballPos- agentPos).th().radian() - 0.4 - 1*(0.2-agentPos.dist(ballPos))- agent->dir().th().radian());
     else
         kkMovementTheta =((ballPos- agentPos).th().radian() - agent->dir().th().radian());
@@ -1020,8 +1021,9 @@ void CSkillKick::jTurn()
     //        ballx=0;
     //        bally=0;
     //    }
-    angPid->error = (kkFinalDir - agent->dir().th()).radian();
-    double reduce = 0.8;
+    angPid->error = (kickFinalDir - agent->dir().th()).radian();
+
+    double reduce = 1.2;
 
     Circle2D oppPenalty(wm->field->oppGoal() + Vector2D(0.2 , 0),1.6);
 
@@ -1047,7 +1049,7 @@ void CSkillKick::jTurn()
 
     //reduce = 1;
 
-    if(slow)
+    if((slow || wm->ball->vel.length() > 2) || ((wm->ball->vel.length() > 1) && (wm->field->isInOppPenaltyArea(ballPos + wm->ball->vel))))
     {
         agent->setRobotVel(reduce*cos(kkMovementTheta)
                            ,reduce*sin(kkMovementTheta)
@@ -1066,7 +1068,7 @@ void CSkillKick::turnForKick()
     if(kkShotEmpySpot)
         target = findMostPossible();
     agent->setRoller(0);
-    if ((agent->dir().th() - kkFinalDir).degree()  <- 10 )
+    if ((agent->dir().th() - kickFinalDir).degree()  <- 10 )
     {
         angPid->kp = 4;
         //debug(QString("-50"),D_HOSSEIN);
@@ -1079,7 +1081,7 @@ void CSkillKick::turnForKick()
 
 
     }
-    else if ((agent->dir().th() - kkFinalDir).degree()  > 10 )
+    else if ((agent->dir().th() - kickFinalDir).degree()  > 10 )
     {
         angPid->kp = 4;
         //debug(QString("50"),D_HOSSEIN);
@@ -1126,7 +1128,7 @@ void CSkillKick::kkIntercept()
 
     if(nowTurn.contains(ballPos) && ballRealVel < 0.5)
     {
-        if(fabs((kkFinalDir - agent->dir().th()).degree()) > 35)
+        if(fabs((kickFinalDir - agent->dir().th()).degree()) > 35)
             return turnForKick();
         else
             return jTurn();
@@ -1140,24 +1142,24 @@ void CSkillKick::kkIntercept()
 void CSkillKick::kkPenalty()
 {
     angPid->kp =4;
-    if( ((ballPos - agentPos).th() - kkFinalDir).degree()  > 90  )
+    if( ((ballPos - agentPos).th() - kickFinalDir).degree()  > 90  )
         kkMovementTheta = ((ballPos - agentPos).th().radian() + 0.8+1.5*(0.4-agentPos.dist(ballPos))- agent->dir().th().radian());
-    else if(((ballPos - agentPos).th() - kkFinalDir).degree() <- 90)
+    else if(((ballPos - agentPos).th() - kickFinalDir).degree() <- 90)
         kkMovementTheta = ((ballPos- agentPos).th().radian() - 0.8- 1.5*(0.4-agentPos.dist(ballPos))- agent->dir().th().radian());
-    else if(((ballPos - agentPos).th() - kkFinalDir).degree() >45)
+    else if(((ballPos - agentPos).th() - kickFinalDir).degree() >45)
         kkMovementTheta = ((ballPos- agentPos).th().radian() +0.7 + 1.5*(0.4-agentPos.dist(ballPos)) - agent->dir().th().radian());
-    else if(((ballPos - agentPos).th() - kkFinalDir).degree() < -45)
+    else if(((ballPos - agentPos).th() - kickFinalDir).degree() < -45)
         kkMovementTheta = ((ballPos- agentPos).th().radian() - 0.7 - 1.5*(0.4-agentPos.dist(ballPos))- agent->dir().th().radian());
-    else if(((ballPos - agentPos).th() - kkFinalDir).degree() >3)
+    else if(((ballPos - agentPos).th() - kickFinalDir).degree() >3)
         kkMovementTheta = ((ballPos- agentPos).th().radian() +0.6 + 1.5*(0.2-agentPos.dist(ballPos)) - agent->dir().th().radian());
-    else if(((ballPos - agentPos).th() - kkFinalDir).degree() < -3)
+    else if(((ballPos - agentPos).th() - kickFinalDir).degree() < -3)
         kkMovementTheta = ((ballPos- agentPos).th().radian() - 0.6 - 1.5*(0.2-agentPos.dist(ballPos))- agent->dir().th().radian());
     else
         kkMovementTheta =((ballPos- agentPos).th().radian() - agent->dir().th().radian());
     /////////////////////////////////////////////////////////////////////////////////
     double ballx= (wm->ball->vel.x)*cos(agent->dir().th().radian()) + (wm->ball->vel.y)*sin(agent->dir().th().radian());
     double bally= -1*(wm->ball->vel.x)*sin(agent->dir().th().radian()) + (wm->ball->vel.y)*cos(agent->dir().th().radian());
-    angPid->error = (kkFinalDir - agent->dir().th()).radian();
+    angPid->error = (kickFinalDir - agent->dir().th()).radian();
     double reduce = 0.6;
     if(interceptMode)
         agent->setRobotVel(reduce*cos(kkMovementTheta)  + 0.4*ballx,reduce*sin(kkMovementTheta)+0.4*bally ,angPid->PID_OUT());
@@ -1266,11 +1268,11 @@ void CSkillKick::findPosToGo()
         finalPos = knowledge->getReflectPos(wm->field->oppGoal());
     }
 
-    if((fabs(((ballPos - agentPos).th() - kkFinalDir).degree()) < 60))
+    if((fabs(((ballPos - agentPos).th() - kickFinalDir).degree()) < 60))
     {
         finalPos = finalPos - (target-finalPos).norm() * 0.1;
     }
-    gpa->init(finalPos,target-ballPos);
+    gpa->init(finalPos,Vector2D(cos(kickFinalDir.radian()),sin(kickFinalDir.radian())));
     gpa->setAvoidBall(true);
     gpa->setNoAvoid(false);
 
@@ -1278,7 +1280,7 @@ void CSkillKick::findPosToGo()
         gpa->setBallObstacleRadius(0);
     else
         gpa->setBallObstacleRadius(0.3);
-    if((fabs(((ballPos - agentPos).th() - kkFinalDir).degree()) < 60) && (agentPos.dist(ballPos) < 1) && (wm->ball->vel.length() > 0.2)) {
+    if((fabs(((ballPos - agentPos).th() - kickFinalDir).degree()) < 60) && (agentPos.dist(ballPos) < 1) && (wm->ball->vel.length() > 0.2)) {
         jTurn();
         return;
     }
@@ -1336,7 +1338,7 @@ void CSkillKick::findPosToGoAlt()
     gpa->setAvoidBall(true);
 
     gpa->setBallObstacleRadius(1);
-    if((fabs(((ballPos - agentPos).th() - kkFinalDir).degree()) < 60) && (agentPos.dist(ballPos) < 1) && (wm->ball->vel.length() > 0.2)) {
+    if((fabs(((ballPos - agentPos).th() - kickFinalDir).degree()) < 60) && (agentPos.dist(ballPos) < 1) && (wm->ball->vel.length() > 0.2)) {
         jTurn();
         return;
     }
@@ -1354,7 +1356,34 @@ void CSkillKick::execute()
     kkDist = agentPos.dist(target);
     ballPos = wm->ball->pos;
     kkBallDist = agentPos.dist(ballPos);
-    kkFinalDir = (target - ballPos).th();
+    AngleDeg maxAngP,maxAngN;
+    AngleDeg kickTargetDir ;
+    kickTargetDir= (target - ballPos).th();
+    maxAngP = (target - ballPos).th() + kickAngTol;
+    maxAngN = (target - ballPos).th() - kickAngTol;
+
+    if(alternateMode)
+    {
+    if((ballPos - agentPos).th().degree() > kickAngTol)
+    {
+        kickFinalDir = maxAngP;
+    }
+    else if((ballPos- agentPos).th().degree() < -1 * kickAngTol)
+    {
+        kickFinalDir = maxAngN;
+    }
+    else
+    {
+        kickFinalDir = ( ballPos-agentPos).th();
+    }
+
+    if(kickerOn)
+        kickFinalDir = kickTargetDir;
+    }
+    else
+    {
+        kickFinalDir = kickTargetDir;
+    }
     finalDirVec = target - ballPos;
     oneTouchDir=Vector2D::unitVector(oneTouchAngle(agentPos, agent->vel(), wm->ball->vel, agentPos - ballPos, target, conf()->SkillsParams_KickOneTouch_Landa(), conf()->SkillsParams_KickOneTouch_Gamma()));
 
@@ -1389,7 +1418,7 @@ void CSkillKick::execute()
     }
     else if(veryFine)
     {
-        if(kickerOn && fabs((agent->dir().th() - kkFinalDir).degree()) < 1)
+        if(kickerOn && fabs((agent->dir().th() - kickTargetDir).degree()) < 1)
         {
             if(chip)
                 agent->setChip(kickSpeed);
@@ -1405,7 +1434,7 @@ void CSkillKick::execute()
 
     else
     {
-        if(kickerOn && fabs((agent->dir().th() - kkFinalDir).degree()) < tol || kickerOn && fabs((agent->dir().th() - kkFinalDir).degree()) < 2)
+        if(kickerOn && fabs((agent->dir().th() - kickTargetDir).degree()) < tol || kickerOn && fabs((agent->dir().th() - kickTargetDir).degree()) < 2)
         {
 
             if(chip)
