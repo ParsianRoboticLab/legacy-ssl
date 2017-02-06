@@ -33,7 +33,7 @@
                                 {
                                     "flag": false,
                                     "name": "MoveSkill",
-                                    "primary": 10000,
+                                    "primary": 1000,
                                     "secondary": 1000
                                 },
                                 {

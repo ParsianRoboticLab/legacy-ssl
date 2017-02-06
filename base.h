@@ -5,7 +5,7 @@
 #define REVNUM "$Rev: 2484 $"
 
 #define KK_PLAYON
-#define PARSIANWORKSHOP
+//#define PARSIANWORKSHOP
 //#define SIMULATION_MODE
 //#define GAME_MODE
 

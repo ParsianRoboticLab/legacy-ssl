@@ -151,9 +151,7 @@ SOURCES += main.cpp \
     tools/planloader.cpp \
     tools/loadplayoffjson.cpp \
     util/filewatcher.cpp \
-    plays/indirect.cpp \
-    plays/direct.cpp \
-    plays/kickoff.cpp
+    proto/referee.pb.cc
 
 
 HEADERS += base.h \
@@ -316,9 +314,7 @@ HEADERS += base.h \
     tools/planloader.h \
     tools/loadplayoffjson.h \
     util/filewatcher.h \
-    plays/indirect.h \
-    plays/direct.h \
-    plays/kickoff.h \
+    proto/referee.pb.h \
     plays/plays.h
 
 

@@ -122,7 +122,10 @@ public:
         OurPenaltyKick = 8,
         TheirPenaltyKick = 9,
         Start = 10,
-        NormalStart = 11
+        NormalStart = 11,
+        //added
+        OurBallPlacement = 12,
+        TheirBallPlacement = 13
     };
     enum Support
     {
@@ -292,6 +295,7 @@ public:
     void generateDefensePositions(int defenses, bool goalie, QList<Circle2D> avoidCircles, QList<Vector2D> &defendersPos, Vector2D &goaliePos, QList<DefensePositions> neighbourStates, double distanceFactor, Vector2D goalieCurrentPos = Vector2D::INVALIDATED);
     void generateDefensePositions(int defenses, bool goalie, QList<Circle2D> avoidCircles, QList<Vector2D> &defendersPos, Vector2D &goaliePos, Vector2D goalieCurrentPos = Vector2D::INVALIDATED);
     void checkShootDanger();
+    void Aminshoot(Vector2D ball, QList<Circle2D> obstacles, double& _empty, Vector2D& _best);
     void calculateCommandFrameRate();
     double lastTimeCommandFPSCalced;
     FormationCounts formation;
