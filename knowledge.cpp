@@ -4025,10 +4025,9 @@ Vector2D CKnowledge::getBest() {
 
 
 //added
-QVector2D CKnowledge::getBPPosition(){
+Vector2D CKnowledge::getBPPosition(){
     return bpPosition;
 }
 void CKnowledge::setBPPosition(float x, float y){
-    bpPosition.setX(x);
-    bpPosition.setY(y);
+    bpPosition = Vector2D(x,y);
 }

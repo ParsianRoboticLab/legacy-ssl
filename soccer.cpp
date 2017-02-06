@@ -912,6 +912,7 @@ void CSoccer::refUpdate()
     desPos = referee.designated_position();
     knowledge->setBPPosition(desPos.x(), desPos.y());
 
+
     gsp.cmd = compute_command(referee);
     gsp.cmd_counter = referee.command_counter();
     gsp.goals_blue = referee.blue().score();

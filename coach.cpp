@@ -1200,7 +1200,6 @@ void CCoach::choosePlaymakeAndSupporter(bool needSupporter,bool defenseFirst)
     double playMakeParam[6];//edited 5 to 6
     double biggestPoint = -1000;
     double ballVelCoef = 0.5;
-//    debug(QString("---%1").arg(ourPlayers.count()), D_ERROR);
     for(int i = 0 ; i < ourPlayers.count() ; i++)
     {
         playMakeParam[i] = 1/(wm->our[ourPlayers[i]]->pos.dist(wm->ball->pos+wm->ball->vel*ballVelCoef));
@@ -1353,10 +1352,10 @@ bool CCoach::decideAttack()
         firstTime = true;
 
     } else if( knowledge->getGameState() == CKnowledge::OurBallPlacement){//added
-        debug( "our bp" , D_ERROR);
+        debug( "our bp" , D_ATOUSA);
 
     } else if( knowledge->getGameState() == CKnowledge::TheirBallPlacement){//added
-        debug( "their bp" , D_ERROR);
+        debug( "their bp" , D_ATOUSA);
 
     } else if( knowledge->getGameState() == CKnowledge::Start ){
         decidePlayOn(ourPlayers, lastPlayers);
@@ -1758,8 +1757,8 @@ void CCoach::setFastPlay() {
 
 void CCoach::execute()
 {
-    debug(QString("state : %1 \n").arg(knowledge->getGameState()), D_ERROR);
-    debug(QString(" mode : %1 \n").arg(knowledge->getGameState()), D_ERROR);
+//    debug(QString("state : %1 \n").arg(knowledge->getGameState()), D_ATOUSA);
+//    debug(QString(" mode : %1 \n").arg(knowledge->getGameState()), D_ATOUSA);
 
     draw(Circle2D(Vector2D(_PENALTY_AREA_CIRCLE_X , 0) , _PENALTY_AREA_CIRCLE_RAD) , 0 , 360 , "red");
     bool falseingNan = false;

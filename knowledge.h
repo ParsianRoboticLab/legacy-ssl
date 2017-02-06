@@ -107,7 +107,7 @@ class CKnowledge
 
 private:
     //added
-    QVector2D bpPosition;
+    Vector2D bpPosition;
 
 
 protected:
@@ -153,7 +153,7 @@ public:
 
 
     //added
-    QVector2D getBPPosition();
+    Vector2D getBPPosition();
     void setBPPosition(float x, float y);
 
 

@@ -146,8 +146,13 @@ void CSkillAutoBallPlacement::gotoTarget()
 void CSkillAutoBallPlacement::execute()
 {
     kick->setAgent(agent);
+
+    //added
+    target = Vector2D(knowledge->getBPPosition().x, knowledge->getBPPosition().y);
+    draw(Circle2D(target, 0.10), QColor(Qt::cyan));
+
     gotoBall();
-    debug(QString("tar : %1 , %2").arg(target.x).arg(target.y), D_Mahmood);
+    debug(QString("tar : %1 , %2").arg(target.x).arg(target.y), D_MAHMOOD);
 
 return;
 
@@ -173,5 +178,5 @@ return;
                      //agent->setRobotAbsVel(0,0,0);
                      //isFinished = true;
                   }
-    debug(QString("dist: %1").arg(target.dist(wm->ball->pos)),D_Mahmood);
+    debug(QString("dist: %1").arg(target.dist(wm->ball->pos)),D_MAHMOOD);
 }

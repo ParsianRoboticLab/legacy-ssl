@@ -4,10 +4,39 @@
 #include "mainapplication.h"
 #include "trajectoryplanner.h"
 double dist=3,v=0;
-
+#include "skills/autoballplacement.h"
 
 void CMainApplication::Experimental2()
 {
+
+    Vector2D v = knowledge->getMousePos();
+    debug(QString("x = %1, y = %2").arg(v.x).arg(v.y), D_ATOUSA);
+
+
+    return;
+    static COurBallPlacement *obp = new COurBallPlacement();
+    QList<int> ag;
+//    ag.append(0);
+    ag.append(1);
+//    ag.append(2);
+//    ag.append(3);
+//    ag.append(4);
+    ag.append(5);
+    obp->init(ag, NULL);
+    obp->execute();
+
+
+/*
+    static CSkillAutoBallPlacement *abp = new CSkillAutoBallPlacement(knowledge->getAgent(0));
+    abp->execute();
+*/
+    //gotoPoint
+
+    /*
+    static CSkillGotoPointAvoid *skillll = new CSkillGotoPointAvoid(knowledge->getAgent(0));
+    skillll->init(Vector2D(-2,-2), Vector2D(0,0));
+    skillll->execute();
+    */
 
     //debug(QString("Hamed %1").arg(policy()->Mark_Test()), D_MAHI);
     return;
