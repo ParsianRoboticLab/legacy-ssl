@@ -7,7 +7,6 @@ INIT_SKILL(CSkillAutoBallPlacement, "Auto ball Placement");
 CSkillAutoBallPlacement::CSkillAutoBallPlacement(CAgent *_agent) : CSkill(_agent)
 {
     isFinished = false;
-    GPA = new CSkillGotoPointAvoid(_agent);
     kick = new CSkillKick(_agent);
     bangBang = new CNewBangBang();
     agent = _agent;
@@ -22,7 +21,6 @@ double CSkillAutoBallPlacement::progress()
 
 CSkillAutoBallPlacement::~CSkillAutoBallPlacement()
 {
-    delete GPA;
     delete kick;
     delete bangBang;
 }
@@ -30,7 +28,6 @@ CSkillAutoBallPlacement::~CSkillAutoBallPlacement()
 void CSkillAutoBallPlacement::gotoBall()
 {
     Circle2D dribblerArea (agent->pos() + agent->dir().norm()*0.09,0.1);
-    double vx,vy,w;
     kick->setTarget( target);
     kick->setShotToEmptySpot(false);
     kick->setSlow(true);
@@ -43,71 +40,53 @@ void CSkillAutoBallPlacement::gotoBall()
              ballCounter= 0;
          }
 
-    if(ballCounter < 50)
+    if(ballCounter < 50 && isFinished == false)
     {
         kick->setKickSpeed(0);
         kick->setSpin(1);
         kick->execute();
-    } else if(ballCounter < 80)
+    } else if(ballCounter < 80 && isFinished == false)
          {
              kick->setKickSpeed(0);
-             kick->setSpin(5);
+             kick->setSpin(knowledge->agentSetRollerABPbB[0]);
              kick->execute();
          } else
               {
-                  draw(target);
-                  agent->setRoller(5);
-                  bangBang->setAngInPath(true);
-                  bangBang->setSlow(true);
-                  bangBang->setAngKp(1);
-                  bangBang->setAccMax(0.3);
-                  bangBang->setDecMax(1);
-                  bangBang->setVelMax(1);
-                  bangBang->bangBangSpeed(agent->pos(),agent->vel(),agent->dir(),
-                                          target,wm->ball->pos - agent->pos(),0,0.016,vx,vy,w);
-                  agent->setRobotAbsVel(vx,vy,w);
+                  gotoTarget();
               }
 
-    return;
+//    return;
 
-    if(ballCounter > 20 && ballCounter <=80)
-    {
-        kick->setSpin(7);
-        kick->setKickSpeed(0);
-    } else if(ballCounter > 80)
-         {
-             kick->setSpin(7);
-             kick->setKickSpeed(350);
-         } else
-              {
-                  kick->setSpin(1);
-                  kick->setKickSpeed(0);
-              }
+//    if(ballCounter > 20 && ballCounter <=80)
+//    {
+//        kick->setSpin(7);
+//        kick->setKickSpeed(0);
+//    } else if(ballCounter > 80)
+//         {
+//             kick->setSpin(7);
+//             kick->setKickSpeed(350);
+//         } else
+//              {
+//                  kick->setSpin(1);
+//                  kick->setKickSpeed(0);
+//              }
 
-    if(target.dist(agent->pos())< 0.05)
-    {
-        kick->setSpin(0);
-        kick->setKickSpeed(0);
-    } else if(target.dist(agent->pos())<1)
-         {
-             kick->setSpin(1);
-             kick->setKickSpeed(0);
-             kick->execute();
-         } else
-              {
-                 kick->execute();
-              }
-    kick->setChip(true);
-    kick->setGoalieMode(false);
+//    if(target.dist(agent->pos())< 0.05)
+//    {
+//        kick->setSpin(0);
+//        kick->setKickSpeed(0);
+//    }// else if(target.dist(agent->pos())<1)
+     //    {
+     //        kick->setSpin(1);
+     //        kick->setKickSpeed(0);
+     //        kick->execute();
+     //    } else
+     //         {
+     //            kick->execute();
+     //         }
+   // kick->setChip(true);
+   // kick->setGoalieMode(false);
 
-//    Vector2D finalPos;
-//    finalPos = ballPos + (ballPos - target).norm() * 0.12;
-//    GPA->init(finalPos,ballPos - finalPos);
-//    GPA->setAvoidBall(true);
-//    GPA->setBallObstacleRadius(0.2);//0.2
-//    GPA->setSlowMode(true);
-//    GPA->setVerySlow(true);
-//    GPA->execute();
     if(target.dist(wm->ball->pos) < 0.05)
         {
             agent->setRoller(0);
@@ -116,31 +95,36 @@ void CSkillAutoBallPlacement::gotoBall()
         }
 }
 
+
 void CSkillAutoBallPlacement::gotoTarget()
 {
-    Vector2D hum(target);
-    Vector2D finalPos;
-    finalPos = ballPos + (ballPos - target).norm() * 0.000001;
-    GPA->init(finalPos,ballPos - finalPos);
-    GPA->setAvoidBall(true);
-    GPA->setBallObstacleRadius(0.1);///0.2
-    GPA->setSlowMode(true);
-    GPA->setVerySlow(false);
-    GPA->execute();
-    if(target.dist(ballPos)> 1) {
-        agent->setRoller(1);///1
-    } else
-         {
+    double vx,vy,w;
+    draw(target);
+    agent->setRoller(knowledge->agentSetRollerABPbB[0]);////inja
+    bangBang->setAngInPath(true);
+    bangBang->setSlow(true);
+    bangBang->setAngKp(1);
+    bangBang->setAccMax(0.3);
+    bangBang->setDecMax(1);
+    bangBang->setVelMax(1);
+    bangBang->bangBangSpeed(agent->pos(),agent->vel(),agent->dir(),
+                            target,wm->ball->pos - agent->pos(),0,0.016,vx,vy,w);
+
+    if(target.dist(wm->ball->pos) < 0.2  && isFinished == false)
+        {
+            agent->setRoller(1);
+        }
+    if(target.dist(wm->ball->pos) < 0.1)
+        {
             agent->setRoller(0);
-         }
-    if(target.dist(ballPos)>1.5) {
-        target=(agent->pos().norm()*0.01);
-        agent->setChip(300);
-    } else
-         {
-            agent->setChip(0);
-            target=hum;
-         }
+            isFinished = true;
+
+        }
+    agent->setRobotAbsVel(vx,vy,w);
+    if( isFinished == true)
+    {
+        agent->setRobotAbsVel(0,0,0);
+    }
 }
 
 void CSkillAutoBallPlacement::execute()
@@ -152,9 +136,8 @@ void CSkillAutoBallPlacement::execute()
     draw(Circle2D(target, 0.10), QColor(Qt::cyan));
 
     gotoBall();
-    debug(QString("tar : %1 , %2").arg(target.x).arg(target.y), D_MAHMOOD);
-
-return;
+//    debug(QString("tar : %1 , %2").arg(target.x).arg(target.y), D_MAHMOOD);
+    debug(QString("isFinished : %1 ").arg(isFinished), D_MAHMOOD);
 
     ballPos = wm->ball->pos;
     agentPos = agent->pos();
@@ -163,20 +146,17 @@ return;
     {
         gotoTarget();
         isFinished = false;
-    } else if(target.dist(wm->ball->pos) > 0.1)//0.03
+    } else if(target.dist(wm->ball->pos) > 0.1)
         {
             gotoBall();
             isFinished= false;
-        } else if(target.dist(wm->ball->pos) < 0.5)
+        } else if(target.dist(wm->ball->pos) < 0.05)
              {
                 agent->setRoller(0);
                 agent->setRobotAbsVel(0,0,0);
                 isFinished = true;
-             } else
-                  {
-                     //agent->setRoller(0);
-                     //agent->setRobotAbsVel(0,0,0);
-                     //isFinished = true;
-                  }
+             }
+
+
     debug(QString("dist: %1").arg(target.dist(wm->ball->pos)),D_MAHMOOD);
 }

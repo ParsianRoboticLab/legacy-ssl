@@ -9,7 +9,7 @@
 class CSkillAutoBallPlacement : public CSkill
 {
 private:
-    CSkillGotoPointAvoid *GPA;
+//    CSkillGotoPointAvoid *GPA;
     CSkillKick *kick;
     CNewBangBang *bangBang;
 

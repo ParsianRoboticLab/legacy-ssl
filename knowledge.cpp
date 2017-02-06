@@ -22,7 +22,6 @@ CKnowledge::CKnowledge(CAgent** _agents)
 {
     //ABBAS
     refShortcuts = false;
-
     shirjeBlocking = false;
     lastFrameShirjeBlock = -1;
     ourShirjeBlocker = -1;
@@ -108,24 +107,24 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
 
     //////////////////////////////fill ProfilerResult
-               profiler = new CNewProfiler();
-               profiler->load(JSON);
+    profiler = new CNewProfiler();
+    profiler->load(JSON);
 
-               QVector< QVector<double> > *KickCoeff = new QVector< QVector<double> >();
+    QVector< QVector<double> > *KickCoeff = new QVector< QVector<double> >();
 
-               CPolynomialRegression ProRes;
+    CPolynomialRegression ProRes;
 
-               for(int q=0; q<16; q++)
-                   KickCoeff->append(ProRes.PolynomialRegression(profiler->robotsProfile[q].finalKickMap.values() , profiler->robotsProfile[q].finalKickMap.keys(),2));
+    for(int q=0; q<16; q++)
+        KickCoeff->append(ProRes.PolynomialRegression(profiler->robotsProfile[q].finalKickMap.values() , profiler->robotsProfile[q].finalKickMap.keys(),2));
 
-               //    ProfilerResult[robotID][0:kick , 1:chip , 2:SpinKick , 3:SpinChip][10*distance(0-80)] ---> contains needed voltage for this distance
+    //    ProfilerResult[robotID][0:kick , 1:chip , 2:SpinKick , 3:SpinChip][10*distance(0-80)] ---> contains needed voltage for this distance
 
-               for(int q=0; q<16; q++)
-                   for(double dis=0; dis<=8; dis+=0.1){
-                       if(KickCoeff->at(q).count()>0)
-                           ProfilerResult[q][0][(int)(dis*10)] =(double)
-                                   KickCoeff->at(q).at(0)+KickCoeff->at(q).at(1)*dis+KickCoeff->at(q).at(2)*dis*dis;
-                   }
+    for(int q=0; q<16; q++)
+        for(double dis=0; dis<=8; dis+=0.1){
+            if(KickCoeff->at(q).count()>0)
+                ProfilerResult[q][0][(int)(dis*10)] =(double)
+                        KickCoeff->at(q).at(0)+KickCoeff->at(q).at(1)*dis+KickCoeff->at(q).at(2)*dis*dis;
+        }
 
 }
 
@@ -4020,6 +4019,183 @@ bool CKnowledge::getNecessaryDefKick() {
 
 
 Vector2D CKnowledge::getBest() {
+
+}
+
+struct VectorIndex {
+    Vector2D vec;
+    int index;
+};
+void CKnowledge::Aminshoot(rcsc::Vector2D ball, QList<rcsc::Circle2D> obstacles, double &_empty, rcsc::Vector2D &_best) {
+
+
+    VectorIndex vecc[12],temp;
+    Vector2D tangents[12];
+    Segment2D ttan[12];
+    Ray2D     tan[12];
+    Vector2D zol1, zol2;
+
+
+
+    Segment2D oppgoalLine(wm->field->oppCornerL(), wm->field->oppCornerR());
+    Segment2D oppfiledLine(wm->field->oppGoalL(),wm->field->oppGoalR());
+
+
+    for (int i=0;i<obstacles.size();i++){
+        obstacles[i].tangent(ball, &tangents[2*i], &tangents[2*i +1]);
+
+    }
+
+    int x=0,km=0;
+    for(int i=0; i<obstacles.size()*2;i++,km++)
+    {
+        tan[i]= Ray2D(ball,tangents[i]);
+        ttan[i]= Segment2D(ball,oppgoalLine.intersection(tan[i].line()));
+        for (int j=0;j<obstacles.size();j++) {
+            if(obstacles[j].intersection(ttan[i],&zol1,&zol2) == 2)
+                x=1;
+
+        }
+        if((x==0)&&(oppfiledLine.intersection(ttan[i]).valid()))
+        {
+            vecc[i].vec = oppgoalLine.intersection(tan[i].line());
+        }
+        else vecc[i].vec = Vector2D(wm->field->oppGoal().x,-i-5);
+        x=0;
+
+    }
+
+    for(int i=0;i<obstacles.size()*2;i=i+2)
+    {
+        if(tangents[i].y>tangents[i+1].y)
+        {
+            vecc[i].index=1;
+            vecc[i+1].index=0;
+        }
+        else
+        {
+            vecc[i].index=0;
+            vecc[i+1].index=1;
+        }
+    }
+
+
+
+    for(int x=0;x<obstacles.size()*2 ;x++)
+    {
+        for(int z=0;z< obstacles.size()*2;z++)
+        {
+            if(vecc[z].vec.y < vecc[z+1].vec.y)
+            {
+                temp = vecc[z];
+                vecc[z] = vecc[z+1];
+                vecc[z+1] = temp;
+            }
+        }
+    }
+
+
+
+    Vector2D f  = Vector2D(wm->field->center());
+    Vector2D s  = Vector2D(wm->field->center());
+    Vector2D y1 = Vector2D(wm->field->center());
+    Vector2D y2 = Vector2D(wm->field->center());
+
+
+    if(vecc[0].vec.y > wm->field->oppGoalR().y && vecc[0].vec.y < wm->field->oppGoalL().y)
+    {
+        if(vecc[0].index==1 )
+        {
+            f = Vector2D(wm->field->oppGoalL().x,wm->field->oppGoalL().y-.05);
+            s = vecc[0].vec;
+            y1=f; y2=s;
+
+        }
+        else {
+            f = vecc[0].vec;
+            if(vecc[1].vec.y > wm->field->oppGoalR().y && vecc[1].vec.y < wm->field->oppGoalL().y)
+                s= vecc[1].vec;
+            else
+                s=Vector2D(wm->field->oppGoalR().x,wm->field->oppGoalR().y+.05);
+            if(fabs(y2.y-y1.y) < fabs(s.y-f.y))
+            {
+                y2=s;
+                y1=f;
+            }
+
+        }
+    }
+
+    for(int i=1;i<obstacles.size()*2;i++)
+    {
+
+        if(vecc[i].index==1)
+            continue;
+
+        if(vecc[i].vec.y>wm->field->oppGoalR().y && vecc[i].vec.y<wm->field->oppGoalL().y)
+        {
+            f = vecc[i].vec;
+            if(vecc[i+1].vec.y>wm->field->oppGoalR().y && vecc[i+1].vec.y<wm->field->oppGoalL().y)
+                s= vecc[i+1].vec;
+            else
+                s=Vector2D(wm->field->oppGoalR().x,wm->field->oppGoalR().y+.05);
+
+
+            if( fabs(y2.y-y1.y) < fabs(s.y-f.y))
+            {
+                y2=s;
+                y1=f;
+
+            }
+            i++;
+
+        }
+
+
+    }
+
+    debug(QString("AA%1 %2 %3 %4 %5").arg(_best.x).arg("||").arg(_best.y).arg("||").arg(_empty),D_ALI);
+
+
+    // Line2D bisectorLine (originPoint , AngleDeg::bisect((firstPoint - originPoint).th() , (thirdPoint - originPoint).th()));
+            draw(y2);
+            draw(y1);
+    _empty = y1.y-y2.y;
+
+    if((y1==wm->field->center() && y2 == wm->field->center()) || obstacles.isEmpty())
+    {
+        Line2D bisectorLine (ball , AngleDeg::bisect((wm->field->oppGoalL() - ball).th() , (wm->field->oppGoalR() - ball).th()));
+        _best = oppgoalLine.intersection(bisectorLine);
+
+        _empty=1;
+        draw(_best,0,QColor(Qt::red));
+    }
+
+    else
+    {
+
+
+        if (y1.y==wm->field->oppGoalL().y-.05)
+        {
+            _best= y1;
+        }
+        else if(y2.y==wm->field->oppGoalR().y+.05)
+        {
+            _best=y2;
+        }
+        else
+        {
+            Line2D bisectorLine (ball , AngleDeg::bisect((y1 - ball).th() , (y2 - ball).th()));
+            _best= oppgoalLine.intersection(bisectorLine);
+
+        }
+        draw(_best,0,QColor(Qt::red));
+    }
+    debug(QString("%1 %2 %3 %4 %5").arg(_best.x).arg("||").arg(_best.y).arg("||").arg(_empty),D_ALI);
+
+
+
+
 
 }
 

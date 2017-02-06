@@ -12,9 +12,6 @@
 #include "plays/forcestart.h"
 #include "plays/playoff.h"
 #include "plays/dynamicattack.h"
-#include "plays/indirect.h"
-#include "plays/direct.h"
-#include "plays/kickoff.h"
 #include "plays/ourballplacement.h"
 #include "plays/theirballplacement.h"
 

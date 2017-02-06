@@ -311,6 +311,7 @@ public:
     void generateDefensePositions(int defenses, bool goalie, QList<Circle2D> avoidCircles, QList<Vector2D> &defendersPos, Vector2D &goaliePos, QList<DefensePositions> neighbourStates, double distanceFactor, Vector2D goalieCurrentPos = Vector2D::INVALIDATED);
     void generateDefensePositions(int defenses, bool goalie, QList<Circle2D> avoidCircles, QList<Vector2D> &defendersPos, Vector2D &goaliePos, Vector2D goalieCurrentPos = Vector2D::INVALIDATED);
     void checkShootDanger();
+    void Aminshoot(Vector2D ball, QList<Circle2D> obstacles, double& _empty, Vector2D& _best);
     void calculateCommandFrameRate();
     double lastTimeCommandFPSCalced;
     FormationCounts formation;
@@ -426,6 +427,10 @@ public:
     void SRSetAgentArg(int _id, double _Vx, double _Vy, double _Vr, double _KickSpeed = 0, double _ChipSpeed = 0, double _SpinSpeed = 0);
     void SRSetAgentAbsArg(int _id, double _Vx, double _Vy, double _Vr, double _KickSpeed = 0, double _ChipSpeed = 0, double _SpinSpeed = 0);
     bool SRIsUpdated(int _id);
+
+    //ABP....................ROBO:{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11}
+    int agentSetRollerABPbB[12] = { 4, 4, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4};
+    //completed with profiler
 
 
 

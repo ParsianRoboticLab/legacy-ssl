@@ -150,14 +150,11 @@ SOURCES += main.cpp \
     skillsthread.cpp \
     tools/planloader.cpp \
     tools/loadplayoffjson.cpp \
-    proto/referee.pb.cc \
-    plays/indirect.cpp \
-    plays/direct.cpp \
-    plays/kickoff.cpp \
     util/filewatcher.cpp \
-    skills/autoballplacement.cpp \
+    proto/referee.pb.cc \
     plays/ourballplacement.cpp \
-    plays/theirballplacement.cpp
+    plays/theirballplacement.cpp\
+    skills/autoballplacement.cpp 
 
 
 HEADERS += base.h \
@@ -320,14 +317,11 @@ HEADERS += base.h \
     tools/planloader.h \
     tools/loadplayoffjson.h \
     proto/referee.pb.h \
-    plays/indirect.h \
-    plays/direct.h \
-    plays/kickoff.h \
     plays/plays.h \
-    util/filewatcher.h \
-    skills/autoballplacement.h \
+    plays/theirballplacement.h \
     plays/ourballplacement.h \
-    plays/theirballplacement.h
+    skills/autoballplacement.h \
+    util/filewatcher.h
 
 
 unix:INCLUDEPATH += "/usr/local/include"
