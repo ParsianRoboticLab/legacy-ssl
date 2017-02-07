@@ -907,12 +907,6 @@ void CSoccer::refUpdate()
         return;
     }
 
-
-    SSL_Referee_Point desPos;
-    desPos = referee.designated_position();
-    knowledge->setBPPosition(desPos.x(), desPos.y());
-
-
     gsp.cmd = compute_command(referee);
     gsp.cmd_counter = referee.command_counter();
     gsp.goals_blue = referee.blue().score();
@@ -920,6 +914,11 @@ void CSoccer::refUpdate()
     gsp.time_remaining = referee.stage_time_left();
     cmdCnt = gsp.cmd_counter;
 
+    if( gsp.cmd == 'b' || gsp.cmd == 'B' ){
+        SSL_Referee_Point desPos;
+        desPos = referee.designated_position();
+        knowledge->setBPPosition(desPos.x(), desPos.y());
+    }
 
     //gets goalie id for both teams
     if( wm->getTeamColor() == _COLOR_BLUE){

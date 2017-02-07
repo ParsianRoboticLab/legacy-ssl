@@ -545,10 +545,13 @@ void CMainApplication::refShortcutsChanged(bool val)
 
 void CMainApplication::SetManualGS( int id ){
     //added
-    if( strRefCommands.at(id).toAscii().at(0) == 'b'){
+
+    if( strRefCommands.at(id).toAscii().at(0) == 'b' || strRefCommands.at(id).toAscii().at(0) == 'B'){
+
         knowledge->setBPPosition(knowledge->getMousePos().x, knowledge->getMousePos().y);
         qDebug() << "pos : " << knowledge->getBPPosition().x << "," << knowledge->getBPPosition().y << endl;
     }
+
     wm->gs->transition(strRefCommands.at(id).toAscii().at(0));
 }
 
