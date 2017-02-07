@@ -817,11 +817,12 @@ private:
     QPushButton *btnClear;
     QStringList fileNames;
     QCheckBox *chbxDraws , *chbxDebugs;
-    QCheckBox *chbxDebug[19];
+    QCheckBox *chbxDebug[20];
     QMap<int16_t,QColor> tcolor;
     bool pause;
     qint16 loggerFPS;
     long type;
+    long type1;
     int fBfStep;
 public slots:
     void browseDialog();
