@@ -78,10 +78,12 @@ CCoach::CCoach(CAgent**_agents)
     ourIndirect   = new COurIndirect;
     ourDirect     = new CDoubleSizeOurDirect;
     ourPenalty    = new COurPenalty;
+    ourBallPlacement = new COurBallPlacement;
     theirKickOff  = new CTheirKickOff;
     theirIndirect = new CTheirIndirect;
     theirDirect   = new CTheirDirect;
     theirPenalty  = new CTheirPenalty;
+    theirBallPlacement = new CTheirBallPlacement;
     forceStart    = new CForceStart;
 
     ourPlayOff    = NULL;
@@ -1193,10 +1195,8 @@ void CCoach::choosePlaymakeAndSupporter(bool needSupporter,bool defenseFirst)
     }
 
 
-
-
     ////////////////////first we choose our playmake
-    double playMakeParam[5];
+    double playMakeParam[6];//edited 5 to 6
     double biggestPoint = -1000;
     double ballVelCoef = 0.5;
     for(int i = 0 ; i < ourPlayers.count() ; i++)
@@ -1232,6 +1232,7 @@ void CCoach::choosePlaymakeAndSupporter(bool needSupporter,bool defenseFirst)
     //playmakeId = 11;
 
 }
+
 bool CCoach::decideAttack()
 {
 
@@ -1725,6 +1726,8 @@ void CCoach::setFastPlay() {
 
 void CCoach::execute()
 {
+//    debug(QString("state : %1 \n").arg(knowledge->getGameState()), D_ATOUSA);
+//    debug(QString(" mode : %1 \n").arg(knowledge->getGameState()), D_ATOUSA);
 
     draw(Circle2D(Vector2D(_PENALTY_AREA_CIRCLE_X , 0) , _PENALTY_AREA_CIRCLE_RAD) , 0 , 360 , "red");
     bool falseingNan = false;
@@ -2002,11 +2005,11 @@ bool CCoach::decideNormalStart(QList<int> &_ourPlayers) {
 }
 
 bool CCoach::decideOurBallPlacement(QList<int> &_ourPlayers) {
-
+    selectedPlay = ourBallPlacement;
 }
 
 bool CCoach::decideTheirBallPlacement(QList<int> &_ourPlayers) {
-
+    selectedPlay = theirBallPlacement;
 }
 
 bool CCoach::decideNull(QList<int> &_ourPlayers) {

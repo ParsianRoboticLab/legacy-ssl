@@ -695,10 +695,13 @@ bool CField::isInOppPenaltyArea(Vector2D point)
 {
 	Circle2D c1(fOppGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD);
 	Circle2D c2(fOppGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD);
-	Rect2D r(fOppGoal + Vector2D(-0,-_GOAL_WIDTH/4),fOppGoal + Vector2D(-_GOAL_RAD,+_GOAL_WIDTH/4));
-	draw(c1,270,360,"blue",false);
+        Rect2D r(fOppGoal + Vector2D(-0,-_GOAL_WIDTH/4),fOppGoal + Vector2D(-_GOAL_RAD,+_GOAL_WIDTH/4));
+        Rect2D Back(fOppGoal + Vector2D(-0,-_GOAL_WIDTH/2) + Vector2D(-0,-0.75),fOppGoal + Vector2D(0.05,+_GOAL_WIDTH/2)+Vector2D(-0,+0.75));
+        draw(c1,270,360,"blue",false);
 	draw(c2,180,270,"blue",false);
     draw(r,"blue");
+
+    draw(Back,"red");
     if (r.contains(point))
         return true;
     if (c1.contains(point))
@@ -713,6 +716,8 @@ bool CField::isInOppPenaltyArea(Vector2D point)
         if( (th > 90) && (th < 180) )
         return true;
     }
+    if (Back.contains(point))
+        return true;
     return false;
 }
 

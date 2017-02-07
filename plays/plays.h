@@ -12,5 +12,7 @@
 #include "plays/forcestart.h"
 #include "plays/playoff.h"
 #include "plays/dynamicattack.h"
+#include "plays/ourballplacement.h"
+#include "plays/theirballplacement.h"
 
 #endif // PLAYS_H
