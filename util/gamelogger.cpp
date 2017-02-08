@@ -43,7 +43,7 @@ void CGameLogger::setDrawer(CDrawer *_drawer ){
     drawer = _drawer;
 }
 
-void CGameLogger::openFilesToLog(QString baseFileName){
+void CGameLogger::openFilesToLog(QString baseFileName,QString totalDescription){
 
 #ifndef Q_OS_MACX
     baseFileName = "logs/" + baseFileName;
@@ -61,22 +61,35 @@ void CGameLogger::openFilesToLog(QString baseFileName){
         fileLogError = true;
     }
     else{
+        qint32 descriptionSz;
+        descriptionSz=totalDescription.toStdString().size();
+
 
         logDS.setDevice(&logFile);
         logDS << LOGGER_MAGIC;
         logDS << LOGGER_VERSION;
+        logDS << descriptionSz;
+        logDS.writeRawData(totalDescription.toStdString().c_str() , descriptionSz);
 
         debugDS.setDevice(&debugFile);
         debugDS << LOGGER_MAGIC;
         debugDS << LOGGER_VERSION;
+        debugDS << descriptionSz;
+        debugDS.writeRawData(totalDescription.toStdString().c_str() , descriptionSz);
 
         drawDS.setDevice(&drawFile);
         drawDS << LOGGER_MAGIC;
         drawDS << LOGGER_VERSION;
+        drawDS << descriptionSz;
+        drawDS.writeRawData(totalDescription.toStdString().c_str() , descriptionSz);
 
         infoDS.setDevice(&infoFile);
         infoDS << LOGGER_MAGIC;
         infoDS << LOGGER_VERSION;
+        infoDS << descriptionSz;
+        infoDS.writeRawData(totalDescription.toStdString().c_str() , descriptionSz);
+
+
 
 
         counter = 0;
@@ -106,8 +119,11 @@ void CGameLogger::closeLogFiles(bool force){
     }
 }
 void CGameLogger::openFileToReplay(QString fileName){
-    qint32 magic , version , magic2 , version2 , magic3 , version3;
-    qint32 sz;
+    qint32 magic , version , magic2 , version2 , magic3 , version3 , magic4 , version4;
+    QString totalDescription;
+    qint32 sz, descriptionSz;
+    char text[100000];
+    std::string desc;
     int curPos;
     QString ss;
     QList <QString> qq;
@@ -123,7 +139,11 @@ void CGameLogger::openFileToReplay(QString fileName){
     ss += ".draw";
     readDraw.setFileName(ss);
 
-    if( !readLog.open(QIODevice::ReadOnly) || !readDebug.open(QIODevice::ReadOnly) || !readDraw.open(QIODevice::ReadOnly) ){
+    ss = QString(fileName.toStdString().substr(0 ,fileName.size()-4).c_str());
+    ss += ".info";
+    readInfo.setFileName(ss);
+
+    if( !readLog.open(QIODevice::ReadOnly) || !readDebug.open(QIODevice::ReadOnly) || !readDraw.open(QIODevice::ReadOnly) || !readInfo.open(QIODevice::ReadOnly) ){
         qDebug() << "Replay: open Replay Files failed.";
         fileReplayError = true;
     }
@@ -131,15 +151,33 @@ void CGameLogger::openFileToReplay(QString fileName){
         readLogDS.setDevice(&readLog);
         readDebugDS.setDevice(&readDebug);
         readDrawDS.setDevice(&readDraw);
+        readInfoDS.setDevice(&readInfo);
 
         readLogDS >> magic >> version;
         readDebugDS >> magic2 >> version2;
         readDrawDS >> magic3 >> version3;
+
+
+
+        readInfoDS >> magic4 >> version4;
+        readInfoDS >> descriptionSz;
+        readInfoDS.readRawData(text , descriptionSz);
+        desc.assign(text , descriptionSz);
+        totalDescription = totalDescription.fromStdString(desc);
+        qDebug()<<"___Info desc___"+totalDescription+"___"<<descriptionSz;
+        readLogDS >> descriptionSz;
+        readLogDS.readRawData(text , descriptionSz);
+        desc.assign(text , descriptionSz);
+        totalDescription = totalDescription.fromStdString(desc);
+        qDebug()<<"___Log desc___"+totalDescription+"___"<<descriptionSz;
+
+
         if( magic == LOGGER_MAGIC && version == LOGGER_VERSION &&
             magic2 == LOGGER_MAGIC && version2 == LOGGER_VERSION &&
-            magic3 == LOGGER_MAGIC && version3 == LOGGER_VERSION){
+            magic3 == LOGGER_MAGIC && version3 == LOGGER_VERSION &&
+            magic4 == LOGGER_MAGIC && version4 == LOGGER_VERSION){
 
-            curPos = 8;
+            curPos = 12+descriptionSz;
             logSeekList.clear();
             while( readLog.size() > curPos ){
                 logSeekList.append(curPos);
@@ -155,7 +193,7 @@ void CGameLogger::openFileToReplay(QString fileName){
 			framenum = min(framenum , drawSeekList.size());
 			framenum = min(framenum , debugSeekList.size());
 
-            curPos = 8;
+            curPos = 12+descriptionSz;
             debugSeekList.clear();
             while( readDebug.size() > curPos ){
                 debugSeekList.append(curPos);
@@ -168,7 +206,7 @@ void CGameLogger::openFileToReplay(QString fileName){
                 curPos += sz;
             }
 
-            curPos = 8;
+            curPos = 12+descriptionSz;
             drawSeekList.clear();
             while( readDraw.size() > curPos ){
                 drawSeekList.append(curPos);
@@ -191,6 +229,7 @@ void CGameLogger::openFileToReplay(QString fileName){
             fileReplayError = false;
             if( drawSeekList.size() != debugSeekList.size() || debugSeekList.size() != logSeekList.size() ){
                 qDebug() << "Replay: the size of frames doesn't equal. --> " << drawSeekList.size() << "-" << debugSeekList.size() << "-" << logSeekList.size();
+
 //                closeReplayFile(true);
 //                fileReplayError = true;
             }
@@ -210,6 +249,7 @@ void CGameLogger::closeReplayFile( bool force ){
         readLog.close();
         readDebug.close();
         readDraw.close();
+        readInfo.close();
     }
 }
 
@@ -300,7 +340,7 @@ void CGameLogger::writeInfo(){
 
 
 
-
+/*
     for( int i=0 ; i<infos.size() ; i++ ){
 
         infoDS << infos.at(i).canChip;
@@ -310,7 +350,7 @@ void CGameLogger::writeInfo(){
         infoDS << infos.at(i).shootBoard;
     }
     infos.clear();
-
+*/
 
 
 

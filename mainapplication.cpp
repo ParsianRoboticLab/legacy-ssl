@@ -14,6 +14,7 @@
 
 #include "geom.h"
 #include <gamelogger.h>
+#include <widgets.h>
 
 #include <math.h>
 #include <time.h>
@@ -1468,7 +1469,22 @@ void CMainApplication::logBtnPressed()
 
 void CMainApplication::setLoggerReplayMode(QAction *action ){
     if( action->text() == "LogTag"){
-        qDebug("LogTag");
+        if( setReplayMode->isChecked() ){
+            terminateLogOrReplay(false); // terminate Replay
+        }
+        if( action->isChecked() ){
+            qDebug()<<"logtag";
+            CLogTagWidget *LT;
+
+            LT=new CLogTagWidget(this);
+            LT->show();
+
+
+        }
+        else{
+            terminateLogOrReplay(true);
+        }
+
     }
     else if( action->text() == "Log" ){
         if( setReplayMode->isChecked() ){
@@ -1485,6 +1501,7 @@ void CMainApplication::setLoggerReplayMode(QAction *action ){
                     .arg(QString::number(QTime::currentTime().second()) , 2 , cc);
 
             bool ok;
+            QString totlaDescription=suggestionName+"#Nadia#robocup-germany#test plan1#shoot-direct";
             QString baseFileName = QInputDialog::getText(this, tr("Name") , tr("Enter the log name's: ") , QLineEdit::Normal , suggestionName , &ok);
             if( !ok )
                 baseFileName = suggestionName;
@@ -1493,7 +1510,7 @@ void CMainApplication::setLoggerReplayMode(QAction *action ){
             gameLogger->setIsLogMode(true);
             gameLogger->closeLogger = false;
             gameLogger->logMode = true;
-            gameLogger->openFilesToLog(baseFileName);
+            gameLogger->openFilesToLog(baseFileName,totlaDescription);
             loggerMutex->unlock();
 
             gameLogger->start(QThread::NormalPriority);
@@ -1503,7 +1520,7 @@ void CMainApplication::setLoggerReplayMode(QAction *action ){
         }
     }
     else if( action->text() == "Replay" ){
-        if( setLogMode->isChecked() ){
+        if(setLogMode->isChecked() || setLogTagMode->isChecked()){
             terminateLogOrReplay(true); // terminate log
         }
         if( action->isChecked() ){
@@ -1530,7 +1547,16 @@ void CMainApplication::setLoggerReplayMode(QAction *action ){
             terminateLogOrReplay(false);
         }
     }
+
 }
+
+
+
+
+
+
+
+
 
 void CMainApplication::loggerWidgetRejected(){
     setReplayMode->trigger();
@@ -1543,6 +1569,7 @@ void CMainApplication::keyboardWidgetRejected(){
 void CMainApplication::terminateLogOrReplay(bool whichOne ){
     if( whichOne ){
         setLogMode->setChecked(false);
+        setLogTagMode->setChecked(false);
 
         loggerMutex->lock();
         gameLogger->closeLogger = true;

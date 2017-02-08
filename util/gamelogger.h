@@ -91,7 +91,7 @@ class CGameLogger;
 
 class CGameLogger: public QThread{
     QFile logFile , debugFile , drawFile , infoFile;
-    QFile readLog , readDebug , readDraw;
+    QFile readLog , readDebug , readDraw , readInfo;
     QDataStream logDS , debugDS , drawDS ,infoDS;
     QDataStream readLogDS , readDebugDS , readDrawDS , readInfoDS;
     QList <SPacketData> packets;
@@ -132,7 +132,7 @@ public:
     void addToDraws(QString , Vector2D , QColor , int );
     void addToDraws(Rect2D , QColor , bool);
     void closeLogFiles(bool force);
-    void openFilesToLog(QString);
+    void openFilesToLog(QString,QString);
     void closeReplayFile(bool force);
     void openFileToReplay(QString);
     void setDrawer(CDrawer *);

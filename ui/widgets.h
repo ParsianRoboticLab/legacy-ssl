@@ -839,6 +839,29 @@ public slots:
     void replayFPSChanged();
 };
 
+
+class CLogTagWidget : public QDialog
+{
+    Q_OBJECT
+public:
+    CLogTagWidget(QWidget*);
+    ~CLogTagWidget();
+private:
+    QLineEdit *WhoLogs, *WhereLogs, *DescriptionLogs, *teamNameLogs , *TagsInThisLog;
+    QLabel *WhoLogsl, *WhereLogsl, *DescriptionLogsl, *teamNameLogsl, *TagsInThisLogl;
+    QPushButton *StartLog;
+public slots:
+    void StartLogfunc();
+    QString getWhoLogs();
+    QString getWhereLogs();
+    QString getDescriptionLogs();
+    QString getTagsInThisLog();
+};
+
+
+
+
+
 class MyTreeView : public QTreeView
 {
     Q_OBJECT

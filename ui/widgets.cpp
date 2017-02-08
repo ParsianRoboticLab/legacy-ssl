@@ -3,6 +3,7 @@
 #include "worldmodel.h"
 #include "VarTypes/VarTypes.h"
 #include "coach.h"
+#include "gamelogger.h"
 
 #include <QGridLayout>
 #include <QVBoxLayout>
@@ -1560,7 +1561,8 @@ void CMonitorWidget::paintGL()
     drawField();
 
     loggerMutex->lock();
-    if( gameLogger->getIsLogMode() && recShowBool ){
+
+    if( gameLogger->getIsLogMode() && recShowBool){
         // Show Log Mode
         drawArc(-3.600 , 2.500 , 0.08 , 0 , 360 , QColor("red") , true);
         drawText(-3.480 , 2.400 , "REC" , QColor("red") , 14);
@@ -3264,6 +3266,7 @@ void CLoggerWidget::reBuildWidget(){
 
 void CLoggerWidget::browseDialog(){
     QStringList files = dialog->getOpenFileNames(this, tr("Open LogFile") ,"log" , tr("Log Files (*.log)"));
+    //qDebug()<<files;
 
     if( files.size() == 0 )
         return;
@@ -3424,7 +3427,6 @@ void CLoggerWidget::cursorIncrement(){
 
         for( int i=0 ; i<gameLogger->debugList.size() ; i++ ){
             DType=gameLogger->debugList.at(i).type;
-            qDebug()<< DType;
             if(DType<0 && DType>-32768){
                 DType+=65536;
                 if((DType & type1) > 32768)
@@ -3551,6 +3553,79 @@ void CLoggerWidget::replayFPSChanged(){
 bool CLoggerWidget::state(){
     return isLoggerWorking;
 }
+
+CLogTagWidget::CLogTagWidget(QWidget* parent):QDialog(parent){
+    WhoLogs=new QLineEdit("Nadia",this);
+    WhereLogs=new QLineEdit("robocup-germany",this);
+    DescriptionLogs=new QLineEdit("test plan1",this);
+    teamNameLogs=new QLineEdit("parsian-skuba",this);
+    TagsInThisLog=new QLineEdit("shoot-direct",this);
+    WhoLogsl=new QLabel("Enter your name: ",this);
+    WhereLogsl=new QLabel("Where are you logging:");
+    DescriptionLogsl=new QLabel("description for this log:",this);
+    teamNameLogsl=new QLabel("team Name:",this);
+    TagsInThisLogl=new QLabel("Enter Some tags for this Log:",this);
+    StartLog=new QPushButton("start LOG",this);
+    QGridLayout *LogTagL=new QGridLayout(this);
+    LogTagL->addWidget(WhoLogsl,1,1);
+    LogTagL->addWidget(WhoLogs,1,2);
+    LogTagL->addWidget(WhereLogsl,2,1);
+    LogTagL->addWidget(WhereLogs,2,2);
+    LogTagL->addWidget(DescriptionLogsl,3,1);
+    LogTagL->addWidget(DescriptionLogs,3,2);
+    LogTagL->addWidget(teamNameLogsl,4,1);
+    LogTagL->addWidget(teamNameLogs,4,2);
+    LogTagL->addWidget(TagsInThisLogl,5,1);
+    LogTagL->addWidget(TagsInThisLog,5,2);
+    LogTagL->addWidget(StartLog,6,2);
+    this->setLayout(LogTagL);
+
+    connect(StartLog , SIGNAL(pressed()) , this , SLOT(StartLogfunc()));
+}
+
+CLogTagWidget::~CLogTagWidget(){
+}
+void CLogTagWidget::StartLogfunc(){
+    this->close();
+    QString totalDescription;
+     QChar cc = '0';
+    QString baseFileName = QString("%1%2%3-%4%5%6")
+            .arg(QString::number(QDate::currentDate().year()) , 4 , cc)
+            .arg(QString::number(QDate::currentDate().month()) , 2 , cc)
+            .arg(QString::number(QDate::currentDate().day()) , 2 , cc)
+            .arg(QString::number(QTime::currentTime().hour()) , 2 , cc)
+            .arg(QString::number(QTime::currentTime().minute()) , 2 , cc)
+            .arg(QString::number(QTime::currentTime().second()) , 2 , cc);
+    totalDescription=baseFileName+"#"+getWhoLogs()+"#"+getWhereLogs()+"#"+getDescriptionLogs()+"#"+getTagsInThisLog();
+    if(getDescriptionLogs()!="test plan1"){
+        baseFileName+=getDescriptionLogs();
+    }
+
+    loggerMutex->lock();
+    gameLogger->setIsLogMode(true);
+    gameLogger->closeLogger = false;
+    gameLogger->logMode = true;
+    gameLogger->openFilesToLog(baseFileName,totalDescription);
+    loggerMutex->unlock();
+
+    gameLogger->start(QThread::NormalPriority);
+
+
+}
+QString CLogTagWidget::getWhoLogs(){
+    return this->WhoLogs->text();
+}
+QString CLogTagWidget::getWhereLogs(){
+    return this->WhereLogs->text();
+}
+QString CLogTagWidget::getDescriptionLogs(){
+    return this->DescriptionLogs->text();
+}
+QString CLogTagWidget::getTagsInThisLog(){
+    return this->TagsInThisLog->text();
+}
+
+
 
 class PlayFileHightlighter : public QSyntaxHighlighter
 {
