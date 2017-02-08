@@ -116,7 +116,7 @@ void CMainApplication::Experimental4()
 
     prfl1->setAgent(knowledge->getAgent(p1));
     prfl1->setAgentID(p1);
-    prfl1->setKickSpeed(kickSpeed/120);
+    prfl1->setKickSpeed(kickSpeed);
     prfl1->setReceiveRadius(1);
     prfl1->setTolerance(0.01);
     prfl1->setIsActive(true);
@@ -126,7 +126,7 @@ void CMainApplication::Experimental4()
 
     prfl2->setAgent(knowledge->getAgent(p2));
     prfl2->setAgentID(p2);
-    prfl2->setKickSpeed(kickSpeed/120);
+    prfl2->setKickSpeed(kickSpeed);
     prfl2->setReceiveRadius(1);
     prfl2->setTolerance(0.01);
     prfl2->setIsActive(true);
