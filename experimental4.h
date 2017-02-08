@@ -89,9 +89,9 @@ static CRolePlayOn * prfl1 = new CRolePlayOn();
 
 static CRolePlayOn * prfl2 = new CRolePlayOn();
 
-static int p2 = 4 , p1 = 5;
-static double kickSpeed = 200 , MaxSpeed = 1023 , MinSpeed = 200 , speedStep = 50;
-static double xpos2 = -3 , ypos2 = 2.6 , xpos1 , ypos1;
+static int p2 = 0 , p1 = 1;
+static double kickSpeed = 100 , MaxSpeed = 1023 , MinSpeed = 100 , speedStep = 50;
+static double xpos2 = -2.8 , ypos2 = 2 , xpos1 , ypos1;
 
 void CMainApplication::Experimental4()
 {
@@ -117,7 +117,7 @@ void CMainApplication::Experimental4()
     prfl1->setAgent(knowledge->getAgent(p1));
     prfl1->setAgentID(p1);
     prfl1->setKickSpeed(kickSpeed);
-    prfl1->setReceiveRadius(1);
+    prfl1->setReceiveRadius(1.2);
     prfl1->setTolerance(0.01);
     prfl1->setIsActive(true);
     prfl1->setChip(false);
@@ -127,7 +127,7 @@ void CMainApplication::Experimental4()
     prfl2->setAgent(knowledge->getAgent(p2));
     prfl2->setAgentID(p2);
     prfl2->setKickSpeed(kickSpeed);
-    prfl2->setReceiveRadius(1);
+    prfl2->setReceiveRadius(1.2);
     prfl2->setTolerance(0.01);
     prfl2->setIsActive(true);
     prfl2->setChip(false);
@@ -137,17 +137,17 @@ void CMainApplication::Experimental4()
 
 
     if(kickSpeed < 500){
-        xpos1 = -1;   ypos1 = 1.5;
+        xpos1 = -0.7;   ypos1 = 0.7;
         lowSpeed = true;
 
     }else{
-        xpos1 = -3;   ypos1 = -2.5;
+        xpos1 = -3.8;   ypos1 = -2.5;
         lowSpeed = false;
     }
 
-    draw(Segment2D(Vector2D(-4 , 0) , Vector2D(0 , 3) ) , QColor(Qt::white));
+    draw(Segment2D(Vector2D(-4.5 , 0) , Vector2D(0 , 3) ) , QColor(Qt::white));
     draw(Segment2D(Vector2D(0 , 0) , Vector2D(0 , 3) ) , QColor(Qt::white));
-    draw(Segment2D(Vector2D(-4 , 0) , Vector2D(0, 0) ) , QColor(Qt::white));
+    draw(Segment2D(Vector2D(-4.5 , 0) , Vector2D(0, 0) ) , QColor(Qt::white));
 
     if(first){
         prfl2->setSelectedSkill(roleSkill::GotopointAvoid);
@@ -171,10 +171,10 @@ void CMainApplication::Experimental4()
 
     if(!first){
 
-        if( (Triangle2D(Vector2D(0 , 0) ,Vector2D(-4 , 0) , Vector2D(0 , 3)).contains(wm->ball->pos)
+        if( (Triangle2D(Vector2D(0 , 0) ,Vector2D(-4.5 , 0) , Vector2D(0 , 3)).contains(wm->ball->pos)
              && lowSpeed) || (!lowSpeed && wm->ball->pos.y <= 0) ){
 
-            if(wm->ball->vel.length() < 0.3){
+            if(wm->ball->vel.length() < 0.2){
 
                 prfl1->setSelectedSkill(roleSkill::Kick);
                 prfl1->setTarget(Vector2D(xpos2,ypos2));
@@ -204,7 +204,7 @@ void CMainApplication::Experimental4()
         }
         else
         {
-            if(wm->ball->vel.length() < 0.3){
+            if(wm->ball->vel.length() < 0.2){
 
                 prfl2->setSelectedSkill(roleSkill::Kick);
                 prfl2->setTarget(Vector2D(xpos1,ypos1));
@@ -245,7 +245,9 @@ void CMainApplication::Experimental4()
             if(maxBallVel <=  wm->ball->vel.length())
                 maxBallVel =  wm->ball->vel.length();
 
-            else if(maxBallVel > 0.01){
+            else 
+            // if(maxBallVel > (2.0/900000)*kickSpeed*kickSpeed + (39.0/9000)*kickSpeed)
+            {
 
                 if(counter%2==0)
                 {
@@ -302,13 +304,13 @@ void CMainApplication::Experimental4()
 
                 debug(QString("counter: %2 , kick speed: %1").arg(kickSpeed).arg(counter) , D_MAHI);
 
+                maxBallVel = 0;
+                avg1=0;
+                avg2=0;
+                cnt=0;
+
                 if(counter == repeat){
                     debug("adding data" , D_MAHI);
-
-                    maxBallVel = 0;
-                    avg1=0;
-                    avg2=0;
-                    cnt=0;
 
                     profiler.robotsProfile[p1].kickMap.insert(kickSpeed , realRes1);
                     profiler.robotsProfile[p2].kickMap.insert(kickSpeed , realRes2);
@@ -319,9 +321,12 @@ void CMainApplication::Experimental4()
 
                         if(kickSpeed<1000){
                             kickSpeed += speedStep;
-                            xpos1 -= 0.05;
-                            ypos1 += 0.05;
+                            if(lowSpeed){
+                                xpos2 -= kickSpeed/3000;
+                                ypos2 += kickSpeed/5000;
+                            }
                         }
+
                         else
                             kickSpeed = MaxSpeed;
 
@@ -329,7 +334,8 @@ void CMainApplication::Experimental4()
                     else
                     {
                         kickSpeed = MinSpeed;
-
+                        xpos2 = -2.8; ypos2 = 2;
+                        
                         /////////////////////// changing robots
                         // if(p2 != 5){
                         //     p1 += 2;
@@ -898,7 +904,7 @@ if(f) {
 
 #endif // EXPERIMENTAL4_H
 
-
+/*
 double CMainApplication::maxBallSpeed(){
 
     //    static CSkillKick* test3 = new CSkillKick(knowledge->getAgent(agentID));
@@ -930,3 +936,4 @@ double CMainApplication::maxBallSpeed(){
     return 0;
 
 }
+*/
