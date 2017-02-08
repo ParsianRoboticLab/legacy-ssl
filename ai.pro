@@ -152,9 +152,9 @@ SOURCES += main.cpp \
     tools/loadplayoffjson.cpp \
     util/filewatcher.cpp \
     proto/referee.pb.cc \
-    plays/indirect.cpp \
-    plays/direct.cpp \
-    plays/kickoff.cpp
+    plays/ourballplacement.cpp \
+    plays/theirballplacement.cpp\
+    skills/autoballplacement.cpp 
 
 
 HEADERS += base.h \
@@ -316,12 +316,12 @@ HEADERS += base.h \
     skillsthread.h \
     tools/planloader.h \
     tools/loadplayoffjson.h \
-    util/filewatcher.h \
     proto/referee.pb.h \
-    plays/indirect.h \
-    plays/direct.h \
-    plays/kickoff.h \
-    plays/plays.h
+    plays/plays.h \
+    plays/theirballplacement.h \
+    plays/ourballplacement.h \
+    skills/autoballplacement.h \
+    util/filewatcher.h
 
 
 unix:INCLUDEPATH += "/usr/local/include"
@@ -402,3 +402,7 @@ INCLUDEPATH += $$PWD/intentions/
 
 RESOURCES +=
 CONFIG += c++11
+
+
+
+

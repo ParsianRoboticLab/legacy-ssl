@@ -186,7 +186,7 @@ private:
     double kkMovementTheta;
     Vector2D ballPos;
     double ballRealVel;
-    AngleDeg kkFinalDir;
+    AngleDeg kickFinalDir;
     Vector2D finalDirVec;
     Vector2D finalPos;
     void direct();
@@ -257,6 +257,8 @@ public:
     SkillProperty(CSkillKick, bool, VeryFine, veryFine);
     SkillProperty(CSkillKick, bool, GoalieMode, goalieMode);
     SkillProperty(CSkillKick, bool, AlternateMode, alternateMode);
+    SkillProperty(CSkillKick, double,KickAngTol, kickAngTol);
+
 };
 
 

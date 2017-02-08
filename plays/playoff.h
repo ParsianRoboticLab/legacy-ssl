@@ -17,7 +17,6 @@
     protected: type local
 
 
-
 struct robotAttr {
     int index;
     int agent;
@@ -134,29 +133,38 @@ struct SPositioningAgent {
     // TODO : Make positionArg a List of Pointers
 
     QList<SPositioningArg> positionArg;
-    long mahiLastTime;
-    int stateNumber;
-    bool flag;
+    int stateNumber = 0;
+    bool zombie = false;
 
+
+
+
+    //////////////Methods
     SPositioningArg getArgs(const int& _state = 0) const {
         if ((_state + stateNumber) < positionArg.size()) {
             return positionArg.at(stateNumber + _state);
+
         } else {
+
             debug(QString("getArgs : wrong arg %1 < %2").arg(positionArg.size()).arg(_state + stateNumber), D_ERROR);
             qWarning() << QString("getArgs : wrong arg %1 < %2").arg(positionArg.size()).arg(_state + stateNumber);
             SPositioningArg null;
             return null;
+
         }
     }
 
     SPositioningArg getAbsArgs(const int& _state = 0) const {
         if (_state < positionArg.size()) {
             return positionArg.at(_state);
-        } else {
+
+       } else {
+
             debug(QString("getArgs : wrong absarg %1 < %2").arg(positionArg.size()).arg(_state), D_ERROR);
             qWarning() << QString("getArgs : wrong absarg %1 < %2").arg(positionArg.size()).arg(_state);
             SPositioningArg null;
             return null;
+
         }
     }
 
@@ -239,6 +247,11 @@ struct SMatching {
     SCommon *common;
 };
 
+struct AgentPoint {
+    int id    = -1;
+    int state = -1;
+};
+
 struct SExecution {
 
     QList< QList<playOffRobot> > AgentPlan;
@@ -246,6 +259,8 @@ struct SExecution {
     int symmetry     =  1;
     int theLastAgent = -1;
     int theLastState = -1;
+    AgentPoint passer;
+    AgentPoint reciver;
 };
 
 struct SGUI {
@@ -278,6 +293,9 @@ struct SPlan {
 
 }
 
+typedef QPair<NGameOff::AgentPoint, NGameOff::AgentPoint> AgentPair;
+
+
 using namespace NGameOff;
 
 class CPlayOff : public CMasterPlay {
@@ -295,8 +313,8 @@ public:
     void execute_6();
     void init(QList <int> _agents , QMap<QString , EditData*> *_editData);
     virtual QString whoami() {return "PlayOff";}
-    bool firstTime;
-    bool kickOffFirstTimeFlag;
+    bool firstTime = true;
+    bool kickOffFirstTimeFlag = true;
     //GUI
 
     QList< QList<SPlayOffPlan*> > updatePlans();
@@ -314,15 +332,18 @@ public:
     //////////
 
     void setMasterPlan(SPlan* _thePlan);
+    void analyseShoot();
+    void analysePass();
+
     void setMasterMode(EMode _mode);
     EMode getMasterMode();
 
     void setInitial(bool _init);
 private:
-    bool initial;
+    bool initial = true;
 
     /////////////*NEW*/////////////
-    SPlan* masterPlan;
+    SPlan* masterPlan = NULL;
     EMode masterMode;
     //////////Dynamic Plan////////////
 
@@ -409,6 +430,13 @@ private:
     double getMaxVel(const CRolePlayOff* _roleAgent, const SPositioningArg& _posArg);
     Vector2D getMoveTarget(int agentID,int agentState);
     Vector2D getMoveTarget(const SPositioningArg& _posArg);
+    /// After life points
+    Vector2D getMarkTarget   (const SPositioningArg&);
+    Vector2D getDefenseTarget(const SPositioningArg&);
+    Vector2D getSupportTarget(const SPositioningArg&);
+    ///
+
+
     void checkEndState();
     bool isTaskDone(int agentID);
     bool isTaskDone(CRolePlayOff*);
@@ -507,10 +535,14 @@ private:
     void assignKick     (CRolePlayOff*, const SPositioningAgent&, bool _chip);
     void assignReceive  (CRolePlayOff*, const SPositioningAgent&, bool _ignoreAngle);
     int findFirstPasser();
-    QPair<int, int> findTheLast(const SExecution& _plan);
+    roleSkill::ESkill chooseBestAfterLifeRoleSkill(CRolePlayOff*,
+                                                   const SPositioningAgent&);
+
+    QPair<int, int> findTheLastShoot(const SExecution& _plan);
+    void findThePasserandReciver(const SExecution&, AgentPair&);
     int findReciver(int _passer, int _state);
     QList<SBallOwner> ownerList;
-
+    bool havePassInPlan;
 
 protected:
     void reset();
