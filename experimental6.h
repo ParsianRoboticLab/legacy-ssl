@@ -11,7 +11,7 @@
 clock_t t;
 //#define speedTest
 
-//#define kickTest
+#define kickTest
 QList <Vector2D> agentpath;
 
 struct VectorIndex {
@@ -273,7 +273,7 @@ return;
         stopFlag = false;
     if(knowledge->joystick->getButton4())
         stopFlag = true;
-    int skillAgent = 0;
+    int skillAgent = 3;
 
 
 
@@ -290,24 +290,6 @@ return;
     return;
 #endif
 
-
-    static CSkillDribble mD(soccer->agents[skillAgent]);
-    mD.setInitialLook(Vector2D(10000000,0));
-    mD.setTarget(knowledge->getAgent(4)->pos());
-    mD.setKickTol(2);
-    mD.setKickSpeed(500);
-    mD.setDoPass(true);
-    mD.execute();
-
-    /////////////////
-    static CSkillKick myKick(knowledge->getAgent(7));
-    myKick.setTarget(wm->field->ourGoal());
-    myKick.setChip(false);
-    myKick.setKickSpeed(1);
-    myKick.execute();
-
-
-    return;
     static bool catchTheBall = false;
     static CSkillGotoPointAvoid mGP(soccer->agents[skillAgent]);
     static int timer = 0;
@@ -333,18 +315,10 @@ return;
     if(dribblerArea.contains(wm->ball->pos))
     {
         if(!catchTheBall)
-        {
-            soccer->agents[skillAgent]->setRoller(1);
-
             mGP.execute();
-        }
         else
-        {
-            soccer->agents[skillAgent]->setRoller(6);
-
-            soccer->agents[skillAgent]->setRobotVel(0,0,2);
-        }
-
+            soccer->agents[skillAgent]->setRobotVel(-1,0,0);
+        soccer->agents[skillAgent]->setRoller(5);
         timer ++;
     }
     else
@@ -363,10 +337,10 @@ return;
     {
         catchTheBall = false;
     }
+    draw(dribblerArea,QColor(Qt::red));
 
 
-
-
+    draw(mousePos,1,QColor(Qt::black));
     return;
 
     static CSkillGotoPointAvoid mgpa(soccer->agents[1]);
