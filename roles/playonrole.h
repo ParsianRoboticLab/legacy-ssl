@@ -83,6 +83,9 @@ public:
 
     ClassProperty(CRolePlayOn, Vector2D, WaitPos, waitPos, updated);
 
+    //fateme
+    ClassProperty(CRolePlayOn, bool, DontKick, dontKick, updated);
+//    ClassProperty(CRolePlayOn, Vector2D, Pos, pos, updated);
 };
 
 #endif // PLAYONROLE_H
