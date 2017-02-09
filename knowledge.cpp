@@ -109,7 +109,6 @@ CKnowledge::CKnowledge(CAgent** _agents)
     //////////////////////////////fill ProfilerResult
     profiler = new CNewProfiler();
 //    profiler->load(JSON);
-
     QVector< QVector<double> > *KickCoeff = new QVector< QVector<double> >();
 
     CPolynomialRegression ProRes;
