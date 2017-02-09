@@ -81,10 +81,464 @@ void drawGraph(QList<double> data, QColor color) {
 
 QList<double> graph, graph2;
 
+
+static CRolePlayOn * rcvr ;
+static CRolePlayOn *pss ;
+
+static CRolePlayOn * prfl1 = new CRolePlayOn();
+
+static CRolePlayOn * prfl2 = new CRolePlayOn();
+
+static int p2 = 0 , p1 = 1;
+static double kickSpeed = 100 , MaxSpeed = 1023 , MinSpeed = 100 , speedStep = 50;
+static double xpos2 = -2.8 , ypos2 = 2 , xpos1 , ypos1;
+
 void CMainApplication::Experimental4()
 {
+    // fill profiler
+
+    //////////////////////////////////
+    //////// :| //////////////////////
+    //////////////////////////////////
+
+    static bool ballIsNear = false , first = true , lowSpeed;
+    static int counter = 1 , repeat = 8;
+
+    static QList<double> realRes1, realRes2;
+
+    static CNewProfiler profiler;
+    //    profiler.save(JSON , "/home/nazanin/workspace/ssl/ssl6/myProfiler.json");
+    //    profiler->save(JSON);
+
+    static double maxBallVel=0 , avg1=0, avg2=0;
+    static int cnt = 1;
+
+
+    prfl1->setAgent(knowledge->getAgent(p1));
+    prfl1->setAgentID(p1);
+    prfl1->setKickSpeed(kickSpeed);
+    prfl1->setReceiveRadius(1.2);
+    prfl1->setTolerance(0.01);
+    prfl1->setIsActive(true);
+    prfl1->setChip(false);
+    prfl1->setSlow(true);
+    prfl1->execute();
+
+    prfl2->setAgent(knowledge->getAgent(p2));
+    prfl2->setAgentID(p2);
+    prfl2->setKickSpeed(kickSpeed);
+    prfl2->setReceiveRadius(1.2);
+    prfl2->setTolerance(0.01);
+    prfl2->setIsActive(true);
+    prfl2->setChip(false);
+    prfl2->setSlow(true);
+    prfl2->execute();
+
+
+
+    if(kickSpeed < 500){
+        xpos1 = -0.7;   ypos1 = 0.7;
+        lowSpeed = true;
+
+    }else{
+        xpos1 = -3.8;   ypos1 = -2.5;
+        lowSpeed = false;
+    }
+
+    draw(Segment2D(Vector2D(-4.5 , 0) , Vector2D(0 , 3) ) , QColor(Qt::white));
+    draw(Segment2D(Vector2D(0 , 0) , Vector2D(0 , 3) ) , QColor(Qt::white));
+    draw(Segment2D(Vector2D(-4.5 , 0) , Vector2D(0, 0) ) , QColor(Qt::white));
+
+    if(first){
+        prfl2->setSelectedSkill(roleSkill::GotopointAvoid);
+        prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
+
+        prfl1->setTargetDir(wm->ball->pos - knowledge->getAgent(p1)->pos());
+        prfl2->setTargetDir(wm->ball->pos - knowledge->getAgent(p2)->pos());
+
+        prfl1->setTarget(Vector2D(xpos1 , ypos1));
+        prfl2->setTarget(Vector2D(xpos2 , ypos2));
+
+
+        if(Circle2D(knowledge->getAgent(prfl2->getAgentID())->pos() , 1).contains(wm->ball->pos) ||
+                Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 1).contains(wm->ball->pos) ){
+            prfl1->setSelectedSkill(roleSkill::ReceivePass);
+            prfl2->setSelectedSkill(roleSkill::Kick);
+            first = false;
+        }
+    }
+
+
+    if(!first){
+
+        if( (Triangle2D(Vector2D(0 , 0) ,Vector2D(-4.5 , 0) , Vector2D(0 , 3)).contains(wm->ball->pos)
+             && lowSpeed) || (!lowSpeed && wm->ball->pos.y <= 0) ){
+
+            if(wm->ball->vel.length() < 0.2){
+
+                prfl1->setSelectedSkill(roleSkill::Kick);
+                prfl1->setTarget(Vector2D(xpos2,ypos2));
+
+                rcvr = prfl2;
+                pss = prfl1;
+
+                if(!Circle2D(knowledge->getAgent(prfl2->getAgentID())->pos() , 0.1).contains(prfl2->getTarget()))
+                    prfl1->setDontKick(true);
+                else
+                    prfl1->setDontKick(false);
+            }
+            else
+            {
+                prfl1->setSelectedSkill(roleSkill::ReceivePass);
+
+                //                rcvr = prfl1;
+                //                pss = prfl2;
+
+                prfl1->setTarget(Vector2D(xpos1,ypos1));
+                prfl1->setWaitPos(Vector2D(xpos1,ypos1));
+            }
+
+            prfl2->setSelectedSkill(roleSkill::ReceivePass);
+            prfl2->setTarget(Vector2D(xpos2,ypos2));
+            prfl2->setWaitPos(Vector2D(xpos2,ypos2));
+        }
+        else
+        {
+            if(wm->ball->vel.length() < 0.2){
+
+                prfl2->setSelectedSkill(roleSkill::Kick);
+                prfl2->setTarget(Vector2D(xpos1,ypos1));
+
+                rcvr = prfl1;
+                pss = prfl2;
+
+                if(!Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.1).contains(prfl1->getTarget()))
+                    prfl2->setDontKick(true);
+                else
+                    prfl2->setDontKick(false);
+            }
+            else
+            {
+                prfl2->setSelectedSkill(roleSkill::ReceivePass);
+                prfl2->setTarget(Vector2D(xpos2,ypos2));
+                prfl2->setWaitPos(Vector2D(xpos2,ypos2));
+
+                //                pss = prfl1;
+                //                rcvr = prfl2;
+            }
+
+            prfl1->setSelectedSkill(roleSkill::ReceivePass);
+            prfl1->setTarget(Vector2D(xpos1,ypos1));
+            prfl1->setWaitPos(Vector2D(xpos1,ypos1));
+        }
+
+        draw(Circle2D( knowledge->getAgent(pss->getAgentID())->pos() , 0.25 ) , QColor(Qt::blue));
+        draw(Circle2D( knowledge->getAgent(pss->getAgentID())->pos() , 0.5 ) , QColor(Qt::black));
+
+
+        //////////////////// max ball vel
+        if(avg2 >= avg1){
+            cnt++;
+            avg1 = avg2;
+            avg2 += (avg1*(cnt-1)+wm->ball->vel.length())/cnt;
+
+            if(maxBallVel <=  wm->ball->vel.length())
+                maxBallVel =  wm->ball->vel.length();
+
+            else 
+            // if(maxBallVel > (2.0/900000)*kickSpeed*kickSpeed + (39.0/9000)*kickSpeed)
+            {
+
+                if(counter%2==0)
+                {
+
+                    if(realRes1.size()!=0){
+                        if(realRes1.at(realRes1.size()-1) != maxBallVel){
+                            realRes1.append(maxBallVel);
+                            debug(QString("max vel recorded : %1").arg(maxBallVel) , D_MAHI);
+                        }
+                    }
+                    else
+                        realRes1.append(maxBallVel);
+                }
+
+                else
+                {
+                    if(realRes2.size()!=0){
+                        if(realRes2.at(realRes2.size()-1) != maxBallVel){
+                            realRes2.append(maxBallVel);
+                            debug(QString("max vel recorded : %1").arg(maxBallVel) , D_MAHI);
+                        }
+                    }
+                    else
+                        realRes2.append(maxBallVel);
+
+                }
+
+
+            }
+        }
+        else
+        {
+            cnt=0;
+            avg2=0;
+            avg1=0;
+        }
+
+        //    if(wm->ball->vel.length() < 0.2){
+        //        maxBallVel = 0;
+        //        avg2=0;
+        //        avg1=0;
+        //    }
+
+
+        //////////////////// check if robot kicked the ball
+
+        if ( Circle2D( knowledge->getAgent(pss->getAgentID())->pos() , 0.25 ).contains(wm->ball->pos) )
+            ballIsNear = true;
+
+
+        //////////////////// increasing kick speed
+        if(ballIsNear)
+            if ( !Circle2D( knowledge->getAgent(pss->getAgentID())->pos() , 0.5 ).contains(wm->ball->pos) ){
+
+                debug(QString("counter: %2 , kick speed: %1").arg(kickSpeed).arg(counter) , D_MAHI);
+
+                maxBallVel = 0;
+                avg1=0;
+                avg2=0;
+                cnt=0;
+
+                if(counter == repeat){
+                    debug("adding data" , D_MAHI);
+
+                    profiler.robotsProfile[p1].kickMap.insert(kickSpeed , realRes1);
+                    profiler.robotsProfile[p2].kickMap.insert(kickSpeed , realRes2);
+                    profiler.save(JSON);
+
+
+                    if(kickSpeed != MaxSpeed){
+
+                        if(kickSpeed<1000){
+                            kickSpeed += speedStep;
+                            if(lowSpeed){
+                                xpos2 -= kickSpeed/3000;
+                                ypos2 += kickSpeed/5000;
+                            }
+                        }
+
+                        else
+                            kickSpeed = MaxSpeed;
+
+                    }
+                    else
+                    {
+                        kickSpeed = MinSpeed;
+                        xpos2 = -2.8; ypos2 = 2;
+                        
+                        /////////////////////// changing robots
+                        // if(p2 != 5){
+                        //     p1 += 2;
+                        //     p2 += 2;
+                        // }
+                    }
+
+                    counter = 1;
+
+                    realRes1.clear();
+                    realRes2.clear();
+
+                }
+                else
+                    counter++;
+
+                ballIsNear = false;
+
+            }
+    }
 
     return;
+
+
+
+
+
+    //chip hit the ground
+
+
+    /////////////////////////
+    //////// not working fine
+    /////////////////////////
+
+    static QList<Vector2D> pos , chipPos;
+    static Vector2D v1 , v2;
+    static int mini=0;
+    static AngleDeg minAng = 180.0;
+    const int maax=20;
+
+
+    //    static CSkillKick* test4 = new CSkillKick(knowledge->getAgent(4));
+    //    test4->setTarget(wm->ball->pos);
+    //    test4->setChip(true);
+    //    test4->setAutoChipSpeed(true);
+    //    test4->execute();
+
+
+    pos.append(wm->ball->pos);
+
+    if(chipPos.size()==0)
+        chipPos.append(pos.at(0));
+
+    if(pos.size() > maax){
+
+        pos.pop_front();
+
+        v1 = pos.at(0) - pos.at(maax/2);
+        v2 = pos.at(maax-1) - pos.at(maax/2);
+
+        draw(Segment2D(pos.at(0) , pos.at(maax/2)) , QColor(Qt::red));
+        draw(Segment2D(pos.at(maax-1) , pos.at(maax/2)) , QColor(Qt::red));
+        draw(QString("min angle : %1 , v1 v2 : %2").arg(minAng.degree()).arg(v2.angleWith(v1).degree()) , Vector2D(2,2));
+
+        if(v1.length() > 0.2 && v2.length() > 0.2){
+
+            if(v2.angleWith(v1).radian() < minAng.radian()){
+                minAng=v1.angleWith(v2);
+                mini=maax/2;
+            }
+
+            else if((v1.angleWith(v2) /*- minAng*/).degree() > 10  &&  mini != 0){
+
+                if(1||fabs(chipPos.last().y - pos.at(mini).y) > 0.01 || fabs(chipPos.last().x - pos.at(mini).x) > 0.01){
+                    chipPos.append(pos.at(mini));
+                    debug(QString("Saved Posision[%4] : %1 , %2 , min angle : %3").arg(pos.at(mini).x).arg(pos.at(mini).y).arg(minAng.radian()).arg(chipPos.size()) , D_MAHI);
+                    minAng = 180.0;
+                }
+
+            }
+
+        }
+
+    }
+
+    Q_FOREACH(Vector2D v , pos)
+        draw(v , 0 , QColor(Qt::blue) , 1);
+
+    Q_FOREACH(Vector2D cp , chipPos)
+        draw(cp , 0, QColor(Qt::black));
+
+    return;
+
+
+
+
+
+
+
+    /*
+
+      //////////////////////////////
+      //////// not tested compeletly
+      //////////////////////////////
+
+    static CSkillKick* test4 = new CSkillKick(knowledge->getAgent(3));
+    test4->setTarget(mousePos);
+    test4->setKickSpeed(6);
+    test4->setChip(true);
+    test4->execute();
+
+    static AngleDeg ang=0;
+    static Vector2D chipPos[1000000];
+    static int ii = 0;
+
+    //    if(ii < 10){
+
+    //        if( ang.sin() * wm->ball->vel.th().sin() < 0
+    //            && fabs( wm->ball->vel.th().sin() ) > 0.1){
+    //            ang = wm->ball->vel.th().sin();
+    //            chipPos[ii] = wm->ball->pos;
+    //            ii++;
+
+    //            qDebug()<<"ball pos : "<<chipPos[ii].x<<" , "<<chipPos[ii].y<<"      , Angle :  " << ang.radian();
+    //            draw(chipPos[ii] , 0 , QColor(Qt::red));
+    //        }
+    //        else
+    //            ang = wm->ball->vel.th().sin();
+
+    //        qDebug()<<"ii : "<<ii;
+
+    //    }
+
+    static double velY=0;
+
+    if(velY * wm->ball->vel.y < 0 && ( wm->ball->vel.y  > 0.0099 || wm->ball->vel.y  < -0.0099 ) ){
+        velY = wm->ball->vel.y;
+        chipPos[ii] = wm->ball->pos;
+        ii++;
+
+        qDebug()<<"ball pos "<<ii<<" : "<<chipPos[ii].x<<" , "<<chipPos[ii].y<<"    , velY :"<<velY;
+    }
+    else
+        velY = wm->ball->vel.y;
+
+    //qDebug()<<"velY : "<<wm->ball->vel.y;
+
+    return;
+*/
+
+
+    /*
+
+    //ball max velocity
+
+    ////////////////////////
+    //////// working fine :)
+    ////////////////////////
+
+    //    CskillNewGotoPoint *test1 = new CskillNewGotoPoint(soccer->agents[4]);
+    //    test1->init(knowledge->getMousePos(),Vector2D(0,0));
+    //    test1->execute();
+    //    test1->setMaxAcceleration(4);
+    //    test1->setMaxDeceleration(-3);
+    //    test1->setMaxVelocity(4);
+    //    test1->setSlowMode(false);
+    //    test1->execute();
+
+    static CSkillKick* test3 = new CSkillKick(knowledge->getAgent(4));
+    test3->setTarget(mousePos);
+    test3->setKickSpeed(6);
+    test3->setChip(false);
+    test3->execute();
+
+    static double maxBallVel , avg1=0, avg2=0;
+    static int cnt = 1;
+
+    if(avg2 >= avg1){
+        cnt++;
+        avg1 = avg2;
+        avg2 += (avg1*(cnt-1)+wm->ball->vel.length())/cnt;
+
+        qDebug()<<"ball max vel :"<<maxBallVel;
+
+        if(maxBallVel <  wm->ball->vel.length())
+            maxBallVel =  wm->ball->vel.length();
+    }
+
+    if(wm->ball->vel.length() < 0.2){
+        maxBallVel = 0;
+        avg2=0;
+        avg1=0;
+    }
+
+
+    */
+
+    return;
+
+
+
+
+
 
     static CLoadPlayOffJson loader(QDir::currentPath() + QString("/playoff"));
     loader.setAutoUpdate(true);
@@ -123,74 +577,74 @@ void CMainApplication::Experimental4()
 
 
 
-return;
+    return;
 
-int AHZcounter = 0;
-int AHZcounterTest = 0;
-QList<CAgent*> agents;
-int i = 0;
-static bool ahz = true;
-static QList<CSkillGotoPointAvoid*> AHZGotoPointAvoid;
-//CSkillGotoPointAvoid *gpa = new CSkillGotoPointAvoid();
-// gpa->setTarget(Vector2D(0,0), Vector2D(0,1));
-// gpa->execute();
+    int AHZcounter = 0;
+    int AHZcounterTest = 0;
+    QList<CAgent*> agents;
+    int i = 0;
+    static bool ahz = true;
+    static QList<CSkillGotoPointAvoid*> AHZGotoPointAvoid;
+    //CSkillGotoPointAvoid *gpa = new CSkillGotoPointAvoid();
+    // gpa->setTarget(Vector2D(0,0), Vector2D(0,1));
+    // gpa->execute();
 
-agents.clear();
-for(size_t i = 0;i < 16;i++) {
-    if(knowledge->getAgent(i)->isVisible()) {
-        agents.append(knowledge->getAgent(i));
+    agents.clear();
+    for(size_t i = 0;i < 16;i++) {
+        if(knowledge->getAgent(i)->isVisible()) {
+            agents.append(knowledge->getAgent(i));
+        }
     }
-}
 
-if(ahz) {
-    AHZGotoPointAvoid.clear();
-    for(size_t i = 0;i < agents.size();i++) {
-        CSkillGotoPointAvoid* temp = new CSkillGotoPointAvoid(agents.at(i));
-        AHZGotoPointAvoid.append(temp);
+    if(ahz) {
+        AHZGotoPointAvoid.clear();
+        for(size_t i = 0;i < agents.size();i++) {
+            CSkillGotoPointAvoid* temp = new CSkillGotoPointAvoid(agents.at(i));
+            AHZGotoPointAvoid.append(temp);
+        }
+        ahz = false;
     }
-    ahz = false;
-}
 
-AHZcounterTest = AHZGotoPointAvoid.size();
-for(size_t i = 0;i < AHZcounterTest;i++) {
-    AHZGotoPointAvoid[i]->setTarget(Vector2D(-0.1,(-_FIELD_HEIGHT / (2 * AHZcounterTest)) - (i * _FIELD_HEIGHT /(2 * AHZcounterTest)) + 1.5),Vector2D(-1,0));
-    AHZGotoPointAvoid[i]->execute();
+    AHZcounterTest = AHZGotoPointAvoid.size();
+    for(size_t i = 0;i < AHZcounterTest;i++) {
+        AHZGotoPointAvoid[i]->setTarget(Vector2D(-0.1,(-_FIELD_HEIGHT / (2 * AHZcounterTest)) - (i * _FIELD_HEIGHT /(2 * AHZcounterTest)) + 1.5),Vector2D(-1,0));
+        AHZGotoPointAvoid[i]->execute();
 
-}
+    }
 
-return;
-//TEST SVN
-char x = 'c';
-double b = 1.1;
-double a = 2;
+    return;
+    //TEST SVN
+    char x = 'c';
+    double b = 1.1;
+    double a = 2;
 
-return;
-CNewProfiler mahiiii;
-mahiiii.insertRecord(PKICK,100,2,4);
-mahiiii.save(JSON);
-static double maxSpeed = 0;
-static Vector2D max(0,0);
-if(wm->ball->vel.length()/2 > maxSpeed)
-{
-    maxSpeed = wm->ball->vel.length()/2;
-    max = wm->ball->pos;
-}
+    return;
+    CNewProfiler mahiiii;
+    mahiiii.insertRecord(PKICK,100,2,4);
+    mahiiii.save(JSON);
+    static double maxSpeed = 0;
+    static Vector2D max(0,0);
+    if(wm->ball->vel.length()/2 > maxSpeed)
+    {
+        maxSpeed = wm->ball->vel.length()/2;
+        max = wm->ball->pos;
+    }
 
-draw(QString("max: %1").arg(maxSpeed),Vector2D(0,1));
-draw(max);
-return;
+    draw(QString("max: %1").arg(maxSpeed),Vector2D(0,1));
+    draw(max);
+    return;
 
 
-CNewProfiler *mahi0 = new CNewProfiler();
-mahi0->mahiRecord(0,1,PKICK);
+    CNewProfiler *mahi0 = new CNewProfiler();
+    mahi0->mahiRecord(0,1,PKICK);
 
 
-return;
-CNewProfiler mahi;
-static CNewProfiler mahi2;
-static bool f = true;
+    return;
+    CNewProfiler mahi;
+    static CNewProfiler mahi2;
+    static bool f = true;
 
-/*
+    /*
 mahi.robotsProfile[0].kickMap.insert(50,0.2);
 mahi.robotsProfile[0].kickMap.insert(100,0.5);
 mahi.robotsProfile[0].kickMap.insert(150,0.6);
@@ -242,210 +696,244 @@ if(f) {
 }
 */
 
-mahi.robotsProfile[0].drawProfile();
+    mahi.robotsProfile[0].drawProfile();
 
-//    QMap<int,double> Mahimap = mahi2.robotsProfile[0].kickMap;
-//    mahi.robotsProfile[0].fillArray(mahi.robotsProfile[0].kickMap,mahi.robotsProfile[0].kickArr,true);
-//    mahi.robotsProfile[0].sortPairArrByValue(mahi.robotsProfile[0].kickArr,0,KICK_ARRAY_SIZE);
-//    debug(QString("%2  : %1").arg(mahi.robotsProfile[0].kickArr[0].second).arg(mahi.robotsProfile[0].kickArr[0].first),D_MAHI);
-//    debug(QString("%2 : %1").arg(mahi.robotsProfile[0].kickArr[1].second).arg(mahi.robotsProfile[0].kickArr[1].first),D_MAHI);
-//    debug(QString("%2  : %1").arg(mahi.robotsProfile[0].kickArr[2].second).arg(mahi.robotsProfile[0].kickArr[2].first),D_MAHI);
-//    debug(QString("%2 : %1").arg(mahi.robotsProfile[0].kickArr[3].second).arg(mahi.robotsProfile[0].kickArr[3].first),D_MAHI);
-//    debug(QString("150 : %1").arg(mahi.robotsProfile[0].kickArr[2].second),D_MAHI);
-//    debug(QString("200 : %1").arg(mahi.robotsProfile[0].kickArr[3].second),D_MAHI);
-//    debug(QString("250 : %1").arg(mahi.robotsProfile[0].kickArr[4].second),D_MAHI);
-//    debug(QString("300 : %1").arg(mahi.robotsProfile[0].kickArr[5].second),D_MAHI);
-//    debug(QString("350 : %1").arg(mahi.robotsProfile[0].kickArr[6].second),D_MAHI);
-//    debug(QString("400 : %1").arg(mahi.robotsProfile[0].kickArr[20].second),D_MAHI);
-//    debug(QString("450 : %1").arg(mahi.robotsProfile[0].kickArr[21].second),D_MAHI);
-//    debug(QString("500 : %1").arg(mahi.robotsProfile[0].kickArr[22].second),D_MAHI);
-//    debug(QString("550 : %1").arg(mahi.robotsProfile[0].kickArr[23].second),D_MAHI);
-//    debug(QString("600 : %1").arg(mahi.robotsProfile[0].kickArr[24].second),D_MAHI);
+    //    QMap<int,double> Mahimap = mahi2.robotsProfile[0].kickMap;
+    //    mahi.robotsProfile[0].fillArray(mahi.robotsProfile[0].kickMap,mahi.robotsProfile[0].kickArr,true);
+    //    mahi.robotsProfile[0].sortPairArrByValue(mahi.robotsProfile[0].kickArr,0,KICK_ARRAY_SIZE);
+    //    debug(QString("%2  : %1").arg(mahi.robotsProfile[0].kickArr[0].second).arg(mahi.robotsProfile[0].kickArr[0].first),D_MAHI);
+    //    debug(QString("%2 : %1").arg(mahi.robotsProfile[0].kickArr[1].second).arg(mahi.robotsProfile[0].kickArr[1].first),D_MAHI);
+    //    debug(QString("%2  : %1").arg(mahi.robotsProfile[0].kickArr[2].second).arg(mahi.robotsProfile[0].kickArr[2].first),D_MAHI);
+    //    debug(QString("%2 : %1").arg(mahi.robotsProfile[0].kickArr[3].second).arg(mahi.robotsProfile[0].kickArr[3].first),D_MAHI);
+    //    debug(QString("150 : %1").arg(mahi.robotsProfile[0].kickArr[2].second),D_MAHI);
+    //    debug(QString("200 : %1").arg(mahi.robotsProfile[0].kickArr[3].second),D_MAHI);
+    //    debug(QString("250 : %1").arg(mahi.robotsProfile[0].kickArr[4].second),D_MAHI);
+    //    debug(QString("300 : %1").arg(mahi.robotsProfile[0].kickArr[5].second),D_MAHI);
+    //    debug(QString("350 : %1").arg(mahi.robotsProfile[0].kickArr[6].second),D_MAHI);
+    //    debug(QString("400 : %1").arg(mahi.robotsProfile[0].kickArr[20].second),D_MAHI);
+    //    debug(QString("450 : %1").arg(mahi.robotsProfile[0].kickArr[21].second),D_MAHI);
+    //    debug(QString("500 : %1").arg(mahi.robotsProfile[0].kickArr[22].second),D_MAHI);
+    //    debug(QString("550 : %1").arg(mahi.robotsProfile[0].kickArr[23].second),D_MAHI);
+    //    debug(QString("600 : %1").arg(mahi.robotsProfile[0].kickArr[24].second),D_MAHI);
 
-//    debug(QString("%1 : %2").arg(mahi.robotsProfile[0].kickMap.value(kic)),D_MAHI);
-debug(QString("%1 : %2").arg(mahi.robotsProfile[0].getKickSpeed(0.1)).arg(0.1),D_MAHI);
-debug(QString("%1 : %2").arg(mahi.robotsProfile[0].getKickSpeed(0.25)).arg(0.25),D_MAHI);
-debug(QString("%1 : %2").arg(mahi.robotsProfile[0].getKickSpeed(0.65)).arg(0.65),D_MAHI);
-debug(QString("%1 : %2").arg(mahi.robotsProfile[0].getKickSpeed(0.95)).arg(0.95),D_MAHI);
-debug(QString("%1 : %2").arg(mahi.robotsProfile[0].getKickSpeed(1.15)).arg(1.15),D_MAHI);
-debug(QString("%1 : %2").arg(mahi.robotsProfile[0].getKickSpeed(1.55)).arg(1.55),D_MAHI);
+    //    debug(QString("%1 : %2").arg(mahi.robotsProfile[0].kickMap.value(kic)),D_MAHI);
+    debug(QString("%1 : %2").arg(mahi.robotsProfile[0].getKickSpeed(0.1)).arg(0.1),D_MAHI);
+    debug(QString("%1 : %2").arg(mahi.robotsProfile[0].getKickSpeed(0.25)).arg(0.25),D_MAHI);
+    debug(QString("%1 : %2").arg(mahi.robotsProfile[0].getKickSpeed(0.65)).arg(0.65),D_MAHI);
+    debug(QString("%1 : %2").arg(mahi.robotsProfile[0].getKickSpeed(0.95)).arg(0.95),D_MAHI);
+    debug(QString("%1 : %2").arg(mahi.robotsProfile[0].getKickSpeed(1.15)).arg(1.15),D_MAHI);
+    debug(QString("%1 : %2").arg(mahi.robotsProfile[0].getKickSpeed(1.55)).arg(1.55),D_MAHI);
 
-return;
-CskillNewGotoPoint *gotopointSkill = new CskillNewGotoPoint(soccer->agents[1]);
+    return;
+    CskillNewGotoPoint *gotopointSkill = new CskillNewGotoPoint(soccer->agents[1]);
 
-return;
+    return;
 
-CSkillTurn *turnSkill = new CSkillTurn(soccer->agents[1]);
-turnSkill->setDirection(Vector2D(0,1));
-turnSkill->setTurnMode(CSkillTurn::Fast);
+    CSkillTurn *turnSkill = new CSkillTurn(soccer->agents[1]);
+    turnSkill->setDirection(Vector2D(0,1));
+    turnSkill->setTurnMode(CSkillTurn::Fast);
 
-draw(QString("dir = %1").arg(soccer->agents[1]->dir().dir().degree()),Vector2D(1,1));
-turnSkill->execute();
-// soccer->agents[1]->setRobotVel(-1,0,10);
-
-
+    draw(QString("dir = %1").arg(soccer->agents[1]->dir().dir().degree()),Vector2D(1,1));
+    turnSkill->execute();
+    // soccer->agents[1]->setRobotVel(-1,0,10);
 
 
 
-return;
-double tempSpeed;
-SRAgentArgs temp;
-for(int i = 0; i <_MAX_NUM_PLAYERS; i++)
-{
-    if(knowledge->SRGetAgentArg(i, temp))
+
+
+    return;
+    double tempSpeed;
+    SRAgentArgs temp;
+    for(int i = 0; i <_MAX_NUM_PLAYERS; i++)
     {
-        soccer->agents[i]->setRobotVel(temp.Vx, temp.Vy, temp.Vr);
-        if(temp.KickSpeed != 0)
+        if(knowledge->SRGetAgentArg(i, temp))
         {
-            tempSpeed = int(temp.KickSpeed*(1023/8));
-            if(tempSpeed > 1023) tempSpeed = 1023;
-            soccer->agents[i]->setKick(tempSpeed);
-        }
-        if(temp.ChipSpeed != 0)
-        {
-            tempSpeed = int(temp.ChipSpeed*(1023/8));
-            if(tempSpeed > 1023) tempSpeed = 1023;
-            soccer->agents[i]->setChip(tempSpeed);
-        }
-        if(temp.KickSpeed != 0)
-        {
-            tempSpeed = int(temp.SpinSpeed*(1023/8));
-            if(tempSpeed > 1023) tempSpeed = 1023;
-            soccer->agents[i]->setRoller(tempSpeed);
+            soccer->agents[i]->setRobotVel(temp.Vx, temp.Vy, temp.Vr);
+            if(temp.KickSpeed != 0)
+            {
+                tempSpeed = int(temp.KickSpeed*(1023/8));
+                if(tempSpeed > 1023) tempSpeed = 1023;
+                soccer->agents[i]->setKick(tempSpeed);
+            }
+            if(temp.ChipSpeed != 0)
+            {
+                tempSpeed = int(temp.ChipSpeed*(1023/8));
+                if(tempSpeed > 1023) tempSpeed = 1023;
+                soccer->agents[i]->setChip(tempSpeed);
+            }
+            if(temp.KickSpeed != 0)
+            {
+                tempSpeed = int(temp.SpinSpeed*(1023/8));
+                if(tempSpeed > 1023) tempSpeed = 1023;
+                soccer->agents[i]->setRoller(tempSpeed);
+            }
         }
     }
-}
 
-return;
-CSkillKick *ttt= new CSkillKick(soccer->agents[5]);
-ttt->setTarget(wm->field->ourGoal());
-ttt->setKickSpeed(1000);
-ttt->setSlow(false);
-ttt->execute();
-return;
-CskillNewGotoPoint *test = new CskillNewGotoPoint(soccer->agents[4]);
-test->init(knowledge->getMousePos(),Vector2D(0,0));
-test->execute();
-test->setMaxAcceleration(4);
-test->setMaxDeceleration(-3);
-test->setMaxVelocity(4);
-test->setSlowMode(false);
-test->execute();
-return;
+    return;
+    CSkillKick *ttt= new CSkillKick(soccer->agents[5]);
+    ttt->setTarget(wm->field->ourGoal());
+    ttt->setKickSpeed(1000);
+    ttt->setSlow(false);
+    ttt->execute();
+    return;
+    CskillNewGotoPoint *test = new CskillNewGotoPoint(soccer->agents[4]);
+    test->init(knowledge->getMousePos(),Vector2D(0,0));
+    test->execute();
+    test->setMaxAcceleration(4);
+    test->setMaxDeceleration(-3);
+    test->setMaxVelocity(4);
+    test->setSlowMode(false);
+    test->execute();
+    return;
 #ifndef GAME_MODE
-//    static CSkillKick* kick = new CSkillKick(soccer->agents[0]);
-//    static CSkillKickOneTouch* onetouch = new CSkillKickOneTouch(soccer->agents[0]);
-//    static int active = -1;
-//    static int cntr = 50;
-//    static int mode = 1;
-//    if (knowledge->joystick->getButton11() && cntr > 50)
-//    {
-//        if (kick->getAgent() != NULL)
-//            kick->getAgent()->self()->tracker->reset();
-//    }
-//    if (knowledge->joystick->getButton8() && cntr > 50)
-//    {
-//        mode *= -1;
-//        cntr = 0;
-//    }
-//    if ( knowledge->joystick->getButton6() && cntr > 50)
-//    {
-//        active *= -1;
-//        cntr = 0;
-//    }
-//    cntr ++;
-//    if ( knowledge->joystick->getButton7())
-//        kick->setAgent(soccer->agents[0]);
-//    if ( knowledge->joystick->getButton1())
-//        kick->setAgent(soccer->agents[1]);
-//    if ( knowledge->joystick->getButton2())
-//        kick->setAgent( soccer->agents[2]);
-//    if ( knowledge->joystick->getButton4())
-//        kick->setAgent( soccer->agents[4]);
-//    if ( knowledge->joystick->getButton3())
-//        kick->setAgent( soccer->agents[3]);
-//    if ( knowledge->joystick->getButton5())
-//        kick->setAgent( soccer->agents[5]);
+    //    static CSkillKick* kick = new CSkillKick(soccer->agents[0]);
+    //    static CSkillKickOneTouch* onetouch = new CSkillKickOneTouch(soccer->agents[0]);
+    //    static int active = -1;
+    //    static int cntr = 50;
+    //    static int mode = 1;
+    //    if (knowledge->joystick->getButton11() && cntr > 50)
+    //    {
+    //        if (kick->getAgent() != NULL)
+    //            kick->getAgent()->self()->tracker->reset();
+    //    }
+    //    if (knowledge->joystick->getButton8() && cntr > 50)
+    //    {
+    //        mode *= -1;
+    //        cntr = 0;
+    //    }
+    //    if ( knowledge->joystick->getButton6() && cntr > 50)
+    //    {
+    //        active *= -1;
+    //        cntr = 0;
+    //    }
+    //    cntr ++;
+    //    if ( knowledge->joystick->getButton7())
+    //        kick->setAgent(soccer->agents[0]);
+    //    if ( knowledge->joystick->getButton1())
+    //        kick->setAgent(soccer->agents[1]);
+    //    if ( knowledge->joystick->getButton2())
+    //        kick->setAgent( soccer->agents[2]);
+    //    if ( knowledge->joystick->getButton4())
+    //        kick->setAgent( soccer->agents[4]);
+    //    if ( knowledge->joystick->getButton3())
+    //        kick->setAgent( soccer->agents[3]);
+    //    if ( knowledge->joystick->getButton5())
+    //        kick->setAgent( soccer->agents[5]);
 
-//    if (mode == 1)
-//    {
-//        draw(QString( " kick "), Vector2D(0,2),"yellow");
-//        kick->setTarget( wm->field->oppGoal());
-//        kick->setKickSpeed(9);
-//        kick->setThroughMode(false);
-//        kick->setSlow(false);
-//        kick->setInterceptMode(true);
-//        kick->setParallelMode(false);
-//        kick->setWaitFrames( 1);
-//        kick->setTolerance( 0.1);
-//        kick->setDontKick(false);
-//        kick->setTarget(wm->field->oppGoal());
-//        kick->setSpin(0);
-//        kick->setChip(false);
-//        if ( active == 1)
-//            kick->execute();
-//        else
-//            kick->getAgent()->waitHere();
-//    }
-//    else {
-//        draw(QString( " one "), Vector2D(0,2),"orange");
-//        onetouch->setAgent(kick->getAgent());
-//        onetouch->setTarget( wm->field->oppGoal());
-//        onetouch->setKickSpeed(31);
-//        onetouch->setTarget(wm->field->oppGoal());
-//        onetouch->setChip(false);
-//        if ( active == 1)
-//            onetouch->execute();
-//        else
-//            onetouch->getAgent()->waitHere();
+    //    if (mode == 1)
+    //    {
+    //        draw(QString( " kick "), Vector2D(0,2),"yellow");
+    //        kick->setTarget( wm->field->oppGoal());
+    //        kick->setKickSpeed(9);
+    //        kick->setThroughMode(false);
+    //        kick->setSlow(false);
+    //        kick->setInterceptMode(true);
+    //        kick->setParallelMode(false);
+    //        kick->setWaitFrames( 1);
+    //        kick->setTolerance( 0.1);
+    //        kick->setDontKick(false);
+    //        kick->setTarget(wm->field->oppGoal());
+    //        kick->setSpin(0);
+    //        kick->setChip(false);
+    //        if ( active == 1)
+    //            kick->execute();
+    //        else
+    //            kick->getAgent()->waitHere();
+    //    }
+    //    else {
+    //        draw(QString( " one "), Vector2D(0,2),"orange");
+    //        onetouch->setAgent(kick->getAgent());
+    //        onetouch->setTarget( wm->field->oppGoal());
+    //        onetouch->setKickSpeed(31);
+    //        onetouch->setTarget(wm->field->oppGoal());
+    //        onetouch->setChip(false);
+    //        if ( active == 1)
+    //            onetouch->execute();
+    //        else
+    //            onetouch->getAgent()->waitHere();
 
-//    }
-static CSkillGotoPointAvoid* gp0 = new CSkillGotoPointAvoid( soccer->agents[0]);
-static CSkillGotoPointAvoid* gp1= new CSkillGotoPointAvoid( soccer->agents[1]);
-static CSkillGotoPointAvoid* gp4 = new CSkillGotoPointAvoid( soccer->agents[5]);
-static CSkillTurn* turn0 = new CSkillTurn( soccer->agents[0]);
-static CSkillTurn* turn1 = new CSkillTurn( soccer->agents[1]);
-static CSkillTurn* turn4 = new CSkillTurn( soccer->agents[5]);
+    //    }
+    static CSkillGotoPointAvoid* gp0 = new CSkillGotoPointAvoid( soccer->agents[0]);
+    static CSkillGotoPointAvoid* gp1= new CSkillGotoPointAvoid( soccer->agents[1]);
+    static CSkillGotoPointAvoid* gp4 = new CSkillGotoPointAvoid( soccer->agents[5]);
+    static CSkillTurn* turn0 = new CSkillTurn( soccer->agents[0]);
+    static CSkillTurn* turn1 = new CSkillTurn( soccer->agents[1]);
+    static CSkillTurn* turn4 = new CSkillTurn( soccer->agents[5]);
 
-static int mode = 0;
-if ( knowledge->joystick->getButton6())
-mode = 1;
-if ( knowledge->joystick->getButton8())
-mode = 0;
-if ( mode )
-{
-    gp0->setTargetLook(Vector2D(-1.5,1), Vector2D(0,1));
-    gp1->setTargetLook(Vector2D(-1.5,0), Vector2D(0,1));
-    gp4->setTargetLook(Vector2D(-1.5,-1), Vector2D(0,1));
-}
-else
-{
-gp0->setTargetLook(Vector2D(1.5,1), Vector2D(0,1));
-gp1->setTargetLook(Vector2D(1.5,0), Vector2D(0,1));
-gp4->setTargetLook(Vector2D(1.5,-1), Vector2D(0,1));
-}
+    static int mode = 0;
+    if ( knowledge->joystick->getButton6())
+        mode = 1;
+    if ( knowledge->joystick->getButton8())
+        mode = 0;
+    if ( mode )
+    {
+        gp0->setTargetLook(Vector2D(-1.5,1), Vector2D(0,1));
+        gp1->setTargetLook(Vector2D(-1.5,0), Vector2D(0,1));
+        gp4->setTargetLook(Vector2D(-1.5,-1), Vector2D(0,1));
+    }
+    else
+    {
+        gp0->setTargetLook(Vector2D(1.5,1), Vector2D(0,1));
+        gp1->setTargetLook(Vector2D(1.5,0), Vector2D(0,1));
+        gp4->setTargetLook(Vector2D(1.5,-1), Vector2D(0,1));
+    }
 
-gp0->execute();
-gp1->execute();
-gp4->execute();
+    gp0->execute();
+    gp1->execute();
+    gp4->execute();
 
-turn0->setAgent(soccer->agents[0]);
-turn0->setDirection(Vector2D(0,1));
-turn0->setTurnMode(CSkillTurn::Intercept);
-turn0->execute();
+    turn0->setAgent(soccer->agents[0]);
+    turn0->setDirection(Vector2D(0,1));
+    turn0->setTurnMode(CSkillTurn::Intercept);
+    turn0->execute();
 
-turn1->setAgent(soccer->agents[1]);
-turn1->setDirection(Vector2D(0,1));
-turn1->setTurnMode(CSkillTurn::Intercept);
-turn1->execute();
+    turn1->setAgent(soccer->agents[1]);
+    turn1->setDirection(Vector2D(0,1));
+    turn1->setTurnMode(CSkillTurn::Intercept);
+    turn1->execute();
 
-turn4->setAgent(soccer->agents[5]);
-turn4->setDirection(Vector2D(0,1));
-turn4->setTurnMode(CSkillTurn::Intercept);
-turn4->execute();
+    turn4->setAgent(soccer->agents[5]);
+    turn4->setDirection(Vector2D(0,1));
+    turn4->setTurnMode(CSkillTurn::Intercept);
+    turn4->execute();
 
 
 #endif
 }
 
 #endif // EXPERIMENTAL4_H
+
+/*
+double CMainApplication::maxBallSpeed(){
+
+    //    static CSkillKick* test3 = new CSkillKick(knowledge->getAgent(agentID));
+    //    test3->setTarget(mousePos);
+    //    test3->setKickSpeed(6);
+    //    test3->setChip(false);
+    //    test3->execute();
+
+    static double maxBallVel , avg1=0, avg2=0;
+    static int cnt = 1;
+
+    if(avg2 >= avg1){
+        cnt++;
+        avg1 = avg2;
+        avg2 += (avg1*(cnt-1)+wm->ball->vel.length())/cnt;
+
+        if(maxBallVel <  wm->ball->vel.length())
+            maxBallVel =  wm->ball->vel.length();
+    }
+    else
+
+        return maxBallVel;
+    //    if(wm->ball->vel.length() < 0.2){
+    //        maxBallVel = 0;
+    //        avg2=0;
+    //        avg1=0;
+    //    }
+
+    return 0;
+
+}
+*/

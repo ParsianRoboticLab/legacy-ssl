@@ -245,6 +245,9 @@ public:
     bool MergeCamerasExperiment();
     void TechnicalChallenge();
 
+    double maxBallSpeed();
+
+
     void terminateLogOrReplay(bool);
 };
 
