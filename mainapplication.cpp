@@ -549,6 +549,7 @@ void CMainApplication::SetManualGS( int id ){
         knowledge->setBPPosition(knowledge->getMousePos().x, knowledge->getMousePos().y);
         qDebug() << "pos : " << knowledge->getBPPosition().x << "," << knowledge->getBPPosition().y << endl;
     }
+
     wm->gs->transition(strRefCommands.at(id).toAscii().at(0));
 }
 
