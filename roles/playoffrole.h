@@ -17,7 +17,7 @@ public:
     void execute();
     int resetTime();
     int getElapsed() const;
-
+    bool deleted;
     CSkillKick *kickSkill;
     CSkillReceivePass *receivePassSkill;
     CSkillKickOneTouch *oneTouchSkill;

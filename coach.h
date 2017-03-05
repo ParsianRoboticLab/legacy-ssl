@@ -74,7 +74,7 @@ private:
     CTheirKickOff        *theirKickOff;
     CTheirIndirect       *theirIndirect;
     CTheirBallPlacement  *theirBallPlacement;
-    CDoubleSizeOurDirect *ourDirect;
+    CDoubleSizeOurDirect *ourDoubleSizeDirect;
 
     CForceStart          *forceStart;
     CDynamicAttack       *dynamicAttack;
