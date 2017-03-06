@@ -2,6 +2,7 @@
 
 
 CRolePlayOff::CRolePlayOff() {
+    deleted = false;
     qDebug() << "HEY";
     gotoPointAvoidSkill = new CSkillGotoPointAvoid(NULL);
     kickSkill = new CSkillKick(NULL);
@@ -18,6 +19,25 @@ CRolePlayOff::~CRolePlayOff() {
     delete kickSkill;
     delete oneTouchSkill;
     delete receivePassSkill;
+}
+
+void CRolePlayOff::reset()
+{
+  //  deleted = false;
+    delete gotoPointAvoidSkill;
+    delete kickSkill;
+    delete oneTouchSkill;
+    delete receivePassSkill;
+    deleted = false;
+    qDebug() << "HEY";
+    gotoPointAvoidSkill = new CSkillGotoPointAvoid(NULL);
+    kickSkill = new CSkillKick(NULL);
+    oneTouchSkill = new CSkillKickOneTouch(NULL);
+    receivePassSkill = new CSkillReceivePass(NULL);
+    updated = true;
+    roleUpdate = false;
+    timer.start();
+    agentID = -1;
 }
 
 void CRolePlayOff::update() {

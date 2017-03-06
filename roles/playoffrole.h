@@ -14,6 +14,7 @@ public:
 
     CRolePlayOff();
     ~CRolePlayOff();
+    void reset();
     void execute();
     int resetTime();
     int getElapsed() const;

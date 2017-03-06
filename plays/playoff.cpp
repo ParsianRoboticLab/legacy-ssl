@@ -2090,19 +2090,50 @@ void CPlayOff::resetP(){
 }
 
 void CPlayOff::reset(){
+
+
+    qDebug() << "Bring yourself back online playoff";
+
+    radLimit = 2;
+    decidePlan = true;
+    firstTime = true;
+    agentSize = 1;
+    ballEnteredKickerFlag = false;
+    ballEnteredKickerChipFlag = false;
+    passReceivedFlag = false;
+    isPassDoneflag = false;
+    for(int i = 0;i < 6;i++) {
+        isFirstTime[i] = true;
+        positionAgent[i].stateNumber = 0;
+        roleAgent[i]->reset();
+        newRoleAgent[i]->reset();
+        isBallNearRobot[i] = false;
+        isBallNearRobotF[i] = false;
+        positionAgent[i].zombie = false;
+    }
+    isBallIn = false;
+    cnt = 0;
+    tempAgent = new CRolePlayOff();
+    doPass = false;
+    setTimer = true;
+    kickOffFirstTimeFlag = true;
+    ////////////
+
+    currentPlan = new SPlayOffPlan();
+    masterPlan = NULL;
+//    kickOffPos[0] = Vector2D(wm->ball->pos.x - 0.3,wm->ball->pos.y);
+//    kickOffPos[1] = Vector2D(-0.3,2);
+//    kickOffPos[2] = Vector2D(-0.3,-2);
+//    kickOffPos[3] = Vector2D(-3.3,0);
+
+    initial    = true;
+    playOnFlag = false;
+    havePassInPlan = false;
+
     executedCycles = 0;
     activeAgents.clear();
     markAgents.clear();
     debug(QString("reset Plan"),D_MAHI);
-    for(int i = 0;i < 6;i++) {
-        positionAgent[i].stateNumber = 0;
-        //        positionAgent[i].mahiLastTime = knowledge->getCurrentKKTime(); // removed !
-        isFirstTime[i] = 0;
-        //        currentPlan->AgentPlan[i].clear();
-        currentPlan = NULL;
-    }
-    isBallIn = false;
-
 }
 
 void CPlayOff::init(QList<int> _agents , QMap<QString , EditData*> *_editData){
