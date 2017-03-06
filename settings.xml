@@ -2,10 +2,10 @@
 <VarXML>
 	<Var name="Bang Bang" type="list">
 		<Var name="Acc" type="double" minval="0.000000" maxval="">
-			4.000000
+			2.000000
 		</Var>
 		<Var name="Dec" type="double" minval="0.000000" maxval="">
-			4.000000
+			2.000000
 		</Var>
 		<Var name="Max Vel" type="double" minval="0.000000" maxval="">
 			4.000000
