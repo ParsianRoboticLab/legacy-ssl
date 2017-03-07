@@ -1664,10 +1664,13 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
             //check Ball matchig with symmetry
             Vector2D symBall = Vector2D(matching.initPos.ball.x,
                                         -matching.initPos.ball.y);
+
             if (isRegionMatched(matching.initPos.ball)) {
                 plan->execution.symmetry = 1;
             } else if (isRegionMatched(symBall)) {
                 plan->execution.symmetry = -1;
+            } else {
+                continue;
             }
 
             plan->common.currentSize = _ourplayers.size();
@@ -1684,7 +1687,14 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
         return;
     }
 
-    NGameOff::SPlan* thePlan = chooseMostSuccecfull(validPlans); //Choose Best valid Plan
+
+    int randNo = rand() % validPlans.size();
+    NGameOff::SPlan* thePlan = validPlans[randNo]; //chooseMostSuccecfull(validPlans); //Choose Best valid Plan
+    for (int i = 0;i < validPlans.size();i++) {
+        qDebug() << validPlans[i]->gui.index[2];
+
+    }
+    qDebug() << randNo << thePlan->gui.index[2];
     matchPlan(thePlan, _ourplayers); //Match The Plan
     ourPlayOff->setMasterPlan(thePlan);
     ourPlayOff->analyseShoot(); // should call after setmasterplan

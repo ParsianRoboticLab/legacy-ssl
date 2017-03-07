@@ -3,7 +3,6 @@
 
 CRolePlayOff::CRolePlayOff() {
     deleted = false;
-    qDebug() << "HEY";
     gotoPointAvoidSkill = new CSkillGotoPointAvoid(NULL);
     kickSkill = new CSkillKick(NULL);
     oneTouchSkill = new CSkillKickOneTouch(NULL);
@@ -23,13 +22,13 @@ CRolePlayOff::~CRolePlayOff() {
 
 void CRolePlayOff::reset()
 {
-  //  deleted = false;
     delete gotoPointAvoidSkill;
     delete kickSkill;
     delete oneTouchSkill;
     delete receivePassSkill;
+
     deleted = false;
-    qDebug() << "HEY";
+
     gotoPointAvoidSkill = new CSkillGotoPointAvoid(NULL);
     kickSkill = new CSkillKick(NULL);
     oneTouchSkill = new CSkillKickOneTouch(NULL);
