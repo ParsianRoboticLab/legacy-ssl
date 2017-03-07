@@ -22,18 +22,19 @@ CRolePlayOff::~CRolePlayOff() {
 
 void CRolePlayOff::reset()
 {
-    delete gotoPointAvoidSkill;
-    delete kickSkill;
-    delete oneTouchSkill;
-    delete receivePassSkill;
+
+    // TODO : JUST FOR TEST ! IF NOTHING GOES WRONG WE'LL W+BE SAFE !
+//    delete gotoPointAvoidSkill;
+//    delete kickSkill;
+//    delete oneTouchSkill;
+//    delete receivePassSkill;
+//    gotoPointAvoidSkill = new CSkillGotoPointAvoid(NULL);
+//    kickSkill = new CSkillKick(NULL);
+//    oneTouchSkill = new CSkillKickOneTouch(NULL);
+//    receivePassSkill = new CSkillReceivePass(NULL);
+//    updated = true;
 
     deleted = false;
-
-    gotoPointAvoidSkill = new CSkillGotoPointAvoid(NULL);
-    kickSkill = new CSkillKick(NULL);
-    oneTouchSkill = new CSkillKickOneTouch(NULL);
-    receivePassSkill = new CSkillReceivePass(NULL);
-    updated = true;
     roleUpdate = false;
     timer.start();
     agentID = -1;

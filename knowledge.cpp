@@ -279,7 +279,7 @@ double CKnowledge::currentTime()
     return CProfiler::getTime();
 }
 
-long CKnowledge::getCurrentKKTime()
+long CKnowledge::getCurrentTime()
 {
     return CProfiler::getKKTime();
 }

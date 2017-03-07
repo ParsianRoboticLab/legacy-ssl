@@ -458,7 +458,7 @@ void CPlayOff::mainPlanner(int _agentSize) {
             kickOffFirstTimeFlag = false;
         }
 
-        lastDecideTime = knowledge->getCurrentKKTime();
+        lastDecideTime = knowledge->getCurrentTime();
         kickOffExecute();
         return;
 
@@ -469,7 +469,7 @@ void CPlayOff::mainPlanner(int _agentSize) {
             resetP();
             debug("WHHY", D_MAHI);
             setAgentSize(_agentSize);
-            lastDecideTime = knowledge->getCurrentKKTime();
+            lastDecideTime = knowledge->getCurrentTime();
             appendRemainingsAgents(activeAgents);
             debug(QString("agent Size : %1").arg(activeAgents.size()),D_MAHI);
             // Match a Plan if exist a plan for match in fill currentPlan
@@ -836,19 +836,16 @@ bool CPlayOff::newIsPlanEnd() {
 
     if (isPlanDone()) {
         debug("Plan Succeded", D_MAHI);
-
         return true;
 
     } else if (isPlanFaild()) {
         if (lastBallPos.dist(wm->ball->pos) > 0.06) {
             debug("Plan Fully Failed", D_MAHI);
-
+            return true;
         } else {
             debug("rePlaning", D_MAHI);
-
+            return false;
         }
-        return false;
-
     }
 
     return false;
@@ -872,18 +869,16 @@ bool CPlayOff::isPlanDone() {
 }
 
 bool CPlayOff::isPlanFaild() {
+    SFail fail = isAnyTaskFaild();
     if (isTimeOver()) {
         debug ("Faild By Time Over", D_MAHI);
         //        masterPlan->common.addHistory(); // Not Changeing History
         return true;
-    }
-    else if (isBallDirChanged()) {
+    } else if (isBallDirChanged()) {
         debug ("Faild By Ball Dir Changed", D_MAHI);
         masterPlan->common.addHistory(0); // MIN
         return true;
-    }
-    else if (isAnyTaskFaild().fail) {
-        SFail fail = isAnyTaskFaild();
+    } else if (fail = isAnyTaskFaild(), fail.fail) {
         debug(QString("Task Fail : TaskID %1").arg(fail.taskID), D_MAHI);
         debug(QString("Task Fail : AgentID %1").arg(fail.agentID), D_MAHI);
         debug(QString("Task Fail : PlanID %1").arg(fail.planID), D_MAHI);
@@ -918,12 +913,13 @@ bool CPlayOff::isAllTasksDone() {
 
 bool CPlayOff::isTimeOver() {
     if (setTimer) {
-        tempStart = knowledge->getCurrentKKTime();
+        tempStart = knowledge->getCurrentTime();
     }
 
     if (!Circle2D(lastBallPos, 0.5).contains(wm->ball->pos)) {
         setTimer = false;
-        if(knowledge->getCurrentKKTime() - tempStart > 200) {
+        debug(QString("Time That Left: %1").arg(knowledge->getCurrentTime() - tempStart), D_DEBUG);
+        if(knowledge->getCurrentTime() - tempStart > 200) { // 2 Second
             setTimer = true;
             return true;
         }
@@ -932,19 +928,35 @@ bool CPlayOff::isTimeOver() {
 }
 
 bool CPlayOff::isBallDirChanged() {
-    for (size_t agent = 0;agent < 6;agent++) {
-        if(positionAgent[agent].positionArg.size()) {
-            if (positionAgent[agent].getArgs().staticSkill == PassSkill) {
-                debug("HEY IT'S A PASS", D_MAHI);
-                if (isPassFaild(agent)) {
-                    debug(QString("PASS FAILD"),D_MAHI);
-                    draw(QString("PASS FAILD"),Vector2D(2,-1.5));
-                    return true;
-                }
-            }
-        }
+    // USE PASSER FORM INITIAL LEVEL
+    const int& passer = masterPlan->execution.passer.id;
+    const int& recive = masterPlan->execution.reciver.id;
+    Vector2D& b  = wm->ball->pos;
+    if (b.dist(lastBallPos) > 0.5 && !roleAgent[passer]->getChip()) {
+         Vector2D  bv = b + wm->ball->vel.norm()*_MAX_DIST;
+         Circle2D  c(roleAgent[recive]->getWaitPos(), 1); // TODO : CHECK radius
+         Segment2D s(b, bv);
+         draw(s, QColor(Qt::blue));
+         draw(c, QColor(Qt::red));
+         Vector2D v1,v2;
+         if (!c.intersection(s, &v1, &v2)) return true;
+    } else {
+        return false;
     }
-    return false;
+
+//    for (size_t agent = 0;agent < 6;agent++) {
+//        if(positionAgent[agent].positionArg.size()) {
+//            if (positionAgent[agent].getArgs().staticSkill == PassSkill) {
+//                debug("HEY IT'S A PASS", D_MAHI);
+//                if (isPassFaild(agent)) {
+//                    debug(QString("PASS FAILD"),D_MAHI);
+//                    draw(QString("PASS FAILD"),Vector2D(2,-1.5));
+//                    return true;
+//                }
+//            }
+//        }
+//    }
+//    return false;
 }
 
 bool CPlayOff::isFinalShotDone() {
@@ -1124,8 +1136,6 @@ bool CPlayOff::isTasksDone() {
 ///////////////PassManager///////////////////
 void CPlayOff::passManager() {
     // TODO : FOR MORE THAN ONE PASS
-    debug("don't worry ... pass have a manager", D_MAHI);
-
 
     const AgentPoint& p = masterPlan->execution.passer;
     const AgentPoint& r = masterPlan->execution.reciver;
@@ -1137,7 +1147,6 @@ void CPlayOff::passManager() {
     if (/*positionAgent[p.id].stateNumber == p.state*/
             /*&& */ positionAgent[r.id].stateNumber == r.state) {
 
-
         if (positionAgent[r.id].getAbsArgs(r.state).staticPos.dist(c -> pos()) >
                 masterPlan->common.lastDist) {
             doPass = false;
@@ -1148,7 +1157,6 @@ void CPlayOff::passManager() {
         roleAgent[p.id]->setDoPass(doPass);
 
     }
-
 }
 
 ///////////////////////////////////////////////

@@ -39,8 +39,8 @@
                                 {
                                     "flag": false,
                                     "name": "PassSkill",
-                                    "primary": 600,
-                                    "secondary": 600,
+                                    "primary": 800,
+                                    "secondary": 800,
                                     "target": {
                                         "agent": 2,
                                         "index": 4

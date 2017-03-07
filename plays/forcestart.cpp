@@ -292,7 +292,7 @@ void CForceStart::resetPlan() {
     kkTaskDoneOneTouchEnterFlag = false;
     kkTaskDoneRadiusTolerance = 0.0;
 
-    kkLastTime = knowledge->getCurrentKKTime();
+    kkLastTime = knowledge->getCurrentTime();
 
     kkActiveAgents.clear();
     markAgents.clear();
@@ -700,7 +700,7 @@ bool CForceStart::kkIsAgentTaskDone(int tAgent)
 
 bool CForceStart::kkCheckCycleTimeOut(long tTime)
 {
-    if(tTime < knowledge->getCurrentKKTime() - kkLastTime)
+    if(tTime < knowledge->getCurrentTime() - kkLastTime)
         return true;
     return false;
 }
@@ -753,7 +753,7 @@ void CForceStart::kkCheckEndPolicy()
         return;
     }
     //////////////////////////////////// Cycle ////////////////////////////////
-    if(kkDefaultCycle < knowledge->getCurrentKKTime() - kkLastTime)
+    if(kkDefaultCycle < knowledge->getCurrentTime() - kkLastTime)
     {
         decidePlan = true;
         debug(QString("VarTypes Cycle"),D_SEPEHR);
