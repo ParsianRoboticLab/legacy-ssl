@@ -1,3 +1,17 @@
+2017-02-15 (1.0) (Omid 2017, Shahed Univercity) <Parsian 2017 AI team>
+----------
+- add tags to log files
+- add INSTALL 
+- add simple pass manager for playoff
+- merge ejdeha (robocup robodragons code)
+- automatic kick profiller
+- Add auto ball placement skill and technical challenge
+- fix playmake issue to enter penalty area
+- Add Debug for Developers
+- Add telegram webhooks
+- Add contributing Guide
+
+
 2016-11-18
 ----------
 - profiler use regression for find correct data
