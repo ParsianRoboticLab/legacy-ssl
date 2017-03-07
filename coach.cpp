@@ -1663,7 +1663,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
 
             //check Ball matchig with symmetry
             Vector2D symBall = Vector2D(matching.initPos.ball.x,
-                                        -matching.initPos.ball.y);
+                                 (-1) * matching.initPos.ball.y);
 
             if (isRegionMatched(matching.initPos.ball)) {
                 plan->execution.symmetry = 1;
