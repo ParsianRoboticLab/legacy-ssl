@@ -29,7 +29,7 @@ bool CLoadPlayOffJson::load(QString _file) {
     QFile file(_file);
 
     if (!file.open(QIODevice::ReadOnly)) {
-        debug(QString("Couldn't open Profiler file."),D_MAHI);
+        debug(QString("Couldn't open Plan file."),D_MAHI);
         return false;
     }
     QByteArray input = file.readAll();
