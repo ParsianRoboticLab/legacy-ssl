@@ -18,60 +18,16 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  ***************************************************************************/
 
-#ifndef RNG_H
-#define RNG_H
+#ifndef VECTOR2_H
+#define VECTOR2_H
 
-#include "util/vector2.h"
-#include <inttypes.h>
-
-class RNG
+struct Vector2
 {
-public:
-    explicit RNG(uint32_t seed = 0);
+    Vector2() {}
+    Vector2(float x, float y) : x(x), y(y) {}
 
-public:
-    uint32_t uniformInt();
-    double uniform();
-    double uniformPositive();
-    Vector2 uniformVector();
-    double normal(double sigma, double mean = 0.0);
-    Vector2 normalVector(double sigma, double mean = 0.0);
-
-private:
-    uint32_t m_s1;
-    uint32_t m_s2;
-    uint32_t m_s3;
+    float x;
+    float y;
 };
 
-/*!
- * \brief Generate a random floating point number in the range [0, 1]
- * \return A random number drawn from a uniform distribution [0, 1]
- */
-inline double RNG::uniform()
-{
-    return uniformInt() / 4294967296.0;
-}
-
-/*!
- * \brief Initialize a vector with two random values drawn from a uniform distribution
- *
- * \sa uniform
- * \return A random vector drawn from a uniform distribution
- */
-inline Vector2 RNG::uniformVector()
-{
-    return Vector2(uniform(), uniform());
-}
-
-/*!
- * \brief Generate a random value drawn from a normal distribution
- * \param sigma Standard deviation
- * \param mean Expected value
- * \return A random value drawn from a normal distribution
- */
-inline double RNG::normal(double sigma, double mean)
-{
-    return normalVector(sigma, mean).x;
-}
-
-#endif // RNG_H
+#endif // VECTOR2_H

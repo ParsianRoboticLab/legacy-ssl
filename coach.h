@@ -16,7 +16,7 @@
 #include "roles.h"
 #include "tools/planloader.h"
 #include "tools/loadplayoffjson.h"
-
+#include "util/rng.h"
 
 class CCoach {
 

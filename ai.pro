@@ -325,7 +325,8 @@ HEADERS += base.h \
     skills/autoballplacement.h \
     util/filewatcher.h \
     util/timer.h \
-    util/rng.h
+    util/rng.h \
+    util/vector2.h
 
 
 unix:INCLUDEPATH += "/usr/local/include"
@@ -406,6 +407,9 @@ INCLUDEPATH += $$PWD/intentions/
 
 RESOURCES +=
 CONFIG += c++11
+
+
+
 
 
 

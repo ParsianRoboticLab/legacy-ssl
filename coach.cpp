@@ -1687,8 +1687,8 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
         return;
     }
 
-
-    int randNo = rand() % validPlans.size();
+    RNG randomNumberGenerator;
+    int randNo = randomNumberGenerator.uniformInt() % validPlans.size();
     NGameOff::SPlan* thePlan = validPlans[randNo]; //chooseMostSuccecfull(validPlans); //Choose Best valid Plan
     for (int i = 0;i < validPlans.size();i++) {
         qDebug() << validPlans[i]->gui.index[2];
