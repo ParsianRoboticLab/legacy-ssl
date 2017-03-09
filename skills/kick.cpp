@@ -1023,7 +1023,7 @@ void CSkillKick::jTurn()
     //    }
     angPid->error = (kickFinalDir - agent->dir().th()).radian();
 
-    double reduce = 1.2;
+    double reduce = 0.8;
 
     Circle2D oppPenalty(wm->field->oppGoal() + Vector2D(0.2 , 0),1.6);
 

@@ -1623,6 +1623,7 @@ void DefensePlan::matchingDefPos(int _defenseNum)
 
     }
     findOppAgentsToMark(matchPoints);
+    //debug(QString("matching defpos is caled"),D_HAMED);
     findPos(decideNumOfMarks(defPosDecision.overDef));
     matchPoints.append(markPoses);
     draw(QString("aaaaaaaaaa  %1 %2").arg(matchPoints.count()).arg(_defenseNum),Vector2D(-2,2),"red");
@@ -1695,6 +1696,7 @@ void DefensePlan::matchingDefPos(int _defenseNum)
 
 void DefensePlan::execute()
 {
+    debug(QString("defense agents size %1").arg(defenseAgents.size()), D_HAMED);
     ////////////initialize////////////////
     initVars();
     preCalculate();

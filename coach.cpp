@@ -269,7 +269,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent(){
 
 
     int agentsCount = wm->our.t->activeAgents.count();
-
+debug(QString("agents.count%1: To be mopp %2").arg(agentsCount).arg(knowledge->toBeMopps.count()), D_HAMED);
     if( agentsCount == 1 ){
         if( knowledge->isOurNonPlayOnKick() ){
             preferedGoalieAgent = -1;
@@ -300,7 +300,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent(){
             }
             else
             {
-                preferedDefenseCounts = 0;
+                preferedDefenseCounts = 1; //Hamed Changed mhmmd check it
             }
 
         }

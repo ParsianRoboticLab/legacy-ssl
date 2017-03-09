@@ -5,7 +5,7 @@
 			127.0.0.1
 		</Var>
 		<Var name="SSL-Vision Multicast Port" type="int" minval="" maxval="">
-			10005
+			10011
 		</Var>
 		<Var name="Referee-box Multicast IP" type="string">
 			224.5.23.1
@@ -17,7 +17,7 @@
 			127.0.0.1
 		</Var>
 		<Var name="Simulator Port" type="int" minval="" maxval="">
-			10025
+			20010
 		</Var>
 		<Var name="Serial Send Device" type="string">
 			/dev/ttyUSB0
@@ -38,7 +38,7 @@
 			false
 		</Var>
 		<Var name="Our Team Color" type="stringenum">
-			Yellow
+			Blue
 			<Var name="0" type="string">
 				Yellow
 			</Var>
@@ -47,7 +47,7 @@
 			</Var>
 		</Var>
 		<Var name="Our Team Side" type="stringenum">
-			Right
+			Left
 			<Var name="0" type="string">
 				Left
 			</Var>

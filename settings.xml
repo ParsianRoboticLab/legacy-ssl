@@ -287,13 +287,13 @@
 		</Var>
 		<Var name="Debug" type="list">
 			<Var name="Game" type="bool">
-				true
+				false
 			</Var>
 			<Var name="Experiment" type="bool">
 				false
 			</Var>
 			<Var name="Debug" type="bool">
-				true
+				false
 			</Var>
 			<Var name="Nadia" type="bool">
 				false
@@ -308,7 +308,7 @@
 				false
 			</Var>
 			<Var name="Mahi" type="bool">
-				true
+				false
 			</Var>
 			<Var name="Mani" type="bool">
 				false
@@ -320,7 +320,7 @@
 				false
 			</Var>
 			<Var name="Sepehr" type="bool">
-				true
+				false
 			</Var>
 			<Var name="Masood" type="bool">
 				false
@@ -350,7 +350,7 @@
 				false
 			</Var>
 			<Var name="Hamed" type="bool">
-				false
+				true
 			</Var>
 			<Var name="Temp" type="bool">
 				false
