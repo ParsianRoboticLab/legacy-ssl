@@ -1000,19 +1000,21 @@ void CSkillKick::jTurn()
     angPid->kp = 4;
 
     if( ((ballPos - agentPos).th() - kickFinalDir).degree()  > 90  )
-        kkMovementTheta = ((ballPos - agentPos).th().radian() + 0.9+1.5*(0.2-agentPos.dist(ballPos))- agent->dir().th().radian());
+        kkMovementTheta = ((ballPos - agentPos).th().radian() + 0.5+5/(agentPos.dist(ballPos)*100)- agent->dir().th().radian());
     else if(((ballPos - agentPos).th() - kickFinalDir).degree() <- 90)
-        kkMovementTheta = ((ballPos- agentPos).th().radian() - 0.9- 1.5*(0.2-agentPos.dist(ballPos))- agent->dir().th().radian());
+        kkMovementTheta = ((ballPos- agentPos).th().radian() - 0.5- 5/(agentPos.dist(ballPos)*100)- agent->dir().th().radian());
     else if(((ballPos - agentPos).th() - kickFinalDir).degree() >45)
-        kkMovementTheta = ((ballPos- agentPos).th().radian() +0.9 + 1.5*(0.2-agentPos.dist(ballPos)) - agent->dir().th().radian());
+        kkMovementTheta = ((ballPos- agentPos).th().radian() +0.8 + 5/(agentPos.dist(ballPos)*100) - agent->dir().th().radian());
     else if(((ballPos - agentPos).th() - kickFinalDir).degree() < -45)
-        kkMovementTheta = ((ballPos- agentPos).th().radian() - 0.9 - 1.5*(0.2-agentPos.dist(ballPos))- agent->dir().th().radian());
+        kkMovementTheta = ((ballPos- agentPos).th().radian() - 0.8 - 5/(agentPos.dist(ballPos)*100)- agent->dir().th().radian());
     else if(((ballPos - agentPos).th() - kickFinalDir).degree() >15)
-        kkMovementTheta = ((ballPos- agentPos).th().radian() + 0.4 + 1*(0.2-agentPos.dist(ballPos)) - agent->dir().th().radian());
+        kkMovementTheta = ((ballPos- agentPos).th().radian() + 0.5 + 2/(agentPos.dist(ballPos)*100) - agent->dir().th().radian());
     else if(((ballPos - agentPos).th() - kickFinalDir).degree() < -15)
-        kkMovementTheta = ((ballPos- agentPos).th().radian() - 0.4 - 1*(0.2-agentPos.dist(ballPos))- agent->dir().th().radian());
-    else
+        kkMovementTheta = ((ballPos- agentPos).th().radian() - 0.5 - 2/(agentPos.dist(ballPos)*100)- agent->dir().th().radian());
+    else if((((ballPos - agentPos).th() - kickFinalDir).degree() < -10) || (((ballPos - agentPos).th() - kickFinalDir).degree() > 10) || (agentPos.dist(ballPos) > 0.15))
         kkMovementTheta =((ballPos- agentPos).th().radian() - agent->dir().th().radian());
+    else
+        kkMovementTheta = 0;
     /////////////////////////////////////////////////////////////////////////////////
     double ballx= (wm->ball->vel.x)*cos(agent->dir().th().radian()) + (wm->ball->vel.y)*sin(agent->dir().th().radian());
     double bally= -1*(wm->ball->vel.x)*sin(agent->dir().th().radian()) + (wm->ball->vel.y)*cos(agent->dir().th().radian());
@@ -1023,11 +1025,13 @@ void CSkillKick::jTurn()
     //    }
     angPid->error = (kickFinalDir - agent->dir().th()).radian();
 
-    double reduce = 0.8;
+
+    double reduce = 0.6;
+    reduce += 1.8*agentPos.dist(ballPos);
 
     Circle2D oppPenalty(wm->field->oppGoal() + Vector2D(0.2 , 0),1.6);
 
-
+    debug(QString("ang : %1").arg(5/(agentPos.dist(ballPos)*100)),D_MHMMD);
     if(kickerOn)
     {
         reduce =0.8;
@@ -1057,8 +1061,8 @@ void CSkillKick::jTurn()
     }
     else
     {
-        agent->setRobotVel(1.2 * ballx + reduce*cos(kkMovementTheta)
-                           ,1.2 *bally + reduce*sin(kkMovementTheta)
+        agent->setRobotVel(1 * ballx + reduce*cos(kkMovementTheta)
+                           ,1 *bally + reduce*sin(kkMovementTheta)
                            ,angPid->PID_OUT());
     }
 }
