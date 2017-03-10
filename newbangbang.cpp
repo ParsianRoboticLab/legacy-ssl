@@ -234,9 +234,9 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
         }
         break;
     case _bangBangAcc:
-        if(currentVel < 0.3)
+        if(currentVel < 0.2)
         {
-            vDes = 0.5;
+            vDes = 0.3;
         }
         else
         {
