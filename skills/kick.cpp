@@ -1023,17 +1023,17 @@ void CSkillKick::jTurn()
     //    }
     angPid->error = (kickFinalDir - agent->dir().th()).radian();
 
-    double reduce = 1.2;
+    double reduce = 0.8;
 
     Circle2D oppPenalty(wm->field->oppGoal() + Vector2D(0.2 , 0),1.6);
 
 
     if(kickerOn)
     {
-        reduce =0.8;
+        reduce =0.5;
 
         if(slow || passProfiler)
-            reduce = 0.6;
+            reduce = 0.5;
         if(sagMode)
             reduce = 1;
         if(veryFine || oppPenalty.contains(ballPos))
@@ -1042,7 +1042,7 @@ void CSkillKick::jTurn()
     else
     {
         if(slow || passProfiler)
-            reduce = 0.6;
+            reduce = 0.5;
         if(sagMode)
             reduce = 1;
     }
@@ -1265,7 +1265,7 @@ void CSkillKick::findPosToGo()
     }
     if(finalPos.x > _FIELD_WIDTH)
     {
-        finalPos = knowledge->getReflectPos(wm->field->oppGoal());
+        finalPos = knowledge->getReflectPos(wm->field->oppGoal(), 3);
     }
 
     if((fabs(((ballPos - agentPos).th() - kickFinalDir).degree()) < 60))
@@ -1316,7 +1316,7 @@ void CSkillKick::findPosToGoAlt()
 
     if(finalPos.x > _FIELD_WIDTH)
     {
-        finalPos = knowledge->getReflectPos(wm->field->oppGoal());
+        finalPos = knowledge->getReflectPos(wm->field->oppGoal(), 3);
     }
 
     Vector2D finalDir;
