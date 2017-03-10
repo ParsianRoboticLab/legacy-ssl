@@ -242,7 +242,7 @@ public:
     float oneTouchKickThreshold();
     float kickThreshold();
     float kickClosedAngle();
-    Vector2D getReflectPos(Vector2D goal);
+    Vector2D getReflectPos(Vector2D goal, double dist);
     ////////////////////////////////<Mahi>
     Vector2D getReturnPos(Vector2D _goal);
     ///////////////////////////////////</Mahi>

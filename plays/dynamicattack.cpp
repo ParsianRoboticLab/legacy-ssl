@@ -364,23 +364,23 @@ void CDynamicAttack::assignId() {
     if(mahiPoisitionAgents.size() > 2)
         debug(QString("3 : %1 , %2").arg(dist2Point[2]).arg(mahiPoisitionAgents.at(2)->id()),D_MAHI);
 
-    for(size_t i = 0; i < currentPlan.agentSize;i++) {
-        for(size_t i = starter; i < 6;i++)
-            dist2Point[i] =  10000;
-        minDist = 100000;
+//    for(size_t i = 0; i < currentPlan.agentSize;i++) {
+//        for(size_t i = starter; i < 6;i++)
+//            dist2Point[i] =  10000;
+//        minDist = 100000;
 
-        for(size_t j = 0; j < activeAgents.size(); j++) {
-            if(!matchedIDList.contains(activeAgents.at(j)->id())) {
-                dist2Point[i] = dynamicPosition.at(i).dist(activeAgents.at(j)->pos());
-                if(dist2Point[i] < minDist) {
-                    minDist = dist2Point[i];
-                    mahiAgentsID[i] = activeAgents.at(j)->id();
-                }
-            }
-        }
-        matchedIDList.append(mahiAgentsID[i]);
-        mahiPoisitionAgents.append(knowledge->getAgent(mahiAgentsID[i]));
-    }
+//        for(size_t j = 0; j < activeAgents.size(); j++) {
+//            if(!matchedIDList.contains(activeAgents.at(j)->id())) {
+//                dist2Point[i] = dynamicPosition.at(i).dist(activeAgents.at(j)->pos());
+//                if(dist2Point[i] < minDist) {
+//                    minDist = dist2Point[i];
+//                    mahiAgentsID[i] = activeAgents.at(j)->id();
+//                }
+//            }
+//        }
+//        matchedIDList.append(mahiAgentsID[i]);
+//        mahiPoisitionAgents.append(knowledge->getAgent(mahiAgentsID[i]));
+//    }
 
 }
 
@@ -423,7 +423,7 @@ void CDynamicAttack::dynamicPlanner(int agentSize) {
     for(size_t i = 0;i < agentSize;i++) {
         if(mahiAgentsID[i] >= 0) {
             roleAgents[i + 1]->execute();
-//            debug(QString("W %1").arg(mahiAgentsID[1]), D_MAHI);
+            //            debug(QString("W %1").arg(mahiAgentsID[1]), D_MAHI);
         }
     }
 
@@ -440,7 +440,7 @@ void CDynamicAttack::dynamicPlanner(int agentSize) {
         draw(semiDynamicPosition[3], 0, QColor(Qt::black));
 
     //        debug(QString("1 : %1").arg(semiDynamicPosition[1]),D_MAHI);
-//    debug(QString("X : %1").arg(dynamicPosition.size()),D_MAHI);
+    //    debug(QString("X : %1").arg(dynamicPosition.size()),D_MAHI);
     //    debug(QString("GIL : %1").arg(guardIndexList.size()),D_MAHI);
 
     for(size_t i = 0;i < dynamicPosition.size();i++) {
@@ -451,7 +451,7 @@ void CDynamicAttack::dynamicPlanner(int agentSize) {
         showLocations(currentPlan.positionCnt, QColor(Qt::red));
     }
 
-//    debug(QString("Hey : %1").arg(markPositions.size()),D_MAHI);
+    //    debug(QString("Hey : %1").arg(markPositions.size()),D_MAHI);
 
     if(isPlayMakeChanged()) {
         for(size_t i = 0;i < 5;i++) {
@@ -538,16 +538,26 @@ void CDynamicAttack::positioning(int starter,
                 switch(_primerySkill) {
                 case DynamicEnums::Ready:
                 case DynamicEnums::Mark:
+
                     if(roleAgents[i]->getAgent()->pos()
                             .dist(semiDynamicPosition.at(i - starter)) < 0.1
                             || goToDynamic[i]
                             /*|| fast*/) {
                         goToDynamic[i] = true;
-                        roleAgents[i]->setTarget(semiDynamicPosition.at(i - starter));
+                        if(wm->ball->vel.length() < 1)
+                        {
+                            //roleAgents[i]->setTarget(semiDynamicPosition.at(i - starter));
+                            roleAgents[i]->setTarget(markPositions[i-starter]);
+                        }
                         //                        roleAgents[0]->setNoKick(false);
                     }
                     else {
-                        roleAgents[i]->setTarget(semiDynamicPosition.at(i - starter));
+                        if(wm->ball->vel.length() < 1)
+                        {
+                            //roleAgents[i]->setTarget(semiDynamicPosition.at(i - starter));
+                            roleAgents[i]->setTarget(markPositions[i-starter]);
+                        }
+
                         //                        roleAgents[0]->setNoKick(true);
                     }
                     roleAgents[i]->setReceiveRadius(.1);
@@ -664,8 +674,8 @@ void CDynamicAttack::chooseBestPositons() {
         for(size_t j = 0;j < 3;j++) {
             tempDist = currentPlan.passPos
                     .dist(guardLocations[currentPlan.positionCnt]
-                          [i]
-                          [j]);
+                    [i]
+                    [j]);
             if(tempDist < minDist) {
                 minDist = tempDist;
                 tempIndex = j;
@@ -677,16 +687,16 @@ void CDynamicAttack::chooseBestPositons() {
         }
         if(i < currentPlan.positionCnt) {
             semiDynamicPosition.append(guardLocations[currentPlan.positionCnt]
-                                       [guardIndexList.at(i)]
-                                       [tempIndex]);
+                    [guardIndexList.at(i)]
+                    [tempIndex]);
         }
         else if(currentPlan.mode == DynamicEnums::DefenseClear) {
             semiDynamicPosition.append(Vector2D(0, 0));
         }
         else {
             semiDynamicPosition.append(guardLocations[currentPlan.positionCnt]
-                                       [guardIndexList.at(currentPlan.positionCnt - 1)]
-                                       [tempIndex]);
+                    [guardIndexList.at(currentPlan.positionCnt - 1)]
+                    [tempIndex]);
         }
     }
 
@@ -694,44 +704,100 @@ void CDynamicAttack::chooseBestPositons() {
 
 
 void CDynamicAttack::chooseMarkPos() {
-
     Vector2D reflectPos[3];
+    Vector2D temp[4];
+    Circle2D oppCircle(Vector2D(_FIELD_WIDTH/2,0) + Vector2D(0.5,0),1.5);
+    draw(oppCircle,QColor(Qt::black));
+    //first and second marker
+    double k = 0;
+    bool flag = 1;
+    while(flag)
+    {
+        flag = false;
+        oppCircle.intersection(Segment2D(wm->ball->pos, Vector2D(wm->field->oppGoalR().x, wm->field->oppGoalR().y - k)), &temp[0], &temp[3]);
+        oppCircle.intersection(Segment2D(wm->ball->pos, Vector2D(wm->field->oppGoalL().x, wm->field->oppGoalL().y + k)), &temp[1], &temp[3]);
+        for(int i = 0; i < 2; i++)
+        {
+            reflectPos[i] = knowledge->getReflectPos(temp[i], 2.5);
+            //debug(QString("our reflect points are: %1 %2").arg(reflectPos[i].x).arg(reflectPos[i].y),D_ALI);
+        }
+        if(reflectPos[0].dist(reflectPos[1]) < 1.5)
+            flag = true;
 
-    reflectPos[0] = knowledge->getReflectPos(wm->field->oppGoal());
+        k += 0.1;
+    }
+    //third marker
+    Vector2D good = Vector2D(_FIELD_WIDTH/2,0);
+    if(roleAgents[0]->getAgent()!= NULL && roleAgents[0]->getAgent()->pos().y <= 0)
+        good = wm->field->oppGoalR();
+    else
+        good = wm->field->oppGoalL();
+    oppCircle.intersection(Segment2D(wm->ball->pos, good), &temp[2], &temp[3]);
+    if(roleAgents[0]->getAgent()!= NULL)
+        reflectPos[2] = knowledge->getReflectPos((Vector2D(_FIELD_WIDTH/2,0) + good)/2, max(1.5, min(2.0, roleAgents[0]->getAgent()->pos().dist(Vector2D(_FIELD_WIDTH/2,0)) - 0.9)));
+
+
+    /*reflectPos[0] = knowledge->getReflectPos(wm->field->oppGoal());
     reflectPos[1] = knowledge->getReflectPos(wm->field->oppGoalL());
-    reflectPos[2] = knowledge->getReflectPos(wm->field->oppGoalR());
+    reflectPos[2] = knowledge->getReflectPos(wm->field->oppGoalR());*/
 
     markPositions.clear();
 
     for(size_t i = 0;i < 3;i++) {
-        draw(reflectPos[i], 0, QColor(Qt::black));
+        draw(reflectPos[i], 0, QColor(Qt::cyan));
     }
 
-    double tempDist,minDist = 10000;
-    int tempIndex = -1;
-    QList<int> matchedIDs;
-    for(size_t i = 0;i < mahiPoisitionAgents.size();i++) {
 
-        tempDist  = 0;
-        minDist   = 10000;
-        tempIndex = -1;
-        for(size_t j = 0;j < 3;j++) {
-            if(!matchedIDs.contains(j)) {
-                tempDist = mahiPoisitionAgents.at(i)->pos()
-                        .dist(reflectPos[j]);
-                if(tempDist < minDist) {
-                    minDist = tempDist;
-                    tempIndex = j;
-                }
-            }
+
+    MWBM matcher;
+    int n = mahiPoisitionAgents.size();
+   // debug(QString("%1").arg(n),D_ALI);
+    /*for (int i = 0; i < n; ++i) {
+        debug(QString("Agent  : %1").arg(mahiPoisitionAgents.at(i)->id()),D_ALI);
+    }*/
+
+    matcher.create(n, 3);
+    for (size_t i = 0; i < n; i++) {
+        for (size_t j = 0; j < 3; j++) {
+            matcher.setWeight(i,
+                              j,
+                              (-1) *
+                              mahiPoisitionAgents[i] ->
+                              pos().dist(reflectPos[j]));
+
         }
-        matchedIDs.append(tempIndex);
-        markPositions.append(reflectPos[tempIndex]);
     }
+    matcher.findMatching();
+    for (int i = 0; i < 3; ++i)
+    {
+        //debug(QString("%1").arg(matcher.getMatch(i)),D_ALI);
+        markPositions.append(reflectPos[matcher.getMatch(i)]);
+        draw(markPositions.at(i), 0, QColor(Qt::black));
+    }
+    //debug(QString("Done"),D_ALI);
 
-    for(size_t i = 0;i < markPositions.size();i++) {
-        draw(markPositions.at(i), 0, QColor(Qt::green));
-    }
+//    double tempDist,minDist = 10000;
+//    int tempIndex = -1;
+//    QList<int> matchedIDs;
+//    for(size_t i = 0;i < mahiPoisitionAgents.size();i++) {
+
+//        tempDist  = 0;
+//        minDist   = 10000;
+//        tempIndex = -1;
+//        for(size_t j = 0;j < 3;j++) {
+//            if(!matchedIDs.contains(j)) {
+//                tempDist = mahiPoisitionAgents.at(i)->pos()
+//                        .dist(reflectPos[j]);
+//                if(tempDist < minDist) {
+//                    minDist = tempDist;
+//                    tempIndex = j;
+//                }
+//            }
+//        }
+//        matchedIDs.append(tempIndex);
+//        markPositions.append(reflectPos[tempIndex]);
+//    }
+
 
 }
 

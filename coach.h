@@ -1,3 +1,4 @@
+//be name khoda
 #ifndef CCOACH_H
 #define CCOACH_H
 
@@ -26,7 +27,6 @@ public:
     ////////GUI Needed
     CPlayOff* playOff();
     CLoadPlayOffJson* getPlanLoader();
-
     bool inited;
     double playOnTime;
     CCoach(CAgent** _agents);

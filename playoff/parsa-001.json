@@ -44,7 +44,7 @@
                                     "flag": false,
                                     "name": "PassSkill",
                                     "primary": 400,
-                                    "secondary": 600,
+                                    "secondary": 400,
                                     "target": {
                                         "agent": 1,
                                         "index": 1
@@ -87,7 +87,7 @@
                                     "flag": false,
                                     "name": "OneTouchSkill",
                                     "primary": 1000,
-                                    "secondary": 100
+                                    "secondary": 900
                                 }
                             ],
                             "tolerance": 0
@@ -142,7 +142,7 @@
                         {
                             "angel": 0,
                             "pos-x": 3.215080346106304,
-                            "pos-y": 1.0460526315789473,
+                            "pos-y": 1.0361842105263157,
                             "skills": [
                                 {
                                     "flag": false,
@@ -241,7 +241,7 @@
                 "y": -2.6348684210526314
             },
             "chance": 1,
-            "lastDist": 1,
+            "lastDist": 1.5,
             "planMode": "INDIRECT",
             "tags": [
                 ""
@@ -555,8 +555,8 @@
                 "x": -3.8936959208899875,
                 "y": -2.6546052631578947
             },
-            "chance": 1,
-            "lastDist": 1,
+            "chance": 0,
+            "lastDist": 1.5,
             "planMode": "INDIRECT",
             "tags": [
                 ""
@@ -856,7 +856,7 @@
                 "x": -4.3386897404202722,
                 "y": -2.7335526315789473
             },
-            "chance": 1,
+            "chance": 0,
             "lastDist": 1,
             "planMode": "INDIRECT",
             "tags": [
@@ -1157,8 +1157,8 @@
                 "x": 0,
                 "y": 0.019736842105263157
             },
-            "chance": 1,
-            "lastDist": 1,
+            "chance": 0,
+            "lastDist": 1.5,
             "planMode": "KICKOFF",
             "tags": [
                 ""
@@ -1378,8 +1378,8 @@
                 "x": -0.077873918417799753,
                 "y": -0.0098684210526315784
             },
-            "chance": 1,
-            "lastDist": 1,
+            "chance": 0,
+            "lastDist": 1.5,
             "planMode": "KICKOFF",
             "tags": [
                 ""

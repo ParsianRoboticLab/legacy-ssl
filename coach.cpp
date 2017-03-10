@@ -670,8 +670,6 @@ QList<int> CCoach::findBestPoses(int numberOfPositionAgents,bool semiDynamic)
     double dummyDist = 20000;
     int nearestId = 0;
 
-
-
     OurAgents = wm->our.t->activeAgents;
     OppAgents.clear();
     for(int i = 0 ;i<OurAgents.count() ; i++)
@@ -1410,15 +1408,14 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     {
         dynamicAttack->setDefenseClear(false);
     }
-
-    if(findMostPossible(wm->ball->pos) > (0.7 - shotToGoalthr )  )
+    if(findMostPossible(wm->ball->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr )  )
     {
         dynamicAttack->setDirectShot(true);
         shotToGoalthr = 0.6;
     }
     else
     {
-        dynamicAttack->setDirectShot(true);
+        dynamicAttack->setDirectShot(false);
         shotToGoalthr = 0;
     }
     //////////////////////////////////////////////assign agents
@@ -1669,16 +1666,15 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
                 plan->execution.symmetry = 1;
             } else if (isRegionMatched(symBall)) {
                 plan->execution.symmetry = -1;
-            } else {
+            } /*else {
                 continue;
-            }
+            }*/
 
             plan->common.currentSize = _ourplayers.size();
             validPlans.append(plan);
 
         }
     }
-
 
     debug(QString("playoff -> there's %1 valid Plan").arg(validPlans.size()), D_DEBUG);
     if (validPlans.isEmpty()) {
@@ -1698,6 +1694,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     ourPlayOff->setInitial(true);
     ourPlayOff->lockAgents = true;
     lastPlan = thePlan;
+    debug(QString("chosen plan is %1").arg(lastPlan->gui.index[3]), D_ALI);
 }
 
 void CCoach::initDynamicPlay() {
