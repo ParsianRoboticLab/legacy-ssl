@@ -704,6 +704,11 @@ void CDynamicAttack::chooseBestPositons() {
 
 
 void CDynamicAttack::chooseMarkPos() {
+    markPositions.clear();
+    for(int i = 0; i < 3; i++)
+        markPositions.append((Vector2D(5000, 5000)));
+    if(roleAgents[0]->getAgent()== NULL)
+        return;
     Vector2D reflectPos[3];
     Vector2D temp[4];
     Circle2D oppCircle(Vector2D(_FIELD_WIDTH/2,0) + Vector2D(0.5,0),1.5);
@@ -735,8 +740,30 @@ void CDynamicAttack::chooseMarkPos() {
     oppCircle.intersection(Segment2D(wm->ball->pos, good), &temp[2], &temp[3]);
     if(roleAgents[0]->getAgent()!= NULL)
         reflectPos[2] = knowledge->getReflectPos((Vector2D(_FIELD_WIDTH/2,0) + good)/2, max(1.5, min(2.0, roleAgents[0]->getAgent()->pos().dist(Vector2D(_FIELD_WIDTH/2,0)) - 0.9)));
-
-
+    int l = 3;
+    if(roleAgents[0]->getAgent()!= NULL)
+    {
+        l = 0;
+        vector <Vector2D> vt;
+        for(int i = 0; i < 3; i++)
+            if(reflectPos[i].x < 20)
+            {
+                l++;
+                vt.push_back(reflectPos[i]);
+            }
+        for(int i = 0; i < l; i++)
+            for(int j = 0; j < l - 1; j++)
+                if(roleAgents[0]->getAgent()->pos().dist(vt[j]) < roleAgents[0]->getAgent()->pos().dist(vt[j + 1]))
+                    swap(vt[j], vt[j + 1]);
+        /*for(int i = 0; i < 3; i++)
+        {
+            reflectPos[i].x = reflectPos[i].y = 5000;
+        }*/
+        for(int i = 0; i < l; i++)
+        {
+            reflectPos[i] = vt[i];
+        }
+    }
     /*reflectPos[0] = knowledge->getReflectPos(wm->field->oppGoal());
     reflectPos[1] = knowledge->getReflectPos(wm->field->oppGoalL());
     reflectPos[2] = knowledge->getReflectPos(wm->field->oppGoalR());*/
@@ -762,13 +789,13 @@ void CDynamicAttack::chooseMarkPos() {
             matcher.setWeight(i,
                               j,
                               (-1) *
-                              mahiPoisitionAgents[i] ->
-                              pos().dist(reflectPos[j]));
+                              (mahiPoisitionAgents[i] ->
+                              pos().dist(reflectPos[j]) - (reflectPos[i].x < 30 ? 5 * roleAgents[0]->getAgent()->pos().dist(reflectPos[j]) : 0)));
 
         }
     }
     matcher.findMatching();
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < l; ++i)
     {
         //debug(QString("%1").arg(matcher.getMatch(i)),D_ALI);
         markPositions.append(reflectPos[matcher.getMatch(i)]);
