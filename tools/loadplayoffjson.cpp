@@ -37,8 +37,9 @@ bool CLoadPlayOffJson::load(QString _file) {
 
     QJson::Parser parser;
     QVariantMap dataBase = parser.parse(input,&readable).toMap();
-    if (readable) readPlan(dataBase, _file);
-    else {
+    if (readable) {
+        readPlan(dataBase, _file);
+    } else {
         qWarning() << "Can't Parse Plan File : " << _file;
         return false;
     }
@@ -57,7 +58,8 @@ bool CLoadPlayOffJson::readPlan(const QVariantMap &_map, const QString& _file) {
 
     if (mapVersion != API_VERSION) {
         qWarning() << "Version of plan and Application have Confilict."
-                   << "Your Version : " << API_VERSION << "file Version :" << mapVersion;
+                   << "Your Version : " << API_VERSION
+                   << "File Version : " << mapVersion;
         return false;
     }
 
