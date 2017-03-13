@@ -959,13 +959,14 @@ void DefensePlan::runGoalie()
         else if (goalieClearMode && playOnMode ) {
             savedClearPos = findBestPointForChipTarget(savedClearDist,1);
             Segment2D ball2ClearTarget(savedClearPos , ballPos);
-            Circle2D ballCircle(ballPos, 0.25);
+            Circle2D ballCircle(ballPos, 0.35);
             dangerForGoalieClear = false;
             debug(QString("play on"),D_SEPEHR);
             if(wm->our.activeAgentsCount() > 0){
                 for (int i = 0; i < wm->our.activeAgentsCount(); i++) {
                     if(wm->our.active(i)->id != knowledge->goalie->id()) {
-                        if (ballCircle.contains(wm->our.active(i)->pos) && ball2ClearTarget.dist(wm->our.active(i)->pos) < 0.15) {
+                        draw(ball2ClearTarget,"black");
+                        if (ballCircle.contains(wm->our.active(i)->pos) && ball2ClearTarget.dist(wm->our.active(i)->pos) < 0.25) {
                             dangerForGoalieClear = true;
                         }
                     }
@@ -979,7 +980,7 @@ void DefensePlan::runGoalie()
                 }
             }
             if(dangerForGoalieClear){
-                Ray2D goalie2Ball(goaliePos , ballPos);
+                Ray2D goalie2Ball(wm->field->ourGoal() , ballPos);
                 penaltyArea.intersection(goalie2Ball,&Solutions[0],&Solutions[1]);
                 goalieTarget = (Solutions[0].valid() && wm->field->isInField(Solutions[0]) && Solutions[0].dist(ballPos) < Solutions[1].dist(ballPos) ) ? (Solutions[0]) : (Solutions[1]);
                 goalieTarget = goalieTarget - (ballPos - goalieTarget).norm() * 0.09;
@@ -1655,16 +1656,7 @@ void DefensePlan::matchingDefPos(int _defenseNum)
             gpa[ourAgents[i]->id()]->setAvoidPenaltyArea(false);
             gpa[ourAgents[i]->id()]->setAvoidBall(false);
             gpa[ourAgents[i]->id()]->setBallObstacleRadius(0);
-            //gpa[ourAgents[i]->id()]->setBallObstacleRadius(0.5);
-            //gpa[ourAgents[i]->id()]->setLookAt(wm->ball->pos);
 
-           /* if(knowledge->getGameState() == CKnowledge::TheirIndirectKick)
-            {
-                gpa[ourAgents[i]->id()]->setNoAvoid(false);
-                gpa[ourAgents[i]->id()]->setAvoidBall(true);
-                gpa[ourAgents[i]->id()]->setBallObstacleRadius(0.5);
-            }
-            */
             if(knowledge->getGameState() == CKnowledge::TheirIndirectKick)
             {
                 gpa[ourAgents[i]->id()]->setNoAvoid(false);
@@ -1674,7 +1666,12 @@ void DefensePlan::matchingDefPos(int _defenseNum)
                 gpa[ourAgents[i]->id()]->setBallObstacleRadius(0.5);
 
             }
-
+            ////////////////// Addes by AHZ ////////////////////////
+            else if(knowledge->getGameMode() == CKnowledge::Stop || knowledge->getGameState() == CKnowledge::Stop){
+                gpa[ourAgents[i]->id()]->setSlowMode(true);
+                gpa[ourAgents[i]->id()]->setADiveMode(false);
+            }
+            ///////////////////////////////////////////////////////
             if(matchResult[i] < _defenseNum){
 
                 gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , matchPoints[matchResult[i]] - wm->field->ourGoal());
@@ -2717,7 +2714,7 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
                     angleDegreeThrNotStop = 5;
                 }
                 else {
-                    target = AZBisecOpenSeg.intersection((aimLessLine));
+                    target = AZBisecOpenSeg.intersection((aimLessLine)) + Vector2D(0.2,0);
                     angleDegreeThrNotStop = 0;
                 }
 
@@ -3315,7 +3312,7 @@ Vector2D CDefPos::getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Seg
 
 void DefensePlan::executeGoalie()
 {
-    if (goalieAgent != NULL){
+    if(goalieAgent != NULL){
         if(savedClearPos.valid() && clearCnt > 30) {
             savedClearPos.invalidate();
             clearCnt = 0;
@@ -3323,17 +3320,11 @@ void DefensePlan::executeGoalie()
         else if(savedClearPos.valid() && clearCnt <= 30){
             clearCnt++;
         }
-        else {
+        else{
             clearCnt = 0;
         }
         // edited by AHZ
-        // ommite the setChip(CHIP_POWER)
-        if (goalieClearMode) {
-            goalieAgent->setChip(LONG_CHIP_POWER);
-        }
-        else if (knowledge->isCrowdedInFrontOfAgent(goalieAgent->id(),0.5) && goalieClearMode) {
-            goalieAgent->setChip(0); // edited by AHZ
-        }
+        // ommite the setChip(CHIP_POWER)                                
         Rect2D fieldRect(Vector2D(- _FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0)+Vector2D(-0.005,-0.005),Vector2D(_FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0)+Vector2D(+0.005,+0.005));
         Line2D ballPrGoalLine(wm->ball->pos, Vector2D(wm->ball->pos.x,(wm->ball->pos.y + 0.01)));
         Vector2D solut[2];
@@ -3378,39 +3369,62 @@ void DefensePlan::executeGoalie()
             kickSkill->setChip(false);
             kickSkill->setAvoidPenaltyArea(false);
             kickSkill->setGoalieMode(true);
-            if(!isPathToOppGoalieClear())
-            {
+            if(!isPathToOppGoalieClear()){
                 if(!savedClearPos.valid())
                     savedClearPos = findBestPointForChipTarget(savedClearDist,1);
-
                 kickSkill->setTarget(savedClearPos);
                 kickSkill->getAgent()->chipDistanceValue(savedClearDist, false);
                 kickSkill->setChip(true);
             }
 
         }
-        else {
+        else{
             assignSkill( goalieAgent , gpa[goalieAgent->id()]);
-            if (goalieOneTouch) {
-                gpa[goalieAgent->id()]->setSlowMode(false);
-                gpa[goalieAgent->id()]->setADiveMode(true);
-                Vector2D targetDir(0, goalieAgent->pos().y);
+            if(goalieOneTouch){
+                //////////////////// Added by AHZ //////////////////
+                if(knowledge->getGameMode() == CKnowledge::Stop || knowledge->getGameState() == CKnowledge::Stop){
+                    gpa[goalieAgent->id()]->setSlowMode(true);
+                    gpa[goalieAgent->id()]->setADiveMode(false);
+                }
+                else{
+                    gpa[goalieAgent->id()]->setSlowMode(false);
+                    gpa[goalieAgent->id()]->setADiveMode(false);
+                }
+                ////////////////////////////////////////////////////
+                debug("one touch", D_AHZ);
                 gpa[goalieAgent->id()]->init(goalieTarget, wm->ball->pos - goalieTarget);
             }
-            if(dangerForGoalieClear) {
-                // edited by AHZ
-                //                gpa[goalieAgent->id()]->setSlowMode(true);
-                //                gpa[goalieAgent->id()]->setADiveMode(false);
-                //                goalieAgent->setChip(0);
-                gpa[goalieAgent->id()]->init(goalieTarget,  wm->ball->pos - goalieTarget); //edited by AHZ
-            }
-            else {
+            if(dangerForGoalieClear){
+                //edited by AHZ
+                debug("danger", D_AHZ);
                 gpa[goalieAgent->id()]->setSlowMode(false);
                 gpa[goalieAgent->id()]->setADiveMode(false);
-                gpa[goalieAgent->id()]->init(goalieTarget, wm->ball->pos - goalieTarget);
+                goalieAgent->setChip(0);
+                gpa[goalieAgent->id()]->init(goalieTarget,  wm->ball->pos - goalieTarget); //edited by AHZ
+            }
+            else{
+                //////////////////// Added by AHZ //////////////////
+                if(knowledge->getGameMode() == CKnowledge::Stop || knowledge->getGameState() == CKnowledge::Stop){
+                    gpa[goalieAgent->id()]->setSlowMode(true);
+                    gpa[goalieAgent->id()]->setADiveMode(false);
+                }
+                else{
+                    gpa[goalieAgent->id()]->setSlowMode(false);
+                    gpa[goalieAgent->id()]->setADiveMode(false);
+                }
+                ////////////////////////////////////////////////////
+                debug("no danger", D_AHZ);
+                goalieAgent->setChip(0);
+                gpa[goalieAgent->id()]->setSlowMode(false);
+                gpa[goalieAgent->id()]->setADiveMode(false);
+                Ray2D goalie2Ball(wm->field->ourGoal() , wm->ball->pos);
+                Circle2D penaltyArea(wm->field->ourGoal() - Vector2D(0.3,0),1.28);
+                Vector2D Solutions[2];
+                penaltyArea.intersection(goalie2Ball,&Solutions[0],&Solutions[1]);
+                goalieTarget = (Solutions[0].valid() && wm->field->isInField(Solutions[0]) && Solutions[0].dist(ballPos) < Solutions[1].dist(ballPos) ) ? (Solutions[0]) : (Solutions[1]);
+                gpa[goalieAgent->id()]->init(goalieTarget, wm->ball->pos - wm->field->ourGoal());
 
             }
-
             gpa[goalieAgent->id()]->setAvoidPenaltyArea(false);
             gpa[goalieAgent->id()]->setNoAvoid(true);
             gpa[goalieAgent->id()]->execute();
