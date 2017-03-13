@@ -2,7 +2,7 @@
 <VarXML>
 	<Var name="Local Settings" type="list">
 		<Var name="SSL-Vision Multicast IP" type="string">
-			127.0.0.1
+			224.5.23.2
 		</Var>
 		<Var name="SSL-Vision Multicast Port" type="int" minval="" maxval="">
 			10005
@@ -11,7 +11,7 @@
 			224.5.23.1
 		</Var>
 		<Var name="Referee-box Multicast Port" type="int" minval="" maxval="">
-			10001
+			10003
 		</Var>
 		<Var name="Simulator IP" type="string">
 			127.0.0.1
@@ -38,7 +38,7 @@
 			false
 		</Var>
 		<Var name="Our Team Color" type="stringenum">
-			Yellow
+			Blue
 			<Var name="0" type="string">
 				Yellow
 			</Var>

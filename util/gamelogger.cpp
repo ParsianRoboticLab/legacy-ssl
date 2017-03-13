@@ -54,8 +54,10 @@ void CGameLogger::openFilesToLog(QString baseFileName,QString totalDescription){
     debugFile.setFileName(baseFileName + ".debug");
     drawFile.setFileName(baseFileName + ".draw");
     infoFile.setFileName(baseFileName + ".info");
+    analyzeFile.setFileName(baseFileName + ".analyze");
 
-    if( !logFile.open(QIODevice::WriteOnly) || !debugFile.open(QIODevice::WriteOnly) || !drawFile.open(QIODevice::WriteOnly) || !infoFile.open(QIODevice::WriteOnly) ){
+
+    if( !logFile.open(QIODevice::WriteOnly) || !debugFile.open(QIODevice::WriteOnly) || !drawFile.open(QIODevice::WriteOnly) || !infoFile.open(QIODevice::WriteOnly) || !analyzeFile.open(QIODevice::WriteOnly)){
         qDebug() << "Log: open log files failed";
 		closeLogFiles(true);
         fileLogError = true;
@@ -88,7 +90,8 @@ void CGameLogger::openFilesToLog(QString baseFileName,QString totalDescription){
         infoDS << LOGGER_VERSION;
         infoDS << descriptionSz;
         infoDS.writeRawData(totalDescription.toStdString().c_str() , descriptionSz);
-
+        AnalyzeDS.setDevice(&analyzeFile);
+        AnalyzeDS << "{";
 
 
 
@@ -112,10 +115,13 @@ void CGameLogger::closeLogFiles(bool force){
         writeDebugs();
         writeDraws();
         writeInfo();
+        writeAnalyses();
+        AnalyzeDS << "}";
         logFile.close();
         debugFile.close();
         drawFile.close();
         infoFile.close();
+        analyzeFile.close();
     }
 }
 void CGameLogger::openFileToReplay(QString fileName){
@@ -164,12 +170,12 @@ void CGameLogger::openFileToReplay(QString fileName){
         readInfoDS.readRawData(text , descriptionSz);
         desc.assign(text , descriptionSz);
         totalDescription = totalDescription.fromStdString(desc);
-        qDebug()<<"___Info desc___"+totalDescription+"___"<<descriptionSz;
+//        qDebug()<<"___Info desc___"+totalDescription+"___"<<descriptionSz;
         readLogDS >> descriptionSz;
         readLogDS.readRawData(text , descriptionSz);
         desc.assign(text , descriptionSz);
         totalDescription = totalDescription.fromStdString(desc);
-        qDebug()<<"___Log desc___"+totalDescription+"___"<<descriptionSz;
+//        qDebug()<<"___Log desc___"+totalDescription+"___"<<descriptionSz;
 
 
         if( magic == LOGGER_MAGIC && version == LOGGER_VERSION &&
@@ -308,6 +314,29 @@ void CGameLogger::writePackets(){
     }
     packets.clear();
 }
+void CGameLogger::writeAnalyses(){
+    QVariant a;
+    QMap <QString , QList<QVariant> >::iterator ite = analyses.begin();
+    for( ite ; ite != analyses.end() ; ite++ ){
+        AnalyzeDS<<'"'<<ite.key()<<'"'<<":";
+        if(ite.value().size()>1){
+            AnalyzeDS<<'[';
+            for( int i=0 ; i<ite.value().size() ; i++ ){
+                AnalyzeDS<<ite.value().at(i).toString();
+                if(i!=ite.value().size()-1)
+                    AnalyzeDS <<',';
+            }
+            AnalyzeDS<<']';
+        }
+        else
+        {
+            AnalyzeDS<<ite.value().at(0).toStdString();
+        }
+        if(ite != analyses.end()-1)
+            AnalyzeDS <<',';
+
+    }
+}
 
 void CGameLogger::writeDebugs(){
     qint32 siz , sz;
@@ -335,6 +364,8 @@ void CGameLogger::writeDebugs(){
     }
     debugs.clear();
 }
+
+
 
 void CGameLogger::writeInfo(){
 
@@ -702,7 +733,30 @@ void CGameLogger::drawData(){
         }
     }
 }
+void CGameLogger::AddToAnalyze(QString key,QVariant value , bool SaveSameValues){
 
+#ifdef GAME_MODE
+    return;
+#endif
+    loggerMutex->lock();
+    if( gameLogger->getIsLogMode() ){
+//        AnalyzeDS.writeRawData(key.toStdString().c_str() , key.size());
+
+
+        if(analyses.contains(key))
+            if(analyses[key].contains(value) && !SaveSameValues);
+            else
+                analyses[key].append(value);
+        else
+        {
+            QList<QVariant> emptyValueList;
+            emptyValueList.append(value);
+            analyses.insert(key,emptyValueList);
+        }
+        //AnalyzeDS <<"{"<<key<<":"<<value.toString()<<"},";
+    }
+    loggerMutex->unlock();
+}
 
 void CGameLogger::addToDebugs( QString packet , qint16 type){
     debugData.type = type;

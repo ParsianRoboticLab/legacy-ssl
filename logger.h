@@ -37,6 +37,7 @@ void initInfo(void *);
 void setDebugLevel(int l);
 void setDrawLevel(int l);
 void debug(QString text, long type, QColor color = QColor(0,0,0));
+void analyze(QString key,QVariant value,bool SaveSameValues);
 bool drawLock(int ms=-1);
 void drawUnlock();
 void draw (Rect2D _rect = Rect2D(Vector2D(0, 0), Vector2D(0, 0)), QColor _color = QColor(255, 255, 255), bool _filled = false, int level=-1 , bool toBeloged=true);

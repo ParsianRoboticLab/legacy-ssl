@@ -51,6 +51,12 @@ void setDebugLevel(int l)
     loglevel = l;
 }
 
+void analyze(QString key,QVariant value, bool SaveSameValues){
+    gameLogger->AddToAnalyze(key,value,SaveSameValues);
+}
+
+
+
 void debug(QString text, long type, QColor color)
 {
 #ifdef GAME_MODE
