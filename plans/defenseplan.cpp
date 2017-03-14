@@ -2593,13 +2593,10 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
 {
     //////////////////////// Variables of this function //////////////////////
     Vector2D ballPos = _ballPos;
-    Vector2D i[2];
-    Vector2D sol[2];
-    Vector2D target(Vector2D(0,0));
-    Segment2D goal2Ball;
-    QList<Circle2D> defs;
-    Circle2D theCircleAroundTheGoalCircle(wm->field->ourGoal()-Vector2D(0.3,0),1.78);
-    Circle2D aimLessCircle(wm->field->ourGoal()-Vector2D(0.3,0),1.21);
+    Vector2D target(wm->field->ourGoal());
+    Vector2D offsetGoalkeeperPosition = Vector2D(0.2 , 0.0);
+    Segment2D goal2Ball;  
+    QList<Circle2D> defs;    
     double AZBisecOpenAngle = 0,AZBigestOpenAngle = 0,AZDangerPercent = 0,aimLessChord = 0;
     double topFaceLength;
     double bottomFaceLength;
@@ -2656,21 +2653,7 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
         ballheight = ballPos.dist(downFieldLine.nearestPoint(ballPos));
         Line2D aimLessLine(Vector2D(0,0),Vector2D(-1,-1));
         draw(AZBisecOpenSeg,"blue");
-        goal2Ball.assign(wm->field->ourGoal(),wm->ball->pos);
-        //////////////////////////// AHZ ////////////////////////
-        //        ballPos = wm->ball->pos;
-        //        if(!goalcir.contains(ballPos) && theCircleAroundTheGoalCircle.contains(ballPos)){
-        //            dangerFlag = 1;
-        //        }
-        //        if(dangerFlag && wm->ball->vel.length() < 0.5){
-        //            debug(QString("Danger State"),D_SEPEHR);
-        //            aimLessCircle.intersection(goal2Ball,&sol[0],&sol[2]);
-        //            target = (sol[0].dist(knowledge->goalie->pos()) < sol[1].dist(knowledge->goalie->pos()) ? sol[0] : sol[1]);
-        //            //defs.clear();
-        //            dangerFlag = 0;
-        //        }
-        /////////////////////////////////////////////////////////////
-        //else{
+        goal2Ball.assign(wm->field->ourGoal(),wm->ball->pos);        
         dangerFlag = 0;
         /////changes for RoboCup 2016////////in one def, goalie dont move to nearest point///////
 #ifdef THEIR_DIRECT_CENTER
@@ -2679,8 +2662,7 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
             return target;
         }
 #endif
-        if(knowledge->goalie->pos().dist(AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos())) > 0.2 + thr && defenseAgents.size() > 1){
-            debug(QString("1"),D_SEPEHR);
+        if(knowledge->goalie->pos().dist(AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos())) > 0.2 + thr && defenseAgents.size() > 1){            
             target = AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos());
             draw(target);
             thr = 0;
@@ -2706,36 +2688,34 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
             }
             Segment2D AZBisecOpenSeg(ballPos , ballPos + Vector2D(cos(_PI*(AZBisecOpenAngle)/180),sin(_PI*(AZBisecOpenAngle)/180)).norm()*12);
             if(AZBisecOpenSeg.intersection(aimLessLine).isValid()){
-                ////////////////////////////////////////// AHZ /////////////////////////////
-
-                if(Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourGoalL()).degree() < 10 + angleDegreeThrNotStop){
-                    target = wm->field->ourGoalL() + Vector2D(0.12,0);
-                    angleDegreeThrNotStop = 5;
-                }
-                else if(Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourGoalR()).degree() < 10 + angleDegreeThrNotStop){
-                    target = wm->field->ourGoalR() + Vector2D(0.12,0);
-                    angleDegreeThrNotStop = 5;
+                ////////////// Added by AHZ ///////////////////////////////////
+                if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 6.0 + threshOld){
+                    target = AZBisecOpenSeg.intersection((aimLessLine));
+                    threshOld = 0.0;
                 }
                 else {
-                    target = AZBisecOpenSeg.intersection((aimLessLine));
-                    angleDegreeThrNotStop = 0;
+                    target = wm->field->ourGoal() + offsetGoalkeeperPosition;
+                    threshOld = 2.0;
+                }                
+                if(!isInThePenaltyArea(target)){
+                    target = getIntersectionWithPenaltyAreaGk(AZBisecOpenSeg);                    
                 }
+                ////////////////////////////////////////////////////////////////
+            }
+            else{                
+                target = AZBisecOpenSeg.intersection(goalLine) + offsetGoalkeeperPosition;
+            }
+            //////////////////////// Added by AHZ /////////////////////////////
 
-                //////////////////////////////////////////////////////////////////////////
-                if(isInThePenaltyArea(target)){
-                    debug(QString("penalty"),D_SEPEHR);
-                    draw(target);
-                }
-                else{
-                    target = getIntersectionWithPenaltyAreaGk(AZBisecOpenSeg);
-                    //////////// Added By AHZ ///////////////
-                    draw(target);
-                }
+            if(Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourGoalL()).degree() < 10 + angleDegreeThrNotStop){
+                target = wm->field->ourGoalL() + Vector2D(0.12,0);
+                angleDegreeThrNotStop = 5;
             }
-            else{
-                debug(QString("3"),D_SEPEHR);
-                target = AZBisecOpenSeg.intersection(goalLine) + Vector2D(0.1,0.0);
+            else if(Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourGoalR()).degree() < 10 + angleDegreeThrNotStop){
+                target = wm->field->ourGoalR() + Vector2D(0.12,0);
+                angleDegreeThrNotStop = 5;
             }
+            /////////////////////////////////////////////////////////////////
         }
         if (!wm->field->isInField(target) || target.x < -4.4){
 
