@@ -1381,6 +1381,9 @@ void CPlayOff::newFillRoleProperties() {
         if (masterPlan->common.matchedID.contains(i)) {
             if (roleAgent[i]->getRoleUpdate() == false) {
                 roleAgent[i]->setAgent(knowledge->getAgent(masterPlan->common.matchedID.value(i)));
+                if (positionAgent[i].getArgs().staticSkill == MoveSkill && positionAgent[i].getArgs(1).staticSkill == OneTouchSkill) {
+                    positionAgent[i].positionArg.replace(positionAgent[i].stateNumber,positionAgent[i].getArgs(1));
+                }
                 newAssignTask(roleAgent[i], positionAgent[i]);
                 roleAgent[i]->setRoleUpdate(true);
             }
@@ -2674,15 +2677,15 @@ bool CPlayOff::isOneTouchDone(CRolePlayOff * _roleAgent) {
 
 bool CPlayOff::isMoveDone(const CRolePlayOff * _roleAgent) {
     if (_roleAgent->getTimeBased()) {
-        //        debug(QString("EL : %1").arg(_roleAgent->getElapsed()), D_HOSSEIN);
-        //        debug(QString("GT : %1").arg(_roleAgent->getTime()), D_HOSSEIN);
+                debug(QString("EL : %1").arg(_roleAgent->getElapsed()), D_HOSSEIN);
+                debug(QString("GT : %1").arg(_roleAgent->getTime()), D_HOSSEIN);
         if (_roleAgent->getElapsed() > _roleAgent->getTime()) {
-            //            debug("D------------------", D_HOSSEIN);
+                        debug("D------------------", D_HOSSEIN);
             return true;
         }
     } else {
-        if (_roleAgent->getAgent()->pos().dist(_roleAgent->getTarget()) < 0.3) {
-            //            debug("DOOOOOOOOOOOOOOOOON", D_HOSSEIN);
+        if (_roleAgent->getAgent()->pos().dist(_roleAgent->getTarget()) < 1) {
+                        debug("DOOOOOOOOOOOOOOOOON", D_HOSSEIN);
             return true;
         }
     }
