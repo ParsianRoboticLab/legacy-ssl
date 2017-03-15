@@ -1304,15 +1304,17 @@ void CPlayOff::assignTask(int agentID, POffSkills agentSkill) {
         roleAgent[agentID]->setAvoidPenaltyArea(true);
         roleAgent[agentID]->setTargetDir(positionAgent[agentID].getArgs().staticAng);
         roleAgent[agentID]->setMaxVelocity(getMaxVel(agentID, positionAgent[agentID].stateNumber));
-        if(positionAgent[agentID].getArgs().staticPos == POBALLPOS)
-        {
+        if(positionAgent[agentID].getArgs().staticPos == POBALLPOS) {
             roleAgent[agentID]->setTarget(wm->ball->pos - tempVec*0.14);
             roleAgent[agentID]->setTargetDir(tempVec);
             roleAgent[agentID]->setSlow(true);
             roleAgent[agentID]->setMaxVelocity(1);
+        } else {
+            roleAgent[agentID]->setTarget(getMoveTarget(agentID, positionAgent[agentID].stateNumber));    
         }
-        else
-            roleAgent[agentID]->setTarget(getMoveTarget(agentID, positionAgent[agentID].stateNumber));
+
+
+
         roleAgent[agentID]->setSelectedSkill(roleSkill::GotopointAvoid);
         break;
     case NoSkill:
@@ -1422,6 +1424,12 @@ void CPlayOff::assignMove(CRolePlayOff* _roleAgent,
         _roleAgent -> setTargetDir(_posAgent.getArgs().staticAng);
         _roleAgent -> setSlow(false);
         _roleAgent -> setMaxVelocity(getMaxVel(_roleAgent, _posAgent.getArgs()));
+        //////NEXT TARGET
+        if (_posAgent.stateNumber + 1 < _posAgent.positionArg.size()) {
+            if (_posAgent.getArgs(1).staticSkill == MoveSkill) {
+                _roleAgent->setNextTarget(getMoveTarget(_posAgent.getArgs(1)));
+            }
+        }
 
     } else {
 

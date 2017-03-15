@@ -41,9 +41,9 @@ void CRolePlayOff::reset()
 }
 
 void CRolePlayOff::update() {
-    receivePassSkill->setAgent(agent);
     switch(selectedSkill) {
     case roleSkill::Gotopoint:
+        break;
     case roleSkill::GotopointAvoid:
         gotoPointAvoidSkill->init(target, targetDir);
 //        gotoPointAvoidSkill->setNextTarget(nextTarget);
@@ -51,6 +51,8 @@ void CRolePlayOff::update() {
         gotoPointAvoidSkill->setMaxVelocity(maxVelocity);
         gotoPointAvoidSkill->setAvoidBall(avoidBall);
         gotoPointAvoidSkill->setBallObstacleRadius(1);
+        gotoPointAvoidSkill->setAgent(agent);
+
         updated = false;
         break;
     case roleSkill::Kick:
@@ -67,6 +69,8 @@ void CRolePlayOff::update() {
 
         kickSkill->setChip(chip);
         kickSkill->setDontKick(!doPass);
+        kickSkill->setAgent(agent);
+
         if(!doPass && !chip) {
             kickSkill->setTarget(Vector2D(1000, 0));
         }
@@ -77,6 +81,8 @@ void CRolePlayOff::update() {
     case roleSkill::OneTouch:
         oneTouchSkill->setTarget(target);
         oneTouchSkill->setWaitPos(waitPos);
+        oneTouchSkill->setAgent(agent);
+
         if (wm->getIsSimulMode()) oneTouchSkill->setKickSpeed(8);
         else oneTouchSkill->setKickSpeed(kickSpeed);
         updated = false;
@@ -90,6 +96,7 @@ void CRolePlayOff::update() {
             receivePassSkill->setIATargetDir(targetDir);
             receivePassSkill->setIgnoreAngle(false);
         }
+        receivePassSkill->setAgent(agent);
         updated = false;
         break;
     default:
