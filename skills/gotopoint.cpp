@@ -936,6 +936,7 @@ CSkillGotoPointAvoid::CSkillGotoPointAvoid(CAgent *_agent) : CSkillGotoPoint(_ag
     counting = 0;
     averageDir.assign(0 , 0);
     addVel.assign(0,0);
+    nextPos.invalidate();
 }
 
 CSkillGotoPointAvoid::~CSkillGotoPointAvoid()
@@ -1136,6 +1137,7 @@ void CSkillGotoPointAvoid::execute()
         }
     }
 
+
     if ( D > 2.0)
         vf = 4.2;
     if ( D < 0.5)
@@ -1165,10 +1167,28 @@ void CSkillGotoPointAvoid::execute()
     }
     /////////////////////
 
+
     if( noAvoid || result.size() < 3){
         lllll = targetPos;
         vf = 0;
     }
+
+    if(0&&nextPos.isValid())
+    {
+
+        if(nextPos != target)
+        {
+            if(lllll == targetPos)
+            {
+                alpha = fabs(Vector2D::angleBetween(targetPos - agentPos , nextPos - targetPos).degree());
+                vf = -1.0259280143 * log(alpha) + 5.8;
+                debug(QString("vf: %1").arg(vf),D_MHMMD);
+                vf = max(vf , 0.5);
+            }
+        }
+    }
+    debug(QString("vf: %1, %2").arg(vf).arg(agent->vel().length()),D_MHMMD);
+    bangBang->setSmooth(true);// = false;
     bangBang->bangBangSpeed(agentPos,agentVel,agent->dir(),lllll,targetDir,vf,0.016,dVx,dVy,dW);
     agent->setRobotAbsVel(dVx + addVel.x,dVy + addVel.y,dW);
     agent->_ACC = 0;
