@@ -172,6 +172,8 @@ private:
     _PID *speedPidX;
     _PID *speedPidY;
     Vector2D agentPos;
+    Vector2D agentDir;
+    QQueue <Vector2D> dirQueue;
     double kkDist;
     double kkBallDist;
     double kkRadThresh;
