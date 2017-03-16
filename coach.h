@@ -1,3 +1,4 @@
+//be name khoda
 #ifndef CCOACH_H
 #define CCOACH_H
 
@@ -16,7 +17,7 @@
 #include "roles.h"
 #include "tools/planloader.h"
 #include "tools/loadplayoffjson.h"
-
+#include "util/rng.h"
 
 class CCoach {
 
@@ -26,7 +27,6 @@ public:
     ////////GUI Needed
     CPlayOff* playOff();
     CLoadPlayOffJson* getPlanLoader();
-
     bool inited;
     double playOnTime;
     CCoach(CAgent** _agents);
@@ -74,7 +74,7 @@ private:
     CTheirKickOff        *theirKickOff;
     CTheirIndirect       *theirIndirect;
     CTheirBallPlacement  *theirBallPlacement;
-    CDoubleSizeOurDirect *ourDirect;
+    CDoubleSizeOurDirect *ourDoubleSizeDirect;
 
     CForceStart          *forceStart;
     CDynamicAttack       *dynamicAttack;

@@ -8,6 +8,7 @@ CRoleDynamic::CRoleDynamic() {
     moveSkill    = new CSkillGotoPointAvoid(NULL);
 
     selectedSkill = DynamicEnums::NoSkill;
+    agent = NULL;
 }
 
 CRoleDynamic::~CRoleDynamic() {

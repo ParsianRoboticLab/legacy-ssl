@@ -242,7 +242,7 @@ public:
     float oneTouchKickThreshold();
     float kickThreshold();
     float kickClosedAngle();
-    Vector2D getReflectPos(Vector2D goal);
+    Vector2D getReflectPos(Vector2D goal, double dist);
     ////////////////////////////////<Mahi>
     Vector2D getReturnPos(Vector2D _goal);
     ///////////////////////////////////</Mahi>
@@ -304,7 +304,7 @@ public:
     bool selectedOur;
     int shirjezan; //shirje zan e mrl
     double currentTime();
-    long getCurrentKKTime();
+    long getCurrentTime();
     void playChanged();
     double findDangerPercent(CRobot *);
     double getEmptyAngle(Vector2D p,Vector2D p1, Vector2D p2, QList<Circle2D> obs, double& percent, double &mostOpenAngle, double& biggestAngle, bool oppGoal = true, bool _draw = false);

@@ -315,6 +315,7 @@ public:
     virtual QString whoami() {return "PlayOff";}
     bool firstTime = true;
     bool kickOffFirstTimeFlag = true;
+    bool deleted;
     //GUI
 
     QList< QList<SPlayOffPlan*> > updatePlans();
@@ -337,7 +338,7 @@ public:
 
     void setMasterMode(EMode _mode);
     EMode getMasterMode();
-
+    void reset();
     void setInitial(bool _init);
 private:
     bool initial = true;
@@ -545,7 +546,7 @@ private:
     bool havePassInPlan;
 
 protected:
-    void reset();
+
 };
 
 

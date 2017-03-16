@@ -86,6 +86,7 @@ public:
     //////////////////////////////////////
 
     static PositioningPlan position;
+    virtual void reset() = 0;
 private:
     void execPlay();
     QString formationName;
@@ -93,7 +94,6 @@ private:
     QList< holdingPoints > masterStaticPoints;
 
 protected:
-    virtual void reset() = 0;
 
     QMap<QString , EditData*> *editData;
     QList <int> agentsID;

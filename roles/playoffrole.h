@@ -14,10 +14,11 @@ public:
 
     CRolePlayOff();
     ~CRolePlayOff();
+    void reset();
     void execute();
     int resetTime();
     int getElapsed() const;
-
+    bool deleted;
     CSkillKick *kickSkill;
     CSkillReceivePass *receivePassSkill;
     CSkillKickOneTouch *oneTouchSkill;
@@ -27,6 +28,7 @@ public:
     ClassProperty(CRolePlayOff, CAgent*, Agent, agent, updated);
     ClassProperty(CRolePlayOff, roleSkill::ESkill, SelectedSkill, selectedSkill, updated);
     ClassProperty(CRolePlayOff, Vector2D, Target, target, updated);
+    ClassProperty(CRolePlayOff, Vector2D, NextTarget, nextTarget, updated);
     ClassProperty(CRolePlayOff, Vector2D, TargetDir, targetDir, updated);
     ClassProperty(CRolePlayOff, Vector2D, TargetVel, targetVel, updated);
     ClassProperty(CRolePlayOff, bool, AvoidPenaltyArea, avoidPenaltyArea, updated);

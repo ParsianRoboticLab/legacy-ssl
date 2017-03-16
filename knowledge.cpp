@@ -279,7 +279,7 @@ double CKnowledge::currentTime()
     return CProfiler::getTime();
 }
 
-long CKnowledge::getCurrentKKTime()
+long CKnowledge::getCurrentTime()
 {
     return CProfiler::getKKTime();
 }
@@ -1542,16 +1542,15 @@ float CKnowledge::kickClosedAngle()
     return conf()->Coach_kickClosedAngle();
 }
 
-Vector2D CKnowledge::getReflectPos(Vector2D goal)
+Vector2D CKnowledge::getReflectPos(Vector2D goal, double dist)
 {
-
     Vector2D res;
     Vector2D ballPos(wm->ball->pos);
     Segment2D dummySeg(goal,goal+Vector2D(-5,0));
     Vector2D nearest(dummySeg.nearestPoint(ballPos));
     Vector2D sol1,sol2;
     Rect2D oppField(0,_FIELD_HEIGHT/2 -0.01,_FIELD_WIDTH/2 + 0.01,_FIELD_HEIGHT -0.01);
-    Circle2D oppCircle(Vector2D(_FIELD_WIDTH/2,0)- Vector2D(1,0),3);
+    Circle2D oppCircle(Vector2D(_FIELD_WIDTH/2,0)- Vector2D(1,0),dist);
 
 
 
