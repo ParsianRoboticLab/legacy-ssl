@@ -979,12 +979,11 @@ void CCoach::virtualTheirPlayOffState()
         transientFlag = false;
     }
 
-    if(isBallcollide()){
+    if(isBallcollide() && 0){ // TODO : till we fix function && 0
         transientFlag = false;
     }
 
     knowledge->transientFlag = transientFlag;
-
     lastState  = currentState;
 
 }

@@ -116,7 +116,7 @@ private:
     QTime trasientTimeOut;
     int translationTimeOutTime;
     bool isBallcollide();
-    void calcDesiredMarkCounts();
+    void calcDesiredMarkCounts(); // not used at all
     ///////////////////////new play make and supporter chooser
     int playmakeId,supporterId;
     double playMakeTh;
