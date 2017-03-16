@@ -185,7 +185,7 @@ public:
 
     bool isAnyDefenderMarking() const;
     ///////Mhmmd///////////
-    void getDefencePoses(Vector2D *poses);
+    void fillDefencePositionsTo(Vector2D *poses);
     //////////////////////
 
     //////////////////HMD/////////////////
@@ -341,7 +341,8 @@ private:
     bool defClearFlag;
 
     double overDefThr;
-
+    /////////////////////////MAHI
+    int decideNumOfMarksInPlayOff(int _defenseCount);
 };
 
 #endif // DEFENSE_H

@@ -794,7 +794,7 @@ void CMarkPlan::findBallOwnership()
     // if (count() == 0) return;
     oppOffenders.clear();
     ourOffenders.clear();
-    ourOffenders = wm->our.t->activeAgents;
+    ourOffenders = wm->our.data->activeAgents;
     /*for (int i=0;i<count();i++)
         {
                 ourOffenders.append(agent(i)->id());
@@ -818,7 +818,7 @@ void CMarkPlan::findBallOwnership()
     }
     // draw(QString("our: %1 , opp: %2").arg(s1).arg(s2), Vector2D(-2, -2.4), "blue");
 
-    NewFastestToBall f = knowledge->newFastestToBall(0.016, wm->our.t->activeAgents, wm->opp.t->activeAgents);//ourOffenders, oppOffenders);
+    NewFastestToBall f = knowledge->newFastestToBall(0.016, wm->our.data->activeAgents, wm->opp.data->activeAgents);//ourOffenders, oppOffenders);
     //NewFastestToBall f = knowledge->findFastest(0.016, ourOffenders, oppOffenders);
     fastestTime = f.ourFastestTime() - f.oppFastestTime();
 
@@ -1077,7 +1077,7 @@ void CMarkPlan::extractGameSituation(){
         draw ("We Lost It!", Vector2D(-2,1.5), "white");
     }
 
-    NewFastestToBall result = knowledge->newFastestToBall(0.016 , wm->our.t->activeAgents , wm->opp.t->activeAgents);
+    NewFastestToBall result = knowledge->newFastestToBall(0.016 , wm->our.data->activeAgents , wm->opp.data->activeAgents);
     double ourTim = -1 , oppTim = -1;
     if( result.ourF.size() )
         ourTim = result.ourF.at(0).first;

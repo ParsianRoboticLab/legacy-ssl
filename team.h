@@ -15,7 +15,7 @@ struct CTeamData
 class CTeam
 {
 public:
-    CTeamData *t;
+    CTeamData *data;
     CTeam(bool isOurTeam,bool noKalman);
     ~CTeam();
     CRobot* operator [](const int i);

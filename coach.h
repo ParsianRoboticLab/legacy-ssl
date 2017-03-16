@@ -110,18 +110,18 @@ private:
     void decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers);
     QTime defenseTimeForVisionProblem[2];
     double shotToGoalthr ;
-    void virtualPlayOffState();
-    bool translationFlag;
+    void virtualTheirPlayOffState();
+    bool transientFlag;
     CKnowledge::State lastState;
-    QTime translateTimeOut;
+    QTime trasientTimeOut;
     int translationTimeOutTime;
     bool isBallcollide();
-    void calcDesiredMarkCounts();
+    void calcDesiredMarkCounts(); // not used at all
     ///////////////////////new play make and supporter chooser
     int playmakeId,supporterId;
     double playMakeTh;
     int lastPlayMake;
-    void choosePlaymakeAndSupporter(bool needSupporter,bool defenseFirst);
+    void choosePlaymakeAndSupporter(bool defenseFirst);
 
     ///////////////////////////////////////////////
 

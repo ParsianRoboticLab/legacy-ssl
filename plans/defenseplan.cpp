@@ -711,7 +711,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
 
 
         draw(QString("Last Condition"));
-        if(playOff || knowledge->translationFlag)
+        if(playOff || knowledge->transientFlag)
         {
             QList<QPair<Vector2D, double> > tempsorted = sortdangerpassplayoff(oppAgentsToMarkPos);
 
@@ -1103,7 +1103,7 @@ void DefensePlan::setPointToKick()
 void DefensePlan::initVars(float goalCircleRad)
 {
 #ifndef OLD_FASTEST
-    fastestToBall = knowledge->newFastestToBall(0.016 , wm->our.t->activeAgents , wm->opp.t->activeAgents);
+    fastestToBall = knowledge->newFastestToBall(0.016 , wm->our.data->activeAgents , wm->opp.data->activeAgents);
     int ourFastest = fastestToBall.ourFastest();
 #else
     fastestToBall = knowledge->findFastestToBall(wm->our.t->activeAgents, wm->opp.t->activeAgents);
@@ -2230,6 +2230,17 @@ bool DefensePlan::defenseCheckBallDangerForOneTouch(){
     return false;
 }
 
+int DefensePlan::decideNumOfMarksInPlayOff(int _defenseCount) {
+
+    // used in playoff without counting goalie
+    // TODO: knowlege->tobemark should be replaced
+    if(policy()->Mark_ManToManAllTransiant() && knowledge->toBeMopps.count() < _defenseCount ){
+         return _defenseCount - knowledge->toBeMopps.count();
+    } else {
+        return _defenseCount;
+    }
+}
+
 bool DefensePlan::checkStillBeingInOneTouch(bool goalieFlag){
     if(goalieFlag) {
 
@@ -2554,11 +2565,11 @@ bool DefensePlan::isBallGoingToOppArea()
 
 //////// Mhmmd/////////For sending the positioning data of defences to coach////////
 
-void DefensePlan::getDefencePoses(Vector2D *poses)
+void DefensePlan::fillDefencePositionsTo(Vector2D *poses)
 {
-    for (int i=0 ; i<defenseAgents.count() ; i++)
+    for (int i=0 ; i < defenseAgents.count() ; i++) {
         poses[i] = defensePoints[i];
-    ///// end
+    }
 }
 
 ///////////Arash.Z//////////Functions needed for goalie//////////
@@ -3430,22 +3441,17 @@ int DefensePlan::decideNumOfMarks(double _overDef)
                     || (knowledge->getGameState() == CKnowledge::TheirIndirectKick)
                     );
     if(defenseCount > 0) {
-        if (playOff ) {
-            return defenseCount - knowledge->desiredDefCount;
-        }
-        else if(knowledge->translationFlag) {
+        if (playOff) {
+            return decideNumOfMarksInPlayOff(defenseCount);
+        } else if(knowledge->transientFlag) {
             return defenseCount - 1;
-        }
-        else if(playOn) {
-
-
+        } else if(playOn) {
             if((Vector2D::angleOf(BallPos,ourGoal,leftCorner).abs() < 20 + overDefThr
                 ||Vector2D::angleOf(BallPos,ourGoal,rightCorner).abs() < 20 + overDefThr)
                     && defenseCount > 1 && !Circle2D((wm->field->ourGoal() - Vector2D(0.2,0)),1.60).contains(wm->ball->pos)) {
                 overDefThr = 5;
                 return 1;
-            }
-            else {
+            } else {
                 overDefThr = 0;
             }
         }
@@ -3491,7 +3497,7 @@ bool DefensePlan::checkIndirectAreaPass(Vector2D opp){
     double indirectAvoidRadius = 0.5 + 0.1;
     Circle2D indirectAvoidCircle(wm->ball->pos, indirectAvoidRadius);
 
-    if (indirectAvoidCircle.contains(PassBlockRatio(segmentperpass, opp).first()) && !knowledge->translationFlag)
+    if (indirectAvoidCircle.contains(PassBlockRatio(segmentperpass, opp).first()) && !knowledge->transientFlag)
         return 1;
     else
     {
@@ -3508,7 +3514,7 @@ bool DefensePlan::checkIndirectAreaShoot(Vector2D opp) {
     Circle2D indirectAvoidCircle(wm->ball->pos, indirectAvoidRadius);
 
 
-    if (indirectAvoidCircle.contains(ShootBlockRatio(segmentpershoot, opp).first()) && !knowledge->translationFlag)
+    if (indirectAvoidCircle.contains(ShootBlockRatio(segmentpershoot, opp).first()) && !knowledge->transientFlag)
         return 1;
     else
     {
@@ -3569,7 +3575,7 @@ void DefensePlan::findPos(int _markAgentSize)
     ///////////////// Man To Man AllTransiant Mode for Mark ////////////////////
     if(policy()->Mark_ManToManAllTransiant())
     {
-        if(knowledge->translationFlag)
+        if(knowledge->transientFlag)
             segmentpershoot = 0.05;
         else
             segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
@@ -3627,7 +3633,7 @@ void DefensePlan::findOppAgentsToMark(QList <Vector2D> _realDefTargets)
     Segment2D tempMarkSeg;
     Vector2D sol1,sol2;
     // oppAgentsToMark.first()->pos = Vector2D(1,1);
-    if(!knowledge->translationFlag)
+    if(!knowledge->transientFlag)
     {
         for(int i = 0 ; i < oppAgentsToMark.count() ;i ++ )
         {
@@ -3939,7 +3945,7 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
     return tempQlist;
 }
 bool DefensePlan::lookat(){
-    if(knowledge->translationFlag && (policy()->Mark_ManToManAllTransiant() || policy()->Mark_ManToManSomeTransiant()))
+    if(knowledge->transientFlag && (policy()->Mark_ManToManAllTransiant() || policy()->Mark_ManToManSomeTransiant()))
         return 1;
     else
         return 0;

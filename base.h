@@ -4,8 +4,9 @@
 
 #define REVNUM "$Rev: 2484 $"
 
+// TODO : remove this macro
 #define KK_PLAYON
-#define PARSIANWORKSHOP
+//#define PARSIANWORKSHOP
 //#define SIMULATION_MODE
 //#define GAME_MODE
 
@@ -239,11 +240,3 @@ struct GameStatePacket
 #define for_visible_agents(AGENTS, i) for (int i=0;i<_NUM_PLAYERS;i++) if (AGENTS[i]->isVisible())
 
 #endif // BASE_H
-
-/*
-
-TODO
-
-* Referee: http://www.qtcentre.org/forum/archive/index.php/t-3347.html
-
-*/

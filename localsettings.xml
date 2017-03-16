@@ -17,7 +17,7 @@
 			127.0.0.1
 		</Var>
 		<Var name="Simulator Port" type="int" minval="" maxval="">
-			10025
+			20011
 		</Var>
 		<Var name="Serial Send Device" type="string">
 			/dev/ttyUSB0
