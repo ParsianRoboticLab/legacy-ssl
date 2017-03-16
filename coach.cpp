@@ -302,8 +302,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
     } else if( knowledge->isOurNonPlayOnKick() ) {
         preferedDefenseCounts = 0;
     } else if( knowledge->isTheirNonPlayOnKick()) {
-// TODO : fix when agentcount is 0
-        preferedDefenseCounts = agentsCount - 1;
+        preferedDefenseCounts = max(agentsCount - 1, 0);
     } else if (transientFlag
                &&  knowledge->getGameState() != CKnowledge::TheirKickOff
                ||  knowledge->getGameState() == CKnowledge::TheirPenaltyKick) {
@@ -876,26 +875,21 @@ QList<int> CCoach::findBestPoses(int numberOfPositionAgents,bool semiDynamic)
 
 }
 
-// TODO : FIXME : DASTAN
+// TODO : fix this dastan
 void CCoach::assignDefenseAgents(int defenseCount){
 
 
     QQueue<int> ids = wm->our.data->activeAgents;
-    if( goalieAgent ){
+    if( goalieAgent ) {
         ids.removeOne(goalieAgent->id());
     }
-    double nearestDist = 1000000;
-    double nearestRobot = -1;
-
-    if(playmakeId != -1)
-    {
+    if(playmakeId != -1) {
         ids.removeOne(playmakeId);
     }
-
-    // TODO : fix this function interface
-    defenses.getDefencePoses(defenseTargets); //fill 'defenseTarget'
-
+    defenses.fillDefencePositionsTo(defenseTargets);
     //////////////////calculate playmake dist
+    double nearestDist = 1000000;
+    double nearestRobot = -1;
     double nDistFPM = 10000;
     int nDistId = -1;
     Circle2D ourDefenseArea(wm->field->ourGoal() + Vector2D(-0.2 , 0),1.6);
@@ -910,7 +904,6 @@ void CCoach::assignDefenseAgents(int defenseCount){
     && knowledge->getGameState() == CKnowledge::Start ) {
 
         exeptionPlayMakeThr = 0.2;
-        exeptionPlayMake = knowledge->getAgent(nDistId);
         // TODO : should be checked
         //        ids.removeOne(nDistId);
     } else {

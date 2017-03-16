@@ -2565,7 +2565,7 @@ bool DefensePlan::isBallGoingToOppArea()
 
 //////// Mhmmd/////////For sending the positioning data of defences to coach////////
 
-void DefensePlan::getDefencePoses(Vector2D *poses)
+void DefensePlan::fillDefencePositionsTo(Vector2D *poses)
 {
     for (int i=0 ; i < defenseAgents.count() ; i++) {
         poses[i] = defensePoints[i];

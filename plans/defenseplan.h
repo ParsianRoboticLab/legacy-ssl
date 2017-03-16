@@ -185,7 +185,7 @@ public:
 
     bool isAnyDefenderMarking() const;
     ///////Mhmmd///////////
-    void getDefencePoses(Vector2D *poses);
+    void fillDefencePositionsTo(Vector2D *poses);
     //////////////////////
 
     //////////////////HMD/////////////////
