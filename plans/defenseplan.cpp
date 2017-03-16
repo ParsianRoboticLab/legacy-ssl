@@ -2230,6 +2230,17 @@ bool DefensePlan::defenseCheckBallDangerForOneTouch(){
     return false;
 }
 
+int DefensePlan::decideNumOfMarksInPlayOff(int _defenseCount) {
+
+    // used in playoff without counting goalie
+    // TODO: knowlege->tobemark should be replaced
+    if(policy()->Mark_ManToManAllTransiant() && knowledge->toBeMopps.count() < _defenseCount ){
+         return _defenseCount - knowledge->toBeMopps.count();
+    } else {
+        return _defenseCount;
+    }
+}
+
 bool DefensePlan::checkStillBeingInOneTouch(bool goalieFlag){
     if(goalieFlag) {
 
@@ -2556,9 +2567,9 @@ bool DefensePlan::isBallGoingToOppArea()
 
 void DefensePlan::getDefencePoses(Vector2D *poses)
 {
-    for (int i=0 ; i<defenseAgents.count() ; i++)
+    for (int i=0 ; i < defenseAgents.count() ; i++) {
         poses[i] = defensePoints[i];
-    ///// end
+    }
 }
 
 ///////////Arash.Z//////////Functions needed for goalie//////////
@@ -3431,7 +3442,7 @@ int DefensePlan::decideNumOfMarks(double _overDef)
                     );
     if(defenseCount > 0) {
         if (playOff) {
-            return defenseCount - knowledge->desiredDefCount;
+            return decideNumOfMarksInPlayOff(defenseCount);
         } else if(knowledge->transientFlag) {
             return defenseCount - 1;
         } else if(playOn) {

@@ -4,6 +4,7 @@
 
 #define REVNUM "$Rev: 2484 $"
 
+// TODO : remove this macro
 #define KK_PLAYON
 //#define PARSIANWORKSHOP
 //#define SIMULATION_MODE

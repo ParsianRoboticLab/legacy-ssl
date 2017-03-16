@@ -121,7 +121,7 @@ private:
     int playmakeId,supporterId;
     double playMakeTh;
     int lastPlayMake;
-    void choosePlaymakeAndSupporter(bool needSupporter,bool defenseFirst);
+    void choosePlaymakeAndSupporter(bool defenseFirst);
 
     ///////////////////////////////////////////////
 

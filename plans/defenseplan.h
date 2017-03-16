@@ -341,7 +341,8 @@ private:
     bool defClearFlag;
 
     double overDefThr;
-
+    /////////////////////////MAHI
+    int decideNumOfMarksInPlayOff(int _defenseCount);
 };
 
 #endif // DEFENSE_H

@@ -266,7 +266,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         lastPreferredDefenseCounts = preferedDefenseCounts;
         return;
     } else {
-        preferedDefenseCounts = policy()->Formation_Defense();
+        preferedDefenseCounts = policy()->Formation_Defense(); // handle stop
     }
 
     int agentsCount = wm->our.data->activeAgents.count();
@@ -283,7 +283,8 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         if(wm->opp.active(i)->pos.x <= 0) oppsAttack = true;
     }
 
-    if( knowledge->isStart() ) {
+    // TODO : should be fixed :)
+    if( knowledge->isStart() && transientFlag == false) {
 
         if (agentsCount == 1) {
             preferedDefenseCounts = 0; // just one playmake
@@ -300,9 +301,11 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
     } else if( knowledge->isOurNonPlayOnKick() ) {
         preferedDefenseCounts = 0;
     } else if( knowledge->isTheirNonPlayOnKick()) {
+// TODO : fix when agentcount is 0
         preferedDefenseCounts = agentsCount - 1;
     } else if (transientFlag
-               &&  knowledge->getGameState() != CKnowledge::TheirKickOff){
+               &&  knowledge->getGameState() != CKnowledge::TheirKickOff
+               ||  knowledge->getGameState() == CKnowledge::TheirPenaltyKick) {
         preferedDefenseCounts = agentsCount;
     }
 
@@ -313,25 +316,28 @@ void CCoach::calcDesiredMarkCounts()
 {
 
     int agentsCount = wm->our.data->activeAgents.count();
-    if( agentsCount == 2 ){
-        knowledge->desiredDefCount = 0;
-    }
-    else if( agentsCount == 3 ){
-
-        if(knowledge->toBeMopps.count() == 0)
-            knowledge->desiredDefCount = 1;
-        else if(knowledge->toBeMopps.count() <=2 )
-        {
-            knowledge->desiredDefCount = 2 - knowledge->toBeMopps.count();
+    if (goalieAgent != NULL) {
+        if (goalieAgent->isVisible()) {
+            agentsCount--;
         }
-        else
-        {
+    }
+
+    // used in playoff without counting goalie
+
+    if( agentsCount == 2 ) {
+        knowledge->desiredDefCount = 0;
+    } else if( agentsCount == 3 ) {
+
+        if(knowledge->toBeMopps.count() == 0) {
+            knowledge->desiredDefCount = 1;
+        } else if(knowledge->toBeMopps.count() <=2 ) {
+            knowledge->desiredDefCount = 2 - knowledge->toBeMopps.count();
+        } else {
             knowledge->desiredDefCount = 0;
         }
 
 
-    }
-    else if( agentsCount == 4  ){
+    } else if( agentsCount == 4  ){
 
 
         if(knowledge->toBeMopps.count() == 0)
@@ -345,8 +351,7 @@ void CCoach::calcDesiredMarkCounts()
             knowledge->desiredDefCount = 0;
         }
 
-    }
-    else if( agentsCount == 5 ){
+    } else if( agentsCount == 5 ){
 
         if(knowledge->toBeMopps.count() == 0)
             knowledge->desiredDefCount = 2;
@@ -381,8 +386,7 @@ void CCoach::assignGoalieAgent( int goalieID ){
     QQueue<int> ids = wm->our.data->activeAgents;
     goalieAgent = NULL;
     if( ids.contains(goalieID) ){
-        CAgent *agnt = knowledge->getAgent(goalieID);
-        goalieAgent = agnt;
+        goalieAgent = knowledge->getAgent(goalieID);
     }
 }
 CKnowledge::ballPossesionState CCoach::isBallOurs()
@@ -871,7 +875,8 @@ QList<int> CCoach::findBestPoses(int numberOfPositionAgents,bool semiDynamic)
 
 }
 
-void CCoach::assignDefenseAgents( int defenseCount){
+// TODO : FIXME : DASTAN
+void CCoach::assignDefenseAgents(int defenseCount){
 
 
     QQueue<int> ids = wm->our.data->activeAgents;
@@ -886,7 +891,9 @@ void CCoach::assignDefenseAgents( int defenseCount){
         ids.removeOne(playmakeId);
     }
 
-    defenses.getDefencePoses(defenseTargets);
+    // TODO : fix this function interface
+    defenses.getDefencePoses(defenseTargets); //fill 'defenseTarget'
+
     //////////////////calculate playmake dist
     double nDistFPM = 10000;
     int nDistId = -1;
@@ -897,29 +904,28 @@ void CCoach::assignDefenseAgents( int defenseCount){
             nDistId = ids[i];
         }
     }
-    if(nDistFPM < 0.3 + exeptionPlayMakeThr && !ourDefenseArea.contains(wm->ball->pos) && knowledge->getGameState() == CKnowledge::Start ) {
+    if (nDistFPM < 0.3 + exeptionPlayMakeThr
+    && !ourDefenseArea.contains(wm->ball->pos)
+    && knowledge->getGameState() == CKnowledge::Start ) {
+
         exeptionPlayMakeThr = 0.2;
         exeptionPlayMake = knowledge->getAgent(nDistId);
-        ids.removeOne(nDistId);
-    }
-    else {
+        // TODO : should be checked
+        //        ids.removeOne(nDistId);
+    } else {
         exeptionPlayMakeThr = 0;
     }
 
     defenseAgents.clear();
-    for(int i =0 ;i < defenseCount ; i++)
-    {
+    for(int i =0 ;i < defenseCount ; i++) {
         nearestDist = 1000000;
-        for(int j = 0 ; j < ids.count() ; j++)
-        {
-            if(wm->our[ids[j]]->pos.dist(defenseTargets[i]) < nearestDist)
-            {
+        for(int j = 0 ; j < ids.count() ; j++) {
+            if(wm->our[ids[j]]->pos.dist(defenseTargets[i]) < nearestDist) {
                 nearestDist = wm->our[ids[j]]->pos.dist(defenseTargets[i]);
                 nearestRobot =  ids[j];
             }
         }
-        if(nearestRobot>=0)
-        {
+        if(nearestRobot>=0) {
             defenseAgents.append(knowledge->getAgent(nearestRobot));
             ids.removeOne(nearestRobot);
         }
@@ -935,8 +941,6 @@ void CCoach::assignDefenseAgents( int defenseCount){
 
     lastDefenseAgents.clear();
     lastDefenseAgents.append(defenseAgents);
-
-
 
     knowledge->defenseAgents.clear();
     knowledge->defenseAgents.append(defenseAgents);
@@ -994,20 +998,18 @@ void CCoach::virtualTheirPlayOffState()
 void CCoach::decideDefense(){
     assignGoalieAgent(preferedGoalieAgent);
     assignDefenseAgents(preferedDefenseCounts);
-    calcDesiredMarkCounts();
 
-
+    // TODO : fix this
     if( knowledge->getGameState() == CKnowledge::TheirPenaltyKick ){
         defenseAgents.clear();
         defenses.initGoalie(goalieAgent);
         defenses.initDefense(defenseAgents);
         defenses.execute();
-    }
-    else{
+    } else {
         defenses.initGoalie(goalieAgent);
         defenses.initDefense(defenseAgents);
-        //		defenses.debugAgents("Defense");
         defenses.execute();
+//        		defenses.debugAgents("Defense");
     }
 }
 
@@ -1074,55 +1076,54 @@ void CCoach::updateAttackState()
     }
 
 }
-void CCoach::choosePlaymakeAndSupporter(bool needSupporter,bool defenseFirst)
+void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
 {
     QList<int> ourPlayers = wm->our.data->activeAgents;
-    static QList<int> lastPlayers;
-    if( goalieAgent != NULL ){
+    if( goalieAgent != NULL ) {
         ourPlayers.removeOne(goalieAgent->self()->id);
     }
+
     if(defenseFirst){
         for( int i=0 ; i<defenseAgents.size() ; i++ ){
-            if( ourPlayers.contains(defenseAgents.at(i)->self()->id) ){
+            if ( ourPlayers.contains(defenseAgents.at(i)->self()->id) ) {
                 ourPlayers.removeOne(defenseAgents.at(i)->self()->id);
+            } else {
+                debug("[coach] Bad Defense assining", D_ERROR);
             }
         }
     }
 
-
-    ////////////////////first we choose our playmake
-    double playMakeParam[6];//edited 5 to 6
-    double biggestPoint = -1000;
-    double ballVelCoef = 0.5;
-    for(int i = 0 ; i < ourPlayers.count() ; i++)
-    {
-        playMakeParam[i] = 1/(wm->our[ourPlayers[i]]->pos.dist(wm->ball->pos+wm->ball->vel*ballVelCoef));
-        if(ourPlayers[i] == lastPlayMake)
-            playMakeParam[i] += playMakeTh;
+    if (ourPlayers.size() == 0) {
+        playmakeId = -1;
+        lastPlayMake = -1;
     }
 
-    for(int i = 0 ; i < ourPlayers.count() ; i++)
-    {
-        if(playMakeParam[i] > biggestPoint)
-        {
+    ////////////////////first we choose our playmake
+    double playMakeParam[6] = {0};
+    double biggestPoint = -1000;
+    double ballVelCoef = 0.5;
+    for(int i = 0 ; i < ourPlayers.count() ; i++) {
+        playMakeParam[i] = 1 / (wm->our[ourPlayers[i]]->pos.dist(wm->ball->pos+wm->ball->vel*ballVelCoef));
+        if(ourPlayers[i] == lastPlayMake) {
+            playMakeParam[i] += playMakeTh;
+        }
+    }
+
+    for(int i = 0 ; i < ourPlayers.count() ; i++) {
+        if(playMakeParam[i] > biggestPoint) {
             biggestPoint = playMakeParam[i];
             playmakeId = ourPlayers[i];
         }
     }
 
-
-    if(playmakeId != lastPlayMake )
-    {
-        if(playMakeIntention.elapsed() > playMakeIntentionInterval)
-        {
+    if (playmakeId != lastPlayMake) {
+        if (playMakeIntention.elapsed() > playMakeIntentionInterval) {
             playMakeIntention.restart();
-        }
-        else
-        {
+        } else {
             playmakeId = lastPlayMake;
         }
-
     }
+
     lastPlayMake = playmakeId;
     //playmakeId = 11;
 
@@ -1651,9 +1652,9 @@ void CCoach::execute()
     playmakeId = -1;
     if((critArea.contains(wm->ball->pos) && wm->field->isInField(wm->ball->pos)) || wm->ball->vel.length() > 2) {
         decideDefense();
-        choosePlaymakeAndSupporter(false,true);
+        choosePlaymakeAndSupporter(true);
     } else {
-        choosePlaymakeAndSupporter(false,false);
+        choosePlaymakeAndSupporter(false);
         decideDefense();
     }
 
@@ -1661,26 +1662,16 @@ void CCoach::execute()
 
     decideAttack();
 
-
+    // Old Role Base Execution -- used for block, old_playmaker
     checkRoleAssignments();
-
-    //  debug(QString("%1) Coach Time2: %2").arg(knowledge->frameCount).arg(timer.elapsed()) , D_MASOOD);
-    //  timer.restart();
-
-    for (int i=0;i<_NUM_PLAYERS;i++)
-    {
-        if (agents[i]->isVisible() && agents[i]->idle == false)
-        {
-            if (agents[i]->skill != NULL)
-            {
+    for (int i=0;i<_NUM_PLAYERS;i++) {
+        if (agents[i]->isVisible() && agents[i]->idle == false) {
+            if (agents[i]->skill != NULL) {
                 agents[i]->skill->execute();
             }
         }
     }
 
-    //  debug(QString("%1) Coach Time3: %2").arg(knowledge->frameCount).arg(timer.elapsed()) , D_MASOOD);
-    //  timer.restart();
-    //
     saveGoalie(); //if goalie is trapped under goal net , move it forward to be seen by the vision again
 }
 
