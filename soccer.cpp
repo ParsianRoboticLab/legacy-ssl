@@ -416,7 +416,7 @@ void CSoccer::findSupporterRoles(){
             nearestToBallDist = oppsToMark[i]->pos.dist(wm->ball->pos);
         }
     }
-    if(wm->opp[nearestToBall]->pos.dist(wm->ball->pos) && !knowledge->translationFlag)
+    if(wm->opp[nearestToBall]->pos.dist(wm->ball->pos) && !knowledge->transientFlag)
     {
         oppsToMark.removeOne(wm->opp[nearestToBall]);
     }

@@ -9,7 +9,7 @@
 bool
 IntentionPosition::finished()
 {
-	if( wm->our.t->activeAgents.contains(M_agent_id) == false )
+	if( wm->our.data->activeAgents.contains(M_agent_id) == false )
 	{
 		return true;
 	}
