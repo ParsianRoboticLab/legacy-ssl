@@ -256,10 +256,11 @@ void CCoach::doIntention(){
 void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
 
 
-    // TODO : Fix It
-    // preferedGoalieAgent = wm->our.data->goalieID;
-    preferedGoalieAgent = policy()->Formation_Goalie();
-
+    if (policy()->Formation_GoalieFromGUI()) {
+        preferedGoalieAgent = policy()->Formation_Goalie();
+    } else {
+        preferedGoalieAgent = wm->our.data->goalieID;
+    }
 
     if( policy()->Formation_StrictFormation() ) {
         preferedDefenseCounts = policy()->Formation_Defense();
