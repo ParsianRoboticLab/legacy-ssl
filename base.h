@@ -240,11 +240,3 @@ struct GameStatePacket
 #define for_visible_agents(AGENTS, i) for (int i=0;i<_NUM_PLAYERS;i++) if (AGENTS[i]->isVisible())
 
 #endif // BASE_H
-
-/*
-
-TODO
-
-* Referee: http://www.qtcentre.org/forum/archive/index.php/t-3347.html
-
-*/
