@@ -1810,7 +1810,7 @@ bool paladiumDemo::isWaitDone(int index)
 {
     if(index < 0) index = 0;
     if(index > 5) index = 5;
-    if(knowledge->getCurrentKKTime() - lastTime > pointList[index].at(currentIndex).wait)
+    if(knowledge->getCurrentTime() - lastTime > pointList[index].at(currentIndex).wait)
         return true;
     else
         return false;
@@ -1889,7 +1889,7 @@ void paladiumDemo::execute()
         }
     }
     else
-        lastTime = knowledge->getCurrentKKTime();
+        lastTime = knowledge->getCurrentTime();
 }
 
 void CMainApplication::Experimental1()

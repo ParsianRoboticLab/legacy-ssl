@@ -2,7 +2,7 @@
 
 
 CRolePlayOff::CRolePlayOff() {
-    qDebug() << "HEY";
+    deleted = false;
     gotoPointAvoidSkill = new CSkillGotoPointAvoid(NULL);
     kickSkill = new CSkillKick(NULL);
     oneTouchSkill = new CSkillKickOneTouch(NULL);
@@ -20,18 +20,39 @@ CRolePlayOff::~CRolePlayOff() {
     delete receivePassSkill;
 }
 
+void CRolePlayOff::reset()
+{
+
+    // TODO : JUST FOR TEST ! IF NOTHING GOES WRONG WE'LL W+BE SAFE !
+//    delete gotoPointAvoidSkill;
+//    delete kickSkill;
+//    delete oneTouchSkill;
+//    delete receivePassSkill;
+//    gotoPointAvoidSkill = new CSkillGotoPointAvoid(NULL);
+//    kickSkill = new CSkillKick(NULL);
+//    oneTouchSkill = new CSkillKickOneTouch(NULL);
+//    receivePassSkill = new CSkillReceivePass(NULL);
+//    updated = true;
+
+    deleted = false;
+    roleUpdate = false;
+    timer.start();
+    agentID = -1;
+}
+
 void CRolePlayOff::update() {
     switch(selectedSkill) {
     case roleSkill::Gotopoint:
-
         break;
     case roleSkill::GotopointAvoid:
-        gotoPointAvoidSkill->setAgent(agent);
         gotoPointAvoidSkill->init(target, targetDir);
+//        gotoPointAvoidSkill->setNextTarget(nextTarget);
         gotoPointAvoidSkill->setAvoidPenaltyArea(avoidPenaltyArea);
         gotoPointAvoidSkill->setMaxVelocity(maxVelocity);
         gotoPointAvoidSkill->setAvoidBall(avoidBall);
         gotoPointAvoidSkill->setBallObstacleRadius(1);
+        gotoPointAvoidSkill->setAgent(agent);
+
         updated = false;
         break;
     case roleSkill::Kick:
@@ -47,8 +68,9 @@ void CRolePlayOff::update() {
         }
 
         kickSkill->setChip(chip);
-        kickSkill->setAgent(agent);
         kickSkill->setDontKick(!doPass);
+        kickSkill->setAgent(agent);
+
         if(!doPass && !chip) {
             kickSkill->setTarget(Vector2D(1000, 0));
         }
@@ -59,21 +81,22 @@ void CRolePlayOff::update() {
     case roleSkill::OneTouch:
         oneTouchSkill->setTarget(target);
         oneTouchSkill->setWaitPos(waitPos);
+        oneTouchSkill->setAgent(agent);
+
         if (wm->getIsSimulMode()) oneTouchSkill->setKickSpeed(8);
         else oneTouchSkill->setKickSpeed(kickSpeed);
-        oneTouchSkill->setAgent(agent);
         updated = false;
         break;
     case roleSkill::ReceivePass:
         receivePassSkill->setTarget(target);
         receivePassSkill->setAvoidOppPenaltyArea(avoidPenaltyArea);
         receivePassSkill->setReceiveRadius(receiveRadius);
-        receivePassSkill->setAgent(agent);
         if(ignoreAngle)
         {
             receivePassSkill->setIATargetDir(targetDir);
             receivePassSkill->setIgnoreAngle(false);
         }
+        receivePassSkill->setAgent(agent);
         updated = false;
         break;
     default:

@@ -546,7 +546,7 @@ void CMainApplication::Experimental4()
     return;
     C tempo;
     tempo.loc  = wm->ball->pos;
-    tempo.time = knowledge->getCurrentKKTime();
+    tempo.time = knowledge->getCurrentTime();
     history.append(tempo);
     if(history.size() > VEL_SAMPLES) {
         history.pop_front();

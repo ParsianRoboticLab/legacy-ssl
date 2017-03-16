@@ -74,20 +74,23 @@ CCoach::CCoach(CAgent**_agents)
     //		qDebug() << lastAssign.second[i]->id();
 
 
-    ourKickOff    = new COurKickOff;
-    ourIndirect   = new COurIndirect;
-    ourDirect     = new CDoubleSizeOurDirect;
-    ourPenalty    = new COurPenalty;
-    ourBallPlacement = new COurBallPlacement;
-    theirKickOff  = new CTheirKickOff;
-    theirIndirect = new CTheirIndirect;
-    theirDirect   = new CTheirDirect;
-    theirPenalty  = new CTheirPenalty;
-    theirBallPlacement = new CTheirBallPlacement;
-    forceStart    = new CForceStart;
+    // Old Plays
+    ourKickOff          = new COurKickOff;
+    ourPenalty          = new COurPenalty;
+    forceStart          = new CForceStart;
+    ourIndirect         = new COurIndirect;
+    theirDirect         = new CTheirDirect;
+    theirKickOff        = new CTheirKickOff;
+    theirPenalty        = new CTheirPenalty;
+    theirIndirect       = new CTheirIndirect;
+    ourBallPlacement    = new COurBallPlacement;
+    theirBallPlacement  = new CTheirBallPlacement;
+    ourDoubleSizeDirect = new CDoubleSizeOurDirect;
 
-    ourPlayOff    = NULL;
-    dynamicAttack = new CDynamicAttack();
+
+    // New Plays
+    ourPlayOff          = new CPlayOff;
+    dynamicAttack       = new CDynamicAttack();
 
     for( int i=0 ; i<_MAX_NUM_PLAYERS ; i++ ){
         stopRoles[i] = new CRoleStop(knowledge->getAgent(i));
@@ -110,7 +113,7 @@ CCoach::CCoach(CAgent**_agents)
 
 CCoach::~CCoach()
 {
-    savePostAssignment();
+    savePostAssignment();    
 }
 
 void CCoach::saveGoalie()
@@ -560,8 +563,6 @@ QList<int> CCoach::findBestPoses(int numberOfPositionAgents,bool semiDynamic)
 
     double dummyDist = 20000;
     int nearestId = 0;
-
-
 
     OurAgents = wm->our.data->activeAgents;
     OppAgents.clear();
@@ -1296,15 +1297,14 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     {
         dynamicAttack->setDefenseClear(false);
     }
-
-    if(findMostPossible(wm->ball->pos) > (0.7 - shotToGoalthr )  )
+    if(findMostPossible(wm->ball->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr )  )
     {
         dynamicAttack->setDirectShot(true);
         shotToGoalthr = 0.6;
     }
     else
     {
-        dynamicAttack->setDirectShot(true);
+        dynamicAttack->setDirectShot(false);
         shotToGoalthr = 0;
     }
     //////////////////////////////////////////////assign agents
@@ -1549,19 +1549,21 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
 
             //check Ball matchig with symmetry
             Vector2D symBall = Vector2D(matching.initPos.ball.x,
-                                        -matching.initPos.ball.y);
+                                 (-1) * matching.initPos.ball.y);
+
             if (isRegionMatched(matching.initPos.ball)) {
                 plan->execution.symmetry = 1;
             } else if (isRegionMatched(symBall)) {
                 plan->execution.symmetry = -1;
-            }
+            } /*else {
+                continue;
+            }*/
 
             plan->common.currentSize = _ourplayers.size();
             validPlans.append(plan);
 
         }
     }
-
 
     debug(QString("playoff -> there's %1 valid Plan").arg(validPlans.size()), D_DEBUG);
     if (validPlans.isEmpty()) {
@@ -1570,7 +1572,10 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
         return;
     }
 
-    NGameOff::SPlan* thePlan = chooseMostSuccecfull(validPlans); //Choose Best valid Plan
+    RNG randomNumberGenerator;
+    int randNo = randomNumberGenerator.uniformInt() % validPlans.size();
+    NGameOff::SPlan* thePlan = validPlans[randNo]; //chooseMostSuccecfull(validPlans); //Choose Best valid Plan
+    debug (QString("Plan Number : %1").arg(randNo), D_DEBUG);
     matchPlan(thePlan, _ourplayers); //Match The Plan
     ourPlayOff->setMasterPlan(thePlan);
     ourPlayOff->analyseShoot(); // should call after setmasterplan
@@ -1578,6 +1583,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     ourPlayOff->setInitial(true);
     ourPlayOff->lockAgents = true;
     lastPlan = thePlan;
+    debug(QString("chosen plan is %1").arg(lastPlan->gui.index[3]), D_ALI);
 }
 
 void CCoach::initDynamicPlay() {
@@ -1760,9 +1766,10 @@ bool CCoach::decideHalt(QList<int>& _ourPlayers) {
     }
     knowledge->setLastPlayExecuted(HaltPlay);
 
-    if (ourPlayOff != NULL) {
-        delete ourPlayOff;
-        ourPlayOff = NULL;
+    if(!ourPlayOff->deleted)
+    {
+        ourPlayOff->reset();
+        ourPlayOff->deleted = true;
     }
 
     return true;
@@ -1777,20 +1784,18 @@ bool CCoach::decideStop(QList<int> & _ourPlayers) {
         stopRoles[i]->assign(knowledge->getAgent(_ourPlayers.at(i)));
     }
     knowledge->setLastPlayExecuted(StopPlay);
-
-    if (ourPlayOff != NULL) {
-
-        delete ourPlayOff;
-        ourPlayOff = NULL;
-
+    if(!ourPlayOff->deleted)
+    {
+        ourPlayOff->reset();
+        ourPlayOff->deleted = true;
     }
-
     return true;
 }
 
 bool CCoach::decideOurKickOff(QList<int> &_ourPlayers) {
-    if (ourPlayOff == NULL) {
-        ourPlayOff = new CPlayOff();
+    if(ourPlayOff->deleted)
+    {
+        ourPlayOff->deleted = false;
     }
     selectedPlay = ourPlayOff;
     decidePlayOff(_ourPlayers, KICKOFF);
@@ -1805,8 +1810,9 @@ bool CCoach::decideTheirKickOff(QList<int> &_ourPlayers) {
 }
 
 bool CCoach::decideOurDirect(QList<int> &_ourPlayers) {
-    if (ourPlayOff == NULL) {
-        ourPlayOff = new CPlayOff();
+    if(ourPlayOff->deleted)
+    {
+        ourPlayOff->deleted = false;
     }
     selectedPlay = ourPlayOff;
     decidePlayOff(_ourPlayers, DIRECT);
@@ -1820,9 +1826,9 @@ bool CCoach::decideTheirDirect(QList<int> &_ourPlayers) {
 }
 
 bool CCoach::decideOurIndirect(QList<int> &_ourPlayers) {
-    if (ourPlayOff == NULL) {
-        ourPlayOff = new CPlayOff();
-
+    if(ourPlayOff->deleted)
+    {
+        ourPlayOff->deleted = false;
     }
     selectedPlay = ourPlayOff;
     decidePlayOff(_ourPlayers, INDIRECT);
@@ -1844,26 +1850,25 @@ bool CCoach::decideOurPenalty(QList<int> &_ourPlayers) {
 bool CCoach::decideTheirPenalty(QList<int> &_ourPlayers) {
     selectedPlay = theirPenalty;
     firstTime = true;
-
 }
 
 bool CCoach::decideStart(QList<int> &_ourPlayers) {
     decidePlayOn(_ourPlayers, lastPlayers);
     firstTime = true;
-    if (ourPlayOff != NULL) {
-
-        delete ourPlayOff;
-        ourPlayOff = NULL;
-
+    if(!ourPlayOff->deleted)
+    {
+        ourPlayOff->reset();
+        ourPlayOff->deleted = true;
     }
 }
 
 bool CCoach::decideNormalStart(QList<int> &_ourPlayers) {
     selectedPlay = ourPlayOff;
     firstTime = true;
-    if (ourPlayOff != NULL) {
-        delete ourPlayOff;
-        ourPlayOff = NULL;
+    if(!ourPlayOff->deleted)
+    {
+        ourPlayOff->reset();
+        ourPlayOff->deleted = true;
     }
 }
 
@@ -1878,9 +1883,10 @@ bool CCoach::decideTheirBallPlacement(QList<int> &_ourPlayers) {
 bool CCoach::decideNull(QList<int> &_ourPlayers) {
     selectedPlay->markAgents.clear();
     firstTime = true;
-    if (ourPlayOff != NULL) {
-        delete ourPlayOff;
-        ourPlayOff = NULL;
+    if(!ourPlayOff->deleted)
+    {
+        ourPlayOff->reset();
+        ourPlayOff->deleted = true;
     }
     debug(QString("Unexpected Game State: %1 %2").arg(knowledge->stateToString(knowledge->getGameState())).arg(knowledge->getGameState()) , D_ERROR , "red");
     return false;

@@ -273,6 +273,7 @@ class CPolicyWidget : public QWidget
             DEF_VALUE(DynamicPlay, bool, Bool, FarForward)
             DEF_VALUE(DynamicPlay, bool, Bool, NearForward)
             DEF_VALUE(DynamicPlay, double, Double, Area)
+            DEF_VALUE(DynamicPlay, double, Double, DirectTrsh)
 
     DEF_TREE(Mark)
             DEF_VALUE(Mark, bool , Bool, PlayOffManToMan)
