@@ -971,7 +971,6 @@ void CPlayOff::passManager() {
 
         } else {
             doPass = true;
-
         }
         roleAgent[p.id]->setDoPass(doPass);
 
@@ -1014,10 +1013,12 @@ long CPlayOff::timeTillReceive() {
 void CPlayOff::terminateReceiverTasks() {
     if(ownerReceiveList.size()) {
         isFirstTime[ownerReceiveList.at(0).receiveAgent] = true;
-        if(positionAgent[ownerReceiveList.at(0).receiveAgent].stateNumber < ownerReceiveList.at(0).receiveIndex) {
+        if(positionAgent[ownerReceiveList.at(0).receiveAgent].stateNumber < ownerReceiveList.at(0).receiveIndex)
             positionAgent[ownerReceiveList.at(0).receiveAgent].stateNumber++;
-        }
-    } }
+        //        positionAgent[ownerReceiveList.at(0).receiveAgent].stateNumber = ownerReceiveList.at(0).receiveIndex;
+        //        debug(QString("NEW RECEIVER INDEX : %1").arg(positionAgent[ownerReceiveList.at(0).receiveIndex].stateNumber),D_KK);
+    }
+}
 
 ///////////////////////////////////////////
 void CPlayOff::checkEndState() {
