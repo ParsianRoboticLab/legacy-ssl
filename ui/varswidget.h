@@ -215,6 +215,7 @@ class CPolicyWidget : public QWidget
     VarTypes::VarTrigger *v_trigUpdateCoach;
     DEF_TREE(Formation)
         DEF_VALUE(Formation, bool, Bool, StrictFormation)
+        DEF_VALUE(Formation, bool, Bool, GoalieFromGUI)
         DEF_VALUE(Formation, int, Int, Goalie)
         DEF_VALUE(Formation, int, Int, Defense)
     DEF_TREE(PlayMaker)

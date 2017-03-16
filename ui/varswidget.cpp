@@ -262,6 +262,7 @@ CPolicyWidget::CPolicyWidget()
 
     ADD_TREE(Formation,"Formation",false);
     ADD_VALUE(Formation, Bool, StrictFormation, false, "Strict Formation");
+    ADD_VALUE(Formation, Bool, GoalieFromGUI, false, "Goalie from GUI");
     ADD_VALUE(Formation, Int, Goalie, 1, "Goalie ID");
     ADD_VALUE(Formation, Int, Defense, 1, "Defense Count");
     ADD_TREE(PlayMaker,"Play Maker",false);
@@ -501,8 +502,10 @@ IMPL_VALUE(CVarsWidget,Experiments_AutoReferee, int, Int, autorefereefMulticastP
 
 
 IMPL_VALUE(CPolicyWidget,Formation, bool, Bool, StrictFormation)
+IMPL_VALUE(CPolicyWidget,Formation, bool, Bool, GoalieFromGUI)
 IMPL_VALUE(CPolicyWidget,Formation, int, Int, Goalie)
 IMPL_VALUE(CPolicyWidget,Formation, int, Int, Defense)
+
 IMPL_VALUE(CPolicyWidget,PlayMaker, bool, Bool, JustKickToGoal)
 IMPL_VALUE(CPolicyWidget,PlayMaker, bool, Bool, JustChipToGoalInBelowDist)
 IMPL_VALUE(CPolicyWidget,PlayMaker, double, Double, ChipToGoalDist)
