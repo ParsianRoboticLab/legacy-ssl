@@ -308,7 +308,7 @@
 				false
 			</Var>
 			<Var name="Mahi" type="bool">
-				true
+				false
 			</Var>
 			<Var name="Mani" type="bool">
 				false
@@ -320,7 +320,7 @@
 				false
 			</Var>
 			<Var name="Sepehr" type="bool">
-				true
+				false
 			</Var>
 			<Var name="Masood" type="bool">
 				false
@@ -335,7 +335,7 @@
 				false
 			</Var>
 			<Var name="AHZ" type="bool">
-				false
+				true
 			</Var>
 			<Var name="Mahmood" type="bool">
 				false
