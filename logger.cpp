@@ -86,7 +86,7 @@ void debug(QString text, long type, QColor color)
     if (conf()->Performance_Debug_debugAtousa())     mask1 = mask1 | 2;
     if (conf()->Performance_Debug_debugAHZ())        mask1 = mask1 | 4;
     if (conf()->Performance_Debug_debugAmin())       mask1 = mask1 | 8;
-    if (conf()->Performance_Debug_debugAmiR())       mask1 = mask1 | 16;
+    if (conf()->Performance_Debug_debugParsa())       mask1 = mask1 | 16;
     if (conf()->Performance_Debug_debugHamed())      mask1 = mask1 | 32;
 
     if(type>32768 && (type & mask1)) {
@@ -145,7 +145,7 @@ void debug0(QString text, long type, QColor color)
         if (conf()->Performance_Debug_debugAtousa()) mask = mask | 131072;
         if (conf()->Performance_Debug_debugAHZ()) mask = mask | 262144;
         if (conf()->Performance_Debug_debugAmin()) mask = mask | 524288;
-        if (conf()->Performance_Debug_debugAmiR()) mask = mask | 1048576;
+        if (conf()->Performance_Debug_debugParsa()) mask = mask | 1048576;
         if (conf()->Performance_Debug_debugHamed()) mask = mask | 2097152;
 
 

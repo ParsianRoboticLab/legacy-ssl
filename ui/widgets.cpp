@@ -3141,7 +3141,7 @@ CLoggerWidget::CLoggerWidget(){
     chbxDebug[6] = new QCheckBox("Mahmood" , this);
     chbxDebug[7] = new QCheckBox("AHZ" , this);
     chbxDebug[8] = new QCheckBox("Amin" , this);
-    chbxDebug[9] = new QCheckBox("AmiR" , this);
+    chbxDebug[9] = new QCheckBox("Parsa" , this);
     chbxDebug[10] = new QCheckBox("Game" , this);
     chbxDebug[11] = new QCheckBox("Ali" , this);
     chbxDebug[12] = new QCheckBox("Arash" , this);
@@ -3587,7 +3587,7 @@ void CLoggerWidget::debugTypeChanged(){
         type1 |= D_AMIN;
     }
     if( chbxDebug[9]->isChecked() ){
-        type1 |= D_AMIR;
+        type1 |= D_PARSA;
     }
 
 

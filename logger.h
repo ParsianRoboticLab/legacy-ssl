@@ -22,7 +22,7 @@
 #define D_ATOUSA     32770
 #define D_AHZ        32772
 #define D_AMIN       32776
-#define D_AMIR       32784
+#define D_PARSA       32784
 #define D_HAMED      32800
 
 
