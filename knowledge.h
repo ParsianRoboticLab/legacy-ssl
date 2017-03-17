@@ -179,7 +179,7 @@ public:
         int select();
         void setPassRecvTarget(int id);
     } playmakerSelector;
-    bool translationFlag;
+    bool transientFlag;
     int newFastestSelector(QList <CAgent*> _agents);
     int nonPlayOnFastestSelector(QList <CAgent*> _agents);
     void sortByX(QList <CAgent *> &_agents );
@@ -246,6 +246,10 @@ public:
     ////////////////////////////////<Mahi>
     Vector2D getReturnPos(Vector2D _goal);
     ///////////////////////////////////</Mahi>
+
+    //////////////////////////////////<HMD>
+    QList<Vector2D> ToBeMark;
+    //////////////////////////////////</HMD>
     bool canSendPass(int sender, int receiver, Vector2D point, double factor);
     int getBallOwner(bool& ours);
     bool isBallOurs();
@@ -350,7 +354,7 @@ public:
     int lastFramePAreaAvoided;
     int currentPlayAllowedAgents;
     FastestToBall findFastestToBall(QList<int> ourList=QList<int>(), QList<int> oppList=QList<int>());
-    NewFastestToBall newFastestToBall(double timeStep = 0.1, QList<int> ourList=wm->our.t->activeAgents, QList<int> oppList=wm->opp.t->activeAgents);
+    NewFastestToBall newFastestToBall(double timeStep = 0.1, QList<int> ourList=wm->our.data->activeAgents, QList<int> oppList=wm->opp.data->activeAgents);
     bool matchdebug;
     double loopTime, maxLoopTime, visionProcessTime;
     double *plotWidgetCustom;

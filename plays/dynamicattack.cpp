@@ -265,39 +265,55 @@ void CDynamicAttack::makePlan(int agentSize) {
         currentPlan.positionCnt = agentSize;
     }
 
-    if (currentPlan.agents[0].skill == DynamicEnums::Pass) {
-        if(agentSize == 0) {
-            if (isBallInOurField) {
-                currentPlan.agents[0].init(DynamicEnums::PlayMaker,
-                                           DynamicEnums::Chip,
-                                           DynamicEnums::Forward);
-            }
-            else {
-                currentPlan.agents[0].init(DynamicEnums::PlayMaker,
-                                           DynamicEnums::Chip,
-                                           DynamicEnums::Goal);
-            }
-            currentPlan.positionCnt = 0;
-        }
-        else {
+//    if (currentPlan.agents[0].skill == DynamicEnums::Pass) {
+//        if(agentSize == 0) {
+//            if (isBallInOurField) {
+//                currentPlan.agents[0].init(DynamicEnums::PlayMaker,
+//                                           DynamicEnums::Chip,
+//                                           DynamicEnums::Forward);
+//            }
+//            else {
+//                currentPlan.agents[0].init(DynamicEnums::PlayMaker,
+//                                           DynamicEnums::Shot,
+//                                           DynamicEnums::Goal);
+//            }
+//            currentPlan.positionCnt = 0;
+//        }
+//        else {
 
-            if (isBallInOurField) {
-                currentPlan.agents[0].init(DynamicEnums::PlayMaker,
-                                           DynamicEnums::Chip,
-                                           DynamicEnums::Forward);
-            }
-            /*
-            else {
-                currentPlan.agents[0].init(DynamicEnums::PlayMaker,
-                                           DynamicEnums::Chip,
-                                           DynamicEnums::Goal);
-            }*/
-            currentPlan.positionCnt = agentSize;
+//            if (isBallInOurField) {
+//                currentPlan.agents[0].init(DynamicEnums::PlayMaker,
+//                                           DynamicEnums::Chip,
+//                                           DynamicEnums::Forward);
+//            }
+//            /*
+//            else {
+//                currentPlan.agents[0].init(DynamicEnums::PlayMaker,
+//                                           DynamicEnums::Chip,
+//                                           DynamicEnums::Goal);
+//            }*/
+//            currentPlan.positionCnt = agentSize;
+//        }
+//    }
+    if(isBallInOurField)
+    {
+//        if(agentSize == 0)
+//        {
+//            currentPlan.agents[0].init(DynamicEnums::PlayMaker,
+//                                       DynamicEnums::Shot,
+//                                       DynamicEnums::Forward);
+//        }
+        currentPlan.agents[0].init(DynamicEnums::PlayMaker,
+                                   DynamicEnums::Chip,
+                                   DynamicEnums::Forward);
+        for(size_t i = 0;i < agentSize;i++) {
+            currentPlan.agents[i + 1].region = DynamicEnums::Near;//regionsList.at(i - 1);
+            currentPlan.agents[i + 1].role   = DynamicEnums::Position;
+            currentPlan.agents[i + 1].skill  = DynamicEnums::Ready;
         }
+        currentPlan.positionCnt = agentSize;
     }
-
     debug(QString("DC : %1").arg(currentPlan.positionCnt),D_MAHI);
-
 }
 
 void CDynamicAttack::assignId() {
@@ -546,16 +562,16 @@ void CDynamicAttack::positioning(int starter,
                         goToDynamic[i] = true;
                         if(wm->ball->vel.length() < 1)
                         {
-                            //roleAgents[i]->setTarget(semiDynamicPosition.at(i - starter));
-                            roleAgents[i]->setTarget(markPositions[i-starter]);
+                            roleAgents[i]->setTarget(semiDynamicPosition.at(i - starter));
+//                            roleAgents[i]->setTarget(markPositions[i-starter]);
                         }
                         //                        roleAgents[0]->setNoKick(false);
                     }
                     else {
                         if(wm->ball->vel.length() < 1)
                         {
-                            //roleAgents[i]->setTarget(semiDynamicPosition.at(i - starter));
-                            roleAgents[i]->setTarget(markPositions[i-starter]);
+                            roleAgents[i]->setTarget(semiDynamicPosition.at(i - starter));
+//                            roleAgents[i]->setTarget(markPositions[i-starter]);
                         }
 
                         //                        roleAgents[0]->setNoKick(true);

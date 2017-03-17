@@ -114,9 +114,10 @@ protected:
     void manToManMarkInPlayOn(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void tempFindPos(int _markAgentSize);
-    int angleDegreeThr = 0;
+    int angleDegreeThr = 0;    
     int angleDegreeThrNotStop = 0;
     int angleDegreeThrNotStopAHZ = 0;
+    double threshOld = 0.0;
     ///////////////////////////////////////////////////
     void executeGoalie();
     Vector2D blockTheBall();
@@ -185,13 +186,13 @@ public:
 
     bool isAnyDefenderMarking() const;
     ///////Mhmmd///////////
-    void getDefencePoses(Vector2D *poses);
+    void fillDefencePositionsTo(Vector2D *poses);
     //////////////////////
 
     //////////////////HMD/////////////////
     QList<Vector2D> markPoses;
       QList<Vector2D> markAngs;
-
+      int  HMDtransient;
       double markRadius;
       double markRadiusStrict;
       double segmentpershoot;
@@ -341,7 +342,8 @@ private:
     bool defClearFlag;
 
     double overDefThr;
-
+    /////////////////////////MAHI
+    int decideNumOfMarksInPlayOff(int _defenseCount);
 };
 
 #endif // DEFENSE_H

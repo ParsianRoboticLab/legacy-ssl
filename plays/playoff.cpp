@@ -1219,6 +1219,8 @@ void CPlayOff::newFillRoleProperties() {
     for(size_t i = 0;i < agentsID.size(); i++) {
         if (masterPlan->common.matchedID.contains(i)) {
             if (roleAgent[i]->getRoleUpdate() == false) {
+
+                roleAgent[i]->setFirstMove((positionAgent[i].stateNumber == 0));
                 roleAgent[i]->setAgent(knowledge->getAgent(masterPlan->common.matchedID.value(i)));
                 if (positionAgent[i].stateNumber + 1 < positionAgent[i].positionArg.size()) {
                     if (positionAgent[i].getArgs().staticSkill == MoveSkill && positionAgent[i].getArgs(1).staticSkill == OneTouchSkill) {
@@ -1430,12 +1432,6 @@ void CPlayOff::assignMove(CRolePlayOff* _roleAgent,
         _roleAgent -> setTargetDir(_posAgent.getArgs().staticAng);
         _roleAgent -> setSlow(false);
         _roleAgent -> setMaxVelocity(getMaxVel(_roleAgent, _posAgent.getArgs()));
-        //////NEXT TARGET
-        if (_posAgent.stateNumber + 1 < _posAgent.positionArg.size()) {
-            if (_posAgent.getArgs(1).staticSkill == MoveSkill) {
-                _roleAgent->setNextTarget(getMoveTarget(_posAgent.getArgs(1)));
-            }
-        }
 
     } else {
 
@@ -1637,7 +1633,7 @@ bool CPlayOff::chipOrNot(int passerID, int ReceiverID, int ReceiverState){
 }
 
 bool CPlayOff::chipOrNot(const SPositioningArg& _posArg) {
-
+    return true;
     if (_posArg.leftData < 0) {
         return true;
     } else if(_posArg.rightData < 0) {
@@ -2570,6 +2566,11 @@ bool CPlayOff::isOneTouchDone(CRolePlayOff * _roleAgent) {
 }
 
 bool CPlayOff::isMoveDone(const CRolePlayOff * _roleAgent) {
+
+    if (_roleAgent->getFirstMove() && _roleAgent->getTarget() != POBALLPOS) {
+        return true ;
+    }
+
     if (_roleAgent->getTimeBased()) {
         debug(QString("EL : %1").arg(_roleAgent->getElapsed()), D_HOSSEIN);
         debug(QString("GT : %1").arg(_roleAgent->getTime()), D_HOSSEIN);
@@ -2578,6 +2579,7 @@ bool CPlayOff::isMoveDone(const CRolePlayOff * _roleAgent) {
             return true;
         }
     } else {
+        // TODO : vartypes this
         if (_roleAgent->getAgent()->pos().dist(_roleAgent->getTarget()) < 0.3) {
             return true;
         }
