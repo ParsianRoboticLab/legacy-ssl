@@ -43,10 +43,6 @@ void CRolePlayOff::reset()
 void CRolePlayOff::update() {
     switch(selectedSkill) {
     case roleSkill::Gotopoint:
-<<<<<<< HEAD
-=======
-
->>>>>>> parent of c0a9049... fix playoff role
         break;
     case roleSkill::GotopointAvoid:
         gotoPointAvoidSkill->setAgent(agent);
