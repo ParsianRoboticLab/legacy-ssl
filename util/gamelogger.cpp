@@ -330,7 +330,7 @@ void CGameLogger::writeAnalyses(){
         }
         else
         {
-            AnalyzeDS<<ite.value().at(0).toStdString();
+            AnalyzeDS<<ite.value().at(0).toString();
         }
         if(ite != analyses.end()-1)
             AnalyzeDS <<',';
