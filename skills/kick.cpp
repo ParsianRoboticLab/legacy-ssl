@@ -858,14 +858,14 @@ void CSkillKick::waitAndKick()
 
 void CSkillKick::kDontKick()
 {
-    gpa->setSlowMode(true);
-    if(passProfiler)
+
+
         gpa->setVerySlow(true);
     Vector2D finalPos;
     finalPos=ballPos-(target-ballPos).norm()*0.2;
     if(fabs((kickFinalDir - agentDir.th()).degree()) < 20)
         finalPos=ballPos-(target-ballPos).norm()*0.14;
-    gpa->setBallObstacleRadius(0.2);
+    gpa->setBallObstacleRadius(0.3);
     gpa->setADiveMode(false);
     gpa->setNoAvoid(false);
     gpa->init(finalPos, ballPos - agentPos);

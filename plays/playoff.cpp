@@ -2567,8 +2567,8 @@ bool CPlayOff::isOneTouchDone(CRolePlayOff * _roleAgent) {
 
 bool CPlayOff::isMoveDone(const CRolePlayOff * _roleAgent) {
 
-    if (_roleAgent->getFirstMove()) {
-        return true;
+    if (_roleAgent->getFirstMove() && _roleAgent->getTarget() != POBALLPOS) {
+        return true ;
     }
 
     if (_roleAgent->getTimeBased()) {

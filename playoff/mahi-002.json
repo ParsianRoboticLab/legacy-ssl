@@ -669,8 +669,8 @@
                     "positions": [
                         {
                             "angel": 0,
-                            "pos-x": 4.0605686032138442,
-                            "pos-y": -2.7828947368421053,
+                            "pos-x": 4.1495673671199009,
+                            "pos-y": -2.575657894736842,
                             "skills": [
                                 {
                                     "flag": false,
@@ -682,10 +682,10 @@
                                     "flag": false,
                                     "name": "PassSkill",
                                     "primary": 500,
-                                    "secondary": 400,
+                                    "secondary": 550,
                                     "target": {
                                         "agent": 1,
-                                        "index": 2
+                                        "index": 3
                                     }
                                 }
                             ],
@@ -725,9 +725,23 @@
                             "tolerance": 0
                         },
                         {
-                            "angel": 139.08971889096745,
-                            "pos-x": 2.5920889987639057,
-                            "pos-y": 1.4407894736842106,
+                            "angel": 71.567161875437137,
+                            "pos-x": 1.8355995055624226,
+                            "pos-y": 0.66118421052631571,
+                            "skills": [
+                                {
+                                    "flag": false,
+                                    "name": "MoveSkill",
+                                    "primary": 0,
+                                    "secondary": 0
+                                }
+                            ],
+                            "tolerance": 0
+                        },
+                        {
+                            "angel": 0,
+                            "pos-x": 3.7713226205191597,
+                            "pos-y": 1.2532894736842106,
                             "skills": [
                                 {
                                     "flag": false,
@@ -922,8 +936,8 @@
                 }
             ],
             "ballInitPos": {
-                "x": 4.0605686032138442,
-                "y": -2.7828947368421053
+                "x": 4.1495673671199009,
+                "y": -2.575657894736842
             },
             "chance": 1,
             "lastDist": 1.5,
@@ -978,10 +992,10 @@
                                     "flag": false,
                                     "name": "PassSkill",
                                     "primary": 500,
-                                    "secondary": 500,
+                                    "secondary": 550,
                                     "target": {
                                         "agent": 1,
-                                        "index": 2
+                                        "index": 3
                                     }
                                 }
                             ],
@@ -1022,8 +1036,22 @@
                         },
                         {
                             "angel": 93.57909426145271,
-                            "pos-x": 3.2373300370828182,
-                            "pos-y": 1.6776315789473686,
+                            "pos-x": 1.3461063040791101,
+                            "pos-y": 1.006578947368421,
+                            "skills": [
+                                {
+                                    "flag": false,
+                                    "name": "MoveSkill",
+                                    "primary": 0,
+                                    "secondary": 0
+                                }
+                            ],
+                            "tolerance": 0
+                        },
+                        {
+                            "angel": 0,
+                            "pos-x": 3.9048207663782444,
+                            "pos-y": 1.2828947368421053,
                             "skills": [
                                 {
                                     "flag": false,
@@ -1260,7 +1288,7 @@
                                     "flag": false,
                                     "name": "PassSkill",
                                     "primary": 500,
-                                    "secondary": 500,
+                                    "secondary": 550,
                                     "target": {
                                         "agent": 1,
                                         "index": 2
