@@ -3666,6 +3666,8 @@ void DefensePlan::findOppAgentsToMark(QList <Vector2D> _realDefTargets)
 
     }
 
+    knowledge->ToBeMark.clear();
+    knowledge->ToBeMark.append(oppAgentsToMarkPos);
 
     // qSort(oppAgentsToMarkPos.begin(),oppAgentsToMarkPos.end(),CMarkPlan::sortBy);
 
