@@ -114,9 +114,10 @@ protected:
     void manToManMarkInPlayOn(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void tempFindPos(int _markAgentSize);
-    int angleDegreeThr = 0;
+    int angleDegreeThr = 0;    
     int angleDegreeThrNotStop = 0;
     int angleDegreeThrNotStopAHZ = 0;
+    double threshOld = 0.0;
     ///////////////////////////////////////////////////
     void executeGoalie();
     Vector2D blockTheBall();
