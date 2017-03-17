@@ -1014,7 +1014,9 @@ void DefensePlan::runGoalie()
 
             }
             goalieTarget = strictFollowBall(predictedBall);
-
+//            if(!wm->field->isInField(goalieTarget)){
+//                goalieTarget = penaltyArea.intersection(Line2D(wm->ball->pos , wm->field->ourGoal()));
+//            }
 #ifdef STRICT_FOLLOW
             predictedBall = ballPrediction(true);
             if(predictedBall.x + 0.02 < goaliePos.x){
@@ -1331,6 +1333,7 @@ DefensePlan::DefensePlan()
 
     oneTouchCnt = 5;
     ///HMD
+    HMDtransient = 0;
     markRadius = 1.6;
     markRadiusStrict = 1.39;
     segmentpershoot = policy()->Mark_ShootRatioBlock() / 100.0;
@@ -3431,7 +3434,7 @@ int DefensePlan::decideNumOfMarks(double _overDef)
         if (playOff) {
             return decideNumOfMarksInPlayOff(defenseCount);
         } else if(knowledge->transientFlag) {
-            return defenseCount - 1;
+            return defenseCount;//TO DO:
         } else if(playOn) {
             if((Vector2D::angleOf(BallPos,ourGoal,leftCorner).abs() < 20 + overDefThr
                 ||Vector2D::angleOf(BallPos,ourGoal,rightCorner).abs() < 20 + overDefThr)
@@ -3562,8 +3565,8 @@ void DefensePlan::findPos(int _markAgentSize)
     ///////////////// Man To Man AllTransiant Mode for Mark ////////////////////
     if(policy()->Mark_ManToManAllTransiant())
     {
-        if(knowledge->transientFlag)
-            segmentpershoot = 0.05;
+        if(knowledge->transientFlag && HMDtransient == 0)
+            segmentpershoot = 0.3;
         else
             segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
     }
@@ -3588,9 +3591,9 @@ void DefensePlan::findPos(int _markAgentSize)
 }
 
 Vector2D DefensePlan::posvel(CRobot* opp){
-    if(opp->vel.length() > 0.5 && opp->vel.x < 0)
+   /* if(opp->vel.length() > 0.5 && opp->vel.x < 0)
         return opp->pos + 0.5 * opp->vel;
-    else
+    else*/
         return opp->pos;
 }
 
@@ -3645,6 +3648,9 @@ void DefensePlan::findOppAgentsToMark(QList <Vector2D> _realDefTargets)
     {
         if(posvel(oppAgentsToMark[i]).x > policy()->Mark_OppOmitLimitPlayoff()){
             oppAgentsToMark.removeOne(oppAgentsToMark[i]);
+            // TODO:chage the transeint this flag
+            /*if(oppAgentsToMark[i]->vel.length() > 1)
+                HMDtransient = 1;*/
             i--;
         }
     }

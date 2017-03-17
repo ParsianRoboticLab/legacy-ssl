@@ -102,7 +102,7 @@ CCoach::CCoach(CAgent**_agents)
     defenseTimeForVisionProblem[1].start();
     transientFlag = false;
     trasientTimeOut.start();
-    translationTimeOutTime =  1000;
+    translationTimeOutTime =  4000;
     exeptionPlayMake = NULL;
     exeptionPlayMakeThr = 0;
 
@@ -975,9 +975,9 @@ void CCoach::virtualTheirPlayOffState()
         transientFlag = false;
     }
 
-    if(wm->ball->pos.x >= 0) {
+   /* if(wm->ball->pos.x >= 0) {
         transientFlag = false;
-    }
+    }*/
 
     if(isBallcollide() && 0){ // TODO : till we fix function && 0
         transientFlag = false;

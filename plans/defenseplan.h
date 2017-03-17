@@ -192,7 +192,7 @@ public:
     //////////////////HMD/////////////////
     QList<Vector2D> markPoses;
       QList<Vector2D> markAngs;
-
+      int  HMDtransient;
       double markRadius;
       double markRadiusStrict;
       double segmentpershoot;
