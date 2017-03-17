@@ -43,10 +43,14 @@ void CRolePlayOff::reset()
 void CRolePlayOff::update() {
     switch(selectedSkill) {
     case roleSkill::Gotopoint:
+<<<<<<< HEAD
+=======
+
+>>>>>>> parent of c0a9049... fix playoff role
         break;
     case roleSkill::GotopointAvoid:
+        gotoPointAvoidSkill->setAgent(agent);
         gotoPointAvoidSkill->init(target, targetDir);
-//        gotoPointAvoidSkill->setNextTarget(nextTarget);
         gotoPointAvoidSkill->setAvoidPenaltyArea(avoidPenaltyArea);
         gotoPointAvoidSkill->setMaxVelocity(maxVelocity);
         gotoPointAvoidSkill->setAvoidBall(avoidBall);
@@ -68,6 +72,7 @@ void CRolePlayOff::update() {
         }
 
         kickSkill->setChip(chip);
+        kickSkill->setAgent(agent);
         kickSkill->setDontKick(!doPass);
         kickSkill->setAgent(agent);
 
@@ -85,12 +90,14 @@ void CRolePlayOff::update() {
 
         if (wm->getIsSimulMode()) oneTouchSkill->setKickSpeed(8);
         else oneTouchSkill->setKickSpeed(kickSpeed);
+        oneTouchSkill->setAgent(agent);
         updated = false;
         break;
     case roleSkill::ReceivePass:
         receivePassSkill->setTarget(target);
         receivePassSkill->setAvoidOppPenaltyArea(avoidPenaltyArea);
         receivePassSkill->setReceiveRadius(receiveRadius);
+        receivePassSkill->setAgent(agent);
         if(ignoreAngle)
         {
             receivePassSkill->setIATargetDir(targetDir);
