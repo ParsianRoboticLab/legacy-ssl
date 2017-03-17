@@ -246,6 +246,10 @@ public:
     ////////////////////////////////<Mahi>
     Vector2D getReturnPos(Vector2D _goal);
     ///////////////////////////////////</Mahi>
+
+    //////////////////////////////////<HMD>
+    QList<Vector2D> ToBeMark;
+    //////////////////////////////////</HMD>
     bool canSendPass(int sender, int receiver, Vector2D point, double factor);
     int getBallOwner(bool& ours);
     bool isBallOurs();

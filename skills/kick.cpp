@@ -1038,8 +1038,6 @@ void CSkillKick::jTurn()
     //    }
     angPid->error = (kickFinalDir - agentDir.th()).radian();
 
-
-
     Circle2D oppPenalty(wm->field->oppGoal() + Vector2D(0.2 , 0),1.6);
 
     debug(QString("ang : %1").arg(5/(agentPos.dist(ballPos)*100)),D_MHMMD);
