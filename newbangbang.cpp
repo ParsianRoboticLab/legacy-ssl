@@ -191,7 +191,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
 
     if ( fabs((agentMovementTh - agentDir.th()).degree()) > 80 && fabs((agentMovementTh - agentDir.th()).degree()) < 100 )
     {
-        amax = 60;
+        amax = 40;
     }
     if(slow)
     {
@@ -202,9 +202,9 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     }
     else if(oneTouch)
     {
-        posPid->kp = 7;
-        amax = 60;
-        posPid->kd = 5;
+        posPid->kp = 4;
+        amax = 45;
+        posPid->kd = 7;
         posPid->ki = conf()->BangBang_posKI();
     }
     else

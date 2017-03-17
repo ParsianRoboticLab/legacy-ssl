@@ -6,7 +6,7 @@
 
 // TODO : remove this macro
 #define KK_PLAYON
-//#define PARSIANWORKSHOP
+#define PARSIANWORKSHOP
 //#define SIMULATION_MODE
 //#define GAME_MODE
 

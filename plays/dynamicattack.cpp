@@ -546,16 +546,16 @@ void CDynamicAttack::positioning(int starter,
                         goToDynamic[i] = true;
                         if(wm->ball->vel.length() < 1)
                         {
-                            //roleAgents[i]->setTarget(semiDynamicPosition.at(i - starter));
-                            roleAgents[i]->setTarget(markPositions[i-starter]);
+                            roleAgents[i]->setTarget(semiDynamicPosition.at(i - starter));
+//                            roleAgents[i]->setTarget(markPositions[i-starter]);
                         }
                         //                        roleAgents[0]->setNoKick(false);
                     }
                     else {
                         if(wm->ball->vel.length() < 1)
                         {
-                            //roleAgents[i]->setTarget(semiDynamicPosition.at(i - starter));
-                            roleAgents[i]->setTarget(markPositions[i-starter]);
+                            roleAgents[i]->setTarget(semiDynamicPosition.at(i - starter));
+//                            roleAgents[i]->setTarget(markPositions[i-starter]);
                         }
 
                         //                        roleAgents[0]->setNoKick(true);

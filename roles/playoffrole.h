@@ -50,6 +50,7 @@ public:
     ClassProperty(CRolePlayOff, long long, Time, time, dont);
     ClassProperty(CRolePlayOff, bool, BallIsNear, ballIsNear, dont);
     ClassProperty(CRolePlayOff, bool, TimeBased, timeBased, dont);
+    ClassProperty(CRolePlayOff, bool, FirstMove, firstMove, dont);
 
 
 public:

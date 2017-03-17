@@ -1555,9 +1555,9 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
                 plan->execution.symmetry = 1;
             } else if (isRegionMatched(symBall)) {
                 plan->execution.symmetry = -1;
-            } /*else {
+            } else {
                 continue;
-            }*/
+            }
 
             plan->common.currentSize = _ourplayers.size();
             validPlans.append(plan);
@@ -1583,7 +1583,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     ourPlayOff->setInitial(true);
     ourPlayOff->lockAgents = true;
     lastPlan = thePlan;
-    debug(QString("chosen plan is %1").arg(lastPlan->gui.index[3]), D_ALI);
+    debug(QString("chosen plan is %1").arg(lastPlan->gui.index[3]), D_MAHI);
 }
 
 void CCoach::initDynamicPlay() {
