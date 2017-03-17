@@ -39,8 +39,8 @@
                                 {
                                     "flag": false,
                                     "name": "PassSkill",
-                                    "primary": 800,
-                                    "secondary": 800,
+                                    "primary": 400,
+                                    "secondary": 400,
                                     "target": {
                                         "agent": 2,
                                         "index": 4
@@ -165,8 +165,13 @@
                         },
                         {
                             "angel": 0,
+<<<<<<< HEAD
                             "pos-x": 1.2459826946847961,
                             "pos-y": 0.16776315789473684,
+=======
+                            "pos-x": 0.30,
+                            "pos-y": 1.7072368421052631,
+>>>>>>> origin/HMD
                             "skills": [
                                 {
                                     "flag": false,

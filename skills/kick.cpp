@@ -1037,6 +1037,12 @@ void CSkillKick::jTurn()
     angPid->error = (kickFinalDir - agentDir.th()).radian();
 
 
+<<<<<<< HEAD
+=======
+
+    double reduce = 0.6;
+    reduce += 1.8*agentPos.dist(ballPos);
+>>>>>>> origin/HMD
 
     Circle2D oppPenalty(wm->field->oppGoal() + Vector2D(0.2 , 0),1.6);
 

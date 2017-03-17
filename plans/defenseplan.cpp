@@ -768,7 +768,6 @@ void DefensePlan::markExecute(int _markAgentSize)
     matchPoints.append(1);
     matchPoints.append(2);
     matchPoints.append(3);
-    debug(QString("Number of agents %1").arg(_markAgentSize), D_MAHI);
     //    knowledge->Matching(agents,markPoses,matchPoints);
     if(_markAgentSize == markPoses.count())
     {
@@ -1623,6 +1622,7 @@ void DefensePlan::matchingDefPos(int _defenseNum)
 
     }
     findOppAgentsToMark(matchPoints);
+    //debug(QString("matching defpos is caled"),D_HAMED);
     findPos(decideNumOfMarks(defPosDecision.overDef));
     matchPoints.append(markPoses);
     draw(QString("aaaaaaaaaa  %1 %2").arg(matchPoints.count()).arg(_defenseNum),Vector2D(-2,2),"red");
@@ -1695,6 +1695,7 @@ void DefensePlan::matchingDefPos(int _defenseNum)
 
 void DefensePlan::execute()
 {
+    debug(QString("defense agents size %1").arg(defenseAgents.size()), D_HAMED);
     ////////////initialize////////////////
     initVars();
     preCalculate();
@@ -3671,6 +3672,8 @@ void DefensePlan::findOppAgentsToMark(QList <Vector2D> _realDefTargets)
 
     }
 
+    knowledge->ToBeMark.clear();
+    knowledge->ToBeMark.append(oppAgentsToMarkPos);
 
     // qSort(oppAgentsToMarkPos.begin(),oppAgentsToMarkPos.end(),CMarkPlan::sortBy);
 
@@ -3697,7 +3700,7 @@ QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2
     double danger;
     /////////////// Polygon
     double radius = .1;
-    double treshold = .2;
+    double treshold = .3;
 
     Vector2D sol1,sol2,sol3;
     Vector2D _pos1 = wm->ball->pos;
@@ -3742,7 +3745,7 @@ QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2
 
 
     double KA=1; //Angle Coefficient
-    double KDB=1;  //Distance To Ball
+    double KDB=0.5;  //Distance To Ball
     double KDG=1;  //Distnce To Goal
     double RangeofAngle = Vector2D::angleOf(wm->field->ourGoalR(),Vector2D(-1.0 * (_FIELD_WIDTH / 2 - _GOAL_RAD), 0), wm->field->ourGoalL()).degree();
     //draw(Vector2D(-1.0 * (_FIELD_WIDTH - _GOAL_WIDTH), 0), QColor(Qt::red));
@@ -3783,15 +3786,17 @@ QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2
 
         danger1 = (KA * fabs(angle) / RangeofAngle) + ( KDB *( 1 - (distancetoball / RangeofDistancetoBall)) ) + (KDG * (1 -(distancetogoal / RangeofDistancetoGoal)));
         danger2 = KAP * ( 1 - AngleP/RangeofAngleP) + KDBP * (1 - distanceToBallProjectionP/RangeofdistanceToBallProjectionP ) + KDIP * (1 - distanceToIntersectP / RangeofdistanceToIntersectP);
-        if(wm->ball->vel.length() < .2)
+        debug(QString("angle: %1, rangeofangle: %2, distansetoball:%3, RangeofDistancetoBall:%4,distancetogoal:%5,rangeofdistansetogoal:%6").arg(angle).arg(RangeofAngle).arg(distancetoball).arg(RangeofDistancetoBall).arg(distancetogoal).arg(RangeofDistancetoGoal),D_HAMED);
+        debug(QString("angleP: %1, rangeofangleP: %2, distansetoballProjectionP:%3, RangeofDistancetoBallProjectionP:%4,distancetointersect:%5,rangeofdistansetointesrsect:%6").arg(AngleP).arg(RangeofAngleP).arg(distanceToBallProjectionP).arg(RangeofdistanceToBallProjectionP).arg(distanceToIntersectP).arg(RangeofdistanceToIntersectP),D_HAMED);
+        if( knowledge->getRealBallVel() < .1)
             danger = danger1;
         else
-            danger = 3 * Polycontain * danger2 + danger1;
+            danger = 10* Polycontain * danger2 + danger1;
 
         temp.second = danger;
         output.append(temp);
-        //draw(QString("HMD danger=%1").arg(danger), oppposdanger[i] + Vector2D(0,0.3), QColor(Qt::red));
-
+        draw(QString("HMD danger=%1").arg(danger), oppposdanger[i] + Vector2D(0,0.3), QColor(Qt::red));
+        //draw(_poly, QColor(Qt::blue));
 
 
 

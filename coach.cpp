@@ -272,7 +272,6 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
     } else {
         preferedDefenseCounts = policy()->Formation_Defense(); // handle stop
     }
-
     int agentsCount = wm->our.data->activeAgents.count();
     if (goalieAgent != NULL) {
         if (goalieAgent->isVisible()) {
