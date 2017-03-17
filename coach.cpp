@@ -1629,6 +1629,9 @@ void CCoach::setPlayOff(NGameOff::EMode _mode) {
 
 void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
 
+    NGameOff::SPlan* nearestPlan = NULL;
+    double minDist = _MAX_DIST;
+    int symmetry = 1;
     QList<NGameOff::SPlan*> validPlans;
     QList<NGameOff::SPlan*> plans = m_planLoader->getPlans(); // Get All of The Plans
     Q_FOREACH(NGameOff::SPlan* plan, plans) { //Find Valid Plans
@@ -1662,13 +1665,28 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
             Vector2D symBall = Vector2D(matching.initPos.ball.x,
                                  (-1) * matching.initPos.ball.y);
 
+            double tempDist    = wm->ball->pos.dist(matching.initPos.ball);
+            double tempSymDist = wm->ball->pos.dist(symBall);
+
+            if (tempDist < minDist) {
+                minDist  = tempDist;
+                symmetry = 1;
+                nearestPlan = plan;
+            }
+
+            if (tempSymDist < minDist) {
+                minDist  = tempSymDist;
+                symmetry = -1;
+                nearestPlan = plan;
+            }
+
             if (isRegionMatched(matching.initPos.ball)) {
                 plan->execution.symmetry = 1;
             } else if (isRegionMatched(symBall)) {
                 plan->execution.symmetry = -1;
-            } /*else {
+            } else {
                 continue;
-            }*/
+            }
 
             plan->common.currentSize = _ourplayers.size();
             validPlans.append(plan);
@@ -1680,6 +1698,17 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     if (validPlans.isEmpty()) {
         debug("[Warning] playoff -> there's no valid Plan", D_ERROR, QColor(Qt::red));
         qWarning() << "[Warning] playoff -> there's no valid Plan from " << m_planLoader->getPlans().size() << "Plans";
+
+        // TEMP FIX
+        debug("[Warning] playoff -> matching nearset plan", D_ERROR, QColor(Qt::red));
+        qWarning() << "[Warning] playoff -> matching a plan from " << m_planLoader->getPlans().size() << "Plans";
+        if (nearestPlan != NULL) {
+            nearestPlan->execution.symmetry = symmetry;
+            validPlans.append(nearestPlan);
+        }
+//        return;
+        // TEMP FIX
+
         return;
     }
 
