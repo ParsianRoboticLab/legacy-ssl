@@ -656,14 +656,14 @@ kckMode CSkillKick::decideMode()
 
     Circle2D robotArea(agentPos,0.6);
 
-    if(agentPos.dist(ballPos) < 1.5)
-        robotArea.assign(agentPos,agentPos.dist(ballPos) - 0.1);
-
+    if(agentPos.dist(ballPos) < 1.5) {
+        robotArea.assign(agentPos,max(agentPos.dist(ballPos) - 0.1, 0.01));
+    }
 
     if(goalieMode)
         robotArea.assign(agentPos,0.5);
     if(ballPos.dist(agentPos) < 1)
-        robotArea.assign(agentPos,ballPos.dist(agentPos) - 0.01);
+        robotArea.assign(agentPos,max(ballPos.dist(agentPos) - 0.01, 0.01));
     Segment2D robotpath(agentPos,ballPos-(target-ballPos).norm()*0.15);
     Segment2D ballpath(wm->ball->pos,wm->ball->pos+wm->ball->vel.norm()*(12));
     double tempAngle;
