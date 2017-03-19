@@ -26,6 +26,7 @@
 #include "learning/policylearner.h"
 #include <fstream>
 #include <soccer.h>
+#include "collectprofdata.h"
 
 class MySoccer : public CSoccer
 {
@@ -220,6 +221,7 @@ public:
     QAction *setExp5Act;
     QAction *setExp6Act;
     QAction *setJsHandy;
+    QAction *setFProfiler;
     QAction *setKProfiler;
     QAction *setTechnicalChallengeAct;
     QAction *setMergeCamerasExperimentAct;

@@ -32,6 +32,7 @@
 #include <QFont>
 #include <algorithm>
 #include "simulation/simulator.h"
+#include "collectprofdata.h"
 
 #include<QMenu>
 #include<QAction>
@@ -3585,6 +3586,8 @@ CLogTagWidget::CLogTagWidget(QWidget* parent):QDialog(parent){
 
 CLogTagWidget::~CLogTagWidget(){
 }
+
+
 void CLogTagWidget::StartLogfunc(){
     this->close();
     QString totalDescription;
@@ -3625,6 +3628,57 @@ QString CLogTagWidget::getTagsInThisLog(){
     return this->TagsInThisLog->text();
 }
 
+
+
+CnewProfilerWidget::CnewProfilerWidget(QWidget* parent):QDialog(parent){
+    profilerRobotsList=new QWidget();
+    l = new QGridLayout(this);
+    ProfilerLayout=new QVBoxLayout;
+    profTxt=new QLineEdit("select active Robots to be profiled:",this);
+    startProf=new QPushButton("start Profiling",this);
+    profilerRobotsList->setLayout(ProfilerLayout);
+    chbxProf[0]=new QCheckBox("0",this);
+    chbxProf[1]=new QCheckBox("1",this);
+    chbxProf[2]=new QCheckBox("2",this);
+    chbxProf[3]=new QCheckBox("3",this);
+    chbxProf[4]=new QCheckBox("4",this);
+    chbxProf[5]=new QCheckBox("5",this);
+    chbxProf[6]=new QCheckBox("6",this);
+    chbxProf[7]=new QCheckBox("7",this);
+    chbxProf[8]=new QCheckBox("8",this);
+    chbxProf[9]=new QCheckBox("9",this);
+
+    for(int i =0;i<10;i++)
+    {
+
+        chbxProf[i]->setChecked(false);
+        ProfilerLayout->addWidget(chbxProf[i]);
+    }
+    l->addWidget(profTxt,1,1);
+    l->addWidget(profilerRobotsList,2,1);
+    l->addWidget(startProf,3,1);
+    this->setLayout(l);
+
+
+
+
+    connect(startProf , SIGNAL(pressed()) , this , SLOT(startProfFunc()));
+}
+
+
+CnewProfilerWidget::~CnewProfilerWidget(){
+}
+void CnewProfilerWidget::startProfFunc(){
+    int i=0;
+    for(int j=0;j<10;j++){
+        if(chbxProf[j]->isChecked()){
+            collectKickProfile->activeRobots[i]=j;
+            i++;
+        }
+    }
+    this->close();
+    ProfilerExecute=true;
+}
 
 
 class PlayFileHightlighter : public QSyntaxHighlighter

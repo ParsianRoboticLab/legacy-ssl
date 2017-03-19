@@ -81,6 +81,7 @@
 #include <QScrollBar>
 #include <QMessageBox>
 #include <QFrame>
+#include "collectprofdata.h"
 
 #include<QMenuBar>
 
@@ -858,6 +859,23 @@ public slots:
     QString getTagsInThisLog();
 };
 
+class CnewProfilerWidget : public QDialog
+{
+    Q_OBJECT
+public:
+    CnewProfilerWidget(QWidget*);
+    ~CnewProfilerWidget();
+    QCheckBox *chbxProf[10];
+    QWidget *profilerRobots;
+    QWidget *profilerRobotsList;
+    QGridLayout *l;
+    QVBoxLayout *ProfilerLayout;
+    QLineEdit *profTxt;
+    QPushButton *startProf;
+private:
+public slots:
+    void startProfFunc();
+};
 
 
 

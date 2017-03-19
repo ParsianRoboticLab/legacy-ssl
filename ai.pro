@@ -156,7 +156,8 @@ SOURCES += main.cpp \
     plays/theirballplacement.cpp\
     skills/autoballplacement.cpp \ 
     util/timer.cpp \
-    util/rng.cpp
+    util/rng.cpp \
+    collectprofdata.cpp
 
 
 HEADERS += base.h \
@@ -326,7 +327,8 @@ HEADERS += base.h \
     util/filewatcher.h \
     util/timer.h \
     util/rng.h \
-    util/vector2.h
+    util/vector2.h \
+    collectprofdata.h
 
 
 unix:INCLUDEPATH += "/usr/local/include"
@@ -407,6 +409,8 @@ INCLUDEPATH += $$PWD/intentions/
 
 RESOURCES +=
 CONFIG += c++11
+
+
 
 
 
