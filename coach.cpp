@@ -1255,7 +1255,6 @@ void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
         qDebug() << "[Coach] first time config done";
     } else {
         setPlayOff( ourPlayOff->getMasterMode() );
-
     }
 }
 void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
@@ -1526,7 +1525,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
         NGameOff::SMatching& matching = plan->matching;
 
         // Just For Debugging
-        if (1) {
+        if (0) {
             qDebug() << "-----------> plan name" << plan->gui.name;
             if (matching.common->planMode  >= _mode)
                 qDebug() << "[Coach] Mode is Valid";
@@ -1550,6 +1549,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
                 && isTagsMatched(matching.common->tags, currentTags)) {
 
             //check Ball matchig with symmetry
+            plan->common.currentSize = _ourplayers.size();
             Vector2D symBall = Vector2D(matching.initPos.ball.x,
                                  (-1) * matching.initPos.ball.y);
 
@@ -1572,30 +1572,24 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
                 plan->execution.symmetry = 1;
             } else if (isRegionMatched(symBall)) {
                 plan->execution.symmetry = -1;
-            } /* else {
+            } else {
                 continue;
-            }*/
+            }
 
-            plan->common.currentSize = _ourplayers.size();
             validPlans.append(plan);
-
         }
     }
 
     debug(QString("playoff -> there's %1 valid Plan").arg(validPlans.size()), D_DEBUG);
     if (validPlans.isEmpty()) {
         debug("[Warning] playoff -> there's no valid Plan", D_ERROR, QColor(Qt::red));
-        qWarning() << "[Warning] playoff -> there's no valid Plan from " << m_planLoader->getPlans().size() << "Plans";
-
-        // TEMP FIX
         debug("[Warning] playoff -> matching nearset plan", D_ERROR, QColor(Qt::red));
-        qWarning() << "[Warning] playoff -> matching a plan from " << m_planLoader->getPlans().size() << "Plans";
         if (nearestPlan != NULL) {
             nearestPlan->execution.symmetry = symmetry;
             validPlans.append(nearestPlan);
+            debug("[Warning] playoff -> nearset plan matched", D_ERROR, QColor(Qt::red));
         }
 //        return;
-        // TEMP FIX
     }
 
     RNG randomNumberGenerator;
