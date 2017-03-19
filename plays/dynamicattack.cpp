@@ -101,17 +101,17 @@ void CDynamicAttack::execute_3() {
 
 void CDynamicAttack::execute_4() {
     debug(QString("Dynamic Attack : 3"),D_MAHI);
-    globalExecute(3);
+    globalExecute(4);
 }
 
 void CDynamicAttack::execute_5() {
     debug(QString("Dynamic Attack : 3"),D_MAHI);
-    globalExecute(3);
+    globalExecute(5);
 }
 
 void CDynamicAttack::execute_6() {
     debug(QString("Dynamic Attack : 3"),D_MAHI);
-    globalExecute(3);
+    globalExecute(6);
 }
 
 void CDynamicAttack::globalExecute(int agentSize) {
@@ -1220,10 +1220,9 @@ QString CDynamicAttack::getString(const DynamicEnums::DynamicMode &_mode) const 
 }
 
 void CDynamicAttack::ballLocation() {
-    if(ballPos.x < -1 ) {
+    if (ballPos.x < -1 ) {
         isBallInOurField = true;
-    }
-    else if(ballPos.x > 0) {
+    } else if (ballPos.x > 0) {
         isBallInOurField = false;
     }
 }
