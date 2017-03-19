@@ -1420,11 +1420,11 @@ void CCoach::matchPlan(NGameOff::SPlan *_plan, const QList<int>& _ourplayers) {
 
             double weight;
             if (_plan->matching.initPos.agents.at(i).x == -100) {
-                weight = knowledge->getAgent(j)->pos().dist(wm->ball->pos);
+                weight = knowledge->getAgent(_ourplayers.at(j))->pos().dist(wm->ball->pos);
             } else {
                 weight = _plan->matching.initPos.agents.at(i).dist(knowledge->getAgent(_ourplayers.at(j))->pos());
             }
-            matcher.setWeight(i, j, (int)((1/(weight + 1))*10));
+            matcher.setWeight(i, j, -(weight));
         }
     }
     qDebug() << "[Coach] matched plan with : " << matcher.findMatching();
@@ -1521,6 +1521,12 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     int symmetry = 1;
     QList<NGameOff::SPlan*> validPlans;
     QList<NGameOff::SPlan*> plans = m_planLoader->getPlans(); // Get All of The Plans
+
+    if (plans.isEmpty()) {
+        debug("There's No Plan", D_ERROR);
+        return;
+    }
+
     Q_FOREACH(NGameOff::SPlan* plan, plans) { //Find Valid Plans
         NGameOff::SMatching& matching = plan->matching;
 
@@ -1589,7 +1595,6 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
             validPlans.append(nearestPlan);
             debug("[Warning] playoff -> nearset plan matched", D_ERROR, QColor(Qt::red));
         }
-//        return;
     }
 
     RNG randomNumberGenerator;
