@@ -1282,7 +1282,8 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
         shotToGoalthr = 0;
     }
     /////////////////////////////////////////////////////////////////////////
-    dynamicAttack->setPositions(findBestPoses(ourPlayers.count()));
+
+    //dynamicAttack->setPositions(findBestPoses(ourPlayers.count()));
 
     dynamicAttack->setWeHaveBall(ballPState == CKnowledge::WEHAVETHEBALL);
     dynamicAttack->setFast(ourAttackState == FAST);

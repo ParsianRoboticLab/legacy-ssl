@@ -517,9 +517,6 @@ void DefensePlan::tempFindPos(int _markAgentSize){
     Vector2D nearest;
     Circle2D IndirectAvoid(wm->ball->pos, 0.6);
 
-    debug(QString(" This is play off"), D_MAHI);
-
-
     if(_markAgentSize == oppAgentsToMarkPos.count())
     {
 

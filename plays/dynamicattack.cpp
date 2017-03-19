@@ -403,20 +403,25 @@ void CDynamicAttack::assignId() {
 void CDynamicAttack::assignTasks() {
     if(currentPlan.agents[0].role == DynamicEnums::PlayMaker) {
         playMake();
-        if(currentPlan.agentSize > 0)
+        if(currentPlan.agentSize > 0) {
             positioning(1, currentPlan.agents[1].skill);
-    }
-    else {
+        }
+
+    } else {
         positioning(0, currentPlan.agents[1].skill);
     }
 }
 
-
+/**
+ * @brief CDynamicAttack::dynamicPlanner
+ * @param agentSize number of positioning Agents
+ */
 void CDynamicAttack::dynamicPlanner(int agentSize) {
 
     activeAgents.clear();
-    for(size_t i = 0; i < 5;i++)
+    for(size_t i = 0; i < 6;i++) {
         mahiAgentsID[i] = -1;
+    }
 
     for(size_t i = 0;i < agentSize;i++) {
         activeAgents.append(knowledge->getAgent(agentsID.at(i)));
@@ -430,44 +435,30 @@ void CDynamicAttack::dynamicPlanner(int agentSize) {
         chooseMarkPos();
     }
     assignTasks();
-    //    ballLocation();
-    //    managePasser();
-
     debug(QString("MODE : %1").arg(getString(currentPlan.mode)),D_MAHI,QColor(Qt::red));
-    debug(QString("ball : %1").arg(isBallInOurField),D_MAHI,QColor(Qt::red));
+    debug(QString("BALL : %1").arg(isBallInOurField),D_MAHI,QColor(Qt::red));
 
     for(size_t i = 0;i < agentSize;i++) {
         if(mahiAgentsID[i] >= 0) {
             roleAgents[i + 1]->execute();
-            //            debug(QString("W %1").arg(mahiAgentsID[1]), D_MAHI);
         }
     }
 
     debug(QString("SKILL: %1").arg(roleAgents[0]->getSelectedSkill()), D_MAHI, QColor(Qt::red));
     roleAgents[0]->execute();
 
-    if(semiDynamicPosition.size() > 0)
-        draw(semiDynamicPosition[0], 0, QColor(Qt::black));
-    if(semiDynamicPosition.size() > 1)
-        draw(semiDynamicPosition[1], 0, QColor(Qt::black));
-    if(semiDynamicPosition.size() > 2)
-        draw(semiDynamicPosition[2], 0, QColor(Qt::black));
-    if(semiDynamicPosition.size() > 3)
-        draw(semiDynamicPosition[3], 0, QColor(Qt::black));
-
-    //        debug(QString("1 : %1").arg(semiDynamicPosition[1]),D_MAHI);
-    //    debug(QString("X : %1").arg(dynamicPosition.size()),D_MAHI);
-    //    debug(QString("GIL : %1").arg(guardIndexList.size()),D_MAHI);
+    for (int i = 0; i < semiDynamicPosition.size(); i++) {
+        draw(semiDynamicPosition[i], 0, QColor(Qt::black));
+    }
 
     for(size_t i = 0;i < dynamicPosition.size();i++) {
         draw(Circle2D(dynamicPosition.at(i),0.2),QColor(Qt::red),false);
     }
+
     if (currentPlan.positionCnt > 0 && currentPlan.positionCnt < 4) {
         showRegions(currentPlan.positionCnt, QColor(Qt::gray));
         showLocations(currentPlan.positionCnt, QColor(Qt::red));
     }
-
-    //    debug(QString("Hey : %1").arg(markPositions.size()),D_MAHI);
 
     if(isPlayMakeChanged()) {
         for(size_t i = 0;i < 5;i++) {
@@ -480,11 +471,11 @@ void CDynamicAttack::dynamicPlanner(int agentSize) {
 void CDynamicAttack::playMake() {
 
     draw(Circle2D(mahiPlayMaker->pos(), 0.1),QColor(Qt::red),true);
-    if(wm->getTeamColor() == _COLOR_BLUE)
+    if(wm->getTeamColor() == _COLOR_BLUE) {
         draw(Circle2D(mahiPlayMaker->pos() + mahiPlayMaker->dir()*0.08,0.06),QColor(Qt::blue),true);
-    else
+    } else {
         draw(Circle2D(mahiPlayMaker->pos() + mahiPlayMaker->dir()*0.08,0.06),QColor(Qt::yellow),true);
-
+    }
 
     roleAgents[0]->setAgent(mahiPlayMaker);
     roleAgents[0]->setAgentID(mahiAgentsID[0]);
