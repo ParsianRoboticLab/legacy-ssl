@@ -3600,21 +3600,6 @@ Vector2D DefensePlan::posvel(CRobot* opp){
 void DefensePlan::findOppAgentsToMark(QList <Vector2D> _realDefTargets)
 {
 
-    obspos.clear();
-    opppos.clear();
-    for(int i=0;i<wm->opp.activeAgentsCount();i++)
-    {
-
-        obspos.append(wm->opp.active(i)->pos);
-        opppos.append(wm->opp.active(i)->pos);
-
-    }
-
-    for(int j=0;j<wm->our.activeAgentsCount();j++)
-    {
-        obspos.append(wm->our.active(j)->pos);
-
-    }
     //allrobot=obspos;
     oppAgentsToMark.clear();
     oppAgentsMarkedByDef.clear();
