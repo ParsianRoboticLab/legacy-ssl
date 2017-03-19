@@ -265,13 +265,14 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         preferedGoalieAgent = wm->our.data->goalieID;
     }
 
-    if( policy()->Formation_StrictFormation() ) {
+    if( policy()->Formation_StrictFormation() && knowledge->isStart()) {
         preferedDefenseCounts = policy()->Formation_Defense();
         lastPreferredDefenseCounts = preferedDefenseCounts;
         return;
     } else {
         preferedDefenseCounts = policy()->Formation_Defense(); // handle stop
     }
+
     int agentsCount = wm->our.data->activeAgents.count();
     if (goalieAgent != NULL) {
         if (goalieAgent->isVisible()) {
@@ -1263,8 +1264,10 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
 
     double PosNum= 0;
     double MarkNum = 0;
+    Circle2D ourDefenseArea(wm->field->ourGoal() + Vector2D(-0.2 , 0),1.6);
 
-    if (knowledge->variables["clearing"] == "true") {
+    if (knowledge->variables["clearing"] == "true"
+    || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length() < 1)) {
         if(playmakeId != -1) {
             ourPlayers.append(playmakeId);
             dynamicAttack->setPlayMake(-1);

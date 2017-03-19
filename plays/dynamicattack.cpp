@@ -432,7 +432,7 @@ void CDynamicAttack::dynamicPlanner(int agentSize) {
     chooseBestPosForPass();
     if(agentSize > 0 || currentPlan.mode == DynamicEnums::DefenseClear) {
         chooseBestPositons();
-        chooseMarkPos();
+//        chooseMarkPos();
     }
     assignTasks();
     debug(QString("MODE : %1").arg(getString(currentPlan.mode)),D_MAHI,QColor(Qt::red));
@@ -709,7 +709,7 @@ void CDynamicAttack::chooseBestPositons() {
 
 }
 
-
+// TODO : remove this without kindness
 void CDynamicAttack::chooseMarkPos() {
     markPositions.clear();
     for(int i = 0; i < 3; i++)
@@ -720,24 +720,6 @@ void CDynamicAttack::chooseMarkPos() {
     Vector2D temp[4];
     Circle2D oppCircle(Vector2D(_FIELD_WIDTH/2,0) + Vector2D(0.5,0),1.5);
     draw(oppCircle,QColor(Qt::black));
-    //first and second marker
-    double k = 0;
-    bool flag = 1;
-    while(flag)
-    {
-        flag = false;
-        oppCircle.intersection(Segment2D(wm->ball->pos, Vector2D(wm->field->oppGoalR().x, wm->field->oppGoalR().y - k)), &temp[0], &temp[3]);
-        oppCircle.intersection(Segment2D(wm->ball->pos, Vector2D(wm->field->oppGoalL().x, wm->field->oppGoalL().y + k)), &temp[1], &temp[3]);
-        for(int i = 0; i < 2; i++)
-        {
-            reflectPos[i] = knowledge->getReflectPos(temp[i], 2.5);
-            //debug(QString("our reflect points are: %1 %2").arg(reflectPos[i].x).arg(reflectPos[i].y),D_ALI);
-        }
-        if(reflectPos[0].dist(reflectPos[1]) < 1.5)
-            flag = true;
-
-        k += 0.1;
-    }
     //third marker
     Vector2D good = Vector2D(_FIELD_WIDTH/2,0);
     if(roleAgents[0]->getAgent()!= NULL && roleAgents[0]->getAgent()->pos().y <= 0)
