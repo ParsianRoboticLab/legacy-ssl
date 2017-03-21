@@ -3559,6 +3559,7 @@ void DefensePlan::findPos(int _markAgentSize)
             segmentpershoot = 0.3;
         else
             segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
+            segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
     }
     else{
         segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
