@@ -1327,7 +1327,6 @@ DefensePlan::DefensePlan()
 
     oneTouchCnt = 5;
     ///HMD
-    HMDtransient = 0;
     markRadius = 1.6;
     markRadiusStrict = 1.39;
     segmentpershoot = policy()->Mark_ShootRatioBlock() / 100.0;
@@ -3556,7 +3555,7 @@ void DefensePlan::findPos(int _markAgentSize)
     ///////////////// Man To Man AllTransiant Mode for Mark ////////////////////
     if(policy()->Mark_ManToManAllTransiant())
     {
-        if(knowledge->transientFlag && HMDtransient == 0)
+        if(knowledge->transientFlag)
             segmentpershoot = 0.3;
         else
             segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
