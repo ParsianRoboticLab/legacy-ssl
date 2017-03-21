@@ -504,8 +504,6 @@ void DefensePlan::tempFindPos(int _markAgentSize){
 
     Circle2D MarkArea(wm->field->ourGoal(),markRadius);
     Circle2D MarkAreaStrict(wm->field->ourGoal(), markRadiusStrict);
-    Vector2D sol1,sol2;
-    Segment2D tempMarkSeg;
     oppmarkedpos.clear();
     markPoses.clear();
     draw(MarkArea,QColor(Qt::blue));
@@ -513,14 +511,8 @@ void DefensePlan::tempFindPos(int _markAgentSize){
 
     Segment2D temp;         //distance
     int count;
-    double mindistance = 9;
-    Vector2D nearest;
-    Circle2D IndirectAvoid(wm->ball->pos, 0.6);
 
-    debug(QString(" This is play off"), D_MAHI);
-
-
-    if(_markAgentSize == oppAgentsToMarkPos.count())
+     if(_markAgentSize == oppAgentsToMarkPos.count())
     {
 
         draw(QString("first if"), Vector2D(0,0),QColor(Qt::red));
@@ -545,10 +537,10 @@ void DefensePlan::tempFindPos(int _markAgentSize){
 
     }
 
-    else if(_markAgentSize > oppAgentsToMarkPos.count() && (_markAgentSize - oppAgentsToMarkPos.count()) <= oppAgentsToMarkPos.count())
+    else if(_markAgentSize > oppAgentsToMarkPos.count() )
     {
         draw(QString("second if"), Vector2D(0,0),QColor(Qt::red));
-
+/*
         for(int i=0; i < _markAgentSize - oppAgentsToMarkPos.count(); i++)
         {
 
@@ -566,6 +558,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
 
 
         }
+*/
         // Blocking direct shoot
 
         for(int i =0;i < oppAgentsToMarkPos.count();i++)
@@ -582,34 +575,33 @@ void DefensePlan::tempFindPos(int _markAgentSize){
                 markAngs.append(indirectAvoidShoot(oppAgentsToMarkPos[i]).last());
             }
         }
-        // Blocking pass which is marked by defence
-        for(int i=0;i<oppAgentsMarkedByDef.count();i++)
+        QList<QPair<Vector2D, double> > tempsorted = sortdangerpassplayoff(oppAgentsToMarkPos);
+        for(int i=0;i<min(_markAgentSize - oppAgentsToMarkPos.count(), oppAgentsToMarkPos.count());i++)
         {
 
-            if(!checkIndirectAreaPass(oppAgentsToMarkPos[i]))
+            if(!checkIndirectAreaPass(tempsorted[i].first))
             {
-                markPoses.append(PassBlockRatio(segmentperpass, oppAgentsToMarkPos[i]).first());
-                markAngs.append(PassBlockRatio(segmentperpass, oppAgentsToMarkPos[i]).last());
+                markPoses.append(PassBlockRatio(segmentperpass, tempsorted[i].first).first());
+                markAngs.append(PassBlockRatio(segmentperpass, tempsorted[i].first).last());
             }
             else
             {
-                markPoses.append(indirectAvoidPass(oppAgentsToMarkPos[i]).first());
-                markAngs.append(indirectAvoidPass(oppAgentsToMarkPos[i]).last());
+                markPoses.append(indirectAvoidPass(tempsorted[i].first).first());
+                markAngs.append(indirectAvoidPass(tempsorted[i].first).last());
             }
         }
 
         //extra robot we have
-
         if(_markAgentSize > markPoses.count())
         {
-
+            count = 0;
             for(int i=markPoses.count() ; i<_markAgentSize; i++)
             {
 
                 if(markPoses.count() < _markAgentSize)
                 {
 
-                    markPoses.append(Vector2D(0,  count ));
+                    markPoses.append(Vector2D(0,  count *  4.5/ 6  * pow(-1, count) ));
                     markAngs.append(Vector2D(1,0));
                 }
                 count++;
@@ -617,7 +609,9 @@ void DefensePlan::tempFindPos(int _markAgentSize){
 
         }
 
+
     }
+     /*
     else if((_markAgentSize > oppAgentsToMarkPos.count()) &&  ((_markAgentSize - oppAgentsToMarkPos.count()) > oppAgentsToMarkPos.count()))
     {
 
@@ -705,7 +699,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
         }
     }
 
-
+*/
     else if(_markAgentSize < oppAgentsToMarkPos.count())
     {
 
@@ -2244,11 +2238,8 @@ int DefensePlan::decideNumOfMarksInPlayOff(int _defenseCount) {
 
     // used in playoff without counting goalie
     // TODO: knowlege->tobemark should be replaced
-    if(policy()->Mark_ManToManAllTransiant() && knowledge->toBeMopps.count() < _defenseCount ){
-         return _defenseCount - knowledge->toBeMopps.count();
-    } else {
+
         return _defenseCount;
-    }
 }
 
 bool DefensePlan::checkStillBeingInOneTouch(bool goalieFlag){
@@ -3275,16 +3266,15 @@ Vector2D CDefPos::getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Seg
     Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD + PAreaOffset);
     Rect2D r(fOurGoal + Vector2D(+0,-_GOAL_WIDTH/4),fOurGoal + Vector2D(+_GOAL_RAD + PAreaOffset,+_GOAL_WIDTH/4));
     draw(c1, 0, 90,QColor(Qt::black));
-    //    draw(c2, 90, 180,QColor(Qt::black));
+    draw(c2, 90, 180,QColor(Qt::black));
     draw(r,QColor(Qt::black));
     ////////////////////////////////////////////////
     r.intersection(_seg,&ins[0],&ins[1]);
     if(ins[0].valid() || ins[1].valid()) {
         finter = (ins[0].x > ins[1].x) ? ins[0] : ins[1];
-
         if(finter.x > -3.42) {
-            draw(QString("rect"),Vector2D(0,-2),"red");
-            draw(finter);
+            //draw(QString("rect"),Vector2D(0,-2),"red");
+            //draw(finter);
             return finter;
         }
     }
@@ -3536,7 +3526,7 @@ QList<Vector2D> DefensePlan::indirectAvoidShoot(Vector2D opp) {
 
 QList<Vector2D> DefensePlan::indirectAvoidPass(Vector2D opp) {
     Segment2D tempseg;
-    tempseg.assign(wm->ball->pos, opp);
+    tempseg.assign(wm->ball->pos, opp + 10 * (opp - wm->ball->pos));
     double indirectAvoidRadius = 0.5 + .1;
     Circle2D indirectAvoidCircle(wm->ball->pos,indirectAvoidRadius);
     Vector2D sol1, sol2, sol;
@@ -3549,6 +3539,7 @@ QList<Vector2D> DefensePlan::indirectAvoidPass(Vector2D opp) {
     {
         sol = sol2;
     }
+
     QList<Vector2D> temp;
     temp.clear();
     temp.append(sol);temp.append(wm->ball->pos - opp);
@@ -3590,11 +3581,32 @@ void DefensePlan::findPos(int _markAgentSize)
     }
 }
 
-Vector2D DefensePlan::posvel(CRobot* opp){
-   /* if(opp->vel.length() > 0.5 && opp->vel.x < 0)
-        return opp->pos + 0.5 * opp->vel;
-    else*/
+Vector2D DefensePlan::posvel(CRobot* opp, double VelReliabiity){
+    if(VelReliabiity == 0)
         return opp->pos;
+    if(wm->field->isInOurPenaltyArea(opp->pos))
+        debug(QString("its in our penalty area"), D_HAMED);
+    if(!(opp->vel.length() > 0.5  && opp->vel.x < 0))
+        VelReliabiity = 0;
+    CDefPos test;
+    Vector2D temppos = opp->pos + VelReliabiity * opp->vel;
+    //draw(temppos,'red');
+    Segment2D tempseg;
+    tempseg.assign(opp->pos, opp->pos + VelReliabiity * opp->vel );
+    draw(tempseg,QColor(Qt::yellow));
+    Vector2D penaltyvec;
+    penaltyvec.assign(test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).x,test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).y)  ;
+    debug(QString("PenaltyVec x is: %1 PenaltyVec y is: %2").arg(penaltyvec.x).arg(penaltyvec.y), D_HAMED);
+    if(wm->field->isInField(penaltyvec)){
+        debug(QString("penaltyvec is valid"), D_HAMED);
+        return penaltyvec;
+    }
+    else if((temppos).x < -4.4)
+        return Vector2D(-4.4,(opp->pos + VelReliabiity * opp->vel).y) ;
+    else
+        return opp->pos + VelReliabiity * opp->vel;
+
+
 }
 
 void DefensePlan::findOppAgentsToMark(QList <Vector2D> _realDefTargets)
@@ -3608,32 +3620,11 @@ void DefensePlan::findOppAgentsToMark(QList <Vector2D> _realDefTargets)
     Segment2D tempMarkSeg;
     Vector2D sol1,sol2;
     // oppAgentsToMark.first()->pos = Vector2D(1,1);
-    if(!knowledge->transientFlag)
-    {
-        for(int i = 0 ; i < oppAgentsToMark.count() ;i ++ )
-        {
-            tempMarkSeg.assign(posvel(oppAgentsToMark[i]),wm->field->ourGoal());
-            for(int j = 0 ; j <_realDefTargets.size() ; j++)
-            {
-                if(Circle2D(_realDefTargets[j], 0.05).intersection(tempMarkSeg,&sol1,&sol2))
-                {
-                    oppAgentsMarkedByDef.append(oppAgentsToMark[i]);
-                    break;
-                }
-            }
-        }
-    }
-
-    for(int i =0 ; i < oppAgentsMarkedByDef.count() ; i++)
-    {
-        oppAgentsToMark.removeOne(oppAgentsMarkedByDef[i]);
-    }
-
     for(int i = 0; i < oppAgentsToMark.count(); i++)
     {
-        if(posvel(oppAgentsToMark[i]).x > policy()->Mark_OppOmitLimitPlayoff()){
+        if(oppAgentsToMark[i]->pos.x > policy()->Mark_OppOmitLimitPlayoff()){
             oppAgentsToMark.removeOne(oppAgentsToMark[i]);
-            // TODO:chage the transeint this flag
+            // TODO: chage the transeint this flag
             /*if(oppAgentsToMark[i]->vel.length() > 1)
                 HMDtransient = 1;*/
             i--;
@@ -3645,13 +3636,13 @@ void DefensePlan::findOppAgentsToMark(QList <Vector2D> _realDefTargets)
     for(int i = 0; i<oppAgentsToMark.count(); i++)
     {
         draw(oppAgentsToMark[i]->pos);
-        oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i]));
+        oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i], 0));
 
     }
 
     knowledge->ToBeMark.clear();
     knowledge->ToBeMark.append(oppAgentsToMarkPos);
-
+    debug(QString("OppAgenttoMark count %1").arg(oppAgentsToMarkPos.count()), D_HAMED);
     // qSort(oppAgentsToMarkPos.begin(),oppAgentsToMarkPos.end(),CMarkPlan::sortBy);
 
 }
@@ -3763,8 +3754,8 @@ QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2
 
         danger1 = (KA * fabs(angle) / RangeofAngle) + ( KDB *( 1 - (distancetoball / RangeofDistancetoBall)) ) + (KDG * (1 -(distancetogoal / RangeofDistancetoGoal)));
         danger2 = KAP * ( 1 - AngleP/RangeofAngleP) + KDBP * (1 - distanceToBallProjectionP/RangeofdistanceToBallProjectionP ) + KDIP * (1 - distanceToIntersectP / RangeofdistanceToIntersectP);
-        debug(QString("angle: %1, rangeofangle: %2, distansetoball:%3, RangeofDistancetoBall:%4,distancetogoal:%5,rangeofdistansetogoal:%6").arg(angle).arg(RangeofAngle).arg(distancetoball).arg(RangeofDistancetoBall).arg(distancetogoal).arg(RangeofDistancetoGoal),D_HAMED);
-        debug(QString("angleP: %1, rangeofangleP: %2, distansetoballProjectionP:%3, RangeofDistancetoBallProjectionP:%4,distancetointersect:%5,rangeofdistansetointesrsect:%6").arg(AngleP).arg(RangeofAngleP).arg(distanceToBallProjectionP).arg(RangeofdistanceToBallProjectionP).arg(distanceToIntersectP).arg(RangeofdistanceToIntersectP),D_HAMED);
+        // debug(QString("angle: %1, rangeofangle: %2, distansetoball:%3, RangeofDistancetoBall:%4,distancetogoal:%5,rangeofdistansetogoal:%6").arg(angle).arg(RangeofAngle).arg(distancetoball).arg(RangeofDistancetoBall).arg(distancetogoal).arg(RangeofDistancetoGoal),D_HAMED);
+        // debug(QString("angleP: %1, rangeofangleP: %2, distansetoballProjectionP:%3, RangeofDistancetoBallProjectionP:%4,distancetointersect:%5,rangeofdistansetointesrsect:%6").arg(AngleP).arg(RangeofAngleP).arg(distanceToBallProjectionP).arg(RangeofdistanceToBallProjectionP).arg(distanceToIntersectP).arg(RangeofdistanceToIntersectP),D_HAMED);
         if( knowledge->getRealBallVel() < .1)
             danger = danger1;
         else

@@ -220,7 +220,7 @@ private:
        QList<Vector2D> oppmarkedpos;
        QList<CRobot*>  oppAgentsToMark;
        QList<CRobot*>  oppAgentsMarkedByDef;
-       Vector2D posvel(CRobot*);
+       Vector2D posvel(CRobot*, double);
 
 
        QList<QPair<Vector2D, double> > sortdangerpassplayon(QList<Vector2D> oppposdanger);
