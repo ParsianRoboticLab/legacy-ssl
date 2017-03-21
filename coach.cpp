@@ -310,6 +310,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
                &&  knowledge->getGameState() != CKnowledge::TheirKickOff
                ||  knowledge->getGameState() == CKnowledge::TheirPenaltyKick) {
         preferedDefenseCounts = agentsCount;
+        debug("[coach] harchi robot mobat darim rikhtim tu defa", D_MAHI);
     }
 
     lastPreferredDefenseCounts = preferedDefenseCounts;
@@ -1097,11 +1098,18 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
                 debug("[coach] Bad Defense assining", D_ERROR);
             }
         }
+    } else {
+        if (ourPlayers.size() - preferedDefenseCounts <= 0) {
+            playmakeId = -1;
+            lastPlayMake = -1;
+            return;
+        }
     }
 
     if (ourPlayers.size() == 0) {
         playmakeId = -1;
         lastPlayMake = -1;
+        return;
     }
 
     ////////////////////first we choose our playmake
@@ -1338,12 +1346,11 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
                     for(int i =0 ; i < ourPlayers.count() ; i++) {
                         if(ourPlayers[i]  != bestX) {
                             selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(i)));
-                            ourPlayers.removeAt(i);
                         }
                     }
+                    ourPlayers.clear();
+                    ourPlayers.append(bestX);
                     Q_ASSERT(ourPlayers.count() == 1 && ourPlayers[0] == bestX);
-                    //ourPlayers.clear();
-                    //ourPlayers.append(bestX);
                 } else {
                     selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
                     ourPlayers.clear();
