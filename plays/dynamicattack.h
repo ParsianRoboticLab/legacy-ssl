@@ -4,6 +4,7 @@
 #include"masterplay.h"
 
 #define SEMIDYNAMIC
+#define _MAX_REGION 7
 
 struct SDynamicAgent {
 
@@ -42,6 +43,8 @@ class CDynamicAttack : public CMasterPlay {
     typedef CMasterPlay super;
 
 public:
+
+
     CDynamicAttack();
     ~CDynamicAttack();
 
@@ -77,17 +80,33 @@ private:
     void assignTasks();
     void checkPlanner();
     ///////////////////////30em 2015
-    Rect2D* guards[4];
+
+    //[RegionCount][RegionIndex]
+    Rect2D* guards[_MAX_REGION];
     inline void showRegions(unsigned int agentSize, QColor color = QColor(Qt::gray));
     inline void assignRegions();
+    inline void assignRegion_0();
+    inline void assignRegion_1();
+    inline void assignRegion_2();
+    inline void assignRegion_3();
+    inline void assignRegion_4();
+    inline void assignRegion_5();
+    inline void assignRegion_6();
     QList<int> guardIndexList;
     QList<Vector2D> semiDynamicPosition;
     QList<Vector2D> markPositions;
 
     //[PositionAgentsCount][GuardIndex][LocationIndex]
-    Vector2D** guardLocations[4];
+    Vector2D** guardLocations[_MAX_REGION];
     inline void showLocations(unsigned int agentSize, QColor color = QColor(Qt::gray));
     inline void assignLocations();
+    inline void assignLocations_0();
+    inline void assignLocations_1();
+    inline void assignLocations_2();
+    inline void assignLocations_3();
+    inline void assignLocations_4();
+    inline void assignLocations_5();
+    inline void assignLocations_6();
     bool isRightTimeToPass();
     int farGuardFromPoint(const int& _guardIndex, const Vector2D& _point);
     void chooseBestPosForPass();

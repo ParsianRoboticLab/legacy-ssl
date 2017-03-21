@@ -16,16 +16,10 @@ CDynamicAttack::CDynamicAttack() {
     else isBallInOurField = true;
 
     guards[0] = new Rect2D();
-
-    for(size_t i = 1;i < 4;i++) {
+    for(size_t i = 1;i < _MAX_REGION;i++) {
         guards[i] = new Rect2D[i];
-    }
-
-    for(size_t i = 1;i < 4;i++) {
-        guardLocations[i] = new Vector2D*[i];
-    }
-    for(size_t i = 1;i < 4;i++) {
-        for(size_t j = 0;j < 4;j++) {
+        guardLocations[i] = new Vector2D* [i];
+        for(size_t j = 0;j < _MAX_REGION;j++) {
             guardLocations[i][j] = new Vector2D[3];
         }
     }
@@ -35,7 +29,6 @@ CDynamicAttack::CDynamicAttack() {
     }
 
     assignRegions();
-
     assignLocations();
 }
 
@@ -48,11 +41,11 @@ CDynamicAttack::~CDynamicAttack() {
     delete   guards[1];
     delete[] guards[2];
     delete[] guards[3];
+    delete[] guards[4];
+    delete[] guards[5];
 
-    delete guardLocations[0];
-
-    for(size_t i = 1;i < 4;i++) {
-        for(size_t j = 0;j < 4;j++) {
+    for(size_t i = 1;i < 6;i++) {
+        for(size_t j = 0;j < 6;j++) {
             delete[] guardLocations[i][j];
         }
     }
@@ -455,10 +448,8 @@ void CDynamicAttack::dynamicPlanner(int agentSize) {
         draw(Circle2D(dynamicPosition.at(i),0.2),QColor(Qt::red),false);
     }
 
-    if (currentPlan.positionCnt > 0 && currentPlan.positionCnt < 4) {
-        showRegions(currentPlan.positionCnt, QColor(Qt::gray));
-        showLocations(currentPlan.positionCnt, QColor(Qt::red));
-    }
+    showRegions(6, QColor(Qt::gray));
+    showLocations(currentPlan.positionCnt, QColor(Qt::red));
 
     if(isPlayMakeChanged()) {
         for(size_t i = 0;i < 5;i++) {
@@ -1028,24 +1019,172 @@ int CDynamicAttack::maxHorizontalDistID(const QList<Vector2D> &_points) {
 }
 
 inline void CDynamicAttack::assignLocations() {
+    // order of call function is important
+    assignLocations_0();
+    assignLocations_1();
+    assignLocations_2();
+    assignLocations_3();
+    assignLocations_4();
+    assignLocations_5();
+    assignLocations_6();
+    ////////////////////////////////////////
 
-    /////////////////////////////////////
-    //No    Region
-    /////////////////////////////////////
+}
+
+inline void CDynamicAttack::assignRegions() {
+    // order of call function is important
+    assignRegion_0();
+    assignRegion_1();
+    assignRegion_2();
+    assignRegion_3();
+    assignRegion_4();
+    assignRegion_5();
+    assignRegion_6();
+    ////////////////////////////////////////
+}
+
+void CDynamicAttack::assignRegion_0() {
+    //Opp Field
+    guards[0]->assign(-_CENTER_CIRCLE_RAD,                 //top_X
+                      _FIELD_HEIGHT/2,                     //top_Y
+                      _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
+                      _FIELD_HEIGHT);                      //Y_Length
+}
+
+
+void CDynamicAttack::assignRegion_1() {
+    //Opp Field
+    guards[1][0].assign(-_CENTER_CIRCLE_RAD,                 //top_X
+                        _FIELD_HEIGHT/2,                     //top_Y
+                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
+                        _FIELD_HEIGHT);                      //Y_Length
+
+}
+
+
+void CDynamicAttack::assignRegion_2() {
+    //Top Opp Half
+    guards[2][0].assign(-_CENTER_CIRCLE_RAD,                //top_X
+                        _FIELD_HEIGHT/2,                    //top_Y
+                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD,//X_Length
+                        _FIELD_HEIGHT/2);                   //Y_Length
+
+    //Bottom Opp Half
+    guards[2][1].assign(-_CENTER_CIRCLE_RAD,                 //top_X
+                        0,                                   //top_Y
+                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
+                        _FIELD_HEIGHT/2);                    //Y_Length
+
+}
+
+
+void CDynamicAttack::assignRegion_3() {
+    //Top Opp Tertium
+    guards[3][0].assign(-_CENTER_CIRCLE_RAD,                 //top_X
+                        _FIELD_HEIGHT/2,                     //top_Y
+                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
+                        _FIELD_HEIGHT/3);                    //Y_Length
+
+    //Middle Opp Tertium
+    guards[3][1].assign(-_CENTER_CIRCLE_RAD,                 //top_X
+                        _FIELD_HEIGHT/2 - _FIELD_HEIGHT/3,   //top_Y
+                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
+                        _FIELD_HEIGHT/3);                    //Y_Length
+
+    //Bottom Opp Tertium
+    guards[3][2].assign(-_CENTER_CIRCLE_RAD,                 //top_X
+                        _FIELD_HEIGHT/2 - 2*_FIELD_HEIGHT/3, //top_Y
+                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
+                        _FIELD_HEIGHT/3);                    //Y_Length
+
+}
+
+
+void CDynamicAttack::assignRegion_4() {
+    //Top Opp 1/4
+    guards[4][0].assign(-_CENTER_CIRCLE_RAD,                 //top_X
+                        _FIELD_HEIGHT/2 - 2*_FIELD_HEIGHT/3, //top_Y
+                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
+                        _FIELD_HEIGHT/3);                    //Y_Length
+
+    //Mid-Top Opp 1/4
+    guards[4][1].assign(-_CENTER_CIRCLE_RAD,                 //top_X
+                        _FIELD_HEIGHT/2 - 2*_FIELD_HEIGHT/3, //top_Y
+                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
+                        _FIELD_HEIGHT/3);                    //Y_Length
+    //Mid-Bottom Opp 1/4
+    guards[4][2].assign(-_CENTER_CIRCLE_RAD,                 //top_X
+                        _FIELD_HEIGHT/2 - 2*_FIELD_HEIGHT/3, //top_Y
+                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
+                        _FIELD_HEIGHT/3);                    //Y_Length
+    //Bottom Opp 1/4
+    guards[4][3].assign(-_CENTER_CIRCLE_RAD,                 //top_X
+                        _FIELD_HEIGHT/2 - 2*_FIELD_HEIGHT/3, //top_Y
+                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
+                        _FIELD_HEIGHT/3);                    //Y_Length
+
+}
+
+
+void CDynamicAttack::assignRegion_5() {
+    for (int i = 0; i < 4; i++) {
+        guards[5][i].assign(guards[4][i].topLeft(), guards[4][i].size());
+    }
+
+    //BackUp Line
+    guards[5][4].assign(-_CENTER_CIRCLE_RAD - 1,             //top_X
+                        _FIELD_HEIGHT/2,                     //top_Y
+                        1,                                   //X_Length
+                        _FIELD_HEIGHT);                      //Y_Length
+
+}
+
+
+void CDynamicAttack::assignRegion_6() {
+    for (int i = 0; i < 5; i++) {
+        guards[6][i].assign(guards[5][i].topLeft(), guards[5][i].size());
+    }
+
+    //BackUp Line
+    guards[6][5].assign(-_FIELD_WIDTH/2 + _FIELD_PENALTY,        //top_X
+                        _PENALTY_WIDTH/2,                        //top_Y
+                        _FIELD_WIDTH/2 - 1 - _CENTER_CIRCLE_RAD, //X_Length
+                        _PENALTY_WIDTH);                         //Y_Length
+
+}
+
+inline void CDynamicAttack::showRegions(unsigned int agentSize,
+                                        QColor color) {
+
+    for(size_t i = 0; i < agentSize; i++) {
+        draw(guards[agentSize][i], color);
+    }
+}
+
+inline void CDynamicAttack::showLocations(unsigned int agentSize,
+                                          QColor color) {
+    for(size_t i = 0;i < agentSize;i++) { //RegionsCount
+        for(size_t j = 0;j < 3;j++) {
+            draw(guardLocations[agentSize][i][j], 0, color);
+        }
+    }
+}
+
+void CDynamicAttack::assignLocations_0() {
     //    guardLocations[0][0][0].assign(0,0);
     //    guardLocations[0][0][1].assign(0,0);
     //    guardLocations[0][0][2].assign(0,0);
+}
 
-    /////////////////////////////////////
-    //One   Region///////////////////////
-    /////////////////////////////////////
+
+void CDynamicAttack::assignLocations_1() {
     //Opp Feild
     guardLocations[1][0][0].assign(_FIELD_WIDTH/4, _FIELD_HEIGHT/4);
     guardLocations[1][0][1].assign(_FIELD_WIDTH/4, 0);
     guardLocations[1][0][2].assign(_FIELD_WIDTH/4, -_FIELD_HEIGHT/4);
-    ///////////////////////////////////
-    //Two   Regions////////////////////
-    ///////////////////////////////////
+}
+
+void CDynamicAttack::assignLocations_2() {
     //Top Opp Half
     guardLocations[2][0][0].assign(0.5, 1  );
     guardLocations[2][0][1].assign(2  , 1.5);
@@ -1064,9 +1203,9 @@ inline void CDynamicAttack::assignLocations() {
     //    guardLocations[2][1][2].assign(_FIELD_WIDTH/2 - 1, //x
     //                                   -_FIELD_HEIGHT/4);  //y
 
-    //////////////////////////////////////
-    //Three Regions///////////////////////
-    //////////////////////////////////////1
+}
+
+void CDynamicAttack::assignLocations_3() {
     //Top Opp Tertium
     guardLocations[3][0][0].assign(1  , 1);
     guardLocations[3][0][1].assign(2.5, 2);
@@ -1100,68 +1239,89 @@ inline void CDynamicAttack::assignLocations() {
 
 }
 
-inline void CDynamicAttack::assignRegions() {
+void CDynamicAttack::assignLocations_4() {
+    // Top Opp 1/4
+    guardLocations[4][0][0].assign(1  , 2.5);
+    guardLocations[4][0][1].assign(2.5, 2.5);
+    guardLocations[4][0][2].assign(3.5, 2.5);
+    // Mid-Top Opp 1/4
 
-    //Opp Field
-    guards[0]->assign(-_CENTER_CIRCLE_RAD,                 //top_X
-                      _FIELD_HEIGHT/2,                     //top_Y
-                      _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
-                      _FIELD_HEIGHT);                      //Y_Length
+    guardLocations[4][1][0].assign(1  , 1.5);
+    guardLocations[4][1][1].assign(2.5, 1.5);
+    guardLocations[4][1][2].assign(3.5, 1.5);
+    // Mid-Bottom Opp 1/4
 
-    //Opp Field
-    guards[1][0].assign(-_CENTER_CIRCLE_RAD,                 //top_X
-                        _FIELD_HEIGHT/2,                     //top_Y
-                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
-                        _FIELD_HEIGHT);                      //Y_Length
+    guardLocations[4][2][0].assign(1  , -1.5);
+    guardLocations[4][2][1].assign(2.5, -1.5);
+    guardLocations[4][2][2].assign(3.5, -1.5);
 
-    //Top Opp Half
-    guards[2][0].assign(-_CENTER_CIRCLE_RAD,                //top_X
-                        _FIELD_HEIGHT/2,                    //top_Y
-                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD,//X_Length
-                        _FIELD_HEIGHT/2);                   //Y_Length
-
-    //Bottom Opp Half
-    guards[2][1].assign(-_CENTER_CIRCLE_RAD,                 //top_X
-                        0,                                   //top_Y
-                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
-                        _FIELD_HEIGHT/2);                    //Y_Length
-
-    //Top Opp Tertium
-    guards[3][0].assign(-_CENTER_CIRCLE_RAD,                 //top_X
-                        _FIELD_HEIGHT/2,                     //top_Y
-                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
-                        _FIELD_HEIGHT/3);                    //Y_Length
-
-    //Middle Opp Tertium
-    guards[3][1].assign(-_CENTER_CIRCLE_RAD,                 //top_X
-                        _FIELD_HEIGHT/2 - _FIELD_HEIGHT/3,   //top_Y
-                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
-                        _FIELD_HEIGHT/3);                    //Y_Length
-
-    //Bottom Opp Tertium
-    guards[3][2].assign(-_CENTER_CIRCLE_RAD,                 //top_X
-                        _FIELD_HEIGHT/2 - 2*_FIELD_HEIGHT/3, //top_Y
-                        _FIELD_WIDTH/2 + _CENTER_CIRCLE_RAD, //X_Length
-                        _FIELD_HEIGHT/3);                    //Y_Length
+    // Bottom Opp 1/4
+    guardLocations[4][3][0].assign(1  , -2.5);
+    guardLocations[4][3][1].assign(2.5, -2.5);
+    guardLocations[4][3][2].assign(3.5, -2.5);
 }
 
-inline void CDynamicAttack::showRegions(unsigned int agentSize,
-                                        QColor color) {
+void CDynamicAttack::assignLocations_5() {
+    // Top Opp 1/4
+    guardLocations[5][0][0].assign(1  , 2.5);
+    guardLocations[5][0][1].assign(2.5, 2.5);
+    guardLocations[5][0][2].assign(3.5, 2.5);
+    // Mid-Top Opp 1/4
 
-    for(size_t i = 0; i < agentSize; i++) {
-        draw(guards[agentSize][i], color);
-    }
+    guardLocations[5][1][0].assign(1  , 1.5);
+    guardLocations[5][1][1].assign(2.5, 1.5);
+    guardLocations[5][1][2].assign(3.5, 1.5);
+    // Mid-Bottom Opp 1/4
+
+    guardLocations[5][2][0].assign(1  , -1.5);
+    guardLocations[5][2][1].assign(2.5, -1.5);
+    guardLocations[5][2][2].assign(3.5, -1.5);
+
+    // Bottom Opp 1/4
+    guardLocations[5][3][0].assign(1  , -2.5);
+    guardLocations[5][3][1].assign(2.5, -2.5);
+    guardLocations[5][3][2].assign(3.5, -2.5);
+
+    // BackUp-Line
+    guardLocations[5][4][0].assign(-1 ,  2);
+    guardLocations[5][4][1].assign(-1 ,  0);
+    guardLocations[5][4][2].assign(-1 , -2);
+
 }
 
-inline void CDynamicAttack::showLocations(unsigned int agentSize,
-                                          QColor color) {
-    for(size_t i = 0;i < agentSize;i++) { //RegionsCount
-        for(size_t j = 0;j < 3;j++) {
-            draw(guardLocations[agentSize][i][j], 0, color);
-        }
-    }
-}
+void CDynamicAttack::assignLocations_6() {
+    // Top Opp 1/4
+    guardLocations[6][0][0].assign(1  , 2.5);
+    guardLocations[6][0][1].assign(2.5, 2.5);
+    guardLocations[6][0][2].assign(3.5, 2.5);
+    // Mid-Top Opp 1/4
 
+    guardLocations[6][1][0].assign(1  , 1.5);
+    guardLocations[6][1][1].assign(2.5, 1.5);
+    guardLocations[6][1][2].assign(3.5, 1.5);
+    // Mid-Bottom Opp 1/4
+
+    guardLocations[6][2][0].assign(1  , -1.5);
+    guardLocations[6][2][1].assign(2.5, -1.5);
+    guardLocations[6][2][2].assign(3.5, -1.5);
+
+    // Bottom Opp 1/4
+    guardLocations[6][3][0].assign(1  , -2.5);
+    guardLocations[6][3][1].assign(2.5, -2.5);
+    guardLocations[6][3][2].assign(3.5, -2.5);
+
+    // BackUp-Line
+    guardLocations[6][4][0].assign(-1 ,  2);
+    guardLocations[6][4][1].assign(-1 ,  0);
+    guardLocations[6][4][2].assign(-1 , -2);
+
+    // Goal Area
+    guardLocations[6][5][0].assign(-3.5 ,  0);
+    guardLocations[6][5][1].assign(-2.5 ,  0);
+    guardLocations[6][5][2].assign(-1.5 ,  0);
+
+
+}
 QString CDynamicAttack::getString(const DynamicEnums::DynamicMode &_mode) const {
     switch(_mode) {
     default:
