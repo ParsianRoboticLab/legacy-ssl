@@ -4,7 +4,7 @@
 #include"masterplay.h"
 
 #define SEMIDYNAMIC
-#define _MAX_REGION 7
+//#define _MAX_REGION 7
 
 struct SDynamicAgent {
 
@@ -82,31 +82,31 @@ private:
     ///////////////////////30em 2015
 
     //[RegionCount][RegionIndex]
-    Rect2D* guards[_MAX_REGION];
-    inline void showRegions(unsigned int agentSize, QColor color = QColor(Qt::gray));
-    inline void assignRegions();
-    inline void assignRegion_0();
-    inline void assignRegion_1();
-    inline void assignRegion_2();
-    inline void assignRegion_3();
-    inline void assignRegion_4();
-    inline void assignRegion_5();
-    inline void assignRegion_6();
+    Rect2D* guards[7];
+    void showRegions(unsigned int agentSize, QColor color = QColor(Qt::gray));
+    void assignRegions();
+    void assignRegion_0();
+    void assignRegion_1();
+    void assignRegion_2();
+    void assignRegion_3();
+    void assignRegion_4();
+    void assignRegion_5();
+    void assignRegion_6();
     QList<int> guardIndexList;
     QList<Vector2D> semiDynamicPosition;
     QList<Vector2D> markPositions;
 
     //[PositionAgentsCount][GuardIndex][LocationIndex]
-    Vector2D** guardLocations[_MAX_REGION];
-    inline void showLocations(unsigned int agentSize, QColor color = QColor(Qt::gray));
-    inline void assignLocations();
-    inline void assignLocations_0();
-    inline void assignLocations_1();
-    inline void assignLocations_2();
-    inline void assignLocations_3();
-    inline void assignLocations_4();
-    inline void assignLocations_5();
-    inline void assignLocations_6();
+    Vector2D** guardLocations[7];
+    void showLocations(unsigned int agentSize, QColor color = QColor(Qt::gray));
+    void assignLocations();
+    void assignLocations_0();
+    void assignLocations_1();
+    void assignLocations_2();
+    void assignLocations_3();
+    void assignLocations_4();
+    void assignLocations_5();
+    void assignLocations_6();
     bool isRightTimeToPass();
     int farGuardFromPoint(const int& _guardIndex, const Vector2D& _point);
     void chooseBestPosForPass();
@@ -136,7 +136,7 @@ private:
 
     QString getString(const DynamicEnums::DynamicMode& _mode) const;    
 
-    CRoleDynamic *roleAgents[5];
+    CRoleDynamic *roleAgents[6];
 
     SDynamicPlan currentPlan;
 
