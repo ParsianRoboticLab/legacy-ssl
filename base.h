@@ -59,25 +59,24 @@ enum DynamicMode {
     Fast,
     Critical,
     NotWeHaveBall,
-    Plan
+    Plan,
+    BallInOurField,
+    NoPositionAgent
+
 };
 
 enum DynamicSkill {
     NoSkill,
-    Ready,
+    //PlayMake Skills
     Pass,
-    Mark,
     CatchBall,
     Shot,
-    Move,
     Keep,
-    Chip
-};
-
-enum DynamicRole {
-    NoRole,
-    PlayMaker,
-    Position
+    Chip,
+    //Positioning
+    Ready,
+    OneTouch,
+    Move,
 };
 
 enum DynamicRegion {
@@ -86,6 +85,7 @@ enum DynamicRegion {
     Forward,
     Far,
     Goal,
+    Reflect,
     Best,
     Supporter
 };
