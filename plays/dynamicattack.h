@@ -8,22 +8,12 @@
 
 struct SDynamicAgent {
 
-    void init(DynamicEnums::DynamicRole _role,
-              DynamicEnums::DynamicSkill _skill,
+    void init(DynamicEnums::DynamicSkill _skill,
               DynamicEnums::DynamicRegion _region) {
-        role   = _role;
         skill  = _skill;
         region = _region;
     }
 
-
-
-    inline Vector2D getTarget() {
-        if(region >= 0)
-            knowledge->getStaticPoses(region);
-    }
-
-    DynamicEnums::DynamicRole role;
     DynamicEnums::DynamicSkill skill;
     DynamicEnums::DynamicRegion region;
 };
@@ -31,10 +21,10 @@ struct SDynamicAgent {
 struct SDynamicPlan {
     int agentSize;
     DynamicEnums::DynamicMode mode;
-    SDynamicAgent agents[5];
+    SDynamicAgent positionAgents[5];
+    SDynamicAgent playmake;
     Vector2D passPos;
     int passID;
-    int positionCnt;
 };
 
 
@@ -71,7 +61,7 @@ private:
 
     void playMake();
     void choosePlayMaker();
-    void positioning(int starter,  DynamicEnums::DynamicSkill skills);
+    void positioning();
     void globalExecute(int agentSize);
     void dynamicPlanner(int agentSize);
 
@@ -136,8 +126,8 @@ private:
 
     QString getString(const DynamicEnums::DynamicMode& _mode) const;    
 
-    CRoleDynamic *roleAgents[6];
-
+    CRoleDynamic *roleAgents[5];
+    CRoleDynamic *roleAgentPM;
     SDynamicPlan currentPlan;
 
     ////////Plan Making
