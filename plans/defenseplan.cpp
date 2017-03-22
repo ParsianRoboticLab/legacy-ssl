@@ -3269,13 +3269,17 @@ Vector2D CDefPos::getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Seg
     draw(r,QColor(Qt::black));
     ////////////////////////////////////////////////
     r.intersection(_seg,&ins[0],&ins[1]);
+    debug(QString("ins1 is %1 %2, ins2 is %3,%4").arg(ins[0].x).arg(ins[0].y).arg(ins[1].x).arg(ins[1].y),D_HAMED);
     if(ins[0].valid() || ins[1].valid()) {
-        finter = (ins[0].x > ins[1].x) ? ins[0] : ins[1];
-        if(finter.x > -3.42) {
-            //draw(QString("rect"),Vector2D(0,-2),"red");
-            //draw(finter);
-            return finter;
+        debug(QString("intersection with midle rect"),D_HAMED);
+        if(ins[0].x > -3.42 && wm->field->isInField(ins[0])){
+        finter =  ins[0];
+        return finter;
         }
+        else if(ins[1].x > -3.42  && wm->field->isInField(ins[1])){
+            finter =  ins[1];
+        return finter;
+    }
     }
     c1.intersection(_seg,&ins[0],&ins[1]);
     if(((wm->field->isInField(ins[0])) && (ins[0].y <= -_GOAL_WIDTH/4) && ins[0].valid()) || ((wm->field->isInField(ins[1]) && ins[1].y <= -_GOAL_WIDTH/4 && ins[1].valid()))) {
@@ -3301,6 +3305,8 @@ Vector2D CDefPos::getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Seg
     draw(finter);
     return finter;
 }
+
+
 
 
 void DefensePlan::executeGoalie()
@@ -3577,7 +3583,7 @@ void DefensePlan::findPos(int _markAgentSize)
     }
     ////////////////// BlockShoot //////////////////////////////////////////////
     else{
-        tempFindPos(_markAgentSize);
+            tempFindPos(_markAgentSize);
     }
 }
 
@@ -3590,24 +3596,24 @@ Vector2D DefensePlan::posvel(CRobot* opp, double VelReliabiity){
         VelReliabiity = 0;
     CDefPos test;
     Vector2D temppos = opp->pos + VelReliabiity * opp->vel;
-    //draw(temppos,'red');
     Segment2D tempseg;
     tempseg.assign(opp->pos, opp->pos + VelReliabiity * opp->vel );
     draw(tempseg,QColor(Qt::yellow));
     Vector2D penaltyvec;
     penaltyvec.assign(test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).x,test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).y)  ;
-    debug(QString("PenaltyVec x is: %1 PenaltyVec y is: %2").arg(penaltyvec.x).arg(penaltyvec.y), D_HAMED);
-    if(wm->field->isInField(penaltyvec)){
-        debug(QString("penaltyvec is valid"), D_HAMED);
+    if(wm->field->isInField(penaltyvec) && penaltyvec.isValid()){
+        debug(QString("intersection with penalty Area"), D_HAMED);
         return penaltyvec;
     }
-    else if((temppos).x < -4.4)
+    else if((temppos).x < -4.4){
+        debug(QString("ball is out"),D_HAMED);
         return Vector2D(-4.4,(opp->pos + VelReliabiity * opp->vel).y) ;
-    else
+    }
+        else{
+    debug(QString("normal mode"),D_HAMED);
         return opp->pos + VelReliabiity * opp->vel;
-
-
-}
+    }
+    }
 
 void DefensePlan::findOppAgentsToMark(QList <Vector2D> _realDefTargets)
 {
@@ -3636,7 +3642,7 @@ void DefensePlan::findOppAgentsToMark(QList <Vector2D> _realDefTargets)
     for(int i = 0; i<oppAgentsToMark.count(); i++)
     {
         draw(oppAgentsToMark[i]->pos);
-        oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i], 0));
+        oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i], 0.5));
 
     }
 
