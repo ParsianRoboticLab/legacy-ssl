@@ -4,25 +4,16 @@
 #include"masterplay.h"
 
 #define SEMIDYNAMIC
+//#define _MAX_REGION 7
 
 struct SDynamicAgent {
 
-    void init(DynamicEnums::DynamicRole _role,
-              DynamicEnums::DynamicSkill _skill,
+    void init(DynamicEnums::DynamicSkill _skill,
               DynamicEnums::DynamicRegion _region) {
-        role   = _role;
         skill  = _skill;
         region = _region;
     }
 
-
-
-    inline Vector2D getTarget() {
-        if(region >= 0)
-            knowledge->getStaticPoses(region);
-    }
-
-    DynamicEnums::DynamicRole role;
     DynamicEnums::DynamicSkill skill;
     DynamicEnums::DynamicRegion region;
 };
@@ -30,10 +21,10 @@ struct SDynamicAgent {
 struct SDynamicPlan {
     int agentSize;
     DynamicEnums::DynamicMode mode;
-    SDynamicAgent agents[5];
+    SDynamicAgent positionAgents[5];
+    SDynamicAgent playmake;
     Vector2D passPos;
     int passID;
-    int positionCnt;
 };
 
 
@@ -42,6 +33,8 @@ class CDynamicAttack : public CMasterPlay {
     typedef CMasterPlay super;
 
 public:
+
+
     CDynamicAttack();
     ~CDynamicAttack();
 
@@ -68,7 +61,7 @@ private:
 
     void playMake();
     void choosePlayMaker();
-    void positioning(int starter,  DynamicEnums::DynamicSkill skills);
+    void positioning();
     void globalExecute(int agentSize);
     void dynamicPlanner(int agentSize);
 
@@ -77,17 +70,33 @@ private:
     void assignTasks();
     void checkPlanner();
     ///////////////////////30em 2015
-    Rect2D* guards[4];
-    inline void showRegions(unsigned int agentSize, QColor color = QColor(Qt::gray));
-    inline void assignRegions();
+
+    //[RegionCount][RegionIndex]
+    Rect2D* guards[7];
+    void showRegions(unsigned int agentSize, QColor color = QColor(Qt::gray));
+    void assignRegions();
+    void assignRegion_0();
+    void assignRegion_1();
+    void assignRegion_2();
+    void assignRegion_3();
+    void assignRegion_4();
+    void assignRegion_5();
+    void assignRegion_6();
     QList<int> guardIndexList;
     QList<Vector2D> semiDynamicPosition;
     QList<Vector2D> markPositions;
 
     //[PositionAgentsCount][GuardIndex][LocationIndex]
-    Vector2D** guardLocations[4];
-    inline void showLocations(unsigned int agentSize, QColor color = QColor(Qt::gray));
-    inline void assignLocations();
+    Vector2D** guardLocations[7];
+    void showLocations(unsigned int agentSize, QColor color = QColor(Qt::gray));
+    void assignLocations();
+    void assignLocations_0();
+    void assignLocations_1();
+    void assignLocations_2();
+    void assignLocations_3();
+    void assignLocations_4();
+    void assignLocations_5();
+    void assignLocations_6();
     bool isRightTimeToPass();
     int farGuardFromPoint(const int& _guardIndex, const Vector2D& _point);
     void chooseBestPosForPass();
@@ -118,7 +127,7 @@ private:
     QString getString(const DynamicEnums::DynamicMode& _mode) const;    
 
     CRoleDynamic *roleAgents[5];
-
+    CRoleDynamic *roleAgentPM;
     SDynamicPlan currentPlan;
 
     ////////Plan Making

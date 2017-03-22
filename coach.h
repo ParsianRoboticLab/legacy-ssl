@@ -23,7 +23,6 @@ class CCoach {
 
 public:
 
-    CKnowledge::ballPossesionState GlobalBallPState;
     ////////GUI Needed
     CPlayOff* playOff();
     CLoadPlayOffJson* getPlanLoader();
@@ -38,7 +37,7 @@ public:
     bool swapAgents(int i, int j);
     void setOpponents();
     int mostSupporterNumber(int num);
-    QList<int> findBestPoses(int numberOfPositionAgents,bool semiDynamic);
+    QList<int> findBestPoses(int numberOfPositionAgents);
     CKnowledge::ballPossesionState lastBallPossesionState;
     CKnowledge::ballPossesionState isBallOurs();
     CKnowledge::ballPossesionState ballPStateIntented;

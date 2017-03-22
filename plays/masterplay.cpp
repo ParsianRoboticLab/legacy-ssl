@@ -301,7 +301,6 @@ void CMasterPlay::execute() {
     default:
         debug(QString("MasterPlay agentsID invalid size: %1!").arg(agentsID.count()) , D_ERROR);
     }
-//    debug(QString("Master Play : %1").arg(agentsID.count()), D_DEBUG);
     execPlay();
 }
 
