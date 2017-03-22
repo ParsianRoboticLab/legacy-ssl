@@ -1255,7 +1255,6 @@ void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
         qDebug() << "[Coach] first time config done";
     } else {
         setPlayOff( ourPlayOff->getMasterMode() );
-
     }
 }
 void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
@@ -1421,11 +1420,11 @@ void CCoach::matchPlan(NGameOff::SPlan *_plan, const QList<int>& _ourplayers) {
 
             double weight;
             if (_plan->matching.initPos.agents.at(i).x == -100) {
-                weight = knowledge->getAgent(j)->pos().dist(wm->ball->pos);
+                weight = knowledge->getAgent(_ourplayers.at(j))->pos().dist(wm->ball->pos);
             } else {
                 weight = _plan->matching.initPos.agents.at(i).dist(knowledge->getAgent(_ourplayers.at(j))->pos());
             }
-            matcher.setWeight(i, j, (int)((1/(weight + 1))*10));
+            matcher.setWeight(i, j, -(weight));
         }
     }
     qDebug() << "[Coach] matched plan with : " << matcher.findMatching();
@@ -1522,11 +1521,17 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     int symmetry = 1;
     QList<NGameOff::SPlan*> validPlans;
     QList<NGameOff::SPlan*> plans = m_planLoader->getPlans(); // Get All of The Plans
+
+    if (plans.isEmpty()) {
+        debug("There's No Plan", D_ERROR);
+        return;
+    }
+
     Q_FOREACH(NGameOff::SPlan* plan, plans) { //Find Valid Plans
         NGameOff::SMatching& matching = plan->matching;
 
         // Just For Debugging
-        if (1) {
+        if (0) {
             qDebug() << "-----------> plan name" << plan->gui.name;
             if (matching.common->planMode  >= _mode)
                 qDebug() << "[Coach] Mode is Valid";
@@ -1550,6 +1555,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
                 && isTagsMatched(matching.common->tags, currentTags)) {
 
             //check Ball matchig with symmetry
+            plan->common.currentSize = _ourplayers.size();
             Vector2D symBall = Vector2D(matching.initPos.ball.x,
                                  (-1) * matching.initPos.ball.y);
 
@@ -1572,30 +1578,23 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
                 plan->execution.symmetry = 1;
             } else if (isRegionMatched(symBall)) {
                 plan->execution.symmetry = -1;
-            } /* else {
+            } else {
                 continue;
-            }*/
+            }
 
-            plan->common.currentSize = _ourplayers.size();
             validPlans.append(plan);
-
         }
     }
 
     debug(QString("playoff -> there's %1 valid Plan").arg(validPlans.size()), D_DEBUG);
     if (validPlans.isEmpty()) {
         debug("[Warning] playoff -> there's no valid Plan", D_ERROR, QColor(Qt::red));
-        qWarning() << "[Warning] playoff -> there's no valid Plan from " << m_planLoader->getPlans().size() << "Plans";
-
-        // TEMP FIX
         debug("[Warning] playoff -> matching nearset plan", D_ERROR, QColor(Qt::red));
-        qWarning() << "[Warning] playoff -> matching a plan from " << m_planLoader->getPlans().size() << "Plans";
         if (nearestPlan != NULL) {
             nearestPlan->execution.symmetry = symmetry;
             validPlans.append(nearestPlan);
+            debug("[Warning] playoff -> nearset plan matched", D_ERROR, QColor(Qt::red));
         }
-//        return;
-        // TEMP FIX
     }
 
     RNG randomNumberGenerator;
