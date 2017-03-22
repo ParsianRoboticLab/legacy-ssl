@@ -2,6 +2,7 @@
 #define EXPERIMENTAL3_H
 #include "mainapplication.h"
 #include <geom/voronoi_diagram_original.h>
+#include <gamelogger.h>
 
 //#define NAVIGATION_CHALLENGE
 
@@ -297,16 +298,13 @@ public:
 
 void CMainApplication::Experimental3()
 {
-    long i;
-    debug("mahmood",D_MAHMOOD);
-    debug("MHMMD",D_MHMMD);
-    debug("atousa",D_ATOUSA);
-    debug("fatemeh",D_FATEMEH);
-    debug("mahi",D_MAHI);
-    debug("amin",D_AMIN);
-    debug("amiR",D_AMIR);
-    debug("AHZ",D_AHZ);
-    debug("hamed",D_HAMED);
+    analyze("hello",13,false);
+    analyze("nadia",1,false);
+    analyze("nadia",3,false);
+    analyze("hello",15,false);
+    analyze("nadia",4,false);
+    analyze("hello",3,false);
+    analyze("robot",10,false);
 return;
 //    Segment2D segToOppGoali[5];
 //    Vector2D tempMousePos = tPoint;

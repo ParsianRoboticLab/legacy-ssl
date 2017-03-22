@@ -22,7 +22,7 @@
 #define D_ATOUSA     32770
 #define D_AHZ        32772
 #define D_AMIN       32776
-#define D_AMIR       32784
+#define D_PARSA       32784
 #define D_HAMED      32800
 
 
@@ -37,6 +37,7 @@ void initInfo(void *);
 void setDebugLevel(int l);
 void setDrawLevel(int l);
 void debug(QString text, long type, QColor color = QColor(0,0,0));
+void analyze(QString key,QVariant value,bool SaveSameValues=false);
 bool drawLock(int ms=-1);
 void drawUnlock();
 void draw (Rect2D _rect = Rect2D(Vector2D(0, 0), Vector2D(0, 0)), QColor _color = QColor(255, 255, 255), bool _filled = false, int level=-1 , bool toBeloged=true);

@@ -807,6 +807,7 @@ public:
 private:
     QFileDialog *dialog;
     QPushButton *btnPlay , *btnBrowse , *btnNextFrame , *btnPreviousFrame;
+    QPushButton *NextFrame, *PreviousFrame;
     QComboBox *cmbList;
     QLineEdit *txtFPS;
     QSlider *slider;
@@ -828,7 +829,9 @@ public slots:
     void browseDialog();
     void playLog();
     void goNextFrame();
+    void goNext10Frame();
     void goPreviousFrame();
+    void goPrevious10Frame();
     void seekChange(int);
     void cursorIncrement();
     void clearDebugTexts();

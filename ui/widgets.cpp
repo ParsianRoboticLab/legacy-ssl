@@ -3107,11 +3107,19 @@ CLoggerWidget::CLoggerWidget(){
     btnPlay = new QPushButton(this);
     btnPlay->setIcon(QIcon("./icons/Play-Hot-icon.png"));
     btnNextFrame = new QPushButton(this);
+    NextFrame = new QPushButton(this);
+
     btnNextFrame->setIcon(QIcon("./icons/Next-Hot-icon.png"));
     btnNextFrame->setShortcut(QKeySequence(tr("Right", "NextFrame")));
+    NextFrame->setShortcut(QKeySequence(tr("Ctrl+Right", "NextNextFrame")));
+    NextFrame->setIcon(QIcon("./icons/Next10.png"));
+
     btnPreviousFrame = new QPushButton(this);
     btnPreviousFrame->setIcon(QIcon("./icons/Previous-Hot-icon.png"));
     btnPreviousFrame->setShortcut(QKeySequence(tr("Left", "PreviousFrame")));
+    PreviousFrame = new QPushButton(this);
+    PreviousFrame->setIcon(QIcon("./icons/Previous10.png"));
+    PreviousFrame->setShortcut(QKeySequence(tr("Ctrl+Left", "PreviousFrame")));
     slider = new QSlider(Qt::Horizontal , this);
     dialog = new QFileDialog(this);
     btnBrowse = new QPushButton("Browse" , this);
@@ -3133,7 +3141,7 @@ CLoggerWidget::CLoggerWidget(){
     chbxDebug[6] = new QCheckBox("Mahmood" , this);
     chbxDebug[7] = new QCheckBox("AHZ" , this);
     chbxDebug[8] = new QCheckBox("Amin" , this);
-    chbxDebug[9] = new QCheckBox("AmiR" , this);
+    chbxDebug[9] = new QCheckBox("Parsa" , this);
     chbxDebug[10] = new QCheckBox("Game" , this);
     chbxDebug[11] = new QCheckBox("Ali" , this);
     chbxDebug[12] = new QCheckBox("Arash" , this);
@@ -3177,8 +3185,10 @@ CLoggerWidget::CLoggerWidget(){
     l->addWidget(lblFPS , 3 , 9);
     l->addWidget(btnPlay , 4 , 0);
     l->addWidget(lblTime , 4 , 1 , 1 , 3);
-    l->addWidget(btnPreviousFrame , 4 , 6);
-    l->addWidget(btnNextFrame , 4 , 7);
+    l->addWidget(PreviousFrame , 4 , 4);
+    l->addWidget(btnPreviousFrame , 4 , 5);
+    l->addWidget(btnNextFrame , 4 , 6);
+    l->addWidget(NextFrame , 4 , 7);
     l->addWidget(lblRefCmd , 4 , 8);
     l->addWidget(debugTexts , 5 , 0 , 7 , 8);
     QWidget* DebugNames=new QWidget();
@@ -3198,7 +3208,9 @@ CLoggerWidget::CLoggerWidget(){
     connect(btnBrowse , SIGNAL(pressed()) , this , SLOT(browseDialog()));
     connect(btnPlay , SIGNAL(pressed()) , this , SLOT(playLog()));
     connect(btnPreviousFrame , SIGNAL(pressed()) , this, SLOT(goPreviousFrame()));
+    connect(PreviousFrame , SIGNAL(pressed()) , this, SLOT(goPrevious10Frame()));
     connect(btnNextFrame , SIGNAL(pressed()) , this , SLOT(goNextFrame()));
+    connect(NextFrame , SIGNAL(pressed()) , this , SLOT(goNext10Frame()));
     connect(slider , SIGNAL(sliderMoved(int)) , this , SLOT(seekChange(int)));
     connect(timer , SIGNAL(timeout()) , this , SLOT(cursorIncrement()));
     connect(btnClear , SIGNAL(pressed()) , this , SLOT(clearDebugTexts()));
@@ -3367,6 +3379,48 @@ void CLoggerWidget::goPreviousFrame(){
     cursorIncrement();
 }
 
+void CLoggerWidget::goPrevious10Frame(){
+    if( pause == false ){
+        pause = true;
+        btnPlay->setIcon(QIcon("./icons/Play-Hot-icon.png"));
+        timer->stop();
+
+        loggerMutex->lock();
+        gameLogger->playPauseMode = false;
+        loggerMutex->unlock();
+    }
+    if( fBfStep != -10 ){
+        fBfStep = -10;
+        loggerMutex->lock();
+        gameLogger->playPauseMode = false;
+        gameLogger->fBfMode = true;
+        loggerMutex->unlock();
+    }
+    debugTexts->clear();
+    cursorIncrement();
+}
+
+void CLoggerWidget::goNext10Frame(){
+    if( pause == false ){
+        pause = true;
+        btnPlay->setIcon(QIcon("./icons/Play-Hot-icon.png"));
+        timer->stop();
+
+        loggerMutex->lock();
+        gameLogger->playPauseMode = false;
+        loggerMutex->unlock();
+    }
+    if( fBfStep != 10 ){
+        fBfStep = 10;
+        loggerMutex->lock();
+        gameLogger->playPauseMode = false;
+        gameLogger->fBfMode = true;
+        loggerMutex->unlock();
+    }
+
+    debugTexts->clear();
+    cursorIncrement();
+}
 void CLoggerWidget::goNextFrame(){
     if( pause == false ){
         pause = true;
@@ -3533,7 +3587,7 @@ void CLoggerWidget::debugTypeChanged(){
         type1 |= D_AMIN;
     }
     if( chbxDebug[9]->isChecked() ){
-        type1 |= D_AMIR;
+        type1 |= D_PARSA;
     }
 
 
