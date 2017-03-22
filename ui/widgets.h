@@ -870,7 +870,8 @@ public:
     QWidget *profilerRobotsList;
     QGridLayout *l;
     QVBoxLayout *ProfilerLayout;
-    QLineEdit *profTxt;
+    QLabel *profTxt,*repeatTxt;
+    QLineEdit *repeatNum;
     QPushButton *startProf;
 private:
 public slots:

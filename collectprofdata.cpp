@@ -2,6 +2,7 @@
 #include "collectprofdata.h"
 #include <knowledge.h>
 #include "geom/triangle_2d.h"
+#include "logger.h"
 
 
 CollectProfData *collectKickProfile;
@@ -31,7 +32,7 @@ void CollectProfData::init(int p1 , int p2){
     debug(QString("__%1__%2__").arg(p1).arg(p2),D_NADIA);
     prfl1->setAgent(knowledge->getAgent(p1));
     prfl1->setAgentID(p1);
-    prfl1->setKickSpeed(kickSpeed1/120);
+    prfl1->setKickSpeed(kickSpeed1/100);
     prfl1->setReceiveRadius(1.2);
     prfl1->setTolerance(0.01);
     prfl1->setIsActive(true);
@@ -40,7 +41,7 @@ void CollectProfData::init(int p1 , int p2){
 
     prfl2->setAgent(knowledge->getAgent(p2));
     prfl2->setAgentID(p2);
-    prfl2->setKickSpeed(kickSpeed2/120);
+    prfl2->setKickSpeed(kickSpeed2/100);
     prfl2->setReceiveRadius(1.2);
     prfl2->setTolerance(0.01);
     prfl2->setIsActive(true);
@@ -56,8 +57,7 @@ void CollectProfData::init(int p1 , int p2){
 
     counter1 = -2;
     counter2 = -2;
-    repeat = 1;
-    speedStep = 200;
+    speedStep = 100;
 }
 
 void CollectProfData::positioning(double xpos1 , double ypos1 , double xpos2 , double ypos2){
@@ -125,7 +125,7 @@ void CollectProfData::LowSpeed(){
             prfl2->setTarget(Vector2D(-_FIELD_WIDTH/2+0.8 , _FIELD_HEIGHT/2-0.8));
             prfl1->setWaitPos(Vector2D(-_FIELD_WIDTH/2+0.8 , _FIELD_HEIGHT/2-0.8));
             prfl2->setWaitPos(Vector2D(-_FIELD_WIDTH/2+0.8 , _FIELD_HEIGHT/2-0.8));
-            prfl1->setKickSpeed(kickSpeed1/120);
+            prfl1->setKickSpeed(kickSpeed1/100);
             debug(QString("prfl1 kick speed:%1").arg(prfl1->getKickSpeed()),D_NADIA);
 
             if(!Circle2D(prfl1->getTarget() , 0.15).contains(knowledge->getAgent(prfl2->getAgentID())->pos()))  // agent1 wait until agent2 is in its target
@@ -154,7 +154,7 @@ void CollectProfData::LowSpeed(){
             prfl1->setTarget(Vector2D( -0.5 , 0.5));
             prfl2->setWaitPos(Vector2D( -0.5 , 0.5));
             prfl1->setWaitPos(Vector2D( -0.5 , 0.5));
-            prfl2->setKickSpeed(kickSpeed2/120);
+            prfl2->setKickSpeed(kickSpeed2/100);
 
             if(!Circle2D(prfl2->getTarget() , 0.15).contains(knowledge->getAgent(prfl1->getAgentID())->pos()))  // agent2 wait until agent1 is in its target
                 prfl2->setDontKick(true);
@@ -227,7 +227,7 @@ void CollectProfData::LowSpeed(){
 void CollectProfData::saveMaxBallSpeed(){
     if(prfl1_Kicked){
         if(counter1 >= 0){
-            if(!(ballSpeed<=(kickSpeed1/360))){
+            if(!(ballSpeed<=(kickSpeed1/300))){
             p1RealSpeedRec.append(ballSpeed);
             p1KickSpeed.append(kickSpeed1);
             debug(QString("1 : max ball speed : %1 , kSpeed : %2").arg(ballSpeed).arg(kickSpeed1) , D_NADIA);
@@ -244,7 +244,7 @@ void CollectProfData::saveMaxBallSpeed(){
         }
     }else{
         if(counter2 >= 0){
-            if(!(ballSpeed<=(kickSpeed2/360))){
+            if(!(ballSpeed<=(kickSpeed2/300))){
             p2RealSpeedRec.append(ballSpeed);
             p2KickSpeed.append(kickSpeed2);
             debug(QString("2 : max ball speed : %1 , kSpeed : %2").arg(ballSpeed).arg(kickSpeed2) , D_NADIA);
@@ -286,7 +286,7 @@ void CollectProfData::HighSpeed(){
             prfl2->setTarget(Vector2D(-_FIELD_WIDTH/2+0.8 , _FIELD_HEIGHT/2-0.8));
             prfl1->setWaitPos(Vector2D(-_FIELD_WIDTH/2+0.8 , _FIELD_HEIGHT/2-0.8));
             prfl2->setWaitPos(Vector2D(-_FIELD_WIDTH/2+0.8 , _FIELD_HEIGHT/2-0.8));
-            prfl1->setKickSpeed(kickSpeed1/120);
+            prfl1->setKickSpeed(kickSpeed1/100);
 
             if(!Circle2D(prfl1->getTarget() , 0.15).contains(knowledge->getAgent(prfl2->getAgentID())->pos()))  // agent1 wait until agent2 is in its target
                 prfl1->setDontKick(true);
@@ -317,7 +317,7 @@ void CollectProfData::HighSpeed(){
             prfl1->setTarget(Vector2D( -0.8 , -_FIELD_HEIGHT/2+0.8));
             prfl2->setWaitPos(Vector2D( -0.8 , -_FIELD_HEIGHT/2+0.8));
             prfl1->setWaitPos(Vector2D( -0.8 , -_FIELD_HEIGHT/2+0.8));
-            prfl2->setKickSpeed(kickSpeed2/120);
+            prfl2->setKickSpeed(kickSpeed2/100);
 
             if(!Circle2D(prfl2->getTarget() , 0.15).contains(knowledge->getAgent(prfl1->getAgentID())->pos()))  // agent2 wait until agent1 is in its target
                 prfl2->setDontKick(true);
@@ -344,7 +344,7 @@ void CollectProfData::HighSpeed(){
         if(wm->ball->vel.length() > ballSpeed){
             ballSpeed = wm->ball->vel.length();
         }
-
+//        qDebug()<<wm->ball->vel.length();
 
         if(wm->ball->vel.length() < 0.01){
 

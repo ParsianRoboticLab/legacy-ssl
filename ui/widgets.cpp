@@ -3634,7 +3634,9 @@ CnewProfilerWidget::CnewProfilerWidget(QWidget* parent):QDialog(parent){
     profilerRobotsList=new QWidget();
     l = new QGridLayout(this);
     ProfilerLayout=new QVBoxLayout;
-    profTxt=new QLineEdit("select active Robots to be profiled:",this);
+    profTxt=new QLabel("select active Robots to be profiled:",this);
+    repeatTxt=new QLabel("repeat:",this);
+    repeatNum=new QLineEdit("3",this);
     startProf=new QPushButton("start Profiling",this);
     profilerRobotsList->setLayout(ProfilerLayout);
     chbxProf[0]=new QCheckBox("0",this);
@@ -3656,7 +3658,9 @@ CnewProfilerWidget::CnewProfilerWidget(QWidget* parent):QDialog(parent){
     }
     l->addWidget(profTxt,1,1);
     l->addWidget(profilerRobotsList,2,1);
-    l->addWidget(startProf,3,1);
+    l->addWidget(repeatTxt,3,1);
+    l->addWidget(repeatNum,3,2);
+    l->addWidget(startProf,4,1);
     this->setLayout(l);
 
 
@@ -3676,6 +3680,7 @@ void CnewProfilerWidget::startProfFunc(){
             i++;
         }
     }
+    collectKickProfile->repeat=repeatNum->text().toInt();
     this->close();
     ProfilerExecute=true;
 }
