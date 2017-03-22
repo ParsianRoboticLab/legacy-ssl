@@ -32,7 +32,7 @@
 #include <QFont>
 #include <algorithm>
 #include "simulation/simulator.h"
-#include "collectprofdata.h"
+#include "collectprofiledata.h"
 
 #include<QMenu>
 #include<QAction>
@@ -3630,7 +3630,7 @@ QString CLogTagWidget::getTagsInThisLog(){
 
 
 
-CnewProfilerWidget::CnewProfilerWidget(QWidget* parent):QDialog(parent){
+CNewProfilerWidget::CNewProfilerWidget(QWidget* parent):QDialog(parent){
     profilerRobotsList=new QWidget();
     l = new QGridLayout(this);
     ProfilerLayout=new QVBoxLayout;
@@ -3670,9 +3670,9 @@ CnewProfilerWidget::CnewProfilerWidget(QWidget* parent):QDialog(parent){
 }
 
 
-CnewProfilerWidget::~CnewProfilerWidget(){
+CNewProfilerWidget::~CNewProfilerWidget(){
 }
-void CnewProfilerWidget::startProfFunc(){
+void CNewProfilerWidget::startProfFunc(){
     int i=0;
     for(int j=0;j<10;j++){
         if(chbxProf[j]->isChecked()){

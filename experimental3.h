@@ -297,16 +297,35 @@ public:
 
 void CMainApplication::Experimental3()
 {
-    long i;
-    debug("mahmood",D_MAHMOOD);
-    debug("MHMMD",D_MHMMD);
-    debug("atousa",D_ATOUSA);
-    debug("fatemeh",D_FATEMEH);
-    debug("mahi",D_MAHI);
-    debug("amin",D_AMIN);
-    debug("amiR",D_AMIR);
-    debug("AHZ",D_AHZ);
-    debug("hamed",D_HAMED);
+//    long i;
+//    debug("mahmood",D_MAHMOOD);
+//    debug("MHMMD",D_MHMMD);
+//    debug("atousa",D_ATOUSA);
+//    debug("fatemeh",D_FATEMEH);
+//    debug("mahi",D_MAHI);
+//    debug("amin",D_AMIN);
+//    debug("amiR",D_AMIR);
+//    debug("AHZ",D_AHZ);
+//    debug("hamed",D_HAMED);
+//    knowledge->profiler->load(JSON);
+//    QVector< QVector<double> > *KickCoeff = new QVector< QVector<double> >();
+
+//    CPolynomialRegression ProRes;
+
+//    for(int q=0; q<16; q++)
+//        KickCoeff->append(ProRes.PolynomialRegression(knowledge->profiler->robotsProfile[q].finalKickMap.values() , knowledge->profiler->robotsProfile[q].finalKickMap.keys(),2));
+
+//    //    ProfilerResult[robotID][0:kick , 1:chip , 2:SpinKick , 3:SpinChip][10*distance(0-80)] ---> contains needed voltage for this distance
+
+//    for(int q=0; q<16; q++)
+//        for(double dis=0; dis<=8; dis+=0.1){
+//            if(KickCoeff->at(q).count()>0)
+//                knowledge->ProfilerResult[q][0][(int)(dis*10)] =(double)
+//                        KickCoeff->at(q).at(0)+KickCoeff->at(q).at(1)*dis+KickCoeff->at(q).at(2)*dis*dis;
+//        }
+
+    for(int i=0;i<80;i++)
+    qDebug()<<knowledge->ProfilerResult[0][0][i];
 return;
 //    Segment2D segToOppGoali[5];
 //    Vector2D tempMousePos = tPoint;

@@ -26,7 +26,7 @@
 #include "learning/policylearner.h"
 #include <fstream>
 #include <soccer.h>
-#include "collectprofdata.h"
+#include "collectprofiledata.h"
 
 class MySoccer : public CSoccer
 {

@@ -47,7 +47,7 @@ CMainApplication::CMainApplication(QWidget *parent)
     experimental=0;
 
     //profiler
-    collectKickProfile=new CollectProfData();
+    collectKickProfile=new CollectProfileData();
 
     /* Init Workspace */
 
@@ -311,7 +311,7 @@ CMainApplication::CMainApplication(QWidget *parent)
     setExp6Act->setCheckable(true);
     setExp6Act->setChecked((experimental==6));
 
-    setFProfiler = new QAction("CollectProfData", this);
+    setFProfiler = new QAction("CollectProfileData", this);
     setFProfiler->setCheckable(true);
     setFProfiler->setChecked((experimental==11));
     ///////////////////////////////////////////////////////////////profiler
@@ -954,8 +954,8 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setJsHandy->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
         setKProfiler->setChecked(false);
-        CnewProfilerWidget *profilerWidget;
-        profilerWidget=new CnewProfilerWidget(this);
+        CNewProfilerWidget *profilerWidget;
+        profilerWidget=new CNewProfilerWidget(this);
         profilerWidget->show();
     }
     /* Control Mode */

@@ -1,5 +1,5 @@
-#ifndef COLLECTPROFDATA_H
-#define COLLECTPROFDATA_H
+#ifndef COLLECTPROFILEDATA_H
+#define COLLECTPROFILEDATA_H
 
 #include <QObject>
 #include <knowledge.h>
@@ -24,7 +24,7 @@ enum KickerStatus{
     ChangeStat
 };
 
-class CollectProfData : public QObject
+class CollectProfileData : public QObject
 {
     Q_OBJECT
 public:
@@ -52,7 +52,7 @@ public:
     QList<double> p1RealSpeedRec , p2RealSpeedRec;
     QList<int> p1KickSpeed , p2KickSpeed;
 
-    CollectProfData();
+    CollectProfileData();
 
     void init(int p1 , int p2);
     void goOut();
@@ -73,7 +73,7 @@ signals:
 public slots:
 
 };
-extern CollectProfData *collectKickProfile;
+extern CollectProfileData *collectKickProfile;
 extern bool ProfilerExecute;
 
-#endif // COLLECTPROFDATA_H
+#endif // COLLECTPROFILEDATA_H

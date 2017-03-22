@@ -1,14 +1,14 @@
 
-#include "collectprofdata.h"
+#include "collectprofiledata.h"
 #include <knowledge.h>
 #include "geom/triangle_2d.h"
 #include "logger.h"
 
 
-CollectProfData *collectKickProfile;
+CollectProfileData *collectKickProfile;
 bool ProfilerExecute=false;
 
-CollectProfData::CollectProfData()
+CollectProfileData::CollectProfileData()
 {
     for(int i=0;i<10;i++)
         activeRobots[i]=-1;
@@ -26,7 +26,7 @@ CollectProfData::CollectProfData()
 
 
 
-void CollectProfData::init(int p1 , int p2){
+void CollectProfileData::init(int p1 , int p2){
 
     debug(QString("__%1__%2__").arg(p1).arg(p2),D_NADIA);
     prfl1->setAgent(knowledge->getAgent(p1));
@@ -59,7 +59,7 @@ void CollectProfData::init(int p1 , int p2){
     speedStep = 100;
 }
 
-void CollectProfData::positioning(double xpos1 , double ypos1 , double xpos2 , double ypos2){
+void CollectProfileData::positioning(double xpos1 , double ypos1 , double xpos2 , double ypos2){
     prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
     prfl1->setTarget(Vector2D(xpos1, ypos1));
     prfl1->setWaitPos(Vector2D(xpos1, ypos1));
@@ -72,7 +72,7 @@ void CollectProfData::positioning(double xpos1 , double ypos1 , double xpos2 , d
     prfl2->execute();
 }
 
-bool CollectProfData::BallIsNear(CRolePlayOn * agent , double rad){
+bool CollectProfileData::BallIsNear(CRolePlayOn * agent , double rad){
     if(Circle2D(knowledge->getAgent(agent->getAgentID())->pos() , rad).contains(wm->ball->pos)){
         rcvr = prfl2;
         pss = prfl1;
@@ -82,7 +82,7 @@ bool CollectProfData::BallIsNear(CRolePlayOn * agent , double rad){
     return false;
     return true;
 }
-void CollectProfData::profilerDraws(){
+void CollectProfileData::profilerDraws(){
     if(prfl1->getSelectedSkill()==roleSkill::Kick)
         draw(Circle2D( knowledge->getAgent(prfl1->getAgentID())->pos() , 0.5 ) , QColor(Qt::black));
 
@@ -102,7 +102,7 @@ void CollectProfData::profilerDraws(){
         draw(Circle2D( knowledge->getAgent(prfl2->getAgentID())->pos() , 0.5 ) , QColor(Qt::darkCyan));
 }
 
-void CollectProfData::LowSpeed(){
+void CollectProfileData::LowSpeed(){
 
     static Triangle2D downTri = Triangle2D( Vector2D( 0 , 0) ,Vector2D(-_FIELD_WIDTH/2 , 0) , Vector2D(0 , _FIELD_HEIGHT/2) );
     static Triangle2D upTri = Triangle2D( Vector2D(-_FIELD_WIDTH/2 , _FIELD_HEIGHT/2) ,Vector2D(-_FIELD_WIDTH/2 , 0) , Vector2D(0 , _FIELD_HEIGHT/2) );
@@ -223,7 +223,7 @@ void CollectProfData::LowSpeed(){
 
 
 
-void CollectProfData::saveMaxBallSpeed(){
+void CollectProfileData::saveMaxBallSpeed(){
     if(prfl1_Kicked){
         if(counter1 >= 0){
             if(!(ballSpeed<=(kickSpeed1/300))){
@@ -265,7 +265,7 @@ void CollectProfData::saveMaxBallSpeed(){
 
 }
 
-void CollectProfData::HighSpeed(){
+void CollectProfileData::HighSpeed(){
     static Triangle2D downTri = Triangle2D( Vector2D( 0 , 0) ,Vector2D(-_FIELD_WIDTH/2 , 0) , Vector2D(0 , _FIELD_HEIGHT/2) );
     static Triangle2D upTri = Triangle2D( Vector2D(-_FIELD_WIDTH/2 , _FIELD_HEIGHT/2) ,Vector2D(-_FIELD_WIDTH/2 , 0) , Vector2D(0 , _FIELD_HEIGHT/2) );
     static Triangle2D *currTri;
@@ -384,7 +384,7 @@ void CollectProfData::HighSpeed(){
     }
 }
 
-void CollectProfData::start(){
+void CollectProfileData::start(){
 
     switch(prfState){
     case InitState:
@@ -442,4 +442,5 @@ void CollectProfData::start(){
         profiler->save(JSON);
         prfState=endState;
         break;
+    }
 }
