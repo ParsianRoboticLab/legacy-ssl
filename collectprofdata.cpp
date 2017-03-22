@@ -17,7 +17,6 @@ CollectProfData::CollectProfData()
     prfl2 = new CRolePlayOn();
     profiler = new CNewProfiler();
     prfState = InitState;
-
     MinSpeed = 100;
     middleSpeed = 500;
 
@@ -418,7 +417,7 @@ void CollectProfData::start(){
             prfState=InitState;
         }
         else
-            debug("falseeee",D_NADIA);
+            debug("finished",D_NADIA);
 
         break;
 
@@ -443,5 +442,4 @@ void CollectProfData::start(){
         profiler->save(JSON);
         prfState=endState;
         break;
-    }
 }
