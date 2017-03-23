@@ -108,7 +108,7 @@ CCoach::CCoach(CAgent**_agents)
 
 
     m_planLoader = new CLoadPlayOffJson(QDir::currentPath() + QString("/playoff"));
-
+    goalieAgent = NULL;
 }
 
 CCoach::~CCoach()
@@ -1608,8 +1608,6 @@ void CCoach::execute()
     // place your reset codes about knowledge vars in this function
     knowledge->resetEssentialVars();
 
-    // checks whether the goalie is under the net or not if it is moves out
-    checkGoalieInsight();
 
     updateKnowledgeVars();
 
@@ -1634,6 +1632,8 @@ void CCoach::execute()
 
     decideAttack();
 
+    // checks whether the goalie is under the net or not if it is moves out
+    checkGoalieInsight();
     // Old Role Base Execution -- used for block, old_playmaker
     checkRoleAssignments();
     for (int i=0;i<_NUM_PLAYERS;i++) {
