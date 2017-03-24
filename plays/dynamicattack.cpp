@@ -322,16 +322,16 @@ void CDynamicAttack::dynamicPlanner(int agentSize) {
         mahiAgentsID[i] = -1;
     }
 
-    for(size_t i = 0;i < agentSize;i++) {
+    for(size_t i = 0; i < agentSize; i++) {
         activeAgents.append(knowledge->getAgent(agentsID.at(i)));
     }
 
     makePlan(agentSize);
     assignId();
-    chooseBestPosForPass();
+    chooseBestPosForPass(semiDynamicPosition);
     if(agentSize > 0 || currentPlan.mode == DynamicEnums::DefenseClear) {
         chooseBestPositons();
-        //        chooseMarkPos();
+//                chooseMarkPos();
     }
     assignTasks();
     debug(QString("MODE : %1").arg(getString(currentPlan.mode)),D_MAHI,QColor(Qt::red));
@@ -430,6 +430,7 @@ void CDynamicAttack::playMake() {
 }
 
 void CDynamicAttack::positioning() {
+
     for(size_t i = 0 ;i < currentPlan.agentSize;i++) {
         if(mahiAgentsID[i] >= 0) {
             roleAgents[i]->setAgentID(mahiAgentsID[i]);
@@ -557,13 +558,11 @@ void CDynamicAttack::chooseBestPositons() {
     double tempDist, minDist;
 
     semiDynamicPosition.clear();
-    for(size_t i = 0;i < guardIndexList.size();i++) {
-        for(size_t j = 0;j < 3;j++) {
+    for (size_t i = 0;i < guardIndexList.size();i++) {
+        for (size_t j = 0;j < 3;j++) {
             tempDist = currentPlan.passPos
-                       .dist(guardLocations[currentPlan.agentSize]
-                       [i]
-                       [j]);
-            if(tempDist < minDist) {
+                      .dist(guardLocations[currentPlan.agentSize][i][j]);
+            if (tempDist < minDist) {
                 minDist = tempDist;
                 tempIndex = j;
             }
@@ -586,7 +585,10 @@ void CDynamicAttack::chooseBestPositons() {
                     [tempIndex]);
         }
     }
-
+//    Vector2D poses[5], bp = ballPos;
+//    double -x = 1, -y = 0.8;
+//    if(bp.y + y <= _FIELD_HEIGHT / 2 || )
+//        y * = 1;
 }
 
 // TODO : remove this without kindness
@@ -698,48 +700,27 @@ void CDynamicAttack::chooseMarkPos() {
 }
 
 
-void CDynamicAttack::chooseBestPosForPass() {
-    //    if(regionsList.count()) {
-    //        currentPlan.passPos = dynamicPosition.at(0);
-    //    }
-    //#ifdef SEMIDYNAMIC
+void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
 
     int tempIndex = 0;
     if(isBallInOurField) {
         if(policy()->DynamicPlay_FarForward()) {
-            tempIndex = minHorizontalDistID(semiDynamicPosition);
+            tempIndex = minHorizontalDistID(_points);
+        } else {
+            tempIndex = maxHorizontalDistID(_points);
         }
-        else {
-            tempIndex = maxHorizontalDistID(semiDynamicPosition);
-        }
-    }
-    else {
+    } else {
         if(policy()->DynamicPlay_NearForward()) {
-            tempIndex = minHorizontalDistID(semiDynamicPosition);
-        }
-        else {
-            tempIndex = maxHorizontalDistID(semiDynamicPosition);
+            tempIndex = minHorizontalDistID(_points);
+        } else {
+            tempIndex = maxHorizontalDistID(_points);
         }
     }
-    if(tempIndex < semiDynamicPosition.size()) {
-        currentPlan.passPos = semiDynamicPosition.at(tempIndex);
-        currentPlan.passID = tempIndex;
+
+    if(tempIndex < _points.size()) {
+        currentPlan.passPos = _points.at(tempIndex);
     }
 
-    //    for(size_t i = 0;i < dynamicPosition.size();i++) {
-
-    //        else {
-
-    //        }
-    //        tempValue = getDynamicValue(dynamicPosition.at(i));
-    //        if(tempValue > maxValue) {
-    //            maxValue  = tempValue;
-    //            tempIndex = i;
-    //        }
-    //    }
-    //    if(dynamicPosition.size() > tempIndex)
-    //        currentPlan.passPos = dynamicPosition.at(tempIndex);
-    //#endif
 }
 double CDynamicAttack::getDynamicValue(const Vector2D &_dynamicPos) const {
     double defMoveAngle, openAngle;
@@ -883,8 +864,8 @@ int CDynamicAttack::minHorizontalDistID(const QList<Vector2D> &_points) {
     double tempDist,minDist = 1000;
     int tempIndex;
 
-    for(size_t i = 0;i < dynamicPosition.size();i++) {
-        tempDist = fabs(ballPos.y - dynamicPosition.at(i).y);
+    for(size_t i = 0;i < _points.size();i++) {
+        tempDist = fabs(ballPos.y - _points.at(i).y);
         if(tempDist < minDist) {
             minDist = tempDist;
             tempIndex = i;
@@ -897,8 +878,8 @@ int CDynamicAttack::maxHorizontalDistID(const QList<Vector2D> &_points) {
     double tempDist,maxDist = -1;
     int tempIndex;
 
-    for(size_t i = 0;i < dynamicPosition.size();i++) {
-        tempDist = fabs(ballPos.y - dynamicPosition.at(i).y);
+    for(size_t i = 0;i < _points.size();i++) {
+        tempDist = fabs(ballPos.y - _points.at(i).y);
         if(tempDist > maxDist) {
             maxDist = tempDist;
             tempIndex = i;
@@ -1189,28 +1170,24 @@ QString CDynamicAttack::getString(const DynamicEnums::DynamicMode &_mode) const 
     default:
     case DynamicEnums::NoMode:
         return QString("NoMode");
-        break;
     case DynamicEnums::DefenseClear:
         return QString("DefenseClear");
-        break;
     case DynamicEnums::NotWeHaveBall:
         return QString("NotWeHaveBall");
-        break;
     case DynamicEnums::HighProb:
         return QString("HighProb");
-        break;
     case DynamicEnums::NoPlanExeption:
         return QString("NoPlanExeption");
-        break;
     case DynamicEnums::Fast:
         return QString("Fast");
-        break;
     case DynamicEnums::Critical:
         return QString("Critical");
-        break;
     case DynamicEnums::Plan:
         return QString("NewPlan");
-        break;
+    case DynamicEnums::BallInOurField:
+        return QString("Ball In Our Field");
+    case DynamicEnums::NoPositionAgent:
+        return QString("No Agent");
     }
 }
 

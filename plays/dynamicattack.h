@@ -98,7 +98,7 @@ private:
     void assignLocations_6();
     bool isRightTimeToPass();
     int farGuardFromPoint(const int& _guardIndex, const Vector2D& _point);
-    void chooseBestPosForPass();
+    void chooseBestPosForPass(QList<Vector2D>);
     void chooseBestPositons();
     void chooseMarkPos();
     double getDynamicValue(const Vector2D& _dynamicPos) const;
@@ -123,7 +123,7 @@ private:
 
     void ballLocation();
 
-    QString getString(const DynamicEnums::DynamicMode& _mode) const;    
+    QString getString(const DynamicEnums::DynamicMode& _mode) const;
 
     CRoleDynamic *roleAgents[5];
     CRoleDynamic *roleAgentPM;
