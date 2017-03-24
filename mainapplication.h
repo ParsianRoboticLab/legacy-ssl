@@ -221,6 +221,7 @@ public:
     QAction *setExp5Act;
     QAction *setExp6Act;
     QAction *setJsHandy;
+    QAction *setAutoBallPlacement;
     QAction *setFProfiler;
     QAction *setKProfiler;
     QAction *setTechnicalChallengeAct;
