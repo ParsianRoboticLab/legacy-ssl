@@ -125,6 +125,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     //Initialize Plan with NULL values
     currentPlan.mode = DynamicEnums::NoMode;
     currentPlan.agentSize = agentSize;
+    debug(QString("[dynamicAttack] ball pos : %1").arg(ballPos.x), D_MAHI);
 
     for(size_t i = 0;i < 5;i++) {
         currentPlan.positionAgents[i].region = DynamicEnums::NoMatter;
@@ -160,7 +161,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     // if Defense isn't clearing and
     // we have the ball
     // ball is in our field
-    else if (isBallInOurField) {
+    else if (ballPos.x < 0) {
         currentPlan.mode = DynamicEnums::BallInOurField;
         currentPlan.playmake.init(DynamicEnums::Chip, DynamicEnums::Forward);
         for(size_t i = 0;i < agentSize;i++) {
@@ -328,11 +329,12 @@ void CDynamicAttack::dynamicPlanner(int agentSize) {
 
     makePlan(agentSize);
     assignId();
-    chooseBestPosForPass(semiDynamicPosition);
-    if(agentSize > 0 || currentPlan.mode == DynamicEnums::DefenseClear) {
+    if(agentSize > 0) {
         chooseBestPositons();
-//                chooseMarkPos();
+//        chooseMarkPos();
+        chooseBestPosForPass(semiDynamicPosition);
     }
+
     assignTasks();
     debug(QString("MODE : %1").arg(getString(currentPlan.mode)),D_MAHI,QColor(Qt::red));
     debug(QString("BALL : %1").arg(isBallInOurField),D_MAHI,QColor(Qt::red));
@@ -359,6 +361,8 @@ void CDynamicAttack::dynamicPlanner(int agentSize) {
     showRegions(currentPlan.agentSize, QColor(Qt::gray));
     showLocations(currentPlan.agentSize, QColor(Qt::red));
 
+
+    // TODO : remove this
     if(isPlayMakeChanged()) {
         for(size_t i = 0;i < 5;i++) {
             goToDynamic[i] = false;
@@ -418,12 +422,8 @@ void CDynamicAttack::playMake() {
         roleAgentPM->setEmptySpot(true);
         roleAgentPM->setChip(false);
         roleAgentPM->setNoKick(false);
-        if(wm->getIsSimulMode()) {
-            roleAgentPM->setKickSpeed(8);
-        }
-        else {
-            roleAgentPM->setKickSpeed(1023); // TODO : 8m/s by profiller
-        }
+        roleAgentPM->setTarget(wm->field->oppGoal());
+        roleAgentPM->setKickSpeed(1023); // TODO : 8m/s by profiller
         roleAgentPM->setSelectedSkill(DynamicEnums::Shot);// Skill Kick
         break;
     }
@@ -450,7 +450,7 @@ void CDynamicAttack::positioning() {
                     roleAgents[i]->setSelectedSkill(DynamicEnums::Ready);// Receive Skill
                     break;
                 case DynamicEnums::OneTouch: // OneTouch Reflects
-                    roleAgents[i]->setWaitPos(markPositions.at(i));
+                    roleAgents[i]->setWaitPos(semiDynamicPosition.at(i));
                     // TODO : fix the target
                     roleAgents[i]->setTarget(wm->field->oppGoal());
                     roleAgents[i]->setSelectedSkill(DynamicEnums::OneTouch);// Receive Skill
@@ -649,11 +649,6 @@ void CDynamicAttack::chooseMarkPos() {
 
     MWBM matcher;
     int n = mahiPoisitionAgents.size();
-    // debug(QString("%1").arg(n),D_ALI);
-    /*for (int i = 0; i < n; ++i) {
-        debug(QString("Agent  : %1").arg(mahiPoisitionAgents.at(i)->id()),D_ALI);
-    }*/
-
     matcher.create(n, 3);
     for (size_t i = 0; i < n; i++) {
         for (size_t j = 0; j < 3; j++) {
@@ -672,30 +667,6 @@ void CDynamicAttack::chooseMarkPos() {
         markPositions.append(reflectPos[matcher.getMatch(i)]);
         draw(markPositions.at(i), 0, QColor(Qt::black));
     }
-    //debug(QString("Done"),D_ALI);
-
-    //    double tempDist,minDist = 10000;
-    //    int tempIndex = -1;
-    //    QList<int> matchedIDs;
-    //    for(size_t i = 0;i < mahiPoisitionAgents.size();i++) {
-
-    //        tempDist  = 0;
-    //        minDist   = 10000;
-    //        tempIndex = -1;
-    //        for(size_t j = 0;j < 3;j++) {
-    //            if(!matchedIDs.contains(j)) {
-    //                tempDist = mahiPoisitionAgents.at(i)->pos()
-    //                        .dist(reflectPos[j]);
-    //                if(tempDist < minDist) {
-    //                    minDist = tempDist;
-    //                    tempIndex = j;
-    //                }
-    //            }
-    //        }
-    //        matchedIDs.append(tempIndex);
-    //        markPositions.append(reflectPos[tempIndex]);
-    //    }
-
 
 }
 
