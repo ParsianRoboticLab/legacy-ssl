@@ -60,7 +60,7 @@ private:
 
     void playMake();
     void choosePlayMaker();
-    void positioning();
+    void positioning(QList <Vector2D> _points);
     void globalExecute(int agentSize);
     void dynamicPlanner(int agentSize);
 
