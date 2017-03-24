@@ -3,7 +3,6 @@
 
 #include"masterplay.h"
 
-#define SEMIDYNAMIC
 //#define _MAX_REGION 7
 
 struct SDynamicAgent {
