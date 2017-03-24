@@ -568,6 +568,7 @@ CSkillKick::CSkillKick(CAgent *_agent) : CSkill(_agent)
 
     intercept = new CSkillIntercept(_agent);
     kickSpeed = 15;
+    avoidOppPenaltyArea = true;
     chip = false;
     spin = false;
     slow = false;
@@ -683,7 +684,7 @@ kckMode CSkillKick::decideMode()
         return KPENALTY;
     }
 
-    else if(wm->field->isInOppPenaltyArea(ballPos) && !passProfiler)
+    else if(wm->field->isInOppPenaltyArea(ballPos) && !passProfiler && avoidOppPenaltyArea)
     {
         return KAVOIDOPPENALTY;
     }
@@ -1035,36 +1036,11 @@ void CSkillKick::jTurn()
     //    /////////////////////////////////////////////////////////////////////////////////
     double ballx= (wm->ball->vel.x)*cos(agentDir.th().radian()) + (wm->ball->vel.y)*sin(agentDir.th().radian());
     double bally= -1*(wm->ball->vel.x)*sin(agentDir.th().radian()) + (wm->ball->vel.y)*cos(agentDir.th().radian());
-    //    if(wm->ball->vel.length() < 0.5)
-    //    {
-    //        ballx=0;
-    //        bally=0;
-    //    }
-    angPid->error = (kickFinalDir - agentDir.th()).radian();
+    angPid->error = (kickFinalDir - agent->dir().th()).radian();
 
     Circle2D oppPenalty(wm->field->oppGoal() + Vector2D(0.2 , 0),1.6);
 
     debug(QString("ang : %1").arg(5/(agentPos.dist(ballPos)*100)),D_MHMMD);
-    /*if(kickerOn)
-    {
-        reduce =0.5;
-
-        if(slow || passProfiler)
-            reduce = 0.5;
-        if(sagMode)
-            reduce = 1;
-        if(veryFine || oppPenalty.contains(ballPos))
-            reduce = 0.3;
-    }
-    else
-    {
-        if(slow || passProfiler)
-            reduce = 0.5;
-        if(sagMode)
-            reduce = 1;
-    }
-*/
-    //reduce = 1;
 
 
     draw(QString("1: %1,2 %2,3: %3").arg(reduce*sin(kkMovementTheta)).arg(agent->vel().length()*sin(Vector2D::angleBetween(agentDir,agent->vel()).radian())).arg(Vector2D::angleBetween(agentDir,agent->vel()).degree()),Vector2D(1,-1));
@@ -1395,15 +1371,18 @@ void CSkillKick::execute()
     kkBallDist = agentPos.dist(ballPos);
     AngleDeg maxAngP,maxAngN;
     AngleDeg kickTargetDir ;
-    kickTargetDir= (target - ballPos).th();
+
     maxAngP = (target - ballPos).th() + kickAngTol;
     maxAngN = (target - ballPos).th() - kickAngTol;
     draw(Segment2D(agentPos,agentPos+agentDir*10));
-
+    if(kkShotEmpySpot)
+        target = findMostPossible();
+    kickTargetDir= (target - ballPos).th();
     dirQueue.append(agent->dir());
     if(dirQueue.count() == 10) {
         dirQueue.dequeue();
     }
+    agentDir = Vector2D(0,0);
     Q_FOREACH(Vector2D v,dirQueue) {
         agentDir += v;
     }
@@ -1441,8 +1420,7 @@ void CSkillKick::execute()
     gpa->setAgent(agent);
     kickMode = decideMode();
 
-    if(kkShotEmpySpot)
-        target = findMostPossible();
+
     if(dontKick)
     {
         agent->setKick(0);

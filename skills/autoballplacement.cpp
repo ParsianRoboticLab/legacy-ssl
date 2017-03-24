@@ -8,6 +8,7 @@ CSkillAutoBallPlacement::CSkillAutoBallPlacement(CAgent *_agent) : CSkill(_agent
 {
     isFinished = false;
     kick = new CSkillKick(_agent);
+    kick->setAvoidOppPenaltyArea(false);
     bangBang = new CNewBangBang();
     agent = _agent;
     ballCounter = 0;
