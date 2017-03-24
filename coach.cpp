@@ -1086,8 +1086,8 @@ void CCoach::updateAttackState()
 void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
 {
     QList<int> ourPlayers = wm->our.data->activeAgents;
-    if( goalieAgent != NULL ) {
-        ourPlayers.removeOne(goalieAgent->self()->id);
+    if( ourPlayers.contains(preferedGoalieAgent) ) {
+        ourPlayers.removeOne(preferedGoalieAgent);
     }
 
     if(defenseFirst){
