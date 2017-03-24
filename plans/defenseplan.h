@@ -127,7 +127,7 @@ protected:
     bool ballIsInPenaltyAreaAndIsNotInDangerCircle;
     bool dangerForGoalieClearByOurAgents;
     bool dangerForGoalieClearByOppAgents;
-    bool stopMode = knowledge->isStop();
+    bool stopMode;
     ///////////////////////////////////////////////////
     void executeGoalie();
     Vector2D blockTheBall();
