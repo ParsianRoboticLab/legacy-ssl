@@ -32,7 +32,10 @@ class CDefPos {
 public:
     CDefPos();
     kkDefPos getDefPositions(Vector2D _ballPos, int _size, double _limit1, double _limit2);
+    //HMD
     Vector2D getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Segment2D _seg);
+    bool isInPenaltyAreaDef(double _tempBestRadius , Vector2D vec);
+    //HMD Finish
     double nearRadius[2];
     bool isNearPenaltyArea;
 
@@ -202,7 +205,6 @@ public:
     //////////////////HMD/////////////////
     QList<Vector2D> markPoses;
       QList<Vector2D> markAngs;
-      int  HMDtransient;
       double markRadius;
       double markRadiusStrict;
       double segmentpershoot;
@@ -227,12 +229,10 @@ private:
        QList<Vector2D> indirectAvoidPass(Vector2D);
        int numberOfMarkers;
        QList<Vector2D> oppAgentsToMarkPos;
-       QList<Vector2D> obspos;
-       QList<Vector2D> opppos;
        QList<Vector2D> oppmarkedpos;
        QList<CRobot*>  oppAgentsToMark;
        QList<CRobot*>  oppAgentsMarkedByDef;
-       Vector2D posvel(CRobot*);
+       Vector2D posvel(CRobot*, double);
 
 
        QList<QPair<Vector2D, double> > sortdangerpassplayon(QList<Vector2D> oppposdanger);
