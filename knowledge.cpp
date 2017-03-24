@@ -4007,6 +4007,10 @@ bool CKnowledge::SRIsUpdated(int _id)
 {
     return CRAgent[_id].updated;
 }
+double CKnowledge::getKickSpeedProfile(int agentId,double kickSpeedInput){
+
+    return ProfilerResult[0][agentId][(int)round(kickSpeedInput*10)]/100;
+}
 
 void CKnowledge::setNecessaryDefKick(bool tempNcssryDefKick) {
     necessaryDefKick = tempNcssryDefKick;
