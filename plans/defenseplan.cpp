@@ -1321,7 +1321,7 @@ DefensePlan::DefensePlan()
     markRadius = 1.6;
     markRadiusStrict = 1.39;
     segmentpershoot = policy()->Mark_ShootRatioBlock() / 100.0;
-    segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100.0;
+    segmentperpass = (100  - policy()->Mark_PassRatioBlock()) / 100.0;
     /////
     //added by KK
     predictThresh = 0;
@@ -3570,7 +3570,7 @@ void DefensePlan::findPos(int _markAgentSize)
     if(policy()->Mark_ManToManAllTransiant())
     {
         if(knowledge->transientFlag)
-            segmentpershoot = 0.3;
+            segmentpershoot = 0.2;
         else
             segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
             segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
