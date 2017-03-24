@@ -754,20 +754,11 @@ void DefensePlan::tempFindPos(int _markAgentSize){
 
 void DefensePlan::markExecute(int _markAgentSize)
 {
-
-    QList<int> matchPoints;
-
-    matchPoints.clear();
-    matchPoints.append(0);
-    matchPoints.append(1);
-    matchPoints.append(2);
-    matchPoints.append(3);
-    //    knowledge->Matching(agents,markPoses,matchPoints);
     if(_markAgentSize == markPoses.count())
     {
         for(int i =0;i<markPoses.count(); i++)
         {
-            if(i < matchPoints.size()) {
+            if(i < _markAgentSize) {
                 draw(Circle2D(markPoses[i], 0.1), QColor(Qt::white), true);
                 debug(QString("%1 : x : %2, y : %3").arg(i).arg(markPoses[i].x).arg(markPoses[i].y),D_MAHI);
             }
