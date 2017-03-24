@@ -3250,11 +3250,18 @@ kkDefPos CDefPos::getDefPositions(Vector2D _ballPos, int _size, double _limit1, 
     }
     return tempDefPos;
 }
-
+bool CDefPos::isInPenaltyAreaDef(double _tempBestRadius , Vector2D vec){
+    Segment2D tempSeg;
+    tempSeg.assign(vec, wm->field->ourGoal());
+    CDefPos test;
+    return !(test.getIntersectionWithPenaltyAreaDef(_tempBestRadius, tempSeg).isValid() || wm->field->isInField(test.getIntersectionWithPenaltyAreaDef(_tempBestRadius, tempSeg)) );
+}
 Vector2D CDefPos::getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Segment2D _seg)
 {
     ////////////////////////////////////////////////
-    Vector2D ins[2];
+    Vector2D ins1[2];
+    Vector2D ins2[2];
+    Vector2D ins3[2];
     Vector2D finter;
     Vector2D fOurGoal(- _FIELD_WIDTH/2.0 , 0.0);
     double PAreaOffset = _tempBestRadius - 1.37;
@@ -3268,44 +3275,54 @@ Vector2D CDefPos::getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Seg
     draw(c2, 90, 180,QColor(Qt::black));
     draw(r,QColor(Qt::black));
     ////////////////////////////////////////////////
-    r.intersection(_seg,&ins[0],&ins[1]);
-    debug(QString("ins1 is %1 %2, ins2 is %3,%4").arg(ins[0].x).arg(ins[0].y).arg(ins[1].x).arg(ins[1].y),D_HAMED);
-    if(ins[0].valid() || ins[1].valid()) {
-        debug(QString("intersection with midle rect"),D_HAMED);
-        if(ins[0].x > -3.42 && wm->field->isInField(ins[0])){
-        finter =  ins[0];
-        return finter;
+    r.intersection(_seg,&ins1[0],&ins1[1]);
+    if((wm->field->isInField(ins1[0])) && (ins3[0].x >=-3.42) && ins1[0].valid() || ins1[1].valid() && (wm->field->isInField(ins1[1])) && (ins3[1].x >=-3.42)) {
+        debug(QString("Debug Rect intersection ins1 is %1 %2, ins2 is %3,%4").arg(ins1[0].x).arg(ins1[0].y).arg(ins1[1].x).arg(ins1[1].y),D_HAMED);
+        if(ins1[0].x > -3.42 && wm->field->isInField(ins1[0])){
+            finter =  ins1[0];
+            return finter;
         }
-        else if(ins[1].x > -3.42  && wm->field->isInField(ins[1])){
-            finter =  ins[1];
-        return finter;
+        else if(ins1[1].x > -3.42  && wm->field->isInField(ins1[1])){
+            finter =  ins1[1];
+            return finter;
+        }
     }
-    }
-    c1.intersection(_seg,&ins[0],&ins[1]);
-    if(((wm->field->isInField(ins[0])) && (ins[0].y <= -_GOAL_WIDTH/4) && ins[0].valid()) || ((wm->field->isInField(ins[1]) && ins[1].y <= -_GOAL_WIDTH/4 && ins[1].valid()))) {
-        if(!wm->field->isInField(ins[1]))
-            finter = ins[0];
-        else if(!wm->field->isInField(ins[0]))
-            finter = ins[1];
-        else
-            finter = (ins[0].x > ins[1].x) ? ins[0] : ins[1];
-
+    c1.intersection(_seg,&ins2[0],&ins2[1]);
+    if(((wm->field->isInField(ins2[0])) && (ins2[0].y <= -_GOAL_WIDTH/4) && ins2[0].valid()) || ((wm->field->isInField(ins2[1]) && ins2[1].y <= -_GOAL_WIDTH/4 && ins2[1].valid()))){
         draw(QString("c1"),Vector2D(0,-2),"red");
         draw(finter);
+        debug(QString("Debug Lower Circle intersection ins1 is %1 %2, ins2 is %3,%4").arg(ins2[0].x).arg(ins2[0].y).arg(ins2[1].x).arg(ins2[1].y),D_HAMED);
+    if(((wm->field->isInField(ins2[0])) && (ins2[0].y <= -_GOAL_WIDTH/4) && ins2[0].valid())) {
+            finter = ins2[0];
+             return finter;
+        }
+        else if(((wm->field->isInField(ins2[1]) && ins2[1].y <= -_GOAL_WIDTH/4 && ins2[1].valid()))){
+            finter = ins2[1];
+              return finter;
+             }
+        /*else
+              {
+            finter = (ins2[0].x > ins2[1].x) ? ins2[0] : ins2[1];
+            return finter;
+}*/
+    }
+
+    c2.intersection(_seg,&ins3[0],&ins3[1]);
+    if(((wm->field->isInField(ins3[0])) && (ins3[0].y >=_GOAL_WIDTH/4) && ins3[0].valid()) || ((wm->field->isInField(ins3[1]) && ins3[1].y >= _GOAL_WIDTH/4 && ins3[1].valid()))) {
+        draw(QString("c2"),Vector2D(0,-2),"red");
+        draw(finter);
+        debug(QString("Debug Upper Circle Intersection ins1 is %1 %2, ins2 is %3,%4").arg(ins3[0].x).arg(ins3[0].y).arg(ins3[1].x).arg(ins3[1].y),D_HAMED);
+    if((wm->field->isInField(ins3[0])) && (ins3[0].y >=_GOAL_WIDTH/4)){
+        finter = ins3[0];
         return finter;
     }
-    c2.intersection(_seg,&ins[0],&ins[1]);
-    if(!wm->field->isInField(ins[1]))
-        finter = ins[0];
-    else if(!wm->field->isInField(ins[0]))
-        finter = ins[1];
-    else
-        finter = (ins[0].x > ins[1].x) ? ins[0] : ins[1];
-    draw(QString("c2"),Vector2D(0,-2),"red");
-    draw(finter);
-    return finter;
+    else if(wm->field->isInField(ins3[1]) && ins3[1].y >= _GOAL_WIDTH/4)
+        finter = ins3[1];
+        return finter;
+    }
+    Vector2D invalid;
+    return invalid;
 }
-
 
 
 
@@ -3588,25 +3605,24 @@ void DefensePlan::findPos(int _markAgentSize)
 }
 
 Vector2D DefensePlan::posvel(CRobot* opp, double VelReliabiity){
+    CDefPos test;
     if(VelReliabiity == 0)
         return opp->pos;
-    if(wm->field->isInOurPenaltyArea(opp->pos))
-        debug(QString("its in our penalty area"), D_HAMED);
-    if(!(opp->vel.length() > 0.5  && opp->vel.x < 0))
-        VelReliabiity = 0;
-    CDefPos test;
-    Vector2D temppos = opp->pos + VelReliabiity * opp->vel;
+    if(!opp->vel.length() > 0.5  || opp->vel.x > 0 || test.isInPenaltyAreaDef(1.37, opp->pos)){
+        VelReliabiity = 0;    
+    }
     Segment2D tempseg;
+    Vector2D temppos = opp->pos + VelReliabiity * opp->vel;
     tempseg.assign(opp->pos, opp->pos + VelReliabiity * opp->vel );
     draw(tempseg,QColor(Qt::yellow));
     Vector2D penaltyvec;
     penaltyvec.assign(test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).x,test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).y)  ;
-    if(wm->field->isInField(penaltyvec) && penaltyvec.isValid()){
-        debug(QString("intersection with penalty Area"), D_HAMED);
+    if(wm->field->isInField(penaltyvec) && penaltyvec.isValid() && tempseg.length() != 0){
+        debug(QString("Intersection with penalty area by penaltyvec: %1,%2").arg(penaltyvec.x).arg(penaltyvec.y),D_HAMED);
         return penaltyvec;
     }
     else if((temppos).x < -4.4){
-        debug(QString("ball is out"),D_HAMED);
+        debug(QString("Opp is out"),D_HAMED);
         return Vector2D(-4.4,(opp->pos + VelReliabiity * opp->vel).y) ;
     }
         else{
@@ -3642,7 +3658,7 @@ void DefensePlan::findOppAgentsToMark(QList <Vector2D> _realDefTargets)
     for(int i = 0; i<oppAgentsToMark.count(); i++)
     {
         draw(oppAgentsToMark[i]->pos);
-        oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i], 0.5));
+        oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i], 1));
 
     }
 
