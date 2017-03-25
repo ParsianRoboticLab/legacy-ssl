@@ -245,6 +245,7 @@ public:
     SkillProperty(CSkillKick, bool, Clear, clear);
     SkillProperty(CSkillKick, int, WaitFrames, waitFrames);
     SkillProperty(CSkillKick, bool, AvoidPenaltyArea, avoidPenaltyArea);
+    SkillProperty(CSkillKick, bool, AvoidOppPenaltyArea, avoidOppPenaltyArea);
     SkillProperty(CSkillKick, bool, InterceptMode, interceptMode);
     SkillProperty(CSkillKick, bool, DontKick, dontKick);
     SkillProperty(CSkillKick, bool, SagMode, sagMode);

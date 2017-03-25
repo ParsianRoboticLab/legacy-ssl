@@ -11,12 +11,6 @@
 
 #define POBALLPOS Vector2D(1234, 8456)
 
-#define ClassProperty(skill,type,name,local,chflag) \
-    public: inline type get##name() {return local;} \
-    public: inline skill* set##name(type val) {local = val;chflag = true;return this;} \
-    protected: type local
-
-
 struct robotAttr {
     int index;
     int agent;

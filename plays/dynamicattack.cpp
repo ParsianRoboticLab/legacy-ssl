@@ -125,6 +125,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     //Initialize Plan with NULL values
     currentPlan.mode = DynamicEnums::NoMode;
     currentPlan.agentSize = agentSize;
+    debug(QString("[dynamicAttack] ball pos : %1").arg(ballPos.x), D_MAHI);
 
     for(size_t i = 0;i < 5;i++) {
         currentPlan.positionAgents[i].region = DynamicEnums::NoMatter;
@@ -160,7 +161,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     // if Defense isn't clearing and
     // we have the ball
     // ball is in our field
-    else if (isBallInOurField) {
+    else if (ballPos.x < 0) {
         currentPlan.mode = DynamicEnums::BallInOurField;
         currentPlan.playmake.init(DynamicEnums::Chip, DynamicEnums::Forward);
         for(size_t i = 0;i < agentSize;i++) {
@@ -175,8 +176,8 @@ void CDynamicAttack::makePlan(int agentSize) {
         currentPlan.mode = DynamicEnums::HighProb;
         currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
         for(size_t i = 0;i < agentSize;i++) {
-            currentPlan.positionAgents[i].region = DynamicEnums::Reflect;
-            currentPlan.positionAgents[i].skill  = DynamicEnums::OneTouch;
+            currentPlan.positionAgents[i].region = DynamicEnums::Best;
+            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
         }
 
     }
@@ -224,7 +225,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     // we have positioning agents
     // there's no need to be fast and
     // there is no plan for this situation
-    else if(noPlanException) {
+    else {
 
         currentPlan.mode = DynamicEnums::NoPlanExeption;
         currentPlan.playmake.init(DynamicEnums::Pass, DynamicEnums::Best);
@@ -232,15 +233,6 @@ void CDynamicAttack::makePlan(int agentSize) {
             currentPlan.positionAgents[i].region = DynamicEnums::Best;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
         }
-    }
-    // if Defense isn't clearing and
-    // we have ball and
-    // shot prob isn't more than 50% and
-    // there is plan for this situation
-    // we have positioning agents
-    // SO WHY THIS CODE EXECUTED !!!
-    else {
-        debug(QString("ERR: Dynamic Attacks Executed Wrong"),D_MAHI);
     }
 
 }
@@ -252,52 +244,30 @@ void CDynamicAttack::assignId() {
         mahiPlayMaker = knowledge->getAgent(playmakeID);
     }
 
-    double dist2Point[5];
-    double minDist = 100000;
     int tempIndex;
     QList<int> matchedIDList;
-    for(size_t i = 0; i < 6;i++) {
-        dist2Point[i] =  10000;
-    }
-
-
     mahiPoisitionAgents.clear();
     guardIndexList.clear();
-    for(size_t i = 0; i < activeAgents.size(); i++) {
 
-        for(size_t k = 0; k < 6;k++) {
-            dist2Point[i] =  10000;
-        }
-
-        minDist = 100000;
-        tempIndex  = -1;
-        for(size_t j = 0;j < currentPlan.agentSize;j++) {
-            if(!matchedIDList.contains(j)) {
-                dist2Point[j] = guards[currentPlan.agentSize][j].center()
-                                .dist(activeAgents.at(i)->pos());
-                if(dist2Point[j] < minDist) {
-                    minDist = dist2Point[j];
-                    tempIndex = j;
-
-                }
-            }
-        }
-        matchedIDList.append(tempIndex);
-        guardIndexList.append(tempIndex);
-        if(i < activeAgents.size()) {
-            mahiAgentsID[i] = activeAgents.at(i)->id();
-            mahiPoisitionAgents.append(activeAgents.at(i));
+    MWBM matcher;
+    int n = activeAgents.size();
+    matcher.create(n, n);
+    for(size_t i = 0; i < n; i++) {
+        for(int j = 0; j < n; j++) {
+            matcher.setWeight(i, j, -1 * guards[currentPlan.agentSize][j]
+                    .center().dist(activeAgents.at(i)->pos()));
         }
     }
-
-    if(mahiPoisitionAgents.size() > 0)
-        debug(QString("1 : %1 , %2").arg(dist2Point[0]).arg(mahiPoisitionAgents.at(0)->id()),D_MAHI);
-    if(mahiPoisitionAgents.size() > 1)
-        debug(QString("2 : %1 , %2").arg(dist2Point[1]).arg(mahiPoisitionAgents.at(1)->id()),D_MAHI);
-    if(mahiPoisitionAgents.size() > 2)
-        debug(QString("3 : %1 , %2").arg(dist2Point[2]).arg(mahiPoisitionAgents.at(2)->id()),D_MAHI);
-
-
+    matcher.findMatching();
+    for(int i = 0; i < n; i++) {
+        tempIndex = matcher.getMatch(i);
+        matchedIDList.append(tempIndex);
+        guardIndexList.append(tempIndex);
+        mahiAgentsID[i] = activeAgents.at(i)->id();
+        mahiPoisitionAgents.append(activeAgents.at(i));
+    }
+    for(int i = 0; i < mahiPoisitionAgents.size(); i++)
+        debug(QString("1 : %2").arg(mahiPoisitionAgents.at(i)->id()),D_MAHI);
 }
 
 void CDynamicAttack::assignTasks() {
@@ -307,7 +277,7 @@ void CDynamicAttack::assignTasks() {
     }
 
     if(currentPlan.agentSize > 0) {
-        positioning();
+        positioning(semiDynamicPosition);
     }
 
 }
@@ -323,17 +293,18 @@ void CDynamicAttack::dynamicPlanner(int agentSize) {
         mahiAgentsID[i] = -1;
     }
 
-    for(size_t i = 0;i < agentSize;i++) {
+    for(size_t i = 0; i < agentSize; i++) {
         activeAgents.append(knowledge->getAgent(agentsID.at(i)));
     }
 
     makePlan(agentSize);
     assignId();
-    chooseBestPosForPass();
-    if(agentSize > 0 || currentPlan.mode == DynamicEnums::DefenseClear) {
+    if(agentSize > 0) {
         chooseBestPositons();
-        //        chooseMarkPos();
+  //    chooseMarkPos();
+        chooseBestPosForPass(semiDynamicPosition);
     }
+
     assignTasks();
     debug(QString("MODE : %1").arg(getString(currentPlan.mode)),D_MAHI,QColor(Qt::red));
     debug(QString("BALL : %1").arg(isBallInOurField),D_MAHI,QColor(Qt::red));
@@ -360,6 +331,8 @@ void CDynamicAttack::dynamicPlanner(int agentSize) {
     showRegions(currentPlan.agentSize, QColor(Qt::gray));
     showLocations(currentPlan.agentSize, QColor(Qt::red));
 
+
+    // TODO : remove this
     if(isPlayMakeChanged()) {
         for(size_t i = 0;i < 5;i++) {
             goToDynamic[i] = false;
@@ -419,56 +392,63 @@ void CDynamicAttack::playMake() {
         roleAgentPM->setEmptySpot(true);
         roleAgentPM->setChip(false);
         roleAgentPM->setNoKick(false);
-        if(wm->getIsSimulMode()) {
-            roleAgentPM->setKickSpeed(8);
-        }
-        else {
-            roleAgentPM->setKickSpeed(1023); // TODO : 8m/s by profiller
-        }
+        roleAgentPM->setTarget(wm->field->oppGoal());
+        roleAgentPM->setKickSpeed(1023); // TODO : 8m/s by profiller
         roleAgentPM->setSelectedSkill(DynamicEnums::Shot);// Skill Kick
         break;
     }
 }
 
-void CDynamicAttack::positioning() {
+void CDynamicAttack::positioning(QList<Vector2D> _points) {
+bool check = false;
     for(size_t i = 0 ;i < currentPlan.agentSize;i++) {
         if(mahiAgentsID[i] >= 0) {
             roleAgents[i]->setAgentID(mahiAgentsID[i]);
             roleAgents[i]->setAgent(mahiPoisitionAgents.at(i));
             roleAgents[i]->setAvoidPenaltyArea(true);
-            if(i < semiDynamicPosition.size()) {
+            if(i < _points.size()) {
 
                 switch(currentPlan.positionAgents[i].skill) {
                 case DynamicEnums::Ready: // Ready For Pass
-                    roleAgents[i]->setTarget(semiDynamicPosition.at(i));
-                    if (roleAgents[i]->getAgent()->pos().dist(
-                        roleAgents[i]->getTarget()) > 1) {
-                        roleAgents[i]->setReceiveRadius(.1);
-                    } else {
-                        roleAgents[i]->setReceiveRadius(1);
-                    }
+
+                    roleAgents[i]->setTarget(_points.at(i));
+                    roleAgents[i]->setReceiveRadius(
+                                max(0.0, 1 - roleAgents[i]->getAgent()->pos()
+                                    .dist(roleAgents[i]->getTarget())));
                     roleAgents[i]->setSelectedSkill(DynamicEnums::Ready);// Receive Skill
+
                     break;
                 case DynamicEnums::OneTouch: // OneTouch Reflects
-                    roleAgents[i]->setWaitPos(markPositions.at(i));
+
+                    roleAgents[i]->setWaitPos(_points.at(i));
                     // TODO : fix the target
                     roleAgents[i]->setTarget(wm->field->oppGoal());
                     roleAgents[i]->setSelectedSkill(DynamicEnums::OneTouch);// Receive Skill
+
                     break;
                 case DynamicEnums::Move:
-                    roleAgents[i]->setTarget(semiDynamicPosition.at(i));
+
+                    roleAgents[i]->setTarget(_points.at(i));
                     roleAgents[i]->setTargetDir(ballPos - roleAgents[i]->getAgent()->pos());
                     roleAgents[i]->setSelectedSkill(DynamicEnums::Move);
+
                     break;
                 case DynamicEnums::NoSkill:
+
                     roleAgents[i]->setSelectedSkill(DynamicEnums::Ready);// Receive Skill
+
                     break;
                 }
+
+                if(roleAgents[i]->getTarget() == currentPlan.passPos)
+                    check = true;
+                 //debug(QString("pos positions : %1 %2").arg(roleAgents[i]->getTarget().x).arg(roleAgents[i]->getTarget().y), D_PARSA);
             }
         } else {
             debug("[dynamicAttack] mahiagent ha eshtebahe chera ?", D_MAHI);
         }
     }
+    //assert(check);
 }
 
 
@@ -558,13 +538,11 @@ void CDynamicAttack::chooseBestPositons() {
     double tempDist, minDist;
 
     semiDynamicPosition.clear();
-    for(size_t i = 0;i < guardIndexList.size();i++) {
-        for(size_t j = 0;j < 3;j++) {
+    for (size_t i = 0;i < guardIndexList.size();i++) {
+        for (size_t j = 0;j < 3;j++) {
             tempDist = currentPlan.passPos
-                       .dist(guardLocations[currentPlan.agentSize]
-                       [i]
-                       [j]);
-            if(tempDist < minDist) {
+                      .dist(guardLocations[currentPlan.agentSize][i][j]);
+            if (tempDist < minDist) {
                 minDist = tempDist;
                 tempIndex = j;
             }
@@ -587,7 +565,10 @@ void CDynamicAttack::chooseBestPositons() {
                     [tempIndex]);
         }
     }
-
+//    Vector2D poses[5], bp = ballPos;
+//    double -x = 1, -y = 0.8;
+//    if(bp.y + y <= _FIELD_HEIGHT / 2 || )
+//        y * = 1;
 }
 
 // TODO : remove this without kindness
@@ -648,11 +629,6 @@ void CDynamicAttack::chooseMarkPos() {
 
     MWBM matcher;
     int n = mahiPoisitionAgents.size();
-    // debug(QString("%1").arg(n),D_ALI);
-    /*for (int i = 0; i < n; ++i) {
-        debug(QString("Agent  : %1").arg(mahiPoisitionAgents.at(i)->id()),D_ALI);
-    }*/
-
     matcher.create(n, 3);
     for (size_t i = 0; i < n; i++) {
         for (size_t j = 0; j < 3; j++) {
@@ -671,76 +647,36 @@ void CDynamicAttack::chooseMarkPos() {
         markPositions.append(reflectPos[matcher.getMatch(i)]);
         draw(markPositions.at(i), 0, QColor(Qt::black));
     }
-    //debug(QString("Done"),D_ALI);
-
-    //    double tempDist,minDist = 10000;
-    //    int tempIndex = -1;
-    //    QList<int> matchedIDs;
-    //    for(size_t i = 0;i < mahiPoisitionAgents.size();i++) {
-
-    //        tempDist  = 0;
-    //        minDist   = 10000;
-    //        tempIndex = -1;
-    //        for(size_t j = 0;j < 3;j++) {
-    //            if(!matchedIDs.contains(j)) {
-    //                tempDist = mahiPoisitionAgents.at(i)->pos()
-    //                        .dist(reflectPos[j]);
-    //                if(tempDist < minDist) {
-    //                    minDist = tempDist;
-    //                    tempIndex = j;
-    //                }
-    //            }
-    //        }
-    //        matchedIDs.append(tempIndex);
-    //        markPositions.append(reflectPos[tempIndex]);
-    //    }
-
 
 }
 
 
-void CDynamicAttack::chooseBestPosForPass() {
-    //    if(regionsList.count()) {
-    //        currentPlan.passPos = dynamicPosition.at(0);
-    //    }
-    //#ifdef SEMIDYNAMIC
-
+void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
+    QList <Vector2D> temp;
+    for(int i = 0; i < currentPlan.agentSize; i++) {
+        temp.append(_points.at(i));
+        //debug(QString("pass candidates : %1 %2").arg(temp.at(i).x).arg(temp.at(i).y), D_PARSA);
+    }
     int tempIndex = 0;
-    if(isBallInOurField) {
+    //TODO : sharte paiin bayad isBallInOurField bashe amma felan isBallInOurField eshteba por mishe.
+    if(ballPos.x < 0) {
         if(policy()->DynamicPlay_FarForward()) {
-            tempIndex = minHorizontalDistID(semiDynamicPosition);
+            tempIndex = minHorizontalDistID(temp);
+        } else {
+            tempIndex = maxHorizontalDistID(temp);
         }
-        else {
-            tempIndex = maxHorizontalDistID(semiDynamicPosition);
-        }
-    }
-    else {
+    } else {
         if(policy()->DynamicPlay_NearForward()) {
-            tempIndex = minHorizontalDistID(semiDynamicPosition);
-        }
-        else {
-            tempIndex = maxHorizontalDistID(semiDynamicPosition);
+            tempIndex = minHorizontalDistID(temp);
+        } else {
+            tempIndex = maxHorizontalDistID(temp);
         }
     }
-    if(tempIndex < semiDynamicPosition.size()) {
-        currentPlan.passPos = semiDynamicPosition.at(tempIndex);
-        currentPlan.passID = tempIndex;
+
+    if(tempIndex < temp.size()) {
+        currentPlan.passPos = _points.at(tempIndex);
     }
 
-    //    for(size_t i = 0;i < dynamicPosition.size();i++) {
-
-    //        else {
-
-    //        }
-    //        tempValue = getDynamicValue(dynamicPosition.at(i));
-    //        if(tempValue > maxValue) {
-    //            maxValue  = tempValue;
-    //            tempIndex = i;
-    //        }
-    //    }
-    //    if(dynamicPosition.size() > tempIndex)
-    //        currentPlan.passPos = dynamicPosition.at(tempIndex);
-    //#endif
 }
 double CDynamicAttack::getDynamicValue(const Vector2D &_dynamicPos) const {
     double defMoveAngle, openAngle;
@@ -884,13 +820,17 @@ int CDynamicAttack::minHorizontalDistID(const QList<Vector2D> &_points) {
     double tempDist,minDist = 1000;
     int tempIndex;
 
-    for(size_t i = 0;i < dynamicPosition.size();i++) {
-        tempDist = fabs(ballPos.y - dynamicPosition.at(i).y);
+    for(size_t i = 0;i < _points.size();i++) {
+        tempDist = fabs(ballPos.y - _points.at(i).y);
+        if (lastPassPos == i) {
+            tempDist -= 1;
+        }
         if(tempDist < minDist) {
             minDist = tempDist;
             tempIndex = i;
         }
     }
+    lastPassPos = tempIndex;
     return tempIndex;
 }
 
@@ -898,13 +838,17 @@ int CDynamicAttack::maxHorizontalDistID(const QList<Vector2D> &_points) {
     double tempDist,maxDist = -1;
     int tempIndex;
 
-    for(size_t i = 0;i < dynamicPosition.size();i++) {
-        tempDist = fabs(ballPos.y - dynamicPosition.at(i).y);
+    for(size_t i = 0;i < _points.size();i++) {
+        tempDist = fabs(ballPos.y - _points.at(i).y);
+        if (lastPassPos == i) {
+            tempDist += 1;
+        }
         if(tempDist > maxDist) {
             maxDist = tempDist;
             tempIndex = i;
         }
     }
+    lastPassPos = tempIndex;
     return tempIndex;
 }
 
@@ -1070,9 +1014,9 @@ void CDynamicAttack::assignLocations_0() {
 
 void CDynamicAttack::assignLocations_1() {
     //Opp Feild
-    guardLocations[1][0][0].assign(_FIELD_WIDTH/4, _FIELD_HEIGHT/4);
+    guardLocations[1][0][0].assign(_FIELD_WIDTH/2 - 0.5, _FIELD_HEIGHT/4 + 0.5);
     guardLocations[1][0][1].assign(_FIELD_WIDTH/4, 0);
-    guardLocations[1][0][2].assign(_FIELD_WIDTH/4, -_FIELD_HEIGHT/4);
+    guardLocations[1][0][2].assign(_FIELD_WIDTH/2 - 0.5, -_FIELD_HEIGHT/4 - 0.5);
 }
 
 void CDynamicAttack::assignLocations_2() {
@@ -1190,33 +1134,29 @@ QString CDynamicAttack::getString(const DynamicEnums::DynamicMode &_mode) const 
     default:
     case DynamicEnums::NoMode:
         return QString("NoMode");
-        break;
     case DynamicEnums::DefenseClear:
         return QString("DefenseClear");
-        break;
     case DynamicEnums::NotWeHaveBall:
         return QString("NotWeHaveBall");
-        break;
     case DynamicEnums::HighProb:
         return QString("HighProb");
-        break;
     case DynamicEnums::NoPlanExeption:
         return QString("NoPlanExeption");
-        break;
     case DynamicEnums::Fast:
         return QString("Fast");
-        break;
     case DynamicEnums::Critical:
         return QString("Critical");
-        break;
     case DynamicEnums::Plan:
         return QString("NewPlan");
-        break;
+    case DynamicEnums::BallInOurField:
+        return QString("Ball In Our Field");
+    case DynamicEnums::NoPositionAgent:
+        return QString("No Agent");
     }
 }
 
 void CDynamicAttack::ballLocation() {
-    if (ballPos.x < -1 ) {
+    if (ballPos.x < 0 ) {
         isBallInOurField = true;
     } else if (ballPos.x > 0) {
         isBallInOurField = false;

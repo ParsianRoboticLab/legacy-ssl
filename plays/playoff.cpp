@@ -1633,7 +1633,6 @@ bool CPlayOff::chipOrNot(int passerID, int ReceiverID, int ReceiverState){
 }
 
 bool CPlayOff::chipOrNot(const SPositioningArg& _posArg) {
-    return true;
     if (_posArg.leftData < 0) {
         return true;
     } else if(_posArg.rightData < 0) {

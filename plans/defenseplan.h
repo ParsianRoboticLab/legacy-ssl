@@ -106,10 +106,10 @@ protected:
     void runGoalie();
     bool ballBehindGoalie, goalieOneTouch, goalieInPenaltyAreaPrediction, goalieClearMode, goalieStrictFollow, goalieFollow, ballIsOutOfField;
     double strictfollowThr;
-    double behindBallThr;
-    bool dangerForGoalieClear;
+    double behindBallThr;    
     bool besidePoleFlag;
-    int oneTouchCnt;
+    bool dangerForGoalieClear;
+    int oneTouchCnt;    
     ////////////////////////////// AHZ ///////////////////
     Vector2D getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion);
     Line2D getBisectorLine(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
@@ -117,10 +117,20 @@ protected:
     void manToManMarkInPlayOn(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void tempFindPos(int _markAgentSize);
+    bool isIndirectArea(Vector2D);
     int angleDegreeThr = 0;    
     int angleDegreeThrNotStop = 0;
     int angleDegreeThrNotStopAHZ = 0;
     double threshOld = 0.0;
+    double ballCircleR = 0.5;
+    bool isCrowdedInFrontOfPenaltyAreaByOurAgents;
+    bool isCrowdedInFrontOfPenaltyAreaByOppAgents;
+    bool ballISInpenaltyAreaAndDangerCircle;
+    bool ballIsNotInPenaltyAreaAndIsInDangerCircle;
+    bool ballIsInPenaltyAreaAndIsNotInDangerCircle;
+    bool dangerForGoalieClearByOurAgents;
+    bool dangerForGoalieClearByOppAgents;
+    bool stopMode;
     ///////////////////////////////////////////////////
     void executeGoalie();
     Vector2D blockTheBall();
