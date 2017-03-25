@@ -56,6 +56,8 @@ public:
     void setPlayMake(int _playMake);
     void setCritical(bool _critical);
 
+    SDynamicPlan currentPlan;
+
 private:
 
     void playMake();
@@ -127,7 +129,6 @@ private:
 
     CRoleDynamic *roleAgents[5];
     CRoleDynamic *roleAgentPM;
-    SDynamicPlan currentPlan;
 
     ////////Plan Making
     bool isDefenseClearing,isWeHaveBall,noPlanException;
@@ -157,7 +158,7 @@ private:
 
 
     bool keepOrNot();
-
+    int lastPassPos;
     /////////Intentions
 //    int intenHighProb;
 
