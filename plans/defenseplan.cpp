@@ -2426,7 +2426,7 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
                 aimLessChord = bottomFaceLength_forTalles.nearestPoint(openAngGoalIntersectionTop).dist(openAngGoalIntersectionTop);
                 debug(QString("top koochik tar"),D_SEPEHR);
                 aimLessLine = Line2D(bottomFaceLength_forTalles.nearestPoint(openAngGoalIntersectionTop),openAngGoalIntersectionTop);
-                draw(Segment2D(bottomFaceLength_forTalles.nearestPoint(openAngGoalIntersectionTop),openAngGoalIntersectionTop), QColor(Qt::black));
+//                draw(Segment2D(bottomFaceLength_forTalles.nearestPoint(openAngGoalIntersectionTop),openAngGoalIntersectionTop), QColor(Qt::black));
             }
             else{
                 aimLessChord = topFaceLength_forTalles.nearestPoint(openAngGoalIntersectionBottom).dist(openAngGoalIntersectionBottom);
@@ -3338,7 +3338,7 @@ void DefensePlan::findPos(int _markAgentSize){
     if(policy()->Mark_ManToManAllTransiant())
     {
         if(knowledge->transientFlag)
-            segmentpershoot = 0.3;
+            segmentpershoot = 0.2;
         else
             segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
             segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
@@ -3425,7 +3425,7 @@ void DefensePlan::findOppAgentsToMark(QList <Vector2D> _realDefTargets)
     for(int i = 0; i<oppAgentsToMark.count(); i++)
     {
         draw(oppAgentsToMark[i]->pos);
-        oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i], 1));
+        oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i], 0.5));
 
     }
 
