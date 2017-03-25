@@ -1645,6 +1645,7 @@ void DefensePlan::matchingDefPos(int _defenseNum)
             }
             ///////////////////////////////////////
             assignSkill( ourAgents[i] , gpa[ourAgents[i]->id()]);
+
             if(ourAgents[i]->pos().dist(matchPoints[matchResult[i]]) > 0.35)
                 matchPoints[matchResult[i]] = checkDefensePoint(ourAgents[i], matchPoints[matchResult[i]]);
             draw(Circle2D(matchPoints[matchResult[i]] , 0.05) , 0 , 360 , "black" , true);
@@ -3560,7 +3561,32 @@ QList<Vector2D> DefensePlan::indirectAvoidPass(Vector2D opp) {
     temp.append(sol);temp.append(wm->ball->pos - opp);
     return temp;
 }
+void DefensePlan::inteliDecideMarkType(){
+    Segment2D tempseg;
+    CDefPos test;
+    if(knowledge->transientFlag == true)
+    {
+        if(LastTs != knowledge->transientFlag){
+        dir = wm->opp[knowledge->nearestOppToBall]->dir;
+        }
+        tempseg.assign(wm->ball->pos, wm->ball->pos + 10 * dir);
+        draw(tempseg, QColor(Qt::green));
+        if(test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).isValid()){
+        MantoManAllTransientFlag =  false;
+        segmentpershoot = 1;
+        }
+        else{
+            MantoManAllTransientFlag = true;
+            segmentpershoot = 0.2;
+        }
 
+    }
+    else {
+        segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
+        segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
+    }
+    LastTs = knowledge->transientFlag;
+}
 void DefensePlan::findPos(int _markAgentSize)
 {
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
@@ -3572,30 +3598,7 @@ void DefensePlan::findPos(int _markAgentSize)
     int intelligence = 1;
     bool MantoManAllTransientFlag = policy()->Mark_ManToManAllTransiant();
     if(intelligence == 1){
-        Segment2D tempseg;
-        CDefPos test;
-        if(knowledge->transientFlag == true)
-        {
-            if(LastTs != knowledge->transientFlag){
-            dir = wm->opp[knowledge->nearestOppToBall]->dir;
-            }
-            tempseg.assign(wm->ball->pos, wm->ball->pos + 10 * dir);
-            draw(tempseg, QColor(Qt::green));
-            if(test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).isValid()){
-            MantoManAllTransientFlag =  false;
-            segmentpershoot = 1;
-            }
-            else{
-                MantoManAllTransientFlag = true;
-                segmentpershoot = 0.2;
-            }
-
-        }
-        else {
-            segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
-            segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
-        }
-        LastTs = knowledge->transientFlag;
+        inteliDecideMarkType();
     }
     else if(MantoManAllTransientFlag)
     {
