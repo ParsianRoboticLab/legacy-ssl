@@ -376,7 +376,9 @@ void CSkillReceivePass::execute()
     ballRealVel = knowledge->getRealBallVel();
     gotopointavoid->setSlowMode(slow);
     gotopointavoid->setAgent(agent);
-    gotopointavoid->setNoAvoid(true);
+    gotopointavoid->setNoAvoid(false);
+    gotopointavoid->setBallObstacleRadius(0.4);
+    gotopointavoid->setAvoidBall(true);
 
     kkBallPos = wm->ball->pos;
     kkAgentPos = agent->pos();
@@ -684,7 +686,7 @@ kckMode CSkillKick::decideMode()
         return KPENALTY;
     }
 
-    else if(wm->field->isInOppPenaltyArea(ballPos) && !passProfiler && avoidOppPenaltyArea)
+    else if(wm->field->isInOppPenaltyArea(ballPos) && !passProfiler && avoidOppPenaltyArea && !((robotArea.intersection(ballpath,&tempVec1,&tempVec2) ==2 && ballRealVel > 1 )))
     {
         return KAVOIDOPPENALTY;
     }
@@ -801,7 +803,7 @@ void CSkillKick::waitAndKick()
     if (!target.valid()) target = wm->field->oppGoal();
 
     Segment2D ballPath;
-    double stopParam = 0.09;
+    double stopParam = 0.07;
     ballPath.assign(ballPos,ballPos + wm->ball->vel.norm()*(agentPos.dist(ballPos) - stopParam + 0.01));
 
     Segment2D ballLine;
@@ -1002,7 +1004,7 @@ void CSkillKick::jTurn()
 {
     if(kkShotEmpySpot)
         target = findMostPossible();
-    angPid->kp = 3;
+    angPid->kp = 4;
     Polygon2D robotKickArea;
 
 
@@ -1049,7 +1051,7 @@ void CSkillKick::jTurn()
     speedPidX->kd = 0;
     speedPidY->kd = 1;
     speedPidX->kp = 0.6;
-    speedPidY->kp = 0.5;
+    speedPidY->kp = 0.25;
     if(knowledge->isOurNonPlayOnKick())
     {
         reduce = 0.5;

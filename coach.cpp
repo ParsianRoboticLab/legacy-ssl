@@ -31,6 +31,7 @@ CCoach::CCoach(CAgent**_agents)
     possessionIntentionInterval = 200;
     playOnTime = 2000;
     playMakeIntentionInterval = 1000;
+    playMakeTh = 1;
 
 
     /////////////////////
@@ -593,12 +594,14 @@ QList<int> CCoach::findBestPoses(int numberOfPositionAgents)
 
 
     double minDist = 10000;
-    /* TODO : check this code is work like the big commented code that is down of this code*/
+    /* TODO : check this code is working like the big commented code that is down of this code*/
+    if( numberOfPositionAgents == 0)
+        return result;
     int quotient = 6 / numberOfPositionAgents;
     for(int _c = 0 ; _c < numberOfPositionAgents ;_c++) {
         for(int _i = 0 ; _i < 30 ;_i++) {
             if(quotient * _c > _i || quotient * _c < _i) {
-                posWeights[_i] = -100000;
+                posWeights[_i] = -10000000;
                 continue;
             }
             minDist = 100000;
@@ -614,7 +617,7 @@ QList<int> CCoach::findBestPoses(int numberOfPositionAgents)
                 if(minDist<= 1)
                     posWeights[_i] +=2;
                 else
-                    posWeights[_i] -=100000;
+                    posWeights[_i] -=10000;
                 posWeights[_i] -= 4*minDist;
             }
             else {
@@ -636,9 +639,10 @@ QList<int> CCoach::findBestPoses(int numberOfPositionAgents)
                 if(_i == bestPosNum[k])
                     posWeights[_i]=-1000;
             }
-            if(knowledge->getStaticPoses(_i).dist(wm->ball->pos) < 1) {
-                posWeights[_i]=-1000;
-            }
+            posWeights[_i] -= 10000.0 / max(0.01, knowledge->getStaticPoses(_i).dist(wm->ball->pos));
+           /* if(knowledge->getStaticPoses(_i).dist(wm->ball->pos) < 1) {
+                posWeights[_i] = -10000;
+            }*/
             if(knowledge->getStaticPoses(_i).dist(wm->our[nearestId]->pos) < 1.5) {
                 posWeights[_i]=-1000;
             }
@@ -646,7 +650,7 @@ QList<int> CCoach::findBestPoses(int numberOfPositionAgents)
             if(numberOfPositionAgents == 1)
                 posWeights[_i]+= 3* Vector2D::angleOf(wm->ball->pos,wm->field->oppGoal(),knowledge->getStaticPoses(_i)).radian();
             if(wm->field->isInOppPenaltyArea(knowledge->getStaticPoses(_i)) )
-                posWeights[_i] = -100000;
+                posWeights[_i] = -1000000;
             bestPosWeight = -1000000;
             for(int _i = 0; _i < 30 ;_i++) {
                 if(posWeights[_i] >= bestPosWeight)
@@ -1115,10 +1119,23 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
     ////////////////////first we choose our playmake
     double playMakeParam[6] = {0};
     double biggestPoint = -1000;
-    double ballVelCoef = 0.5;
+    double ballVelCoef = 1;
+
+
+    double minDistForPass = 100000;
+    int minDistForPassId = -1;
+
+    for(int i = 0 ; i < ourPlayers.count() ; i++) {
+        if(wm->our[ourPlayers[i]]->pos.dist(dynamicAttack->currentPlan.passPos) < minDistForPass)
+        {
+            minDistForPassId = ourPlayers[i];
+        }
+    }
+
+
     for(int i = 0 ; i < ourPlayers.count() ; i++) {
         playMakeParam[i] = 1 / (wm->our[ourPlayers[i]]->pos.dist(wm->ball->pos+wm->ball->vel*ballVelCoef));
-        if(ourPlayers[i] == lastPlayMake) {
+        if((ourPlayers[i] == lastPlayMake) || (ourPlayers[i] == minDistForPassId) ) {
             playMakeParam[i] += playMakeTh;
         }
     }
@@ -1285,8 +1302,8 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
         dynamicAttack->setDefenseClear(false);
     }
 
-    if(findMostPossible(wm->ball->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr)) {
-        dynamicAttack->setDirectShot(false);
+    if(findMostPossible(wm->our[playmakeId]->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr)) {
+        dynamicAttack->setDirectShot(true);
         shotToGoalthr = 0.6;
     } else {
         dynamicAttack->setDirectShot(false);
@@ -1294,7 +1311,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     }
     /////////////////////////////////////////////////////////////////////////
 
-    //dynamicAttack->setPositions(findBestPoses(ourPlayers.count()));
+    dynamicAttack->setPositions(findBestPoses(ourPlayers.count()));
 
     dynamicAttack->setWeHaveBall(ballPState == CKnowledge::WEHAVETHEBALL);
     dynamicAttack->setFast(ourAttackState == FAST);
