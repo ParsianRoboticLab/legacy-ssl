@@ -113,7 +113,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
     CPolynomialRegression ProRes;
 
-    profiler->load(JSON);
+//    profiler->load(JSON);
     for(int q=0; q<16; q++)
         KickCoeff->append(ProRes.PolynomialRegression(profiler->robotsProfile[q].finalKickMap.values() , profiler->robotsProfile[q].finalKickMap.keys(),2));
 
