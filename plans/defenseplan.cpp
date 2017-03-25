@@ -1322,6 +1322,7 @@ DefensePlan::DefensePlan()
     markRadiusStrict = 1.39;
     segmentpershoot = policy()->Mark_ShootRatioBlock() / 100.0;
     segmentperpass = (100  - policy()->Mark_PassRatioBlock()) / 100.0;
+    LastTs = false;
     /////
     //added by KK
     predictThresh = 0;
@@ -3567,7 +3568,18 @@ void DefensePlan::findPos(int _markAgentSize)
                     || (knowledge->getGameState() == CKnowledge::TheirIndirectKick)
                     );
     ///////////////// Man To Man AllTransiant Mode for Mark ////////////////////
-    if(policy()->Mark_ManToManAllTransiant())
+    int intelligence = 1;
+    bool MantoManAllTransientFlag = policy()->Mark_ManToManAllTransiant();
+    /*if(intelligence == 1){
+        if(LastTs != knowledge->transientFlag)
+        {
+            MantoManAllTransientFlag = true;
+
+        }
+        LastTs = knowledge->transientFlag;
+
+    }*/
+    if(MantoManAllTransientFlag)
     {
         if(knowledge->transientFlag)
             segmentpershoot = 0.2;
