@@ -43,8 +43,7 @@ private:
     Vector2D getXYByAngle(double _angle, double _radius);
     double getRobotAngle(double _radius);
     double getAngleByXY(Vector2D _point);
-    kk2Angles getIntersections(Vector2D _ballPos, double _radius);
-    double getBestRadiusBySize(double _openAngle, int _size);
+    kk2Angles getIntersections(Vector2D _ballPos, double _radius);    
     double findBestRadius(int _numOfDefs);
     double oneDefThr;
 
@@ -131,6 +130,8 @@ protected:
     bool dangerForGoalieClearByOurAgents;
     bool dangerForGoalieClearByOppAgents;
     bool stopMode;
+    bool limitBetweenAHZAndHMD;
+    bool limitBetweenHMDAndAHZ;
     ///////////////////////////////////////////////////
     void executeGoalie();
     Vector2D blockTheBall();
@@ -302,16 +303,11 @@ private:
     bool oneTouchPointFlagG;
 
     bool isPathToOppGoalieClear();
-    Vector2D findBestPointForChipTarget(double &chipDist,bool isGoalie);
-
-    int checkOppPassDanger(QList<int> &arr);
-    bool doBlockPass;
-    double timeToReachPoint(double dist);
+    Vector2D findBestPointForChipTarget(double &chipDist,bool isGoalie);    
+    bool doBlockPass;    
     double timeToReach;
     Vector2D blockPassPoint;
-    QList<int> dangerousOpp;
-    long getCurrentTimeInMsec();
-    bool isPathClear(Segment2D line, int myDefID, double vel);
+    QList<int> dangerousOpp;    
 
     double goalieAreaHis;
     Vector2D goalieTargetDir;
