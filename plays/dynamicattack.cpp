@@ -176,8 +176,8 @@ void CDynamicAttack::makePlan(int agentSize) {
         currentPlan.mode = DynamicEnums::HighProb;
         currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
         for(size_t i = 0;i < agentSize;i++) {
-            currentPlan.positionAgents[i].region = DynamicEnums::Reflect;
-            currentPlan.positionAgents[i].skill  = DynamicEnums::OneTouch;
+            currentPlan.positionAgents[i].region = DynamicEnums::Best;
+            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
         }
 
     }
@@ -447,7 +447,7 @@ bool check = false;
             debug("[dynamicAttack] mahiagent ha eshtebahe chera ?", D_MAHI);
         }
     }
-    assert(check);
+    //assert(check);
 }
 
 
@@ -657,7 +657,8 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
         //debug(QString("pass candidates : %1 %2").arg(temp.at(i).x).arg(temp.at(i).y), D_PARSA);
     }
     int tempIndex = 0;
-    if(isBallInOurField) {
+    //TODO : sharte paiin bayad isBallInOurField bashe amma felan isBallInOurField eshteba por mishe.
+    if(ballPos.x < 0) {
         if(policy()->DynamicPlay_FarForward()) {
             tempIndex = minHorizontalDistID(temp);
         } else {
@@ -820,11 +821,15 @@ int CDynamicAttack::minHorizontalDistID(const QList<Vector2D> &_points) {
 
     for(size_t i = 0;i < _points.size();i++) {
         tempDist = fabs(ballPos.y - _points.at(i).y);
+        if (lastPassPos == i) {
+            tempDist -= 1;
+        }
         if(tempDist < minDist) {
             minDist = tempDist;
             tempIndex = i;
         }
     }
+    lastPassPos = tempIndex;
     return tempIndex;
 }
 
@@ -834,11 +839,15 @@ int CDynamicAttack::maxHorizontalDistID(const QList<Vector2D> &_points) {
 
     for(size_t i = 0;i < _points.size();i++) {
         tempDist = fabs(ballPos.y - _points.at(i).y);
+        if (lastPassPos == i) {
+            tempDist += 1;
+        }
         if(tempDist > maxDist) {
             maxDist = tempDist;
             tempIndex = i;
         }
     }
+    lastPassPos = tempIndex;
     return tempIndex;
 }
 
@@ -1004,9 +1013,9 @@ void CDynamicAttack::assignLocations_0() {
 
 void CDynamicAttack::assignLocations_1() {
     //Opp Feild
-    guardLocations[1][0][0].assign(_FIELD_WIDTH/4, _FIELD_HEIGHT/4);
+    guardLocations[1][0][0].assign(_FIELD_WIDTH/2 - 0.5, _FIELD_HEIGHT/4 + 0.5);
     guardLocations[1][0][1].assign(_FIELD_WIDTH/4, 0);
-    guardLocations[1][0][2].assign(_FIELD_WIDTH/4, -_FIELD_HEIGHT/4);
+    guardLocations[1][0][2].assign(_FIELD_WIDTH/2 - 0.5, -_FIELD_HEIGHT/4 - 0.5);
 }
 
 void CDynamicAttack::assignLocations_2() {
@@ -1146,7 +1155,7 @@ QString CDynamicAttack::getString(const DynamicEnums::DynamicMode &_mode) const 
 }
 
 void CDynamicAttack::ballLocation() {
-    if (ballPos.x < -1 ) {
+    if (ballPos.x < 0 ) {
         isBallInOurField = true;
     } else if (ballPos.x > 0) {
         isBallInOurField = false;
