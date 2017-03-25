@@ -11,6 +11,10 @@ double AvgWithoutOutliers(QList<double> data , double accuracy){
     QList<double> isOutlier;
     double size = data.count() , n=0;
     double avrg=0 , a=0 , b=0 , res=0;
+
+    if(size==1)
+        return data.first();
+
     for(int i=0; i<size; i++)
         avrg+=data.at(i);
 

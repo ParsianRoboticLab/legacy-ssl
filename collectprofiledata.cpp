@@ -235,11 +235,17 @@ void CollectProfileData::saveMaxBallSpeed(){
                 counter1--;
         }
         counter1++;
-        if(counter1 == repeat){
+        if(counter1 == repeat && kickSpeed1<MaxSpeed+1){
             counter1 = 0;
             profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1 , p1RealSpeedRec);
             p1RealSpeedRec.clear();
             kickSpeed1 += speedStep;
+        }
+        else if(kickSpeed1==1000){
+            counter1 = 0;
+            profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1 , p1RealSpeedRec);
+            p1RealSpeedRec.clear();
+            kickSpeed1 = MaxSpeed;
         }
     }else{
         if(counter2 >= 0){
@@ -251,11 +257,17 @@ void CollectProfileData::saveMaxBallSpeed(){
             else counter2--;
         }
         counter2++;
-        if(counter2 == repeat){
+        if(counter2 == repeat && kickSpeed2<MaxSpeed+1){
             counter2 = 0;
             profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2 , p2RealSpeedRec);
             p2RealSpeedRec.clear();
             kickSpeed2 += speedStep;
+        }
+        else if(kickSpeed2==1000){
+            counter2 = 0;
+            profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2 , p2RealSpeedRec);
+            p2RealSpeedRec.clear();
+            kickSpeed2 += MaxSpeed;
         }
     }
     ballSpeed = 0;
