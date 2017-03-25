@@ -1063,6 +1063,7 @@ DefensePlan::DefensePlan()
     segmentperpass = (100  - policy()->Mark_PassRatioBlock()) / 100.0;
     LastTs = false;
     dir  = Vector2D(1,0);
+    MantoManAllTransientFlag =  policy()->Mark_ManToManAllTransiant();
     /////
     //added by KK
     predictThresh = 0;

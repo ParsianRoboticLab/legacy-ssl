@@ -209,6 +209,7 @@ public:
       double markRadiusStrict;
       double segmentpershoot;
       double segmentperpass;
+      bool MantoManAllTransientFlag;
       bool LastTs;
       Vector2D dir;
     ///////////////////////////////////
@@ -216,6 +217,7 @@ public:
 
 private:
       ///////////////////////HMD///////////////
+      void inteliDecideMarkType();
       void findPos(int _markAgentSize);
        void findOppAgentsToMark(QList<Vector2D> _realDefTargets);
        QList<CRobot*> sortdanger(const QList<CRobot*> oppagent);
