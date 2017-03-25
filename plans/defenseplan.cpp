@@ -1323,6 +1323,7 @@ DefensePlan::DefensePlan()
     segmentpershoot = policy()->Mark_ShootRatioBlock() / 100.0;
     segmentperpass = (100  - policy()->Mark_PassRatioBlock()) / 100.0;
     LastTs = false;
+    dir  = Vector2D(1,0);
     /////
     //added by KK
     predictThresh = 0;
@@ -3570,16 +3571,33 @@ void DefensePlan::findPos(int _markAgentSize)
     ///////////////// Man To Man AllTransiant Mode for Mark ////////////////////
     int intelligence = 1;
     bool MantoManAllTransientFlag = policy()->Mark_ManToManAllTransiant();
-    /*if(intelligence == 1){
-        if(LastTs != knowledge->transientFlag)
+    if(intelligence == 1){
+        Segment2D tempseg;
+        CDefPos test;
+        if(knowledge->transientFlag == true)
         {
-            MantoManAllTransientFlag = true;
+            if(LastTs != knowledge->transientFlag){
+            dir = wm->opp[knowledge->nearestOppToBall]->dir;
+            }
+            tempseg.assign(wm->ball->pos, wm->ball->pos + 10 * dir);
+            draw(tempseg, QColor(Qt::green));
+            if(test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).isValid()){
+            MantoManAllTransientFlag =  false;
+            segmentpershoot = 1;
+            }
+            else{
+                MantoManAllTransientFlag = true;
+                segmentpershoot = 0.2;
+            }
 
         }
+        else {
+            segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
+            segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
+        }
         LastTs = knowledge->transientFlag;
-
-    }*/
-    if(MantoManAllTransientFlag)
+    }
+    else if(MantoManAllTransientFlag)
     {
         if(knowledge->transientFlag)
             segmentpershoot = 0.2;

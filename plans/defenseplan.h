@@ -199,6 +199,8 @@ public:
       double markRadiusStrict;
       double segmentpershoot;
       double segmentperpass;
+      bool LastTs;
+      Vector2D dir;
     ///////////////////////////////////
 
 
