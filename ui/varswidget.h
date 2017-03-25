@@ -57,6 +57,7 @@ public:
      DEF_VALUE(LocalSettings,bool,Bool,SharedRadioReceive)
      DEF_ENUM(LocalSettings,std::string,OurTeamColor)
      DEF_ENUM(LocalSettings,std::string,OurTeamSide)
+     DEF_VALUE(LocalSettings,bool, Bool, ParsianWorkShop)
   DEF_TREE(Common)
      DEF_VALUE(Common,int,Int,Viewport_Width)
      DEF_VALUE(Common,int,Int,Command_Interval)
@@ -185,7 +186,7 @@ public:
         DEF_VALUE(Performance_Debug, bool, Bool, debugAHZ)
         DEF_VALUE(Performance_Debug, bool, Bool, debugFatemeh)
         DEF_VALUE(Performance_Debug, bool, Bool, debugAtousa)
-        DEF_VALUE(Performance_Debug, bool, Bool, debugAmiR)
+        DEF_VALUE(Performance_Debug, bool, Bool, debugParsa)
         DEF_VALUE(Performance_Debug, bool, Bool, debugAmin)
         DEF_VALUE(Performance_Debug, bool, Bool, debugHamed)
 

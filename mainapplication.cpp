@@ -30,6 +30,8 @@
 #include "mergeCamerasExperiment.h"
 #include "joystickhandy.h"
 #include "kickprofiler.h"
+#include "autoballplacement.h"
+
 
 QString startUpMode;
 QString coachMode;
@@ -44,6 +46,9 @@ CMainApplication::CMainApplication(QWidget *parent)
 
     updatedEver=false;
     experimental=0;
+
+    //profiler
+    collectKickProfile=new CollectProfileData();
 
     /* Init Workspace */
 
@@ -306,6 +311,10 @@ CMainApplication::CMainApplication(QWidget *parent)
     setExp6Act = new QAction("Experimental6", this);
     setExp6Act->setCheckable(true);
     setExp6Act->setChecked((experimental==6));
+
+    setFProfiler = new QAction("CollectProfileData", this);
+    setFProfiler->setCheckable(true);
+    setFProfiler->setChecked((experimental==11));
     ///////////////////////////////////////////////////////////////profiler
     setKProfiler = new QAction("Kick Profiler", this);
     setKProfiler->setCheckable(true);
@@ -317,6 +326,11 @@ CMainApplication::CMainApplication(QWidget *parent)
     setJsHandy->setCheckable(true);
     setJsHandy->setChecked((experimental==9));
     setJsHandy->setShortcut(QKeySequence(tr("Ctrl+J","JoyStick Handy Controller")));
+
+    /////////////////////////////////////////////////auto ball placement
+    setAutoBallPlacement = new QAction("Auto Ball Placement", this);
+    setAutoBallPlacement->setCheckable(true);
+    setAutoBallPlacement->setChecked((experimental==12));
 
     ////////////////////////////////////////////////
     setTechnicalChallengeAct = new QAction("TechnicalChallenge", this);
@@ -378,7 +392,9 @@ CMainApplication::CMainApplication(QWidget *parent)
     modeMenu->addAction(setExp5Act);
     modeMenu->addAction(setExp6Act);
     modeMenu->addAction(setJsHandy);
+    modeMenu->addAction(setAutoBallPlacement);
     modeMenu->addAction(setKProfiler);
+    modeMenu->addAction(setFProfiler);
     modeMenu->addAction(setTechnicalChallengeAct);
     modeMenu->addAction(setMergeCamerasExperimentAct);
     modeMenu->addAction(setMixedAct);
@@ -652,6 +668,15 @@ void CMainApplication::customControl(bool &custom)
         if (experimental==7) TechnicalChallenge();
         if (experimental==9) JsHandy();
         if (experimental==10) kickProfiler();
+        if (experimental==11) {
+            if(ProfilerExecute)
+                collectKickProfile->start();
+        }
+        if(experimental == 12)
+        {
+            autoBallPlacement();
+        }
+
     }
     else {
         custom = false;
@@ -797,6 +822,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp5Act->setChecked(false);
         setExp6Act->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
+        setFProfiler->setChecked(false);
     }
     else if (action->text() == setExp2Act->text())
     {
@@ -809,6 +835,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp5Act->setChecked(false);
         setExp6Act->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
+        setFProfiler->setChecked(false);
     }
     else if (action->text() == setExp3Act->text())
     {
@@ -821,6 +848,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp5Act->setChecked(false);
         setExp6Act->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
+        setFProfiler->setChecked(false);
     }
     else if (action->text() == setExp4Act->text())
     {
@@ -833,6 +861,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp5Act->setChecked(false);
         setExp6Act->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
+        setFProfiler->setChecked(false);
     }
     else if (action->text() == setExp5Act->text())
     {
@@ -845,6 +874,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp4Act->setChecked(false);
         setExp6Act->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
+        setFProfiler->setChecked(false);
     }
     else if (action->text() == setExp6Act->text())
     {
@@ -857,6 +887,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp4Act->setChecked(false);
         setExp5Act->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
+        setFProfiler->setChecked(false);
     }
     else if (action->text() == setTechnicalChallengeAct->text())
     {
@@ -869,7 +900,9 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp4Act->setChecked(false);
         setExp5Act->setChecked(false);
         setExp6Act->setChecked(false);
+        setJsHandy->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
+        setFProfiler->setChecked(false);
     }
     else if (action->text() == setMergeCamerasExperimentAct->text())
     {
@@ -887,7 +920,9 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp4Act->setChecked(false);
         setExp5Act->setChecked(false);
         setExp6Act->setChecked(false);
+        setJsHandy->setChecked(false);
         setTechnicalChallengeAct->setChecked(false);
+        setFProfiler->setChecked(false);
     }
     else if (action->text() == setJsHandy->text())
     {
@@ -901,6 +936,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp5Act->setChecked(false);
         setExp6Act->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
+        setFProfiler->setChecked(false);
     }
     else if (action->text() == setKProfiler->text())
     {
@@ -914,7 +950,44 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp5Act->setChecked(false);
         setExp6Act->setChecked(false);
         setJsHandy->setChecked(false);
+        setJsHandy->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
+        setFProfiler->setChecked(false);
+    }
+    else if (action->text() == setFProfiler->text())
+    {
+        experimental = 11;
+        if (setFProfiler->isChecked()) setFProfiler->setChecked(true);
+        else {setFProfiler->setChecked(false);experimental=0;}
+        setExp1Act->setChecked(false);
+        setExp2Act->setChecked(false);
+        setExp3Act->setChecked(false);
+        setExp4Act->setChecked(false);
+        setExp5Act->setChecked(false);
+        setExp6Act->setChecked(false);
+        setJsHandy->setChecked(false);
+        setMergeCamerasExperimentAct->setChecked(false);
+        setKProfiler->setChecked(false);
+        setJsHandy->setChecked(false);
+        CNewProfilerWidget *profilerWidget;
+        profilerWidget=new CNewProfilerWidget(this);
+        profilerWidget->show();
+    }
+    else if (action->text() == setAutoBallPlacement->text())
+    {
+        experimental = 12;
+        if (setAutoBallPlacement->isChecked()) setAutoBallPlacement->setChecked(true);
+        else {setAutoBallPlacement->setChecked(false);experimental=0;}
+        setExp1Act->setChecked(false);
+        setExp2Act->setChecked(false);
+        setExp3Act->setChecked(false);
+        setExp4Act->setChecked(false);
+        setExp5Act->setChecked(false);
+        setExp6Act->setChecked(false);
+        setJsHandy->setChecked(false);
+        setMergeCamerasExperimentAct->setChecked(false);
+        setKProfiler->setChecked(false);
+        setJsHandy->setChecked(false);
     }
     /* Control Mode */
     CSoccer::ControlMode lastControlMode = soccer->getControlMode();
@@ -1195,6 +1268,7 @@ CMainApplication::~CMainApplication()
     delete keyboardWidget;
     delete plotWidget;
     delete statusWidget;
+    delete setAutoBallPlacement;
     delete skillWidget;
     delete roleWidget;
 
@@ -1217,6 +1291,7 @@ CMainApplication::~CMainApplication()
     delete setExp6Act;
     delete setJsHandy;
     delete setKProfiler;
+    delete setFProfiler;
     delete setTechnicalChallengeAct;
     delete setMergeCamerasExperimentAct;
     delete tabWidget;
@@ -1474,7 +1549,6 @@ void CMainApplication::setLoggerReplayMode(QAction *action ){
             terminateLogOrReplay(false); // terminate Replay
         }
         if( action->isChecked() ){
-            qDebug()<<"logtag";
             CLogTagWidget *LT;
 
             LT=new CLogTagWidget(this);

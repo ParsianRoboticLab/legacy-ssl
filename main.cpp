@@ -36,6 +36,12 @@ void handle2(int)
 	//draw(" Segmentation Fault",Vector2D(0,0),"red",0);
 }
 
+void fullHandle(int sig) {
+    haltAllRobots();
+    qDebug()<<sig;
+    gameLogger->closeLogFiles(true);
+}
+
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
@@ -64,6 +70,11 @@ int main(int argc, char *argv[])
     signal(SIGSEGV,handle);
 
     signal(SIGALRM,handle2);
+
+    for (int i = 0; i < 31;i++) {
+        signal(i, fullHandle);
+    }
+
 
     CMainApplication mApp;
 

@@ -20,6 +20,7 @@ CKnowledge *knowledge;
 
 CKnowledge::CKnowledge(CAgent** _agents)
 {
+
     //ABBAS
     refShortcuts = false;
     shirjeBlocking = false;
@@ -108,11 +109,11 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
     //////////////////////////////fill ProfilerResult
     profiler = new CNewProfiler();
-//    profiler->load(JSON);
     QVector< QVector<double> > *KickCoeff = new QVector< QVector<double> >();
 
     CPolynomialRegression ProRes;
 
+    profiler->load(JSON);
     for(int q=0; q<16; q++)
         KickCoeff->append(ProRes.PolynomialRegression(profiler->robotsProfile[q].finalKickMap.values() , profiler->robotsProfile[q].finalKickMap.keys(),2));
 
