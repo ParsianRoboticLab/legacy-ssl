@@ -1370,8 +1370,7 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     findPos(decideNumOfMarks(defPosDecision.overDef));
     matchPoints.append(markPoses);
     draw(QString("aaaaaaaaaa  %1 %2").arg(matchPoints.count()).arg(_defenseNum),Vector2D(-2,2),"red");
-    draw(QString("  %1").arg(ourAgents.count()),Vector2D(2,2),"red");
-    debug(QString("ter mal : %1").arg(_defenseNum) , D_AHZ , "green");
+    draw(QString("  %1").arg(ourAgents.count()),Vector2D(2,2),"red");    
     if(matchPoints.count() == ourAgents.count())
     {
         knowledge->Matching(ourAgents,matchPoints,matchResult);
@@ -1419,7 +1418,14 @@ void DefensePlan::matchingDefPos(int _defenseNum){
             }
             ///////// Go To Point Avoid for mark agents ////////////////////
             else{
-                gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , markAngs.at(i));
+                ////////// Added By AHZ /////////////////////
+                //// for 4far game (must be review again)///////
+                if(i < markAngs.size()){
+                    gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , markAngs.at(i));
+                }
+                else{
+                    gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , matchPoints[matchResult[i]] - wm->field->ourGoal());
+                }
             }
         }
     }
