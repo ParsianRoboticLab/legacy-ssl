@@ -315,6 +315,7 @@ void CPlayOff::getPassTimeline(SPlayOffPlan *tCurrentPlan, QList<POOwnerReceive>
 
 void CPlayOff::globalExecute() {
 
+    Q_ASSERT(masterPlan != NULL);
     if(masterPlan != NULL) {
         if (initial) {
             qDebug() << *masterPlan;
@@ -1314,7 +1315,7 @@ void CPlayOff::assignMove(CRolePlayOff* _roleAgent,
         _roleAgent -> setSlow(true);
         _roleAgent -> setMaxVelocity(1);
 
-    } else if (_roleAgent->getTime() != 0) { // Time is Zero
+    } else if (_roleAgent->getTime() > 10) {
 
         _roleAgent -> setTimeBased(true);
         _roleAgent -> setTarget(getMoveTarget(_posAgent.getArgs()));
@@ -1325,6 +1326,7 @@ void CPlayOff::assignMove(CRolePlayOff* _roleAgent,
     } else {
 
         _roleAgent -> setTimeBased(false);
+        _roleAgent -> setEventDist(_posAgent.getArgs().staticEscapeRadius);
         _roleAgent -> setTarget(getMoveTarget(_posAgent.getArgs()));
         _roleAgent -> setTargetDir(_posAgent.getArgs().staticAng);
         _roleAgent -> setSlow(false);
@@ -2060,7 +2062,7 @@ bool CPlayOff::isMoveDone(const CRolePlayOff * _roleAgent) {
         }
     } else {
         // TODO : vartypes this
-        if (_roleAgent->getAgent()->pos().dist(_roleAgent->getTarget()) < 0.3) {
+        if (_roleAgent->getAgent()->pos().dist(_roleAgent->getTarget()) < _roleAgent->getEventDist()) {
             return true;
         }
     }

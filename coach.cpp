@@ -1522,7 +1522,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
         NGameOff::SMatching& matching = plan->matching;
 
         // Just For Debugging
-        if (0) {
+        if (1) {
             qDebug() << "-----------> plan name" << plan->gui.name;
             if (matching.common->planMode  >= _mode)
                 qDebug() << "[Coach] Mode is Valid";
@@ -1586,6 +1586,11 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
             validPlans.append(nearestPlan);
             debug("[Warning] playoff -> nearset plan matched", D_ERROR, QColor(Qt::red));
         }
+    }
+
+    if (validPlans.isEmpty()) {
+        debug ("[coach] WE DONT HAVE PLAN AT ALL", D_MAHI);
+        return;
     }
 
     RNG randomNumberGenerator;
