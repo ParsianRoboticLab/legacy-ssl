@@ -42,6 +42,8 @@ public:
     CKnowledge::ballPossesionState isBallOurs();
     CKnowledge::ballPossesionState ballPStateIntented;
     static QMap<QString, EditData*> editData; //Contains Formations
+    Vector2D lastBallVel;
+    Vector2D lastBallPos;
 
 private:
     double findMostPossible(Vector2D agentPos);
