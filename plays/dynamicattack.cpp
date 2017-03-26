@@ -272,6 +272,7 @@ void CDynamicAttack::assignId() {
 
 void CDynamicAttack::assignTasks() {
     if (mahiPlayMaker != NULL) {
+        debug(QString("mahi %1").arg(mahiPlayMaker->id()),D_HAMED);
         playMake();
     }
 

@@ -147,7 +147,7 @@ private:
     int mahiAgentsID[5];
     bool isBallInOurField;
 
-    int playmakeID;
+    int playmakeID = -1;
 
     Vector2D ballPos;
     Vector2D ballVel;
