@@ -1287,7 +1287,6 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
         debug(QString("playmake : %1").arg(playmakeId),D_MHMMD);
     }
 
-    double PosNum= 0;
     double MarkNum = 0;
     Circle2D ourDefenseArea(wm->field->ourGoal() + Vector2D(-0.2 , 0),1.6);
 
@@ -1401,6 +1400,33 @@ void CCoach::matchPlan(NGameOff::SPlan *_plan, const QList<int>& _ourplayers) {
     qDebug() << "[Coach] mathched by" << _plan->common.matchedID;
 }
 
+void CCoach::checkGUItoRefineMatch(SPlan *_plan, const QList<int>& _ourplayers) {
+    if (policy()->PlayOff_IDBasePasser() && _ourplayers.contains(policy()->PlayOff_PasserID())) {
+        int temp = _plan->matching.common->matchedID.value(0);
+        _plan->matching.common->matchedID[0] = policy()->PlayOff_PasserID();
+        for (int i = 1;i < _plan->matching.common->matchedID.size(); i++) {
+            if (_plan->matching.common->matchedID[i] == policy()->PlayOff_PasserID()) {
+                _plan->matching.common->matchedID[i] = temp;
+                break;
+            }
+        }
+    }
+
+    if (policy() -> PlayOff_IDBaseOneToucher()
+    && _ourplayers.contains(policy() -> PlayOff_OneToucherID())) {
+        int temp = _plan -> matching.common -> matchedID.value(1);
+        _plan -> matching.common -> matchedID[1] = policy() -> PlayOff_OneToucherID();
+        for (int i = 2;i < _plan->matching.common->matchedID.size(); i++) {
+            if (_plan->matching.common->matchedID[i] == policy()->PlayOff_OneToucherID()) {
+                _plan->matching.common->matchedID[i] = temp;
+                break;
+            }
+        }
+    }
+
+    qDebug() << "[coach] final Match : " << _plan->matching.common->matchedID;
+}
+
 bool CCoach::isTagsMatched(const QStringList& base, const QStringList& required) {
     Q_FOREACH(QString tag, required)
         if (!base.contains(tag))
@@ -1496,7 +1522,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
         NGameOff::SMatching& matching = plan->matching;
 
         // Just For Debugging
-        if (0) {
+        if (1) {
             qDebug() << "-----------> plan name" << plan->gui.name;
             if (matching.common->planMode  >= _mode)
                 qDebug() << "[Coach] Mode is Valid";
@@ -1562,11 +1588,17 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
         }
     }
 
+    if (validPlans.isEmpty()) {
+        debug ("[coach] WE DONT HAVE PLAN AT ALL", D_MAHI);
+        return;
+    }
+
     RNG randomNumberGenerator;
     int randNo = randomNumberGenerator.uniformInt() % validPlans.size();
     NGameOff::SPlan* thePlan = validPlans[randNo]; //chooseMostSuccecfull(validPlans); //Choose Best valid Plan
     debug (QString("Plan Number : %1").arg(randNo), D_DEBUG);
     matchPlan(thePlan, _ourplayers); //Match The Plan
+    checkGUItoRefineMatch(thePlan, _ourplayers);
     ourPlayOff->setMasterPlan(thePlan);
     ourPlayOff->analyseShoot(); // should call after setmasterplan
     ourPlayOff->analysePass(); // should call after setmasterplan
@@ -1789,7 +1821,6 @@ bool CCoach::decideOurKickOff(QList<int> &_ourPlayers) {
     }
     selectedPlay = ourPlayOff;
     decidePlayOff(_ourPlayers, KICKOFF);
-    //      lastPlayers.append(ourPlayers); // WHY ??
     debug(QString("ourplayers : %1").arg(_ourPlayers.size()),D_MAHI);
 
 }

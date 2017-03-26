@@ -156,6 +156,7 @@ private:
     //TODO : squere or Liner matching
     NGameOff::SPlan* chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans);
     void matchPlan(NGameOff::SPlan* _plan, const QList<int>& _ourplayers);
+    void checkGUItoRefineMatch(NGameOff::SPlan* _plan, const QList<int> &_ourplayers);
     QStringList currentTags;
 
     NGameOff::SPlan* lastPlan;

@@ -312,10 +312,6 @@ public:
     bool deleted;
     //GUI
 
-    QList< QList<SPlayOffPlan*> > updatePlans();
-    QList< QList<SPlayOffPlan*> > loadSQLs(QList<QString> _directorys);
-    void addSQL(QString _directory);
-    QList< QList<SPlayOffPlan*> > addSQLs(QStringList _directorys);
     void debugDirs();
 
     QList<QString> dirList;
@@ -373,9 +369,7 @@ private:
     /////////////////////////////////////////////////////////////////
     ////////////////////////////////////////KK SQL & MATCHIN'////////
     /////////////////////////////////////////////////////////////////
-    void setPlanDir(QString directory);
     void loadSQL();
-    int loadPlan();
     Vector2D convertPos(int _x, int _y, int _symmetry);
     void loadEachPlan(SPlayOffPlan *_plan, QString _name, int _symmetry);
     bool loadSQLtoStruct(QSqlQuery _query,
