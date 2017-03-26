@@ -32,8 +32,8 @@ void CRolePlayOff::reset()
 //    kickSkill = new CSkillKick(NULL);
 //    oneTouchSkill = new CSkillKickOneTouch(NULL);
 //    receivePassSkill = new CSkillReceivePass(NULL);
-//    updated = true;
 
+    updated = true;
     deleted = false;
     roleUpdate = false;
     timer.start();
