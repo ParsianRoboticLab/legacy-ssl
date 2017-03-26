@@ -116,6 +116,7 @@ protected:
     void manToManMarkInPlayOn(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void tempFindPos(int _markAgentSize);
+    void getIntersectionWithPenaltyAreaAHZ(Segment2D , Vector2D sol1 , Vector2D sol2);
     bool isIndirectArea(Vector2D);
     int angleDegreeThr = 0;    
     int angleDegreeThrNotStop = 0;
@@ -131,7 +132,7 @@ protected:
     bool dangerForGoalieClearByOppAgents;
     bool stopMode;
     bool limitBetweenAHZAndHMD;
-    bool limitBetweenHMDAndAHZ;
+    bool limitBetweenHMDAndAHZ;    
     ///////////////////////////////////////////////////
     void executeGoalie();
     Vector2D blockTheBall();
