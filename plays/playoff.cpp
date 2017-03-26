@@ -463,15 +463,19 @@ void CPlayOff::staticExecute() {
         newAssignTasks();
 
     } else {
-        newFillRoleProperties();
-        newPosExecute();
-        newCheckEndState();
+        if (knowledge->getGameState() != CKnowledge::OurKickOff) {
 
-        if(masterPlan->common.currentSize > 1 && havePassInPlan) {
-            passManager();
-        }
-        if(newIsPlanEnd()) {
-            playOnFlag = true;
+            newFillRoleProperties();
+            newPosExecute();
+            newCheckEndState();
+
+            if(masterPlan->common.currentSize > 1 && havePassInPlan) {
+                passManager();
+            }
+            if(newIsPlanEnd()) {
+                playOnFlag = true;
+            }
+
         }
     }
 }
@@ -680,10 +684,10 @@ bool CPlayOff::isPlanDone() {
             return true;
         }
     } else if (isFinalShotDone()) {
-            debug ("Done By Final Shot !", D_MAHI);
-            // TODO : IF GOAL THEN 10 ELSE 9
-            masterPlan->common.addHistory(10); //FULL
-            return true;
+        debug ("Done By Final Shot !", D_MAHI);
+        // TODO : IF GOAL THEN 10 ELSE 9
+        masterPlan->common.addHistory(10); //FULL
+        return true;
     }
     return false;
 }
@@ -765,19 +769,6 @@ bool CPlayOff::isBallDirChanged() {
         return false;
     }
 
-    //    for (size_t agent = 0;agent < 6;agent++) {
-    //        if(positionAgent[agent].positionArg.size()) {
-    //            if (positionAgent[agent].getArgs().staticSkill == PassSkill) {
-    //                debug("HEY IT'S A PASS", D_MAHI);
-    //                if (isPassFaild(agent)) {
-    //                    debug(QString("PASS FAILD"),D_MAHI);
-    //                    draw(QString("PASS FAILD"),Vector2D(2,-1.5));
-    //                    return true;
-    //                }
-    //            }
-    //        }
-    //    }
-    //    return false;
 }
 
 bool CPlayOff::isFinalShotDone() {
