@@ -1287,7 +1287,6 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
         debug(QString("playmake : %1").arg(playmakeId),D_MHMMD);
     }
 
-    double PosNum= 0;
     double MarkNum = 0;
     Circle2D ourDefenseArea(wm->field->ourGoal() + Vector2D(-0.2 , 0),1.6);
 
@@ -1789,7 +1788,6 @@ bool CCoach::decideOurKickOff(QList<int> &_ourPlayers) {
     }
     selectedPlay = ourPlayOff;
     decidePlayOff(_ourPlayers, KICKOFF);
-    //      lastPlayers.append(ourPlayers); // WHY ??
     debug(QString("ourplayers : %1").arg(_ourPlayers.size()),D_MAHI);
 
 }
