@@ -1377,19 +1377,14 @@ void DefensePlan::matchingDefPos(int _defenseNum){
                 gpa[ourAgents[i]->id()]->setADiveMode(false);
             }
             //////////// Go To Point Avoid for defense agents //////////////////
-            if(matchResult[i] < _defenseNum){
+            if(i < _defenseNum){
                 gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , matchPoints[matchResult[i]] - wm->field->ourGoal());
             }
             ///////// Go To Point Avoid for mark agents ////////////////////
             else{
                 ////////// Added By AHZ /////////////////////
-                //// for 4far game (must be review again)///////
-                if(i < markAngs.size()){
-                    gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , markAngs.at(i));
-                }
-                else{
-                    gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , matchPoints[matchResult[i]] - wm->field->ourGoal());
-                }
+                //// for 4far game ///////
+                gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , markAngs.at(i - _defenseNum));
             }
         }
     }
@@ -2297,20 +2292,26 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
                 ////////////// Added by AHZ ///////////////////////////////////
                 if(Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourGoalL()).degree() < 10 + angleDegreeThrNotStop){
                     target = wm->field->ourGoalL() + Vector2D(0.10,0);
-                    angleDegreeThrNotStop = 5;
+                    angleDegreeThrNotStop = 0;
                 }
                 else if(Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourGoalR()).degree() < 10 + angleDegreeThrNotStop){
                     target = wm->field->ourGoalR() + Vector2D(0.10,0);
-                    angleDegreeThrNotStop = 5;
+                    angleDegreeThrNotStop = 0;
                 }
                 else{
-                    if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 6.0 + threshOld){
-                        target = AZBisecOpenSeg.intersection((aimLessLine));
-                        threshOld = 0.0;
+                    angleDegreeThrNotStop = 3;
+                    if(defenseCount == 2){
+                        if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 6.0 + threshOld){
+                            target = AZBisecOpenSeg.intersection((aimLessLine));
+                            threshOld = 0.0;
+                        }
+                        else{
+                            target = wm->field->ourGoal() + offsetGoalkeeperPosition;
+                            threshOld = 2.0;
+                        }
                     }
-                    else{
-                        target = wm->field->ourGoal() + offsetGoalkeeperPosition;
-                        threshOld = 2.0;
+                    else if(defenseCount == 1){
+                        target = AZBisecOpenSeg.intersection((aimLessLine));
                     }
                 }
                 if(!isInThePenaltyArea(target)){
@@ -2754,7 +2755,16 @@ kkDefPos CDefPos::getDefPositions(Vector2D _ballPos, int _size, double _limit1, 
         isNearPenaltyArea = false;
     }
     if (tempBestRadius > _limit2) {
-        tempBestRadius = _limit2;
+        ///////////// Added By AHZ for One Defense better //////////////////////
+        if(_size == 2){
+            tempBestRadius = _limit2;
+        }
+        else if(_size == 1){
+            if(tempBestRadius > 4.5){
+                tempBestRadius = 4.5;
+            }
+        }
+        ///////////////////////////////////////////////////////////////////////
         isNearPenaltyArea = false;
     }
 
@@ -3230,7 +3240,7 @@ void DefensePlan::findPos(int _markAgentSize){
         }
     }
     /////////////////////////////////////////////
-    if(wm->ball->pos.x > xLimitForblockingPass){
+    else if(wm->ball->pos.x > xLimitForblockingPass){
         limitBetweenAHZAndHMD = true;
         if(playOff){
             manToManMarkInPlayOffBlockPass(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
