@@ -967,13 +967,16 @@ bool CCoach::isBallcollide()
     Segment2D ballPath(wm->ball->pos,wm->ball->pos+wm->ball->vel);
     for(int i = 0 ; i < wm->our.activeAgentsCount() ; i++) {
         dummyCircle.assign(wm->our.active(i)->pos,0.08);
-        if(dummyCircle.intersection(ballPath,&sol1,&sol2) && wm->our.active(i)->pos.dist(wm->ball->pos) < 0.14) {
+        if(dummyCircle.intersection(ballPath,&sol1,&sol2) && wm->our.active(i)->pos.dist(wm->ball->pos) < 0.14 && fabs ((wm->ball->vel - lastBallVel).length()) > 0.5 )  {
+            lastBallVel = wm->ball->vel;
             return true;
         }
         if(wm->ball->vel.length() < 0.5 && wm->our.active(i)->pos.dist(wm->ball->pos) < 0.13) {
+            lastBallVel = wm->ball->vel;
             return true;
         }
     }
+    lastBallVel = wm->ball->vel;
     return false;
 }
 
@@ -995,11 +998,11 @@ void CCoach::virtualTheirPlayOffState()
         transientFlag = false;
     }
 
-    /* if(wm->ball->pos.x >= 0) {
+     if(wm->ball->pos.x >= 1) {
         transientFlag = false;
-    }*/
+    }
 
-    if(isBallcollide() && 0){ // TODO : till we fix function && 0
+    if(isBallcollide() ){ // TODO : till we fix function && 0
         transientFlag = false;
     }
 
