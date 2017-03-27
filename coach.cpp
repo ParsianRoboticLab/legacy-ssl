@@ -548,6 +548,8 @@ CKnowledge::ballPossesionState CCoach::isBallOurs()
     }
 
     lastBallPossesionState = decidePState;
+////f**ked by mhmmd
+    analyze("ball Possesion",decidePState,true);
     return decidePState;
 }
 

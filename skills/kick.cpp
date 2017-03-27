@@ -1648,6 +1648,37 @@ kkOTMode CSkillKickOneTouch::decideMode()
 
 }
 
+
+Vector2D CSkillKickOneTouch::findMostPossible()
+{
+
+    QList<int> tempObstacles;
+    QList <Circle2D> obstacles;
+    obstacles.clear();
+    for(int i = 0 ; i < wm->opp.activeAgentsCount() ; i++)
+    {
+        obstacles.append(Circle2D(wm->opp.active(i)->pos,0.1));
+    }
+
+    for(int i = 0 ; i < wm->our.activeAgentsCount() ; i++)
+    {
+        if(wm->our.active(i)->id != agent->id())
+            obstacles.append(Circle2D(wm->our.active(i)->pos,0.1));
+    }
+    double prob,angle,biggestAngle;
+
+    knowledge->getEmptyAngle(wm->ball->pos-(wm->field->oppGoal()-wm->ball->pos).norm()*0.15,wm->field->oppGoalL(),wm->field->oppGoalR(), obstacles, prob, angle, biggestAngle);
+    //debug(QString("prob: %1 , angle :%2, biggest:%3").arg(prob).arg(angle).arg(biggestAngle),D_MHMMD);
+
+    Segment2D goalSeg(wm->field->oppGoalL(),wm->field->oppGoalR());
+    Vector2D sol1,sol2;
+    //    debug(QString("ang %1").arg(angle),D_MHMMD);
+    draw(Segment2D(wm->ball->pos , wm->ball->pos + Vector2D(cos(_PI*(angle)/180),sin(_PI*(angle)/180)).norm()*12));
+
+    return  goalSeg.intersection(Segment2D(wm->ball->pos , wm->ball->pos + Vector2D(cos(_PI*(angle)/180),sin(_PI*(angle)/180)).norm()*12));
+}
+
+
 void CSkillKickOneTouch::execute()
 {
     ballRealVel = knowledge->getRealBallVel();
@@ -1655,7 +1686,10 @@ void CSkillKickOneTouch::execute()
     gotopointavoid->setOneTouchMode(true);
     gotopointavoid->setNoAvoid(true);
 
+    if(shotToEmptySpot)
+        target = findMostPossible();
     if (!target.valid()) target = wm->field->oppGoal();
+
 
 
     Vector2D ballPos = wm->ball->pos;
