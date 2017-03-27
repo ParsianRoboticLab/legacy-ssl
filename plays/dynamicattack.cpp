@@ -658,8 +658,8 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
     }
     int tempIndex = 0;
 
-    if(mahiPlayMaker != NULL && mahiPlayMaker->pos().dist(ballPos) > 0.2)
-        return;
+    /*if(mahiPlayMaker != NULL && mahiPlayMaker->pos().dist(ballPos) > 0.15)
+        return;*/
 
     //TODO : sharte paiin bayad isBallInOurField bashe amma felan isBallInOurField eshteba por mishe.
     if(ballPos.x < 0) {
