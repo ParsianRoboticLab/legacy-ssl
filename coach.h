@@ -162,6 +162,7 @@ private:
     NGameOff::SPlan* lastPlan;
     QList<int> lastPlayers;
     CKnowledge::ballPossesionState ballPState;
+    Vector2D lastBallVel;
     //////////////Decide Attack functions
     bool decideHalt               (QList<int>&);
     bool decideStop               (QList<int>&);
