@@ -56,7 +56,7 @@ private:
     double exeptionPlayMakeThr;
     QList<CAgent*> defenseAgents;
     DefensePlan defenses;
-    int preferedDefenseCounts , lastPreferredDefenseCounts;
+    int preferedDefenseCounts ,lastPreferredDefenseCounts;
     int preferedGoalieAgent;
     Vector2D defenseTargets[12];
     QTime intentionTimePossession;
