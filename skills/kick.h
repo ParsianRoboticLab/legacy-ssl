@@ -411,6 +411,7 @@ private:
     double cirThresh;
     double kickCirThresh;
     double velThresh;
+    Vector2D findMostPossible();
 public:
     double ballRealVel;
     static Vector2D newOneTouchAng(CAgent *oneTouchAgent,Vector2D target,double kickSpeed,double alpha,double beta,double gama);
@@ -428,6 +429,7 @@ public:
     SkillProperty(CSkillKickOneTouch, bool, RecvChip, recvChip);
     SkillProperty(CSkillKickOneTouch, bool, AvoidPenaltyArea, avoidPenaltyArea);
     SkillProperty(CSkillKickOneTouch, bool, MoveTowardTheBall, moveTowardTheBall);
+    SkillProperty(CSkillKickOneTouch, bool, ShotToEmptySpot, shotToEmptySpot);
 };
 
 
