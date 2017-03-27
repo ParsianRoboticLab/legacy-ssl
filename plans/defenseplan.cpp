@@ -593,8 +593,8 @@ void DefensePlan::runGoalie(){
         double oneTouchCoef = 0.5;
         savedClearPos = findBestPointForChipTarget(savedClearDist,1);
         penaltyArea.intersection(Line2D(wm->ball->pos , wm->field->ourGoal()),&Solutions[0] , &Solutions[1]);
-        Circle2D dangerCircle = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.48);
-        Circle2D dangerCircle1 = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.18);
+        Circle2D dangerCircle = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.40);
+        Circle2D dangerCircle1 = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.13);
         draw(dangerCircle , "yellow");
         draw(dangerCircle1 , "yellow");
         for(int i = 0; i < wm->our.activeAgentsCount(); i++){
@@ -2195,6 +2195,7 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
     //////////////////////// Variables of this function //////////////////////
     Vector2D ballPos = _ballPos;
     Vector2D target(wm->field->ourGoal());
+    Vector2D sol1 , sol2;
     Vector2D offsetGoalkeeperPosition = Vector2D(0.3 , 0.0);
     Segment2D goal2Ball;
     QList<Circle2D> defs;
@@ -2209,7 +2210,7 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
     //////////////////////////////////////////////////////////////////////////
     if(knowledge->goalie != NULL){
         ballPos = _ballPos;
-        Segment2D goalLine(wm->field->ourGoal()+Vector2D(0,-0.8) , wm->field->ourGoal()+Vector2D(0,0.8));
+        Segment2D goalLine(wm->field->ourGoal()+Vector2D(0,-0.8) , wm->field->ourGoal() + Vector2D(0,0.8));
         Segment2D downFieldLine(Vector2D(-_FIELD_WIDTH/2,-_FIELD_HEIGHT/2),Vector2D(-_FIELD_WIDTH/2,_FIELD_HEIGHT/2));
         //////////////////////////////// Appending circles on defense agents /////////////////////////////////////////
         for (g = 0; g < defenseAgents.count() ; g++){
@@ -2253,7 +2254,7 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
         //////////////////////////Height of the triangle ///////////////////////////////////////////////////////
         ballheight = ballPos.dist(downFieldLine.nearestPoint(ballPos));
         Line2D aimLessLine(Vector2D(0,0),Vector2D(-1,-1));
-        draw(AZBisecOpenSeg,"blue");
+        draw(AZBisecOpenSeg,"red");
         goal2Ball.assign(wm->field->ourGoal(),wm->ball->pos);
         dangerFlag = 0;
         /////changes for RoboCup 2016////////in one def, goalie dont move to nearest point///////
@@ -2311,7 +2312,9 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
                         }
                     }
                     else if(defenseCount == 1){
-                        target = AZBisecOpenSeg.intersection((aimLessLine));
+                        Circle2D(wm->field->ourGoal() , 1.28).intersection(Segment2D(wm->ball->pos , AZBisecOpenSeg.intersection(aimLessLine)) , &sol1 , &sol2);
+                        target = getPointInDirection(AZBisecOpenSeg.intersection((aimLessLine)) , sol1.dist(wm->field->ourGoal()) < sol2.dist(wm->field->ourGoal()) ? sol1 : sol2, 0.1);
+                        draw(target , 1 , "green");
                     }
                 }
                 if(!isInThePenaltyArea(target)){
@@ -2325,9 +2328,7 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
             //////////////////////// Added by AHZ /////////////////////////////
             /////////////////////////////////////////////////////////////////
         }
-        if (!wm->field->isInField(target) || target.x < -4.4){
-
-            debug(QString("4"),D_SEPEHR);
+        if ((!wm->field->isInField(target) || target.x < -4.4) && defenseCount == 2){
             target = AZBisecOpenSeg.intersection(goalLine) + offsetGoalkeeperPosition;
         }
     }
