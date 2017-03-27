@@ -42,7 +42,7 @@ public:
     CKnowledge::ballPossesionState isBallOurs();
     CKnowledge::ballPossesionState ballPStateIntented;
     static QMap<QString, EditData*> editData; //Contains Formations
-    Vector2D lastBallVel;
+    Vector2D lastBallVelPM;
     Vector2D lastBallPos;
 
 private:

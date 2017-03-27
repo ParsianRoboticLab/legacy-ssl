@@ -20,7 +20,7 @@ CCoach::CCoach(CAgent**_agents)
     agents = _agents;
     lastSelected = -1;
     lastAssignCycle = -10;
-    lastBallVel = Vector2D(0,0);
+    lastBallVelPM = Vector2D(0,0);
     lastBallPos = Vector2D(0,0);
 
     ///////////////////////////////////
@@ -969,16 +969,16 @@ bool CCoach::isBallcollide()
     Segment2D ballPath(wm->ball->pos,wm->ball->pos+wm->ball->vel);
     for(int i = 0 ; i < wm->our.activeAgentsCount() ; i++) {
         dummyCircle.assign(wm->our.active(i)->pos,0.08);
-        if(dummyCircle.intersection(ballPath,&sol1,&sol2) && wm->our.active(i)->pos.dist(wm->ball->pos) < 0.14 && fabs ((wm->ball->vel - lastBallVel).length()) > 0.5 )  {
-            lastBallVel = wm->ball->vel;
+        if(dummyCircle.intersection(ballPath,&sol1,&sol2) && wm->our.active(i)->pos.dist(wm->ball->pos) < 0.14 && fabs ((wm->ball->vel - lastBallVelPM).length()) > 0.5 )  {
+            lastBallVelPM = wm->ball->vel;
             return true;
         }
         if(wm->ball->vel.length() < 0.5 && wm->our.active(i)->pos.dist(wm->ball->pos) < 0.13) {
-            lastBallVel = wm->ball->vel;
+            lastBallVelPM = wm->ball->vel;
             return true;
         }
     }
-    lastBallVel = wm->ball->vel;
+    lastBallVelPM = wm->ball->vel;
     return false;
 }
 
@@ -1186,7 +1186,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
         /*if(ourPlayers[i] == minDistForPassId)
             playMakeParam[i] += playMakeTh;*/
 
-        if(ourPlayers[i] == lastPlayMake && (wm->ball->vel.dist(lastBallVel) < 0.5) && (wm->ball->pos.dist(lastBallPos) < 0.3)) {
+        if(ourPlayers[i] == lastPlayMake && (wm->ball->vel.dist(lastBallVelPM) < 0.5) && (wm->ball->pos.dist(lastBallPos) < 0.3)) {
             debug(QString("dictator point goes to : %1").arg(ourPlayers[i]), D_PARSA);
             playMakeParam[i] += playMakeTh + 5;
         }
@@ -1215,9 +1215,9 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
     debug(QString("now ball pos : %1 %2").arg(wm->ball->pos.x).arg(wm->ball->pos.y), D_PARSA);*/
     debug(QString("pos dist : %1").arg(wm->ball->pos.dist(lastBallPos)), D_PARSA);
 
-    debug(QString("last ball vel : %1 %2").arg(lastBallVel.x).arg(lastBallVel.y), D_PARSA);
+    debug(QString("last ball vel : %1 %2").arg(lastBallVelPM.x).arg(lastBallVelPM.y), D_PARSA);
     debug(QString("now ball vel : %1 %2").arg(wm->ball->vel.x).arg(wm->ball->vel.y), D_PARSA);
-    debug(QString("vel dist : %1").arg(wm->ball->vel.dist(lastBallVel)), D_PARSA);
+    debug(QString("vel dist : %1").arg(wm->ball->vel.dist(lastBallVelPM)), D_PARSA);
 
     debug(QString("pass pos : %1 %2").arg(dynamicAttack->currentPlan.passPos.x).arg(dynamicAttack->currentPlan.passPos.y), D_PARSA);
 
@@ -1231,7 +1231,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
 
     lastPlayMake = playmakeId;
 
-    lastBallVel = wm->ball->vel;
+    lastBallVelPM = wm->ball->vel;
     lastBallPos = wm->ball->pos;
 
 
