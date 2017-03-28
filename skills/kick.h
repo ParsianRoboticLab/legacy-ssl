@@ -206,7 +206,8 @@ private:
     void findPosToGo();
     void findPosToGoAlt();
     double oneTouchAngle(Vector2D pos,Vector2D vel,Vector2D ballVel,Vector2D ballDir,Vector2D goal,double landa,double gamma);
-
+    Vector2D jTurnStartPos;
+    bool isJturn;
 
     CSkillGotoPointAvoid *gpa;
     CSkillIntercept *kickIntercept;
