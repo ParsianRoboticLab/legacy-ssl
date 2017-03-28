@@ -336,7 +336,7 @@ kkRPMode CSkillReceivePass::decideMode()
         velThresh = 0.2;
         return RPRECEIVE;
     }
-    else if(tempCircle.contains(kkAgentPos) && ballRealVel > 0.8 )
+    else if(tempCircle.contains(kkAgentPos) && ballRealVel > 0.2 )
     {
         cirThresh = 1.0;
         Circle2D tempKickCircle(kkAgentPos, 0.3 + kickCirThresh);
