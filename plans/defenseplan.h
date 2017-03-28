@@ -43,8 +43,7 @@ private:
     Vector2D getXYByAngle(double _angle, double _radius);
     double getRobotAngle(double _radius);
     double getAngleByXY(Vector2D _point);
-    kk2Angles getIntersections(Vector2D _ballPos, double _radius);
-    double getBestRadiusBySize(double _openAngle, int _size);
+    kk2Angles getIntersections(Vector2D _ballPos, double _radius);    
     double findBestRadius(int _numOfDefs);
     double oneDefThr;
 
@@ -117,6 +116,7 @@ protected:
     void manToManMarkInPlayOn(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void tempFindPos(int _markAgentSize);
+    void getIntersectionWithPenaltyAreaAHZ(Segment2D , Vector2D sol1 , Vector2D sol2);
     bool isIndirectArea(Vector2D);
     int angleDegreeThr = 0;    
     int angleDegreeThrNotStop = 0;
@@ -131,6 +131,8 @@ protected:
     bool dangerForGoalieClearByOurAgents;
     bool dangerForGoalieClearByOppAgents;
     bool stopMode;
+    bool limitBetweenAHZAndHMD;
+    bool limitBetweenHMDAndAHZ;    
     ///////////////////////////////////////////////////
     void executeGoalie();
     Vector2D blockTheBall();
@@ -209,11 +211,15 @@ public:
       double markRadiusStrict;
       double segmentpershoot;
       double segmentperpass;
+      bool MantoManAllTransientFlag;
+      bool LastTs;
+      Vector2D dir;
     ///////////////////////////////////
 
 
 private:
       ///////////////////////HMD///////////////
+      void inteliDecideMarkType();
       void findPos(int _markAgentSize);
        void findOppAgentsToMark(QList<Vector2D> _realDefTargets);
        QList<CRobot*> sortdanger(const QList<CRobot*> oppagent);
@@ -302,16 +308,11 @@ private:
     bool oneTouchPointFlagG;
 
     bool isPathToOppGoalieClear();
-    Vector2D findBestPointForChipTarget(double &chipDist,bool isGoalie);
-
-    int checkOppPassDanger(QList<int> &arr);
-    bool doBlockPass;
-    double timeToReachPoint(double dist);
+    Vector2D findBestPointForChipTarget(double &chipDist,bool isGoalie);    
+    bool doBlockPass;    
     double timeToReach;
     Vector2D blockPassPoint;
-    QList<int> dangerousOpp;
-    long getCurrentTimeInMsec();
-    bool isPathClear(Segment2D line, int myDefID, double vel);
+    QList<int> dangerousOpp;    
 
     double goalieAreaHis;
     Vector2D goalieTargetDir;

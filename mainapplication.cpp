@@ -1483,25 +1483,26 @@ void haltAllRobots()
             if (flag) break;
         }
     }
+/////continue log in simulate mode
 
-    if( loggerMutex->tryLock(25) ){
-        gameLogger->closeLogger = true;
-        gameLogger->setIsLogMode(false);
-        gameLogger->logMode = false;
-        gameLogger->closeLogFiles(false);
-        loggerMutex->unlock();
-        QTime tm;
-        tm.start();
-        while( tm.elapsed() < 25 )
-        {
-            bool flag=false;
-            if( loggerMutex->tryLock(1) ){
-                flag = gameLogger->loggerClosed;
-                loggerMutex->unlock();
-            }
-            if (flag) break;
-        }
-    }
+//    if( loggerMutex->tryLock(25) ){
+//        gameLogger->closeLogger = true;
+//        gameLogger->setIsLogMode(false);
+//        gameLogger->logMode = false;
+//        gameLogger->closeLogFiles(false);
+//        loggerMutex->unlock();
+//        QTime tm;
+//        tm.start();
+//        while( tm.elapsed() < 25 )
+//        {
+//            bool flag=false;
+//            if( loggerMutex->tryLock(1) ){
+//                flag = gameLogger->loggerClosed;
+//                loggerMutex->unlock();
+//            }
+//            if (flag) break;
+//        }
+//    }
 
     char o[20];
     for (int k=0;k<100;k++)

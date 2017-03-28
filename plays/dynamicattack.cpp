@@ -272,6 +272,7 @@ void CDynamicAttack::assignId() {
 
 void CDynamicAttack::assignTasks() {
     if (mahiPlayMaker != NULL) {
+        debug(QString("mahi %1").arg(mahiPlayMaker->id()),D_HAMED);
         playMake();
     }
 
@@ -657,6 +658,10 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
         //debug(QString("pass candidates : %1 %2").arg(temp.at(i).x).arg(temp.at(i).y), D_PARSA);
     }
     int tempIndex = 0;
+
+    /*if(mahiPlayMaker != NULL && mahiPlayMaker->pos().dist(ballPos) > 0.15)
+        return;*/
+
     //TODO : sharte paiin bayad isBallInOurField bashe amma felan isBallInOurField eshteba por mishe.
     if(ballPos.x < 0) {
         if(policy()->DynamicPlay_FarForward()) {

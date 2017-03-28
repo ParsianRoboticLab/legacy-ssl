@@ -307,10 +307,11 @@ CPolicyWidget::CPolicyWidget()
     ADD_VALUE(KKPlayOn, Int, KKChipSpeed, 550, "Chip Speed");
     ADD_VALUE(KKPlayOn, Int, KKShotSpeed, 1023, "Shot Speed");
     ADD_VALUE(KKPlayOn, Int, KKChipToGoalSpeed, 650, "Chip to Goal Speed");
-    ADD_TREE(KKPlayOff,"PlayOff",false);
-    ADD_VALUE(KKPlayOff, String, KKPOPlanSQL, QDir::currentPath().toStdString()+"/poplan.db3", "SQL Directory");
-    ADD_VALUE(KKPlayOff, Bool, KKPOSymmetry, false, "Symmetry");
-    ADD_VALUE(KKPlayOff, Bool, KKPOUseDef, false, "Use Def Robots");
+    ADD_TREE(PlayOff,"PlayOff",false);
+    ADD_VALUE(PlayOff, Bool, IDBasePasser, false, "ID Base Passer");
+    ADD_VALUE(PlayOff, Int, PasserID, 0, "Passer ID ");
+    ADD_VALUE(PlayOff, Bool, IDBaseOneToucher, false, "ID Base OneToucher");
+    ADD_VALUE(PlayOff, Int, OneToucherID, 0, "One Toucher ID ");
     ADD_TREE(DynamicPlay, "DynamicPlay", false);
     ADD_VALUE(DynamicPlay, Int , LowSpeedPass   , 300, "Low Speed Pass");
     ADD_VALUE(DynamicPlay, Int , MediumSpeedPass, 600, "Medium Speed Pass");
@@ -544,9 +545,10 @@ IMPL_VALUE(CPolicyWidget,KKPlayOn, int, Int, KKChipSpeed)
 IMPL_VALUE(CPolicyWidget,KKPlayOn, int, Int, KKShotSpeed)
 IMPL_VALUE(CPolicyWidget,KKPlayOn, int, Int, KKChipToGoalSpeed)
 
-IMPL_VALUE(CPolicyWidget,KKPlayOff, std::string, String, KKPOPlanSQL)
-IMPL_VALUE(CPolicyWidget,KKPlayOff, bool, Bool, KKPOSymmetry)
-IMPL_VALUE(CPolicyWidget,KKPlayOff, bool, Bool, KKPOUseDef)
+IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, IDBasePasser)
+IMPL_VALUE(CPolicyWidget,PlayOff, int, Int, PasserID)
+IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, IDBaseOneToucher)
+IMPL_VALUE(CPolicyWidget,PlayOff, int, Int, OneToucherID)
 
 IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , LowSpeedPass)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , MediumSpeedPass)

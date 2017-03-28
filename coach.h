@@ -42,6 +42,8 @@ public:
     CKnowledge::ballPossesionState isBallOurs();
     CKnowledge::ballPossesionState ballPStateIntented;
     static QMap<QString, EditData*> editData; //Contains Formations
+    Vector2D lastBallVelPM;
+    Vector2D lastBallPos;
 
 private:
     double findMostPossible(Vector2D agentPos);
@@ -156,11 +158,13 @@ private:
     //TODO : squere or Liner matching
     NGameOff::SPlan* chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans);
     void matchPlan(NGameOff::SPlan* _plan, const QList<int>& _ourplayers);
+    void checkGUItoRefineMatch(NGameOff::SPlan* _plan, const QList<int> &_ourplayers);
     QStringList currentTags;
 
     NGameOff::SPlan* lastPlan;
     QList<int> lastPlayers;
     CKnowledge::ballPossesionState ballPState;
+    Vector2D lastBallVel;
     //////////////Decide Attack functions
     bool decideHalt               (QList<int>&);
     bool decideStop               (QList<int>&);
