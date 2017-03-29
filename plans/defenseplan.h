@@ -133,6 +133,7 @@ protected:
     bool stopMode;
     bool limitBetweenAHZAndHMD;
     bool limitBetweenHMDAndAHZ;    
+    QList <QString> markRoles;
     ///////////////////////////////////////////////////
     void executeGoalie();
     Vector2D blockTheBall();
