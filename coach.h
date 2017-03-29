@@ -42,10 +42,13 @@ public:
     CKnowledge::ballPossesionState isBallOurs();
     CKnowledge::ballPossesionState ballPStateIntented;
     static QMap<QString, EditData*> editData; //Contains Formations
-    Vector2D lastBallVelPM;
-    Vector2D lastBallPos;
+  /*  ClassProperty(CCoach, Vector2D, LastBallVelPm, lastBallVelPM, updated);
+    ClassProperty(CCoach, Vector2D, LastBallPos, lastBallPos, updated);*/
 
 private:
+    Vector2D lastBallVelPM;
+    Vector2D lastBallPos;
+    bool updated;
     double findMostPossible(Vector2D agentPos);
     CKnowledge::State kkLastState;
     CAgent *goalieAgent;
@@ -53,7 +56,7 @@ private:
     double exeptionPlayMakeThr;
     QList<CAgent*> defenseAgents;
     DefensePlan defenses;
-    int preferedDefenseCounts , lastPreferredDefenseCounts;
+    int preferedDefenseCounts ,lastPreferredDefenseCounts;
     int preferedGoalieAgent;
     Vector2D defenseTargets[12];
     QTime intentionTimePossession;
