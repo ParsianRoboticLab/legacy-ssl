@@ -57,6 +57,8 @@ void CMainApplication::Experimental6()
     static CSkillDribble mpass(soccer->agents[skillAgent]);
     Circle2D opFak(wm->opp[2]->pos + wm->opp[2]->dir.norm()*0.08,0.07);
     static CSkillKick passKick(soccer->agents[skillAgent]);
+
+    draw(Circle2D(wm->opp[knowledge->getNearestOppToPoint(wm->ball->pos)]->pos,0.1),QColor(Qt::cyan));
     passKick.setKickSpeed(500);
     passKick.setTarget(soccer->agents[5]->pos());
 

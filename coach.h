@@ -133,9 +133,10 @@ private:
 
     enum attackState
     {
-        SAFE = 0,
-        FAST = 1,
-        CRITICAL =2
+        SAFE     = 0,
+        FAST     = 1,
+        CRITICAL = 2,
+        BallInOppJaw  = 3
     };
     attackState ourAttackState;
     void updateAttackState();
