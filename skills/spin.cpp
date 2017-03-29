@@ -31,10 +31,12 @@ void CSkillDribble::spinDribble()
 {
     kick->setChip(chip);
     kick->setTarget(initLook);
+    kick->setSlow(false);
+    kick->setPassProfiler(false);
     if(catchedBall == false)
     {
         kick->execute();
-        kick->setSpin(1);
+        kick->setSpin(3);
     }
     else if(!(readyForPass&&doPass))
     {
@@ -49,7 +51,7 @@ void CSkillDribble::spinDribble()
     {
         kick->setTarget(target);
         kick->execute();
-        kick->setSpin(1);
+        kick->setSpin(3);
     }
 
     if(fabs((agentDir.th() - (target- agentPos).th()).degree()) < tol )
@@ -89,7 +91,7 @@ void CSkillDribble::execute()
         catchedCounter = 0;
     }
 
-    if(catchedCounter > 50)
+    if(catchedCounter > 100)
     {
         catchedBall = true;
     }

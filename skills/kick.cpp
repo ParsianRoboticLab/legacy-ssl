@@ -709,7 +709,7 @@ kckMode CSkillKick::decideMode()
         }
         else
         {
-            if(fabs((kickFinalDir - agentDir.th()).degree()) > 40 && dribblerArea.contains(ballPos)) {
+          if(fabs((kickFinalDir - agentDir.th()).degree()) > 40 && dribblerArea.contains(ballPos)) {
                 return KTURN;
                 jTurnThr = 0;
             }
@@ -767,7 +767,7 @@ void CSkillKick::kgoalie()
 
     if(kickerOn)
     {
-        reduce =2;
+        reduce =0.7;
     }
 
     double ballx= (wm->ball->vel.x)*cos(agentDir.th().radian()) + (wm->ball->vel.y)*sin(agentDir.th().radian());
@@ -776,18 +776,11 @@ void CSkillKick::kgoalie()
     Segment2D goalLine(wm->field->ourGoalL(),wm->field->ourGoalR());
     Vector2D targetInt;
     targetInt = goalLine.intersection(ballpath);
-    if(agentPos.x < ballPos.x +0.02)
-    {
-        gpa->init(targetInt,Vector2D(0,0));
-        gpa->setNoAvoid(true);
-        //gpa->setADiveMode(false);
-        gpa->execute();
-    }
-    else {
+
         agent->setRobotVel(reduce*cos(kkMovementTheta)*(1+ballx)
                            ,reduce*sin(kkMovementTheta)*(1+bally) + 2*bally
                            ,angPid->PID_OUT());
-    }
+
 }
 
 void CSkillKick::kWaitForTurn()
@@ -1024,7 +1017,7 @@ void CSkillKick::jTurn()
     double reduce = 0.5;
     reduce += 1.4*agentPos.dist(ballPos) - 0.7*wm->ball->vel.length();
     reduce = max(reduce,0.7);
-    if(wm->field->isInOppPenaltyArea(ballPos + (wm->field->oppGoal() - ballPos).norm()*0.05) && agentPos.dist(ballPos) <0.25)
+    if(passProfiler || (wm->field->isInOppPenaltyArea(ballPos + (wm->field->oppGoal() - ballPos).norm()*0.05) && agentPos.dist(ballPos) <0.25))
     {
         reduce = 0.3;
     }
@@ -1040,9 +1033,9 @@ void CSkillKick::jTurn()
     else if(movementDir < -50)
         shift = -15 - (1-agentPos.dist(ballPos))*61;
     else if(movementDir > 0)
-        shift = 5 + (1-agentPos.dist(ballPos))*40;
+        shift = 5 + (1-agentPos.dist(ballPos))*45;
     else if(movementDir < 0)
-        shift = -5 - (1-agentPos.dist(ballPos))*40;
+        shift = -5 - (1-agentPos.dist(ballPos))*45;
     if(robotKickArea.contains(ballPos) && wm->ball->vel.length() < 0.1)
         kkMovementTheta = 0;
     else
@@ -1503,10 +1496,7 @@ void CSkillKick::execute()
         agent->setChip(1);
         jTurnStartPos = agentPos;
     }
-    else
-    {
-        agent->setChip(0);
-    }
+
 
     if(kickerOn && (!knowledge->isOurNonPlayOnKick() || penaltyKick))
     {
