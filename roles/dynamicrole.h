@@ -17,6 +17,7 @@ public:
 
 private:
     CSkillKick           *shotSkill;
+    CSkillDribble        *dribbleSkill;
     CSkillKeep           *keepSkill;
     CSkillNewPass        *passSkill;
     CSkillReceivePass    *receiveSkill;

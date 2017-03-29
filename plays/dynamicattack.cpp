@@ -182,6 +182,20 @@ void CDynamicAttack::makePlan(int agentSize) {
 
     }
     // if Defense isn't clearing and
+    // shot prob isn't more than 50% and
+    // ball is in opp's agent's fak
+    // maybe there can be a critical situation
+    // but this is more important
+    else if (ballInOppJaw) {
+        currentPlan.mode = DynamicEnums::BallInOppJaw;
+        currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Best);
+
+        for(size_t i = 0;i < agentSize;i++) {
+            currentPlan.positionAgents[i].region = DynamicEnums::Best;
+            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+        }
+    }
+    // if Defense isn't clearing and
     // we have ball and
     // shot prob isn't more than 50% and
     // there is a critical situation
@@ -237,6 +251,10 @@ void CDynamicAttack::makePlan(int agentSize) {
 
 }
 
+CAgent* CDynamicAttack::getMahiPlayMaker() {
+    return mahiPlayMaker;
+}
+
 void CDynamicAttack::assignId() {
 
     mahiPlayMaker = NULL;
@@ -254,17 +272,20 @@ void CDynamicAttack::assignId() {
     matcher.create(n, n);
     for(size_t i = 0; i < n; i++) {
         for(int j = 0; j < n; j++) {
-            matcher.setWeight(i, j, -1 * guards[currentPlan.agentSize][j]
-                    .center().dist(activeAgents.at(i)->pos()));
+            matcher.setWeight(i, j, -1 * semiDynamicPosition[i].dist(activeAgents.at(j)->pos()));
         }
     }
-    matcher.findMatching();
+    matcher.findMaxMinMatching();
+    //matcher.findMatching();
     for(int i = 0; i < n; i++) {
         tempIndex = matcher.getMatch(i);
         matchedIDList.append(tempIndex);
-        guardIndexList.append(tempIndex);
-        mahiAgentsID[i] = activeAgents.at(i)->id();
-        mahiPoisitionAgents.append(activeAgents.at(i));
+        /*for(int j = 0; j < currentPlan.agentSize; j++)
+            if(guards[currentPlan.agentSize][j].contains(semiDynamicPosition[tempIndex]))
+                guardIndexList.append(j);*/
+        guardIndexList.append(i);
+        mahiAgentsID[i] = tempIndex;//activeAgents.at(i)->id();
+        mahiPoisitionAgents.append(activeAgents.at(tempIndex));
     }
     for(int i = 0; i < mahiPoisitionAgents.size(); i++)
         debug(QString("1 : %2").arg(mahiPoisitionAgents.at(i)->id()),D_MAHI);
@@ -298,13 +319,13 @@ void CDynamicAttack::dynamicPlanner(int agentSize) {
     }
 
     makePlan(agentSize);
-    assignId();
+
     if(agentSize > 0) {
         chooseBestPositons();
   //    chooseMarkPos();
         chooseBestPosForPass(semiDynamicPosition);
     }
-
+    assignId();
     assignTasks();
     debug(QString("MODE : %1").arg(getString(currentPlan.mode)),D_MAHI,QColor(Qt::red));
     debug(QString("BALL : %1").arg(isBallInOurField),D_MAHI,QColor(Qt::red));
@@ -537,8 +558,12 @@ void CDynamicAttack::chooseBestPositons() {
     int tempIndex = 0;
     double tempDist, minDist;
 
+    guardIndexList.clear();
+    for(int i = 0; i < currentPlan.agentSize; i++)
+        guardIndexList.append(i);
+
     semiDynamicPosition.clear();
-    for (size_t i = 0;i < guardIndexList.size();i++) {
+    for (size_t i = 0;i < currentPlan.agentSize;i++) {
         for (size_t j = 0;j < 3;j++) {
             tempDist = currentPlan.passPos
                       .dist(guardLocations[currentPlan.agentSize][i][j]);
@@ -547,13 +572,13 @@ void CDynamicAttack::chooseBestPositons() {
                 tempIndex = j;
             }
         }
-        if(guards[currentPlan.agentSize][guardIndexList.at(i)]
+        if(guards[currentPlan.agentSize][i]
            .contains(ballPos + ballVel)) {
             tempIndex = farGuardFromPoint(i, ballPos + ballVel);
         }
         if(i < currentPlan.agentSize) {
             semiDynamicPosition.append(guardLocations[currentPlan.agentSize]
-                    [guardIndexList.at(i)]
+                    [i]
                     [tempIndex]);
         }
         else if(currentPlan.mode == DynamicEnums::DefenseClear) {
@@ -561,7 +586,7 @@ void CDynamicAttack::chooseBestPositons() {
         }
         else {
             semiDynamicPosition.append(guardLocations[currentPlan.agentSize]
-                    [guardIndexList.at(currentPlan.agentSize - 1)]
+                    [currentPlan.agentSize - 1]
                     [tempIndex]);
         }
     }
@@ -1037,7 +1062,7 @@ void CDynamicAttack::assignLocations_2() {
 
 void CDynamicAttack::assignLocations_3() {
     //Top Opp Tertium
-    guardLocations[3][0][0].assign(1  , 1);
+    guardLocations[3][0][0].assign(1  , 1.5);
     guardLocations[3][0][1].assign(2.5, 2);
     guardLocations[3][0][2].assign(3.5, 2);
     //Middle Opp Tertium
@@ -1045,14 +1070,14 @@ void CDynamicAttack::assignLocations_3() {
     guardLocations[3][1][1].assign(1.5, 0);
     guardLocations[3][1][2].assign(2.5, 0);
     //Bottom Opp Tertium
-    guardLocations[3][2][0].assign(1  , -1);
+    guardLocations[3][2][0].assign(1  , -1.5);
     guardLocations[3][2][1].assign(2.5, -2);
     guardLocations[3][2][2].assign(3.5, -2);
 }
 
 void CDynamicAttack::assignLocations_4() {
     // Top Opp 1/4
-    guardLocations[4][0][0].assign(1  , 2.5);
+    guardLocations[4][0][0].assign(1.5  , 2.5);
     guardLocations[4][0][1].assign(2.5, 2.5);
     guardLocations[4][0][2].assign(3.5, 2.5);
     // Mid-Top Opp 1/4
@@ -1067,7 +1092,7 @@ void CDynamicAttack::assignLocations_4() {
     guardLocations[4][2][2].assign(3.5, -1);
 
     // Bottom Opp 1/4
-    guardLocations[4][3][0].assign(1  , -2.5);
+    guardLocations[4][3][0].assign(1.5, -2.5);
     guardLocations[4][3][1].assign(2.5, -2.5);
     guardLocations[4][3][2].assign(3.5, -2.5);
 }
@@ -1199,6 +1224,10 @@ void CDynamicAttack::setNoPlanException(bool _noPlanException) {
 
 void CDynamicAttack::setCritical(bool _critical) {
     critical = _critical;
+}
+
+void CDynamicAttack::setBallInOppJaw(bool _ballInOppJaw) {
+    ballInOppJaw = _ballInOppJaw;
 }
 
 void CDynamicAttack::setFast(bool _fast) {

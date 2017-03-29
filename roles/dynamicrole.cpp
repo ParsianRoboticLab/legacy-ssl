@@ -61,7 +61,15 @@ void CRoleDynamic::update() {
            shotSkill->setKickSpeed(kickSpeed);
        }
        break;
-
+   case DynamicEnums::Dribble:
+       dribbleSkill->setAgent(agent);
+       dribbleSkill->setChip(chip);
+       dribbleSkill->setDoPass(true);
+       if(wm->opp[knowledge->getNearestOppToPoint(wm->ball->pos)] != NULL)
+            dribbleSkill->setInitialLook(wm->opp[knowledge->getNearestOppToPoint(wm->ball->pos)]->pos);
+       dribbleSkill->setTarget(target);
+       dribbleSkill->setKickSpeed(kickSpeed);
+       dribbleSkill->setKickTol(0.01);
    case DynamicEnums::Pass:
        shotSkill->setAgent(agent);
        shotSkill->setTarget(target);
@@ -131,6 +139,9 @@ void CRoleDynamic::execute() {
     case DynamicEnums::Pass:
     case DynamicEnums::CatchBall:
         shotSkill->execute();
+        break;
+    case DynamicEnums::Dribble:
+        dribbleSkill->execute();
         break;
     case DynamicEnums::Move:
         moveSkill->execute();
