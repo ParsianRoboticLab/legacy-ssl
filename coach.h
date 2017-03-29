@@ -46,6 +46,8 @@ public:
     ClassProperty(CCoach, Vector2D, LastBallPos, lastBallPos, updated);*/
 
 private:
+    Vector2D passPos;
+    bool passPlayMake;
     Vector2D lastBallVelPM;
     Vector2D lastBallPos;
     bool updated;

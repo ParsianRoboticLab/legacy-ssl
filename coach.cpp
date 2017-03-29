@@ -22,6 +22,8 @@ CCoach::CCoach(CAgent**_agents)
     lastAssignCycle = -10;
     lastBallVelPM = Vector2D(0,0);
     lastBallPos = Vector2D(0,0);
+    passPos = Vector2D(0,0);
+    passPlayMake = false;
 
     ///////////////////////////////////
     goalieTimer.start();
@@ -32,7 +34,7 @@ CCoach::CCoach(CAgent**_agents)
 
     possessionIntentionInterval = 200;
     playOnTime = 2000;
-    playMakeIntentionInterval = 1000;
+    playMakeIntentionInterval = 300;
     playMakeTh = 0.3;
 
 
@@ -1134,6 +1136,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
     double biggestPoint = -1000;
     double ballVelCoef = 0.4;
     double nearestDist = 1000;
+    bool changePassChoose = true;
 
     int nearestId = -1;
     for(int i = 0 ; i < ourPlayers.count() ; i++) {
@@ -1144,12 +1147,15 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
             nearestId = i;
         }
     }
-
+    if(dynamicAttack->getMahiPlayMaker() != NULL)
+        if(dynamicAttack->getMahiPlayMaker()->pos().dist(wm->ball->pos) < 0.13)
+            passPos = dynamicAttack->currentPlan.passPos;
     /// if an agent is very close to the ball or ball is almost witout velocity
     if(nearestDist < 0.3 || wm->ball->vel.length() < 0.1)
     {
         for(int i = 0 ; i < ourPlayers.count() ; i++) {
-            playMakeParam[i] += 1 / max(0.1, (wm->our[ourPlayers[i]]->pos.dist
+            playMakeParam[i] += 1 / max(0.1, ((wm->our[ourPlayers[i]]->pos +
+                       wm->our[ourPlayers[i]]->vel * (ballVelCoef / 3)).dist
                               (wm->ball->pos+wm->ball->vel*ballVelCoef)));
 
             for(int i = 0 ; i < ourPlayers.count(); i++)
@@ -1174,65 +1180,71 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
         debug(QString("Here"), D_PARSA);
         return;
     }
-    //else
     double minDistForPass = 100000;
     int minDistForPassId = -1;
-
+    //points by distance
     for(int i = 0 ; i < ourPlayers.count() ; i++) {
-        playMakeParam[i] += 1 / max(0.1, (wm->our[ourPlayers[i]]->pos.dist
-                       (wm->ball->pos+wm->ball->vel*ballVelCoef)));
-    }
+        playMakeParam[i] += 1 / max(0.1, ((wm->our[ourPlayers[i]]->pos +
+                   wm->our[ourPlayers[i]]->vel * ballVelCoef / 3).dist
+                          (wm->ball->pos+wm->ball->vel*ballVelCoef)));
 
+    }
+    //finding nearest to passing position
     for(int i = 0 ; i < ourPlayers.count() ; i++) { // finding nearest to pass pos
-        if((wm->our[ourPlayers[i]]->pos + wm->our[ourPlayers[i]]->vel).dist
-                (dynamicAttack->currentPlan.passPos) < minDistForPass)
+        if((wm->our[ourPlayers[i]]->pos + wm->our[ourPlayers[i]]->vel * (ballVelCoef / 5)).dist
+                (passPos) < minDistForPass)
         {
             minDistForPass = (wm->our[ourPlayers[i]]->pos +
                             wm->our[ourPlayers[i]]->vel).dist
-                            (dynamicAttack->currentPlan.passPos);
+                            (passPos);
             minDistForPassId = i;
         }
     }
-
+     debug(QString("passPlayMake choosing is : %1").arg(passPlayMake), D_PARSA);
 
     for(int i = 0 ; i < ourPlayers.count() ; i++) {
         /*if(ourPlayers[i] == minDistForPassId)
             playMakeParam[i] += playMakeTh;*/
 
-        if(ourPlayers[i] == lastPlayMake &&
-                (wm->ball->vel.dist(lastBallVelPM) < 0.5) &&
-                (wm->ball->pos.dist(lastBallPos) < 0.3)) { //changing play maker event based
-            debug(QString("dictator point goes to : %1").arg(ourPlayers[i]), D_PARSA);
-            playMakeParam[i] += playMakeTh + 5;
+        if((ourPlayers[i] == lastPlayMake) && (passPlayMake == true))
+        {
+            debug(QString("last PlayMake is : %1 %2").arg(lastPlayMake).arg(ourPlayers[i]), D_PARSA);
+            debug(QString("vel dist : %1").arg(wm->ball->vel.dist(lastBallVelPM)), D_PARSA);
+            debug(QString("pos dist and we are here: %1").arg(wm->ball->pos.dist(lastBallPos)), D_PARSA);
+            if(wm->ball->vel.dist(lastBallVelPM) < 0.6)
+                if(wm->ball->pos.dist(lastBallPos) < 0.5) {         //changing play maker event based
+                   debug(QString("dictator point goes to : %1").arg(ourPlayers[i]), D_PARSA);
+                    playMakeParam[i] += playMakeTh + 5;
+                }
         }
+        else
+            changePassChoose = false;
     }
-    double passPosDisToPla = dynamicAttack->currentPlan.passPos.dist
+    double passPosDisToPla = passPos.dist
             (wm->our[ourPlayers[minDistForPassId]]->pos +
              wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef / 2) ;
     double ballMoveLineDisToPla = Line2D(wm->ball->pos,wm->ball->pos +
               wm->ball->vel).dist(wm->our[ourPlayers[minDistForPassId]]->pos +
               wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef);
+    bool passPointGiven = false;
+
     if(passPosDisToPla < 1.1)
         if(ballMoveLineDisToPla < 1.1)
-            if(wm->ball->pos.dist(dynamicAttack->currentPlan.passPos) >
+            if(wm->ball->pos.dist(passPos) >
                     (wm->ball->pos + wm->ball->vel).dist
-                    (dynamicAttack->currentPlan.passPos)) {
+                    (passPos)) {
                 double timeToStopBall = wm->ball->vel.length() / 0.4;
                 Vector2D distToStopBall = wm->ball->vel * timeToStopBall *
                         timeToStopBall / 2 * -0.4 / wm->ball->vel.length() +
                         timeToStopBall * wm->ball->vel;
-         //   if(Segment2D(wm->ball->pos, wm->ball->pos + distToStopBall).dist(dynamicAttack->currentPlan.passPos) < 1) {
+         //   if(Segment2D(wm->ball->pos, wm->ball->pos + distToStopBall).dist(passPos) < 1) {
                 debug(QString("pass point goes to : %1").arg(ourPlayers[minDistForPassId]), D_PARSA);
                 playMakeParam[minDistForPassId] += playMakeTh + 2;
+                passPointGiven = true;
           // }
             }
 
-    for(int i = 0 ; i < ourPlayers.count() ; i++) {
-        if(playMakeParam[i] > biggestPoint) {
-            biggestPoint = playMakeParam[i];
-            playmakeId = ourPlayers[i];
-        }
-    }
+
    /* debug(QString("last ball pos : %1 %2").arg(lastBallPos.x).arg(lastBallPos.y), D_PARSA);
     debug(QString("now ball pos : %1 %2").arg(wm->ball->pos.x).arg(wm->ball->pos.y), D_PARSA);*/
     debug(QString("pos dist : %1").arg(wm->ball->pos.dist(lastBallPos)), D_PARSA);
@@ -1241,18 +1253,38 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
     debug(QString("now ball vel : %1 %2").arg(wm->ball->vel.x).arg(wm->ball->vel.y), D_PARSA);
     debug(QString("vel dist : %1").arg(wm->ball->vel.dist(lastBallVelPM)), D_PARSA);
 
-    debug(QString("pass pos : %1 %2").arg(dynamicAttack->currentPlan.passPos.x).arg(dynamicAttack->currentPlan.passPos.y), D_PARSA);
+    debug(QString("pass pos : %1 %2").arg(passPos.x).arg(passPos.y), D_PARSA);
+    debug(QString("passPlayMake choosing is : %1").arg(passPlayMake), D_PARSA);
+    debug(QString("mindistpassId is : %1").arg(minDistForPassId), D_PARSA);
 
-   /*if (playmakeId != lastPlayMake) {
+    for(int i = 0 ; i < ourPlayers.count(); i++)
+        if(ourPlayers[i] == lastPlayMake && !passPlayMake)
+            if(wm->ball->pos.dist(lastBallPos) < 0.7)
+                playMakeParam[i] += playMakeTh;
+
+    for(int i = 0 ; i < ourPlayers.count() ; i++) {
+        if(playMakeParam[i] > biggestPoint) {
+            biggestPoint = playMakeParam[i];
+            playmakeId = ourPlayers[i];
+        }
+    }
+
+    if (playmakeId != lastPlayMake && !passPlayMake) {
         if (playMakeIntention.elapsed() > playMakeIntentionInterval) {
             playMakeIntention.restart();
         } else {
             playmakeId = lastPlayMake;
         }
-    }*/
+    }
+
+    if(playmakeId == ourPlayers[minDistForPassId] && passPointGiven)
+        passPlayMake = true;
+
+    debug(QString("passPlayMake choosing is : %1").arg(passPlayMake), D_PARSA);
 
     lastPlayMake = playmakeId;
-
+    if(!passPointGiven)
+        passPlayMake = changePassChoose;
     lastBallVelPM = wm->ball->vel;
     lastBallPos = wm->ball->pos;
 

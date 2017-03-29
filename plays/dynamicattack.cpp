@@ -237,6 +237,10 @@ void CDynamicAttack::makePlan(int agentSize) {
 
 }
 
+CAgent* CDynamicAttack::getMahiPlayMaker() {
+    return mahiPlayMaker;
+}
+
 void CDynamicAttack::assignId() {
 
     mahiPlayMaker = NULL;

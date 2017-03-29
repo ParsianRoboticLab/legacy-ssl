@@ -58,6 +58,8 @@ public:
 
     SDynamicPlan currentPlan;
 
+    CAgent* getMahiPlayMaker();
+
 private:
 
     void playMake();
