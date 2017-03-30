@@ -110,7 +110,7 @@ private:
     void assignDefenseAgents(int defenseCount);
     void checkGoalieInsight();
     void decidePreferedDefenseAgentsCountAndGoalieAgent();
-    bool decideAttack();
+    void decideAttack();
     void decideDefense();
     void decidePlayOff(QList<int>& _ourplayers, POMODE _mode = INDIRECT);
     void decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers);
@@ -172,21 +172,21 @@ private:
     CKnowledge::ballPossesionState ballPState;
     Vector2D lastBallVel;
     //////////////Decide Attack functions
-    bool decideHalt               (QList<int>&);
-    bool decideStop               (QList<int>&);
-    bool decideOurKickOff         (QList<int>&);
-    bool decideTheirKickOff       (QList<int>&);
-    bool decideOurIndirect        (QList<int>&);
-    bool decideTheirIndirect      (QList<int>&);
-    bool decideOurDirect          (QList<int>&);
-    bool decideTheirDirect        (QList<int>&);
-    bool decideOurPenalty         (QList<int>&);
-    bool decideTheirPenalty       (QList<int>&);
-    bool decideStart              (QList<int>&);
-    bool decideNormalStart        (QList<int>&);
-    bool decideOurBallPlacement   (QList<int>&);
-    bool decideTheirBallPlacement (QList<int>&);
-    bool decideNull               (QList<int>&);
+    void decideHalt               (QList<int>&);
+    void decideStop               (QList<int>&);
+    void decideOurKickOff         (QList<int>&);
+    void decideTheirKickOff       (QList<int>&);
+    void decideOurIndirect        (QList<int>&);
+    void decideTheirIndirect      (QList<int>&);
+    void decideOurDirect          (QList<int>&);
+    void decideTheirDirect        (QList<int>&);
+    void decideOurPenalty         (QList<int>&);
+    void decideTheirPenalty       (QList<int>&);
+    void decideNormalStart        (QList<int>&);
+    void decideStart              (QList<int>&);
+    void decideOurBallPlacement   (QList<int>&);
+    void decideTheirBallPlacement (QList<int>&);
+    void decideNull               (QList<int>&);
     /////////////////////////////////////
 
 };

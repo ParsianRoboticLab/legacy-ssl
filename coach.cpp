@@ -1313,7 +1313,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
     }
 }
 
-bool CCoach::decideAttack()
+void CCoach::decideAttack()
 {
     ballPState = isBallOurs();
     updateAttackState();
@@ -1337,11 +1337,13 @@ bool CCoach::decideAttack()
     switch (knowledge->getGameState()) { // GAMESTATE
 
     case CKnowledge::Halt:
-        return decideHalt(ourPlayers);
+        decideHalt(ourPlayers);
+        return;
         break;
 
     case CKnowledge::Stop:
-        return decideStop(ourPlayers);
+        decideStop(ourPlayers);
+        return;
         break;
 
     case CKnowledge::OurKickOff:
@@ -1405,7 +1407,8 @@ bool CCoach::decideAttack()
         decideTheirBallPlacement(ourPlayers);
         break;
     default:
-        return decideNull(ourPlayers);
+        decideNull(ourPlayers);
+        return;
         break;
     }
 
@@ -1413,7 +1416,6 @@ bool CCoach::decideAttack()
     selectedPlay->execute();
     lastPlayers.clear();
     lastPlayers.append(ourPlayers);
-    return true;
 }
 
 void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
@@ -1956,7 +1958,7 @@ CLoadPlayOffJson* CCoach::getPlanLoader() {
     return m_planLoader;
 }
 
-bool CCoach::decideHalt(QList<int>& _ourPlayers) {
+void CCoach::decideHalt(QList<int>& _ourPlayers) {
     firstTime = true;
     cyclesWaitAfterballMoved = 0;
     clearIntentions();
@@ -1974,10 +1976,9 @@ bool CCoach::decideHalt(QList<int>& _ourPlayers) {
         ourPlayOff->deleted = true;
     }
 
-    return true;
 }
 
-bool CCoach::decideStop(QList<int> & _ourPlayers) {
+void CCoach::decideStop(QList<int> & _ourPlayers) {
     firstTime = true;
     cyclesWaitAfterballMoved = 0;
     clearIntentions();
@@ -1991,10 +1992,9 @@ bool CCoach::decideStop(QList<int> & _ourPlayers) {
         ourPlayOff->reset();
         ourPlayOff->deleted = true;
     }
-    return true;
 }
 
-bool CCoach::decideOurKickOff(QList<int> &_ourPlayers) {
+void CCoach::decideOurKickOff(QList<int> &_ourPlayers) {
     if(ourPlayOff->deleted)
     {
         ourPlayOff->deleted = false;
@@ -2005,12 +2005,12 @@ bool CCoach::decideOurKickOff(QList<int> &_ourPlayers) {
 
 }
 
-bool CCoach::decideTheirKickOff(QList<int> &_ourPlayers) {
+void CCoach::decideTheirKickOff(QList<int> &_ourPlayers) {
     selectedPlay = theirKickOff;
     firstTime = true;
 }
 
-bool CCoach::decideOurDirect(QList<int> &_ourPlayers) {
+void CCoach::decideOurDirect(QList<int> &_ourPlayers) {
     if(ourPlayOff->deleted)
     {
         ourPlayOff->deleted = false;
@@ -2021,12 +2021,12 @@ bool CCoach::decideOurDirect(QList<int> &_ourPlayers) {
 
 }
 
-bool CCoach::decideTheirDirect(QList<int> &_ourPlayers) {
+void CCoach::decideTheirDirect(QList<int> &_ourPlayers) {
     selectedPlay = theirDirect;
     firstTime = true;
 }
 
-bool CCoach::decideOurIndirect(QList<int> &_ourPlayers) {
+void CCoach::decideOurIndirect(QList<int> &_ourPlayers) {
     if(ourPlayOff->deleted)
     {
         ourPlayOff->deleted = false;
@@ -2037,28 +2037,28 @@ bool CCoach::decideOurIndirect(QList<int> &_ourPlayers) {
 
 }
 
-bool CCoach::decideTheirIndirect(QList<int> &_ourPlayers) {
+void CCoach::decideTheirIndirect(QList<int> &_ourPlayers) {
     selectedPlay = theirIndirect;
     firstTime = true;
 }
 
-bool CCoach::decideOurPenalty(QList<int> &_ourPlayers) {
+void CCoach::decideOurPenalty(QList<int> &_ourPlayers) {
     selectedPlay = ourPenalty;
     debug("penalty",D_MHMMD);
     firstTime = true;
 }
 
-bool CCoach::decideTheirPenalty(QList<int> &_ourPlayers) {
+void CCoach::decideTheirPenalty(QList<int> &_ourPlayers) {
     selectedPlay = theirPenalty;
     firstTime = true;
 }
 
-bool CCoach::decideStart(QList<int> &_ourPlayers) {
+void CCoach::decideStart(QList<int> &_ourPlayers) {
     selectedPlay = dynamicAttack;
     decidePlayOn(_ourPlayers, lastPlayers);
 }
 
-bool CCoach::decideNormalStart(QList<int> &_ourPlayers) {
+void CCoach::decideNormalStart(QList<int> &_ourPlayers) {
     selectedPlay = ourPlayOff;
     firstTime = true;
     if(!ourPlayOff->deleted)
@@ -2068,15 +2068,15 @@ bool CCoach::decideNormalStart(QList<int> &_ourPlayers) {
     }
 }
 
-bool CCoach::decideOurBallPlacement(QList<int> &_ourPlayers) {
+void CCoach::decideOurBallPlacement(QList<int> &_ourPlayers) {
     selectedPlay = ourBallPlacement;
 }
 
-bool CCoach::decideTheirBallPlacement(QList<int> &_ourPlayers) {
+void CCoach::decideTheirBallPlacement(QList<int> &_ourPlayers) {
     selectedPlay = theirBallPlacement;
 }
 
-bool CCoach::decideNull(QList<int> &_ourPlayers) {
+void CCoach::decideNull(QList<int> &_ourPlayers) {
     selectedPlay->markAgents.clear();
     firstTime = true;
     if(!ourPlayOff->deleted)
@@ -2085,5 +2085,4 @@ bool CCoach::decideNull(QList<int> &_ourPlayers) {
         ourPlayOff->deleted = true;
     }
     debug(QString("Unexpected Game State: %1 %2").arg(knowledge->stateToString(knowledge->getGameState())).arg(knowledge->getGameState()) , D_ERROR , "red");
-    return false;
 }
