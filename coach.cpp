@@ -270,52 +270,50 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         preferedGoalieAgent = wm->our.data->goalieID;
     }
 
-    if( policy()->Formation_StrictFormation() && knowledge->isStart()) {
-        preferedDefenseCounts = policy()->Formation_Defense();
-        lastPreferredDefenseCounts = preferedDefenseCounts;
-        return;
-    } else {
-        preferedDefenseCounts = policy()->Formation_Defense(); // handle stop
-    }
+    preferedDefenseCounts = policy()->Formation_Defense(); // handle stop
+    if(!policy()->Formation_StrictFormation() || !knowledge->isStart()) {
 
-    int agentsCount = wm->our.data->activeAgents.count();
-    if (goalieAgent != NULL) {
-        if (goalieAgent->isVisible()) {
-            agentsCount--;
-        }
-    }
-
-    bool oppsAttack = false;
-
-    // TODO : vartypes this
-    for(int i = 0 ; i < wm->opp.activeAgentsCount() ; i++) {
-        if(wm->opp.active(i)->pos.x <= 0) oppsAttack = true;
-    }
-
-    // TODO : should be fixed :)
-    if( knowledge->isStart() && transientFlag == false) {
-
-        if (agentsCount == 1) {
-            preferedDefenseCounts = 0; // just one playmake
-        } else if (agentsCount == 2) {
-            preferedDefenseCounts = 1; // one playmake and one defense
-        } else {
-            if (oppsAttack) {
-                preferedDefenseCounts = 2;
-            } else {
-                preferedDefenseCounts = 1;
+        int agentsCount = wm->our.data->activeAgents.count();
+        if (goalieAgent != NULL) {
+            if (goalieAgent->isVisible()) {
+                agentsCount--;
             }
         }
 
-    } else if( knowledge->isOurNonPlayOnKick() ) {
-        preferedDefenseCounts = 0;
-    } else if( knowledge->isTheirNonPlayOnKick()) {
-        preferedDefenseCounts = max(agentsCount - 1, 0);
-    } else if (transientFlag
-               &&  knowledge->getGameState() != CKnowledge::TheirKickOff
-               ||  knowledge->getGameState() == CKnowledge::TheirPenaltyKick) {
-        preferedDefenseCounts = agentsCount;
-        debug("[coach] harchi robot mobat darim rikhtim tu defa", D_MAHI);
+        bool oppsAttack = false;
+
+        // TODO : vartypes this
+        for(int i = 0 ; i < wm->opp.activeAgentsCount() ; i++) {
+            if(wm->opp.active(i)->pos.x <= 0) oppsAttack = true;
+        }
+
+        // TODO : should be fixed :)
+        if( knowledge->isStart() && transientFlag == false) {
+
+            if (agentsCount == 1) {
+                preferedDefenseCounts = 0; // just one playmake
+            } else if (agentsCount == 2) {
+                preferedDefenseCounts = 1; // one playmake and one defense
+            } else {
+                if (oppsAttack) {
+                    preferedDefenseCounts = 2;
+                } else {
+                    preferedDefenseCounts = 1;
+                }
+            }
+
+        } else if( knowledge->isOurNonPlayOnKick() ) {
+            preferedDefenseCounts = 0;
+
+        } else if( knowledge->isTheirNonPlayOnKick()) {
+            preferedDefenseCounts = max(agentsCount - 1, 0);
+        } else if (transientFlag
+                   &&  knowledge->getGameState() != CKnowledge::TheirKickOff
+                   ||  knowledge->getGameState() == CKnowledge::TheirPenaltyKick) {
+            preferedDefenseCounts = agentsCount;
+            debug("[coach] harchi robot mobat darim rikhtim tu defa", D_MAHI);
+        }
+
     }
 
     lastPreferredDefenseCounts = preferedDefenseCounts;
@@ -552,7 +550,6 @@ CKnowledge::ballPossesionState CCoach::isBallOurs()
     }
 
     lastBallPossesionState = decidePState;
-    ////f**ked by mhmmd
     analyze("ball Possesion",decidePState,true);
 
     if(wm->ball->pos.x > 0)
@@ -1200,8 +1197,8 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
         //points by distance
         for(int i = 0 ; i < ourPlayers.count() ; i++) {
             playMakeParam[i] += 1 / max(0.1, ((wm->our[ourPlayers[i]]->pos +
-                                               wm->our[ourPlayers[i]]->vel * ballVelCoef / 3).dist
-                                              (wm->ball->pos+wm->ball->vel*ballVelCoef)));
+                                              wm->our[ourPlayers[i]]->vel * ballVelCoef / 3).dist
+                    (wm->ball->pos+wm->ball->vel*ballVelCoef)));
 
         }
 
@@ -1211,12 +1208,12 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
                     (passPos) < minDistForPass)
             {
                 minDistForPass = (wm->our[ourPlayers[i]]->pos +
-                                  wm->our[ourPlayers[i]]->vel).dist
+                        wm->our[ourPlayers[i]]->vel).dist
                         (passPos);
                 minDistForPassId = i;
             }
         }
-       // debug(QString("passPlayMake choosing is : %1").arg(passPlayMake), D_PARSA);
+        // debug(QString("passPlayMake choosing is : %1").arg(passPlayMake), D_PARSA);
 
         for(int i = 0 ; i < ourPlayers.count() ; i++) {
             /*if(ourPlayers[i] == minDistForPassId)
@@ -1227,11 +1224,11 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
                 debug(QString("passPlayMake choosing is : %1").arg(passPlayMake), D_PARSA);
             }
             if (ourPlayers[i] == lastPlayMake
-            && passPlayMake
-            && wm->ball->vel.dist(lastBallVelPM) < 0.6
-            && wm->ball->pos.dist(lastBallPos)   < 0.5) {
-                        debug(QString("dictator point goes to : %1").arg(ourPlayers[i]), D_PARSA);
-                        playMakeParam[i] += playMakeTh + 5;
+                    && passPlayMake
+                    && wm->ball->vel.dist(lastBallVelPM) < 0.6
+                    && wm->ball->pos.dist(lastBallPos)   < 0.5) {
+                debug(QString("dictator point goes to : %1").arg(ourPlayers[i]), D_PARSA);
+                playMakeParam[i] += playMakeTh + 5;
             } else {
                 changePassChoose = false;
             }
@@ -1239,10 +1236,10 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
 
         double passPosDisToPla = passPos.dist
                 (wm->our[ourPlayers[minDistForPassId]]->pos +
-                 wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef / 3) ;
+                wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef / 3) ;
         double ballMoveLineDisToPla = Line2D(wm->ball->pos,wm->ball->pos +
                                              wm->ball->vel).dist(wm->our[ourPlayers[minDistForPassId]]->pos +
-                                                                 wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef);
+                wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef);
         bool passPointGiven = false;
 
         if(passPosDisToPla < 1.1)
@@ -1254,7 +1251,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
                     Vector2D distToStopBall = wm->ball->vel * timeToStopBall *
                             timeToStopBall / 2 * -0.4 / wm->ball->vel.length() +
                             timeToStopBall * wm->ball->vel;
-                     //  if(Segment2D(wm->ball->pos, wm->ball->pos + distToStopBall).dist(passPos) < 1) {
+                    //  if(Segment2D(wm->ball->pos, wm->ball->pos + distToStopBall).dist(passPos) < 1) {
                     debug(QString("pass point goes to : %1").arg(ourPlayers[minDistForPassId]), D_PARSA);
                     playMakeParam[minDistForPassId] += playMakeTh + 2;
                     passPointGiven = true;
@@ -1624,7 +1621,16 @@ NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& pla
 
 void CCoach::selectPlayOffMode(NGameOff::EMode &_mode) {
     // TODO : a real one needed
-    _mode = NGameOff::StaticPlay;
+    if (knowledge->getGameState() == CKnowledge::OurKickOff
+    ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
+        _mode = NGameOff::StaticPlay;
+
+    } else if (wm->ball->pos.x > 1) {
+        _mode = NGameOff::StaticPlay;
+    } else {
+        _mode = NGameOff::DynamicPlay;
+
+    }
 }
 
 void CCoach::initPlayOffMode(const NGameOff::EMode _mode,
@@ -1635,7 +1641,7 @@ void CCoach::initPlayOffMode(const NGameOff::EMode _mode,
         initStaticPlay(_gameMode, _ourplayers);
         break;
     case NGameOff::DynamicPlay:
-        initDynamicPlay();
+        initDynamicPlay(_ourplayers);
         break;
     case NGameOff::FastPlay:
         initFastPlay();
@@ -1771,8 +1777,19 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     debug(QString("chosen plan is %1").arg(lastPlan->gui.index[3]), D_MAHI);
 }
 
-void CCoach::initDynamicPlay() {
-    // TODO : Initial Dynamic Play
+void CCoach::initDynamicPlay(QList<int> _ourplayers) {
+
+    for (int i = 0; i < 6; i++) {
+        if (i >= _ourplayers.size()) {
+            ourPlayOff->dynamicMatch[i] = -1;
+        } else {
+            ourPlayOff->dynamicMatch[i] = _ourplayers.at(i);
+        }
+    }
+
+    ourPlayOff->setInitial(true);
+    ourPlayOff->lockAgents = true;
+
 }
 
 void CCoach::initFastPlay() {
@@ -1790,7 +1807,7 @@ void CCoach::setStaticPlay() {
 
 void CCoach::setDynamicPlay() {
     // TODO : Write Dynamic Play checker
-
+    ourPlayOff->setInitial(false);
 }
 
 void CCoach::setFirstPlay() {
@@ -2070,5 +2087,3 @@ bool CCoach::decideNull(QList<int> &_ourPlayers) {
     debug(QString("Unexpected Game State: %1 %2").arg(knowledge->stateToString(knowledge->getGameState())).arg(knowledge->getGameState()) , D_ERROR , "red");
     return false;
 }
-
-

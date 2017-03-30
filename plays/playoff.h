@@ -444,6 +444,8 @@ private:
     void oneRightOneCentre();
     void twoSidesOneCentre();
     void twoSideOneCentreOneDef();
+    void twoSideOneCentreTwoDef();
+    void twoSideOneCentreTwoDefAndGoalie();
     ////////////////////////////////////
     int matchKickOffID(int _agentSize);
     bool isFinalShotDone();
@@ -532,6 +534,10 @@ private:
     int findReciver(int _passer, int _state);
     QList<SBallOwner> ownerList;
     bool havePassInPlan;
+    ////Dynamic
+public:
+    int dynamicMatch[6];
+
 
 protected:
 

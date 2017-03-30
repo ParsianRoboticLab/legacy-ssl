@@ -149,7 +149,7 @@ private:
                          const QList<int>& _agentSize);
     void setPlayOff(NGameOff::EMode _mode);
     void initStaticPlay(const POMODE _mode, const QList<int>& _agentSize);
-    void initDynamicPlay();
+    void initDynamicPlay(QList<int> _ourplayers);
     void initFastPlay();
     void initFirstPlay();
     void setStaticPlay();
@@ -188,7 +188,6 @@ private:
     bool decideTheirBallPlacement (QList<int>&);
     bool decideNull               (QList<int>&);
     /////////////////////////////////////
-
 
 };
 

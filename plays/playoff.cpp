@@ -32,10 +32,12 @@ CPlayOff::CPlayOff()
 
     currentPlan = new SPlayOffPlan();
     masterPlan = NULL;
-    kickOffPos[0] = Vector2D(wm->ball->pos.x - 0.3,wm->ball->pos.y);
-    kickOffPos[1] = Vector2D(-0.3,2);
-    kickOffPos[2] = Vector2D(-0.3,-2);
-    kickOffPos[3] = Vector2D(-3.3,0);
+    kickOffPos[0] = Vector2D(wm->ball->pos.x - 0.3, wm->ball->pos.y);
+    kickOffPos[1] = Vector2D(-0.3,  2.5);
+    kickOffPos[2] = Vector2D(-0.3, -2.5);
+    kickOffPos[3] = Vector2D(-2  ,  0);
+    kickOffPos[4] = Vector2D(-0.5,  1);
+    kickOffPos[5] = Vector2D(-0.5, -1);
 
     initial    = true;
     playOnFlag = false;
@@ -315,17 +317,22 @@ void CPlayOff::getPassTimeline(SPlayOffPlan *tCurrentPlan, QList<POOwnerReceive>
 
 void CPlayOff::globalExecute() {
 
-    Q_ASSERT(masterPlan != NULL);
-    if(masterPlan != NULL) {
-        if (initial) {
-            qDebug() << *masterPlan;
-            lastBallPos = wm->ball->pos;
+    if (masterMode == NGameOff::StaticPlay) {
+        Q_ASSERT(masterPlan != NULL);
+        if(masterPlan != NULL) {
+            if (initial) {
+                qDebug() << *masterPlan;
+                lastBallPos = wm->ball->pos;
+            }
+            staticExecute();
+        } else {
+            qDebug() << "master is null";
+            initial = true;
+            return;
         }
-        mainExecute();
+
     } else {
-        qDebug() << "master is null";
-        initial = true;
-        return;
+        mainExecute();
     }
 }
 
@@ -373,13 +380,18 @@ void CPlayOff::staticExecute() {
                 playOnFlag = true;
             }
 
+        } else {
+            kickOffStopModePlay(masterPlan->common.currentSize);
+            for (int i = 0; i < masterPlan->common.currentSize; i++) {
+                newRoleAgent[i]->execute();
+            }
         }
     }
 }
 
 
 void CPlayOff::dynamicExecute() {
-    // TODO : Write Dynamic Execution (playoff)
+    debug("DYNAMIC :D ", D_MAHI);
 }
 
 void CPlayOff::fastExecute() {
@@ -411,14 +423,20 @@ void CPlayOff::mahiVector(int limit) {
 }
 
 void CPlayOff::kickOffStopModePlay(int tAgentsize) {
-    for(int i =0; i < agentSize;i++) {
-        newRoleAgent[i]->setAvoidBall(true);
-        newRoleAgent[i]->setAvoidPenaltyArea(true);
-        newRoleAgent[i]->setSelectedSkill(roleSkill::GotopointAvoid);
+
+    for (int i = 0; i < masterPlan->common.currentSize; i++) {
+        if (newRoleAgent[i]->getRoleUpdate() == false) {
+            newRoleAgent[i]->setUpdated(true);
+            newRoleAgent[i]->setAgent(knowledge->getAgent(masterPlan->common.matchedID.value(i)));
+            newRoleAgent[i]->setRoleUpdate(true);
+            newRoleAgent[i]->setAvoidBall(true);
+            newRoleAgent[i]->setAvoidPenaltyArea(true);
+            newRoleAgent[i]->setSelectedSkill(roleSkill::GotopointAvoid);
+
+        }
     }
+
     switch(tAgentsize) {
-    /*case 0:
-        break;*/
     case 1:
         oneBehindBall();
         break;
@@ -432,17 +450,16 @@ void CPlayOff::kickOffStopModePlay(int tAgentsize) {
     case 4:
         twoSideOneCentreOneDef();
         break;
-    default:
-        break;
-        /*case 5:
+    case 5:
+        twoSideOneCentreTwoDef();
         break;
     case 6:
-        break;*/
-
+        twoSideOneCentreTwoDefAndGoalie();
+        break;
+    default:
+        break;
     }
-    //    for(int i =0; i < agentSize;i++) {
-    //        newRoleAgent[i]->setAgent(knowledge->getAgent(activeAgents.at(i)->id()));
-    //    }
+
 }
 
 void CPlayOff::oneBehindBall() {
@@ -475,13 +492,41 @@ void CPlayOff::twoSidesOneCentre() {
 
 void CPlayOff::twoSideOneCentreOneDef() {
     newRoleAgent[0]->setTarget(kickOffPos[0]);
-    newRoleAgent[0]->setTargetDir(-activeAgents.at(0)->pos() + wm->ball->pos);
+    newRoleAgent[0]->setTargetDir(-newRoleAgent[0]->getAgent()->pos() + wm->ball->pos);
     newRoleAgent[1]->setTarget(kickOffPos[1]);
-    newRoleAgent[1]->setTargetDir(-activeAgents.at(1)->pos() + wm->field->oppGoal());
+    newRoleAgent[1]->setTargetDir(-newRoleAgent[1]->getAgent()->pos() + wm->field->oppGoal());
     newRoleAgent[2]->setTarget(kickOffPos[2]);
-    newRoleAgent[2]->setTargetDir(-activeAgents.at(2)->pos() + wm->field->oppGoal());
+    newRoleAgent[2]->setTargetDir(-newRoleAgent[2]->getAgent()->pos() + wm->field->oppGoal());
     newRoleAgent[3]->setTarget(kickOffPos[3]);
-    newRoleAgent[3]->setTargetDir(-activeAgents.at(3)->pos() + wm->field->oppGoal());
+    newRoleAgent[3]->setTargetDir(-newRoleAgent[3]->getAgent()->pos() + wm->field->oppGoal());
+}
+
+void CPlayOff::twoSideOneCentreTwoDef() {
+    newRoleAgent[0]->setTarget(kickOffPos[0]);
+    newRoleAgent[0]->setTargetDir(-newRoleAgent[0]->getAgent()->pos() + wm->ball->pos);
+    newRoleAgent[1]->setTarget(kickOffPos[1]);
+    newRoleAgent[1]->setTargetDir(-newRoleAgent[1]->getAgent()->pos() + wm->field->oppGoal());
+    newRoleAgent[2]->setTarget(kickOffPos[2]);
+    newRoleAgent[2]->setTargetDir(-newRoleAgent[2]->getAgent()->pos() + wm->field->oppGoal());
+    newRoleAgent[3]->setTarget(kickOffPos[4]);
+    newRoleAgent[3]->setTargetDir(-newRoleAgent[4]->getAgent()->pos() + wm->field->oppGoal());
+    newRoleAgent[4]->setTarget(kickOffPos[5]);
+    newRoleAgent[4]->setTargetDir(-newRoleAgent[4]->getAgent()->pos() + wm->field->oppGoal());
+}
+
+void CPlayOff::twoSideOneCentreTwoDefAndGoalie() {
+    newRoleAgent[0]->setTarget(kickOffPos[0]);
+    newRoleAgent[0]->setTargetDir(-newRoleAgent[0]->getAgent()->pos() + wm->ball->pos);
+    newRoleAgent[1]->setTarget(kickOffPos[1]);
+    newRoleAgent[1]->setTargetDir(-newRoleAgent[1]->getAgent()->pos() + wm->field->oppGoal());
+    newRoleAgent[2]->setTarget(kickOffPos[2]);
+    newRoleAgent[2]->setTargetDir(-newRoleAgent[2]->getAgent()->pos() + wm->field->oppGoal());
+    newRoleAgent[3]->setTarget(kickOffPos[3]);
+    newRoleAgent[3]->setTargetDir(-newRoleAgent[3]->getAgent()->pos() + wm->field->oppGoal());
+    newRoleAgent[4]->setTarget(kickOffPos[4]);
+    newRoleAgent[4]->setTargetDir(-newRoleAgent[4]->getAgent()->pos() + wm->field->oppGoal());
+    newRoleAgent[5]->setTarget(kickOffPos[5]);
+    newRoleAgent[5]->setTargetDir(-newRoleAgent[5]->getAgent()->pos() + wm->field->oppGoal());
 }
 
 int CPlayOff::matchKickOffID(int _agentSize) {
