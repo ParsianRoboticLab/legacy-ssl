@@ -537,8 +537,16 @@ private:
     ////Dynamic
 public:
     int dynamicMatch[6];
+private:
+    void dynamicAssignID();
+    void checkEndDynamicState();
+    Vector2D getDynamicTarget(int i);
 
 
+    int dynamicAgentSize;
+    bool ready,pass,shot;
+    int dynamicState;
+    long dynamicStartTime;
 protected:
 
 };
