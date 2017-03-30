@@ -31,25 +31,27 @@ void CSkillDribble::spinDribble()
 {
     kick->setChip(chip);
     kick->setTarget(initLook);
+    kick->setSlow(false);
+    kick->setPassProfiler(false);
     if(catchedBall == false)
     {
         kick->execute();
-        kick->setSpin(1);
+        kick->setSpin(3);
     }
     else if(!(readyForPass&&doPass))
     {
         double vx,vy,vw;
         agent->setRoller(5);
-        bangBang->setAngKp(1.1);
+        bangBang->setAngKp(4.1);
         bangBang->setAngInPath(true);
-        bangBang->bangBangSpeed(agentPos,agent->vel(),agentDir,agentPos - (agentDir).norm()*0.01,target-agentPos,0,0.016,vx,vy,vw);
+        bangBang->bangBangSpeed(agentPos,agent->vel(),agentDir,agentPos + (agentDir).norm()*1,target-agentPos,0,0.016,vx,vy,vw);
         agent->setRobotAbsVel(vx,vy,vw);
     }
     else
     {
         kick->setTarget(target);
         kick->execute();
-        kick->setSpin(1);
+        kick->setSpin(3);
     }
 
     if(fabs((agentDir.th() - (target- agentPos).th()).degree()) < tol )
@@ -74,6 +76,7 @@ void CSkillDribble::checkState()
 
 void CSkillDribble::execute()
 {
+    draw(target,0,QColor(Qt::black));
     agentPos = agent->pos();
     agentDir = agent->dir();
     ballPos = wm->ball->pos;
@@ -89,7 +92,7 @@ void CSkillDribble::execute()
         catchedCounter = 0;
     }
 
-    if(catchedCounter > 50)
+    if(catchedCounter > 30)
     {
         catchedBall = true;
     }
