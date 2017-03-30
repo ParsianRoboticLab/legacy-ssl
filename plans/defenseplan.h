@@ -132,8 +132,12 @@ protected:
     bool dangerForGoalieClearByOppAgents;
     bool stopMode;
     bool limitBetweenAHZAndHMD;
-    bool limitBetweenHMDAndAHZ;    
+    bool limitBetweenHMDAndAHZ;
+    bool changeInMarkPlanFlag;
+    bool changeInMarkGUI;
+    bool lastChangeInMarkGUI;
     QList <QString> markRoles;
+    QList <QString> lastMarkRoles;
     ///////////////////////////////////////////////////
     void executeGoalie();
     Vector2D blockTheBall();
