@@ -7,6 +7,7 @@ CRoleDynamic::CRoleDynamic() {
     receiveSkill  = new CSkillReceivePass(NULL);
     moveSkill     = new CSkillGotoPointAvoid(NULL);
     oneTouchSkill = new CSkillKickOneTouch(NULL);
+    dribbleSkill  = new CSkillDribble(NULL);
     selectedSkill = DynamicEnums::NoSkill;
     agent = NULL;
 }
@@ -18,6 +19,7 @@ CRoleDynamic::~CRoleDynamic() {
     delete receiveSkill;
     delete moveSkill;
     delete oneTouchSkill;
+    delete dribbleSkill;
 }
 
 void CRoleDynamic::update() {
@@ -65,8 +67,9 @@ void CRoleDynamic::update() {
        dribbleSkill->setAgent(agent);
        dribbleSkill->setChip(chip);
        dribbleSkill->setDoPass(true);
-       if(wm->opp[knowledge->getNearestOppToPoint(wm->ball->pos)] != NULL)
-            dribbleSkill->setInitialLook(wm->opp[knowledge->getNearestOppToPoint(wm->ball->pos)]->pos);
+       //if(wm->opp[knowledge->getNearestOppToPoint(wm->ball->pos)] != NULL)
+         //   dribbleSkill->setInitialLook(wm->opp[knowledge->getNearestOppToPoint(wm->ball->pos)]->pos);
+       dribbleSkill->setInitialLook(wm->field->oppGoal());
        dribbleSkill->setTarget(target);
        dribbleSkill->setKickSpeed(kickSpeed);
        dribbleSkill->setKickTol(0.01);
@@ -141,6 +144,7 @@ void CRoleDynamic::execute() {
         shotSkill->execute();
         break;
     case DynamicEnums::Dribble:
+        draw(Circle2D(Vector2D(0,0), 3),QColor(Qt::cyan));
         dribbleSkill->execute();
         break;
     case DynamicEnums::Move:

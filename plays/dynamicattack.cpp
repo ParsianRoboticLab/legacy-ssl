@@ -148,6 +148,19 @@ void CDynamicAttack::makePlan(int agentSize) {
 
     }
     // if Defense isn't clearing and
+    // ball in the jaw
+    else if (ballInOppJaw) {
+        debug(QString("we are in ballinoppjaw"), D_PARSA);
+        draw(Circle2D(Vector2D(0,0), 2), QColor(Qt::black));
+        currentPlan.mode = DynamicEnums::BallInOppJaw;
+        currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Best);
+
+        for(size_t i = 0;i < agentSize;i++) {
+            currentPlan.positionAgents[i].region = DynamicEnums::Best;
+            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+        }
+    }
+    // if Defense isn't clearing and
     // we Don't have the ball
     else if (knowledge->ballPossesion != CKnowledge::WEHAVETHEBALL) {
         currentPlan.mode = DynamicEnums::NotWeHaveBall;
@@ -180,20 +193,6 @@ void CDynamicAttack::makePlan(int agentSize) {
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
         }
 
-    }
-    // if Defense isn't clearing and
-    // shot prob isn't more than 50% and
-    // ball is in opp's agent's fak
-    // maybe there can be a critical situation
-    // but this is more important
-    else if (ballInOppJaw) {
-        currentPlan.mode = DynamicEnums::BallInOppJaw;
-        currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Best);
-
-        for(size_t i = 0;i < agentSize;i++) {
-            currentPlan.positionAgents[i].region = DynamicEnums::Best;
-            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
-        }
     }
     // if Defense isn't clearing and
     // we have ball and
@@ -376,6 +375,12 @@ void CDynamicAttack::playMake() {
     roleAgentPM->setAvoidPenaltyArea(true);
 
     switch(currentPlan.playmake.skill) {
+    case DynamicEnums::Dribble:
+        roleAgentPM->setChip(true);
+        roleAgentPM->setTarget(currentPlan.passPos);
+        roleAgentPM->setKickSpeed(appropriatePassSpeed());
+        roleAgentPM->setSelectedSkill(DynamicEnums::Dribble);
+        break;
     case DynamicEnums::Pass:
         roleAgentPM->setChip(chipOrNot(currentPlan.passPos, 0.5, 0.1));
         if(roleAgentPM->getChip()) {
@@ -1050,12 +1055,12 @@ void CDynamicAttack::assignLocations_1() {
 
 void CDynamicAttack::assignLocations_2() {
     //Top Opp Half
-    guardLocations[2][0][0].assign(0.5, 1  );
+    guardLocations[2][0][0].assign(2, 1.5  );
     guardLocations[2][0][1].assign(2  , 1.5);
     guardLocations[2][0][2].assign(3.5, 2  );
 
     //Bottom Opp Half
-    guardLocations[2][1][0].assign(0.5, -1  );
+    guardLocations[2][1][0].assign(2, -1.5  );
     guardLocations[2][1][1].assign(2  , -1.5);
     guardLocations[2][1][2].assign(3.5, -2  );
 }
