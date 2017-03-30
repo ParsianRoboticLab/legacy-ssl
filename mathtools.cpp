@@ -985,7 +985,7 @@ double MWBM::findMaxMinMatching()
     double l = minWeight - 1, r = 0;
     for(int _t = 25; _t >= 0; _t--)
     {
-        qDebug() << l << " " << r << endl;
+        //qDebug() << l << " " << r << endl;
         double m = (r + l) / 2;
         for(int i = 0; i < n; i++)
             for(int j = 0; j < n; j++)
