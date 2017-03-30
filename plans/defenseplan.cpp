@@ -41,6 +41,7 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
     Vector2D sol3 , sol4;
     Vector2D sol5 , sol6;
     Vector2D sol7 , sol8;
+    QList <Vector2D> sol;
     double opponentAgentsCircleR = 0.2;
     QList<int> omittedOpp;
     QList<Circle2D> opponentAgentsCircle;
@@ -57,6 +58,27 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
     markPoses.clear();
     markAngs.clear();
     markRoles.clear();
+    /////////////////////////// for Intelligent Mark //////////////
+    if(LastTS != knowledge->transientFlag){
+        opponentPasserDirection = wm->opp[knowledge->nearestOppToBall]->dir;
+        opponentPasserPossition = wm->opp[knowledge->nearestOppToBall]->pos;
+        changeInTSMode = true;
+    }
+    if(changeInTSMode){
+        penaltyArea.intersection(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , &sol7 , &sol8);
+        if(wm->field->isInField(sol7) && wm->field->isInField(sol8)){
+            sol.append(wm->field->ourPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+            draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
+            markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
+            markRoles.append(QString("shotBlocker"));
+            markAngs.append(wm->field->center() - wm->field->ourGoal());
+            ourMarkAgentsSize--;
+        }
+    }
+    if(!knowledge->transientFlag){
+        changeInTSMode = false;
+    }
+    LastTS = knowledge->transientFlag;
     ////////////////////////////////////////////////////////////////////////////
     debug(QString("Mark Agents Count : %1").arg(ourMarkAgentsSize) , D_SEPEHR , QColor(Qt::red));
     debug(QString("Opponent Agents to be mark count : %1").arg(opponentAgentsToBeMarkPossition.size()) , D_SEPEHR , QColor(Qt::red));
@@ -281,18 +303,49 @@ Vector2D DefensePlan::getPointInDirection(Vector2D firstPoint , Vector2D secondP
 /////////////////////////////// end of AHZ /////////////////////////////////////
 void DefensePlan::tempFindPos(int _markAgentSize){
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
-    bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)
-                    || (knowledge->getGameState() == CKnowledge::TheirKickOff)
-                    || (knowledge->getGameState() == CKnowledge::TheirIndirectKick)
-                    );
-    Circle2D MarkArea(wm->field->ourGoal(),markRadius);
+    bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)|| (knowledge->getGameState() == CKnowledge::TheirKickOff)|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
+    int count;
+    Circle2D penaltyArea(wm->field->ourGoal(),1.28);
+    Vector2D sol7 , sol8;
+    QList <Vector2D> sol;
     oppmarkedpos.clear();
     markPoses.clear();
     markRoles.clear();
-    draw(MarkArea,QColor(Qt::blue));
     markAngs.clear();
-    int count;
-
+    /////////////////////////// Added by AHZ for Intelligent Mark //////////////
+    if(LastTS != knowledge->transientFlag){
+        opponentPasserDirection = wm->opp[knowledge->nearestOppToBall]->dir;
+        opponentPasserPossition = wm->opp[knowledge->nearestOppToBall]->pos;
+        changeInTSMode = true;
+    }
+    if(changeInTSMode){
+        penaltyArea.intersection(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , &sol7 , &sol8);
+        if(wm->field->isInField(sol7) && wm->field->isInField(sol8)){
+            sol.append(wm->field->ourPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+            draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
+            markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
+            markRoles.append(QString("shotBlocker"));
+            markAngs.append(wm->field->center() - wm->field->ourGoal());
+            _markAgentSize--;
+        }
+    }
+    if(knowledge->transientFlag){
+        if(penaltyArea.intersection(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , &sol7 , &sol8)){
+            MantoManAllTransientFlag = false;
+            segmentpershoot = 1;
+        }
+        else{
+            MantoManAllTransientFlag = true;
+            segmentpershoot = 0.2;
+        }
+    }
+    else{
+        changeInTSMode = false;
+        segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
+        segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
+    }
+    LastTS = knowledge->transientFlag;
+    ////////////////////////////////////
     if(_markAgentSize == oppAgentsToMarkPos.count())
     {
         ///shoot block
@@ -1009,7 +1062,7 @@ DefensePlan::DefensePlan()
     markRadiusStrict = 1.39;
     segmentpershoot = policy()->Mark_ShootRatioBlock() / 100.0;
     segmentperpass = (100  - policy()->Mark_PassRatioBlock()) / 100.0;
-    LastTs = false;
+    //LastTS = false;
     dir  = Vector2D(1,0);
     MantoManAllTransientFlag =  policy()->Mark_ManToManAllTransiant();
     /////
@@ -1038,6 +1091,7 @@ DefensePlan::DefensePlan()
     /////////// AHZ //////////////
     lastMarkRoles.append(markRoles);
     changeInMarkPlanFlag = false;
+    changeInTSMode = false;
     ////////////////////////////////
     for (int i = 0; i < _MAX_NUM_PLAYERS; i++)
     {
@@ -1292,16 +1346,15 @@ void DefensePlan::matchingDefPos(int _defenseNum){
         markRoles.clear();
         changeInMarkPlanFlag = false;
     }
-    if(playOffMode){
+    else if(playOffMode){
         for(int i = 0 ; i < lastMarkRoles.size() ; i++){
-            draw(lastMarkRoles.at(i), markPoses.at(i) - Vector2D(0 , 0.8) , "black");
             if(markRoles.at(i) != lastMarkRoles.at(i)){
                 changeInMarkPlanFlag = true;
             }
         }
     }
     debug(QString("changeInMarkPlanFlag: %1").arg(changeInMarkPlanFlag) ,D_AHZ, "green");
-    if(!changeInMarkPlanFlag && (playOffMode || knowledge->transientFlag)){
+    if(!changeInMarkPlanFlag){
         knowledge->Matching(ourAgents,matchPoints,matchResult);
     }
     lastMarkRoles.clear();
@@ -3080,7 +3133,7 @@ bool DefensePlan::checkIndirectAreaPass(Vector2D opp){
     }
 }
 
-bool DefensePlan::checkIndirectAreaShoot(Vector2D opp) {
+bool DefensePlan::checkIndirectAreaShoot(Vector2D opp){
     //if that point be in Indirect Area we will return 1
 
 
@@ -3097,8 +3150,7 @@ bool DefensePlan::checkIndirectAreaShoot(Vector2D opp) {
     }
 }
 
-
-QList<Vector2D> DefensePlan::indirectAvoidShoot(Vector2D opp) {
+QList<Vector2D> DefensePlan::indirectAvoidShoot(Vector2D opp){
     Segment2D tempseg;
     tempseg.assign(opp, wm->field->ourGoal());
     double indirectAvoidRadius = 0.5 + .1;
@@ -3119,7 +3171,7 @@ QList<Vector2D> DefensePlan::indirectAvoidShoot(Vector2D opp) {
     return temp;
 }
 
-QList<Vector2D> DefensePlan::indirectAvoidPass(Vector2D opp) {
+QList<Vector2D> DefensePlan::indirectAvoidPass(Vector2D opp){
     Segment2D tempseg;
     tempseg.assign(wm->ball->pos, opp + 10 * (opp - wm->ball->pos));
     double indirectAvoidRadius = 0.5 + .1;
@@ -3140,46 +3192,42 @@ QList<Vector2D> DefensePlan::indirectAvoidPass(Vector2D opp) {
     temp.append(sol);temp.append(wm->ball->pos - opp);
     return temp;
 }
+
 void DefensePlan::inteliDecideMarkType(){
     Segment2D tempseg;
     CDefPos test;
-    if(knowledge->transientFlag == true)
+    if(knowledge->transientFlag)
     {
-        if(LastTs != knowledge->transientFlag){
+        if(LastTS != knowledge->transientFlag){
             dir = wm->opp[knowledge->nearestOppToBall]->dir;
         }
         tempseg.assign(wm->ball->pos, wm->ball->pos + 10 * dir);
         draw(tempseg, QColor(Qt::green));
         if(test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).isValid()){
-            MantoManAllTransientFlag =  false;
+            MantoManAllTransientFlag = false;
             segmentpershoot = 1;
         }
         else{
             MantoManAllTransientFlag = true;
             segmentpershoot = 0.2;
         }
-
     }
     else {
         segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
         segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
     }
-    LastTs = knowledge->transientFlag;
+    LastTS = knowledge->transientFlag;
 }
 
 void DefensePlan::findPos(int _markAgentSize){
     double xLimitForblockingPass = 0;
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
     bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)|| (knowledge->getGameState() == CKnowledge::TheirKickOff)|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
-    stopMode = knowledge->isStop();
-    ///////////////// Man To Man AllTransiant Mode for Mark ////////////////////
-    int intelligence = 1;
     bool MantoManAllTransientFlag = policy()->Mark_ManToManAllTransiant();
     bool manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
-    if(intelligence == 1){
-        inteliDecideMarkType();
-    }
-    else if(MantoManAllTransientFlag)
+    stopMode = knowledge->isStop();
+    ///////////////// Man To Man AllTransiant Mode for Mark ////////////////////
+    if(MantoManAllTransientFlag)
     {
         if(knowledge->transientFlag)
             segmentpershoot = 0.3;
