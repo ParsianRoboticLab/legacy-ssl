@@ -398,164 +398,178 @@ void CCoach::assignGoalieAgent( int goalieID ){
 }
 CKnowledge::ballPossesionState CCoach::isBallOurs()
 {
-    int oppNearestToBall=-1,ourNearestToBall=-1;
+    int oppNearestToBall = -1, ourNearestToBall = -1;
     double oppNearestToBallDist = 100000, ourNearestToBallDist = 100000;
-    Segment2D ballPath(wm->ball->pos,wm->ball->pos+wm->ball->vel*2);
+    double oppIntersetMin       = 100000, ourIntersetMin       = 100000;
+    Vector2D  ballPos = wm->ball->pos;
+    Vector2D  ballVel = wm->ball->vel;
+    Segment2D ballPath(ballPos, ballPos + ballVel * 2);
     Segment2D oppPath;
-    Vector2D ballPos = wm->ball->pos;
-    Vector2D dummy1,dummy2;
-    double oppIntersetMin = 100000,ourIntersetMin = 100000;
-    int oppIntersectAgent = -1,ourIntersectAgent = -1;
+    Vector2D dummy1, dummy2;
+    int oppIntersectAgent = -1, ourIntersectAgent = -1;
     CKnowledge::ballPossesionState decidePState;
     QList <CAgent*> ourAgents;
     QList <CRobot*> oppAgents;
-    ourAgents.clear();
 
     ////////////////// our
-
     ourAgents = knowledge->getActiveAgents();
-
-    if(knowledge->goalie != NULL){
+    if(goalieAgent != NULL) {
         ourAgents.removeOne(knowledge->goalie);
     }
+
     for(int i = 0 ; i<knowledge->defenseAgents.count() ; i++){
         ourAgents.removeOne(knowledge->defenseAgents[i]);
     }
-    ////////////////// opp
-    oppAgents.clear();
-    for(int i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
-        oppAgents .append( wm->opp.active(i));
-    }
-
-
 
     for(int i = 0 ; i < ourAgents.count() ; i++) {
-        if(ourAgents[i]->pos().dist(ballPos) < ourNearestToBallDist) {
+        double ourDist = ourAgents[i]->pos().dist(ballPos);
+        if(ourDist < ourNearestToBallDist) {
+            ourNearestToBallDist = ourDist;
             ourNearestToBall = ourAgents[i]->id();
-            ourNearestToBallDist = ourAgents[i]->pos().dist(ballPos);
         }
         draw(ourAgents[i]->pos(),1,QColor(Qt::black));
 
         if(wm->ball->vel.length() > 0.5){
-            if(Circle2D(ourAgents[i]->pos() , 0.12).intersection(ballPath,&dummy1,&dummy2)){
-                if(ourAgents[i]->pos().dist(ballPos) < ourIntersetMin)
-                {
-                    ourIntersetMin = ourAgents[i]->pos().dist(ballPos);
+            if(Circle2D(ourAgents[i]->pos() , 0.12).intersection(ballPath,&dummy1,&dummy2)) {
+                ourDist = ourAgents[i]->pos().dist(ballPos);
+                if(ourDist < ourIntersetMin) {
+                    ourIntersetMin    = ourDist;
                     ourIntersectAgent = ourAgents[i]->id();
                 }
             }
         }
     }
 
-    for(int i = 0 ; i < oppAgents.count() ; i++){
-        if(wm->opp.active(i)->vel.length()<0.5){
-            Circle2D(oppAgents[i]->pos,0.3).tangent(ballPos,&dummy1,&dummy2);
-            oppPath.assign(oppAgents[i]->pos,oppAgents[i]->pos);
-        }
-        else{
-            oppPath.assign(oppAgents[i]->pos,oppAgents[i]->pos + oppAgents[i]->vel);
-        }
+    ////////////////// opp
+    oppAgents.clear();
+    for(int i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
+        oppAgents.append(wm->opp.active(i));
+    }
 
+    for (int i = 0 ; i < oppAgents.count() ; i++) {
+        if (oppAgents.at(i)->vel.length() < 0.5) {
+            double oppDist = oppAgents[i]->pos.dist(ballPos);
+            if(oppDist < oppNearestToBallDist){
+                oppNearestToBallDist = oppDist;
+                oppNearestToBall = oppAgents[i]->id;
+            }
 
-        if(oppPath.nearestPoint(ballPos).dist(ballPos) < oppNearestToBallDist){
-            oppNearestToBallDist = oppPath.nearestPoint(ballPos).dist(ballPos);
-            oppNearestToBall = oppAgents[i]->id;
-        }
+            if(wm->ball->vel.length() > 0.5){
+                if(Circle2D(oppAgents[i]->pos , 0.12).intersection(ballPath,&dummy1,&dummy2)) {
+                    if(oppAgents[i]->pos.dist(ballPos) < oppIntersetMin) {
+                        oppIntersetMin    = oppAgents[i]->pos.dist(ballPos);
+                        oppIntersectAgent = oppAgents[i]->id;
+                    }
+                }
+            }
 
-        if(wm->ball->vel.length() > 0.5){
-            if(oppPath.intersection(ballPath).isValid()){
-                if(oppAgents[i]->pos.dist(ballPos) < oppIntersetMin){
-                    oppIntersetMin = oppAgents[i]->pos.dist(ballPos);
-                    oppIntersectAgent = oppAgents[i]->id;
+        } else {
+            oppPath.assign(oppAgents[i]->pos, oppAgents[i]->pos + oppAgents[i]->vel);
+            double oppDist = oppPath.nearestPoint(ballPos).dist(ballPos);
+            if(oppDist < oppNearestToBallDist){
+                oppNearestToBall = oppAgents[i]->id;
+                oppNearestToBallDist = oppDist;
+            }
+
+            if(wm->ball->vel.length() > 0.5){
+                if(oppPath.intersection(ballPath).isValid()){
+                    oppDist = oppAgents[i]->pos.dist(ballPos);
+                    if(oppDist < oppIntersetMin){
+                        oppIntersetMin = oppDist;
+                        oppIntersectAgent = oppAgents[i]->id;
+                    }
                 }
             }
         }
-        draw(oppPath.nearestPoint(ballPos));
-
-
     }
 
+    ///////////////////////////
+    ///////////////////////////
+    ///
+    ///
 
-
-
-    if(oppNearestToBall == -1 || (wm->field->isInOurPenaltyArea(wm->ball->pos)  && wm->ball->vel.length()<0.5))
-    {
+    if(oppNearestToBall == -1 || (wm->field->isInOurPenaltyArea(wm->ball->pos) && wm->ball->vel.length() < 0.5)) {
         decidePState =  CKnowledge::WEHAVETHEBALL;
-    }
-    else if(oppIntersectAgent != -1 && ourIntersectAgent == -1 && wm->ball->vel.length() > 1)
+    } else if(oppIntersectAgent != -1 && ourIntersectAgent == -1 && wm->ball->vel.length() > 1) {
         decidePState = CKnowledge::WEDONTHAVETHEBALL;
-    else if(oppIntersectAgent != -1 && ourIntersectAgent != -1 && ourIntersetMin > oppIntersetMin  - 0.1 && wm->ball->vel.length() > 0.5)
+    } else if(oppIntersectAgent != -1 && ourIntersectAgent != -1 && (ourIntersetMin > oppIntersetMin - 0.1) && wm->ball->vel.length() > 0.5) {
         decidePState = CKnowledge::WEDONTHAVETHEBALL;
-    else if(oppNearestToBallDist <= ourNearestToBallDist){
+    } else if(oppNearestToBallDist <= ourNearestToBallDist) {
         decidePState = CKnowledge::WEDONTHAVETHEBALL;
-    }
-    else if(ourNearestToBallDist < 0.3 && oppNearestToBallDist > ourNearestToBallDist){
+    } else if(ourNearestToBallDist < 0.3 && oppNearestToBallDist > ourNearestToBallDist){
         decidePState = CKnowledge::WEHAVETHEBALL;
-    }
-    else if(oppNearestToBallDist > ourNearestToBallDist +0.5){
+    } else if(oppNearestToBallDist > ourNearestToBallDist + 0.5){
         decidePState = CKnowledge::WEHAVETHEBALL;
-    }
-    else if(ourNearestToBallDist < oppNearestToBallDist && ballPos.x < 0.1){
+    } else if(ourNearestToBallDist < oppNearestToBallDist && ballPos.x < 0.1){
         decidePState = CKnowledge::SOSOTHEIR;
-    }
-    else if(ourNearestToBallDist < oppNearestToBallDist && ballPos.x >= 0.1){
+    } else if(ourNearestToBallDist < oppNearestToBallDist && ballPos.x >= 0.1){
         decidePState = CKnowledge::SOSOOUR;
-    }
-    else if(oppIntersectAgent == -1 && ourIntersectAgent != -1 && wm->ball->vel.length() > 0.7)
+    } else if(oppIntersectAgent == -1 && ourIntersectAgent != -1 && wm->ball->vel.length() > 0.7) {
         decidePState = CKnowledge::WEHAVETHEBALL;
-    else{
+    } else {
         decidePState = CKnowledge::SOSOTHEIR;
     }
 
-
-
-
-    if(decidePState == CKnowledge::WEHAVETHEBALL)
+    if (decidePState == CKnowledge::WEHAVETHEBALL) {
         playOnExecTime.restart();
-    if(lastBallPossesionState == CKnowledge::WEHAVETHEBALL && (decidePState == CKnowledge::WEDONTHAVETHEBALL || decidePState == CKnowledge::SOSOTHEIR || decidePState == CKnowledge::SOSOOUR) && playOnExecTime.elapsed() < playOnTime)
-    {
+    }
+
+    if(lastBallPossesionState == CKnowledge::WEHAVETHEBALL && (decidePState == CKnowledge::WEDONTHAVETHEBALL || decidePState == CKnowledge::SOSOTHEIR || decidePState == CKnowledge::SOSOOUR) && playOnExecTime.elapsed() < playOnTime) {
         decidePState = CKnowledge::WEHAVETHEBALL;
     }
 
 
 
-    if(oppNearestToBall >= 0){
+    if(oppNearestToBall >= 0) {
         Circle2D oppNearestDribblerArea(wm->opp[oppNearestToBall]->pos + wm->opp[oppNearestToBall]->dir.norm()*0.1 , 0.15);
         draw(oppNearestDribblerArea,QColor(Qt::red));
-        if(oppNearestDribblerArea.contains(ballPos) && ourNearestToBallDist > 0.3)
+        if(oppNearestDribblerArea.contains(ballPos) && ourNearestToBallDist > 0.3) {
             decidePState = CKnowledge::WEDONTHAVETHEBALL;
-        else if( oppNearestDribblerArea.contains(ballPos) )
-        {
-            if(wm->ball->pos.x >= 0.1)
-            {
+        } else if( oppNearestDribblerArea.contains(ballPos) ) {
+            if(wm->ball->pos.x >= 0.1) {
                 decidePState = CKnowledge::SOSOOUR;
-            }
-            else
-            {
+            } else {
                 decidePState = CKnowledge::SOSOTHEIR;
             }
         }
     }
 
-    if(decidePState != lastBallPossesionState)
-    {
-        if(intentionTimePossession.elapsed() > possessionIntentionInterval)
-        {
+    if(decidePState != lastBallPossesionState) {
+        if(intentionTimePossession.elapsed() > possessionIntentionInterval) {
             intentionTimePossession.restart();
-        }
-        else
-        {
+        } else {
             decidePState = lastBallPossesionState;
         }
+    }
+
+
+    ////////////      ///////////
+    ////////////      ///////////
+    //// NEW BALL POSSESSION ////
+
+
+    if(wm->ball->pos.x > 0.5) {
+        decidePState = CKnowledge::WEHAVETHEBALL;
+
+    } else if (wm->ball->pos.x < -0.5){
+        decidePState = CKnowledge::WEDONTHAVETHEBALL;
+    } else {
+        decidePState = lastBallPossesionState;
+    }
+
+    if (wm->field->isInOurPenaltyArea(wm->ball->pos)
+    &&  wm->ball->vel.length() < 0.2) {
+        decidePState = CKnowledge::WEHAVETHEBALL;
+    }
+
+    if (wm->field->isInOppPenaltyArea(wm->ball->pos)
+            && wm->ball->vel.length() < 0.1) {
+        decidePState = CKnowledge::WEDONTHAVETHEBALL;
     }
 
     lastBallPossesionState = decidePState;
     analyze("ball Possesion",decidePState,true);
 
-    if(wm->ball->pos.x > 0)
-        decidePState = CKnowledge ::WEHAVETHEBALL;
-    else
-        decidePState = CKnowledge ::WEDONTHAVETHEBALL;
     return decidePState;
 }
 
@@ -1155,7 +1169,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
         }
     }
     /// if an agent is very close to the ball or ball is almost witout velocity
-    if(nearestDist < 0.3 || wm->ball->vel.length() < 0.1 || nearestDistvel < 0.3) {
+    if(nearestDist < 0.3 || wm->ball->vel.length() < 0.1 || nearestDistvel < 0.1) {
         for(int i = 0 ; i < ourPlayers.count() ; i++) {
 
             const Vector2D& agentPos = wm->our[ourPlayers[i]]->pos;
@@ -1624,7 +1638,7 @@ NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& pla
 void CCoach::selectPlayOffMode(NGameOff::EMode &_mode) {
     // TODO : a real one needed
     if (knowledge->getGameState() == CKnowledge::OurKickOff
-    ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
+            ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
         _mode = NGameOff::StaticPlay;
 
     } else if (wm->ball->pos.x > 1) {
