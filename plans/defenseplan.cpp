@@ -69,10 +69,12 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
         if(wm->field->isInField(sol7) && wm->field->isInField(sol8)){
             sol.append(wm->field->ourPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
             draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
-            markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
-            markRoles.append(QString("predictBlocker"));
-            markAngs.append(wm->field->center() - wm->field->ourGoal());
-            ourMarkAgentsSize--;
+            if(!sol.isEmpty()){
+                markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
+                markRoles.append(QString("predictBlocker"));
+                markAngs.append(wm->field->center() - wm->field->ourGoal());
+                ourMarkAgentsSize--;
+            }
         }
     }
     if(!knowledge->transientFlag){
@@ -328,13 +330,15 @@ void DefensePlan::tempFindPos(int _markAgentSize){
     }
     if(changeInTSMode){
         penaltyArea.intersection(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , &sol7 , &sol8);
-        if(wm->field->isInField(sol7) && wm->field->isInField(sol8)){
+        if(wm->field->isInField(sol7) && wm->field->isInField(sol8)){            
             sol.append(wm->field->ourPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
             draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
-            markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
-            markRoles.append(QString("predictBlocker"));
-            markAngs.append(wm->field->center() - wm->field->ourGoal());
-            _markAgentSize--;
+            if(!sol.isEmpty()){
+                markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
+                markRoles.append(QString("predictBlocker"));
+                markAngs.append(wm->field->center() - wm->field->ourGoal());
+                _markAgentSize--;
+            }
         }
     }
     if(knowledge->transientFlag){
@@ -344,7 +348,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
         }
         else{
             MantoManAllTransientFlag = true;
-            segmentpershoot = 0.2;
+            segmentpershoot = 0.05;
         }
     }
     else{
@@ -627,15 +631,6 @@ void DefensePlan::runGoalie(){
             //////////////////////////// AHZ ////////////////////////
             ballPos = wm->ball->pos;
             goalieTarget = wm->field->ourGoal() + goalKeeperTargetOffSet;
-//            if(Vector2D::angleOf(ballPos,wm->field->ourGoal(),wm->field->ourGoalL()).degree() < 20 + angleDegreeThr || Vector2D::angleOf(ballPos,wm->field->ourGoal(),wm->field->ourGoalR()).degree() < 20+  angleDegreeThr){
-//                debug(QString("yess"),D_SEPEHR);
-//                angleDegreeThr = 5;
-//                goalieTarget = wm->field->ourGoal() + goalKeeperTargetOffSet;
-//            }
-//            else{
-//                angleDegreeThr = 0;
-//                goalieTarget = strictFollowBall(ballPos);
-//            }
             //////////////////////////////////////////////////////
             return;
         }
@@ -3364,10 +3359,6 @@ QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2
 
 
         //        draw(QString("mindistance%1").arg(mintempdis), oppposdanger[i] + Vector2D(0,0.5), QColor(Qt::blue));
-
-
-
-
     }
     ///sorting the Qlist
     for(int i = 0; i< output.count(); i++)
