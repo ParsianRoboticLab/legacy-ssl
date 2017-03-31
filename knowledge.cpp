@@ -113,7 +113,16 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
     CPolynomialRegression ProRes;
 
-//    profiler->load(JSON);
+
+    for(int i=0; i< 16; i++)
+        for(int j=0; j<4; j++)
+            for(int k=0; k<81; k++)
+                ProfilerResult[i][j][k] = -1;
+
+
+    profiler->load(JSON /* , "havij.json"*/);
+
+
     for(int q=0; q<16; q++)
         KickCoeff->append(ProRes.PolynomialRegression(profiler->robotsProfile[q].finalKickMap.values() , profiler->robotsProfile[q].finalKickMap.keys(),2));
 
@@ -145,51 +154,84 @@ Vector2D CKnowledge::getStaticPoses(int num)
 double CKnowledge::getProfile(int agentId, double realParameter, bool isKick,bool spinOn ){
     double kickspeed=0;
     int counter=0;
+
     if(isKick && !spinOn)
     {
-//        debug(QString("_%1_").arg(ProfilerResult[agentId][0][(int)round(realParameter*10)]),D_NADIA);
-        if( ProfilerResult[agentId][0][(int)round(realParameter*10)]>0)
-            return ProfilerResult[agentId][0][(int)round(realParameter*10)];
-        else{
-                for(int i=0;i<8;i++)
-                {
-                    if(ProfilerResult[agentId][i][(int)round(realParameter*10)]!=0){
-                    kickspeed+=ProfilerResult[agentId][i][(int)round(realParameter*10)];
-                    counter++;
-                    }
-                }
-                kickspeed/counter;
+        if(realParameter*10 > 80)   // out of index, very high speed
+            return 1023;
 
-                if(kickspeed > 1024)
-                    return 1000;
-                else if(kickspeed > 0)
-                    return kickspeed;
-                else
-                    return 100;
+        kickspeed=ProfilerResult[agentId][0][(int)round(realParameter*10)];
+
+        if(kickspeed != -1){
+
+            if(realParameter*10==80)
+                return ProfilerResult[agentId][0][(int)round(realParameter*10-1)];
+
+            if(kickspeed > 1024)
+                return 1000;
+            else if(kickspeed > 100)
+                return kickspeed;
+            else
+                return 100;
+        }
+        else
+        {
+            int prev;
+            if(realParameter*10==80)
+                prev = 1;
+            else
+                prev = 0;
+
+            for(int i=0;i<8;i++)
+            {
+                if(ProfilerResult[agentId][i][(int)round(realParameter*10-prev)] = -1){
+                    kickspeed+=ProfilerResult[agentId][i][(int)round(realParameter*10-prev)];
+                    counter++;
+                }
             }
+
+            kickspeed/=counter;
+
+            if(prev==1)
+                return kickspeed;
+
+            if(kickspeed > 1024)
+                return 1000;
+            else if(kickspeed > 100)
+                return kickspeed;
+            else
+                return 100;
+        }
     }
     else if(!isKick && !spinOn)
     {
 
-        if( ProfilerResult[agentId][1][(int)round(realParameter*10)]!=0)
-            return ProfilerResult[agentId][1][(int)round(realParameter*10)];
+        kickspeed=ProfilerResult[agentId][1][(int)round(realParameter*10)];
+        if(kickspeed != -1){
+            if(kickspeed > 1024)
+                return 1000;
+            else if(kickspeed > 100)
+                return kickspeed;
+            else
+                return 100;
+        }
         else{
-                for(int i=0;i<8;i++)
-                {
-                    if(ProfilerResult[agentId][i][(int)round(realParameter*10)]!=0){
+            for(int i=0;i<8;i++)
+            {
+                if(ProfilerResult[agentId][i][(int)round(realParameter*10)] > 0){
                     kickspeed+=ProfilerResult[agentId][i][(int)round(realParameter*10)];
                     counter++;
-                    }
                 }
-                kickspeed/counter;
-
-                if(kickspeed > 1024)
-                    return 1000;
-                else if(kickspeed > 0)
-                    return kickspeed;
-                else
-                    return 100;
             }
+            kickspeed/=counter;
+
+            if(kickspeed > 1024)
+                return 1000;
+            else if(kickspeed > 100)
+                return kickspeed;
+            else
+                return 100;
+        }
     }
     else if(isKick && spinOn){
 
@@ -4223,8 +4265,8 @@ void CKnowledge::Aminshoot(rcsc::Vector2D ball, QList<rcsc::Circle2D> obstacles,
 
 
     // Line2D bisectorLine (originPoint , AngleDeg::bisect((firstPoint - originPoint).th() , (thirdPoint - originPoint).th()));
-            draw(y2);
-            draw(y1);
+    draw(y2);
+    draw(y1);
     _empty = y1.y-y2.y;
 
     if((y1==wm->field->center() && y2 == wm->field->center()) || obstacles.isEmpty())
