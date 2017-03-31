@@ -313,7 +313,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
     markRoles.clear();
     markAngs.clear();
     /////////////////////////// Added by AHZ for Intelligent Mark //////////////
-    if(LastTS != knowledge->transientFlag){
+    if(LastTS != knowledge->transientFlag && LastTS == 0){
         opponentPasserDirection = wm->opp[knowledge->nearestOppToBall]->dir;
         opponentPasserPossition = wm->opp[knowledge->nearestOppToBall]->pos;
         changeInTSMode = true;
