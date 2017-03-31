@@ -42,7 +42,7 @@ public:
     ClassProperty(CRolePlayOff, bool, Intercept, intercept, updated);
     ClassProperty(CRolePlayOff, bool, AvoidBall,avoidBall, updated);
     ClassProperty(CRolePlayOff, bool, IgnoreAngle, ignoreAngle, updated);
-
+    ClassProperty(CRolePlayOff, double, EventDist, eventDist, updated);
     ClassProperty(CRolePlayOff, bool, DoPass, doPass, updated);
 
     ////////Not Executive Property

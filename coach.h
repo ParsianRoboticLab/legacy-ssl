@@ -23,7 +23,6 @@ class CCoach {
 
 public:
 
-    CKnowledge::ballPossesionState GlobalBallPState;
     ////////GUI Needed
     CPlayOff* playOff();
     CLoadPlayOffJson* getPlanLoader();
@@ -38,13 +37,20 @@ public:
     bool swapAgents(int i, int j);
     void setOpponents();
     int mostSupporterNumber(int num);
-    QList<int> findBestPoses(int numberOfPositionAgents,bool semiDynamic);
+    QList<int> findBestPoses(int numberOfPositionAgents);
     CKnowledge::ballPossesionState lastBallPossesionState;
     CKnowledge::ballPossesionState isBallOurs();
     CKnowledge::ballPossesionState ballPStateIntented;
     static QMap<QString, EditData*> editData; //Contains Formations
+  /*  ClassProperty(CCoach, Vector2D, LastBallVelPm, lastBallVelPM, updated);
+    ClassProperty(CCoach, Vector2D, LastBallPos, lastBallPos, updated);*/
 
 private:
+    Vector2D passPos;
+    bool passPlayMake;
+    Vector2D lastBallVelPM;
+    Vector2D lastBallPos;
+    bool updated;
     double findMostPossible(Vector2D agentPos);
     CKnowledge::State kkLastState;
     CAgent *goalieAgent;
@@ -52,7 +58,7 @@ private:
     double exeptionPlayMakeThr;
     QList<CAgent*> defenseAgents;
     DefensePlan defenses;
-    int preferedDefenseCounts , lastPreferredDefenseCounts;
+    int preferedDefenseCounts ,lastPreferredDefenseCounts;
     int preferedGoalieAgent;
     Vector2D defenseTargets[12];
     QTime intentionTimePossession;
@@ -127,9 +133,10 @@ private:
 
     enum attackState
     {
-        SAFE = 0,
-        FAST = 1,
-        CRITICAL =2
+        SAFE     = 0,
+        FAST     = 1,
+        CRITICAL = 2,
+        BallInOppJaw  = 3
     };
     attackState ourAttackState;
     void updateAttackState();
@@ -157,11 +164,13 @@ private:
     //TODO : squere or Liner matching
     NGameOff::SPlan* chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans);
     void matchPlan(NGameOff::SPlan* _plan, const QList<int>& _ourplayers);
+    void checkGUItoRefineMatch(NGameOff::SPlan* _plan, const QList<int> &_ourplayers);
     QStringList currentTags;
 
     NGameOff::SPlan* lastPlan;
     QList<int> lastPlayers;
     CKnowledge::ballPossesionState ballPState;
+    Vector2D lastBallVel;
     //////////////Decide Attack functions
     bool decideHalt               (QList<int>&);
     bool decideStop               (QList<int>&);

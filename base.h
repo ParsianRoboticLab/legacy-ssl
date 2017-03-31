@@ -7,7 +7,6 @@
 
 // TODO : remove this macro
 #define KK_PLAYON
-#define PARSIANWORKSHOP
 //#define SIMULATION_MODE
 //#define GAME_MODE
 
@@ -60,25 +59,26 @@ enum DynamicMode {
     Fast,
     Critical,
     NotWeHaveBall,
-    Plan
+    Plan,
+    BallInOurField,
+    NoPositionAgent,
+    BallInOppJaw
+
 };
 
 enum DynamicSkill {
     NoSkill,
-    Ready,
+    //PlayMake Skills
     Pass,
-    Mark,
     CatchBall,
     Shot,
-    Move,
     Keep,
-    Chip
-};
-
-enum DynamicRole {
-    NoRole,
-    PlayMaker,
-    Position
+    Chip,
+    //Positioning
+    Ready,
+    OneTouch,
+    Move,
+    Dribble
 };
 
 enum DynamicRegion {
@@ -87,6 +87,7 @@ enum DynamicRegion {
     Forward,
     Far,
     Goal,
+    Reflect,
     Best,
     Supporter
 };

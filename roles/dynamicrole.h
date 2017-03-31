@@ -17,13 +17,15 @@ public:
 
 private:
     CSkillKick           *shotSkill;
+    CSkillDribble        *dribbleSkill;
     CSkillKeep           *keepSkill;
     CSkillNewPass        *passSkill;
     CSkillReceivePass    *receiveSkill;
     CSkillGotoPointAvoid *moveSkill;
+    CSkillKickOneTouch   *oneTouchSkill;
     // CSKill "KEEP"
 
-
+    void update();
     bool updated;
 
     ClassProperty(CRoleDynamic, CAgent*, Agent, agent, updated);

@@ -32,8 +32,8 @@ void CRolePlayOff::reset()
 //    kickSkill = new CSkillKick(NULL);
 //    oneTouchSkill = new CSkillKickOneTouch(NULL);
 //    receivePassSkill = new CSkillReceivePass(NULL);
-//    updated = true;
 
+    updated = true;
     deleted = false;
     roleUpdate = false;
     timer.start();
@@ -84,6 +84,7 @@ void CRolePlayOff::update() {
         oneTouchSkill->setWaitPos(waitPos);
         oneTouchSkill->setAgent(agent);
         oneTouchSkill->setChip(false);
+        oneTouchSkill->setShotToEmptySpot(true);
         if (wm->getIsSimulMode()) oneTouchSkill->setKickSpeed(8);
         else oneTouchSkill->setKickSpeed(kickSpeed);
         oneTouchSkill->setAgent(agent);

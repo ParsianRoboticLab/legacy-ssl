@@ -134,7 +134,12 @@ CKnowledge::~CKnowledge()
 }
 Vector2D CKnowledge::getStaticPoses(int num)
 {
-    return staticPoses.at(num);
+    if (num < staticPoses.size()) {
+        return staticPoses.at(num);
+    } else {
+        return Vector2D::INVALIDATED;
+    }
+
 }
 
 void CKnowledge::calculateCommandFrameRate()

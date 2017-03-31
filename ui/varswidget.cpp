@@ -67,6 +67,7 @@ CVarsWidget::CVarsWidget()
             ADD_TO_ENUM(LocalSettings,OurTeamSide,"Left")
             ADD_TO_ENUM(LocalSettings,OurTeamSide,"Right")
             END_ENUM(LocalSettings,OurTeamSide)
+            ADD_VALUE(LocalSettings,Bool,ParsianWorkShop,false,"Parsian Workshop")
             ADD_TREE(Common,"Common",true)
             ADD_VALUE(Common,Int,Viewport_Width,800,"Viewport Width")
             ADD_VALUE(Common,Int,Command_Interval,10,"Command Sending Interval(ms)")
@@ -199,7 +200,7 @@ CVarsWidget::CVarsWidget()
             ADD_VALUE(Performance_Debug, Bool, debugMahmood, false, "Mahmood")
             ADD_VALUE(Performance_Debug, Bool, debugAtousa, false, "Atousa")
             ADD_VALUE(Performance_Debug, Bool, debugAmin, false, "Amin")
-            ADD_VALUE(Performance_Debug, Bool, debugAmiR, false, "Amir")
+            ADD_VALUE(Performance_Debug, Bool, debugParsa, false, "Parsa")
             ADD_VALUE(Performance_Debug, Bool, debugHamed, false, "Hamed")
             ADD_TREE(Experiments,"Experiments",false)
             ADD_PTREE(Experiments, AutoReferee, "Automated Referee")
@@ -306,10 +307,11 @@ CPolicyWidget::CPolicyWidget()
     ADD_VALUE(KKPlayOn, Int, KKChipSpeed, 550, "Chip Speed");
     ADD_VALUE(KKPlayOn, Int, KKShotSpeed, 1023, "Shot Speed");
     ADD_VALUE(KKPlayOn, Int, KKChipToGoalSpeed, 650, "Chip to Goal Speed");
-    ADD_TREE(KKPlayOff,"PlayOff",false);
-    ADD_VALUE(KKPlayOff, String, KKPOPlanSQL, QDir::currentPath().toStdString()+"/poplan.db3", "SQL Directory");
-    ADD_VALUE(KKPlayOff, Bool, KKPOSymmetry, false, "Symmetry");
-    ADD_VALUE(KKPlayOff, Bool, KKPOUseDef, false, "Use Def Robots");
+    ADD_TREE(PlayOff,"PlayOff",false);
+    ADD_VALUE(PlayOff, Bool, IDBasePasser, false, "ID Base Passer");
+    ADD_VALUE(PlayOff, Int, PasserID, 0, "Passer ID ");
+    ADD_VALUE(PlayOff, Bool, IDBaseOneToucher, false, "ID Base OneToucher");
+    ADD_VALUE(PlayOff, Int, OneToucherID, 0, "One Toucher ID ");
     ADD_TREE(DynamicPlay, "DynamicPlay", false);
     ADD_VALUE(DynamicPlay, Int , LowSpeedPass   , 300, "Low Speed Pass");
     ADD_VALUE(DynamicPlay, Int , MediumSpeedPass, 600, "Medium Speed Pass");
@@ -384,6 +386,7 @@ IMPL_VALUE(CVarsWidget,LocalSettings,bool,Bool,SharedRadioEnable)
 IMPL_VALUE(CVarsWidget,LocalSettings,bool,Bool,SharedRadioReceive)
 IMPL_ENUM(CVarsWidget,LocalSettings,std::string,OurTeamColor)
 IMPL_ENUM(CVarsWidget,LocalSettings,std::string,OurTeamSide)
+IMPL_VALUE(CVarsWidget,LocalSettings,bool,Bool,ParsianWorkShop)
 IMPL_VALUE(CVarsWidget,Common,int,Int,Viewport_Width)
 IMPL_VALUE(CVarsWidget,Common,int,Int,Command_Interval)
 IMPL_VALUE(CVarsWidget,Common,int,Int,Monitor_Interval)
@@ -493,7 +496,7 @@ IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugAHZ)
 IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugFatemeh)
 IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugAtousa)
 IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugAmin)
-IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugAmiR)
+IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugParsa)
 IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugHamed)
 
 
@@ -542,9 +545,10 @@ IMPL_VALUE(CPolicyWidget,KKPlayOn, int, Int, KKChipSpeed)
 IMPL_VALUE(CPolicyWidget,KKPlayOn, int, Int, KKShotSpeed)
 IMPL_VALUE(CPolicyWidget,KKPlayOn, int, Int, KKChipToGoalSpeed)
 
-IMPL_VALUE(CPolicyWidget,KKPlayOff, std::string, String, KKPOPlanSQL)
-IMPL_VALUE(CPolicyWidget,KKPlayOff, bool, Bool, KKPOSymmetry)
-IMPL_VALUE(CPolicyWidget,KKPlayOff, bool, Bool, KKPOUseDef)
+IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, IDBasePasser)
+IMPL_VALUE(CPolicyWidget,PlayOff, int, Int, PasserID)
+IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, IDBaseOneToucher)
+IMPL_VALUE(CPolicyWidget,PlayOff, int, Int, OneToucherID)
 
 IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , LowSpeedPass)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , MediumSpeedPass)

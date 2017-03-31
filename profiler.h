@@ -118,7 +118,8 @@ public :
     CProfile();
     QMap<int, double> finalKickMap;
     QMap<int, QList<double> > kickMap;
-    QMap<int, double> chipMap;
+    QMap<int, double> finalChipMap;
+    QMap<int, QList<double> > chipMap;
 
     QMap<int,double> finalSpinKickMap;
     QMap<int, QList<double> > SpinKickMap;
@@ -211,7 +212,8 @@ private:
     int AgentsID[16] = {-1};
     QMap<int,double> finalKickMap;
     QMap<int, QList<double> > kickMap;
-    QMap<int,double> chipMap;
+    QMap<int,double> finalChipMap;
+    QMap<int, QList<double> > chipMap;
 
     QMap<int,double> finalSpinKickMap;
     QMap<int, QList<double> > SpinKickMap;
@@ -237,7 +239,7 @@ class CNewProfiler : public QObject{
 
     Q_OBJECT
 
-private:    
+private:
     bool isParsedOk;
     QVariantMap variantMapResualt;
     int kickerID,receiverID;

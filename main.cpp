@@ -12,28 +12,74 @@ void handle(int)
     policy()->save();
     conf()->save();
 
-//    char *params[] = {"mode", "real"};
+    if( loggerMutex->tryLock(25) ){
+        gameLogger->closeLogger = true;
+        gameLogger->setIsLogMode(false);
+        gameLogger->logMode = false;
+        gameLogger->closeLogFiles(false);
+        loggerMutex->unlock();
+        QTime tm;
+        tm.start();
+        while( tm.elapsed() < 25 )
+        {
+            bool flag=false;
+            if( loggerMutex->tryLock(1) ){
+                flag = gameLogger->loggerClosed;
+                loggerMutex->unlock();
+            }
+            if (flag) break;
+        }
+    }
 
-//    execve("./ai", params, NULL);
-//   QProcess* q = new QProcess;
-//   if (knowledge->getGameState() == CKnowledge::Stop)
-//   q->startDetached("./ai", QStringList() << "mode" << "real" << "ref" << "S");
-//   else
-//       q->startDetached("./ai", QStringList() << "mode" << "real" << "ref" << "s");
-//   delete q;
-//        system("./ai mode real");
+    //    char *params[] = {"mode", "real"};
+
+    //    execve("./ai", params, NULL);
+    //   QProcess* q = new QProcess;
+    //   if (knowledge->getGameState() == CKnowledge::Stop)
+    //   q->startDetached("./ai", QStringList() << "mode" << "real" << "ref" << "S");
+    //   else
+    //       q->startDetached("./ai", QStringList() << "mode" << "real" << "ref" << "s");
+    //   delete q;
+    //        system("./ai mode real");
     qDebug() << "Code Terminated with Segmentation Fault, all robots are freezed.";
     exit(100);
-	//draw(" Segmentation Fault",Vector2D(0,0),"red",0);
+    //draw(" Segmentation Fault",Vector2D(0,0),"red",0);
 }
 
 void handle2(int)
 {
-	haltAllRobots();
-//			system("./ai mode real");
+    haltAllRobots();
+    //			system("./ai mode real");
     qDebug() << "GDB Paused program.";
-//	system("./ai");
-	//draw(" Segmentation Fault",Vector2D(0,0),"red",0);
+    //	system("./ai");
+    //draw(" Segmentation Fault",Vector2D(0,0),"red",0);
+}
+
+void fullHandle(int sig) {
+    qDebug()<< "[main.cpp] Terminate Signal : " << sig;
+    haltAllRobots();
+    policy()->save();
+    conf()->save();
+    if( loggerMutex->tryLock(25) ){
+        gameLogger->closeLogger = true;
+        gameLogger->setIsLogMode(false);
+        gameLogger->logMode = false;
+        gameLogger->closeLogFiles(false);
+        loggerMutex->unlock();
+        QTime tm;
+        tm.start();
+        while( tm.elapsed() < 25 )
+        {
+            bool flag=false;
+            if( loggerMutex->tryLock(1) ){
+                flag = gameLogger->loggerClosed;
+                loggerMutex->unlock();
+            }
+            if (flag) break;
+        }
+    }
+    exit(sig);
+
 }
 
 int main(int argc, char *argv[])
@@ -61,9 +107,14 @@ int main(int argc, char *argv[])
         }
     }
 
-    signal(SIGSEGV,handle);
+    //    signal(SIGSEGV,handle);
 
-    signal(SIGALRM,handle2);
+    //    signal(SIGALRM,handle2);
+
+    for (int i = 0; i < 31;i++) {
+        signal(i, fullHandle);
+    }
+
 
     CMainApplication mApp;
 
