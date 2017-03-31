@@ -96,20 +96,27 @@ class MWBM //Maximum Weighted Bipartite Matching
 {
 private:
     int n, cap;
-    int **W;
-    int *U, *V, *Y; /* <-- weight variables */
-    int *M, *N, *P, *Q, *R, *S, *T;
+    double **W;
+    double *U, *V, *Y; /* <-- weight variables */
+    double *N, *P, *R, *S, *T;
+    int *Q, *M;
 public:
     MWBM();
     MWBM(int _m, int _n);
     void changeSize(int k, int r); //max(k,r) should be less than n (otherwise destroy() then create(...,...) )
     ~MWBM();
-    void setWeight(int i, int j, int w);
-    int getWeight(int i, int j);
+    void setWeight(int i, int j, double w);
+    double getWeight(int i, int j);
     void create(int _m, int _n);
     void destroy();
-    int findMatching();
+    double findMatching();
     int getMatch(int i);
+    //TODO : added by parsa but does not have impementation or needs to check implementations
+    int findMinMinMatching();
+    double findMaxMinMatching();
+    bool hasPerfectMatching();
+    void setWeightsByDists(QList <Vector2D> upNodes, QList <Vector2D> downNodes);
+    //end of functions added by parsa
 };
 
 void linefit(QVector<Vector2D> p, double &a, double &b);

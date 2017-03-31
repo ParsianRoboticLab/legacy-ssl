@@ -616,7 +616,7 @@ CSkillKick::CSkillKick(CAgent *_agent) : CSkill(_agent)
     alternateMode = false;
     kickAngTol = 50;
     isJturn = false;
-
+    passProfiler = false;
 }
 
 CSkillKick::~CSkillKick()
@@ -656,7 +656,7 @@ kckMode CSkillKick::decideMode()
 
     Vector2D tempVec1, tempVec2;
     Circle2D ballArea(ballPos,0.13);
-    Circle2D dribblerArea(agentPos+agentDir.norm()*0.1,0.1);
+    Circle2D dribblerArea(agentPos+agentDir.norm()*0.1,0.15);
 
     Circle2D robotArea(agentPos,0.6);
 
@@ -694,10 +694,10 @@ kckMode CSkillKick::decideMode()
     else
     {
 
-        if((robotArea.intersection(ballpath,&tempVec1,&tempVec2) ==2 && ballRealVel > 1 ))
+        if((robotArea.intersection(ballpath,&tempVec1,&tempVec2) ==2 && ballRealVel > 0.5 ))
         {
 
-            if(goalieMode || fabs(((target-agentPos).th().degree() - (ballPos-agentPos).th().degree() )) < 80 )
+            if(goalieMode || fabs(((target-agentPos).th().degree() - (ballPos-agentPos).th().degree() )) < 70 )
                 return KWAITANDKICK;
             else
                 return KWAITFORTURN;
@@ -1015,13 +1015,13 @@ void CSkillKick::jTurn()
     draw(robotKickArea);
 
     double reduce = 0.5;
-    reduce += 1.4*agentPos.dist(ballPos) - 0.7*wm->ball->vel.length();
+    reduce += 2*agentPos.dist(ballPos) - 0.7*wm->ball->vel.length();
     reduce = max(reduce,0.7);
     if(passProfiler || (wm->field->isInOppPenaltyArea(ballPos + (wm->field->oppGoal() - ballPos).norm()*0.05) && agentPos.dist(ballPos) <0.25))
     {
         reduce = 0.3;
     }
-    reduce = min(reduce,1.5);
+    reduce = min(reduce,2.5);
     double movementDir = ((ballPos - agentPos).th() - kickFinalDir).degree();
     double robotDir = (ballPos - agentPos).th().radian() - agentDir.th().radian();
     double shift = 0;
@@ -1055,8 +1055,8 @@ void CSkillKick::jTurn()
 
     speedPidX->kd = 0;
     speedPidY->kd = 1;
-    speedPidX->kp = 0.6;
-    speedPidY->kp = 0.25;
+    speedPidX->kp = 0;
+    speedPidY->kp = 0.2;
     if(knowledge->isOurNonPlayOnKick())
     {
         reduce = 0.5;
@@ -1443,7 +1443,7 @@ void CSkillKick::execute()
     }
     else if(kickMode == KWAITANDKICK)
     {
-        if(Circle2D(agentPos,1).contains(ballPos) && fabs((agentDir.th() - oneTouchDir.th()).degree()) < 3)
+        if(Circle2D(agentPos,1).contains(ballPos) && fabs((agentDir.th() - oneTouchDir.th()).degree()) < 2)
         {
             agent->setRoller(spin);
             if(chip)
@@ -1460,7 +1460,7 @@ void CSkillKick::execute()
     }
     else if(veryFine)
     {
-        if(kickerOn && fabs((agentDir.th() - kickTargetDir).degree()) < 1)
+        if(kickerOn && fabs((agentDir.th() - kickTargetDir).degree()) < 2)
         {
             if(chip)
                 agent->setChip(kickSpeed);
@@ -1476,7 +1476,7 @@ void CSkillKick::execute()
 
     else
     {
-        if(kickerOn && fabs((agentDir.th() - kickTargetDir).degree()) < tol || kickerOn && fabs((agentDir.th() - kickTargetDir).degree()) < 2)
+        if(kickerOn && fabs((agentDir.th() - kickTargetDir).degree()) < tol || kickerOn && fabs((agentDir.th() - kickTargetDir).degree()) < 1)
         {
 
             if(chip)
@@ -1693,7 +1693,7 @@ void CSkillKickOneTouch::execute()
     oneTouchMode = decideMode();
 
     Segment2D ballPath;
-    double stopParam = 0.07;
+    double stopParam = 0.08;
     ballPath.assign(ballPos,ballPos + wm->ball->vel.norm()*(agentPos.dist(ballPos) - stopParam + 0.01));
     Segment2D ballLine;
     ballLine.assign(ballPos,ballPos + wm->ball->vel.norm()*(15));

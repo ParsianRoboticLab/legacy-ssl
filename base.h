@@ -61,7 +61,8 @@ enum DynamicMode {
     NotWeHaveBall,
     Plan,
     BallInOurField,
-    NoPositionAgent
+    NoPositionAgent,
+    BallInOppJaw
 
 };
 
@@ -77,6 +78,7 @@ enum DynamicSkill {
     Ready,
     OneTouch,
     Move,
+    Dribble
 };
 
 enum DynamicRegion {

@@ -46,6 +46,8 @@ public:
     ClassProperty(CCoach, Vector2D, LastBallPos, lastBallPos, updated);*/
 
 private:
+    Vector2D passPos;
+    bool passPlayMake;
     Vector2D lastBallVelPM;
     Vector2D lastBallPos;
     bool updated;
@@ -131,9 +133,10 @@ private:
 
     enum attackState
     {
-        SAFE = 0,
-        FAST = 1,
-        CRITICAL =2
+        SAFE     = 0,
+        FAST     = 1,
+        CRITICAL = 2,
+        BallInOppJaw  = 3
     };
     attackState ourAttackState;
     void updateAttackState();
