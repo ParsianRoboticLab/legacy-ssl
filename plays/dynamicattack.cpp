@@ -1,6 +1,10 @@
 #include "dynamicattack.h"
 
 CDynamicAttack::CDynamicAttack() {
+    guardSize = 3;
+    for(int i = 0; i < 6; i++)
+        lastGuards[i] = -1;
+
     for(size_t i = 0;i  < 6;i++) {
         roleAgents[i] = new CRoleDynamic();
     }
@@ -558,8 +562,96 @@ int CDynamicAttack::appropriateChipSpeed() {
     return policy()->DynamicPlay_MediumSpeedChip();
 }
 
-void CDynamicAttack::chooseBestPositons() {
+void CDynamicAttack::chooseBestPositons()
+{
+    int agentSize = currentPlan.agentSize;
 
+    guardIndexList.clear();
+    for(int i = 0; i < currentPlan.agentSize; i++)
+        guardIndexList.append(i);
+
+    semiDynamicPosition.clear();
+
+    for(int i = 0; i < agentSize; i++)
+    {
+        bool     canNot[guardSize];
+        double   score [guardSize];
+        Vector2D points[guardSize];
+        Vector2D passPos = currentPlan.passPos;
+
+        double minPassDist = 1000;
+        double ballVelCoef = 0.4;
+        int    minPassId   = -1;
+
+        for(int j = 0; j < guardSize; j++)
+        {
+            canNot[j] = 0;
+            score[j] = 0;
+            points[j] = guardLocations[agentSize][i][j];
+        }
+
+        for(int j = 0; j < guardSize; j++)
+        {
+            score[j] += j * 0.2;
+            score[j] -= 1 / max(0.5, knowledge->getNearestOppToPoint(points[j]));
+            /*if((ballPos + ballVel * ballVelCoef).dist(points[j]) < 1)
+                canNot[j] = 1;*/
+            Line2D ballToPoint = Line2D(ballPos, points[j]);
+            Segment2D goalLine;
+            goalLine = Segment2D(wm->field->oppGoalL(), wm->field->oppGoalR());
+            if(goalLine.intersection(ballToPoint).x <= _FIELD_WIDTH / 2)
+                if(points[j].x > ballPos.x)
+                    canNot[j] = 1;
+            if(passPos.dist(points[j]) < minPassDist)
+            {
+                minPassDist = passPos.dist(points[j]);
+                minPassId   = j;
+            }
+            if(guards[agentSize][i].contains(ballPos + ballVel * ballVelCoef))
+                score[j] += points[j].dist(ballPos + ballVelCoef * ballVel) / 2;
+        }
+        if(lastGuards[i] != -1)
+        {
+            score[lastGuards[i]] += 0.5;
+            debug(QString("last guard : %1").arg(lastGuards[i]), D_PARSA);
+        }
+        if(guards[agentSize][i].contains(passPos))
+        {
+            debug(QString("minPassId : %1").arg(minPassId), D_PARSA);
+            score[minPassId] += 2;
+        }
+        int minId = -1;
+        for(int j = 0; j < guardSize; j++)
+            if(minId == -1 || score[j] > score[minId])
+                if(!canNot[j] || (guards[agentSize][i].contains(passPos) && j == minPassId))
+                    minId = j;
+
+        if(minId == -1)
+        {
+            semiDynamicPosition.append(Vector2D(0, points[0].y));
+            lastGuards[i] = -1;
+        }
+        else
+        {
+            semiDynamicPosition.append(points[minId]);
+            lastGuards[i] = minId;
+        }
+
+        debug(QString("region %1").arg(i), D_PARSA);
+        debug(QString("passPos : %1 %2").arg(passPos.x).arg(passPos.y), D_PARSA);
+
+        for(int j = 0; j < guardSize; j++)
+        {
+            debug(QString("score and canNot of point %1 %2 are %3 %4")
+                  .arg(points[j].x).arg(points[j].y).arg(score[j])
+                  .arg(canNot[j]), D_PARSA);
+        }
+    }
+
+    //TODO : this was the previous code. use if it is better.
+
+    /*draw(Segment2D(ballPos,wm->field->oppGoalL()), QColor(Qt::black));
+    draw(Segment2D(ballPos,wm->field->oppGoalR()), QColor(Qt::black));
     int tempIndex = 0;
     double tempDist, minDist;
 
@@ -594,7 +686,8 @@ void CDynamicAttack::chooseBestPositons() {
                     [currentPlan.agentSize - 1]
                     [tempIndex]);
         }
-    }
+    }*/
+
 //    Vector2D poses[5], bp = ballPos;
 //    double -x = 1, -y = 0.8;
 //    if(bp.y + y <= _FIELD_HEIGHT / 2 || )
@@ -1163,6 +1256,7 @@ void CDynamicAttack::assignLocations_6() {
 
 
 }
+
 QString CDynamicAttack::getString(const DynamicEnums::DynamicMode &_mode) const {
     switch(_mode) {
     default:

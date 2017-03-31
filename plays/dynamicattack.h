@@ -62,6 +62,8 @@ public:
     CAgent* getMahiPlayMaker();
 
 private:
+    int guardSize;
+    int lastGuards[6];
 
     void playMake();
     void choosePlayMaker();
