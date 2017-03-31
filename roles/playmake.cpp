@@ -946,6 +946,8 @@ void CRolePlayMake::executeOurPenalty()
         }
 
         kick->setTarget(penaltyTarget);
+        // TODO : Fix This Speed
+        // TODO : check this mhmmd
         kick->setKickSpeed(kick->getAgent()->kickSpeedValue(7.8,false));
         kick->setPenaltyKick(true);
         kick->setInterceptMode(false);
