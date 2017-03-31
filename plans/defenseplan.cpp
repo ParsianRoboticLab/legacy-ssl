@@ -330,7 +330,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
     }
     if(changeInTSMode){
         penaltyArea.intersection(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , &sol7 , &sol8);
-        if(wm->field->isInField(sol7) && wm->field->isInField(sol8)){            
+        if(wm->field->isInField(sol7) && wm->field->isInField(sol8)){
             sol.append(wm->field->ourPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
             draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
             if(!sol.isEmpty()){
@@ -2296,7 +2296,6 @@ Vector2D DefensePlan::followBall(Vector2D _ballPos)
     }
 }
 
-
 int DefensePlan::predictMostDangrousOppToBall(){
     //////////////////////////////////////////////////////// GOALIE CHECK ONE TOUCHE
     // make it to a function ... oppRoles
@@ -2561,7 +2560,6 @@ bool DefensePlan::defenseOneTouchOrNot(){
 }
 
 /////////End of Arash.z/////////////////////////////////////////
-
 
 /////////////////////// KK Def Positioning Funcs///////////////
 
