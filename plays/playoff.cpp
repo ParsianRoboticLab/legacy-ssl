@@ -399,17 +399,17 @@ void CPlayOff::dynamicExecute() {
 
 
         dynamicPlayKhafan();
-//    dynamicPlayBlocker();
-//        dynamicPlayChipToGoal();
-
-
-    for(int i = 0;i < dynamicAgentSize;i++) {
-        roleAgent[i]->execute();
-    }
-
         checkEndKhafan();
-//    checkEndBlocker();
-//        checkEndChipToGoal();
+
+        /*dynamicPlayBlocker();
+        checkEndBlocker();*/
+
+        /*dynamicPlayChipToGoal();
+        checkEndChipToGoal();*/
+
+        for(int i = 0;i < dynamicAgentSize;i++) {
+            roleAgent[i]->execute();
+        }
 }
 
 
@@ -577,7 +577,7 @@ void CPlayOff::checkEndKhafan() {
 
     if (dynamicState == 4) {
         debug(QString("[dastan] : %1").arg(knowledge->getCurrentTime() - dynamicStartTime), D_MAHI);
-        if (wm->ball->pos.dist(wm->field->oppGoal()) - 0.1 < roleAgent[1]->getAgent()->pos().dist(wm->field->oppGoal())) {
+        if (wm->ball->pos.dist(wm->field->oppGoal()) - 0.5 < roleAgent[1]->getAgent()->pos().dist(wm->field->oppGoal())) {
             pass = false;
             shot = true;
             dynamicState = 6;
@@ -599,6 +599,9 @@ void CPlayOff::checkEndKhafan() {
     }
 
     if (dynamicState == 6) {
+        // TODO : check this
+        playOnFlag = true;
+        shot = false;
         if (wm->ball->vel.length() < 0.2) {
             playOnFlag = true;
             dynamicState = 0;
@@ -626,9 +629,10 @@ void CPlayOff::checkEndBlocker() {
 
     if (dynamicState == 2) {
         for (int i = 0;i < wm->opp.activeAgentsCount(); i++) {
-            if (Circle2D(roleAgent[0] -> getAgent() -> pos() + roleAgent[0]->getAgent()->dir().norm()*0.6, 0.3).contains(wm->opp.active(i)->pos)) {
-                dynamicState = 6;
-                shot = true;
+            if (Circle2D(roleAgent[0] -> getAgent() -> pos() + roleAgent[0]->getAgent()->dir().norm()*0.6, 0.3).contains(wm->opp.active(i)->pos))
+                if(roleAgent[0]->getAgent()->dir().norm().dist(roleAgent[0]->getTarget().norm()) < 0.1) {
+                    dynamicState = 6;
+                    shot = true;
             }
         }
 
@@ -663,6 +667,7 @@ void CPlayOff::checkEndChipToGoal() {
     if (dynamicState == 2) {
         if (Circle2D(wm->ball->pos, 0.5).contains(roleAgent[0]->getAgent()->pos())) {
             shot = true;
+            dynamicState = 6;
             dynamicStartTime = knowledge->getCurrentTime();
         }
     }
@@ -684,6 +689,7 @@ void CPlayOff::checkEndChipToGoal() {
 
 Vector2D CPlayOff::getDynamicTarget(int i) {
     Vector2D first = wm->ball->pos*0.7 + wm->field->oppGoal()*0.3;
+    first.y += 0.3;
 
     switch (i) {
     case 1:
