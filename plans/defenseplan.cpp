@@ -1493,158 +1493,31 @@ void DefensePlan::announceClearing(bool state)
     else knowledge->variables["clearing"] = "false";
 }
 
-void DefensePlan::penaltyGoalie()
-{
 
-    for( int i=0; i<5 ; i++ ){
-        executeSkill[i] = false;
-    }
-
-    int defAgentNum = defenseAgents.count();
-    switch (defAgentNum){
-    case 1:
-        defenseTargets[0]=Vector2D(-2,1);
-        defenseDirs[0]=defenseTargets[0]-wm->ball->pos;
-        executeSkill[0]=1;
-        break;
-    case 2:
-        defensePoints[0]=Vector2D(-2,1);
-        executeSkill[0]=1;
-        defensePoints[1]=Vector2D(-2,1.5);
-        executeSkill[1]=1;
-        doMatch(defenseAgents[0]->pos() , defenseAgents[1]->pos() , defensePoints[0] , defensePoints[1] , -1 , 1);
-        defenseDirs[0]=defensePoints[0]-wm->ball->pos;
-        defenseDirs[1]=defensePoints[1]-wm->ball->pos;
-        defenseTargets[0]=defensePoints[0];
-        defenseTargets[1]=defensePoints[1];
-        break;
-    case 3:
-        defensePoints[0]=Vector2D(-2,1);
-        executeSkill[0]=1;
-        defensePoints[1]=Vector2D(-2,1.5);
-        executeSkill[1]=1;
-        defensePoints[2]=Vector2D(-2,-1);
-        executeSkill[2]=1;
-
-        doMatchThree(defenseAgents[0]->pos() , defenseAgents[1]->pos() , defensePoints[0] , defensePoints[1] , 0 , 1);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[0]->pos() , defensePoints[2] , defensePoints[0] , 2 , 0);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[1]->pos() , defensePoints[2] , defensePoints[1] , 2 , 1);
-        doMatchThree(defenseAgents[0]->pos() , defenseAgents[1]->pos() , defensePoints[0] , defensePoints[1] , 0 , 1);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[0]->pos() , defensePoints[2] , defensePoints[0] , 2 , 0);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[1]->pos() , defensePoints[2] , defensePoints[1] , 2 , 1);
-
-
-        defenseTargets[0]=defensePoints[0];
-        defenseTargets[1]=defensePoints[1];
-        defenseTargets[2]=defensePoints[2];
-
-        defenseDirs[0]=defenseTargets[0]-wm->ball->pos;
-        defenseDirs[1]=defenseTargets[1]-wm->ball->pos;
-        defenseDirs[2]=defenseTargets[2]-wm->ball->pos;
-        break;
-    case 4:
-        defensePoints[0]=Vector2D(-2,1);
-        executeSkill[0]=1;
-        defensePoints[1]=Vector2D(-2,1.5);
-        executeSkill[1]=1;
-        defensePoints[2]=Vector2D(-2,-1);
-        executeSkill[2]=1;
-        defensePoints[3]=Vector2D(-2,-1.5);
-        executeSkill[3]=1;
-
-        doMatchThree(defenseAgents[0]->pos() , defenseAgents[1]->pos() , defensePoints[0] , defensePoints[1] , 0 , 1);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[0]->pos() , defensePoints[2] , defensePoints[0] , 2 , 0);
-        doMatchThree(defenseAgents[0]->pos() , defenseAgents[3]->pos() , defensePoints[0] , defensePoints[3] , 0 , 3);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[1]->pos() , defensePoints[2] , defensePoints[1] , 2 , 1);
-        doMatchThree(defenseAgents[3]->pos() , defenseAgents[1]->pos() , defensePoints[3] , defensePoints[1] , 3 , 1);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[3]->pos() , defensePoints[2] , defensePoints[3] , 2 , 3);
-        doMatchThree(defenseAgents[0]->pos() , defenseAgents[1]->pos() , defensePoints[0] , defensePoints[1] , 0 , 1);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[0]->pos() , defensePoints[2] , defensePoints[0] , 2 , 0);
-        doMatchThree(defenseAgents[0]->pos() , defenseAgents[3]->pos() , defensePoints[0] , defensePoints[3] , 0 , 3);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[1]->pos() , defensePoints[2] , defensePoints[1] , 2 , 1);
-        doMatchThree(defenseAgents[3]->pos() , defenseAgents[1]->pos() , defensePoints[3] , defensePoints[1] , 3 , 1);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[3]->pos() , defensePoints[2] , defensePoints[3] , 2 , 3);
-
-        defenseTargets[0]=defensePoints[0];
-        defenseTargets[1]=defensePoints[1];
-        defenseTargets[2]=defensePoints[2];
-        defenseTargets[3]=defensePoints[3];
-
-        defenseDirs[0]=-(defenseTargets[0]-wm->ball->pos);
-        defenseDirs[1]=-(defenseTargets[1]-wm->ball->pos);
-        defenseDirs[2]=-(defenseTargets[2]-wm->ball->pos);
-        defenseDirs[3]=(defenseTargets[3]-wm->ball->pos);
-
-        break;
-    }
+void DefensePlan::penaltyGoalie(){
     Vector2D ballPos = wm->ball->pos;
     const float goalLineExtra = 0.03;
     const double xDiff = 0.10;
-    Line2D newLine(wm->field->ourGoalL()+Vector2D(+xDiff,+goalLineExtra),
-                   wm->field->ourGoalR()+Vector2D(+xDiff,-goalLineExtra));
-
-    CRobot* opp = NULL;
-    float minDist = 9999.9;
-    for (int i = 0 ; i < wm->opp.activeAgentsCount() ; i++)
-    {
-        float dist = wm->opp.active(i)->pos.dist(ballPos);
-        if (dist < minDist)
-        {
-            opp = wm->opp.active(i);
-            minDist = dist;
-        }
-    }
-
-    if (opp == NULL) return; //### Added By Ali
-
+    Line2D newLine(wm->field->ourGoalL() + Vector2D(+xDiff,+goalLineExtra),wm->field->ourGoalR()+Vector2D(+xDiff,-goalLineExtra));
     const double epsilon = 0.12;
     Vector2D target(-2.93, 0.0);
-
-    Line2D ballRay(ballPos, ballPos + opp->dir);
+    Line2D ballRay(ballPos, ballPos + (wm->opp[knowledge->nearestOppToBall]->dir));
     Vector2D intersectionPoint = newLine.intersection(ballRay);
-    if (intersectionPoint.valid())
+    if(intersectionPoint.valid()){
         target = intersectionPoint;
-    else
+        draw(target , 0 , "black");
+    }
+    else{
         target.y = 0.0;
-    //sounds like this target is tokhom
+    }
     target.y = min(max(target.y, wm->field->ourGoalR().y + epsilon), wm->field->ourGoalL().y - epsilon + 0.03);
-
     Vector2D targetDir(10, 10);
     targetDir.setDir(AngleDeg(60));
     targetDir.setLength(1);
-
     assignSkill(goalieAgent , gpa[goalieAgent->id()]);
-    gpa[goalieAgent->id()]->init(target, targetDir); // in Ejdeha code : gpa[goalieAgent->id()]->init(target, wm->ball->pos - goalieTarget);
-    if( executeSkill[0] ){
-        defenseTargets[0] = checkDefensePoint(defenseAgents.at(0), defenseTargets[0]);
-        assignSkill( defenseAgents.at(0) , gpa[defenseAgents.at(0)->id()]);
-        gpa[defenseAgents.at(0)->id()]->setTarget(defenseTargets[0], -defenseTargets[0] + wm->ball->pos);
-        draw(Circle2D(defenseTargets[0] , 0.05) , 0 , 360 , "black" , true);
-
-    }
-
-    if( executeSkill[1] ){
-        defenseTargets[1] = checkDefensePoint(defenseAgents.at(1), defenseTargets[1]);
-        assignSkill( defenseAgents.at(1) , gpa[defenseAgents.at(1)->id()]);
-        gpa[defenseAgents.at(1)->id()]->setTarget(defenseTargets[1] , -defenseTargets[1] + wm->ball->pos);
-        draw(Circle2D(defenseTargets[1] , 0.05) , 0 , 360 , "black" , true);
-    }
-
-
-    if( executeSkill[2] ){
-        defenseTargets[2] = checkDefensePoint(defenseAgents.at(2), defenseTargets[2]);
-        assignSkill( defenseAgents.at(2) , gpa[defenseAgents.at(2)->id()]);
-        gpa[defenseAgents.at(2)->id()]->setTarget(defenseTargets[2] , -defenseTargets[2]  + wm->ball->pos);
-        draw(Circle2D(defenseTargets[2] , 0.05) , 0 , 360 , "black" , true);
-
-    }
-
-    if( executeSkill[3] ){
-        defenseTargets[3] = checkDefensePoint(defenseAgents.at(3), defenseTargets[3]);
-        assignSkill( defenseAgents.at(3) , gpa[defenseAgents.at(3)->id()]);
-        gpa[defenseAgents.at(3)->id()]->setTarget(defenseTargets[3] , -defenseTargets[3]  + wm->ball->pos);
-        draw(Circle2D(defenseTargets[3] , 0.05) , 0 , 360 , "black" , true);
-    }
+    gpa[goalieAgent->id()]->setSlowMode(false);
+    gpa[goalieAgent->id()]->setADiveMode(true);
+    gpa[goalieAgent->id()]->init(target , targetDir);
 }
 
 bool DefensePlan::defenseClearOrNot(){
