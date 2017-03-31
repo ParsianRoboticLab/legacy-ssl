@@ -135,7 +135,7 @@ protected:
     bool limitBetweenHMDAndAHZ;
     bool changeInMarkPlanFlag;
     bool changeInTSMode;
-    int ahzCounter;
+    int lastOpponentAgentsToBeMarkSize;
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;
     QList <Vector2D> tenLastOpponentDirection;

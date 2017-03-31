@@ -1099,6 +1099,7 @@ DefensePlan::DefensePlan()
     changeInTSMode = false;
     sumOfLastOpponentDirection = Vector2D(0,0);
     sumOfLastOpponentPosition = Vector2D(0,0);
+    lastOpponentAgentsToBeMarkSize = 0;
     ////////////////////////////////
     for (int i = 0; i < _MAX_NUM_PLAYERS; i++)
     {
@@ -1349,29 +1350,29 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     matchPoints.append(markPoses);
     draw(QString(" %1 %2").arg(matchPoints.count()).arg(_defenseNum),Vector2D(-2,2),"red");
     draw(QString("  %1").arg(ourAgents.count()),Vector2D(2,2),"red");
-//    if(stopMode || playOnMode){
-//        markRoles.clear();
-//        changeInMarkPlanFlag = false;
-//    }
-//    else if(playOffMode || knowledge->transientFlag){
-//        for(int i = 0 ; i < lastMarkRoles.size() ; i++){
-//            if(markRoles.at(i) != lastMarkRoles.at(i)){
-//                changeInMarkPlanFlag = true;
-//            }
-//        }
-//    }
-//    debug(QString("changeInMarkPlanFlag: %1").arg(changeInMarkPlanFlag) ,D_AHZ, "green");
-//    if(!changeInMarkPlanFlag){
+    if(stopMode || playOnMode){
+        markRoles.clear();
+        changeInMarkPlanFlag = false;
+    }
+    else if((playOffMode || knowledge->transientFlag) && (oppAgentsToMarkPos.size() == lastOpponentAgentsToBeMarkSize)){
+        for(int i = 0 ; i < lastMarkRoles.size() ; i++){
+            if(markRoles.at(i) != lastMarkRoles.at(i)){
+                changeInMarkPlanFlag = true;
+            }
+        }
+    }
+    debug(QString("changeInMarkPlanFlag: %1").arg(changeInMarkPlanFlag) ,D_AHZ, "green");
+    if(!changeInMarkPlanFlag){
         knowledge->Matching(ourAgents,matchPoints,matchResult);
-//    }
-//    lastMarkRoles.clear();
-//    lastMarkRoles.append(markRoles);
+    }
+    lastMarkRoles.clear();
+    lastMarkRoles.append(markRoles);
+    lastOpponentAgentsToBeMarkSize = oppAgentsToMarkPos.size();
     if(matchPoints.count() == ourAgents.count()){
         for(int i =0; i < defenseCount  ; i++)
             defensePoints[i] = matchPoints[i];
         for(int i =0 ; i < matchPoints.count() && i < matchResult.count() ; i++)
         {
-
             ///// edited by mahi && AHZ /////
             gpa[ourAgents[i]->id()]->noRelax();
             for (int j = 0; j  < ourAgents.size(); j++) {
