@@ -11,6 +11,7 @@ CRolePlayOff::CRolePlayOff() {
     roleUpdate = false;
     timer.start();
     agentID = -1;
+    lookForward = true;
 }
 
 CRolePlayOff::~CRolePlayOff() {
@@ -38,6 +39,7 @@ void CRolePlayOff::reset()
     roleUpdate = false;
     timer.start();
     agentID = -1;
+    lookForward = true;
 }
 
 void CRolePlayOff::update() {
@@ -60,19 +62,18 @@ void CRolePlayOff::update() {
         kickSkill->setAvoidPenaltyArea(avoidPenaltyArea);
         kickSkill->setInterceptMode(intercept);
         if(wm->getIsSimulMode()) {
-            kickSkill->setKickSpeed(static_cast<int>(kickSpeed/170));
+            kickSkill->setKickSpeed(static_cast<int>(kickSpeed/120));
 
         } else {
             kickSkill->setKickSpeed(kickSpeed);
 
         }
-
         kickSkill->setChip(chip);
         kickSkill->setAgent(agent);
         kickSkill->setDontKick(!doPass);
         kickSkill->setAgent(agent);
 
-        if(!doPass && !chip) {
+        if(!doPass && !chip && lookForward) {
             kickSkill->setTarget(Vector2D(1000, 0));
         }
         updated = false;
