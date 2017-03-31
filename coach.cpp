@@ -1088,10 +1088,10 @@ void CCoach::updateAttackState()
         ourAttackState = SAFE;
         debug(QString("Attack: safe"),D_MHMMD);
     }
-    else if(Circle2D(oppNearest->pos + oppNearest->dir.norm() * 0.08, 0.1).contains(wm->ball->pos)) {
+    /*else if(Circle2D(oppNearest->pos + oppNearest->dir.norm() * 0.08, 0.1).contains(wm->ball->pos)) {
         ourAttackState = BallInOppJaw;
         debug(QString("Attack: ballinoppjaw"),D_MHMMD);
-    }
+    }*/
     else if(robotCritArea.contains(oppNearest->pos)) {
         ourAttackState = CRITICAL;
         debug(QString("Attack: critical"),D_MHMMD);
@@ -1134,20 +1134,20 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
     ////////////////////first we choose our playmake
 
     double playMakeParam[6] = {0};
-    double biggestPoint = -1000;
-    double ballVelCoef = 0.4;
-    double agentVelCoef = ballVelCoef / 3;
-    double nearestDist = 1000;
-    bool changePassChoose = true;
+    double biggestPoint     = -1000;
+    double ballVelCoef      = 0.4;
+    double agentVelCoef     = ballVelCoef / 3;
+    double nearestDistvel   = 1000;
+    double nearestDist      = 1000;
+    bool changePassChoose   = true;
 
-    int nearestId = -1;
     for(int i = 0 ; i < ourPlayers.count() ; i++) {
-        double t = wm->our[ourPlayers[i]]->pos.dist(wm->ball->pos);
-        if(t < nearestDist)
-        {
-            nearestDist = t;
-            nearestId = i;
-        }
+        double t = wm->our[ourPlayers[i]]->pos.dist(wm->ball->pos + wm->ball->vel * agentVelCoef);
+        double t2 = wm->our[ourPlayers[i]]->pos.dist(wm->ball->pos);
+        if(t < nearestDistvel)
+            nearestDistvel = t;
+        if(t2 < nearestDist)
+            nearestDist = t2;
     }
     if(dynamicAttack->getMahiPlayMaker() != NULL) {
         if(dynamicAttack->getMahiPlayMaker()->pos().dist(wm->ball->pos) < 0.13) {
@@ -1155,7 +1155,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
         }
     }
     /// if an agent is very close to the ball or ball is almost witout velocity
-    if(nearestDist < 0.3 || wm->ball->vel.length() < 0.1) {
+    if(nearestDist < 0.3 || wm->ball->vel.length() < 0.1 || nearestDistvel < 0.3) {
         for(int i = 0 ; i < ourPlayers.count() ; i++) {
 
             const Vector2D& agentPos = wm->our[ourPlayers[i]]->pos;
@@ -1981,6 +1981,7 @@ void CCoach::decideHalt(QList<int>& _ourPlayers) {
 void CCoach::decideStop(QList<int> & _ourPlayers) {
     firstTime = true;
     cyclesWaitAfterballMoved = 0;
+    lastPlayMake = -1;
     clearIntentions();
     CMasterPlay::position.reset();
     for( int i=0 ; i < _ourPlayers.size() ; i++ ){
