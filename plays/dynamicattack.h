@@ -64,6 +64,8 @@ public:
 private:
     int guardSize;
     int lastGuards[6];
+    Vector2D lastPassPosLoc;
+    Vector2D lastBallPos;
 
     void playMake();
     void choosePlayMaker();
