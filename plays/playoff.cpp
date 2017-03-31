@@ -396,18 +396,20 @@ void CPlayOff::staticExecute() {
 void CPlayOff::dynamicExecute() {
 
 
-    //    dynamicPlayKhafan();
+
+
+        dynamicPlayKhafan();
 //    dynamicPlayBlocker();
-        dynamicPlayChipToGoal();
+//        dynamicPlayChipToGoal();
 
 
     for(int i = 0;i < dynamicAgentSize;i++) {
         roleAgent[i]->execute();
     }
 
-    //    checkEndKhafan();
+        checkEndKhafan();
 //    checkEndBlocker();
-        checkEndChipToGoal();
+//        checkEndChipToGoal();
 }
 
 
@@ -492,9 +494,6 @@ void CPlayOff::dynamicPlayBlocker() {
 
         ready = false;
 
-    } else if (pass) {
-        pass = false;
-        shot = true;
     } else if (shot) {
 
         roleAgent[0] -> setKickSpeed(1023); // Vartypes This
@@ -619,8 +618,6 @@ void CPlayOff::checkEndKhafan() {
 void CPlayOff::checkEndBlocker() {
     if (ready) {
         dynamicState = 2;
-    } else if (pass) {
-        dynamicState = 4;
     } else if (shot) {
         dynamicState = 6;
     }
@@ -630,46 +627,25 @@ void CPlayOff::checkEndBlocker() {
     if (dynamicState == 2) {
         for (int i = 0;i < wm->opp.activeAgentsCount(); i++) {
             if (Circle2D(roleAgent[0] -> getAgent() -> pos() + roleAgent[0]->getAgent()->dir().norm()*0.6, 0.3).contains(wm->opp.active(i)->pos)) {
-                dynamicState = 4;
-                pass = true;
+                dynamicState = 6;
+                shot = true;
             }
         }
-    }
 
-    if (dynamicState == 4) {
-        debug(QString("[dastan] : %1").arg(knowledge->getCurrentTime() - dynamicStartTime), D_MAHI);
-        if (wm->ball->pos.dist(wm->field->oppGoal()) - 0.1 < roleAgent[1]->getAgent()->pos().dist(wm->field->oppGoal())) {
-            pass = false;
-            shot = true;
-            dynamicState = 6;
-        }
-        if (!Circle2D(roleAgent[0]->getAgent()->pos(), 0.5).contains(wm->ball->pos) && dynamicStartTime == -1) {
-            dynamicStartTime = knowledge->getCurrentTime();
-        }
+        dynamicStartTime = knowledge->getCurrentTime();
 
-        if (wm->ball->vel.length() < 0.2 && dynamicStartTime != -1) {
-            playOnFlag = true;
-            dynamicState = 0;
-        }
-
-        if (knowledge->getCurrentTime() - dynamicStartTime > 100 && dynamicStartTime != -1) {
-            playOnFlag = true;
-            dynamicState = 0;
-
-        }
     }
 
     if (dynamicState == 6) {
-        if (wm->ball->vel.length() < 0.2) {
+
+        if (!Circle2D(roleAgent[0]->getAgent()->pos(), 0.5).contains(wm->ball->pos)) {
             playOnFlag = true;
             dynamicState = 0;
         }
-        debug(QString("[dastan] : %1").arg(knowledge->getCurrentTime() - dynamicStartTime), D_MAHI);
 
-        if (knowledge->getCurrentTime() - dynamicStartTime > 200 && dynamicStartTime != -1) {
+        if (knowledge->getCurrentTime() - dynamicStartTime > 300 && dynamicStartTime != -1) {
             playOnFlag = true;
             dynamicState = 0;
-
         }
 
     }
