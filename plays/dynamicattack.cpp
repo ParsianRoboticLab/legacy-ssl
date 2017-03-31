@@ -1055,14 +1055,14 @@ void CDynamicAttack::assignLocations_1() {
 
 void CDynamicAttack::assignLocations_2() {
     //Top Opp Half
-    guardLocations[2][0][0].assign(2, 1.5  );
-    guardLocations[2][0][1].assign(2  , 1.5);
-    guardLocations[2][0][2].assign(3.5, 2  );
+    guardLocations[2][0][0].assign(1.25, 1.5  );
+    guardLocations[2][0][1].assign(2   , 1.5);
+    guardLocations[2][0][2].assign(3.5 , 2  );
 
     //Bottom Opp Half
-    guardLocations[2][1][0].assign(2, -1.5  );
-    guardLocations[2][1][1].assign(2  , -1.5);
-    guardLocations[2][1][2].assign(3.5, -2  );
+    guardLocations[2][1][0].assign(1.25, -1.5  );
+    guardLocations[2][1][1].assign(2   , -1.5);
+    guardLocations[2][1][2].assign(3.5 , -2  );
 }
 
 void CDynamicAttack::assignLocations_3() {
@@ -1082,46 +1082,46 @@ void CDynamicAttack::assignLocations_3() {
 
 void CDynamicAttack::assignLocations_4() {
     // Top Opp 1/4
-    guardLocations[4][0][0].assign(1.5  , 2.5);
+    guardLocations[4][0][0].assign(1.8, 2.5);
     guardLocations[4][0][1].assign(2.5, 2.5);
-    guardLocations[4][0][2].assign(3.5, 2.5);
+    guardLocations[4][0][2].assign(3.6, 2.25);
     // Mid-Top Opp 1/4
 
     guardLocations[4][1][0].assign(1  , 1);
     guardLocations[4][1][1].assign(2.5, 1);
-    guardLocations[4][1][2].assign(3.5, 1);
+    guardLocations[4][1][2].assign(3.5, 0.9);
     // Mid-Bottom Opp 1/4
 
     guardLocations[4][2][0].assign(1  , -1);
     guardLocations[4][2][1].assign(2.5, -1);
-    guardLocations[4][2][2].assign(3.5, -1);
+    guardLocations[4][2][2].assign(3.5, -0.9);
 
     // Bottom Opp 1/4
-    guardLocations[4][3][0].assign(1.5, -2.5);
+    guardLocations[4][3][0].assign(1.8, -2.5);
     guardLocations[4][3][1].assign(2.5, -2.5);
-    guardLocations[4][3][2].assign(3.5, -2.5);
+    guardLocations[4][3][2].assign(3.6, -2.25);
 }
 
 void CDynamicAttack::assignLocations_5() {
     // Top Opp 1/4
-    guardLocations[5][0][0].assign(1  , 2.5);
+    guardLocations[5][0][0].assign(1.8, 2.5);
     guardLocations[5][0][1].assign(2.5, 2.5);
-    guardLocations[5][0][2].assign(3.5, 2.5);
+    guardLocations[5][0][2].assign(3.6, 2.25);
     // Mid-Top Opp 1/4
 
     guardLocations[5][1][0].assign(1  , 1);
     guardLocations[5][1][1].assign(2.5, 1);
-    guardLocations[5][1][2].assign(3.5, 1);
+    guardLocations[5][1][2].assign(3.5, 0.9);
     // Mid-Bottom Opp 1/4
 
     guardLocations[5][2][0].assign(1  , -1);
     guardLocations[5][2][1].assign(2.5, -1);
-    guardLocations[5][2][2].assign(3.5, -1);
+    guardLocations[5][2][2].assign(3.5, -0.9);
 
     // Bottom Opp 1/4
-    guardLocations[5][3][0].assign(1  , -2.5);
+    guardLocations[5][3][0].assign(1.8, -2.5);
     guardLocations[5][3][1].assign(2.5, -2.5);
-    guardLocations[5][3][2].assign(3.5, -2.5);
+    guardLocations[5][3][2].assign(3.6, -2.25);
 
     // BackUp-Line
     guardLocations[5][4][0].assign(-1 ,  2);

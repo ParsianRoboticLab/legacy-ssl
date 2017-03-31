@@ -3688,8 +3688,8 @@ CNewProfilerWidget::CNewProfilerWidget(QWidget* parent):QDialog(parent){
     ProfilerLayout=new QVBoxLayout;
     profTxt=new QLabel("select active Robots to be profiled:",this);
     repeatTxt=new QLabel("repeat:",this);
-    filenamelable=new QLabel("JSON file name:" , this);
-    fileName = new QLineEdit("MahiProfiler.json" , this);
+    //filenamelable=new QLabel("JSON file name:" , this);
+    //fileName = new QLineEdit("MahiProfiler.json" , this);
     repeatNum=new QLineEdit("3",this);
     startProf=new QPushButton("start Profiling",this);
     profilerRobotsList->setLayout(ProfilerLayout);
@@ -3714,8 +3714,8 @@ CNewProfilerWidget::CNewProfilerWidget(QWidget* parent):QDialog(parent){
     l->addWidget(profilerRobotsList,2,1);
     l->addWidget(repeatTxt,3,1);
     l->addWidget(repeatNum,3,2);
-    l->addWidget(filenamelable,4,1);
-    l->addWidget(fileName,4,2);
+    //l->addWidget(filenamelable,4,1);
+    //l->addWidget(fileName,4,2);
     l->addWidget(startProf,5,1);
     this->setLayout(l);
 
@@ -3736,7 +3736,7 @@ void CNewProfilerWidget::startProfFunc(){
             i++;
         }
     }
-    collectKickProfile->filename=fileName->text();
+    //collectKickProfile->filename=fileName->text();
     collectKickProfile->repeat=repeatNum->text().toInt();
     this->close();
     ProfilerExecute=true;
