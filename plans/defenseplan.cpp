@@ -313,9 +313,17 @@ void DefensePlan::tempFindPos(int _markAgentSize){
     markRoles.clear();
     markAngs.clear();
     /////////////////////////// Added by AHZ for Intelligent Mark //////////////
+    if(playOff){
+        tenLastOpponentDirection.append(wm->opp[knowledge->nearestOppToBall]->dir);
+    }
     if(LastTS != knowledge->transientFlag && LastTS == 0){
-        opponentPasserDirection = wm->opp[knowledge->nearestOppToBall]->dir;
+        for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - 9 ; i--){
+            sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
+        }
+        opponentPasserDirection = sumOfLastOpponentDirection / 10;
         opponentPasserPossition = wm->opp[knowledge->nearestOppToBall]->pos;
+        tenLastOpponentDirection.clear();
+        sumOfLastOpponentDirection = Vector2D(0,0);
         changeInTSMode = true;
     }
     if(changeInTSMode){
@@ -1062,7 +1070,7 @@ DefensePlan::DefensePlan()
     markRadiusStrict = 1.39;
     segmentpershoot = policy()->Mark_ShootRatioBlock() / 100.0;
     segmentperpass = (100  - policy()->Mark_PassRatioBlock()) / 100.0;
-    //LastTS = false;
+    LastTS = true;
     dir  = Vector2D(1,0);
     MantoManAllTransientFlag =  policy()->Mark_ManToManAllTransiant();
     /////
@@ -1092,6 +1100,8 @@ DefensePlan::DefensePlan()
     lastMarkRoles.append(markRoles);
     changeInMarkPlanFlag = false;
     changeInTSMode = false;
+    sumOfLastOpponentDirection = Vector2D(0,0);
+    sumOfLastOpponentPosition = Vector2D(0,0);
     ////////////////////////////////
     for (int i = 0; i < _MAX_NUM_PLAYERS; i++)
     {
