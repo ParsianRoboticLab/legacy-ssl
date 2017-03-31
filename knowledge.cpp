@@ -142,6 +142,63 @@ Vector2D CKnowledge::getStaticPoses(int num)
 
 }
 
+double CKnowledge::getProfile(int agentId, double realParameter, bool isKick,bool spinOn ){
+    double kickspeed=0;
+    int counter=0;
+    if(isKick && !spinOn)
+    {
+//        debug(QString("_%1_").arg(ProfilerResult[agentId][0][(int)round(realParameter*10)]),D_NADIA);
+        if( ProfilerResult[agentId][0][(int)round(realParameter*10)]>0)
+            return ProfilerResult[agentId][0][(int)round(realParameter*10)];
+        else{
+                for(int i=0;i<8;i++)
+                {
+                    if(ProfilerResult[agentId][i][(int)round(realParameter*10)]!=0){
+                    kickspeed+=ProfilerResult[agentId][i][(int)round(realParameter*10)];
+                    counter++;
+                    }
+                }
+                kickspeed/counter;
+
+                if(kickspeed > 1024)
+                    return 1000;
+                else if(kickspeed > 0)
+                    return kickspeed;
+                else
+                    return 100;
+            }
+    }
+    else if(!isKick && !spinOn)
+    {
+
+        if( ProfilerResult[agentId][1][(int)round(realParameter*10)]!=0)
+            return ProfilerResult[agentId][1][(int)round(realParameter*10)];
+        else{
+                for(int i=0;i<8;i++)
+                {
+                    if(ProfilerResult[agentId][i][(int)round(realParameter*10)]!=0){
+                    kickspeed+=ProfilerResult[agentId][i][(int)round(realParameter*10)];
+                    counter++;
+                    }
+                }
+                kickspeed/counter;
+
+                if(kickspeed > 1024)
+                    return 1000;
+                else if(kickspeed > 0)
+                    return kickspeed;
+                else
+                    return 100;
+            }
+    }
+    else if(isKick && spinOn){
+
+    }
+    else if(!isKick && spinOn){
+
+    }
+}
+
 void CKnowledge::calculateCommandFrameRate()
 {
     double now = CProfiler::getTime();

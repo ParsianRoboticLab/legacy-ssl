@@ -575,12 +575,9 @@ void CollectProfileData::ChipProfiling(){
 
 void CollectProfileData::start(){
 
-    Triangle2D upTri = Triangle2D( Vector2D(-_FIELD_WIDTH/2 , _FIELD_HEIGHT/2) ,Vector2D(-_FIELD_WIDTH/2 , 0) , Vector2D(0 , _FIELD_HEIGHT/2) );
-
     switch(prfState){
 
     case InitState:
-//        debug("init state" , D_FATEMEH);
         if(activeRobots[activeRobotsCount]!=-1){
             if(activeRobots[activeRobotsCount+1]!= -1){
                 init(activeRobots[activeRobotsCount],activeRobots[activeRobotsCount+1]);
@@ -600,7 +597,6 @@ void CollectProfileData::start(){
         break;
 
     case Pos1:
-//        debug("pos1" , D_FATEMEH);
         positioning(lowPosX1 , lowPosY1 , lowPosX2 , lowPosY2);
         if( Circle2D(knowledge->getAgent(prfl2->getAgentID())->pos() , 0.1).contains(prfl2->getTarget()) &&
                 Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.1).contains(prfl1->getTarget()) ){
@@ -611,7 +607,6 @@ void CollectProfileData::start(){
         break;
 
     case goOutState:
-//        debug("goOut state" , D_FATEMEH);
         positioning(-0.6 , 0.7 , -0.6 , -0.4 );
         if( Circle2D(knowledge->getAgent(prfl2->getAgentID())->pos() , 0.4).contains(prfl2->getTarget()) &&
                 Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.4).contains(prfl1->getTarget()) ){
@@ -628,7 +623,6 @@ void CollectProfileData::start(){
         break;
 
     case Pos2:
-//        debug("pos2" , D_FATEMEH);
         positioning(highPosX1 , highPosY1 , highPosX2 , highPosY2);
         if( Circle2D(knowledge->getAgent(prfl2->getAgentID())->pos() , 0.1).contains(prfl2->getTarget()) &&
                 Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.1).contains(prfl1->getTarget()) ){
@@ -645,7 +639,6 @@ void CollectProfileData::start(){
         break;
 
     case Pos3:
-//        debug("pos3" , D_FATEMEH);
         positioning(chipPosX , chipPosY);
         if(Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.1).contains(prfl1->getTarget()) ){
             prfState = IsChip;
@@ -654,13 +647,11 @@ void CollectProfileData::start(){
         break;
 
     case StartHigh:
-//        debug("start high" , D_FATEMEH);
         HighSpeed();
 
         break;
 
     case SaveProf:
-//        debug("save prof" , D_FATEMEH);
         profiler->save(JSON , filename);
         prfState=endState;
 
