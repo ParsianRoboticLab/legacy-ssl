@@ -539,7 +539,13 @@ public:
     int dynamicMatch[6];
 private:
     void dynamicAssignID();
-    void checkEndDynamicState();
+    void dynamicPlayKhafan();
+    void dynamicPlayBlocker();
+    void dynamicPlayChipToGoal();
+
+    void checkEndKhafan();
+    void checkEndBlocker();
+    void checkEndChipToGoal();
     Vector2D getDynamicTarget(int i);
 
 
