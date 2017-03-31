@@ -70,7 +70,7 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
             sol.append(wm->field->ourPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
             draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
             markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
-            markRoles.append(QString("shotBlocker"));
+            markRoles.append(QString("predictBlocker"));
             markAngs.append(wm->field->center() - wm->field->ourGoal());
             ourMarkAgentsSize--;
         }
@@ -332,7 +332,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
             sol.append(wm->field->ourPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
             draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
             markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
-            markRoles.append(QString("shotBlocker"));
+            markRoles.append(QString("predictBlocker"));
             markAngs.append(wm->field->center() - wm->field->ourGoal());
             _markAgentSize--;
         }
@@ -581,6 +581,7 @@ void DefensePlan::runGoalie(){
     Vector2D goaliePos;
     Vector2D Solutions[2];
     Vector2D goalKeeperTargetOffSet = Vector2D(0.2 , 0.0);
+    Segment2D goalLine(wm->field->ourGoalL() + Vector2D(0.2 , 0.1) , wm->field->ourGoalR() + Vector2D(0.2 , -0.1));
     bool playOnMode = knowledge->getGameMode() == CKnowledge::Start;
     stopMode = knowledge->isStop();
     ////////////////////////// Added Danger Mode && edited by AHZ //////////////////////////
@@ -625,15 +626,16 @@ void DefensePlan::runGoalie(){
             debug(QString("stopMode"),D_SEPEHR);
             //////////////////////////// AHZ ////////////////////////
             ballPos = wm->ball->pos;
-            if(Vector2D::angleOf(ballPos,wm->field->ourGoal(),wm->field->ourGoalL()).degree() < 20 + angleDegreeThr || Vector2D::angleOf(ballPos,wm->field->ourGoal(),wm->field->ourGoalR()).degree() < 20+  angleDegreeThr){
-                debug(QString("yess"),D_SEPEHR);
-                angleDegreeThr = 5;
-                goalieTarget = wm->field->ourGoal() + goalKeeperTargetOffSet;
-            }
-            else{
-                angleDegreeThr = 0;
-                goalieTarget = strictFollowBall(ballPos);
-            }
+            goalieTarget = wm->field->ourGoal() + goalKeeperTargetOffSet;
+//            if(Vector2D::angleOf(ballPos,wm->field->ourGoal(),wm->field->ourGoalL()).degree() < 20 + angleDegreeThr || Vector2D::angleOf(ballPos,wm->field->ourGoal(),wm->field->ourGoalR()).degree() < 20+  angleDegreeThr){
+//                debug(QString("yess"),D_SEPEHR);
+//                angleDegreeThr = 5;
+//                goalieTarget = wm->field->ourGoal() + goalKeeperTargetOffSet;
+//            }
+//            else{
+//                angleDegreeThr = 0;
+//                goalieTarget = strictFollowBall(ballPos);
+//            }
             //////////////////////////////////////////////////////
             return;
         }
@@ -1352,23 +1354,23 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     matchPoints.append(markPoses);
     draw(QString(" %1 %2").arg(matchPoints.count()).arg(_defenseNum),Vector2D(-2,2),"red");
     draw(QString("  %1").arg(ourAgents.count()),Vector2D(2,2),"red");
-    if(stopMode || playOnMode){
-        markRoles.clear();
-        changeInMarkPlanFlag = false;
-    }
-    else if(playOffMode){
-        for(int i = 0 ; i < lastMarkRoles.size() ; i++){
-            if(markRoles.at(i) != lastMarkRoles.at(i)){
-                changeInMarkPlanFlag = true;
-            }
-        }
-    }
-    debug(QString("changeInMarkPlanFlag: %1").arg(changeInMarkPlanFlag) ,D_AHZ, "green");
-    if(!changeInMarkPlanFlag){
+//    if(stopMode || playOnMode){
+//        markRoles.clear();
+//        changeInMarkPlanFlag = false;
+//    }
+//    else if(playOffMode || knowledge->transientFlag){
+//        for(int i = 0 ; i < lastMarkRoles.size() ; i++){
+//            if(markRoles.at(i) != lastMarkRoles.at(i)){
+//                changeInMarkPlanFlag = true;
+//            }
+//        }
+//    }
+//    debug(QString("changeInMarkPlanFlag: %1").arg(changeInMarkPlanFlag) ,D_AHZ, "green");
+//    if(!changeInMarkPlanFlag){
         knowledge->Matching(ourAgents,matchPoints,matchResult);
-    }
-    lastMarkRoles.clear();
-    lastMarkRoles.append(markRoles);
+//    }
+//    lastMarkRoles.clear();
+//    lastMarkRoles.append(markRoles);
     if(matchPoints.count() == ourAgents.count()){
         for(int i =0; i < defenseCount  ; i++)
             defensePoints[i] = matchPoints[i];
@@ -1492,7 +1494,6 @@ void DefensePlan::announceClearing(bool state)
     if (state) knowledge->variables["clearing"] = "true";
     else knowledge->variables["clearing"] = "false";
 }
-
 
 void DefensePlan::penaltyGoalie(){
     Vector2D ballPos = wm->ball->pos;
