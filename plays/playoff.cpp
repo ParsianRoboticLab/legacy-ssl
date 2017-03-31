@@ -398,14 +398,14 @@ void CPlayOff::dynamicExecute() {
 
 
 
-        dynamicPlayKhafan();
-        checkEndKhafan();
+//        dynamicPlayKhafan();
+//        checkEndKhafan();
 
         /*dynamicPlayBlocker();
         checkEndBlocker();*/
 
-        /*dynamicPlayChipToGoal();
-        checkEndChipToGoal();*/
+        dynamicPlayChipToGoal();
+        checkEndChipToGoal();
 
         for(int i = 0;i < dynamicAgentSize;i++) {
             roleAgent[i]->execute();

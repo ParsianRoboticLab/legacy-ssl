@@ -1437,7 +1437,7 @@ void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
     //Decide Plan
     if (firstTime) {
         NGameOff::EMode tempMode;
-        selectPlayOffMode(tempMode);
+        selectPlayOffMode(_ourplayers.size(), tempMode);
         initPlayOffMode(tempMode, _mode, _ourplayers);
         ourPlayOff->setMasterMode(tempMode);
         firstTime = false;
@@ -1635,9 +1635,11 @@ NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& pla
     return bestPlans[rand()%bestPlans.size()];
 }
 
-void CCoach::selectPlayOffMode(NGameOff::EMode &_mode) {
+void CCoach::selectPlayOffMode(int agentSize, NGameOff::EMode &_mode) {
     // TODO : a real one needed
-    if (knowledge->getGameState() == CKnowledge::OurKickOff
+    if (agentSize < 2) {
+        _mode = NGameOff::DynamicPlay;
+    } else if (knowledge->getGameState() == CKnowledge::OurKickOff
             ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
         _mode = NGameOff::StaticPlay;
 
@@ -1645,7 +1647,6 @@ void CCoach::selectPlayOffMode(NGameOff::EMode &_mode) {
         _mode = NGameOff::StaticPlay;
     } else {
         _mode = NGameOff::DynamicPlay;
-
     }
 }
 

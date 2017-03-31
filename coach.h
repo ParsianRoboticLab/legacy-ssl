@@ -143,7 +143,7 @@ private:
 
 
     /////////////////////////New Play Off
-    void selectPlayOffMode(NGameOff::EMode& _mode);
+    void selectPlayOffMode(int agentSize, NGameOff::EMode& _mode);
     void initPlayOffMode(const NGameOff::EMode _mode,
                          const POMODE _gameMode,
                          const QList<int>& _agentSize);
@@ -188,7 +188,6 @@ private:
     void decideTheirBallPlacement (QList<int>&);
     void decideNull               (QList<int>&);
     /////////////////////////////////////
-
 };
 
 #define GetRole(Role, number) static_cast<Role*> (getRole(Role::Name, number))
