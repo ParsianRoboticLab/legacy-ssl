@@ -576,21 +576,66 @@ void CDynamicAttack::chooseBestPositons()
 
     for(int i = 0; i < agentSize; i++)
     {
+        debug(QString("region %1").arg(i), D_PARSA);
         int best = -1;
         Vector2D points[guardSize];
+        double tempAngle[guardSize];
+        double maxAng = -1;
         for(int j = 0; j < guardSize; j++)
         {
-            points[j] = guardLocations[agentSize][i][j];
-            double tempAngle = ballPos.angleBetween(wm->field->oppGoal(), points[j]).degree();
-            if(tempAngle < 85)
-                if(best == -1 || points[best].x < points[j].x)
-                    best = j;
-
+            points[j]    = guardLocations[agentSize][i][j];
+            tempAngle[j] = Vector2D::angleOf(wm->field->oppGoal(), points[j],ballPos).degree();
+            debug(QString("angle is  : %1").arg(tempAngle[j]), D_PARSA);
+            maxAng = max(maxAng, tempAngle[j]);
         }
+        for(int j = 0; j < guardSize; j++)
+            if(tempAngle[j] < 85)
+                if(best == -1 || points[best].x < points[j].x)
+                    if((ballPos + ballVel * 0.4).dist(points[j]) > 0.8)
+                        best = j;
         if(best == -1)
-            semiDynamicPosition.append(Vector2D(0, points[0].y));
+        {
+            if(maxAng < 115)
+            {
+                for(int h = 0; h < guardSize / 2; h++)
+                {
+                    int tempIndex1 = (guardSize / 2 + h) % guardSize;
+                    int tempIndex2 = (guardSize / 2 + h  + guardSize) % guardSize;
+                    if((ballPos + ballVel * 0.4).dist(points[tempIndex1]) > 0.8)
+                    {
+                        semiDynamicPosition.append(   points[tempIndex1]);
+                        break;
+                    }
+                    if((ballPos + ballVel * 0.4).dist(points[tempIndex2]) > 0.8)
+                    {
+                        semiDynamicPosition.append(points[tempIndex2]);
+                        break;
+                    }
+                }
+                /*int bestId = 0;
+                for(int j = 1; j < guardSize; j++)
+                {
+                    double temp1 = Vector2D::angleOf(wm->field->oppGoal(), points
+                                                     [j     ],ballPos).degree();
+                    double temp2 = Vector2D::angleOf(wm->field->oppGoal(), points
+                                                     [bestId],ballPos).degree();
+                    if(temp1 < temp2)
+                        bestId = j;
+                }
+                semiDynamicPosition.append(points[bestId]);*/
+            }
+            else
+            {
+                if(Vector2D(0, points[0].y).dist(ballPos) > 0.5)
+                    semiDynamicPosition.append(Vector2D(0, points[0].y));
+                else
+                    semiDynamicPosition.append(Vector2D(0, points[0].y
+                                               + 0.5 - points[0].y + ballPos.y));
+            }
+        }
         else
             semiDynamicPosition.append(points[best]);
+        debug(QString(""), D_PARSA);
     }
 
 
@@ -1221,7 +1266,7 @@ void CDynamicAttack::assignLocations_3() {
 
 void CDynamicAttack::assignLocations_4() {
     // Top Opp 1/4
-    guardLocations[4][0][0].assign(1.8, 2.5);
+    guardLocations[4][0][0].assign(1.75, 2.25);
     guardLocations[4][0][1].assign(2.5, 2.5);
     guardLocations[4][0][2].assign(3.6, 2.25);
     // Mid-Top Opp 1/4
@@ -1236,14 +1281,14 @@ void CDynamicAttack::assignLocations_4() {
     guardLocations[4][2][2].assign(3.5, -0.9);
 
     // Bottom Opp 1/4
-    guardLocations[4][3][0].assign(1.8, -2.5);
+    guardLocations[4][3][0].assign(1.75, -2.25);
     guardLocations[4][3][1].assign(2.5, -2.5);
     guardLocations[4][3][2].assign(3.6, -2.25);
 }
 
 void CDynamicAttack::assignLocations_5() {
     // Top Opp 1/4
-    guardLocations[5][0][0].assign(1.8, 2.5);
+    guardLocations[5][0][0].assign(1.75, 2.25);
     guardLocations[5][0][1].assign(2.5, 2.5);
     guardLocations[5][0][2].assign(3.6, 2.25);
     // Mid-Top Opp 1/4
@@ -1258,7 +1303,7 @@ void CDynamicAttack::assignLocations_5() {
     guardLocations[5][2][2].assign(3.5, -0.9);
 
     // Bottom Opp 1/4
-    guardLocations[5][3][0].assign(1.8, -2.5);
+    guardLocations[5][3][0].assign(1.75, -2.25);
     guardLocations[5][3][1].assign(2.5, -2.5);
     guardLocations[5][3][2].assign(3.6, -2.25);
 
