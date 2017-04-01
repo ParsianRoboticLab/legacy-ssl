@@ -64,6 +64,8 @@ public:
 
     QString filename;
 
+    QTime kickerWait;
+
     QList<double> p1RealSpeedRec , p2RealSpeedRec;
     QList<int> p1KickSpeed , p2KickSpeed;
 

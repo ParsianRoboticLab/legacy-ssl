@@ -49,6 +49,7 @@ void CRolePlayOn::initTask()
             kickSkill->setChip(chip);
             kickSkill->setSpin(spin);
             kickSkill->setKickSpeed(kickSpeed);
+            kickSkill->setPassProfiler(true);
             kickSkill->setAvoidPenaltyArea(avoidPenaltyArea);
             kickSkill->setIsGotoPointAvoid(isGotoPointAvoid);
             //fateme
