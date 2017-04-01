@@ -1742,6 +1742,11 @@ void CMainApplication::loadFormationConfigs(){
     CCoach::editData["TheirPenaltyKick"]->openConf(prefix+"their_penalty_kick.conf");
     CCoach::editData["OurPenaltyKick"] = new EditData;
     CCoach::editData["OurPenaltyKick"]->openConf(prefix+"our_penalty_kick.conf");
+    CCoach::editData["TheirP"] = new EditData;
+    CCoach::editData["TheirP"]->openConf(prefix+"theirP.conf");
+    CCoach::editData["OurP"] = new EditData;
+    CCoach::editData["OurP"]->openConf(prefix+"ourP.conf");
+
 }
 
 

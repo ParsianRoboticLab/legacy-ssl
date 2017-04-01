@@ -132,7 +132,13 @@ protected:
     bool dangerForGoalieClearByOppAgents;
     bool stopMode;
     bool limitBetweenAHZAndHMD;
-    bool limitBetweenHMDAndAHZ;    
+    bool limitBetweenHMDAndAHZ;
+    bool changeInMarkPlanFlag;
+    bool changeInTSMode;
+    QList <QString> markRoles;
+    QList <QString> lastMarkRoles;
+    Vector2D opponentPasserDirection;
+    Vector2D opponentPasserPossition;
     ///////////////////////////////////////////////////
     void executeGoalie();
     Vector2D blockTheBall();
@@ -212,7 +218,7 @@ public:
       double segmentpershoot;
       double segmentperpass;
       bool MantoManAllTransientFlag;
-      bool LastTs;
+      bool LastTS;
       Vector2D dir;
     ///////////////////////////////////
 

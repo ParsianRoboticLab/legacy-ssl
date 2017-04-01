@@ -20,3 +20,4 @@ potts
 motion/*
 launcher/*
 *.json
+*.conf.*
