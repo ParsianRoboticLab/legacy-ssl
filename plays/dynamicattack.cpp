@@ -2,6 +2,9 @@
 
 CDynamicAttack::CDynamicAttack() {
     guardSize = 3;
+    for(int i = 0; i < 6; i++)
+        lastGuards[i] = -1;
+    positioningIntentionInterval = 300;
 
     for(size_t i = 0;i  < 6;i++) {
         roleAgents[i] = new CRoleDynamic();
@@ -391,11 +394,11 @@ void CDynamicAttack::playMake() {
         roleAgentPM -> setEmptySpot(false);
         roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
         // TODO : fix this dastan
-//        if(isRightTimeToPass()) {
-//            roleAgentPM->setNoKick(false); //TEST
-//        } else {
-//            roleAgentPM->setNoKick(true);
-//        }
+        if(isRightTimeToPass()) {
+            roleAgentPM->setNoKick(false); //TEST
+        } else {
+            roleAgentPM->setNoKick(true);
+        }
         break;
     case DynamicEnums::Chip:
         roleAgentPM->setNoKick(false);
@@ -561,7 +564,7 @@ void CDynamicAttack::chooseBestPositons()
 {
     //it has three code of choosing best position that only one of them must be uncommented
     int agentSize = activeAgents.size();
-
+    Vector2D ans;
     guardIndexList.clear();
     for(int i = 0; i < currentPlan.agentSize; i++)
         guardIndexList.append(i);
@@ -586,19 +589,20 @@ void CDynamicAttack::chooseBestPositons()
             points[j]    = guardLocations[agentSize][i][j];
             tooNearToBall[j] = ((ballPos + ballVel * ballVelCoef).
                                           dist(points[j]) <= 1.2);
-            tooFarToBall [j] = ((ballPos + ballVel * ballVelCoef).
-                                          dist(points[j]) > 4.7);
-            tempAngle[j] = Vector2D::angleOf(wm->field->oppGoal(), points[j],ballPos + 0.2 * ballVel).degree();
-            debug(QString("angle   is  : %1").arg(tempAngle    [j]), D_PARSA);
+            tooFarToBall[j] = ((ballPos + ballVel * ballVelCoef).
+                                              dist(points[j]) > 4.7);
+            tempAngle[j] = Vector2D::angleOf(wm->field->oppGoal(),
+                                    points[j],ballPos + 0.2 * ballVel).degree();
+            /*debug(QString("angle   is  : %1").arg(tempAngle    [j]), D_PARSA);
             debug(QString("toofar  is  : %1").arg(tooFarToBall [j]), D_PARSA);
-            debug(QString("toonear is  : %1").arg(tooNearToBall[j]), D_PARSA);
+            debug(QString("toonear is  : %1").arg(tooNearToBall[j]), D_PARSA);*/
             maxAng = max(maxAng, tempAngle[j]);
         }
         for(int j = 0; j < guardSize; j++)
             if(tempAngle[j] < 70 || (j == guardSize - 1 && tempAngle[j] < 80))
                 if(best == -1 || points[best].x < points[j].x)
                     if(!tooNearToBall[j])
-                        if(!tooFarToBall[j])
+                        if(!tooFarToBall[j] || agentSize != 3) //exception for 3 positionings
                             best = j;
         debug(QString("best is : %1").arg(best), D_PARSA);
         if(guards[currentPlan.agentSize][i]
@@ -606,72 +610,72 @@ void CDynamicAttack::chooseBestPositons()
             best = farGuardFromPoint(i, ballPos + ballVel * 0.4);
         }
         debug(QString("best is : %1").arg(best), D_PARSA);
-//        if(best == -1)
-//        {
-//            if(maxAng < 115)
-//            {
-//                for(int h = 0; h < guardSize / 2; h++)
-//                {
-//                    int tempIndex1 = (guardSize / 2 + h) % guardSize;
-//                    int tempIndex2 = (guardSize / 2 + h  + guardSize) % guardSize;
-//                    if(!tooNearToBall[tempIndex1])
-//                    {
-//                        best = tempIndex1;
-//                        break;
-//                    }
-//                    if(!tooNearToBall[tempIndex2])
-//                    {
-//                        best = tempIndex2;
-//                        break;
-//                    }
-//                }
-//                //this can be instead of uppper for.
-//                /*best = 0;
-//                for(int j = 1; j < guardSize; j++)
-//                {
-//                    double temp1 = Vector2D::angleOf(wm->field->oppGoal(), points
-//                                                     [j     ],ballPos).degree();
-//                    double temp2 = Vector2D::angleOf(wm->field->oppGoal(), points
-//                                                     [bestId],ballPos).degree();
-//                    if(temp1 < temp2)
-//                        best = j;
-//                }*/
-//                semiDynamicPosition.append(points[best]);
-//            }
-//            else
-//            {
-//                semiDynamicPosition.append(points[guardSize - 1]);
-//                /*
-//                if(Vector2D(0, points[0].y).dist(ballPos) > 0.5)
-//                    semiDynamicPosition.append(Vector2D(0, points[0].y));
-//                else
-//                    semiDynamicPosition.append(Vector2D(0, points[0].y
-//                                               + 0.5 - points[0].y + ballPos.y));*/
-//            }
-//        }
-        debug(QString("best is : %1").arg(best), D_PARSA);
-        if(best == -1)
+        if(agentSize == 3 && best == guardSize - 1)
+        {
+            Line2D l = Line2D(wm->ball->pos, points[best]);
+            Vector2D dummy;
+            Segment2D s = Segment2D(wm->field->oppGoalR() - Vector2D(0, 0.3),
+                                    wm->field->oppGoalL() + Vector2D(0, 0.3));
+            dummy = s.intersection(l);
+            if(dummy.x < 10)
+            {
+                if(wm->ball->pos.y < 0)
+                    ans = points[best] + Vector2D(0, 0.6);
+                else
+                    ans = points[best] - Vector2D(0, 0.6);
+                best = -2;
+            }
+        }
+        if(best == -2);
+        else if(best == -1)
         {
             if((i == guardSize - 1 || i == 0) && (agentSize == 3))
             {
                 if(ballPos.dist(points[guardSize / 2]) > 0.6)
-                    semiDynamicPosition.append(points[guardSize / 2]);
+                    ans = points[guardSize / 2];
                 else if(ballPos.dist(points[0]) > 0.6)
-                    semiDynamicPosition.append(points[0]);
+                    ans = points[0];
                 else
-                    semiDynamicPosition.append(Vector2D(0, points[0].y));
+                    ans = Vector2D(0, points[0].y);
             }
             else
-                semiDynamicPosition.append(Vector2D(0, points[0].y));
+                ans =Vector2D(0, points[0].y);
         }
         else if(i < currentPlan.agentSize)
-            semiDynamicPosition.append(points[best]);
+            ans = points[best];
         else if(currentPlan.mode == DynamicEnums::DefenseClear)
-            semiDynamicPosition.append(Vector2D(0, 0));
+            ans = Vector2D(0, 0);
         else
-            semiDynamicPosition.append(guardLocations[currentPlan.agentSize]
-                                                     [currentPlan.agentSize - 1]
-                                                     [best]);
+            ans = guardLocations[currentPlan.agentSize]
+                                [currentPlan.agentSize - 1]
+                                [best];
+
+        int matchId = -1;
+        for(int j = 0; j < guardSize; j++)
+            if(points[j] == ans)
+                matchId = j;
+        if(matchId == -1)
+        {
+            semiDynamicPosition.append(ans);
+            positioningIntention.restart();
+            lastGuards[i] = -1;
+        }
+        else if (matchId != lastGuards[i])
+        {
+            if(lastGuards[i] == -1 ||
+                    positioningIntention.elapsed() > positioningIntentionInterval) {
+                semiDynamicPosition.append(ans);
+                positioningIntention.restart();
+                lastGuards[i] = matchId;
+            }
+            else
+                semiDynamicPosition.append(points[lastGuards[i]]);
+        }
+        else
+        {
+            semiDynamicPosition.append(points[matchId]);
+            positioningIntention.restart();
+        }
         debug(QString(""), D_PARSA);
     }
 
@@ -680,14 +684,13 @@ void CDynamicAttack::chooseBestPositons()
      and now it does not work as defenition of some of its variables omitted
      to fix that and run this code add this lines to the private part of
      class CDynamicAttack :
-    int lastGuards[6];
+
     Vector2D lastPassPosLoc;
     Vector2D lastBallPos;
     And add this to the constructor of the class:
     lastPassPosLoc = Vector2D(5000, 5000);
     lastBallPos    = Vector2D(5000, 5000);
-    for(int i = 0; i < 6; i++)
-        lastGuards[i] = -1;*/
+    */
 
 
     /*if(mahiPlayMaker != NULL && ballPos.dist(mahiPlayMaker->pos()) > 0.15)
@@ -999,9 +1002,6 @@ bool CDynamicAttack::isRightTimeToPass() {
             return true;
         }
     }
-
-
-
     return false;
 }
 
@@ -1296,27 +1296,27 @@ void CDynamicAttack::assignLocations_1() {
 
 void CDynamicAttack::assignLocations_2() {
     //Top Opp Half
-    guardLocations[2][0][0].assign(1.25, 1.5  );
-    guardLocations[2][0][1].assign(2   , 1.5);
-    guardLocations[2][0][2].assign(3.5 , 2  );
+    guardLocations[2][0][0].assign(1.15, 1.15);
+    guardLocations[2][0][1].assign(2.1 , 1.65);
+    guardLocations[2][0][2].assign(3.65, 2);
 
     //Bottom Opp Half
-    guardLocations[2][1][0].assign(1.25, -1.5  );
-    guardLocations[2][1][1].assign(2   , -1.5);
-    guardLocations[2][1][2].assign(3.5 , -2  );
+    guardLocations[2][1][0].assign(1.15, -1.15);
+    guardLocations[2][1][1].assign(2.1 , -1.65);
+    guardLocations[2][1][2].assign(3.65, -2  );
 }
 
 void CDynamicAttack::assignLocations_3() {
     //Top Opp Tertium
-    guardLocations[3][0][0].assign(1  , 1.5);
+    guardLocations[3][0][0].assign(1   , 1.5);
     guardLocations[3][0][1].assign(2.25, 2);
     guardLocations[3][0][2].assign(3.65, 1.85);
     //Middle Opp Tertium
-    guardLocations[3][1][0].assign(0.5, 0);
+    guardLocations[3][1][0].assign(0.5 , 0);
     guardLocations[3][1][1].assign(1.75, 0);
     guardLocations[3][1][2].assign(2.75, 0);
     //Bottom Opp Tertium
-    guardLocations[3][2][0].assign(1  , -1.5);
+    guardLocations[3][2][0].assign(1   , -1.5);
     guardLocations[3][2][1].assign(2.25, -2);
     guardLocations[3][2][2].assign(3.65, -1.85);
 }
