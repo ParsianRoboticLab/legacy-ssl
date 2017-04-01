@@ -1411,7 +1411,6 @@ void CCoach::decideAttack()
     case CKnowledge::TheirBallPlacement:
         decideStop(ourPlayers);
         return;
-//        decideTheirBallPlacement(ourPlayers);
         break;
     default:
         decideNull(ourPlayers);
@@ -1449,11 +1448,10 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
         debug(QString("playmake : %1").arg(playmakeId),D_MHMMD);
     }
 
-    double MarkNum = 0;
     Circle2D ourDefenseArea(wm->field->ourGoal() + Vector2D(-0.2 , 0),1.6);
 
     if (knowledge->variables["clearing"] == "true"
-            || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length() < 1)) {
+    || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length() < 1)) {
         if(playmakeId != -1) {
             ourPlayers.append(playmakeId);
             dynamicAttack->setPlayMake(-1);
@@ -1479,13 +1477,12 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     /////////////////////////////////////////////////////////////////////////
 
     dynamicAttack->setPositions(findBestPoses(ourPlayers.count()));
-
     dynamicAttack->setWeHaveBall(ballPState   == CKnowledge::WEHAVETHEBALL);
     dynamicAttack->setFast(ourAttackState     == FAST);
     dynamicAttack->setCritical(ourAttackState == CRITICAL);
-    dynamicAttack->setBallInOppJaw(ourAttackState  == BallInOppJaw);
 
     //////////////////////////////////////////////assign agents
+    double MarkNum = 0;
     if(ballPState == CKnowledge::WEHAVETHEBALL) {
         MarkNum = 0;
     } else if(ballPState == CKnowledge::WEDONTHAVETHEBALL) {
