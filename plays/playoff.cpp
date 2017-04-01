@@ -438,7 +438,8 @@ void CPlayOff::dynamicPlayChipToGoal() {
         roleAgent[0] -> setAvoidCenterCircle(false);
         roleAgent[0] -> setAvoidPenaltyArea(true);
         roleAgent[0] -> setChip(true);
-        roleAgent[0] -> setKickSpeed(policy()->DynamicPlay_MediumSpeedChip()); // Vartypes This
+        double speed = knowledge->getProfile(roleAgent[0]->getAgentID(), roleAgent[0]->getAgent()->pos().dist(wm->field->oppGoal()), false, false);
+        roleAgent[0] -> setKickSpeed(speed); // Vartypes This
         roleAgent[0] -> setTarget(wm->field->oppGoal());
         roleAgent[0] -> setDoPass(false);
         roleAgent[0] -> setIntercept(false);
@@ -475,7 +476,7 @@ void CPlayOff::dynamicPlayBlocker() {
         roleAgent[0] -> setAvoidCenterCircle(false);
         roleAgent[0] -> setAvoidPenaltyArea(true);
         roleAgent[0] -> setChip(false);
-        roleAgent[0] -> setKickSpeed(policy()->DynamicPlay_MediumSpeedPass()); // Vartypes This
+        roleAgent[0] -> setKickSpeed(knowledge->getProfile(roleAgent[0]->getAgentID(), 7.8, false, false)); // Vartypes This
         roleAgent[0] -> setTarget(wm->field->oppGoal().rotatedVector((wm->ball->pos.y < 0 ? 90 : -90)));
         roleAgent[0] -> setDoPass(false);
         roleAgent[0] -> setIntercept(false);
@@ -499,7 +500,7 @@ void CPlayOff::dynamicPlayBlocker() {
 
     } else if (shot) {
 
-        roleAgent[0] -> setKickSpeed(1023); // Vartypes This
+        roleAgent[0] -> setKickSpeed(knowledge->getProfile(roleAgent[0]->getAgentID(), 7.8, false, false)); // Vartypes This
         roleAgent[0] -> setTarget(wm->field->oppGoal());
         roleAgent[0] -> setDoPass(true);
         roleAgent[0] -> setTargetDir(wm->field->oppGoal());

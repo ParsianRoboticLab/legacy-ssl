@@ -564,8 +564,6 @@ private:
 protected:
 
 };
-
-
 ///////////OverLoading Operators
 QDebug operator<< (QDebug d, const NGameOff::SPlan _plan);
 
