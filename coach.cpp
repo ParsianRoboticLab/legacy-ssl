@@ -559,12 +559,12 @@ CKnowledge::ballPossesionState CCoach::isBallOurs()
 
     if (wm->field->isInOurPenaltyArea(wm->ball->pos)
     &&  wm->ball->vel.length() < 0.2) {
-        decidePState = CKnowledge::WEHAVETHEBALL;
+        decidePState = CKnowledge::SOSOTHEIR;
     }
 
     if (wm->field->isInOppPenaltyArea(wm->ball->pos)
             && wm->ball->vel.length() < 0.1) {
-        decidePState = CKnowledge::WEDONTHAVETHEBALL;
+        decidePState = CKnowledge::SOSOOUR;
     }
 
     lastBallPossesionState = decidePState;
@@ -1498,7 +1498,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     } else if(ballPState == CKnowledge::WEDONTHAVETHEBALL) {
         MarkNum = 2;
     } else if(ballPState == CKnowledge::SOSOOUR) {
-        MarkNum = 0;
+        MarkNum = 1;
     } else if(ballPState == CKnowledge::SOSOTHEIR) {
         MarkNum = 1;
     }
@@ -1802,6 +1802,11 @@ void CCoach::initDynamicPlay(QList<int> _ourplayers) {
         } else {
             ourPlayOff->dynamicMatch[i] = _ourplayers.at(i);
         }
+    }
+    if (_ourplayers.size() < 2) {
+        ourPlayOff->dynamicSelect = CHIP;
+    } else {
+        ourPlayOff->dynamicSelect = KHAFAN;
     }
 
     ourPlayOff->setInitial(true);

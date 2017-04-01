@@ -46,6 +46,7 @@ CPlayOff::CPlayOff()
     //Dynamic
     ready = pass = shot = false;
     dynamicStartTime = -1;
+    dynamicSelect = NOSELECT;
 }
 
 CPlayOff::~CPlayOff()
@@ -396,16 +397,18 @@ void CPlayOff::staticExecute() {
 void CPlayOff::dynamicExecute() {
 
 
-
-
-//        dynamicPlayKhafan();
-//        checkEndKhafan();
-
-        /*dynamicPlayBlocker();
-        checkEndBlocker();*/
-
+    if (dynamicSelect == CHIP) {
         dynamicPlayChipToGoal();
         checkEndChipToGoal();
+    } else if (dynamicSelect == KHAFAN) {
+        dynamicPlayKhafan();
+        checkEndKhafan();
+    } else if (dynamicSelect == BLOCKER) {
+        dynamicPlayBlocker();
+        checkEndBlocker();
+    }
+
+
 
         for(int i = 0;i < dynamicAgentSize;i++) {
             roleAgent[i]->execute();
