@@ -135,10 +135,15 @@ protected:
     bool limitBetweenHMDAndAHZ;
     bool changeInMarkPlanFlag;
     bool changeInTSMode;
+    int lastOpponentAgentsToBeMarkSize;
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;
+    QList <Vector2D> tenLastOpponentDirection;
+    QList <Vector2D> tenLastOpponentPosition;
     Vector2D opponentPasserDirection;
     Vector2D opponentPasserPossition;
+    Vector2D sumOfLastOpponentDirection;
+    Vector2D sumOfLastOpponentPosition;
     ///////////////////////////////////////////////////
     void executeGoalie();
     Vector2D blockTheBall();

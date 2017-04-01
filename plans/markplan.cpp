@@ -64,719 +64,236 @@ Vector2D CMarkPlan::getPointInDirection(Vector2D firstPoint , Vector2D secondPoi
     firstPoint = firstPoint + (secondPoint - firstPoint).norm() * proportion * (Segment2D(secondPoint , firstPoint).length());
     return firstPoint;
 }
-void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance){
+void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBeMarkPossition , int ourMarkAgentsSize , double proportionOfDistance){
     ////////////////////////// Variables of this function //////////////////////
     int i;
-    int j = 0;
-    Vector2D opponentPlayMakerPossition;
+    int j;
     Vector2D ourCenterOfGoalPossition = wm->field->ourGoal();
-    Vector2D opponentCenterOfGoalPossition = wm->field->oppGoal();
-    Vector2D ourLeftOfGoalPossition = wm->field->ourGoalL();
-    Vector2D ourRightOfGoalPossition = wm->field->ourGoalR();
     Vector2D sol1 , sol2;
     Vector2D sol3 , sol4;
     Vector2D sol5 , sol6;
-    Vector2D ballPossition;
-    Vector2D ballVelocity;
-    Vector2D secondPos;
-    Segment2D tempSegment;
-    double ballCircleR = 0.09;
+    Vector2D sol7 , sol8;
     double opponentAgentsCircleR = 0.2;
-    QList<Circle2D> opponentAgentsToBeMarkedCircle;
+    QList<Circle2D> opponentAgentsCircle;
+    QList<Circle2D> opponentAgentsToBeMarkCircle;
     QList<Circle2D> tempOpponentAgentsToBeMarkedCircle;
-    QList<Vector2D> tempMarkPoses;
-    QList<Segment2D> opponentAgents2OpponentPlayMaker;
-    QList<QPair<Vector2D , double> > tempSortDangerAgentsToBeBlockPassPlayOn;
     QList<Vector2D> ourMarkAgentsPossition;
-    QList<QPair<Vector2D,double> > sortDangerAgentsToBeBlockPassPlayOn;
-    Circle2D opponentPlayMakerCircle;
-    Circle2D ourGoalCircle(ourCenterOfGoalPossition , 1.43);
-    Circle2D opponentgoalCircle(opponentCenterOfGoalPossition , 1);
-    Segment2D opponentPlayMaker2OurGoal;
-    //////////////////// Clear QLists for change the states ////////////////////
+    QList<QPair<Vector2D,double> > sortDangerAgentsToBeMarkBlockPassPlayOn;
+    QList<QPair<Vector2D,double> > tempSortDangerAgentsToBeBlockPassPlayOn;
+    Circle2D goalCircle(ourCenterOfGoalPossition , 1.43);
+    Circle2D penaltyArea(wm->field->ourGoal(),1.28);
+    //////////////////// Clear QLists for update the states ////////////////////
     ourMarkAgentsPossition.clear();
     markPoses.clear();
     markAngs.clear();
+    markRoles.clear();
+    ////////////////////////////////////////////////////////////////////////////
+    debug(QString("Mark Agents Count : %1").arg(ourMarkAgentsSize) , D_SEPEHR , QColor(Qt::red));
+    debug(QString("Opponent Agents to be mark count : %1").arg(opponentAgentsToBeMarkPossition.size()) , D_SEPEHR , QColor(Qt::red));
     ///////// Make Cirlcles around opponent agents /////////////////////////////
-    for(i = 0 ; i < opponentAgentsToBeMarkePossition.size() ; i++){
-        opponentAgentsToBeMarkedCircle.append(Circle2D(opponentAgentsToBeMarkePossition.at(i) , opponentAgentsCircleR));
-        draw(opponentAgentsToBeMarkedCircle.at(i),QColor(Qt::cyan));
+    for(i = 0 ; i < opponentAgentsToBeMarkPossition.size(); i++){
+        opponentAgentsToBeMarkCircle.append(Circle2D(opponentAgentsToBeMarkPossition.at(i) , opponentAgentsCircleR));
+        draw(opponentAgentsToBeMarkCircle.at(i) , "Cyan");
     }
-    if(opponentAgentsToBeMarkePossition.size() == 0){// opponentAgentsToBeMarkePossition.size() == 1){
-        debug("0 ta darim" , D_SEPEHR);
-        for(i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
-            ourMarkAgentsPossition.append(wm->opp.active(i)->pos);
-        }
-        for(i = 0 ; i < opponentAgentsToBeMarkePossition.size() ; i++){
-            for(j = 0 ; j < ourMarkAgentsPossition.size() ; j++){
-                if(opponentAgentsToBeMarkePossition.at(i) == ourMarkAgentsPossition.at(j)){
-                    ourMarkAgentsPossition.removeAt(j);
-                }
-            }
-        }
-        tempSortDangerAgentsToBeBlockPassPlayOn = sortdangerpassplayoff(ourMarkAgentsPossition);
-        for(i = 0 ; i < tempSortDangerAgentsToBeBlockPassPlayOn.size() ; i++){
-            tempOpponentAgentsToBeMarkedCircle.append(Circle2D(tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first , opponentAgentsCircleR));
-            draw(tempOpponentAgentsToBeMarkedCircle.at(i),QColor(Qt::cyan));
-        }
-
-        for(i = 0 ; i < ourMarkAgentsSize - markPoses.size() ; i++){
-            tempOpponentAgentsToBeMarkedCircle.at(i).intersection(Segment2D(tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first , wm->ball->pos) , &sol1 , &sol2);
-            Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first , wm->ball->pos) , &sol3 , &sol4);
-            tempMarkPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                     Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol3 : sol4,
-                                                     proportionOfDistance));
-            markAngs.append(wm->ball->pos - tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first);
-            if(wm->field->isInOurPenaltyArea(tempMarkPoses.at(i))){
-                debug("AHZ" , D_SEPEHR);
-                if(wm->field->isInOurPenaltyArea(wm->ball->pos) && !wm->field->isInOurPenaltyArea(tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first)){
-                    ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                         Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol3 : sol4) , &sol5 , &sol6);
-                    tempMarkPoses.removeAt(i);
-                    tempMarkPoses.append(getPointInDirection(tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first
-                                                             ,Segment2D(sol5 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol6 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol5 : sol6
-                                                                                                                                                                                                                                , proportionOfDistance));
-                }
-                else if(!wm->field->isInOurPenaltyArea(wm->ball->pos) && wm->field->isInOurPenaltyArea(tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first)){
-                    ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                         Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol3 : sol4) , &sol5 , &sol6);
-                    tempMarkPoses.removeAt(i);
-                    tempMarkPoses.append(getPointInDirection(wm->ball->pos
-                                                             ,Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5 : sol6
-                                                                                                                                                    , proportionOfDistance));
-                }
-                else if(wm->field->isInOurPenaltyArea(wm->ball->pos) && wm->field->isInOurPenaltyArea(tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first)){
-                    ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                         Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol3 : sol4).perpendicularBisector() , &sol5 , &sol6);
-
-                    tempMarkPoses.removeAt(i);
-                    tempMarkPoses.append(wm->field->isInField(sol5) ? sol5 : sol6);
+    ///////////////// Block Pass Plan ////////////////////////////////////
+    if(opponentAgentsToBeMarkPossition.size() == ourMarkAgentsSize){
+        for(i = 0 ; i < ourMarkAgentsSize ; i++){
+            markRoles.append(QString("passBlocker"));
+            //////////// Don't Enter penalty area, mark agents!!! :) ///////////
+            if(penaltyArea.intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)) , &sol7,  &sol8)){
+                if(!wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkPossition.at(i))){
+                    opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
+                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol3 , &sol4);
+                    penaltyArea.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
+                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol5:sol6 ,proportionOfDistance));
                 }
                 else{
-                    ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                         Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol3 : sol4) , &sol5 , &sol6);
-
-                    //                            if(isValidPoint(sol5) && isValidPoint(sol6)){
-                    //                                if(Segment2D(Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , wm->ball->pos).length() >=
-                    //                                        Segment2D(Segment2D(sol5 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol6 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol5:sol6 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length()){
-                    //                                    tempMarkPoses.removeAt(i);
-                    //                                    draw(Segment2D(Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                    //                                    tempMarkPoses.append(getPointInDirection(Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                    //                                    markAngs.append(wm->ball->pos - tempMarkPoses.at(i));
-                    //                                }
-
-                    //                                else{
-                    //                                    tempMarkPoses.removeAt(i);
-                    //                                    tempMarkPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 , Segment2D(sol5 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol6 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol5:sol6 , proportionOfDistance));
-                    //                                    markAngs.append(wm->ball->pos - tempMarkPoses.at(i));
-                    //                                }
-                    //                            }
-                    //                            else{
-                    //                                tempMarkPoses.removeAt(i);
-                    //                                draw(Segment2D(Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                    //                                tempMarkPoses.append(getPointInDirection(Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                    //                                markAngs.append(wm->ball->pos - tempMarkPoses.at(i));
-                    //                            }
+                    goalCircle.intersection(Segment2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)) , &sol1 , &sol2);
+                    markPoses.append(Segment2D(sol1 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol2 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol1 : sol2);
                 }
             }
-
-
+            else{
+                opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
+                Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol3 , &sol4);
+                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4, proportionOfDistance));
+            }
+            markAngs.append(wm->ball->pos - markPoses.at(i));
+            draw(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
+                           Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4) , QColor(Qt::red));
+            draw(Circle2D(wm->ball->pos , ballCircleR),QColor(Qt::black));
+            draw(goalCircle,QColor(Qt::black));
+            debug(QString("Man To Man Mark In PlayOff Mode / BlockPass / our = opp") , D_SEPEHR);
         }
-        markPoses.append(tempMarkPoses);
-        debug(QString("s :%1").arg(markPoses.size()) , D_SEPEHR);
-        debug(QString("coach :%1").arg(ourMarkAgentsSize) , D_SEPEHR);
-
-
     }
-    else{
-        ////////////////////// Drawing the lines between opponent agents to the both side of our goal ////////////////////////////
-        if(ourMarkAgentsSize == 1){
-            if(opponentAgentsToBeMarkePossition.size() == ourMarkAgentsSize){
-                for(i = 0 ; i < ourMarkAgentsSize ; i++){
-                    opponentAgentsToBeMarkedCircle.at(i).intersection(Segment2D(opponentAgentsToBeMarkePossition.at(i) , wm->ball->pos) , &sol1 , &sol2);
-                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(opponentAgentsToBeMarkePossition.at(i) , wm->ball->pos) , &sol3 , &sol4);
-                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                         Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4,
-                                                         proportionOfDistance));
-                    //////////////////// check if the mark agents possition is in ourPenaltyArea or not ////////////////////////////////////////////////////////////
-                    if(wm->field->isInOurPenaltyArea(markPoses.at(i))){
-                        if(wm->field->isInOurPenaltyArea(wm->ball->pos) && !wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(opponentAgentsToBeMarkePossition.at(i)
-                                                                 ,Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5 : sol6
-                                                                                                                                                                                                          , proportionOfDistance));
-                        }
-                        else if(!wm->field->isInOurPenaltyArea(wm->ball->pos) && wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(wm->ball->pos
-                                                                 ,Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5 : sol6
-                                                                                                                                                        , proportionOfDistance));
-                        }
-                        else if(wm->field->isInOurPenaltyArea(wm->ball->pos) && wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4).perpendicularBisector() , &sol5 , &sol6);
-
-                            markPoses.removeAt(i);
-                            markPoses.append(wm->field->isInField(sol5) ? sol5 : sol6);
-                        }
-                        else{
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-
-                            //                        if(isValidPoint(sol5) && isValidPoint(sol6)){
-                            //                            if(Segment2D(Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , wm->ball->pos).length() >=
-                            //                                    Segment2D(Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , opponentAgentsToBeMarkePossition.at(i)).length()){
-                            //                                markPoses.removeAt(i);
-                            //                                draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                            else{
-                            //                                markPoses.removeAt(i);
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 , Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                        }
-                            //                        else{
-                            //                            markPoses.removeAt(i);
-                            //                            draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                            markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                            markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                        }
-                        }
-                    }
-
-
-                    //////////////////// check if the mark agents possition is in opponentPenaltyArea or not ////////////////////////////////////////////////////////////
-                    if(wm->field->isInOppPenaltyArea(markPoses.at(i))){
-                        if(wm->field->isInOppPenaltyArea(markPoses.at(i)) && !wm->field->isInOppPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(opponentAgentsToBeMarkePossition.at(i)
-                                                                 ,Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5 : sol6
-                                                                                                                                                                                                          , proportionOfDistance));
-                        }
-                        else if(!wm->field->isInOppPenaltyArea(wm->ball->pos) && wm->field->isInOppPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(wm->ball->pos
-                                                                 ,Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5 : sol6
-                                                                                                                                                        , proportionOfDistance));
-                        }
-                        else if(wm->field->isInOppPenaltyArea(wm->ball->pos) && wm->field->isInOppPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4).perpendicularBisector() , &sol5 , &sol6);
-
-                            markPoses.removeAt(i);
-                            markPoses.append(wm->field->isInField(sol5) ? sol5 : sol6);
-                        }
-                        else{
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-
-                            //                        if(isValidPoint(sol5) && isValidPoint(sol6)){
-                            //                            if(Segment2D(Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , wm->ball->pos).length() >=
-                            //                                    Segment2D(Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , opponentAgentsToBeMarkePossition.at(i)).length()){
-                            //                                markPoses.removeAt(i);
-                            //                                draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                            else{
-                            //                                markPoses.removeAt(i);
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 , Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                        }
-                            //                        else{
-                            //                            markPoses.removeAt(i);
-                            //                            draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                            markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                            markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                        }
-                        }
-                    }
-                    markAngs.append(wm->ball->pos - markPoses.at(i));
-                    draw(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                   Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , QColor(Qt::red));
-                    draw(Circle2D(wm->ball->pos , ballCircleR),QColor(Qt::black));
-                    draw(ourGoalCircle,QColor(Qt::black));
-                    debug(QString("Man To Man Mark In PlayOff Mode / BlockPass / our = opp") , D_SEPEHR);
+    else if(opponentAgentsToBeMarkPossition.size() < ourMarkAgentsSize){
+        for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
+            markRoles.append(QString("passBlocker"));
+            //////////// Don't Enter penalty area, mark agents!!! :) ///////////
+            if(penaltyArea.intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)) , &sol7,  &sol8)){
+                if(!wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkPossition.at(i))){
+                    opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
+                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol3 , &sol4);
+                    penaltyArea.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
+                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol5:sol6 ,proportionOfDistance));
+                }
+                else{
+                    penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)) , &sol1 , &sol2);
+                    markPoses.append(Segment2D(sol1 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol2 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol1 : sol2);
                 }
             }
-
-            else if (opponentAgentsToBeMarkePossition.size() > ourMarkAgentsSize){
-                sortDangerAgentsToBeBlockPassPlayOn = sortdangerpassplayon(opponentAgentsToBeMarkePossition);
-                for(i = 0 ; i < ourMarkAgentsSize ; i++){
-                    Circle2D(sortDangerAgentsToBeBlockPassPlayOn.at(i).first , opponentAgentsCircleR)
-                            .intersection(Segment2D(sortDangerAgentsToBeBlockPassPlayOn.at(i).first , wm->ball->pos) , &sol1 , &sol2);
-                    Circle2D(wm->ball->pos , ballCircleR)
-                            .intersection(Segment2D(sortDangerAgentsToBeBlockPassPlayOn.at(i).first , wm->ball->pos) , &sol3 , &sol4);
-                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                         Segment2D(sol3 , sortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol3 : sol4,
-                                                         proportionOfDistance));
-                    //////////////////// check if the mark agents possition is in ourPenaltyArea or not ////////////////////////////////////////////////////////////
-                    if(wm->field->isInOurPenaltyArea(markPoses.at(i))){
-                        debug(QString("oomad") , D_SEPEHR);
-                        if(wm->field->isInOurPenaltyArea(wm->ball->pos) && !wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(opponentAgentsToBeMarkePossition.at(i)
-                                                                 ,Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5 : sol6
-                                                                                                                                                                                                          , proportionOfDistance));
-                            debug(QString("gaeedam") , D_SEPEHR);
-                        }
-                        else if(!wm->field->isInOurPenaltyArea(wm->ball->pos) && wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(wm->ball->pos
-                                                                 ,Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5 : sol6
-                                                                                                                                                        , proportionOfDistance));
-                            debug(QString("gaeedam") , D_SEPEHR);
-                        }
-                        else if(wm->field->isInOurPenaltyArea(wm->ball->pos) && wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4).perpendicularBisector() , &sol5 , &sol6);
-
-                            markPoses.removeAt(i);
-                            debug(QString("gaeedam") , D_SEPEHR);
-                            markPoses.append(wm->field->isInField(sol5) ? sol5 : sol6);
-                        }
-                        else{
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-
-                            //                        if(isValidPoint(sol5) && isValidPoint(sol6)){
-                            //                            debug(QString("hastan") , D_SEPEHR);
-                            //                            if(Segment2D(Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , wm->ball->pos).length() >=
-                            //                                    Segment2D(Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , opponentAgentsToBeMarkePossition.at(i)).length()){
-                            //                                markPoses.removeAt(i);
-                            //                                draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                debug(QString("boo miad") , D_SEPEHR);
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                            else{
-                            //                                markPoses.removeAt(i);
-                            //                                debug(QString("sag zade") , D_SEPEHR);
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 , Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                        }
-                            //                        else{
-                            //                            markPoses.removeAt(i);
-                            //                            draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                            markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                            debug(QString("boo miad") , D_SEPEHR);
-                            //                            markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                        }
-                        }
-                    }
-                    //////////////////// check if the mark agents possition is in opponentPenaltyArea or not ////////////////////////////////////////////////////////////
-                    if(wm->field->isInOppPenaltyArea(markPoses.at(i))){
-                        if(wm->field->isInOppPenaltyArea(markPoses.at(i)) && !wm->field->isInOppPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(opponentAgentsToBeMarkePossition.at(i)
-                                                                 ,Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5 : sol6
-                                                                                                                                                                                                          , proportionOfDistance));
-                        }
-                        else if(!wm->field->isInOppPenaltyArea(wm->ball->pos) && wm->field->isInOppPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(wm->ball->pos
-                                                                 ,Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5 : sol6
-                                                                                                                                                        , proportionOfDistance));
-                        }
-                        else if(wm->field->isInOppPenaltyArea(wm->ball->pos) && wm->field->isInOppPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4).perpendicularBisector() , &sol5 , &sol6);
-
-                            markPoses.removeAt(i);
-                            markPoses.append(wm->field->isInField(sol5) ? sol5 : sol6);
-                        }
-                        else{
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-
-                            //                        if(isValidPoint(sol5) && isValidPoint(sol6)){
-                            //                            if(Segment2D(Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , wm->ball->pos).length() >=
-                            //                                    Segment2D(Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , opponentAgentsToBeMarkePossition.at(i)).length()){
-                            //                                markPoses.removeAt(i);
-                            //                                draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                            else{
-                            //                                markPoses.removeAt(i);
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 , Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                        }
-                            //                        else{
-                            //                            markPoses.removeAt(i);
-                            //                            draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                            markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                            markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                        }
-                        }
-                    }
-
-                    markAngs.append(wm->ball->pos - markPoses.at(i));
-
-                    draw(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                   Segment2D(sol3 , sortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol3 : sol4)
-                         , QColor(Qt::red));
-                    draw(Circle2D(wm->ball->pos , ballCircleR),QColor(Qt::black));
-                    debug(QString("MostDanger = %1").arg(sortDangerAgentsToBeBlockPassPlayOn.at(0).second) ,D_SEPEHR , QColor("red"));
-                    debug(QString("opponentAgentsToBeMarkePossitionSize = %1").arg(opponentAgentsToBeMarkePossition.size()) ,D_SEPEHR , QColor("blue"));
-                    debug(QString("MarkAngsSize = %1").arg(markAngs.size()) ,D_SEPEHR , QColor("red"));
-                    debug(QString("Man To Man Mark In PlayOn Mode / BlockPass / opp > our") , D_SEPEHR);
-                }
-
-            }
-
             else{
-                ourGoalCircle.intersection(Segment2D(ourGoalCircle.center() , wm->ball->pos) , &sol1 , &sol2);
-                Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(ourGoalCircle.center() , wm->ball->pos) , &sol3 , &sol4);
-                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2
-                                                                                                                                           ,Segment2D(sol3 , ourGoalCircle.center()).length() < Segment2D(sol4 , ourGoalCircle.center()).length() ? sol3 : sol4
-                                                                                                                                                                                                                                                    ,proportionOfDistance));
-                markAngs.append(wm->ball->pos - markPoses.last());
-                debug(QString("Man To Man Mark In PlayOn / BlockPass / our = 1 / opp < our") , D_SEPEHR);
+                opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
+                Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol3 , &sol4);
+                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4, proportionOfDistance));
+            }
+            markAngs.append(wm->ball->pos - markPoses.at(i));
+            draw(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4), QColor(Qt::red));
+            draw(Circle2D(wm->ball->pos , ballCircleR),QColor(Qt::black));
+            debug(QString("Man To Man Mark In PlayOn Mode / BlockPass / opp < our") , D_SEPEHR);
+        }
+        ////////////// With Extra mark agents ch ghalati bokonim ? :) //////////
+        if(ourMarkAgentsSize - markPoses.size() == opponentAgentsToBeMarkPossition.size()){
+            for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
+                draw(opponentAgentsToBeMarkCircle.at(i),QColor(Qt::cyan));
+            }
+            for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
+                if(!wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkPossition.at(i))){
+                    opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
+                    penaltyArea.intersection(Segment2D(opponentAgentsToBeMarkPossition.at(i) , wm->field->ourGoal()), &sol3 , &sol4);
+                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                }
+                else{
+                    penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)) , &sol1 , &sol2);
+                    markPoses.append(Segment2D(wm->field->center() , sol1).length() < Segment2D(wm->field->center() , sol2).length() ? sol1 : sol2);
+                }
+                markAngs.append(opponentAgentsToBeMarkPossition.at(i) - wm->field->ourGoal());
+                markRoles.append(QString("shotBlocker"));
             }
         }
-        if(ourMarkAgentsSize == 2){
-
-            if(opponentAgentsToBeMarkePossition.size() == ourMarkAgentsSize){
-                for(i = 0 ; i < ourMarkAgentsSize ; i++){
-                    opponentAgentsToBeMarkedCircle.at(i).intersection(Segment2D(opponentAgentsToBeMarkePossition.at(i) , wm->ball->pos) , &sol1 , &sol2);
-                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(opponentAgentsToBeMarkePossition.at(i) , wm->ball->pos) , &sol3 , &sol4);
-                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                         Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4,
-                                                         proportionOfDistance));
-                    //////////////////// check if the mark agents possition is in ourPenaltyArea or not ////////////////////////////////////////////////////////////
-                    if(wm->field->isInOurPenaltyArea(markPoses.at(i))){
-                        if(wm->field->isInOurPenaltyArea(wm->ball->pos) && !wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(opponentAgentsToBeMarkePossition.at(i)
-                                                                 ,Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5 : sol6
-                                                                                                                                                                                                          , proportionOfDistance));
-                        }
-                        else if(!wm->field->isInOurPenaltyArea(wm->ball->pos) && wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(wm->ball->pos
-                                                                 ,Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5 : sol6
-                                                                                                                                                        , proportionOfDistance));
-                        }
-                        else if(wm->field->isInOurPenaltyArea(wm->ball->pos) && wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4).perpendicularBisector() , &sol5 , &sol6);
-
-                            markPoses.removeAt(i);
-                            markPoses.append(wm->field->isInField(sol5) ? sol5 : sol6);
-                        }
-                        else{
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-
-                            //                        if(isValidPoint(sol5) && isValidPoint(sol6)){
-                            //                            if(Segment2D(Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , wm->ball->pos).length() >=
-                            //                                    Segment2D(Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , opponentAgentsToBeMarkePossition.at(i)).length()){
-                            //                                markPoses.removeAt(i);
-                            //                                draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                            else{
-                            //                                markPoses.removeAt(i);
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 , Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                        }
-                            //                        else{
-                            //                            markPoses.removeAt(i);
-                            //                            draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                            markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                            markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                        }
-                        }
-                    }
-                    //////////////////// check if the mark agents possition is in opponentPenaltyArea or not ////////////////////////////////////////////////////////////
-                    if(wm->field->isInOppPenaltyArea(markPoses.at(i))){
-                        if(wm->field->isInOppPenaltyArea(markPoses.at(i)) && !wm->field->isInOppPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(opponentAgentsToBeMarkePossition.at(i)
-                                                                 ,Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5 : sol6
-                                                                                                                                                                                                          , proportionOfDistance));
-                        }
-                        else if(!wm->field->isInOppPenaltyArea(wm->ball->pos) && wm->field->isInOppPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(wm->ball->pos
-                                                                 ,Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5 : sol6
-                                                                                                                                                        , proportionOfDistance));
-                        }
-                        else if(wm->field->isInOppPenaltyArea(wm->ball->pos) && wm->field->isInOppPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4).perpendicularBisector() , &sol5 , &sol6);
-
-                            markPoses.removeAt(i);
-                            markPoses.append(wm->field->isInField(sol5) ? sol5 : sol6);
-                        }
-                        else{
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-
-                            //                        if(isValidPoint(sol5) && isValidPoint(sol6)){
-                            //                            if(Segment2D(Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , wm->ball->pos).length() >=
-                            //                                    Segment2D(Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , opponentAgentsToBeMarkePossition.at(i)).length()){
-                            //                                markPoses.removeAt(i);
-                            //                                draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                            else{
-                            //                                markPoses.removeAt(i);
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 , Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                        }
-                            //                        else{
-                            //                            markPoses.removeAt(i);
-                            //                            draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                            markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                            markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                        }
-                        }
-                    }
-                    markAngs.append(wm->ball->pos - markPoses.at(i));
-                    draw(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                   Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , QColor(Qt::red));
-                    draw(Circle2D(wm->ball->pos , ballCircleR),QColor(Qt::black));
-                    draw(ourGoalCircle,QColor(Qt::black));
-                    debug(QString("Man To Man Mark In PlayOff Mode / BlockPass / our = opp") , D_SEPEHR);
-                }
+        else if(ourMarkAgentsSize - markPoses.size() < opponentAgentsToBeMarkPossition.size()){
+            tempSortDangerAgentsToBeBlockPassPlayOn = sortdangerpassplayon(opponentAgentsToBeMarkPossition);
+            for(i = 0 ; i < tempSortDangerAgentsToBeBlockPassPlayOn.size() ; i++){
+                tempOpponentAgentsToBeMarkedCircle.append(Circle2D(tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first , opponentAgentsCircleR));
+                draw(tempOpponentAgentsToBeMarkedCircle.at(i),QColor(Qt::yellow));
             }
-
-            else if(opponentAgentsToBeMarkePossition.size() > ourMarkAgentsSize){
-                sortDangerAgentsToBeBlockPassPlayOn = sortdangerpassplayon(opponentAgentsToBeMarkePossition);
-                for(i = 0 ; i < ourMarkAgentsSize ; i++){
-                    Circle2D(sortDangerAgentsToBeBlockPassPlayOn.at(i).first , opponentAgentsCircleR)
-                            .intersection(Segment2D(sortDangerAgentsToBeBlockPassPlayOn.at(i).first , wm->ball->pos) , &sol1 , &sol2);
-                    Circle2D(wm->ball->pos , ballCircleR)
-                            .intersection(Segment2D(sortDangerAgentsToBeBlockPassPlayOn.at(i).first , wm->ball->pos) , &sol3 , &sol4);
-                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                         Segment2D(sol3 , sortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol3 : sol4,
-                                                         proportionOfDistance));
-                    //////////////////// check if the mark agents possition is in ourPenaltyArea or not ////////////////////////////////////////////////////////////
-                    if(wm->field->isInOurPenaltyArea(markPoses.at(i))){
-                        debug(QString("oomad") , D_SEPEHR);
-                        if(wm->field->isInOurPenaltyArea(wm->ball->pos) && !wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(opponentAgentsToBeMarkePossition.at(i)
-                                                                 ,Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5 : sol6
-                                                                                                                                                                                                          , proportionOfDistance));
-                            debug(QString("gaeedam") , D_SEPEHR);
-                        }
-                        else if(!wm->field->isInOurPenaltyArea(wm->ball->pos) && wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(wm->ball->pos
-                                                                 ,Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5 : sol6
-                                                                                                                                                        , proportionOfDistance));
-                            debug(QString("gaeedam") , D_SEPEHR);
-                        }
-                        else if(wm->field->isInOurPenaltyArea(wm->ball->pos) && wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4).perpendicularBisector() , &sol5 , &sol6);
-
-                            markPoses.removeAt(i);
-                            debug(QString("gaeedam") , D_SEPEHR);
-                            markPoses.append(wm->field->isInField(sol5) ? sol5 : sol6);
-                        }
-                        else{
-                            ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                 Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-
-                        }
-                    }
-                    //////////////////// check if the mark agents possition is in opponentPenaltyArea or not ////////////////////////////////////////////////////////////
-                    if(wm->field->isInOppPenaltyArea(markPoses.at(i))){
-                        if(wm->field->isInOppPenaltyArea(markPoses.at(i)) && !wm->field->isInOppPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(opponentAgentsToBeMarkePossition.at(i)
-                                                                 ,Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5 : sol6
-                                                                                                                                                                                                          , proportionOfDistance));
-                        }
-                        else if(!wm->field->isInOppPenaltyArea(wm->ball->pos) && wm->field->isInOppPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(wm->ball->pos
-                                                                 ,Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5 : sol6
-                                                                                                                                                        , proportionOfDistance));
-                        }
-                        else if(wm->field->isInOppPenaltyArea(wm->ball->pos) && wm->field->isInOppPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4).perpendicularBisector() , &sol5 , &sol6);
-
-                            markPoses.removeAt(i);
-                            markPoses.append(wm->field->isInField(sol5) ? sol5 : sol6);
-                        }
-                        else{
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-
-                            //                        if(isValidPoint(sol5) && isValidPoint(sol6)){
-                            //                            if(Segment2D(Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , wm->ball->pos).length() >=
-                            //                                    Segment2D(Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , opponentAgentsToBeMarkePossition.at(i)).length()){
-                            //                                markPoses.removeAt(i);
-                            //                                draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                            else{
-                            //                                markPoses.removeAt(i);
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 , Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                        }
-                            //                        else{
-                            //                            markPoses.removeAt(i);
-                            //                            draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                            markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                            markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                        }
-                        }
-                    }
-                    markAngs.append(wm->ball->pos - markPoses.at(i));
-
-                    draw(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                   Segment2D(sol3 , sortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol3 : sol4)
-                         , QColor(Qt::red));
-                    draw(Circle2D(wm->ball->pos , ballCircleR),QColor(Qt::black));
-                    debug(QString("MostDanger = %1").arg(sortDangerAgentsToBeBlockPassPlayOn.at(0).second) ,D_SEPEHR , QColor("red"));
-                    debug(QString("opponentAgentsToBeMarkePossitionSize = %1").arg(opponentAgentsToBeMarkePossition.size()) ,D_SEPEHR , QColor("blue"));
-                    debug(QString("MarkAngsSize = %1").arg(markAngs.size()) ,D_SEPEHR , QColor("red"));
-                    debug(QString("Man To Man Mark In PlayOn Mode / BlockPass / opp > our") , D_SEPEHR);
+            for(i = 0 ; i < ourMarkAgentsSize - markPoses.size() ; i++){
+                if(!wm->field->isInOurPenaltyArea(tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first)){
+                    tempOpponentAgentsToBeMarkedCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first), &sol1 , &sol2);
+                    penaltyArea.intersection(Segment2D(tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first , wm->field->ourGoal()), &sol3 , &sol4);
+                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
                 }
-            }
-
-            else{
-                for(i = 0 ; i < ourMarkAgentsSize ; i++){
-                    opponentAgentsToBeMarkedCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkePossition.at(i))
-                                                                      , &sol1 , &sol2);
-                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkePossition.at(i))
-                                                                       , &sol3 , &sol4);
-                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2
-                                                                                                                                               ,Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4
-                                                                                                                                                                                                                                                                                        , proportionOfDistance));
-                    ////////////////////// check if the mark agents possition is in ourPenaltyArea or not ////////////////////////////////////////////////////////////
-                    if(wm->field->isInOurPenaltyArea(markPoses.at(i))){
-                        ourGoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                             Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                        markPoses.removeAt(i);
-                        markPoses.append(getPointInDirection(opponentAgentsToBeMarkePossition.at(i)
-                                                             ,Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5 : sol6
-                                                                                                                                                                                                      , proportionOfDistance));
-                    }
-                    //////////////////// check if the mark agents possition is in opponentPenaltyArea or not ////////////////////////////////////////////////////////////
-                    if(wm->field->isInOppPenaltyArea(markPoses.at(i))){
-                        if(wm->field->isInOppPenaltyArea(markPoses.at(i)) && !wm->field->isInOppPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(opponentAgentsToBeMarkePossition.at(i)
-                                                                 ,Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5 : sol6
-                                                                                                                                                                                                          , proportionOfDistance));
-                        }
-                        else if(!wm->field->isInOppPenaltyArea(wm->ball->pos) && wm->field->isInOppPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                            markPoses.removeAt(i);
-                            markPoses.append(getPointInDirection(wm->ball->pos
-                                                                 ,Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5 : sol6
-                                                                                                                                                        , proportionOfDistance));
-                        }
-                        else if(wm->field->isInOppPenaltyArea(wm->ball->pos) && wm->field->isInOppPenaltyArea(opponentAgentsToBeMarkePossition.at(i))){
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4).perpendicularBisector() , &sol5 , &sol6);
-
-                            markPoses.removeAt(i);
-                            markPoses.append(wm->field->isInField(sol5) ? sol5 : sol6);
-                        }
-                        else{
-                            opponentgoalCircle.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                                      Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-
-                            //                        if(isValidPoint(sol5) && isValidPoint(sol6)){
-                            //                            if(Segment2D(Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , wm->ball->pos).length() >=
-                            //                                    Segment2D(Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , opponentAgentsToBeMarkePossition.at(i)).length()){
-                            //                                markPoses.removeAt(i);
-                            //                                draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                            else{
-                            //                                markPoses.removeAt(i);
-                            //                                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 , Segment2D(sol5 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol5:sol6 , proportionOfDistance));
-                            //                                markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                            }
-                            //                        }
-                            //                        else{
-                            //                            markPoses.removeAt(i);
-                            //                            draw(Segment2D(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6),QColor(Qt::green));
-                            //                            markPoses.append(getPointInDirection(Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4 , Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5:sol6 , proportionOfDistance));
-                            //                            markAngs.append(wm->ball->pos - markPoses.at(i));
-                            //                        }
-                        }
-                    }
-                    markAngs.append(wm->ball->pos - markPoses.at(i));
-                    draw(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2
-                                                                                                                         ,Segment2D(sol3 , opponentAgentsToBeMarkePossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkePossition.at(i)).length() ? sol3 : sol4)
-                         , QColor(Qt::red));
-                    draw(Circle2D(wm->ball->pos , ballCircleR),QColor(Qt::black));
-                    debug(QString("Man To Man Mark In PlayOn / BlockPass / our = 2 / opp < our") , D_SEPEHR);
+                else{
+                    penaltyArea.intersection(Line2D(wm->field->ourGoal() , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first) , &sol1 , &sol2);
+                    markPoses.append(Segment2D(wm->field->center() , sol1).length() < Segment2D(wm->field->center() , sol2).length() ? sol1 : sol2);
                 }
-                ourGoalCircle.intersection(Segment2D(ourGoalCircle.center() , wm->ball->pos) , &sol1 , &sol2);
-                Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(ourGoalCircle.center() , wm->ball->pos) , &sol3 , &sol4);
-                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2
-                                                                                                                                           ,Segment2D(sol3 , ourGoalCircle.center()).length() < Segment2D(sol4 , ourGoalCircle.center()).length() ? sol3 : sol4
-                                                                                                                                                                                                                                                    ,proportionOfDistance));
-                markAngs.append(wm->ball->pos - markPoses.last());
+                markAngs.append(tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first - wm->field->ourGoal());
+                markRoles.append(QString("shotBlocker"));
             }
         }
+        else if(ourMarkAgentsSize - markPoses.size() > opponentAgentsToBeMarkPossition.size()){
+            for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
+                draw(opponentAgentsToBeMarkCircle.at(i),QColor(Qt::cyan));
+            }
+            for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
+                if(!wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkPossition.at(i))){
+                    opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
+                    penaltyArea.intersection(Segment2D(opponentAgentsToBeMarkPossition.at(i) , wm->field->ourGoal()), &sol3 , &sol4);
+                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                }
+                else{
+                    penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)) , &sol1 , &sol2);
+                    markPoses.append(Segment2D(wm->field->center() , sol1).length() < Segment2D(wm->field->center() , sol2).length() ? sol1 : sol2);
+                }
+                markAngs.append(opponentAgentsToBeMarkPossition.at(i) - wm->field->ourGoal());
+                markRoles.append(QString("shotBlocker"));
+            }
+
+            for(i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
+                opponentAgentsCircle.append(Circle2D(wm->opp.active(i)->pos , opponentAgentsCircleR));
+            }
+            for(i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
+                for(j = 0 ; j < opponentAgentsToBeMarkPossition.size() ; j++){
+                    if(opponentAgentsToBeMarkPossition.at(j) == wm->opp.active(i)->pos){
+                        opponentAgentsCircle.removeAt(i);
+                    }
+                }
+            }
+            for(i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
+                if(Circle2D(wm->ball->pos , ballCircleR).contains(wm->opp.active(i)->pos)){
+                    opponentAgentsCircle.removeAt(i);
+                }
+            }
+            if(opponentAgentsToBeMarkPossition.size() == 0){
+                for(i = 0 ; i < ourMarkAgentsSize ; i++){
+                    if(!wm->field->isInOurPenaltyArea(opponentAgentsCircle.at(i).center())){
+                        opponentAgentsCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()), &sol1 , &sol2);
+                        penaltyArea.intersection(Segment2D(opponentAgentsCircle.at(i).center() , wm->field->ourGoal()), &sol3 , &sol4);
+                        markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsCircle.at(i).center()).length() < Segment2D(sol4 , opponentAgentsCircle.at(i).center()).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                    }
+                    else{
+                        penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()) , &sol1 , &sol2);
+                        markPoses.append(Segment2D(wm->field->center() , sol1).length() < Segment2D(wm->field->center() , sol2).length() ? sol1 : sol2);
+                    }
+                    markAngs.append(opponentAgentsCircle.at(i).center() - wm->field->ourGoal());
+                    markRoles.append(QString("shotBlocker"));
+                }
+            }
+            else{
+                for(i = 0 ; i < ourMarkAgentsSize - markPoses.size()+1 ; i++){
+                    if(!wm->field->isInOurPenaltyArea(opponentAgentsCircle.at(i).center())){
+                        opponentAgentsCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()), &sol1 , &sol2);
+                        penaltyArea.intersection(Segment2D(opponentAgentsCircle.at(i).center() , wm->field->ourGoal()), &sol3 , &sol4);
+                        markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsCircle.at(i).center()).length() < Segment2D(sol4 , opponentAgentsCircle.at(i).center()).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                    }
+                    else{
+                        penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()) , &sol1 , &sol2);
+                        markPoses.append(Segment2D(wm->field->center() , sol1).length() < Segment2D(wm->field->center() , sol2).length() ? sol1 : sol2);
+                    }
+                    markAngs.append(opponentAgentsCircle.at(i).center() - wm->field->ourGoal());
+                    markRoles.append(QString("shotBlocker"));
+                }
+            }
+        }
+    }
+    else if(opponentAgentsToBeMarkPossition.size() > ourMarkAgentsSize){
+        sortDangerAgentsToBeMarkBlockPassPlayOn = sortdangerpassplayon(opponentAgentsToBeMarkPossition);
+        for(i = 0 ; i < ourMarkAgentsSize; i++){
+            //////////// Don't Enter penalty area, mark agents!!! :) ///////////
+            if(penaltyArea.intersection(Segment2D(wm->ball->pos , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first) , &sol7,  &sol8)){
+                if(!wm->field->isInOurPenaltyArea(sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first)){
+                    Circle2D(sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first , opponentAgentsCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first , wm->ball->pos) , &sol1 , &sol2);
+                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first , wm->ball->pos) , &sol3 , &sol4);
+                    penaltyArea.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() ? sol3 : sol4) , &sol5 , &sol6);
+                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() < Segment2D(sol6 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() ? sol5:sol6 ,proportionOfDistance));
+                }
+                else{
+                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first , wm->ball->pos) , &sol1 , &sol2);
+                    penaltyArea.intersection(Segment2D(wm->ball->pos , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first) , &sol5 , &sol6);
+                    markPoses.append(getPointInDirection(Segment2D(sol1 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() < Segment2D(sol2 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() ? sol1 : sol2 ,Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5 :sol6 ,proportionOfDistance));
+                }
+            }
+            else{
+                Circle2D(sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first , opponentAgentsCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first , wm->ball->pos) , &sol1 , &sol2);
+                Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first), &sol3 , &sol4);
+                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() ? sol3 : sol4, proportionOfDistance));
+            }
+            markAngs.append(wm->ball->pos - markPoses.at(i));
+            markRoles.append(QString("passBlocker"));
+            draw(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
+                           Segment2D(sol3 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() ? sol3 : sol4)
+                 , QColor(Qt::red));
+            draw(Circle2D(wm->ball->pos , ballCircleR),QColor(Qt::black));
+            debug(QString("Man To Man Mark In PlayOn Mode / BlockPass / opp > our") , D_SEPEHR);
+        }
+
     }
     //////////////// Draw Possition of Mark Agents //////////////////////////
-    debug(QString("agentsCount : %1").arg(agents.size()) , D_SEPEHR);
-    debug(QString("markPosesSize : %1").arg(markPoses.size()) , D_SEPEHR);
     for(i = 0 ; i < markPoses.size() ; i++){
-        draw(markPoses.at(i),1,QColor(Qt::red));
+        draw(markPoses.at(i) ,1, "white");
+        draw(markRoles.at(i) , markPoses.at(i) - Vector2D(0,0.4) , "white");
     }
 }
+
 //////////////////////////////// end of AHZ ///////////////////////////////////
 void CMarkPlan::findBallOwnership()
 {
