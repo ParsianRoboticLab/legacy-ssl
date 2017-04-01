@@ -1198,11 +1198,11 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
 
         lastPlayMake = playmakeId;
         lastBallPos = wm->ball->pos;
-        debug(QString("now ball vel : %1 %2").arg(wm->ball->vel.x).arg(wm->ball->vel.y), D_PARSA);
-        for(int i = 0; i < ourPlayers.count(); i++) {
+//        debug(QString("now ball vel : %1 %2").arg(wm->ball->vel.x).arg(wm->ball->vel.y), D_PARSA);
+        /*for(int i = 0; i < ourPlayers.count(); i++) {
             debug(QString(" %1 point is : %2 ").arg(ourPlayers[i]).arg(playMakeParam[i]), D_PARSA);
-        }
-        debug(QString("Here"), D_PARSA);
+        }*/
+//        debug(QString("Here"), D_PARSA);
 
     } else {
 
@@ -1232,16 +1232,16 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
         for(int i = 0 ; i < ourPlayers.count() ; i++) {
             /*if(ourPlayers[i] == minDistForPassId)
             playMakeParam[i] += playMakeTh;*/
-            if (ourPlayers[i] == lastPlayMake) {
+            /*if (ourPlayers[i] == lastPlayMake) {
                 debug(QString("pos dist : %1").arg(wm->ball->pos.dist(lastBallPos)), D_PARSA);
                 debug(QString("vel dist : %1").arg(wm->ball->vel.dist(lastBallVelPM)), D_PARSA);
                 debug(QString("passPlayMake choosing is : %1").arg(passPlayMake), D_PARSA);
-            }
+            }*/
             if (ourPlayers[i] == lastPlayMake
                     && passPlayMake
                     && wm->ball->vel.dist(lastBallVelPM) < 0.6
                     && wm->ball->pos.dist(lastBallPos)   < 0.5) {
-                debug(QString("dictator point goes to : %1").arg(ourPlayers[i]), D_PARSA);
+                //debug(QString("dictator point goes to : %1").arg(ourPlayers[i]), D_PARSA);
                 playMakeParam[i] += playMakeTh + 5;
             } else {
                 changePassChoose = false;
@@ -1266,7 +1266,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
                             timeToStopBall / 2 * -0.4 / wm->ball->vel.length() +
                             timeToStopBall * wm->ball->vel;
                     //  if(Segment2D(wm->ball->pos, wm->ball->pos + distToStopBall).dist(passPos) < 1) {
-                    debug(QString("pass point goes to : %1").arg(ourPlayers[minDistForPassId]), D_PARSA);
+                    //debug(QString("pass point goes to : %1").arg(ourPlayers[minDistForPassId]), D_PARSA);
                     playMakeParam[minDistForPassId] += playMakeTh + 2;
                     passPointGiven = true;
                     // }
@@ -1275,7 +1275,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
 
         /*debug(QString("last ball pos : %1 %2").arg(lastBallPos.x).arg(lastBallPos.y), D_PARSA);
         debug(QString("now ball pos : %1 %2").arg(wm->ball->pos.x).arg(wm->ball->pos.y), D_PARSA);*/
-        debug(QString("pos dist : %1").arg(wm->ball->pos.dist(lastBallPos)), D_PARSA);
+        /*debug(QString("pos dist : %1").arg(wm->ball->pos.dist(lastBallPos)), D_PARSA);
 
         debug(QString("last ball vel : %1 %2").arg(lastBallVelPM.x).arg(lastBallVelPM.y), D_PARSA);
         debug(QString("now ball vel : %1 %2").arg(wm->ball->vel.x).arg(wm->ball->vel.y), D_PARSA);
@@ -1283,7 +1283,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
 
         debug(QString("pass pos : %1 %2").arg(passPos.x).arg(passPos.y), D_PARSA);
         debug(QString("passPlayMake choosing is : %1").arg(passPlayMake), D_PARSA);
-        debug(QString("mindistpassId is : %1").arg(ourPlayers[minDistForPassId]), D_PARSA);
+        debug(QString("mindistpassId is : %1").arg(ourPlayers[minDistForPassId]), D_PARSA);*/
 
         for(int i = 0 ; i < ourPlayers.count(); i++)
             if(ourPlayers[i] == lastPlayMake && !passPlayMake)
@@ -1308,7 +1308,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
         if(playmakeId == ourPlayers[minDistForPassId] && passPointGiven)
             passPlayMake = true;
 
-        debug(QString("passPlayMake choosing is : %1").arg(passPlayMake), D_PARSA);
+        //debug(QString("passPlayMake choosing is : %1").arg(passPlayMake), D_PARSA);
 
         lastPlayMake = playmakeId;
         if(!passPointGiven)
@@ -1317,11 +1317,11 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
         lastBallPos = wm->ball->pos;
 
 
-        for(int i = 0; i < ourPlayers.count(); i++) {
+        /*for(int i = 0; i < ourPlayers.count(); i++) {
             debug(QString(" %1 point is : %2 ").arg(ourPlayers[i]).arg(playMakeParam[i]), D_PARSA);
         }
         debug(QString(""), D_PARSA);
-        debug(QString(""), D_PARSA);
+        debug(QString(""), D_PARSA);*/
         //playmakeId = 11;
 
     }

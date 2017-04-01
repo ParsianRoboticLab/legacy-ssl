@@ -316,6 +316,7 @@ public:
     void generateDefensePositions(int defenses, bool goalie, QList<Circle2D> avoidCircles, QList<Vector2D> &defendersPos, Vector2D &goaliePos, Vector2D goalieCurrentPos = Vector2D::INVALIDATED);
     void checkShootDanger();
     void Aminshoot(Vector2D ball, QList<Circle2D> obstacles, double& _empty, Vector2D& _best);
+    double getProfile(int agentId, double realParameter, bool isKick,bool spinOn);
     void calculateCommandFrameRate();
     double lastTimeCommandFPSCalced;
     FormationCounts formation;
@@ -387,7 +388,6 @@ public:
     PropertyGet(int, LastFramePlayChanged, lastFrameplaychanged);
     PropertyGet(CKnowledge::State, LastGameState, lastgamestate);
     PropertyGet(bool, GameStateChanged, gamestatechanged);
-
     Property(Vector2D, MousePos, mousePos);
     Property(int, NumOfAttackers, numofattackers);
     Property(int, NumOfDeffenders, numofdeffenders);
@@ -418,11 +418,13 @@ private:
     SRAgentArgs CRAgent[_MAX_NUM_PLAYERS];
     bool necessaryDefKick;
     QList<Vector2D> staticPoses;
-public:
 
     double ProfilerResult[16][4][81];
+public:
+
     //added by Mahi
     CNewProfiler *profiler;
+    double getKickSpeedProfile(int agentId,double kickSpeedInput);
 
     Vector2D getStaticPoses(int num);
     void setNecessaryDefKick(bool tempNcssryDefKick);
