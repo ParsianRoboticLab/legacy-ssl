@@ -370,13 +370,13 @@ void CDynamicAttack::playMake() {
     switch(currentPlan.playmake.skill) {
     case DynamicEnums::Pass:
         roleAgentPM->setChip(chipOrNot(currentPlan.passPos, 0.5, 0.1));
-        if(roleAgentPM->getChip()) {
-            roleAgentPM->setKickSpeed(appropriateChipSpeed());
-        } else {
-            roleAgentPM->setKickSpeed(appropriatePassSpeed());
-        }
         roleAgentPM -> setTarget(currentPlan.passPos);
         roleAgentPM -> setEmptySpot(false);
+        if(roleAgentPM->getChip()) {
+            roleAgentPM->setKickRealSpeed(appropriateChipSpeed());
+        } else {
+            roleAgentPM->setKickRealSpeed(appropriatePassSpeed());
+        }
         roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
         // TODO : fix this dastan
 //        if(isRightTimeToPass()) {
