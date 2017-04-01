@@ -154,19 +154,6 @@ void CDynamicAttack::makePlan(int agentSize) {
 
     }
     // if Defense isn't clearing and
-    // ball in the jaw
-    else if (ballInOppJaw) {
-        debug(QString("we are in ballinoppjaw"), D_PARSA);
-        draw(Circle2D(Vector2D(0,0), 2), QColor(Qt::black));
-        currentPlan.mode = DynamicEnums::BallInOppJaw;
-        currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Best);
-
-        for(size_t i = 0;i < agentSize;i++) {
-            currentPlan.positionAgents[i].region = DynamicEnums::Best;
-            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
-        }
-    }
-    // if Defense isn't clearing and
     // we Don't have the ball
     else if (knowledge->ballPossesion != CKnowledge::WEHAVETHEBALL) {
         currentPlan.mode = DynamicEnums::NotWeHaveBall;
@@ -381,21 +368,15 @@ void CDynamicAttack::playMake() {
     roleAgentPM->setAvoidPenaltyArea(true);
 
     switch(currentPlan.playmake.skill) {
-    case DynamicEnums::Dribble:
-        roleAgentPM->setChip(true);
-        roleAgentPM->setTarget(currentPlan.passPos);
-        roleAgentPM->setKickSpeed(appropriatePassSpeed());
-        roleAgentPM->setSelectedSkill(DynamicEnums::Dribble);
-        break;
     case DynamicEnums::Pass:
         roleAgentPM->setChip(chipOrNot(currentPlan.passPos, 0.5, 0.1));
-        if(roleAgentPM->getChip()) {
-            roleAgentPM->setKickSpeed(appropriateChipSpeed());
-        } else {
-            roleAgentPM->setKickSpeed(appropriatePassSpeed());
-        }
         roleAgentPM -> setTarget(currentPlan.passPos);
         roleAgentPM -> setEmptySpot(false);
+        if(roleAgentPM->getChip()) {
+            roleAgentPM->setKickRealSpeed(appropriateChipSpeed());
+        } else {
+            roleAgentPM->setKickRealSpeed(appropriatePassSpeed());
+        }
         roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
         // TODO : fix this dastan
 //        if(isRightTimeToPass()) {
@@ -867,7 +848,9 @@ void CDynamicAttack::chooseMarkPos() {
 
 void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
     QList <Vector2D> temp;
-    for(int i = 0; i < currentPlan.agentSize; i++) {
+    // TODO : segment mide
+//    for(int i = 0; i < currentPlan.agentSize; i++) {
+    for (int i = 0; i < _points.size(); i++) {
         temp.append(_points.at(i));
         //debug(QString("pass candidates : %1 %2").arg(temp.at(i).x).arg(temp.at(i).y), D_PARSA);
     }

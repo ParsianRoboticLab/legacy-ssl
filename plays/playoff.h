@@ -54,6 +54,13 @@ enum POMODE {
     KICKOFF  = 3
 };
 
+enum DynamicSelect {
+    NOSELECT = 0,
+    KHAFAN = 1,
+    CHIP = 2,
+    BLOCKER = 3
+};
+
 struct STuneParams {
     double lastDist = 0.5;
 };
@@ -537,6 +544,7 @@ private:
     ////Dynamic
 public:
     int dynamicMatch[6];
+    DynamicSelect dynamicSelect;
 private:
     void dynamicAssignID();
     void dynamicPlayKhafan();
@@ -556,8 +564,6 @@ private:
 protected:
 
 };
-
-
 ///////////OverLoading Operators
 QDebug operator<< (QDebug d, const NGameOff::SPlan _plan);
 
