@@ -61,13 +61,10 @@ void CRolePlayOff::update() {
         kickSkill->setTarget(target);
         kickSkill->setAvoidPenaltyArea(avoidPenaltyArea);
         kickSkill->setInterceptMode(intercept);
-        if(wm->getIsSimulMode()) {
-            kickSkill->setKickSpeed(static_cast<int>(kickSpeed/120));
-
-        } else {
-            kickSkill->setKickSpeed(kickSpeed);
-
+        if (kickSpeed > 10) {
+            kickSpeed = knowledge->getProfile(agent->id(), static_cast<double>(kickSpeed)/130.0, !chip, false);
         }
+        kickSkill->setKickSpeed(kickSpeed);
         kickSkill->setChip(chip);
         kickSkill->setAgent(agent);
         kickSkill->setDontKick(!doPass);
