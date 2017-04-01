@@ -144,15 +144,19 @@ void CollectProfileData::LowSpeed(){
     switch(kickStat){
     case prfl1_Iskicking:
         if(wm->ball->vel.length() < 0.1){           // ball is in downTri and its velocity is near 0 so agent1 kicks the ball
-            prfl1->setSelectedSkill(roleSkill::Kick);
-            prfl2->setSelectedSkill(roleSkill::ReceivePass);
 
-            prfl1->setTarget( Vector2D(lowPosX2 , lowPosY2));
-            prfl2->setTarget( Vector2D(lowPosX2 , lowPosY2));
-            prfl1->setWaitPos(Vector2D(lowPosX2 , lowPosY2));
-            prfl2->setWaitPos(Vector2D(lowPosX2 , lowPosY2));
+            if(kickerWait.elapsed() > 2000){
+                prfl1->setSelectedSkill(roleSkill::Kick);
+                prfl2->setSelectedSkill(roleSkill::ReceivePass);
 
-            prfl1->setKickSpeed(kickSpeed1);
+                prfl1->setTarget( Vector2D(lowPosX2 , lowPosY2));
+                prfl2->setTarget( Vector2D(lowPosX2 , lowPosY2));
+                prfl1->setWaitPos(Vector2D(lowPosX2 , lowPosY2));
+                prfl2->setWaitPos(Vector2D(lowPosX2 , lowPosY2));
+
+                prfl1->setKickSpeed(kickSpeed1);
+            }
+
             debug(QString("prfl1 kick speed:%1").arg(prfl1->getKickSpeed()),D_NADIA);
 
             if(!Circle2D(prfl1->getTarget() , 0.15).contains(knowledge->getAgent(prfl2->getAgentID())->pos()))  // agent1 wait until agent2 is in its target
@@ -174,15 +178,18 @@ void CollectProfileData::LowSpeed(){
 
     case prfl2_Iskicking:
         if(wm->ball->vel.length() < 0.1){           // ball is in upTri and its velocity is near 0 so agent2 kicks the ball
-            prfl2->setSelectedSkill(roleSkill::Kick);
-            prfl1->setSelectedSkill(roleSkill::ReceivePass);
 
-            prfl2->setTarget( Vector2D(lowPosX1 , lowPosY1));
-            prfl1->setTarget( Vector2D(lowPosX1 , lowPosY1));
-            prfl2->setWaitPos(Vector2D(lowPosX1 , lowPosY1));
-            prfl1->setWaitPos(Vector2D(lowPosX1 , lowPosY1));
+            if(kickerWait.elapsed() > 2000){
+                prfl2->setSelectedSkill(roleSkill::Kick);
+                prfl1->setSelectedSkill(roleSkill::ReceivePass);
 
-            prfl2->setKickSpeed(kickSpeed2);
+                prfl2->setTarget( Vector2D(lowPosX1 , lowPosY1));
+                prfl1->setTarget( Vector2D(lowPosX1 , lowPosY1));
+                prfl2->setWaitPos(Vector2D(lowPosX1 , lowPosY1));
+                prfl1->setWaitPos(Vector2D(lowPosX1 , lowPosY1));
+
+                prfl2->setKickSpeed(kickSpeed2);
+            }
 
             if(!Circle2D(prfl2->getTarget() , 0.15).contains(knowledge->getAgent(prfl1->getAgentID())->pos()))  // agent2 wait until agent1 is in its target
                 prfl2->setDontKick(true);
@@ -223,6 +230,7 @@ void CollectProfileData::LowSpeed(){
                     saveMaxBallSpeed();
                     kickerPos = knowledge->getAgent(prfl2->getAgentID())->pos();
                     kickStat = prfl2_Iskicking;
+                    kickerWait.restart();
                 }
             }
             else{
@@ -236,6 +244,7 @@ void CollectProfileData::LowSpeed(){
                     saveMaxBallSpeed();
                     kickerPos = knowledge->getAgent(prfl1->getAgentID())->pos();
                     kickStat = prfl1_Iskicking;
+                    kickerWait.restart();
                 }
             }
 
@@ -247,7 +256,6 @@ void CollectProfileData::LowSpeed(){
     if(kickSpeed1 >= middleSpeed && kickSpeed2 >= middleSpeed )
         prfState = Pos2;
 }
-
 
 void CollectProfileData::saveMaxBallSpeed(){
     if(prfl1_Kicked){
@@ -320,15 +328,18 @@ void CollectProfileData::HighSpeed(){
     switch(kickStat){
     case prfl1_Iskicking:
         if(wm->ball->vel.length() < 0.1){           // ball is in downTri and its velocity is near 0 so agent1 kicks the ball
-            prfl1->setSelectedSkill(roleSkill::Kick);
-            prfl2->setSelectedSkill(roleSkill::ReceivePass);
 
-            prfl1->setTarget( Vector2D(highPosX2 , highPosY2));
-            prfl1->setWaitPos(Vector2D(highPosX2 , highPosY2));
-            prfl2->setTarget( Vector2D(highPosX2 , highPosY2));
-            prfl2->setWaitPos(Vector2D(highPosX2 , highPosY2));
+            if(kickerWait.elapsed() > 2000 || kickSpeed1 < 600){
+                prfl1->setSelectedSkill(roleSkill::Kick);
+                prfl2->setSelectedSkill(roleSkill::ReceivePass);
 
-            prfl1->setKickSpeed(kickSpeed1);
+                prfl1->setTarget( Vector2D(highPosX2 , highPosY2));
+                prfl1->setWaitPos(Vector2D(highPosX2 , highPosY2));
+                prfl2->setTarget( Vector2D(highPosX2 , highPosY2));
+                prfl2->setWaitPos(Vector2D(highPosX2 , highPosY2));
+
+                prfl1->setKickSpeed(kickSpeed1);
+            }
 
             if(!Circle2D(prfl1->getTarget() , 0.15).contains(knowledge->getAgent(prfl2->getAgentID())->pos()))  // agent1 wait until agent2 is in its target
                 prfl1->setDontKick(true);
@@ -348,15 +359,18 @@ void CollectProfileData::HighSpeed(){
 
     case prfl2_Iskicking:
         if(wm->ball->vel.length() < 0.1){           // ball is in upTri and its velocity is near 0 so agent2 kicks the ball
-            prfl2->setSelectedSkill(roleSkill::Kick);
-            prfl1->setSelectedSkill(roleSkill::ReceivePass);
 
-            prfl2->setTarget(Vector2D(highPosX1 , highPosY1));
-            prfl1->setTarget(Vector2D(highPosX1 , highPosY1));
-            prfl2->setWaitPos(Vector2D(highPosX1 , highPosY1));
-            prfl1->setWaitPos(Vector2D(highPosX1 , highPosY1));
+            if(kickerWait.elapsed() > 2000  || kickSpeed2 < 600){
+                prfl2->setSelectedSkill(roleSkill::Kick);
+                prfl1->setSelectedSkill(roleSkill::ReceivePass);
 
-            prfl2->setKickSpeed(kickSpeed2);
+                prfl2->setTarget(Vector2D(highPosX1 , highPosY1));
+                prfl1->setTarget(Vector2D(highPosX1 , highPosY1));
+                prfl2->setWaitPos(Vector2D(highPosX1 , highPosY1));
+                prfl1->setWaitPos(Vector2D(highPosX1 , highPosY1));
+
+                prfl2->setKickSpeed(kickSpeed2);
+            }
 
             if(!Circle2D(prfl2->getTarget() , 0.15).contains(knowledge->getAgent(prfl1->getAgentID())->pos()))  // agent2 wait until agent1 is in its target
                 prfl2->setDontKick(true);
@@ -386,7 +400,7 @@ void CollectProfileData::HighSpeed(){
 
             if(wm->ball->pos.y > 0){ // ball is near to receiver; changing skills
 
-                if(!BallIsNear(prfl2,1)){
+                if(!BallIsNear(prfl2,0.6)){
                     prfl2->setSelectedSkill(roleSkill::GotopointAvoid);
                     prfl2->setWaitPos(wm->ball->pos);
                     prfl2->setTarget(wm->ball->pos);
@@ -395,10 +409,16 @@ void CollectProfileData::HighSpeed(){
                     saveMaxBallSpeed();
                     kickerPos = knowledge->getAgent(prfl2->getAgentID())->pos();
                     kickStat = prfl2_Iskicking;
+
+                    prfl2->setSelectedSkill(roleSkill::GotopointAvoid);
+                    prfl2->setTarget(knowledge->getAgent(prfl2->getAgentID())->pos());
+                    prfl2->setWaitPos(knowledge->getAgent(prfl2->getAgentID())->pos());
+
+                    kickerWait.restart();
                 }
             }else{
 
-                if(!BallIsNear(prfl1,1)){
+                if(!BallIsNear(prfl1,0.6)){
                     prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
                     prfl1->setWaitPos(wm->ball->pos);
                     prfl1->setTarget(wm->ball->pos);
@@ -406,6 +426,12 @@ void CollectProfileData::HighSpeed(){
                     saveMaxBallSpeed();
                     kickerPos = knowledge->getAgent(prfl1->getAgentID())->pos();
                     kickStat = prfl1_Iskicking;
+
+                    prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
+                    prfl1->setTarget(knowledge->getAgent(prfl1->getAgentID())->pos());
+                    prfl1->setWaitPos(knowledge->getAgent(prfl1->getAgentID())->pos());
+
+                    kickerWait.restart();
                 }
             }
 
@@ -554,6 +580,7 @@ void CollectProfileData::start(){
         break;
 
     case Pos1:
+        kickerWait.start();
         positioning(lowPosX1 , lowPosY1 , lowPosX2 , lowPosY2);
         if( Circle2D(knowledge->getAgent(prfl2->getAgentID())->pos() , 0.1).contains(prfl2->getTarget()) &&
                 Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.1).contains(prfl1->getTarget()) ){
@@ -564,7 +591,7 @@ void CollectProfileData::start(){
         break;
 
     case goOutState:
-        positioning(-0.6 , 0.7 , -0.6 , -0.4 );
+        positioning(-0.6 , -0.7 , -0.6 , 0.4 );
         if( Circle2D(knowledge->getAgent(prfl2->getAgentID())->pos() , 0.4).contains(prfl2->getTarget()) &&
                 Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.4).contains(prfl1->getTarget()) ){
             prfState=InitState;
@@ -580,6 +607,7 @@ void CollectProfileData::start(){
         break;
 
     case Pos2:
+        kickerWait.start();
         positioning(highPosX1 , highPosY1 , highPosX2 , highPosY2);
         if( Circle2D(knowledge->getAgent(prfl2->getAgentID())->pos() , 0.1).contains(prfl2->getTarget()) &&
                 Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.1).contains(prfl1->getTarget()) ){
