@@ -566,6 +566,7 @@ int CDynamicAttack::appropriateChipSpeed() {
 
 void CDynamicAttack::chooseBestPositons()
 {
+    //it has three code of choosing best position that only one of them must be uncommented
     int agentSize = currentPlan.agentSize;
 
     guardIndexList.clear();
@@ -574,6 +575,8 @@ void CDynamicAttack::chooseBestPositons()
 
     semiDynamicPosition.clear();
 
+    //first type of choosing and probably the best one
+    //this choose the points with maximum x that has a good one touch angle
     for(int i = 0; i < agentSize; i++)
     {
         debug(QString("region %1").arg(i), D_PARSA);
@@ -633,11 +636,19 @@ void CDynamicAttack::chooseBestPositons()
                                                + 0.5 - points[0].y + ballPos.y));
             }
         }
-        else
+        else if(i < currentPlan.agentSize)
             semiDynamicPosition.append(points[best]);
+        else if(currentPlan.mode == DynamicEnums::DefenseClear) {
+            semiDynamicPosition.append(Vector2D(0, 0));
+        }
+        else {
+            semiDynamicPosition.append(guardLocations[currentPlan.agentSize]
+                    [currentPlan.agentSize - 1]
+                    [tempIndex]);
         debug(QString(""), D_PARSA);
     }
 
+    //second type of choosing and very new but not good
 
     /*if(mahiPlayMaker != NULL && ballPos.dist(mahiPlayMaker->pos()) > 0.15)
     {
@@ -739,7 +750,7 @@ void CDynamicAttack::chooseBestPositons()
 
 
 
-    //TODO : this was the previous code. use if it is better.
+    //third type of choosing and the old one
 
     /*draw(Segment2D(ballPos,wm->field->oppGoalL()), QColor(Qt::black));
     draw(Segment2D(ballPos,wm->field->oppGoalR()), QColor(Qt::black));
