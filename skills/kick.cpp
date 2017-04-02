@@ -674,10 +674,27 @@ kckMode CSkillKick::decideMode()
     tempVec1 = target - ballPos;
     tempAngle = fabs((tempVec1.th() - (ballPos - agentPos).th()).degree());
 
-    if(dribblerArea.contains(ballPos))
-        kickerOn = true;
-    else
-        kickerOn = false;
+    ///////////////////////////////find center of dribbler for pass profiler
+    Polygon2D robotKickArea;
+
+
+    robotKickArea.addVertex(agentPos+agent->dir().norm()*0.08+agent->dir().rotate(90).norm()*0.01);
+    robotKickArea.addVertex(agentPos+agent->dir().norm()*0.35+agent->dir().rotate(90).norm()*0.01);
+    robotKickArea.addVertex(agentPos+agent->dir().norm()*0.35-agent->dir().rotate(90).norm()*0.01);
+    robotKickArea.addVertex(agentPos+agent->dir().norm()*0.08-agent->dir().rotate(90).norm()*0.01);
+
+    if(passProfiler) {
+        if(dribblerArea.contains(ballPos) && robotKickArea.contains(ballPos))
+            kickerOn = true;
+        else
+            kickerOn = false;
+    }
+    else {
+        if(dribblerArea.contains(ballPos))
+            kickerOn = true;
+        else
+            kickerOn = false;
+    }
 
     draw(QString("theta : %1").arg(fabs(((target-agentPos).th().degree() - (ballPos-agentPos).th().degree() ))) , Vector2D(-1,-1));
 
@@ -1015,13 +1032,13 @@ void CSkillKick::jTurn()
     draw(robotKickArea);
 
     double reduce = 0.5;
-    reduce += 1.4*agentPos.dist(ballPos) ;
+    reduce += 2*agentPos.dist(ballPos) ;
     reduce = max(reduce,0.7);
     if(passProfiler || (wm->field->isInOppPenaltyArea(ballPos + (wm->field->oppGoal() - ballPos).norm()*0.05) && agentPos.dist(ballPos) <0.25))
     {
         reduce = 0.3;
     }
-//    reduce = min(reduce,2.5);
+    reduce = min(reduce,2.5);
     double movementDir = ((ballPos - agentPos).th() - kickFinalDir).degree();
     double robotDir = (ballPos - agentPos).th().radian() - agentDir.th().radian();
     double shift = 0;
@@ -1036,7 +1053,7 @@ void CSkillKick::jTurn()
         shift = 5 + (1-agentPos.dist(ballPos))*45;
     else if(movementDir < 0)
         shift = -5 - (1-agentPos.dist(ballPos))*45;
-    if(robotKickArea.contains(ballPos) && wm->ball->vel.length() < 0.1)
+    if(robotKickArea.contains(ballPos) && wm->ball->vel.length() < 0.1 && !passProfiler)
         kkMovementTheta = 0;
     else
         kkMovementTheta = robotDir + AngleDeg::deg2rad(shift);
@@ -1057,7 +1074,7 @@ void CSkillKick::jTurn()
     speedPidY->kd = 1;
     speedPidX->kp = 0;
     speedPidY->kp = 0.2;
-    if(knowledge->isOurNonPlayOnKick())
+    if(knowledge->isOurNonPlayOnKick() && wm->ball->vel.length() < 0.1)
     {
         reduce = 0.5;
         speedPidY->kp = 0;
