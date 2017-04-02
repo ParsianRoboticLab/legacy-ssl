@@ -248,7 +248,7 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
                 }
             }
             if(opponentAgentsToBeMarkPossition.size() == 0){
-                for(i = 0 ; i < ourMarkAgentsSize ; i++){
+                for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
                     if(!wm->field->isInOurPenaltyArea(opponentAgentsCircle.at(i).center())){
                         opponentAgentsCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()), &sol1 , &sol2);
                         penaltyArea.intersection(Segment2D(opponentAgentsCircle.at(i).center() , wm->field->ourGoal()), &sol3 , &sol4);
@@ -3123,7 +3123,7 @@ void DefensePlan::inteliDecideMarkType(){
 }
 
 void DefensePlan::findPos(int _markAgentSize){
-    double xLimitForblockingPass = 0;
+    double xLimitForblockingPass = -2;
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
     bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)|| (knowledge->getGameState() == CKnowledge::TheirKickOff)|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     bool MantoManAllTransientFlag = policy()->Mark_ManToManAllTransiant();
