@@ -227,7 +227,7 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
                 }
             }
             if(opponentAgentsToBeMarkPossition.size() == 0){
-                for(i = 0 ; i < ourMarkAgentsSize ; i++){
+                for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
                     if(!wm->field->isInOurPenaltyArea(opponentAgentsCircle.at(i).center())){
                         opponentAgentsCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()), &sol1 , &sol2);
                         penaltyArea.intersection(Segment2D(opponentAgentsCircle.at(i).center() , wm->field->ourGoal()), &sol3 , &sol4);
@@ -481,8 +481,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
 
 void DefensePlan::markExecute(int _markAgentSize)
 {
-    if(_markAgentSize == markPoses.count())
-    {
+
         for(int i =0;i<markPoses.count(); i++)
         {
             if(i < _markAgentSize) {
@@ -490,7 +489,7 @@ void DefensePlan::markExecute(int _markAgentSize)
                 debug(QString("%1 : x : %2, y : %3").arg(i).arg(markPoses[i].x).arg(markPoses[i].y),D_MAHI);
             }
         }
-    }
+
 }
 
 void DefensePlan::checkGoalieState()
@@ -1355,7 +1354,7 @@ void DefensePlan::matchingDefPos(int _defenseNum){
         changeInMarkPlanFlag = false;
     }
     else if((playOffMode || knowledge->transientFlag) && (oppAgentsToMarkPos.size() == lastOpponentAgentsToBeMarkSize)){
-        for(int i = 0 ; i < lastMarkRoles.size() ; i++){
+        for(int i = 0 ; i < lastMarkRoles.size()  && i < markRoles.size(); i++){
             if(markRoles.at(i) != lastMarkRoles.at(i)){
                 changeInMarkPlanFlag = true;
             }
@@ -3098,7 +3097,7 @@ void DefensePlan::inteliDecideMarkType(){
 }
 
 void DefensePlan::findPos(int _markAgentSize){
-    double xLimitForblockingPass = 0;
+    double xLimitForblockingPass = -2;
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
     bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)|| (knowledge->getGameState() == CKnowledge::TheirKickOff)|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     bool MantoManAllTransientFlag = policy()->Mark_ManToManAllTransiant();
