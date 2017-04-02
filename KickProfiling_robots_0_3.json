@@ -1,0 +1,530 @@
+{
+ "PROFILER" : [
+  {
+   "robot_0" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+     {
+      "kickSpeed" : 300,
+      "realSpeed" : [
+3.71662,
+3.71059,
+3.46798,
+3.36306,
+3.22955,
+3.72163
+      ]
+     },
+     {
+      "kickSpeed" : 400,
+      "realSpeed" : [
+4.61673,
+4.85001,
+4.84991,
+4.58164,
+4.50984,
+4.09237
+      ]
+     },
+     {
+      "kickSpeed" : 500,
+      "realSpeed" : [
+5.62728,
+5.09026,
+6.0554,
+5.82649,
+5.45321,
+4.90264
+      ]
+     },
+     {
+      "kickSpeed" : 600,
+      "realSpeed" : [
+6.00114,
+5.24281,
+5.35238,
+6.12427,
+5.26347,
+5.16237
+      ]
+     },
+     {
+      "kickSpeed" : 700,
+      "realSpeed" : [
+5.54813,
+7.52653,
+6.30268,
+7.652,
+7.50169,
+8.47131
+      ]
+     },
+     {
+      "kickSpeed" : 800,
+      "realSpeed" : [
+7.8761,
+8.1143,
+6.43671,
+5.68963,
+6.72638,
+5.66812
+      ]
+     },
+     {
+      "kickSpeed" : 900,
+      "realSpeed" : [
+6.92691,
+6.13869,
+4.99193,
+7.06894,
+6.35161,
+7.28257
+      ]
+     },
+     {
+      "kickSpeed" : 1000,
+      "realSpeed" : [
+15.196,
+6.95755,
+7.34505,
+12.9569,
+9.10398,
+8.91937
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "robot_1" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+
+    ]
+   }
+  },
+  {
+   "robot_2" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+
+    ]
+   }
+  },
+  {
+   "robot_3" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+
+    ]
+   }
+  },
+  {
+   "robot_4" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+     {
+      "kickSpeed" : 300,
+      "realSpeed" : [
+2.8365,
+3.14464,
+2.6159,
+3.6307,
+3.64966,
+2.41167
+      ]
+     },
+     {
+      "kickSpeed" : 400,
+      "realSpeed" : [
+3.60352,
+5.47128,
+4.8132,
+5.72882,
+4.95882,
+3.88859
+      ]
+     },
+     {
+      "kickSpeed" : 500,
+      "realSpeed" : [
+6.29469,
+4.79341,
+5.42127,
+3.69345,
+4.16093,
+2.10152
+      ]
+     },
+     {
+      "kickSpeed" : 600,
+      "realSpeed" : [
+6.6965,
+5.08384,
+5.60877,
+3.78366,
+5.11441,
+4.89297
+      ]
+     },
+     {
+      "kickSpeed" : 700,
+      "realSpeed" : [
+4.31234,
+5.43802,
+8.62202,
+5.1623,
+6.34196,
+6.60778
+      ]
+     },
+     {
+      "kickSpeed" : 800,
+      "realSpeed" : [
+3.87497,
+3.33953,
+4.66528,
+6.20101,
+5.87567,
+4.76049
+      ]
+     },
+     {
+      "kickSpeed" : 900,
+      "realSpeed" : [
+6.90595,
+6.28837,
+7.48277,
+7.40543,
+9.83557,
+4.55672
+      ]
+     },
+     {
+      "kickSpeed" : 1000,
+      "realSpeed" : [
+8.11787,
+10.4831,
+5.66483,
+7.83913,
+4.70321,
+4.81423
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "robot_5" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+
+    ]
+   }
+  },
+  {
+   "robot_6" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+
+    ]
+   }
+  },
+  {
+   "robot_7" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+
+    ]
+   }
+  },
+  {
+   "robot_8" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+
+    ]
+   }
+  },
+  {
+   "robot_9" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+
+    ]
+   }
+  },
+  {
+   "robot_10" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+
+    ]
+   }
+  },
+  {
+   "robot_11" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+
+    ]
+   }
+  },
+  {
+   "robot_12" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+
+    ]
+   }
+  },
+  {
+   "robot_13" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+
+    ]
+   }
+  },
+  {
+   "robot_14" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+
+    ]
+   }
+  },
+  {
+   "robot_15" :    {
+    "SpinChip" : [
+
+    ],
+    "SpinKick" : [
+
+    ],
+    "chip" : [
+
+    ],
+    "extraDetail" :     {
+     "SpinChip" : "",
+     "SpinKick" : "",
+     "chip" : "",
+     "kick" : ""
+    },
+    "kick" : [
+
+    ]
+   }
+  }
+ ]
+}

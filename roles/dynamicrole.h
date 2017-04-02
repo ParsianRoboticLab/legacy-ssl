@@ -43,6 +43,20 @@ private:
     ClassProperty(CRoleDynamic, bool, NoKick, noKick, updated);
     ClassProperty(CRoleDynamic, int, AgentID, agentID, updated);
 
+public:
+    CRoleDynamic* setKickRealSpeed(double val) {
+        kickSpeed = knowledge -> getProfile(agent->id(), val, chip, false);
+        updated = true;
+        return this;
+    }
+
+
+    CRoleDynamic* setAddKickRealSpeed(double val) {
+        kickSpeed = knowledge -> getProfile(agent->id(), agent->pos().dist(target) + val, chip, false);
+        updated = true;
+        return this;
+    }
+
 };
 
 #endif // DYNAMICROLE_H

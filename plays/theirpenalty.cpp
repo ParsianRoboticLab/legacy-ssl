@@ -34,7 +34,7 @@ void CTheirPenalty::execute_1(){
 
 	appendRemainingsAgents(positionAgents);
 
-	setFormation("TheirPenaltyKick");
+    setFormation("TheirP");
 }
 
 void CTheirPenalty::execute_2(){
@@ -42,7 +42,7 @@ void CTheirPenalty::execute_2(){
 
 	appendRemainingsAgents(positionAgents);
 
-	setFormation("TheirPenaltyKick");
+    setFormation("TheirP");
 }
 
 void CTheirPenalty::execute_3(){
@@ -50,7 +50,7 @@ void CTheirPenalty::execute_3(){
 
 	appendRemainingsAgents(positionAgents);
 
-	setFormation("TheirPenaltyKick");
+    setFormation("TheirP");
 }
 
 void CTheirPenalty::execute_4(){
@@ -58,7 +58,7 @@ void CTheirPenalty::execute_4(){
 
 	appendRemainingsAgents(positionAgents);
 
-	setFormation("TheirPenaltyKick");
+    setFormation("TheirP");
 }
 
 void CTheirPenalty::execute_5(){
@@ -66,7 +66,7 @@ void CTheirPenalty::execute_5(){
 
 	appendRemainingsAgents(positionAgents);
 
-	setFormation("TheirPenaltyKick");
+    setFormation("TheirP");
 }
 
 void CTheirPenalty::execute_6(){
@@ -74,5 +74,5 @@ void CTheirPenalty::execute_6(){
 
 	appendRemainingsAgents(positionAgents);
 
-	setFormation("TheirPenaltyKick");
+    setFormation("TheirP");
 }

@@ -325,9 +325,6 @@ void CMainApplication::Experimental3()
 //                        KickCoeff->at(q).at(0)+KickCoeff->at(q).at(1)*dis+KickCoeff->at(q).at(2)*dis*dis;
 //        }
 
-    for(int i=0;i<80;i++)
-    qDebug()<<knowledge->ProfilerResult[0][0][i];
-
     analyze("hello",13,false);
     analyze("nadia",1,false);
     analyze("nadia",3,false);
