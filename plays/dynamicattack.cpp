@@ -396,11 +396,11 @@ void CDynamicAttack::playMake() {
         roleAgentPM -> setEmptySpot(false);
         roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
         // TODO : fix this dastan
-        if(isRightTimeToPass()) {
+        /*if(isRightTimeToPass()) {
             roleAgentPM->setNoKick(false); //TEST
         } else {
             roleAgentPM->setNoKick(true);
-        }
+        }*/
         break;
     case DynamicEnums::Chip:
         roleAgentPM->setNoKick(false);
@@ -991,6 +991,8 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
         } else {
             tempIndex = maxHorizontalDistID(valids);
         }
+        if(_points.at(tempIndex).dist(ballPos) < 0.2)
+            roleAgentPM->setNoKick(true);
     }
 
     if(tempIndex < temp.size()) {
