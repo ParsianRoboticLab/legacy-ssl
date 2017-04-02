@@ -120,7 +120,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
             for(int k=0; k<81; k++)
                 ProfilerResult[i][j][k] = -1000;
 
-    refRobotID = 0;
+    refRobotID = 2;
 
     // initialize robotCoeff
     for(int i=0; i< 16; i++)
@@ -216,9 +216,9 @@ int CKnowledge::getProfile(int agentId, double realParameter, bool isKick, bool 
     double profiledParameter=0;
     int type;
 
-    if(wm->getIsSimulMode()){
-        return (int)realParameter;
-    }
+//    if(wm->getIsSimulMode()){
+//        return (int)realParameter;
+//    }
 
     if(isKick && !spinOn)
     {
@@ -263,6 +263,8 @@ int CKnowledge::getProfile(int agentId, double realParameter, bool isKick, bool 
         }
         else{   // Linear
             profiledParameter= realParameter*128;
+            if(type == 1)
+                profiledParameter*=2;
         }
 
         if(profiledParameter > 1023)
