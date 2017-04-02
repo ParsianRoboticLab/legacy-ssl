@@ -316,7 +316,7 @@ public:
     void generateDefensePositions(int defenses, bool goalie, QList<Circle2D> avoidCircles, QList<Vector2D> &defendersPos, Vector2D &goaliePos, Vector2D goalieCurrentPos = Vector2D::INVALIDATED);
     void checkShootDanger();
     void Aminshoot(Vector2D ball, QList<Circle2D> obstacles, double& _empty, Vector2D& _best);
-    double getProfile(int agentId, double realParameter, bool isKick,bool spinOn);
+    int getProfile(int agentId, double realParameter, bool isKick=true, bool spinOn=false);
     void calculateCommandFrameRate();
     double lastTimeCommandFPSCalced;
     FormationCounts formation;
@@ -419,6 +419,8 @@ private:
     bool necessaryDefKick;
     QList<Vector2D> staticPoses;
 
+    int refRobotID;
+    double RobotsCoeff[16][4];
     double ProfilerResult[16][4][81];
 public:
 

@@ -39,8 +39,9 @@ void CollectProfileData::init(int p1 , int p2){
     prfl1->setReceiveRadius(1.2);
     prfl1->setTolerance(0.01);
     prfl1->setIsActive(true);
-    prfl1->setChip(false);
+    prfl1->setChip(isChip);
     prfl1->setSlow(true);
+    prfl1->setSpin(spinOn);
 
     prfl2->setAgent(knowledge->getAgent(p2));
     prfl2->setAgentID(p2);
@@ -48,10 +49,16 @@ void CollectProfileData::init(int p1 , int p2){
     prfl2->setReceiveRadius(1.2);
     prfl2->setTolerance(0.01);
     prfl2->setIsActive(true);
-    prfl2->setChip(false);
+    prfl2->setChip(isChip);
     prfl2->setSlow(true);
+    prfl1->setSpin(spinOn);
 
     kickerPos = knowledge->getAgent(prfl1->getAgentID())->pos();
+
+    if(spinOn)
+        waitKickSpeed = MinSpeed;
+    else
+        waitKickSpeed = 600;
 
     ballSpeed = 0;
     kickSpeed1 = MinSpeed;
@@ -327,9 +334,10 @@ void CollectProfileData::HighSpeed(){
 
     switch(kickStat){
     case prfl1_Iskicking:
+        knowledge->getAgent(prfl1->getAgentID())->setRoller(4);
         if(wm->ball->vel.length() < 0.1){           // ball is in downTri and its velocity is near 0 so agent1 kicks the ball
 
-            if(kickerWait.elapsed() > 2000 || kickSpeed1 < 600){
+            if(kickerWait.elapsed() > 2000 || kickSpeed1 < waitKickSpeed){
                 prfl1->setSelectedSkill(roleSkill::Kick);
                 prfl2->setSelectedSkill(roleSkill::ReceivePass);
 
@@ -358,9 +366,11 @@ void CollectProfileData::HighSpeed(){
 
 
     case prfl2_Iskicking:
+        knowledge->getAgent(prfl2->getAgentID())->setRoller(4);
+
         if(wm->ball->vel.length() < 0.1){           // ball is in upTri and its velocity is near 0 so agent2 kicks the ball
 
-            if(kickerWait.elapsed() > 2000  || kickSpeed2 < 600){
+            if(kickerWait.elapsed() > 2000  || kickSpeed2 < waitKickSpeed){
                 prfl2->setSelectedSkill(roleSkill::Kick);
                 prfl1->setSelectedSkill(roleSkill::ReceivePass);
 

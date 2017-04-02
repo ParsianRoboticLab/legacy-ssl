@@ -117,24 +117,48 @@ CKnowledge::CKnowledge(CAgent** _agents)
     for(int i=0; i< 16; i++)
         for(int j=0; j<4; j++)
             for(int k=0; k<81; k++)
-                ProfilerResult[i][j][k] = -1;
+                ProfilerResult[i][j][k] = -1000;
+
+    refRobotID = 0;
+
+    // initialize robotCoeff
+    for(int i=0; i< 16; i++)
+        for(int j=0; j<4; j++)
+            RobotsCoeff[i][j]=1;
+
+    // now fill proper data for RobotsCoeff : e.g. RobotsCoeff[3][0] = 1.32537;
 
 
-    profiler->load(JSON /* , "havij.json"*/);
 
+    profiler->load(JSON  , "MahiProfiler_0_3_repeat4_11.1.96.json");
 
-    for(int q=0; q<16; q++)
-        KickCoeff->append(ProRes.PolynomialRegression(profiler->robotsProfile[q].finalKickMap.values() , profiler->robotsProfile[q].finalKickMap.keys(),2));
+    QList<double> values;
+    QList<int> keys;
+
+    for(int q=0; q<16; q++){
+        values = profiler->robotsProfile[q].finalKickMap.values();
+        values.insert(0 , 0);
+        keys = profiler->robotsProfile[q].finalKickMap.keys();
+        keys.insert(0 , 0);
+        KickCoeff->append(ProRes.PolynomialRegression(values , keys,2));
+    }
 
     //    ProfilerResult[robotID][0:kick , 1:chip , 2:SpinKick , 3:SpinChip][10*distance(0-80)] ---> contains needed voltage for this distance
 
-    for(int q=0; q<16; q++)
-        for(double dis=0; dis<=8; dis+=0.1){
-            if(KickCoeff->at(q).count()>0)
-                ProfilerResult[q][0][(int)(dis*10)] =(double)
-                        KickCoeff->at(q).at(0)+KickCoeff->at(q).at(1)*dis+KickCoeff->at(q).at(2)*dis*dis;
-        }
+    double tempRes;
 
+    for(int q=0; q<16; q++){
+        if(profiler->robotsProfile[q].finalKickMap.keys().size() > 0)
+            if(KickCoeff->at(q).count()>0)
+                for(int dis=0; dis<81; dis++){
+                    tempRes = (double)
+                            KickCoeff->at(q).at(0) + KickCoeff->at(q).at(1)*((double)dis/10) + KickCoeff->at(q).at(2)*((double)dis/10)*((double)dis/10);
+                    if(tempRes != 0 )
+                        ProfilerResult[q][0][dis] = tempRes;
+                    else
+                        ProfilerResult[q][0][dis] = -1000;
+                }
+    }
 }
 
 CKnowledge::~CKnowledge()
@@ -151,94 +175,66 @@ Vector2D CKnowledge::getStaticPoses(int num)
 
 }
 
-double CKnowledge::getProfile(int agentId, double realParameter, bool isKick,bool spinOn ){
-    double kickspeed=0;
-    int counter=0;
+int CKnowledge::getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
+
+    double profiledParameter=0;
+    int type;
 
     if(isKick && !spinOn)
     {
-        if(realParameter*10 > 80)   // out of index, very high speed
-            return 1023;
-
-        kickspeed=ProfilerResult[agentId][0][(int)round(realParameter*10)];
-
-        if(kickspeed != -1){
-
-            if(realParameter*10==80)
-                return ProfilerResult[agentId][0][(int)round(realParameter*10-1)];
-
-            if(kickspeed > 1024)
-                return 1000;
-            else if(kickspeed > 100)
-                return kickspeed;
-            else
-                return 100;
-        }
-        else
-        {
-            int prev;
-            if(realParameter*10==80)
-                prev = 1;
-            else
-                prev = 0;
-
-            for(int i=0;i<8;i++)
-            {
-                if(ProfilerResult[agentId][i][(int)round(realParameter*10-prev)] = -1){
-                    kickspeed+=ProfilerResult[agentId][i][(int)round(realParameter*10-prev)];
-                    counter++;
-                }
-            }
-
-            kickspeed/=counter;
-
-            if(prev==1)
-                return kickspeed;
-
-            if(kickspeed > 1024)
-                return 1000;
-            else if(kickspeed > 100)
-                return kickspeed;
-            else
-                return 100;
-        }
+        type =0;
     }
     else if(!isKick && !spinOn)
     {
-
-        kickspeed=ProfilerResult[agentId][1][(int)round(realParameter*10)];
-        if(kickspeed != -1){
-            if(kickspeed > 1024)
-                return 1000;
-            else if(kickspeed > 100)
-                return kickspeed;
-            else
-                return 100;
-        }
-        else{
-            for(int i=0;i<8;i++)
-            {
-                if(ProfilerResult[agentId][i][(int)round(realParameter*10)] > 0){
-                    kickspeed+=ProfilerResult[agentId][i][(int)round(realParameter*10)];
-                    counter++;
-                }
-            }
-            kickspeed/=counter;
-
-            if(kickspeed > 1024)
-                return 1000;
-            else if(kickspeed > 100)
-                return kickspeed;
-            else
-                return 100;
-        }
+        type =1;
     }
     else if(isKick && spinOn){
-
+        type =2;
     }
     else if(!isKick && spinOn){
-
+        type =3;
     }
+
+
+        if(wm->getIsSimulMode()){
+            return (int)realParameter;
+        }
+
+    if(realParameter < 0) // dummy user
+        return 0;
+
+    if(realParameter*10 > 80)   // out of index, return max speed
+        return 1023;
+
+    profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
+
+    if(profiledParameter != -1000){
+
+        if(profiledParameter > 1023)
+            return 1023;
+        else if(profiledParameter > 0)
+            return (int)profiledParameter;
+        else
+            return 1;
+    }
+    else // no data is saved for this robot
+    {
+        if(ProfilerResult[refRobotID][type][(int)round(realParameter*10)] != -1000){
+            profiledParameter= RobotsCoeff[agentId][type] * knowledge->getProfile(refRobotID , realParameter , isKick , spinOn);
+        }
+        else{
+            profiledParameter= realParameter*128;
+        }
+
+        if(profiledParameter > 1023)
+            return 1023;
+        else if(profiledParameter > 0)
+            return (int)profiledParameter;
+        else{
+            return 1;
+        }
+    }
+
 }
 
 void CKnowledge::calculateCommandFrameRate()
