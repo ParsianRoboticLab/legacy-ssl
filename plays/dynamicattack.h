@@ -62,10 +62,11 @@ public:
     CAgent* getMahiPlayMaker();
 
 private:
-    int guardSize;
-    int lastGuards[6];
     Vector2D lastPassPosLoc;
-    Vector2D lastBallPos;
+    int lastGuards[6];
+    int guardSize;
+    QTime positioningIntention;
+    double positioningIntentionInterval;
 
     void playMake();
     void choosePlayMaker();
