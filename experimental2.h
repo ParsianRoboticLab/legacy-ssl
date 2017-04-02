@@ -15,16 +15,16 @@ void CMainApplication::Experimental2()
         debug(QString("%1________").arg(id) , D_FATEMEH);
 
         for(int i=0; i<90; i+=5){
-            debug(QString("kick: %1 , real : %2").arg(knowledge->getProfile(id , (double)i/10 , true , false)).arg((double)i/10) ,
+            debug(QString("kick: %1 , real : %2").arg(knowledge->getProfile(id , (double)i/10 , false , false)).arg((double)i/10) ,
                   D_FATEMEH);
         }
 
         debug(QString("\nregression %1: ").arg(id) , D_FATEMEH);
 
-        for(int i=0; i < knowledge->profiler->robotsProfile[id].finalKickMap.size(); i++)
+        for(int i=0; i < knowledge->profiler->robotsProfile[id].finalChipMap.size(); i++)
             debug(QString("key : %1 , value : %2").arg(
-                      knowledge->profiler->robotsProfile[id].finalKickMap.keys().at(i)).arg(
-                      knowledge->profiler->robotsProfile[id].finalKickMap.values().at(i)) , D_FATEMEH);
+                      knowledge->profiler->robotsProfile[id].finalChipMap.keys().at(i)).arg(
+                      knowledge->profiler->robotsProfile[id].finalChipMap.values().at(i)) , D_FATEMEH);
         }
     }
     flag=false;
