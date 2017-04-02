@@ -216,9 +216,9 @@ int CKnowledge::getProfile(int agentId, double realParameter, bool isKick, bool 
     double profiledParameter=0;
     int type;
 
-//    if(wm->getIsSimulMode()){
-//        return (int)realParameter;
-//    }
+    if(wm->getIsSimulMode()){
+        return (int)realParameter;
+    }
 
     if(isKick && !spinOn)
     {
