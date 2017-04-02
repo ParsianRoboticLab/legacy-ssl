@@ -119,7 +119,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
             for(int k=0; k<81; k++)
                 ProfilerResult[i][j][k] = -1000;
 
-    refRobotID = 8;
+    refRobotID = 0;
 
     // initialize robotCoeff
     for(int i=0; i< 16; i++)
@@ -130,7 +130,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
 
 
-    profiler->load(JSON /* , "havij.json"*/);
+    profiler->load(JSON  , "MahiProfiler_0_3_repeat4_11.1.96.json");
 
     QList<double> values;
     QList<int> keys;
@@ -147,16 +147,18 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
     double tempRes;
 
-    for(int q=0; q<16; q++)
-        if(KickCoeff->at(q).count()>0)
-            for(int dis=0; dis<81; dis++){
-                tempRes = (double)
-                        KickCoeff->at(q).at(0) + KickCoeff->at(q).at(1)*((double)dis/10) + KickCoeff->at(q).at(2)*((double)dis/10)*((double)dis/10);
-                if(tempRes != 0 )
-                    ProfilerResult[q][0][dis] = tempRes;
-                else
-                    ProfilerResult[q][0][dis] = -1000;
-            }
+    for(int q=0; q<16; q++){
+        if(profiler->robotsProfile[q].finalKickMap.keys().size() > 0)
+            if(KickCoeff->at(q).count()>0)
+                for(int dis=0; dis<81; dis++){
+                    tempRes = (double)
+                            KickCoeff->at(q).at(0) + KickCoeff->at(q).at(1)*((double)dis/10) + KickCoeff->at(q).at(2)*((double)dis/10)*((double)dis/10);
+                    if(tempRes != 0 )
+                        ProfilerResult[q][0][dis] = tempRes;
+                    else
+                        ProfilerResult[q][0][dis] = -1000;
+                }
+    }
 }
 
 CKnowledge::~CKnowledge()
@@ -194,9 +196,9 @@ int CKnowledge::getProfile(int agentId, double realParameter, bool isKick, bool 
     }
 
 
-//    if(wm->getIsSimulMode()){
-//        return (int)realParameter;
-//    }
+        if(wm->getIsSimulMode()){
+            return (int)realParameter;
+        }
 
     if(realParameter < 0) // dummy user
         return 0;
@@ -221,7 +223,7 @@ int CKnowledge::getProfile(int agentId, double realParameter, bool isKick, bool 
             profiledParameter= RobotsCoeff[agentId][type] * knowledge->getProfile(refRobotID , realParameter , isKick , spinOn);
         }
         else{
-                profiledParameter= realParameter*128;
+            profiledParameter= realParameter*128;
         }
 
         if(profiledParameter > 1023)
@@ -229,7 +231,6 @@ int CKnowledge::getProfile(int agentId, double realParameter, bool isKick, bool 
         else if(profiledParameter > 0)
             return (int)profiledParameter;
         else{
-            debug(QString("prof param : %1").arg(profiledParameter) ,D_FATEMEH);
             return 1;
         }
     }

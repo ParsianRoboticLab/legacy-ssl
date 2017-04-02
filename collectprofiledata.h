@@ -49,7 +49,7 @@ public:
 
     int activeRobots[10],activeRobotsCount;
 
-    double kickSpeed1 , kickSpeed2 , MaxSpeed , MinSpeed , speedStep , middleSpeed , ballSpeed;
+    double kickSpeed1 , kickSpeed2 , MaxSpeed , MinSpeed , speedStep , middleSpeed , ballSpeed , waitKickSpeed;
 //    double xpos2 , ypos2 , xpos1 , ypos1 , gx, gy;
     bool prfl1_Kicked;
 
@@ -60,7 +60,7 @@ public:
     double chipPosX , chipPosY;
     double chipTargetX , chipTargetY;
 
-    bool isChip , ChipPosCalculated ,chipAgain;
+    bool isChip , spinOn, ChipPosCalculated ,chipAgain;
 
     QString filename;
 
