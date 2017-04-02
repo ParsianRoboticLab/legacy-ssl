@@ -313,12 +313,12 @@ CPolicyWidget::CPolicyWidget()
     ADD_VALUE(PlayOff, Bool, IDBaseOneToucher, false, "ID Base OneToucher");
     ADD_VALUE(PlayOff, Int, OneToucherID, 0, "One Toucher ID ");
     ADD_TREE(DynamicPlay, "DynamicPlay", false);
-    ADD_VALUE(DynamicPlay, Int , LowSpeedPass   , 300, "Low Speed Pass");
-    ADD_VALUE(DynamicPlay, Int , MediumSpeedPass, 600, "Medium Speed Pass");
-    ADD_VALUE(DynamicPlay, Int , HighSpeedPass  , 800, "High Speed Pass");
-    ADD_VALUE(DynamicPlay, Int , LowSpeedChip   , 300, "Low Speed Chip");
-    ADD_VALUE(DynamicPlay, Int , MediumSpeedChip, 300, "Medium Speed Chip");
-    ADD_VALUE(DynamicPlay, Int , HighSpeedChip  , 300, "High Speed Chip");
+    ADD_VALUE(DynamicPlay, Double , LowSpeedPass   , 0, "Low Speed Pass");
+    ADD_VALUE(DynamicPlay, Double , MediumSpeedPass, 0, "Medium Speed Pass");
+    ADD_VALUE(DynamicPlay, Double , HighSpeedPass  , 0, "High Speed Pass");
+    ADD_VALUE(DynamicPlay, Double , LowSpeedChip   , 0, "Low Speed Chip");
+    ADD_VALUE(DynamicPlay, Double , MediumSpeedChip, 0, "Medium Speed Chip");
+    ADD_VALUE(DynamicPlay, Double , HighSpeedChip  , 0, "High Speed Chip");
     ADD_VALUE(DynamicPlay, Bool, FarForward , false, "Far Forward");
     ADD_VALUE(DynamicPlay, Bool, NearForward, false, "Near Forward");
     ADD_VALUE(DynamicPlay, Double, Area, 0.3, "Pass Area");
@@ -550,12 +550,12 @@ IMPL_VALUE(CPolicyWidget,PlayOff, int, Int, PasserID)
 IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, IDBaseOneToucher)
 IMPL_VALUE(CPolicyWidget,PlayOff, int, Int, OneToucherID)
 
-IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , LowSpeedPass)
-IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , MediumSpeedPass)
-IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , HighSpeedPass)
-IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , LowSpeedChip)
-IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , MediumSpeedChip)
-IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , HighSpeedChip)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , LowSpeedPass)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , MediumSpeedPass)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , HighSpeedPass)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , LowSpeedChip)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , MediumSpeedChip)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , HighSpeedChip)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, bool, Bool, FarForward)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, bool, Bool, NearForward)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, double, Double, Area)

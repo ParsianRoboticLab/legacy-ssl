@@ -19,4 +19,5 @@ potts
 3rdParty/*
 motion/*
 launcher/*
+*.json
 *.conf.*

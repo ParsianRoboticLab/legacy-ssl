@@ -874,7 +874,9 @@ public:
     QGridLayout *l;
     QVBoxLayout *ProfilerLayout;
     QLabel *profTxt,*repeatTxt;
+    QLabel *filenamelable;
     QLineEdit *repeatNum;
+    QLineEdit *fileName;
     QPushButton *startProf;
 private:
 public slots:

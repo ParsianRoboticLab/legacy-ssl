@@ -1,4 +1,3 @@
-
 #ifndef EXPERIMENTAL2_H
 #define EXPERIMENTAL2_H
 #include "mainapplication.h"
@@ -8,18 +7,47 @@ double dist=3,v=0;
 
 void CMainApplication::Experimental2()
 {
+    static bool flag = true;
+    int id=6;
+
+    if(flag){
+        for(id=0; id < 4; id++){
+        debug(QString("%1________").arg(id) , D_FATEMEH);
+
+        for(int i=0; i<90; i+=5){
+            debug(QString("kick: %1 , real : %2").arg(knowledge->getProfile(id , (double)i/10 , false , false)).arg((double)i/10) ,
+                  D_FATEMEH);
+        }
+
+        debug(QString("\nregression %1: ").arg(id) , D_FATEMEH);
+
+        for(int i=0; i < knowledge->profiler->robotsProfile[id].finalChipMap.size(); i++)
+            debug(QString("key : %1 , value : %2").arg(
+                      knowledge->profiler->robotsProfile[id].finalChipMap.keys().at(i)).arg(
+                      knowledge->profiler->robotsProfile[id].finalChipMap.values().at(i)) , D_FATEMEH);
+        }
+    }
+    flag=false;
+
+    return;
+
+
+
+
+
+
     static COurBallPlacement *obp = new COurBallPlacement();
     QList<int> ag;
-//    ag.append(0);
+    //    ag.append(0);
     ag.append(1);
-//    ag.append(2);
-//    ag.append(3);
-//    ag.append(4);
+    //    ag.append(2);
+    //    ag.append(3);
+    //    ag.append(4);
     ag.append(5);
     obp->init(ag, NULL);
     obp->execute();
 
-/*
+    /*
     static CSkillAutoBallPlacement *abp = new CSkillAutoBallPlacement(knowledge->getAgent(0));
     abp->execute();
 */
@@ -42,16 +70,16 @@ void CMainApplication::Experimental2()
     draw(Circle2D(mousePos, wm->ball->radius), QColor(Qt::red));
 
 
-//    Circle2D tempCircle(wm->field->ourGoal()-Vector2D(0.2, 0), 1.33);
-//    draw(tempCircle, QColor(Qt::cyan));
-//    Vector2D tempVec = defPosTest.getXYByAngle(defAngle, defRadius);
+    //    Circle2D tempCircle(wm->field->ourGoal()-Vector2D(0.2, 0), 1.33);
+    //    draw(tempCircle, QColor(Qt::cyan));
+    //    Vector2D tempVec = defPosTest.getXYByAngle(defAngle, defRadius);
 
-//    draw(QString::number(defPosTest.getRobotAngle(defRadius)), Vector2D(-1, _FIELD_HEIGHT/2 - 0.2));
-//    draw(tempVec);
+    //    draw(QString::number(defPosTest.getRobotAngle(defRadius)), Vector2D(-1, _FIELD_HEIGHT/2 - 0.2));
+    //    draw(tempVec);
 
-//    kk2Angles tempAngles = defPosTest.getIntersections(mousePos);
+    //    kk2Angles tempAngles = defPosTest.getIntersections(mousePos);
 
-//    draw(QString("a1:%1, a2: %2").arg(tempAngles.angle1).arg(tempAngles.angle2), Vector2D(-1, _FIELD_HEIGHT/2 - 0.4));
+    //    draw(QString("a1:%1, a2: %2").arg(tempAngles.angle1).arg(tempAngles.angle2), Vector2D(-1, _FIELD_HEIGHT/2 - 0.4));
 
 
     kkDefPos tempDefPos = defPosTest.getDefPositions(mousePos, 2, 1.43, 2.5);
@@ -61,9 +89,9 @@ void CMainApplication::Experimental2()
     }
     return;
     /////////////////////////////////////////////////////////
-//    static CSkillNEWKeep *keepBall = new CSkillNEWKeep( soccer->agents[0] );
-//    keepBall->execute();
-//    return;
+    //    static CSkillNEWKeep *keepBall = new CSkillNEWKeep( soccer->agents[0] );
+    //    keepBall->execute();
+    //    return;
     for(int i = 0; i < 8; i++)
         knowledge->SRSetAgentArg(i, i, (rand()%1023)/100, 2, 3, 4, 5);
     return;
@@ -78,7 +106,7 @@ void CMainApplication::Experimental2()
 
     speed = wm->ball->pos.dist(lastPos)*1000/16;
     if(speed > 0.1)
-    debug(QString("speed : (%1)").arg(speed),D_MAHI);
+        debug(QString("speed : (%1)").arg(speed),D_MAHI);
     lastPos = wm->ball->pos;
 
     return;
@@ -92,8 +120,8 @@ void CMainApplication::Experimental2()
     tRole.setTask(PassDefensive);
     tRole.setTarget(Vector2D(2,2));
     tRole.setTolerance(0.1);
-        tRole.setChip(true);
-            tRole.setKickSpeed(10);
+    tRole.setChip(true);
+    tRole.setKickSpeed(10);
     tRole.setAvoidPenaltyArea(true);
     tRole.setAvoidCenterCircle(false);
     tRole.setIsGotoPointAvoid(true);
