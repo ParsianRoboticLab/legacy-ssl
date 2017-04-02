@@ -34,6 +34,8 @@ Segment2D DefensePlan::getBisectorSegment(Vector2D firstPoint , Vector2D originP
 
 void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsToBeMarkPossition , int ourMarkAgentsSize , double proportionOfDistance){
     ////////////////////////// Variables of this function //////////////////////
+    bool playOn = knowledge->getGameMode() == CKnowledge::Start;
+    bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)|| (knowledge->getGameState() == CKnowledge::TheirKickOff)|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     int i;
     int j;
     Vector2D ourCenterOfGoalPossition = wm->field->ourGoal();
@@ -58,23 +60,32 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
     markPoses.clear();
     markAngs.clear();
     markRoles.clear();
-    /////////////////////////// for Intelligent Mark //////////////
-    if(LastTS != knowledge->transientFlag){
-        opponentPasserDirection = wm->opp[knowledge->nearestOppToBall]->dir;
+    /////////////////////////// Added by AHZ for Intelligent Mark //////////////
+    if(playOn || knowledge->isStop()){
+        sol.clear();
+    }
+    if(playOff){
+        tenLastOpponentDirection.append(wm->opp[knowledge->nearestOppToBall]->dir);
+    }
+    if(LastTS != knowledge->transientFlag && LastTS == 0){
+        for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - 9 ; i--){
+            sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
+        }
+        opponentPasserDirection = sumOfLastOpponentDirection / 10;
         opponentPasserPossition = wm->opp[knowledge->nearestOppToBall]->pos;
+        tenLastOpponentDirection.clear();
+        sumOfLastOpponentDirection = Vector2D(0,0);
         changeInTSMode = true;
     }
     if(changeInTSMode){
-        penaltyArea.intersection(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , &sol7 , &sol8);
-        if(wm->field->isInField(sol7) && wm->field->isInField(sol8)){
-            sol.append(wm->field->ourPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+        sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+        if(sol.size()){
+            sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
             draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
-            if(!sol.isEmpty()){
                 markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
                 markRoles.append(QString("predictBlocker"));
                 markAngs.append(wm->field->center() - wm->field->ourGoal());
-                ourMarkAgentsSize--;
-            }
+                ourMarkAgentsSize;
         }
     }
     if(!knowledge->transientFlag){
@@ -313,7 +324,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
     markRoles.clear();
     markAngs.clear();
     /////////////////////////// Added by AHZ for Intelligent Mark //////////////
-    if(playOn || knowledge->isStop()){
+    if((playOn && !knowledge->transientFlag) || knowledge->isStop()){
         sol.clear();
     }
     if(playOff){
@@ -330,20 +341,18 @@ void DefensePlan::tempFindPos(int _markAgentSize){
         changeInTSMode = true;
     }
     if(changeInTSMode){
-        sol.append(wm->field->ourPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+        sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
         if(sol.size()){
-            sol.append(wm->field->ourPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+            sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
             draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
-            if(!sol.isEmpty()){
                 markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
                 markRoles.append(QString("predictBlocker"));
                 markAngs.append(wm->field->center() - wm->field->ourGoal());
                 _markAgentSize--;
-            }
         }
     }
     if(knowledge->transientFlag){
-        sol.append(wm->field->ourPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+        sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
         if(sol.size()){
             MantoManAllTransientFlag = false;
             segmentpershoot = 0.9;
@@ -483,8 +492,6 @@ void DefensePlan::tempFindPos(int _markAgentSize){
 
 void DefensePlan::markExecute(int _markAgentSize)
 {
-    if(_markAgentSize == markPoses.count())
-    {
         for(int i =0;i<markPoses.count(); i++)
         {
             if(i < _markAgentSize) {
@@ -492,7 +499,6 @@ void DefensePlan::markExecute(int _markAgentSize)
                 debug(QString("%1 : x : %2, y : %3").arg(i).arg(markPoses[i].x).arg(markPoses[i].y),D_MAHI);
             }
         }
-    }
 }
 
 void DefensePlan::checkGoalieState()
@@ -1352,7 +1358,7 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     matchPoints.append(markPoses);
     draw(QString(" %1 %2").arg(matchPoints.count()).arg(_defenseNum),Vector2D(-2,2),"red");
     draw(QString("  %1").arg(ourAgents.count()),Vector2D(2,2),"red");
-    if(stopMode || playOnMode){
+   /* if(stopMode || playOnMode){
         markRoles.clear();
         changeInMarkPlanFlag = false;
     }
@@ -1370,12 +1376,14 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     }
     debug(QString("changeInMarkPlanFlag: %1").arg(changeInMarkPlanFlag) ,D_AHZ, "green");
     if(!changeInMarkPlanFlag){
+   */
         knowledge->Matching(ourAgents,matchPoints,matchResult);
-    }
-    lastMarkRoles.clear();
+    //}
+    /*lastMarkRoles.clear();
     lastMarkRoles.append(markRoles);
     lastOpponentAgentsToBeMarkSize = oppAgentsToMarkPos.size();
-    if(matchPoints.count() == ourAgents.count()){
+    */
+if(matchPoints.count() == ourAgents.count()){
         for(int i =0; i < defenseCount  ; i++)
             defensePoints[i] = matchPoints[i];
         for(int i =0 ; i < matchPoints.count() && i < matchResult.count() ; i++)
