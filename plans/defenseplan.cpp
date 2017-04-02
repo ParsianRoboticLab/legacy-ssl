@@ -307,14 +307,15 @@ void DefensePlan::tempFindPos(int _markAgentSize){
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
     bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)|| (knowledge->getGameState() == CKnowledge::TheirKickOff)|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     int count;
-    Circle2D penaltyArea(wm->field->ourGoal(),1.28);
-    Vector2D sol7 , sol8;
     QList <Vector2D> sol;
     oppmarkedpos.clear();
     markPoses.clear();
     markRoles.clear();
     markAngs.clear();
     /////////////////////////// Added by AHZ for Intelligent Mark //////////////
+    if(playOn || knowledge->isStop()){
+        sol.clear();
+    }
     if(playOff){
         tenLastOpponentDirection.append(wm->opp[knowledge->nearestOppToBall]->dir);
     }
@@ -329,8 +330,8 @@ void DefensePlan::tempFindPos(int _markAgentSize){
         changeInTSMode = true;
     }
     if(changeInTSMode){
-        penaltyArea.intersection(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , &sol7 , &sol8);
-        if(wm->field->isInField(sol7) && wm->field->isInField(sol8)){
+        sol.append(wm->field->ourPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+        if(sol.size()){
             sol.append(wm->field->ourPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
             draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
             if(!sol.isEmpty()){
@@ -342,9 +343,10 @@ void DefensePlan::tempFindPos(int _markAgentSize){
         }
     }
     if(knowledge->transientFlag){
-        if(penaltyArea.intersection(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , &sol7 , &sol8)){
+        sol.append(wm->field->ourPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+        if(sol.size()){
             MantoManAllTransientFlag = false;
-            segmentpershoot = 1;
+            segmentpershoot = 0.9;
         }
         else{
             MantoManAllTransientFlag = true;
@@ -1355,10 +1357,15 @@ void DefensePlan::matchingDefPos(int _defenseNum){
         changeInMarkPlanFlag = false;
     }
     else if((playOffMode || knowledge->transientFlag) && (oppAgentsToMarkPos.size() == lastOpponentAgentsToBeMarkSize)){
-        for(int i = 0 ; i < lastMarkRoles.size() ; i++){
-            if(markRoles.at(i) != lastMarkRoles.at(i)){
-                changeInMarkPlanFlag = true;
+        if(lastMarkRoles.size() == markRoles.size() && lastMarkRoles.size() != 0){
+            for(int i = 0 ; i < lastMarkRoles.size() ; i++){
+                if(markRoles.at(i) != lastMarkRoles.at(i)){
+                    changeInMarkPlanFlag = true;
+                }
             }
+        }
+        else{
+            changeInMarkPlanFlag = true;
         }
     }
     debug(QString("changeInMarkPlanFlag: %1").arg(changeInMarkPlanFlag) ,D_AHZ, "green");
