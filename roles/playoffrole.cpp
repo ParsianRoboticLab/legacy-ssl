@@ -58,13 +58,17 @@ void CRolePlayOff::update() {
         updated = false;
         break;
     case roleSkill::Kick:
+        int tempK;
         kickSkill->setTarget(target);
         kickSkill->setAvoidPenaltyArea(avoidPenaltyArea);
         kickSkill->setInterceptMode(intercept);
+        debug(QString("[playoffRole] kickSpeed : %1").arg(kickSpeed), D_MAHI);
         if (kickSpeed > 10) {
-            kickSpeed = knowledge->getProfile(agent->id(), static_cast<double>(kickSpeed)/130.0, !chip, false);
+            tempK = knowledge->getProfile(agent->id(), static_cast<double>(kickSpeed)/100.0, !chip, false);
         }
-        kickSkill->setKickSpeed(kickSpeed);
+        debug(QString("[playoffRole] profiler kickSpeed : %1").arg(tempK), D_MAHI);
+        //debug(QString("[playoffRole] profile kickSpeed : %1 %2").arg(agent->id()).arg(knowledge->getProfile(agent->id(), static_cast<double>(kickSpeed)/130.0, !chip, false)), D_MAHI);
+        kickSkill->setKickSpeed(tempK);
         kickSkill->setChip(chip);
         kickSkill->setAgent(agent);
         kickSkill->setDontKick(!doPass);
