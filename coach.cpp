@@ -1448,7 +1448,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
         debug(QString("playmake : %1").arg(playmakeId),D_MHMMD);
     }
 
-    Circle2D ourDefenseArea(wm->field->ourGoal() + Vector2D(-0.2 , 0),1.6);
+    Circle2D ourDefenseArea(wm->field->ourGoal(), 1.6);
 
     if (knowledge->variables["clearing"] == "true"
     || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length() < 1)) {
@@ -1501,36 +1501,20 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
         ourPlayers = lastPlayers;
 
     } else {
+        qSort(ourPlayers.begin(), ourPlayers.end());
         if(ourPlayers.count()) {
             if (MarkNum == 2) {
-                for (int i = 0; i < ourPlayers.size(); i++) {
-                    selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(i)));
+                selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
+                ourPlayers.removeFirst();
+                if (ourPlayers.count()) {
+                    selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
+                    ourPlayers.removeFirst();
                 }
-                ourPlayers.clear();
+
+
             } else if (MarkNum == 1) {
                 selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
                 ourPlayers.removeFirst();
-//                if(ourPlayers.count() > 1) {
-//                    int x = -1000;
-//                    int bestX = -1;
-//                    for(int i = 0; i < ourPlayers.count(); i++) {
-//                        if(wm->our[ourPlayers.at(i)]->pos.x > x) {
-//                            x = wm->our[ourPlayers.at(i)]->pos.x;
-//                            bestX = ourPlayers.at(i);
-//                        }
-//                    }
-//                    for(int i =0 ; i < ourPlayers.count() ; i++) {
-//                        if(ourPlayers[i]  != bestX) {
-//                            selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(i)));
-//                        }
-//                    }
-//                    ourPlayers.clear();
-//                    ourPlayers.append(bestX);
-//                } else {
-//                    selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
-//                    ourPlayers.clear();
-
-//                }
             }
         }
     }
