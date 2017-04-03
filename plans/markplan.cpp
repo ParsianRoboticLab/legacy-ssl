@@ -1786,12 +1786,15 @@ void CMarkPlan::execute()
 
 
             draw(QString("Number of Mark %1").arg(agents.count()), Vector2D(-3,3));
+            int count = 0;
+            for(int i = 0; i < agents.count();i++)
+            {
             if(markPoses.size() < agents.count())
             {
-                for(int i = 0; i< agents.count()-markPoses.count();i++)
-                {
-                    markPoses.append(Vector2D(0,i));
+                debug("EXTRA PLAY ON", D_HAMED);
+                    markPoses.append(Vector2D(0,count));
                     markAngs.append(Vector2D(1,0));
+                    count ++;
                 }
             }
         }
