@@ -862,10 +862,10 @@ void CSkillKick::kDontKick()
 
         gpa->setVerySlow(true);
     Vector2D finalPos;
-    finalPos=ballPos-(target-ballPos).norm()*0.2;
-    if(fabs((kickFinalDir - agentDir.th()).degree()) < 20)
-        finalPos=ballPos-(target-ballPos).norm()*0.14;
-    gpa->setBallObstacleRadius(0.3);
+    finalPos=ballPos-(target-ballPos).norm()*0.23;
+    if(fabs((kickFinalDir - agentDir.th()).degree()) < 10)
+        finalPos=ballPos-(target-ballPos).norm()*0.15;
+    gpa->setBallObstacleRadius(0.4);
     gpa->setADiveMode(false);
     gpa->setNoAvoid(false);
     gpa->init(finalPos, ballPos - agentPos);
@@ -1650,7 +1650,7 @@ void CSkillKickOneTouch::execute()
     oneTouchMode = decideMode();
 
     Segment2D ballPath;
-    double stopParam = 0.1;
+    double stopParam = 0.08;
     ballPath.assign(ballPos,ballPos + wm->ball->vel.norm()*(agentPos.dist(ballPos) - stopParam + 0.01));
     Segment2D ballLine;
     ballLine.assign(ballPos,ballPos + wm->ball->vel.norm()*(15));
