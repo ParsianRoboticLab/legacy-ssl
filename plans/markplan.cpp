@@ -1786,6 +1786,14 @@ void CMarkPlan::execute()
 
 
             draw(QString("Number of Mark %1").arg(agents.count()), Vector2D(-3,3));
+            if(markPoses.size() < agents.count())
+            {
+                for(int i = 0; i< agents.count()-markPoses.count();i++)
+                {
+                    markPoses.append(Vector2D(0,i));
+                    markAngs.append(Vector2D(1,0));
+                }
+            }
         }
 
 
@@ -1805,7 +1813,7 @@ void CMarkPlan::execute()
                 if(i < matchPoints.size()) {
                     markGPA[i]->setAgent(agents[i]);
                     markGPA[i]->init(markPoses[matchPoints[i]],markAngs[matchPoints[i]]);
-                    markGPA[i]->setAvoidPenaltyArea(1);
+                    markGPA[i]->setAvoidPenaltyArea(true);
                     markGPA[i]->execute();
                 }
             }
