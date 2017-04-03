@@ -61,7 +61,8 @@ enum DynamicMode {
     NotWeHaveBall,
     Plan,
     BallInOurField,
-    NoPositionAgent
+    NoPositionAgent,
+    BallInOppJaw
 
 };
 
@@ -77,6 +78,7 @@ enum DynamicSkill {
     Ready,
     OneTouch,
     Move,
+    Dribble
 };
 
 enum DynamicRegion {
@@ -214,6 +216,7 @@ struct GameStatePacket
 #define _FIELD_PENALTY          1.000
 #define _GOAL_WIDTH             1.000
 #define _GOAL_RAD               1.000
+#define _AHZ_GOAL_RAD           1.150
 #define _GOAL_DEPTH             0.250
 #define _PENALTY_WIDTH          2.500
 #define _CENTER_CIRCLE_RAD      0.500

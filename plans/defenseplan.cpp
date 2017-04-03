@@ -34,6 +34,8 @@ Segment2D DefensePlan::getBisectorSegment(Vector2D firstPoint , Vector2D originP
 
 void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsToBeMarkPossition , int ourMarkAgentsSize , double proportionOfDistance){
     ////////////////////////// Variables of this function //////////////////////
+    bool playOn = knowledge->getGameMode() == CKnowledge::Start;
+    bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)|| (knowledge->getGameState() == CKnowledge::TheirKickOff)|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     int i;
     int j;
     Vector2D ourCenterOfGoalPossition = wm->field->ourGoal();
@@ -41,22 +43,65 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
     Vector2D sol3 , sol4;
     Vector2D sol5 , sol6;
     Vector2D sol7 , sol8;
-    //Vector2D sol7 , sol8;
+    QList <Vector2D> sol;
     double opponentAgentsCircleR = 0.2;
     QList<int> omittedOpp;
+    QList<Circle2D> opponentAgentsCircle;
     QList<Circle2D> opponentAgentsToBeMarkCircle;
     QList<Circle2D> tempOpponentAgentsToBeMarkedCircle;
-    QList<Vector2D> tempMarkPoses;
     QList<Vector2D> ourMarkAgentsPossition;
     QList<QPair<Vector2D,double> > sortDangerAgentsToBeMarkBlockPassPlayOff;
     QList<QPair<Vector2D,double> > tempSortDangerAgentsToBeBlockPassPlayOff;
     Circle2D goalCircle(ourCenterOfGoalPossition , 1.43);
-    Circle2D penaltyArea(wm->field->ourGoal(),1.25);
+    Circle2D penaltyArea(wm->field->ourGoal(),1.28);
     //////////////////// Clear QLists for update the states ////////////////////
     stopMode = knowledge->isStop();
     ourMarkAgentsPossition.clear();
     markPoses.clear();
     markAngs.clear();
+    markRoles.clear();
+    /////////////////////////// Added by AHZ for Intelligent Mark //////////////
+    if((playOn && !knowledge->transientFlag) || knowledge->isStop()){
+        sol.clear();
+    }
+    if(playOff){
+        tenLastOpponentDirection.append(wm->opp[knowledge->nearestOppToBall]->dir);
+    }
+    if(LastTS != knowledge->transientFlag && LastTS == 0){
+        for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - 9 ; i--){
+            sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
+        }
+        opponentPasserDirection = sumOfLastOpponentDirection / 10;
+        opponentPasserPossition = wm->opp[knowledge->nearestOppToBall]->pos;
+        tenLastOpponentDirection.clear();
+        sumOfLastOpponentDirection = Vector2D(0,0);
+    }
+    if(policy()->Mark_IntelligentMarkPrediction()){
+        if(knowledge->transientFlag){
+            sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+            if(sol.size()){
+                sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+                draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
+                markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
+                markRoles.append(QString("predictBlocker"));
+                markAngs.append(wm->field->center() - wm->field->ourGoal());
+                ourMarkAgentsSize--;
+            }
+        }
+}
+    if(policy()->Mark_IntelligentMarkType()){
+            if(knowledge->transientFlag){
+            sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+            if(sol.size()){
+                segmentpershoot = 0.9;
+            }
+            else{
+                segmentpershoot = 0.05;
+            }
+        }
+
+    }
+    LastTS = knowledge->transientFlag;
     ////////////////////////////////////////////////////////////////////////////
     debug(QString("Mark Agents Count : %1").arg(ourMarkAgentsSize) , D_SEPEHR , QColor(Qt::red));
     debug(QString("Opponent Agents to be mark count : %1").arg(opponentAgentsToBeMarkPossition.size()) , D_SEPEHR , QColor(Qt::red));
@@ -77,12 +122,19 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
     ///////////////// Block Pass Plan ////////////////////////////////////
     if(opponentAgentsToBeMarkPossition.size() == ourMarkAgentsSize){
         for(i = 0 ; i < ourMarkAgentsSize ; i++){
+            markRoles.append(QString("passBlocker"));
             //////////// Don't Enter penalty area, mark agents!!! :) ///////////
             if(penaltyArea.intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)) , &sol7,  &sol8)){
-                opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
-                Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol3 , &sol4);
-                penaltyArea.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol5:sol6 ,proportionOfDistance));
+                if(!wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkPossition.at(i))){
+                    opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
+                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol3 , &sol4);
+                    penaltyArea.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
+                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol5:sol6 ,proportionOfDistance));
+                }
+                else{
+                    goalCircle.intersection(Segment2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)) , &sol1 , &sol2);
+                    markPoses.append(Segment2D(sol1 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol2 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol1 : sol2);
+                }
             }
             else{
                 opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
@@ -99,12 +151,19 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
     }
     else if(opponentAgentsToBeMarkPossition.size() < ourMarkAgentsSize){
         for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
+            markRoles.append(QString("passBlocker"));
             //////////// Don't Enter penalty area, mark agents!!! :) ///////////
             if(penaltyArea.intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)) , &sol7,  &sol8)){
-                opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
-                Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol3 , &sol4);
-                penaltyArea.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol5:sol6 ,proportionOfDistance));
+                if(!wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkPossition.at(i))){
+                    opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
+                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol3 , &sol4);
+                    penaltyArea.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
+                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol5:sol6 ,proportionOfDistance));
+                }
+                else{
+                    penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)) , &sol1 , &sol2);
+                    markPoses.append(Segment2D(sol1 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol2 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol1 : sol2);
+                }
             }
             else{
                 opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
@@ -116,45 +175,108 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
             draw(Circle2D(wm->ball->pos , ballCircleR),QColor(Qt::black));
             debug(QString("Man To Man Mark In PlayOn Mode / BlockPass / opp < our") , D_SEPEHR);
         }
-        goalCircle.intersection(Segment2D(goalCircle.center() , wm->ball->pos) , &sol1 , &sol2);
-        Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(goalCircle.center() , wm->ball->pos) , &sol3 , &sol4);
-        markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , goalCircle.center()).length() < Segment2D(sol4 , goalCircle.center()).length() ? sol3 : sol4                                                                                                                                                                                                                                          ,proportionOfDistance));
-        markAngs.append(wm->ball->pos - markPoses.last());
         ////////////// With Extra mark agents ch ghalati bokonim ? :) //////////
-        if(ourMarkAgentsSize > markPoses.size()){
-            for(i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
-                ourMarkAgentsPossition.append(wm->opp.active(i)->pos);
+        if(ourMarkAgentsSize - markPoses.size() == opponentAgentsToBeMarkPossition.size()){
+            for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
+                draw(opponentAgentsToBeMarkCircle.at(i),QColor(Qt::cyan));
             }
             for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
-                for(j = 0 ; j < ourMarkAgentsPossition.size() ; j++){
-                    if(opponentAgentsToBeMarkPossition.at(i) == ourMarkAgentsPossition.at(j)){
-                        ourMarkAgentsPossition.removeAt(j);
+                if(!wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkPossition.at(i))){
+                    opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
+                    penaltyArea.intersection(Segment2D(opponentAgentsToBeMarkPossition.at(i) , wm->field->ourGoal()), &sol3 , &sol4);
+                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                }
+                else{
+                    penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)) , &sol1 , &sol2);
+                    markPoses.append(Segment2D(wm->field->center() , sol1).length() < Segment2D(wm->field->center() , sol2).length() ? sol1 : sol2);
+                }
+                markAngs.append(opponentAgentsToBeMarkPossition.at(i) - wm->field->ourGoal());
+                markRoles.append(QString("shotBlocker"));
+            }
+        }
+        else if(ourMarkAgentsSize - markPoses.size() < opponentAgentsToBeMarkPossition.size()){
+            tempSortDangerAgentsToBeBlockPassPlayOff = sortdangerpassplayoff(opponentAgentsToBeMarkPossition);
+            for(i = 0 ; i < tempSortDangerAgentsToBeBlockPassPlayOff.size() ; i++){
+                tempOpponentAgentsToBeMarkedCircle.append(Circle2D(tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first , opponentAgentsCircleR));
+                draw(tempOpponentAgentsToBeMarkedCircle.at(i),QColor(Qt::yellow));
+            }
+            for(i = 0 ; i < ourMarkAgentsSize - markPoses.size() ; i++){
+                if(!wm->field->isInOurPenaltyArea(tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first)){
+                    tempOpponentAgentsToBeMarkedCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first), &sol1 , &sol2);
+                    penaltyArea.intersection(Segment2D(tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first , wm->field->ourGoal()), &sol3 , &sol4);
+                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                }
+                else{
+                    penaltyArea.intersection(Line2D(wm->field->ourGoal() , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first) , &sol1 , &sol2);
+                    markPoses.append(Segment2D(wm->field->center() , sol1).length() < Segment2D(wm->field->center() , sol2).length() ? sol1 : sol2);
+                }
+                markAngs.append(tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first - wm->field->ourGoal());
+                markRoles.append(QString("shotBlocker"));
+            }
+        }
+        else if(ourMarkAgentsSize - markPoses.size() > opponentAgentsToBeMarkPossition.size()){
+            for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
+                draw(opponentAgentsToBeMarkCircle.at(i),QColor(Qt::cyan));
+            }
+            for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
+                if(!wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkPossition.at(i))){
+                    opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
+                    penaltyArea.intersection(Segment2D(opponentAgentsToBeMarkPossition.at(i) , wm->field->ourGoal()), &sol3 , &sol4);
+                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                }
+                else{
+                    penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)) , &sol1 , &sol2);
+                    markPoses.append(Segment2D(wm->field->center() , sol1).length() < Segment2D(wm->field->center() , sol2).length() ? sol1 : sol2);
+                }
+                markAngs.append(opponentAgentsToBeMarkPossition.at(i) - wm->field->ourGoal());
+                markRoles.append(QString("shotBlocker"));
+            }
+
+            for(i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
+                opponentAgentsCircle.append(Circle2D(wm->opp.active(i)->pos , opponentAgentsCircleR));
+            }
+            for(i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
+                for(j = 0 ; j < opponentAgentsToBeMarkPossition.size() ; j++){
+                    if(opponentAgentsToBeMarkPossition.at(j) == wm->opp.active(i)->pos){
+                        opponentAgentsCircle.removeAt(i);
                     }
                 }
             }
-            tempSortDangerAgentsToBeBlockPassPlayOff = sortdangerpassplayoff(ourMarkAgentsPossition);
-            for(i = 0 ; i < tempSortDangerAgentsToBeBlockPassPlayOff.size() ; i++){
-                tempOpponentAgentsToBeMarkedCircle.append(Circle2D(tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first , opponentAgentsCircleR));
-                draw(tempOpponentAgentsToBeMarkedCircle.at(i),QColor(Qt::green));
-            }
-            for(i = 0 ; i < ourMarkAgentsSize - markPoses.size() ; i++){
-                if(penaltyArea.intersection(Segment2D(wm->ball->pos , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first) , &sol7 , &sol8)){
-                    tempOpponentAgentsToBeMarkedCircle.at(i).intersection(Segment2D(wm->ball->pos , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first), &sol1 , &sol2);
-                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first), &sol3 , &sol4);
-                    penaltyArea.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first).length() ? sol3 : sol4) , &sol5 , &sol6);
-                    tempMarkPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol5:sol6 ,proportionOfDistance));
+            for(i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
+                if(Circle2D(wm->ball->pos , ballCircleR).contains(wm->opp.active(i)->pos)){
+                    opponentAgentsCircle.removeAt(i);
                 }
-                else{
-                    tempOpponentAgentsToBeMarkedCircle.at(i).intersection(Segment2D(tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first , wm->ball->pos) , &sol1 , &sol2);
-                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first , wm->ball->pos) , &sol3 , &sol4);
-                    tempMarkPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                                                             Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first).length() ? sol3 : sol4,
-                                                             proportionOfDistance));
-                }
-                markAngs.append(wm->ball->pos - tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first);
-
             }
-            markPoses.append(tempMarkPoses);
+            if(opponentAgentsToBeMarkPossition.size() == 0){
+                for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
+                    if(!wm->field->isInOurPenaltyArea(opponentAgentsCircle.at(i).center())){
+                        opponentAgentsCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()), &sol1 , &sol2);
+                        penaltyArea.intersection(Segment2D(opponentAgentsCircle.at(i).center() , wm->field->ourGoal()), &sol3 , &sol4);
+                        markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsCircle.at(i).center()).length() < Segment2D(sol4 , opponentAgentsCircle.at(i).center()).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                    }
+                    else{
+                        penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()) , &sol1 , &sol2);
+                        markPoses.append(Segment2D(wm->field->center() , sol1).length() < Segment2D(wm->field->center() , sol2).length() ? sol1 : sol2);
+                    }
+                    markAngs.append(opponentAgentsCircle.at(i).center() - wm->field->ourGoal());
+                    markRoles.append(QString("shotBlocker"));
+                }
+            }
+            else{
+                for(i = 0 ; i < ourMarkAgentsSize - markPoses.size()+1 ; i++){
+                    if(!wm->field->isInOurPenaltyArea(opponentAgentsCircle.at(i).center())){
+                        opponentAgentsCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()), &sol1 , &sol2);
+                        penaltyArea.intersection(Segment2D(opponentAgentsCircle.at(i).center() , wm->field->ourGoal()), &sol3 , &sol4);
+                        markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsCircle.at(i).center()).length() < Segment2D(sol4 , opponentAgentsCircle.at(i).center()).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                    }
+                    else{
+                        penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()) , &sol1 , &sol2);
+                        markPoses.append(Segment2D(wm->field->center() , sol1).length() < Segment2D(wm->field->center() , sol2).length() ? sol1 : sol2);
+                    }
+                    markAngs.append(opponentAgentsCircle.at(i).center() - wm->field->ourGoal());
+                    markRoles.append(QString("shotBlocker"));
+                }
+            }
         }
     }
     else if(opponentAgentsToBeMarkPossition.size() > ourMarkAgentsSize){
@@ -162,18 +284,25 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
         for(i = 0 ; i < ourMarkAgentsSize; i++){
             //////////// Don't Enter penalty area, mark agents!!! :) ///////////
             if(penaltyArea.intersection(Segment2D(wm->ball->pos , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first) , &sol7,  &sol8)){
-                Circle2D(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first , opponentAgentsCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first , wm->ball->pos) , &sol1 , &sol2);
-                Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first , wm->ball->pos) , &sol3 , &sol4);
-                penaltyArea.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() ? sol3 : sol4) , &sol5 , &sol6);
-                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() < Segment2D(sol6 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() ? sol5:sol6 ,proportionOfDistance));
+                if(!wm->field->isInOurPenaltyArea(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first)){
+                    Circle2D(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first , opponentAgentsCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first , wm->ball->pos) , &sol1 , &sol2);
+                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first , wm->ball->pos) , &sol3 , &sol4);
+                    penaltyArea.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() ? sol3 : sol4) , &sol5 , &sol6);
+                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() < Segment2D(sol6 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() ? sol5:sol6 ,proportionOfDistance));
+                }
+                else{
+                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first , wm->ball->pos) , &sol1 , &sol2);
+                    penaltyArea.intersection(Segment2D(wm->ball->pos , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first) , &sol5 , &sol6);
+                    markPoses.append(getPointInDirection(Segment2D(sol1 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() < Segment2D(sol2 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() ? sol1 : sol2 ,Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5 :sol6 ,proportionOfDistance));
+                }
             }
             else{
                 Circle2D(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first , opponentAgentsCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first , wm->ball->pos) , &sol1 , &sol2);
                 Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first), &sol3 , &sol4);
                 markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() ? sol3 : sol4, proportionOfDistance));
             }
-
             markAngs.append(wm->ball->pos - markPoses.at(i));
+            markRoles.append(QString("passBlocker"));
             draw(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
                            Segment2D(sol3 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() ? sol3 : sol4)
                  , QColor(Qt::red));
@@ -184,15 +313,9 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
     }
     //////////////// Draw Possition of Mark Agents //////////////////////////
     for(i = 0 ; i < markPoses.size() ; i++){
-        if(markPoses.at(i).x > 100){
-            markPoses.removeAt(i);
-            markPoses.append(Vector2D(0,0));
-        }
+        draw(markPoses.at(i) ,1, "white");
+        draw(markRoles.at(i) , markPoses.at(i) - Vector2D(0,0.4) , "white");
     }
-    for(i = 0 ; i < markPoses.size() ; i++){
-        draw(markPoses.at(i),1,QColor(Qt::red));
-    }
-    // }
 }
 
 Vector2D DefensePlan::getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion){
@@ -200,39 +323,66 @@ Vector2D DefensePlan::getPointInDirection(Vector2D firstPoint , Vector2D secondP
     return firstPoint;
 }
 
-void DefensePlan::getIntersectionWithPenaltyAreaAHZ(Segment2D, Vector2D sol1, Vector2D sol2){
-    Vector2D fOurGoal(- _FIELD_WIDTH/2.0 , 0.0);
-    Circle2D c1(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD - 0.07);
-    Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD - 0.07);
-    Rect2D r(fOurGoal + Vector2D(+0,-_GOAL_WIDTH/4),fOurGoal + Vector2D(+_GOAL_RAD - 0.07,+_GOAL_WIDTH/4));
-    draw(c1 , "yellow");
-    draw(c2 , "yellow");
-    draw(r , "yellow");
-}
-
 /////////////////////////////// end of AHZ /////////////////////////////////////
 void DefensePlan::tempFindPos(int _markAgentSize){
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
-    bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)
-                    || (knowledge->getGameState() == CKnowledge::TheirKickOff)
-                    || (knowledge->getGameState() == CKnowledge::TheirIndirectKick)
-                    );
-    Circle2D MarkArea(wm->field->ourGoal(),markRadius);
+    bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)|| (knowledge->getGameState() == CKnowledge::TheirKickOff)|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
+    bool intelligentMarkType = policy()->Mark_IntelligentMarkType();
+    int count;
+    QList <Vector2D> sol;
     oppmarkedpos.clear();
     markPoses.clear();
-    draw(MarkArea,QColor(Qt::blue));
+    markRoles.clear();
     markAngs.clear();
-    int count;
+    /////////////////////////// Added by AHZ for Intelligent Mark //////////////
+    if((playOn && !knowledge->transientFlag) || knowledge->isStop()){
+        sol.clear();
+    }
+    if(playOff){
+        tenLastOpponentDirection.append(wm->opp[knowledge->nearestOppToBall]->dir);
+    }
+    if(LastTS != knowledge->transientFlag && LastTS == 0){
+        for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - 9 ; i--){
+            sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
+        }
+        opponentPasserDirection = sumOfLastOpponentDirection / 10;
+        opponentPasserPossition = wm->opp[knowledge->nearestOppToBall]->pos;
+        tenLastOpponentDirection.clear();
+        sumOfLastOpponentDirection = Vector2D(0,0);
+    }
+    if(policy()->Mark_IntelligentMarkPrediction()){
+        if(knowledge->transientFlag){
+            sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+            if(sol.size()){
+                sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+                draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
+                markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
+                markRoles.append(QString("predictBlocker"));
+                markAngs.append(wm->field->center() - wm->field->ourGoal());
+                _markAgentSize--;
+            }
+        }
+}
+    if(intelligentMarkType){
+            if(knowledge->transientFlag){
+            sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+            if(sol.size()){
+                segmentpershoot = 0.9;
+            }
+            else{
+                segmentpershoot = 0.05;
+            }
+        }
 
+    }
+    LastTS = knowledge->transientFlag;
+    ////////////////////////////////////
     if(_markAgentSize == oppAgentsToMarkPos.count())
     {
-
-        draw(QString("first if"), Vector2D(0,0),QColor(Qt::red));
         ///shoot block
         for(int i=0; i < oppAgentsToMarkPos.count(); i++)
         {
-
-
+            markRoles.append(QString("shotBlocker"));
             if(!checkIndirectAreaShoot(oppAgentsToMarkPos[i]))
             {
                 markPoses.append(ShootBlockRatio(segmentpershoot, oppAgentsToMarkPos[i]).first());
@@ -248,34 +398,12 @@ void DefensePlan::tempFindPos(int _markAgentSize){
         }
 
     }
-
     else if(_markAgentSize > oppAgentsToMarkPos.count() )
     {
-        draw(QString("second if"), Vector2D(0,0),QColor(Qt::red));
-        /*
-        for(int i=0; i < _markAgentSize - oppAgentsToMarkPos.count(); i++)
-        {
-
-
-            if(!checkIndirectAreaPass(oppAgentsToMarkPos[i]))
-            {
-                markPoses.append(PassBlockRatio(segmentperpass, oppAgentsToMarkPos[i]).first());
-                markAngs.append(PassBlockRatio(segmentperpass, oppAgentsToMarkPos[i]).last());
-            }
-            else
-            {
-                markPoses.append(indirectAvoidPass(oppAgentsToMarkPos[i]).first());
-                markAngs.append(indirectAvoidPass(oppAgentsToMarkPos[i]).last());
-            }
-
-
-        }
-*/
         // Blocking direct shoot
-
         for(int i =0;i < oppAgentsToMarkPos.count();i++)
         {
-
+            markRoles.append(QString("shotBlocker"));
             if(!checkIndirectAreaShoot(oppAgentsToMarkPos[i]))
             {
                 markPoses.append(ShootBlockRatio(segmentpershoot, oppAgentsToMarkPos[i]).first());
@@ -290,7 +418,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
         QList<QPair<Vector2D, double> > tempsorted = sortdangerpassplayoff(oppAgentsToMarkPos);
         for(int i=0;i<min(_markAgentSize - oppAgentsToMarkPos.count(), oppAgentsToMarkPos.count());i++)
         {
-
+            markRoles.append(QString("passBlocker"));
             if(!checkIndirectAreaPass(tempsorted[i].first))
             {
                 markPoses.append(PassBlockRatio(segmentperpass, tempsorted[i].first).first());
@@ -311,7 +439,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
 
                 if(markPoses.count() < _markAgentSize)
                 {
-
+                    markRoles.append(QString("shotBlocker"));
                     markPoses.append(Vector2D(0,  count *  4.5/ 6  * pow(-1, count) ));
                     markAngs.append(Vector2D(1,0));
                 }
@@ -322,107 +450,14 @@ void DefensePlan::tempFindPos(int _markAgentSize){
 
 
     }
-    /*
-    else if((_markAgentSize > oppAgentsToMarkPos.count()) &&  ((_markAgentSize - oppAgentsToMarkPos.count()) > oppAgentsToMarkPos.count()))
-    {
-
-        draw(QString("third if"), Vector2D(0,0),QColor(Qt::red));
-
-
-        //Blocking Shoot
-        for(int i =0; i < oppAgentsToMarkPos.count();i++)
-        {
-
-
-            if(!checkIndirectAreaShoot(oppAgentsToMarkPos[i]))
-            {
-                markPoses.append(ShootBlockRatio(segmentpershoot, oppAgentsToMarkPos[i]).first());
-                markAngs.append(ShootBlockRatio(segmentpershoot, oppAgentsToMarkPos[i]).last());
-            }
-            else
-            {
-                markPoses.append(indirectAvoidShoot(oppAgentsToMarkPos[i]).first());
-                markAngs.append(indirectAvoidShoot(oppAgentsToMarkPos[i]).last());
-            }
-
-
-        }
-
-
-        //blocking pass
-
-        for(int i = 0; i< oppAgentsToMark.count();i++)
-        {
-
-            if(!checkIndirectAreaPass(oppAgentsToMarkPos[i]))
-            {
-                markPoses.append(PassBlockRatio(segmentperpass, oppAgentsToMarkPos[i]).first());
-                markAngs.append(PassBlockRatio(segmentperpass, oppAgentsToMarkPos[i]).last());
-            }
-            else
-            {
-                markPoses.append(indirectAvoidPass(oppAgentsToMarkPos[i]).first());
-                markAngs.append(indirectAvoidPass(oppAgentsToMarkPos[i]).last());
-            }
-        }
-
-
-        //  blocking pass to which marked by def
-
-
-        if(oppAgentsMarkedByDef.count() > 0 && _markAgentSize > markPoses.count())
-        {
-
-
-
-            for(int i = 0; i< oppAgentsMarkedByDef.count();i++)
-            {
-                if(!checkIndirectAreaPass(oppAgentsToMarkPos[i]))
-                {
-                    markPoses.append(PassBlockRatio(segmentperpass, oppAgentsToMarkPos[i]).first());
-                    markAngs.append(PassBlockRatio(segmentperpass, oppAgentsToMarkPos[i]).last());
-                }
-                else
-                {
-                    markPoses.append(indirectAvoidPass(oppAgentsToMarkPos[i]).first());
-                    markAngs.append(indirectAvoidPass(oppAgentsToMarkPos[i]).last());
-                }
-
-            }
-        }
-
-
-        //now here we have extra robots
-
-
-        if(_markAgentSize > markPoses.count())
-        {
-
-            debug(QString("the number of our agent is %1").arg(_markAgentSize),D_MAHI);
-
-            count = 0;
-            for(int i=markPoses.count() ; i < _markAgentSize; i++)
-            {
-                markPoses.append(Vector2D(0, count));
-                markAngs.append(Vector2D(1,0));
-                count++;
-            }
-        }
-    }
-
-*/
     else if(_markAgentSize < oppAgentsToMarkPos.count())
     {
-
-
-        draw(QString("Last Condition"));
         if(playOff || knowledge->transientFlag)
         {
             QList<QPair<Vector2D, double> > tempsorted = sortdangerpassplayoff(oppAgentsToMarkPos);
-
             for(int i = 0; i<_markAgentSize; i++)
             {
-
+                markRoles.append(QString("shotBlocker"));
                 if(!checkIndirectAreaShoot(tempsorted[i].first))
                 {
                     markPoses.append(ShootBlockRatio(segmentpershoot, tempsorted[i].first).first());
@@ -441,7 +476,7 @@ void DefensePlan::tempFindPos(int _markAgentSize){
             QList<QPair<Vector2D, double> > tempsorted = sortdangerpassplayon(oppAgentsToMarkPos);
             for(int i = 0; i<_markAgentSize; i++)
             {
-
+                markRoles.append(QString("shotBlocker"));
                 if(!checkIndirectAreaShoot(tempsorted[i].first))
                 {
                     markPoses.append(ShootBlockRatio(segmentpershoot, tempsorted[i].first).first());
@@ -454,19 +489,17 @@ void DefensePlan::tempFindPos(int _markAgentSize){
                 }
 
             }
-
         }
 
     }
-
-    //markPosRefinePlayoff();
+    for(int i = 0 ; i < markPoses.size() ; i++){
+        draw(markRoles.at(i) , markPoses.at(i) - Vector2D(0,0.4) , "white");
+    }
     markExecute(_markAgentSize);
 }
 
 void DefensePlan::markExecute(int _markAgentSize)
 {
-    if(_markAgentSize == markPoses.count())
-    {
         for(int i =0;i<markPoses.count(); i++)
         {
             if(i < _markAgentSize) {
@@ -474,7 +507,6 @@ void DefensePlan::markExecute(int _markAgentSize)
                 debug(QString("%1 : x : %2, y : %3").arg(i).arg(markPoses[i].x).arg(markPoses[i].y),D_MAHI);
             }
         }
-    }
 }
 
 void DefensePlan::checkGoalieState()
@@ -561,22 +593,23 @@ void DefensePlan::checkGoalieState()
 }
 
 void DefensePlan::runGoalie(){
-    ////////////////////////// Added Danger Mode && edited by AHZ //////////////////////////
-    dangerForGoalieClear = false;
-    dangerForGoalieClearByOurAgents = false;
-    dangerForGoalieClearByOppAgents = false;
-    isCrowdedInFrontOfPenaltyAreaByOppAgents = false;
-    isCrowdedInFrontOfPenaltyAreaByOurAgents = false;
-    Vector2D goalKeeperTargetOffSet = Vector2D(0.2 , 0.0);
+
     ///////////////////////////// Variables of this function ////////////////////////////////
     Vector2D ballPos;
     Vector2D ballVel;
     Vector2D predictedBall;
     Vector2D goaliePos;
     Vector2D Solutions[2];
+    Vector2D goalKeeperTargetOffSet = Vector2D(0.2 , 0.0);
+    Segment2D goalLine(wm->field->ourGoalL() + Vector2D(0.2 , 0.1) , wm->field->ourGoalR() + Vector2D(0.2 , -0.1));
     bool playOnMode = knowledge->getGameMode() == CKnowledge::Start;
     stopMode = knowledge->isStop();
-    ///////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////// Added Danger Mode && edited by AHZ //////////////////////////
+    dangerForGoalieClear = false;
+    dangerForGoalieClearByOurAgents = false;
+    dangerForGoalieClearByOppAgents = false;
+    isCrowdedInFrontOfPenaltyAreaByOppAgents = false;
+    isCrowdedInFrontOfPenaltyAreaByOurAgents = false;
     if(knowledge->goalie != NULL){
         Rect2D ourLeftPole(wm->field->ourGoalL() + Vector2D(0.2 , 0.1) , wm->field->ourGoalL() - Vector2D(0 , 0.1));
         Rect2D ourRightPole(wm->field->ourGoalR() + Vector2D(0.2 , 0.1) , wm->field->ourGoalR() - Vector2D(0 , 0.1));
@@ -593,8 +626,8 @@ void DefensePlan::runGoalie(){
         double oneTouchCoef = 0.5;
         savedClearPos = findBestPointForChipTarget(savedClearDist,1);
         penaltyArea.intersection(Line2D(wm->ball->pos , wm->field->ourGoal()),&Solutions[0] , &Solutions[1]);
-        Circle2D dangerCircle = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.48);
-        Circle2D dangerCircle1 = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.18);
+        Circle2D dangerCircle = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.40);
+        Circle2D dangerCircle1 = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.13);
         draw(dangerCircle , "yellow");
         draw(dangerCircle1 , "yellow");
         for(int i = 0; i < wm->our.activeAgentsCount(); i++){
@@ -613,15 +646,7 @@ void DefensePlan::runGoalie(){
             debug(QString("stopMode"),D_SEPEHR);
             //////////////////////////// AHZ ////////////////////////
             ballPos = wm->ball->pos;
-            if(Vector2D::angleOf(ballPos,wm->field->ourGoal(),wm->field->ourGoalL()).degree() < 20 + angleDegreeThr || Vector2D::angleOf(ballPos,wm->field->ourGoal(),wm->field->ourGoalR()).degree() < 20+  angleDegreeThr){
-                debug(QString("yess"),D_SEPEHR);
-                angleDegreeThr = 5;
-                goalieTarget = wm->field->ourGoal() + goalKeeperTargetOffSet;
-            }
-            else{
-                angleDegreeThr = 0;
-                goalieTarget = strictFollowBall(ballPos);
-            }
+            goalieTarget = wm->field->ourGoal() + goalKeeperTargetOffSet;
             //////////////////////////////////////////////////////
             return;
         }
@@ -653,13 +678,11 @@ void DefensePlan::runGoalie(){
             else {
                 penaltyArea.intersection(ballLine,&Solutions[0],&Solutions[1]);
                 goalieTarget = (Solutions[0].valid() && wm->field->isInField(Solutions[0])) ? followBall(Solutions[0]) : followBall(Solutions[1]);
-                //goalieTarget = (Solutions[0].valid() && wm->field->isInField(Solutions[0])) ? strictFollowBall(Solutions[0]) : strictFollowBall(Solutions[1]);
                 draw(QString("Pass ball through penalty area"), Vector2D(0,1),"red");
             }
             return;
         }
-
-        else if(goalieClearMode && playOnMode){
+        else if(goalieClearMode && (playOnMode)){
             ////////////// Danger Mode for inside of the penalty area///////////
             savedClearPos = findBestPointForChipTarget(savedClearDist,1);
             if(wm->our.activeAgentsCount() > 0 || wm->opp.activeAgentsCount() > 0){
@@ -680,12 +703,12 @@ void DefensePlan::runGoalie(){
                 debug("Crowded" , D_AHZ , "red");
                 if(dangerCircle1.contains(wm->ball->pos)){
                     dangerForGoalieClearByOurAgents = true;
-                }               
+                }
             }
             if(isCrowdedInFrontOfPenaltyAreaByOppAgents){
                 if(dangerCircle1.contains(wm->ball->pos)){
                     dangerForGoalieClearByOppAgents = true;
-                }                
+                }
             }
             if(dangerForGoalieClearByOurAgents || dangerForGoalieClearByOppAgents){
                 dangerForGoalieClear = true;
@@ -728,12 +751,12 @@ void DefensePlan::runGoalie(){
             if(isCrowdedInFrontOfPenaltyAreaByOurAgents){
                 if(dangerCircle.contains(wm->ball->pos)){
                     dangerForGoalieClear = true;
-                }                
+                }
             }
             if(isCrowdedInFrontOfPenaltyAreaByOppAgents){
                 if(dangerCircle.contains(wm->ball->pos)){
                     dangerForGoalieClearByOppAgents = true;
-                }                
+                }
             }
             if(dangerForGoalieClearByOurAgents || dangerForGoalieClearByOppAgents){
                 dangerForGoalieClear = true;
@@ -1060,7 +1083,7 @@ DefensePlan::DefensePlan()
     markRadiusStrict = 1.39;
     segmentpershoot = policy()->Mark_ShootRatioBlock() / 100.0;
     segmentperpass = (100  - policy()->Mark_PassRatioBlock()) / 100.0;
-    LastTs = false;
+    LastTS = true;
     dir  = Vector2D(1,0);
     MantoManAllTransientFlag =  policy()->Mark_ManToManAllTransiant();
     /////
@@ -1086,6 +1109,13 @@ DefensePlan::DefensePlan()
     firstDefenseKickLine = -1;
     secondDefenseKickLine = 0;
     goalieKickThreshold = 70;
+    /////////// AHZ //////////////
+    lastMarkRoles.append(markRoles);
+    changeInMarkPlanFlag = false;
+    sumOfLastOpponentDirection = Vector2D(0,0);
+    sumOfLastOpponentPosition = Vector2D(0,0);
+    lastOpponentAgentsToBeMarkSize = 0;
+    ////////////////////////////////
     for (int i = 0; i < _MAX_NUM_PLAYERS; i++)
     {
         lastMarker[i] = -1;
@@ -1308,11 +1338,13 @@ Vector2D DefensePlan::checkDefensePoint(CAgent* agent, const Vector2D& point)
     return retPoint;
 }
 
-/////////////////////////////////////////////////mhmmd
+///////////////////////////////////////////////// AHZ && mhmmd ////////////////
 void DefensePlan::matchingDefPos(int _defenseNum){
     QList <CAgent*> ourAgents;
     QList <Vector2D> matchPoints;
     QList <int> matchResult;
+    bool playOnMode = knowledge->getGameMode() == CKnowledge::Start;
+    bool playOffMode = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)|| (knowledge->getGameState() == CKnowledge::TheirKickOff)|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     stopMode = knowledge->isStop();
     ourAgents.clear();
     ourAgents.append(defenseAgents);
@@ -1323,7 +1355,6 @@ void DefensePlan::matchingDefPos(int _defenseNum){
         }
     }
     matchPoints.clear();
-
     for(int i = 0 ; i < _defenseNum ; i++) {
         draw(tempDefPos.pos[i],0,QColor(Qt::blue));
         matchPoints.append(tempDefPos.pos[i]);
@@ -1332,16 +1363,38 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     findOppAgentsToMark(matchPoints);
     findPos(decideNumOfMarks(defPosDecision.overDef));
     matchPoints.append(markPoses);
-    draw(QString("aaaaaaaaaa  %1 %2").arg(matchPoints.count()).arg(_defenseNum),Vector2D(-2,2),"red");
+    draw(QString(" %1 %2").arg(matchPoints.count()).arg(_defenseNum),Vector2D(-2,2),"red");
     draw(QString("  %1").arg(ourAgents.count()),Vector2D(2,2),"red");
-    if(matchPoints.count() == ourAgents.count())
-    {
+   /* if(stopMode || playOnMode){
+        markRoles.clear();
+        changeInMarkPlanFlag = false;
+    }
+    else if((playOffMode || knowledge->transientFlag) && (oppAgentsToMarkPos.size() == lastOpponentAgentsToBeMarkSize)){
+        if(lastMarkRoles.size() == markRoles.size() && lastMarkRoles.size() != 0){
+            for(int i = 0 ; i < lastMarkRoles.size() ; i++){
+                if(markRoles.at(i) != lastMarkRoles.at(i)){
+                    changeInMarkPlanFlag = true;
+                }
+            }
+        }
+        else{
+            changeInMarkPlanFlag = true;
+        }
+    }
+    debug(QString("changeInMarkPlanFlag: %1").arg(changeInMarkPlanFlag) ,D_AHZ, "green");
+    if(!changeInMarkPlanFlag){
+   */
         knowledge->Matching(ourAgents,matchPoints,matchResult);
+    //}
+    /*lastMarkRoles.clear();
+    lastMarkRoles.append(markRoles);
+    lastOpponentAgentsToBeMarkSize = oppAgentsToMarkPos.size();
+    */
+if(matchPoints.count() == ourAgents.count()){
         for(int i =0; i < defenseCount  ; i++)
             defensePoints[i] = matchPoints[i];
         for(int i =0 ; i < matchPoints.count() && i < matchResult.count() ; i++)
         {
-
             ///// edited by mahi && AHZ /////
             gpa[ourAgents[i]->id()]->noRelax();
             for (int j = 0; j  < ourAgents.size(); j++) {
@@ -1378,23 +1431,18 @@ void DefensePlan::matchingDefPos(int _defenseNum){
                 gpa[ourAgents[i]->id()]->setADiveMode(false);
             }
             //////////// Go To Point Avoid for defense agents //////////////////
-            if(matchResult[i] < _defenseNum){
+            if(i < _defenseNum){
                 gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , matchPoints[matchResult[i]] - wm->field->ourGoal());
             }
             ///////// Go To Point Avoid for mark agents ////////////////////
             else{
                 ////////// Added By AHZ /////////////////////
-                //// for 4far game (must be review again)///////
-                if(i < markAngs.size()){
-                    gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , markAngs.at(i));
-                }
-                else{
-                    gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , matchPoints[matchResult[i]] - wm->field->ourGoal());
-                }
+                //// for 4far game ///////
+                gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , markAngs.at(i - _defenseNum));
             }
         }
-    }
 
+    }
 }
 
 void DefensePlan::execute()
@@ -1466,158 +1514,30 @@ void DefensePlan::announceClearing(bool state)
     else knowledge->variables["clearing"] = "false";
 }
 
-void DefensePlan::penaltyGoalie()
-{
-
-    for( int i=0; i<5 ; i++ ){
-        executeSkill[i] = false;
-    }
-
-    int defAgentNum = defenseAgents.count();
-    switch (defAgentNum){
-    case 1:
-        defenseTargets[0]=Vector2D(-2,1);
-        defenseDirs[0]=defenseTargets[0]-wm->ball->pos;
-        executeSkill[0]=1;
-        break;
-    case 2:
-        defensePoints[0]=Vector2D(-2,1);
-        executeSkill[0]=1;
-        defensePoints[1]=Vector2D(-2,1.5);
-        executeSkill[1]=1;
-        doMatch(defenseAgents[0]->pos() , defenseAgents[1]->pos() , defensePoints[0] , defensePoints[1] , -1 , 1);
-        defenseDirs[0]=defensePoints[0]-wm->ball->pos;
-        defenseDirs[1]=defensePoints[1]-wm->ball->pos;
-        defenseTargets[0]=defensePoints[0];
-        defenseTargets[1]=defensePoints[1];
-        break;
-    case 3:
-        defensePoints[0]=Vector2D(-2,1);
-        executeSkill[0]=1;
-        defensePoints[1]=Vector2D(-2,1.5);
-        executeSkill[1]=1;
-        defensePoints[2]=Vector2D(-2,-1);
-        executeSkill[2]=1;
-
-        doMatchThree(defenseAgents[0]->pos() , defenseAgents[1]->pos() , defensePoints[0] , defensePoints[1] , 0 , 1);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[0]->pos() , defensePoints[2] , defensePoints[0] , 2 , 0);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[1]->pos() , defensePoints[2] , defensePoints[1] , 2 , 1);
-        doMatchThree(defenseAgents[0]->pos() , defenseAgents[1]->pos() , defensePoints[0] , defensePoints[1] , 0 , 1);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[0]->pos() , defensePoints[2] , defensePoints[0] , 2 , 0);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[1]->pos() , defensePoints[2] , defensePoints[1] , 2 , 1);
-
-
-        defenseTargets[0]=defensePoints[0];
-        defenseTargets[1]=defensePoints[1];
-        defenseTargets[2]=defensePoints[2];
-
-        defenseDirs[0]=defenseTargets[0]-wm->ball->pos;
-        defenseDirs[1]=defenseTargets[1]-wm->ball->pos;
-        defenseDirs[2]=defenseTargets[2]-wm->ball->pos;
-        break;
-    case 4:
-        defensePoints[0]=Vector2D(-2,1);
-        executeSkill[0]=1;
-        defensePoints[1]=Vector2D(-2,1.5);
-        executeSkill[1]=1;
-        defensePoints[2]=Vector2D(-2,-1);
-        executeSkill[2]=1;
-        defensePoints[3]=Vector2D(-2,-1.5);
-        executeSkill[3]=1;
-
-        doMatchThree(defenseAgents[0]->pos() , defenseAgents[1]->pos() , defensePoints[0] , defensePoints[1] , 0 , 1);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[0]->pos() , defensePoints[2] , defensePoints[0] , 2 , 0);
-        doMatchThree(defenseAgents[0]->pos() , defenseAgents[3]->pos() , defensePoints[0] , defensePoints[3] , 0 , 3);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[1]->pos() , defensePoints[2] , defensePoints[1] , 2 , 1);
-        doMatchThree(defenseAgents[3]->pos() , defenseAgents[1]->pos() , defensePoints[3] , defensePoints[1] , 3 , 1);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[3]->pos() , defensePoints[2] , defensePoints[3] , 2 , 3);
-        doMatchThree(defenseAgents[0]->pos() , defenseAgents[1]->pos() , defensePoints[0] , defensePoints[1] , 0 , 1);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[0]->pos() , defensePoints[2] , defensePoints[0] , 2 , 0);
-        doMatchThree(defenseAgents[0]->pos() , defenseAgents[3]->pos() , defensePoints[0] , defensePoints[3] , 0 , 3);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[1]->pos() , defensePoints[2] , defensePoints[1] , 2 , 1);
-        doMatchThree(defenseAgents[3]->pos() , defenseAgents[1]->pos() , defensePoints[3] , defensePoints[1] , 3 , 1);
-        doMatchThree(defenseAgents[2]->pos() , defenseAgents[3]->pos() , defensePoints[2] , defensePoints[3] , 2 , 3);
-
-        defenseTargets[0]=defensePoints[0];
-        defenseTargets[1]=defensePoints[1];
-        defenseTargets[2]=defensePoints[2];
-        defenseTargets[3]=defensePoints[3];
-
-        defenseDirs[0]=-(defenseTargets[0]-wm->ball->pos);
-        defenseDirs[1]=-(defenseTargets[1]-wm->ball->pos);
-        defenseDirs[2]=-(defenseTargets[2]-wm->ball->pos);
-        defenseDirs[3]=(defenseTargets[3]-wm->ball->pos);
-
-        break;
-    }
+void DefensePlan::penaltyGoalie(){
     Vector2D ballPos = wm->ball->pos;
     const float goalLineExtra = 0.03;
     const double xDiff = 0.10;
-    Line2D newLine(wm->field->ourGoalL()+Vector2D(+xDiff,+goalLineExtra),
-                   wm->field->ourGoalR()+Vector2D(+xDiff,-goalLineExtra));
-
-    CRobot* opp = NULL;
-    float minDist = 9999.9;
-    for (int i = 0 ; i < wm->opp.activeAgentsCount() ; i++)
-    {
-        float dist = wm->opp.active(i)->pos.dist(ballPos);
-        if (dist < minDist)
-        {
-            opp = wm->opp.active(i);
-            minDist = dist;
-        }
-    }
-
-    if (opp == NULL) return; //### Added By Ali
-
+    Line2D newLine(wm->field->ourGoalL() + Vector2D(+xDiff,+goalLineExtra),wm->field->ourGoalR()+Vector2D(+xDiff,-goalLineExtra));
     const double epsilon = 0.12;
     Vector2D target(-2.93, 0.0);
-
-    Line2D ballRay(ballPos, ballPos + opp->dir);
+    Line2D ballRay(ballPos, ballPos + (wm->opp[knowledge->nearestOppToBall]->dir));
     Vector2D intersectionPoint = newLine.intersection(ballRay);
-    if (intersectionPoint.valid())
+    if(intersectionPoint.valid()){
         target = intersectionPoint;
-    else
+        draw(target , 0 , "black");
+    }
+    else{
         target.y = 0.0;
-    //sounds like this target is tokhom
+    }
     target.y = min(max(target.y, wm->field->ourGoalR().y + epsilon), wm->field->ourGoalL().y - epsilon + 0.03);
-
     Vector2D targetDir(10, 10);
     targetDir.setDir(AngleDeg(60));
     targetDir.setLength(1);
-
     assignSkill(goalieAgent , gpa[goalieAgent->id()]);
-    gpa[goalieAgent->id()]->init(target, targetDir); // in Ejdeha code : gpa[goalieAgent->id()]->init(target, wm->ball->pos - goalieTarget);
-    if( executeSkill[0] ){
-        defenseTargets[0] = checkDefensePoint(defenseAgents.at(0), defenseTargets[0]);
-        assignSkill( defenseAgents.at(0) , gpa[defenseAgents.at(0)->id()]);
-        gpa[defenseAgents.at(0)->id()]->setTarget(defenseTargets[0], -defenseTargets[0] + wm->ball->pos);
-        draw(Circle2D(defenseTargets[0] , 0.05) , 0 , 360 , "black" , true);
-
-    }
-
-    if( executeSkill[1] ){
-        defenseTargets[1] = checkDefensePoint(defenseAgents.at(1), defenseTargets[1]);
-        assignSkill( defenseAgents.at(1) , gpa[defenseAgents.at(1)->id()]);
-        gpa[defenseAgents.at(1)->id()]->setTarget(defenseTargets[1] , -defenseTargets[1] + wm->ball->pos);
-        draw(Circle2D(defenseTargets[1] , 0.05) , 0 , 360 , "black" , true);
-    }
-
-
-    if( executeSkill[2] ){
-        defenseTargets[2] = checkDefensePoint(defenseAgents.at(2), defenseTargets[2]);
-        assignSkill( defenseAgents.at(2) , gpa[defenseAgents.at(2)->id()]);
-        gpa[defenseAgents.at(2)->id()]->setTarget(defenseTargets[2] , -defenseTargets[2]  + wm->ball->pos);
-        draw(Circle2D(defenseTargets[2] , 0.05) , 0 , 360 , "black" , true);
-
-    }
-
-    if( executeSkill[3] ){
-        defenseTargets[3] = checkDefensePoint(defenseAgents.at(3), defenseTargets[3]);
-        assignSkill( defenseAgents.at(3) , gpa[defenseAgents.at(3)->id()]);
-        gpa[defenseAgents.at(3)->id()]->setTarget(defenseTargets[3] , -defenseTargets[3]  + wm->ball->pos);
-        draw(Circle2D(defenseTargets[3] , 0.05) , 0 , 360 , "black" , true);
-    }
+    gpa[goalieAgent->id()]->setSlowMode(false);
+    gpa[goalieAgent->id()]->setADiveMode(true);
+    gpa[goalieAgent->id()]->init(target , targetDir);
 }
 
 bool DefensePlan::defenseClearOrNot(){
@@ -1858,7 +1778,6 @@ void DefensePlan::calcPointForOneTouch()
 }
 
 //added by KK
-
 velAndAccByKK DefensePlan::getVelocityByPos(){
     /*this function calculate ball velocity and acceleration using last three ball position
    *ballPosHistory is a QList that we prepend ball position in it
@@ -1877,7 +1796,6 @@ velAndAccByKK DefensePlan::getVelocityByPos(){
     res.acc = acc1;
     return res;
 }
-
 
 bool DefensePlan::checkBallDangerForOneTouch(){
     //check dangerous velocity according to distance
@@ -1900,6 +1818,7 @@ bool DefensePlan::checkBallDangerForOneTouch(){
 }
 
 bool DefensePlan::defenseCheckBallDangerForOneTouch(){
+    ///////////////// kiram to in code defens p har chi k hast :////////////////
     //check dangerous velocity according to distance
     //velocity will be calculated using ball position in getVelocityByPos func.
     double defCircleRad = 0;
@@ -1911,9 +1830,11 @@ bool DefensePlan::defenseCheckBallDangerForOneTouch(){
         }
     }
     if(defCircleRad > 0){
+        debug("kiiiiiiiiiiiiiire khar" ,D_AHZ , "red");
         defCircle = Circle2D(wm->field->ourGoal(),defCircleRad);
     }
     else {
+        debug("kiiiiiiiiiiiiiire asb" ,D_AHZ , "red");
         defCircle = Circle2D((wm->field->ourGoal() - Vector2D(0.2,0)),1.50);
     }
     double ballVel = getVelocityByPos().vel;
@@ -2200,9 +2121,10 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
 {
     //////////////////////// Variables of this function //////////////////////
     Vector2D ballPos = _ballPos;
-    Vector2D target(wm->field->ourGoal());
-    Vector2D offsetGoalkeeperPosition = Vector2D(0.3 , 0.0);
+    Vector2D sol1 , sol2;
+    Vector2D offsetGoalkeeperPosition = Vector2D(0.2 , 0.0);
     Segment2D goal2Ball;
+    Vector2D target(wm->field->center());
     QList<Circle2D> defs;
     double AZBisecOpenAngle = 0,AZBigestOpenAngle = 0,AZDangerPercent = 0,aimLessChord = 0;
     double topFaceLength;
@@ -2215,7 +2137,7 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
     //////////////////////////////////////////////////////////////////////////
     if(knowledge->goalie != NULL){
         ballPos = _ballPos;
-        Segment2D goalLine(wm->field->ourGoal()+Vector2D(0,-0.8) , wm->field->ourGoal()+Vector2D(0,0.8));
+        Segment2D goalLine(wm->field->ourGoal()+Vector2D(0,-0.8) , wm->field->ourGoal() + Vector2D(0,0.8));
         Segment2D downFieldLine(Vector2D(-_FIELD_WIDTH/2,-_FIELD_HEIGHT/2),Vector2D(-_FIELD_WIDTH/2,_FIELD_HEIGHT/2));
         //////////////////////////////// Appending circles on defense agents /////////////////////////////////////////
         for (g = 0; g < defenseAgents.count() ; g++){
@@ -2259,7 +2181,7 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
         //////////////////////////Height of the triangle ///////////////////////////////////////////////////////
         ballheight = ballPos.dist(downFieldLine.nearestPoint(ballPos));
         Line2D aimLessLine(Vector2D(0,0),Vector2D(-1,-1));
-        draw(AZBisecOpenSeg,"blue");
+        draw(AZBisecOpenSeg,"red");
         goal2Ball.assign(wm->field->ourGoal(),wm->ball->pos);
         dangerFlag = 0;
         /////changes for RoboCup 2016////////in one def, goalie dont move to nearest point///////
@@ -2280,7 +2202,6 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
                 aimLessChord = bottomFaceLength_forTalles.nearestPoint(openAngGoalIntersectionTop).dist(openAngGoalIntersectionTop);
                 debug(QString("top koochik tar"),D_SEPEHR);
                 aimLessLine = Line2D(bottomFaceLength_forTalles.nearestPoint(openAngGoalIntersectionTop),openAngGoalIntersectionTop);
-                //                draw(Segment2D(bottomFaceLength_forTalles.nearestPoint(openAngGoalIntersectionTop),openAngGoalIntersectionTop), QColor(Qt::black));
             }
             else{
                 aimLessChord = topFaceLength_forTalles.nearestPoint(openAngGoalIntersectionBottom).dist(openAngGoalIntersectionBottom);
@@ -2297,21 +2218,31 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
             if(AZBisecOpenSeg.intersection(aimLessLine).isValid()){
                 ////////////// Added by AHZ ///////////////////////////////////
                 if(Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourGoalL()).degree() < 10 + angleDegreeThrNotStop){
-                    target = wm->field->ourGoalL() + Vector2D(0.10,0);
-                    angleDegreeThrNotStop = 5;
+                    Circle2D(wm->field->ourGoal() , 1.28).intersection(Segment2D(wm->ball->pos , AZBisecOpenSeg.intersection(aimLessLine)) , &sol1 , &sol2);
+                    target = getPointInDirection(AZBisecOpenSeg.intersection((aimLessLine)) , sol1.dist(wm->field->ourGoal()) < sol2.dist(wm->field->ourGoal()) ? sol1 : sol2, 0.1);
+                    angleDegreeThrNotStop = 0;
                 }
                 else if(Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourGoalR()).degree() < 10 + angleDegreeThrNotStop){
-                    target = wm->field->ourGoalR() + Vector2D(0.10,0);
-                    angleDegreeThrNotStop = 5;
+                    Circle2D(wm->field->ourGoal() , 1.28).intersection(Segment2D(wm->ball->pos , AZBisecOpenSeg.intersection(aimLessLine)) , &sol1 , &sol2);
+                    target = getPointInDirection(AZBisecOpenSeg.intersection((aimLessLine)) , sol1.dist(wm->field->ourGoal()) < sol2.dist(wm->field->ourGoal()) ? sol1 : sol2, 0.1);
+                    angleDegreeThrNotStop = 0;
                 }
                 else{
-                    if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 6.0 + threshOld){
-                        target = AZBisecOpenSeg.intersection((aimLessLine));
-                        threshOld = 0.0;
+                    angleDegreeThrNotStop = 3;
+                    if(defenseCount == 2){
+                        if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 6.0 + threshOld){
+                            target = AZBisecOpenSeg.intersection((aimLessLine));
+                            threshOld = 0.0;
+                        }
+                        else{
+                            target = wm->field->ourGoal() + offsetGoalkeeperPosition;
+                            threshOld = 2.0;
+                        }
                     }
-                    else{
-                        target = wm->field->ourGoal() + offsetGoalkeeperPosition;
-                        threshOld = 2.0;
+                    else if(defenseCount == 1){
+                        Circle2D(wm->field->ourGoal() , 1.28).intersection(Segment2D(wm->ball->pos , AZBisecOpenSeg.intersection(aimLessLine)) , &sol1 , &sol2);
+                        target = getPointInDirection(AZBisecOpenSeg.intersection((aimLessLine)) , sol1.dist(wm->field->ourGoal()) < sol2.dist(wm->field->ourGoal()) ? sol1 : sol2, 0.1);
+                        draw(target , 1 , "green");
                     }
                 }
                 if(!isInThePenaltyArea(target)){
@@ -2322,12 +2253,8 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos)
             else{
                 target = getIntersectionWithPenaltyAreaGk(AZBisecOpenSeg);
             }
-            //////////////////////// Added by AHZ /////////////////////////////
-            /////////////////////////////////////////////////////////////////
         }
-        if (!wm->field->isInField(target) || target.x < -4.4){
-
-            debug(QString("4"),D_SEPEHR);
+        if ((!wm->field->isInField(target) || target.x < -4.4) && defenseCount == 2){
             target = AZBisecOpenSeg.intersection(goalLine) + offsetGoalkeeperPosition;
         }
     }
@@ -2394,7 +2321,6 @@ Vector2D DefensePlan::followBall(Vector2D _ballPos)
 
     }
 }
-
 
 int DefensePlan::predictMostDangrousOppToBall(){
     //////////////////////////////////////////////////////// GOALIE CHECK ONE TOUCHE
@@ -2661,7 +2587,6 @@ bool DefensePlan::defenseOneTouchOrNot(){
 
 /////////End of Arash.z/////////////////////////////////////////
 
-
 /////////////////////// KK Def Positioning Funcs///////////////
 
 CDefPos::CDefPos()
@@ -2755,7 +2680,16 @@ kkDefPos CDefPos::getDefPositions(Vector2D _ballPos, int _size, double _limit1, 
         isNearPenaltyArea = false;
     }
     if (tempBestRadius > _limit2) {
-        tempBestRadius = _limit2;
+        ///////////// Added By AHZ for One Defense better //////////////////////
+        if(_size == 2){
+            tempBestRadius = _limit2;
+        }
+        else if(_size == 1){
+            if(tempBestRadius > 4.5){
+                tempBestRadius = 4.5;
+            }
+        }
+        ///////////////////////////////////////////////////////////////////////
         isNearPenaltyArea = false;
     }
 
@@ -2987,7 +2921,7 @@ void DefensePlan::executeGoalie()
                 kickSkill->setTarget(savedClearPos);
                 kickSkill->getAgent()->chipDistanceValue(savedClearDist, false);
                 kickSkill->setChip(true);
-            }            
+            }
         }
         else {
             assignSkill( goalieAgent , gpa[goalieAgent->id()]);
@@ -3009,17 +2943,17 @@ void DefensePlan::executeGoalie()
             }
             else{
                 gpa[goalieAgent->id()]->setSlowMode(false);
-                gpa[goalieAgent->id()]->setADiveMode(false);                
+                gpa[goalieAgent->id()]->setADiveMode(false);
                 debug("not danger" , D_AHZ , "green");
                 goalieAgent->setChip(0);
                 //goalieAgent->setChip(LONG_CHIP_POWER);
-//                if(chipGKCounter > 50) {
-//                    goalieAgent->setChip(CHIP_POWER);
-//                    chipGKCounter = 0;
-//                }
-//                else{
-//                    chipGKCounter++;
-//                }
+                //                if(chipGKCounter > 50) {
+                //                    goalieAgent->setChip(CHIP_POWER);
+                //                    chipGKCounter = 0;
+                //                }
+                //                else{
+                //                    chipGKCounter++;
+                //                }
                 gpa[goalieAgent->id()]->init(goalieTarget, wm->ball->pos - wm->field->ourGoal());
             }
             gpa[goalieAgent->id()]->setAvoidPenaltyArea(false);
@@ -3103,7 +3037,7 @@ bool DefensePlan::checkIndirectAreaPass(Vector2D opp){
     }
 }
 
-bool DefensePlan::checkIndirectAreaShoot(Vector2D opp) {
+bool DefensePlan::checkIndirectAreaShoot(Vector2D opp){
     //if that point be in Indirect Area we will return 1
 
 
@@ -3120,8 +3054,7 @@ bool DefensePlan::checkIndirectAreaShoot(Vector2D opp) {
     }
 }
 
-
-QList<Vector2D> DefensePlan::indirectAvoidShoot(Vector2D opp) {
+QList<Vector2D> DefensePlan::indirectAvoidShoot(Vector2D opp){
     Segment2D tempseg;
     tempseg.assign(opp, wm->field->ourGoal());
     double indirectAvoidRadius = 0.5 + .1;
@@ -3142,7 +3075,7 @@ QList<Vector2D> DefensePlan::indirectAvoidShoot(Vector2D opp) {
     return temp;
 }
 
-QList<Vector2D> DefensePlan::indirectAvoidPass(Vector2D opp) {
+QList<Vector2D> DefensePlan::indirectAvoidPass(Vector2D opp){
     Segment2D tempseg;
     tempseg.assign(wm->ball->pos, opp + 10 * (opp - wm->ball->pos));
     double indirectAvoidRadius = 0.5 + .1;
@@ -3163,49 +3096,46 @@ QList<Vector2D> DefensePlan::indirectAvoidPass(Vector2D opp) {
     temp.append(sol);temp.append(wm->ball->pos - opp);
     return temp;
 }
+
 void DefensePlan::inteliDecideMarkType(){
     Segment2D tempseg;
     CDefPos test;
-    if(knowledge->transientFlag == true)
+    if(knowledge->transientFlag)
     {
-        if(LastTs != knowledge->transientFlag){
-        dir = wm->opp[knowledge->nearestOppToBall]->dir;
+        if(LastTS != knowledge->transientFlag){
+            dir = wm->opp[knowledge->nearestOppToBall]->dir;
         }
         tempseg.assign(wm->ball->pos, wm->ball->pos + 10 * dir);
         draw(tempseg, QColor(Qt::green));
         if(test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).isValid()){
-        MantoManAllTransientFlag =  false;
-        segmentpershoot = 1;
+            MantoManAllTransientFlag = false;
+            segmentpershoot = 1;
         }
         else{
             MantoManAllTransientFlag = true;
             segmentpershoot = 0.2;
         }
-
     }
     else {
         segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
         segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
     }
-    LastTs = knowledge->transientFlag;
+    LastTS = knowledge->transientFlag;
 }
 
 void DefensePlan::findPos(int _markAgentSize){
     double xLimitForblockingPass = -2;
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
     bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)|| (knowledge->getGameState() == CKnowledge::TheirKickOff)|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
+    bool MantoManAllTransientFlag = policy()->Mark_ManToManAllTransiant();
+    bool manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
     stopMode = knowledge->isStop();
     ///////////////// Man To Man AllTransiant Mode for Mark ////////////////////
-    int intelligence = 1;
-    bool MantoManAllTransientFlag = policy()->Mark_ManToManAllTransiant();
-    if(intelligence == 1){
-        inteliDecideMarkType();
-    }
-    else if(MantoManAllTransientFlag)
-
+    if(MantoManAllTransientFlag)
     {
-        if(knowledge->transientFlag)
+        if(knowledge->transientFlag){
             segmentpershoot = 0.3;
+        }
         else
             segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
         segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
@@ -3215,7 +3145,7 @@ void DefensePlan::findPos(int _markAgentSize){
         segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
     }
     //////////////// Determine the plan of mark from GUI ////////////////////
-    if(policy()->Mark_PlayOffManToMan()){
+    if(manToManMarkBlockPassFlag){
         if(playOff){
             manToManMarkInPlayOffBlockPass(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
         }
@@ -3224,14 +3154,16 @@ void DefensePlan::findPos(int _markAgentSize){
             manToManMarkInPlayOffBlockPass(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
         }
         else if(playOn){
+            changeInMarkPlanFlag = false;
             tempFindPos(_markAgentSize);
         }
         else if(stopMode){
+            changeInMarkPlanFlag = false;
             tempFindPos(_markAgentSize);
         }
     }
     /////////////////////////////////////////////
-    if(wm->ball->pos.x > xLimitForblockingPass){
+    else if(wm->ball->pos.x > xLimitForblockingPass){
         limitBetweenAHZAndHMD = true;
         if(playOff){
             manToManMarkInPlayOffBlockPass(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
@@ -3255,6 +3187,7 @@ void DefensePlan::findPos(int _markAgentSize){
         }
     }
     else {
+        //changeInMarkPlanFlag = false;
         if(knowledge->transientFlag){
             if(limitBetweenAHZAndHMD){
                 manToManMarkInPlayOffBlockPass(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
@@ -3451,10 +3384,6 @@ QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2
 
 
         //        draw(QString("mindistance%1").arg(mintempdis), oppposdanger[i] + Vector2D(0,0.5), QColor(Qt::blue));
-
-
-
-
     }
     ///sorting the Qlist
     for(int i = 0; i< output.count(); i++)

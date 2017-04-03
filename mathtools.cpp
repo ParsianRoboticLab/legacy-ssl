@@ -11,6 +11,10 @@ double AvgWithoutOutliers(QList<double> data , double accuracy){
     QList<double> isOutlier;
     double size = data.count() , n=0;
     double avrg=0 , a=0 , b=0 , res=0;
+
+    if(size==1)
+        return data.first();
+
     for(int i=0; i<size; i++)
         avrg+=data.at(i);
 
@@ -765,22 +769,22 @@ void MWBM::create(int _m, int _n)
 {
     destroy();
     n = _m;if (_n > _m) n = _n;
-    W = new int* [n];
+    W = new double* [n];
     for (int i=0;i<n;i++)
-        W[i] = new int [n];
+        W[i] = new double [n];
     for (int i=0;i<n;i++)
         for (int j=0;j<n;j++)
             W[i][j] = 0;
-    U = new int [n];
-    V = new int [n];
-    Y = new int [n]; /* <-- weight variables */
+    U = new double [n];
+    V = new double [n];
+    Y = new double [n]; /* <-- weight variables */
+    N = new double [n];
     M = new int [n];
-    N = new int [n];
-    P = new int [n];
+    P = new double [n];
     Q = new int [n];
-    R = new int [n];
-    S = new int [n];
-    T = new int [n];
+    R = new double [n];
+    S = new double [n];
+    T = new double [n];
     cap = n;
 }
 
@@ -812,13 +816,13 @@ void MWBM::changeSize(int k, int r) {
             W[i][j] = 0;
 }
 
-void MWBM::setWeight(int i, int j, int w)
+void MWBM::setWeight(int i, int j, double w)
 {
     if (i >= n || j >= n || i < 0 || j < 0) return;
     W[i][j] = w;
 }
 
-int MWBM::getWeight(int i, int j)
+double MWBM::getWeight(int i, int j)
 {
     if (i >= n || j >= n || i < 0 || j < 0) return 0;
     return W[i][j];
@@ -827,6 +831,15 @@ int MWBM::getWeight(int i, int j)
 int MWBM::getMatch(int i)
 {
     return M[i];
+}
+
+void MWBM::setWeightsByDists(QList <Vector2D> upNodes, QList <Vector2D> downNodes)
+{
+    if(upNodes.size() > n || downNodes.size() > n)
+        return;
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            setWeight(i, j, upNodes[i].dist(downNodes[j]));
 }
 
 /* Graph Theory: Maximum Weighted Bipartite Matching
@@ -857,9 +870,9 @@ int MWBM::getMatch(int i)
 */
 
 /* Returns the maximum weight, with the perfect matching stored in M. */
-int MWBM::findMatching()
+double MWBM::findMatching()
 {
-    int w, y; /* <-- weight variables */
+    double w, y; /* <-- weight variables */
     int i, j, m, p, q, s, t, v;
 
     for (i = 0; i < n; i++) {
@@ -962,6 +975,42 @@ end_phase:
     return w;
 }
 
-
-
-
+double MWBM::findMaxMinMatching()
+{
+    double minWeight = 0;
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            minWeight = min(minWeight, W[i][j]);
+    double tempW[n][n];
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            tempW[i][j] = W[i][j];
+//    qDebug() << "sdlfkjsaldfjiefj" << " " << minWeight << endl;
+    double l = minWeight - 1, r = 0;
+    for(int _t = 25; _t >= 0; _t--)
+    {
+        //qDebug() << l << " " << r << endl;
+        double m = (r + l) / 2;
+        for(int i = 0; i < n; i++)
+            for(int j = 0; j < n; j++)
+                if(W[i][j] < m)
+                    W[i][j] = -12345678;
+        double d = findMatching();
+        if(d <= -12345678)
+            r = m;
+        else
+            l = m;
+        for(int i = 0; i < n; i++)
+            for(int j = 0; j < n; j++)
+                W[i][j] = tempW[i][j];
+    }
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            if(W[i][j] < l)
+                W[i][j] = -12345678;
+    double w = findMatching();
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < n; j++)
+            W[i][j] = tempW[i][j];
+    return w;
+}

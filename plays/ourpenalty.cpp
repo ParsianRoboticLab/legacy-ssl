@@ -32,7 +32,7 @@ void COurPenalty::penaltyKick(){
 
     appendRemainingsAgents(positionAgents);
 
-    setFormation("OurPenaltyKick");
+    setFormation("OurP");
 
 }
 

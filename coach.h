@@ -42,10 +42,15 @@ public:
     CKnowledge::ballPossesionState isBallOurs();
     CKnowledge::ballPossesionState ballPStateIntented;
     static QMap<QString, EditData*> editData; //Contains Formations
-    Vector2D lastBallVelPM;
-    Vector2D lastBallPos;
+  /*  ClassProperty(CCoach, Vector2D, LastBallVelPm, lastBallVelPM, updated);
+    ClassProperty(CCoach, Vector2D, LastBallPos, lastBallPos, updated);*/
 
 private:
+    Vector2D passPos;
+    bool passPlayMake;
+    Vector2D lastBallVelPM;
+    Vector2D lastBallPos;
+    bool updated;
     double findMostPossible(Vector2D agentPos);
     CKnowledge::State kkLastState;
     CAgent *goalieAgent;
@@ -53,7 +58,7 @@ private:
     double exeptionPlayMakeThr;
     QList<CAgent*> defenseAgents;
     DefensePlan defenses;
-    int preferedDefenseCounts , lastPreferredDefenseCounts;
+    int preferedDefenseCounts ,lastPreferredDefenseCounts;
     int preferedGoalieAgent;
     Vector2D defenseTargets[12];
     QTime intentionTimePossession;
@@ -105,7 +110,7 @@ private:
     void assignDefenseAgents(int defenseCount);
     void checkGoalieInsight();
     void decidePreferedDefenseAgentsCountAndGoalieAgent();
-    bool decideAttack();
+    void decideAttack();
     void decideDefense();
     void decidePlayOff(QList<int>& _ourplayers, POMODE _mode = INDIRECT);
     void decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers);
@@ -128,22 +133,23 @@ private:
 
     enum attackState
     {
-        SAFE = 0,
-        FAST = 1,
-        CRITICAL =2
+        SAFE     = 0,
+        FAST     = 1,
+        CRITICAL = 2,
+        BallInOppJaw  = 3
     };
     attackState ourAttackState;
     void updateAttackState();
 
 
     /////////////////////////New Play Off
-    void selectPlayOffMode(NGameOff::EMode& _mode);
+    void selectPlayOffMode(int agentSize, NGameOff::EMode& _mode);
     void initPlayOffMode(const NGameOff::EMode _mode,
                          const POMODE _gameMode,
                          const QList<int>& _agentSize);
     void setPlayOff(NGameOff::EMode _mode);
     void initStaticPlay(const POMODE _mode, const QList<int>& _agentSize);
-    void initDynamicPlay();
+    void initDynamicPlay(QList<int> _ourplayers);
     void initFastPlay();
     void initFirstPlay();
     void setStaticPlay();
@@ -166,24 +172,22 @@ private:
     CKnowledge::ballPossesionState ballPState;
     Vector2D lastBallVel;
     //////////////Decide Attack functions
-    bool decideHalt               (QList<int>&);
-    bool decideStop               (QList<int>&);
-    bool decideOurKickOff         (QList<int>&);
-    bool decideTheirKickOff       (QList<int>&);
-    bool decideOurIndirect        (QList<int>&);
-    bool decideTheirIndirect      (QList<int>&);
-    bool decideOurDirect          (QList<int>&);
-    bool decideTheirDirect        (QList<int>&);
-    bool decideOurPenalty         (QList<int>&);
-    bool decideTheirPenalty       (QList<int>&);
-    bool decideStart              (QList<int>&);
-    bool decideNormalStart        (QList<int>&);
-    bool decideOurBallPlacement   (QList<int>&);
-    bool decideTheirBallPlacement (QList<int>&);
-    bool decideNull               (QList<int>&);
+    void decideHalt               (QList<int>&);
+    void decideStop               (QList<int>&);
+    void decideOurKickOff         (QList<int>&);
+    void decideTheirKickOff       (QList<int>&);
+    void decideOurIndirect        (QList<int>&);
+    void decideTheirIndirect      (QList<int>&);
+    void decideOurDirect          (QList<int>&);
+    void decideTheirDirect        (QList<int>&);
+    void decideOurPenalty         (QList<int>&);
+    void decideTheirPenalty       (QList<int>&);
+    void decideNormalStart        (QList<int>&);
+    void decideStart              (QList<int>&);
+    void decideOurBallPlacement   (QList<int>&);
+    void decideTheirBallPlacement (QList<int>&);
+    void decideNull               (QList<int>&);
     /////////////////////////////////////
-
-
 };
 
 #define GetRole(Role, number) static_cast<Role*> (getRole(Role::Name, number))

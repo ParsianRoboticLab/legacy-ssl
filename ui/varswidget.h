@@ -266,12 +266,12 @@ class CPolicyWidget : public QWidget
             DEF_VALUE(PlayOff, bool, Bool, IDBaseOneToucher)
             DEF_VALUE(PlayOff, int, Int, OneToucherID)
     DEF_TREE(DynamicPlay)
-            DEF_VALUE(DynamicPlay, int , Int, LowSpeedPass)
-            DEF_VALUE(DynamicPlay, int , Int, MediumSpeedPass)
-            DEF_VALUE(DynamicPlay, int , Int, HighSpeedPass)
-            DEF_VALUE(DynamicPlay, int , Int, LowSpeedChip)
-            DEF_VALUE(DynamicPlay, int , Int, MediumSpeedChip)
-            DEF_VALUE(DynamicPlay, int , Int, HighSpeedChip)
+            DEF_VALUE(DynamicPlay, double , Double , LowSpeedPass)
+            DEF_VALUE(DynamicPlay, double , Double , MediumSpeedPass)
+            DEF_VALUE(DynamicPlay, double , Double , HighSpeedPass)
+            DEF_VALUE(DynamicPlay, double , Double , LowSpeedChip)
+            DEF_VALUE(DynamicPlay, double , Double , MediumSpeedChip)
+            DEF_VALUE(DynamicPlay, double , Double , HighSpeedChip)
             DEF_VALUE(DynamicPlay, bool, Bool, FarForward)
             DEF_VALUE(DynamicPlay, bool, Bool, NearForward)
             DEF_VALUE(DynamicPlay, double, Double, Area)
@@ -289,6 +289,9 @@ class CPolicyWidget : public QWidget
             DEF_VALUE(Mark, double, Double, ShootRatioBlock)
             DEF_VALUE(Mark, double, Double, PassRatioBlock)
             DEF_VALUE(Mark, bool, Bool, OmmitNearestToBallPlayon)
+            DEF_VALUE(Mark, bool, Bool, IntelligentMarkType)
+            DEF_VALUE(Mark, bool, Bool, IntelligentMarkPrediction)
+
 
 
   public slots:

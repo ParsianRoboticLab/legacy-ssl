@@ -2,6 +2,8 @@
 #define EXPERIMENTAL4_H
 #include <mainapplication.h>
 
+#include <QTime>
+
 #include "tools/loadplayoffjson.h"
 
 const int VEL_SAMPLES = 10;
@@ -81,287 +83,254 @@ void drawGraph(QList<double> data, QColor color) {
 
 QList<double> graph, graph2;
 
+static CRolePlayOn * pss , * rcvr;
+static CRolePlayOn * prfl1 = new CRolePlayOn() ,  * prfl2 = new CRolePlayOn();
+static int p2 = 1 , p1 = 5 , repeat = 3;
+static QList<double> RealSpeedRec;
+static double kickSpeed = 600 , MaxSpeed = 1023 , MinSpeed = 400 , speedStep = 200 , xpos2 = -2.8 , ypos2 = 2 , xpos1 , ypos1;
 
-static CRolePlayOn * rcvr ;
-static CRolePlayOn *pss ;
+struct BallDistVelo {
+    double vel, dist;
+};
 
-static CRolePlayOn * prfl1 = new CRolePlayOn();
+static int fcount = 2;
+QList<BallDistVelo> ballhist;
+static bool kickSpeedCalculated = false;
 
-static CRolePlayOn * prfl2 = new CRolePlayOn();
+void calckickspeed(){
+    double kickspeed;
+    Vector2D kickStartPoint;
 
-static int p2 = 0 , p1 = 1;
-static double kickSpeed = 100 , MaxSpeed = 1023 , MinSpeed = 100 , speedStep = 50;
-static double xpos2 = -2.8 , ypos2 = 2 , xpos1 , ypos1;
+    if (kickSpeedCalculated) return;
+    double vball = wm->ball->vel.length();
 
-void CMainApplication::Experimental4()
-{
-    // fill profiler
+    if (vball > 0.2)
+    {
+        if (ballhist.count() == 0)
+        {
+            kickStartPoint = wm->ball->pos;
+        }
+        BallDistVelo b;
+        b.dist = (wm->ball->pos - kickStartPoint).length();
+        b.vel  = vball;
+        ballhist.append(b);
+    }
 
-    //////////////////////////////////
-    //////// :| //////////////////////
-    //////////////////////////////////
 
-    static bool ballIsNear = false , first = true , lowSpeed;
-    static int counter = 1 , repeat = 8;
+    //    double s = (wm->ball->pos - kickPoint).innerProduct(wm->ball->pos - target);
 
-    static QList<double> realRes1, realRes2;
+    if (vball < 0.2 /*|| s > 0*/)
+    {
+        if (ballhist.count() > 10)
+        {
+            for (int i=0;i<ballhist.count()*3/4;i++)
+            {
+                double v2s = 0.0;
+                double vs = 0.0;
+                for (int j=i+1;j<ballhist.count();j++)
+                {
+                    double v = sqrt (ballhist[j].vel*ballhist[j].vel + 2.0 * ballhist[j].dist * BallFriction() * Gravity);
+                    v2s += v*v;
+                    vs  += v;
+                }
+                double n = ballhist.count() - (i + 1);
+                double e = (vs / n);
+                double s = v2s / n - e * e;
+                kickspeed = e;
+                //                    RealSpeedRec.append(kicks);
+                if (s < 0.05)
+                {
+                    break;
+                }
+            }
+            kickSpeedCalculated = true;
+            fcount++;
+            debug(QString("Robot%4 : Real Speed: %1 , kickSpeedf: %3 ; n = %2").arg(kickspeed).arg(ballhist.count()).arg(kickSpeed).arg(p1), D_FATEMEH);
+            ballhist.clear();
+        }
+    }
+    draw(kickStartPoint, 1, "red");
 
-    static CNewProfiler profiler;
-    //    profiler.save(JSON , "/home/nazanin/workspace/ssl/ssl6/myProfiler.json");
-    //    profiler->save(JSON);
+}
 
-    static double maxBallVel=0 , avg1=0, avg2=0;
-    static int cnt = 1;
+void calcChipPos(QList<Vector2D> ballposss){
+    QList<Vector2D> save;
+    Vector2D v12 = ballposss.at(0);
+    double tan=0;
 
+    for(int i=0; i<ballposss.size() - 10; i+=2){
+        tan = v12.th().tan();
+        v12 = ballposss.at(i) - ballposss.at(i+5);
+
+        if(save.size() < 7)
+        {
+            if(tan*v12.th().tan() < 0 && fabs(tan - v12.th().tan()) > 0.6){
+                save.append(ballposss.at(i));
+                debug(QString("saved %4 : x : %1 , y : %2 | speed : %3").arg(ballposss.at(i).x).arg(ballposss.at(i).y).arg(kickSpeed).arg(save.size()) , D_FATEMEH);
+            }
+            if(save.size() > 2){
+                if(save.at(0).dist(save.at(2))< 0.9){
+                    kickSpeedCalculated = true;
+                    debug(QString("invalid data : dist 0-2 : %1 , speed : %2").arg(save.at(0).dist(save.at(2))).arg(kickSpeed) , D_FATEMEH , QColor(Qt::darkCyan));
+                    return;
+                }
+            }
+        }
+        else
+        {
+
+            draw(Segment2D(save.at(0) , save.at(2)) , QColor(Qt::darkMagenta));
+            debug(QString("dist 0-2 : %1 , speed : %2").arg(save.at(0).dist(save.at(2))).arg(kickSpeed) , D_FATEMEH , QColor(Qt::blue));
+            kickSpeedCalculated = true;
+        }
+    }
+
+    Q_FOREACH(Vector2D v , save)
+        draw(v , 0 , QColor(Qt::darkRed) , 1);
+
+    save.clear();
+    return;
+
+}
+
+
+QList<Vector2D> ballposss;
+
+void CMainApplication::Experimental4(){
+
+//    static double moshtagh2=0;
+//    analyze("kickspeed" , wm->ball->vel.length(),true);
+//    debug(QString("ball Speed :%1").arg(wm->ball->vel.length()),D_NADIA);
+//    analyze("moshtagh2",(wm->ball->vel.length()-moshtagh2)*1000,true);
+//    debug(QString("moshtagh2 :%1 _ r2:%2").arg(moshtagh2).arg((wm->ball->vel.length()-moshtagh2)*1000),D_NADIA);
+//    moshtagh2=wm->ball->vel.length();
+
+
+    int kicking =0;
 
     prfl1->setAgent(knowledge->getAgent(p1));
     prfl1->setAgentID(p1);
-    prfl1->setKickSpeed(kickSpeed);
     prfl1->setReceiveRadius(1.2);
     prfl1->setTolerance(0.01);
     prfl1->setIsActive(true);
-    prfl1->setChip(false);
+    prfl1->setChip(true);
     prfl1->setSlow(true);
-    prfl1->execute();
-
-    prfl2->setAgent(knowledge->getAgent(p2));
-    prfl2->setAgentID(p2);
-    prfl2->setKickSpeed(kickSpeed);
-    prfl2->setReceiveRadius(1.2);
-    prfl2->setTolerance(0.01);
-    prfl2->setIsActive(true);
-    prfl2->setChip(false);
-    prfl2->setSlow(true);
-    prfl2->execute();
 
 
+    if(ballposss.size()==0)
+        ballposss.append(wm->ball->pos);
 
-    if(kickSpeed < 500){
-        xpos1 = -0.7;   ypos1 = 0.7;
-        lowSpeed = true;
+    if(fabs(wm->ball->pos.x - ballposss.last().x) > 0.003 && fabs(wm->ball->pos.y - ballposss.last().y) > 0.003)
+        ballposss.append(wm->ball->pos);
 
-    }else{
-        xpos1 = -3.8;   ypos1 = -2.5;
-        lowSpeed = false;
-    }
+    if(ballposss.size() > 100)
+        ballposss.removeFirst();
 
-    draw(Segment2D(Vector2D(-4.5 , 0) , Vector2D(0 , 3) ) , QColor(Qt::white));
-    draw(Segment2D(Vector2D(0 , 0) , Vector2D(0 , 3) ) , QColor(Qt::white));
-    draw(Segment2D(Vector2D(-4.5 , 0) , Vector2D(0, 0) ) , QColor(Qt::white));
+    if(kicking == 0){
 
-    if(first){
-        prfl2->setSelectedSkill(roleSkill::GotopointAvoid);
+//        debug("first go to point " , D_FATEMEH);
         prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
+        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.4 , -_FIELD_HEIGHT/2+0.4));
+        prfl1->execute();
 
-        prfl1->setTargetDir(wm->ball->pos - knowledge->getAgent(p1)->pos());
-        prfl2->setTargetDir(wm->ball->pos - knowledge->getAgent(p2)->pos());
-
-        prfl1->setTarget(Vector2D(xpos1 , ypos1));
-        prfl2->setTarget(Vector2D(xpos2 , ypos2));
-
-
-        if(Circle2D(knowledge->getAgent(prfl2->getAgentID())->pos() , 1).contains(wm->ball->pos) ||
-                Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 1).contains(wm->ball->pos) ){
-            prfl1->setSelectedSkill(roleSkill::ReceivePass);
-            prfl2->setSelectedSkill(roleSkill::Kick);
-            first = false;
+        if ( Circle2D(knowledge->getAgent(p1)->pos(), 0.5).contains(wm->ball->pos)  &&  wm->ball->vel.length() < 0.2 )
+        {
+            kicking = 1;
         }
+
+    }
+    if(kicking == 1){
+
+        debug("kicking" , D_FATEMEH);
+        prfl1->setSelectedSkill(roleSkill::Kick);
+        prfl1->setKickSpeed(kickSpeed);
+
+        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.8 , _FIELD_HEIGHT/2-0.8));
+
+        prfl1->execute();
+
+        if(Circle2D(knowledge->getAgent(p1)->pos() , 0.08).contains(wm->ball->pos)){
+            ballposss.clear();
+            debug("cleared" , D_FATEMEH);
+            ballposss.append(wm->ball->pos);
+        }
+
+        if(wm->ball->vel.length() > 2.3){
+            debug("leaving kick state" , D_FATEMEH);
+            kicking = 2;
+            kickSpeedCalculated = false;
+        }
+
+    }
+    if(kicking == 2){
+        debug("second go to point " , D_FATEMEH);
+        prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
+        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.4 , -_FIELD_HEIGHT/2+0.4));
+        prfl1->execute();
+
+        if(ballposss.size() > 80){
+            debug("call func" , D_FATEMEH);
+            calcChipPos(ballposss);
+        }
+
+        if (kickSpeedCalculated)
+        {
+            kicking = 0;
+        }
+
     }
 
 
-    if(!first){
-
-        if( (Triangle2D(Vector2D(0 , 0) ,Vector2D(-4.5 , 0) , Vector2D(0 , 3)).contains(wm->ball->pos)
-             && lowSpeed) || (!lowSpeed && wm->ball->pos.y <= 0) ){
-
-            if(wm->ball->vel.length() < 0.2){
-
-                prfl1->setSelectedSkill(roleSkill::Kick);
-                prfl1->setTarget(Vector2D(xpos2,ypos2));
-
-                rcvr = prfl2;
-                pss = prfl1;
-
-                if(!Circle2D(knowledge->getAgent(prfl2->getAgentID())->pos() , 0.1).contains(prfl2->getTarget()))
-                    prfl1->setDontKick(true);
-                else
-                    prfl1->setDontKick(false);
-            }
-            else
-            {
-                prfl1->setSelectedSkill(roleSkill::ReceivePass);
-
-                //                rcvr = prfl1;
-                //                pss = prfl2;
-
-                prfl1->setTarget(Vector2D(xpos1,ypos1));
-                prfl1->setWaitPos(Vector2D(xpos1,ypos1));
-            }
-
-            prfl2->setSelectedSkill(roleSkill::ReceivePass);
-            prfl2->setTarget(Vector2D(xpos2,ypos2));
-            prfl2->setWaitPos(Vector2D(xpos2,ypos2));
-        }
-        else
-        {
-            if(wm->ball->vel.length() < 0.2){
-
-                prfl2->setSelectedSkill(roleSkill::Kick);
-                prfl2->setTarget(Vector2D(xpos1,ypos1));
-
-                rcvr = prfl1;
-                pss = prfl2;
-
-                if(!Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.1).contains(prfl1->getTarget()))
-                    prfl2->setDontKick(true);
-                else
-                    prfl2->setDontKick(false);
-            }
-            else
-            {
-                prfl2->setSelectedSkill(roleSkill::ReceivePass);
-                prfl2->setTarget(Vector2D(xpos2,ypos2));
-                prfl2->setWaitPos(Vector2D(xpos2,ypos2));
-
-                //                pss = prfl1;
-                //                rcvr = prfl2;
-            }
-
-            prfl1->setSelectedSkill(roleSkill::ReceivePass);
-            prfl1->setTarget(Vector2D(xpos1,ypos1));
-            prfl1->setWaitPos(Vector2D(xpos1,ypos1));
-        }
-
-        draw(Circle2D( knowledge->getAgent(pss->getAgentID())->pos() , 0.25 ) , QColor(Qt::blue));
-        draw(Circle2D( knowledge->getAgent(pss->getAgentID())->pos() , 0.5 ) , QColor(Qt::black));
+    Q_FOREACH(Vector2D v , ballposss)
+        draw(v , 0 , QColor(Qt::white) , 1);
 
 
-        //////////////////// max ball vel
-        if(avg2 >= avg1){
-            cnt++;
-            avg1 = avg2;
-            avg2 += (avg1*(cnt-1)+wm->ball->vel.length())/cnt;
-
-            if(maxBallVel <=  wm->ball->vel.length())
-                maxBallVel =  wm->ball->vel.length();
-
-            else 
-            // if(maxBallVel > (2.0/900000)*kickSpeed*kickSpeed + (39.0/9000)*kickSpeed)
-            {
-
-                if(counter%2==0)
-                {
-
-                    if(realRes1.size()!=0){
-                        if(realRes1.at(realRes1.size()-1) != maxBallVel){
-                            realRes1.append(maxBallVel);
-                            debug(QString("max vel recorded : %1").arg(maxBallVel) , D_MAHI);
-                        }
-                    }
-                    else
-                        realRes1.append(maxBallVel);
-                }
-
-                else
-                {
-                    if(realRes2.size()!=0){
-                        if(realRes2.at(realRes2.size()-1) != maxBallVel){
-                            realRes2.append(maxBallVel);
-                            debug(QString("max vel recorded : %1").arg(maxBallVel) , D_MAHI);
-                        }
-                    }
-                    else
-                        realRes2.append(maxBallVel);
-
-                }
-
-
-            }
-        }
-        else
-        {
-            cnt=0;
-            avg2=0;
-            avg1=0;
-        }
-
-        //    if(wm->ball->vel.length() < 0.2){
-        //        maxBallVel = 0;
-        //        avg2=0;
-        //        avg1=0;
-        //    }
-
-
-        //////////////////// check if robot kicked the ball
-
-        if ( Circle2D( knowledge->getAgent(pss->getAgentID())->pos() , 0.25 ).contains(wm->ball->pos) )
-            ballIsNear = true;
-
-
-        //////////////////// increasing kick speed
-        if(ballIsNear)
-            if ( !Circle2D( knowledge->getAgent(pss->getAgentID())->pos() , 0.5 ).contains(wm->ball->pos) ){
-
-                debug(QString("counter: %2 , kick speed: %1").arg(kickSpeed).arg(counter) , D_MAHI);
-
-                maxBallVel = 0;
-                avg1=0;
-                avg2=0;
-                cnt=0;
-
-                if(counter == repeat){
-                    debug("adding data" , D_MAHI);
-
-                    profiler.robotsProfile[p1].kickMap.insert(kickSpeed , realRes1);
-                    profiler.robotsProfile[p2].kickMap.insert(kickSpeed , realRes2);
-                    profiler.save(JSON);
-
-
-                    if(kickSpeed != MaxSpeed){
-
-                        if(kickSpeed<1000){
-                            kickSpeed += speedStep;
-                            if(lowSpeed){
-                                xpos2 -= kickSpeed/3000;
-                                ypos2 += kickSpeed/5000;
-                            }
-                        }
-
-                        else
-                            kickSpeed = MaxSpeed;
-
-                    }
-                    else
-                    {
-                        kickSpeed = MinSpeed;
-                        xpos2 = -2.8; ypos2 = 2;
-                        
-                        /////////////////////// changing robots
-                        // if(p2 != 5){
-                        //     p1 += 2;
-                        //     p2 += 2;
-                        // }
-                    }
-
-                    counter = 1;
-
-                    realRes1.clear();
-                    realRes2.clear();
-
-                }
-                else
-                    counter++;
-
-                ballIsNear = false;
-
-            }
-    }
 
     return;
 
 
 
 
+//        static QList<Vector2D> save;
+//    //    static Vector2D v12;
+//    //    static double tan=0;
+
+//    if(ballposss.size()==0){
+//        ballposss.append(wm->ball->pos);
+//        save.append(wm->ball->pos);
+//    }
+
+//    if(fabs(wm->ball->pos.x - ballposss.last().x) > 0.003 && fabs(wm->ball->pos.y - ballposss.last().y) > 0.003)
+//        ballposss.append(wm->ball->pos);
+
+
+//    if(ballposss.size() > 100){
+//        ballposss.removeFirst();
+
+//        for(int i=0; i<ballposss.size() - 10; i+=2){
+//            tan = v12.th().tan();
+//            v12 = ballposss.at(i) - ballposss.at(i+5);
+//            draw(Segment2D(ballposss.at(i) , ballposss.at(i+5)) , QColor(Qt::white));
+
+//            if(save.size() < 10){
+//                if(tan*v12.th().tan() < 0 && fabs(tan - v12.th().tan()) > 0.6){
+//                    save.append(ballposss.at(i));
+//                    debug(QString("shib1 : %1 , shib2 : %2").arg(tan).arg(v12.th().tan()) , D_FATEMEH);
+//                }
+//            }
+//            else
+//                save.clear();
+//            //        v23 = ballposss.at(i+5) - ballposss.at(i+10);
+//        }
+//    }
+
+//    Q_FOREACH(Vector2D v , ballposss)
+//        draw(v , 0 , QColor(Qt::darkRed) , 1);
+
+//    Q_FOREACH(Vector2D v , save)
+//        draw(v , 0 , QColor(Qt::cyan) , 1);
+
+//    return;
 
     //chip hit the ground
 
@@ -386,8 +355,8 @@ void CMainApplication::Experimental4()
 
     pos.append(wm->ball->pos);
 
-    if(chipPos.size()==0)
-        chipPos.append(pos.at(0));
+    if(pos.size()==0)
+        pos.append(pos.at(0));
 
     if(pos.size() > maax){
 
@@ -428,6 +397,226 @@ void CMainApplication::Experimental4()
         draw(cp , 0, QColor(Qt::black));
 
     return;
+
+
+
+
+
+
+    // chip
+
+    static double rect_width = 1.7;
+    static int cnt = 0;
+    static QList<Vector2D> ballPos , savePositionUp , savePositionDown , savePositionLeft , savePositionRight;
+    static Vector2D ballVel = wm->ball->vel , ballPosition = wm->ball->pos;
+
+
+    Polygon2D *up = new Polygon2D();
+    up->addVertex(Vector2D(-_FIELD_WIDTH/2 , _FIELD_HEIGHT/2));
+    up->addVertex(Vector2D(-_FIELD_WIDTH/2 , _FIELD_HEIGHT/2-rect_width));
+    up->addVertex(Vector2D(0 , _FIELD_HEIGHT/2-rect_width));
+    up->addVertex(Vector2D(0 , _FIELD_HEIGHT/2));
+
+    Polygon2D *down = new Polygon2D();
+    down->addVertex(Vector2D(-_FIELD_WIDTH/2 , -_FIELD_HEIGHT/2));
+    down->addVertex(Vector2D(-_FIELD_WIDTH/2 , -_FIELD_HEIGHT/2+rect_width));
+    down->addVertex(Vector2D(0 , -_FIELD_HEIGHT/2+rect_width));
+    down->addVertex(Vector2D(0 , -_FIELD_HEIGHT/2));
+
+    Polygon2D *left = new Polygon2D();
+    left->addVertex(Vector2D(-_FIELD_WIDTH/2 , _FIELD_HEIGHT/2));
+    left->addVertex(Vector2D(-_FIELD_WIDTH/2+rect_width , _FIELD_HEIGHT/2));
+    left->addVertex(Vector2D(-_FIELD_WIDTH/2+rect_width , -_FIELD_HEIGHT/2));
+    left->addVertex(Vector2D(-_FIELD_WIDTH/2 , -_FIELD_HEIGHT/2));
+
+    Polygon2D *right = new Polygon2D();
+    right->addVertex(Vector2D(0 , _FIELD_HEIGHT/2));
+    right->addVertex(Vector2D(-rect_width , _FIELD_HEIGHT/2));
+    right->addVertex(Vector2D(-rect_width , -_FIELD_HEIGHT/2));
+    right->addVertex(Vector2D(0 , -_FIELD_HEIGHT/2));
+
+    if(savePositionUp.size()==0){
+        savePositionUp.append(Vector2D(_FIELD_WIDTH/2   , 0));
+        savePositionDown.append(Vector2D(_FIELD_WIDTH/2 , 0));
+        savePositionLeft.append(Vector2D(_FIELD_WIDTH/2 , 0));
+        savePositionRight.append(Vector2D(_FIELD_WIDTH/2 , 0));
+    }
+
+    draw(*up   , QColor(Qt::black));
+    draw(*down , QColor(Qt::black));
+    draw(*left , QColor(Qt::black));
+    draw(*right , QColor(Qt::black));
+
+
+    foreach(Vector2D b , ballPos)
+        draw(b , 0 , QColor(Qt::blue) , 1);
+
+
+    foreach(Vector2D spu , savePositionUp)
+        draw(spu , 0 , QColor(Qt::red) , 1);
+
+    foreach(Vector2D spd , savePositionDown)
+        draw(spd , 0 , QColor(Qt::black) , 1);
+
+    foreach(Vector2D spl , savePositionLeft)
+        draw(spl , 0 , QColor(Qt::white) , 1);
+
+    foreach(Vector2D spr , savePositionRight)
+        draw(spr , 0 , QColor(Qt::darkYellow) , 1);
+
+
+
+    ballPos.append(wm->ball->pos);
+
+    if(ballPos.size() == 121)
+        ballPos.removeFirst();
+
+    if(fabs(wm->ball->vel.x) > 0.02 && fabs(wm->ball->vel.y) > 0.02){
+
+        if(up->contains(wm->ball->pos)){
+            if((/*ballVel.x < 0 &&*/ ballVel.y <= 0) && (/*wm->ball->vel.x < 0 && */wm->ball->vel.y > 0)
+                    //                    || (ballVel.x > 0 && ballVel.y <= 0) && (wm->ball->vel.x > 0 && wm->ball->vel.y > 0)
+                    ){
+                debug("up" , D_FATEMEH);
+                debug(QString("curr ballspeed: x: %1 , y: %2").arg(wm->ball->vel.x).arg(wm->ball->vel.y) , D_FATEMEH);
+                debug(QString("prev ballspeed: x: %1 , y: %2").arg(ballVel.x).arg(ballVel.y) , D_FATEMEH);
+                savePositionUp.append(ballPosition);
+            }
+        }
+
+        if(down->contains(wm->ball->pos)){
+            if((/*ballVel.x > 0 &&*/ ballVel.y >= 0) && (/*wm->ball->vel.x > 0 &&*/ wm->ball->vel.y < 0)
+                    //                    || (ballVel.x < 0 && ballVel.y >= 0) && (wm->ball->vel.x < 0 && wm->ball->vel.y < 0)
+                    ){
+                debug("down" , D_FATEMEH);
+                debug(QString("curr ballspeed: x: %1 , y: %2").arg(wm->ball->vel.x).arg(wm->ball->vel.y) , D_FATEMEH);
+                debug(QString("prev ballspeed: x: %1 , y: %2").arg(ballVel.x).arg(ballVel.y) , D_FATEMEH);
+                savePositionDown.append(ballPosition);
+            }
+        }
+
+        if(left->contains(wm->ball->pos)){
+            if((ballVel.x >= 0 /*&& ballVel.y > 0*/) && (wm->ball->vel.x < 0 /*&& wm->ball->vel.y > 0*/)
+                    //                    || (ballVel.x >= 0 && ballVel.y < 0) && (wm->ball->vel.x < 0 && wm->ball->vel.y < 0)
+                    ){
+                debug("left" , D_FATEMEH);
+                debug(QString("curr ballspeed: x: %1 , y: %2").arg(wm->ball->vel.x).arg(wm->ball->vel.y) , D_FATEMEH);
+                debug(QString("prev ballspeed: x: %1 , y: %2").arg(ballVel.x).arg(ballVel.y) , D_FATEMEH);
+                savePositionLeft.append(ballPosition);
+            }
+        }
+
+        if(right->contains(wm->ball->pos)){
+            if((ballVel.x <= 0 /*&& ballVel.y > 0*/) && (wm->ball->vel.x > 0 /*&& wm->ball->vel.y > 0*/)
+                    //                    || (ballVel.x <= 0 && ballVel.y < 0) && (wm->ball->vel.x > 0 && wm->ball->vel.y < 0)
+                    ){
+                debug("right" , D_FATEMEH);
+                debug(QString("curr ballspeed: x: %1 , y: %2").arg(wm->ball->vel.x).arg(wm->ball->vel.y) , D_FATEMEH);
+                debug(QString("prev ballspeed: x: %1 , y: %2").arg(ballVel.x).arg(ballVel.y) , D_FATEMEH);
+                savePositionRight.append(ballPosition);
+            }
+        }
+
+    }
+
+    // update
+    if(cnt==4){
+        ballPosition = wm->ball->pos;
+        cnt = 0;
+    }
+    else
+        cnt++;
+
+    ballVel = wm->ball->vel;
+
+    return;
+
+
+
+
+
+    // chip, nth attempt
+
+    static QList<Vector2D> ballPosi , hit;
+    static bool ballIsInStraightLine = false , flag =true;
+    static int num = 20 , firstIndex , counter=0 , hitsize=0 , n=7;
+    static Vector2D pos1 , pos2;
+
+    if(ballPosi.size()==0)
+        ballPosi.append(wm->ball->pos);
+
+    if(fabs(wm->ball->pos.x - ballPosi.last().x) > 0.003 && fabs(wm->ball->pos.y - ballPosi.last().y) > 0.003)
+        ballPosi.append(wm->ball->pos);
+
+
+    if(ballPosi.size() == 122){
+        ballPosi.removeFirst();
+
+        for(int i=0 ; i < ballPosi.size()-num-n ; i++){
+
+            for(int j=0; j<n; j++){
+                if(( ballPosi.at(i)-ballPosi.at(i+num/2+j) ).angleWith( ballPosi.at(i+num/2+j)-ballPosi.at(i+num+j) ).degree() > 1){
+                    flag = false;
+                }
+            }
+
+            if(flag){
+                firstIndex = i;
+                pos1 = ballPosi.at(i);
+                pos2 = ballPosi.at(firstIndex+num+2);
+                counter++;
+                //                if(counter==2){
+                ballIsInStraightLine = true;
+                //                    counter=0;
+                break;
+                //                }
+            }
+            flag = true;
+        }
+
+    }
+
+    hitsize = hit.size();
+
+    if(ballIsInStraightLine){
+        for(int i=15 ; i < firstIndex ; i++){
+
+            if( ( ballPosi.at(i)-ballPosi.at(firstIndex) ).angleWith( ballPosi.at(i)-ballPosi.at(firstIndex+num) ).degree() < 1
+                    //                    && ( ballPosi.at(i)-ballPosi.at(firstIndex+1) ).angleWith( ballPosi.at(i)-ballPosi.at(firstIndex+num+1) ).degree() < 0.5
+                    //                    && ( ballPosi.at(i)-ballPosi.at(firstIndex+2) ).angleWith( ballPosi.at(i)-ballPosi.at(firstIndex+num+2) ).degree() < 0.5
+                    )
+            {
+                hit.append(ballPosi.at(i));
+                //                debug(QString("hit pos : x : %1 , y : %2").arg(ballPosi.at(i).x).arg(ballPosi.at(i).y) , D_FATEMEH);
+                debug(QString("saved pos : x %1 , : y : %2").arg(ballPosi.at(i).x).arg(ballPosi.at(i).y) , D_FATEMEH);
+                i+=2;
+            }
+
+        }
+
+    }
+
+    ballIsInStraightLine = false;
+    flag = true;
+
+    //    if(wm->ball->vel.length() < 0.01 && hit.size() > hitsize ){
+    //        ballPosi.clear();
+    //    }
+
+    draw(pos1 , 1 , QColor(Qt::black) , 1);
+    //        draw(pos2 , 1 , QColor(Qt::red) , 1);
+    draw(Segment2D(pos1 , pos2 ) ,QColor(Qt::red));
+
+    foreach(Vector2D b , ballPosi)
+        draw(b , 0 , QColor(Qt::cyan) , 1);
+
+    foreach(Vector2D h , hit){
+        draw(h , 1 , QColor(Qt::darkBlue) , 1);
+    }
+
+    return;
+
+
 
 
 

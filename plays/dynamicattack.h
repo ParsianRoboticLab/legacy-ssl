@@ -55,10 +55,18 @@ public:
     void setFast(bool _fast);
     void setPlayMake(int _playMake);
     void setCritical(bool _critical);
+    void setBallInOppJaw(bool _ballInOppJaw);
 
     SDynamicPlan currentPlan;
 
+    CAgent* getMahiPlayMaker();
+
 private:
+    Vector2D lastPassPosLoc;
+    int lastGuards[6];
+    int guardSize;
+    QTime positioningIntention;
+    double positioningIntentionInterval;
 
     void playMake();
     void choosePlayMaker();
@@ -132,7 +140,7 @@ private:
 
     ////////Plan Making
     bool isDefenseClearing,isWeHaveBall,noPlanException;
-    bool directShot,fast,critical;
+    bool directShot,fast,critical,ballInOppJaw;
     ////////////////////
 
     double shotProb,shotAngle;

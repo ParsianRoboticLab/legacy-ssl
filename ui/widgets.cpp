@@ -351,7 +351,7 @@ CSkillWidget::~CSkillWidget()
 }
 
 bool CSkillWidget::executeSkill()
-{    
+{
     if (!executing) return false;
     if(stopExecution) return false;
     CSkill *s = ((CSkillConfigWidget*) pagesWidget->currentWidget())->skill;
@@ -593,16 +593,14 @@ CProfilerWidget::~CProfilerWidget() {
 
 void CProfilerWidget::slt_insert() {
     ProfileMode tempMode = getMode(skillsCombo->currentIndex());
-    if(tempMode == PCHIP || tempMode == SCHIP)
-        knowledge->profiler->insertRecord(tempMode,
-                                          kickSpeed->text().toInt(),
-                                          theMean,
-                                          currentAgent);
-    else
-        knowledge->profiler->insertRecord(tempMode,
-                                          kickSpeed->text().toInt(),
-                                          ballSpeedAddedList,
-                                          currentAgent);
+    //    if(tempMode == PCHIP || tempMode == SCHIP)
+    //        knowledge->profiler->insertRecord(tempMode,
+    //                                          kickSpeed->text().toInt(),
+    //                                          theMean,
+    //                                          currentAgent);
+    //    else
+    knowledge->profiler->insertRecord(tempMode, kickSpeed->text().toInt(), ballSpeedAddedList, currentAgent);
+
     kickSpeed->setText("");
     realSpeed->setText("");
     theMeanLable->setText(QString("The Mean : "));
@@ -869,7 +867,7 @@ CPlayOffWidget::CPlayOffWidget(CLoadPlayOffJson* _loader, QWidget *parent) : QWi
     deactive->setEnabled(false);
     master->setEnabled(false);
 
-//    selection = columns->selectionModel();
+    //    selection = columns->selectionModel();
 
     model   = new QStandardItemModel();
     selection = new QItemSelectionModel(model);
@@ -1766,7 +1764,7 @@ void CMonitorWidget::drawText(double x, double y, QString text, QColor color, in
                text, font);
 }
 void CMonitorWidget::drawRobot(double x, double y, double ang, int ID, int comID, QColor color, QString str, bool newRobots)
-{    
+{
     double rad = newRobots ? CRobot::robot_radius_new : CRobot::robot_radius_old;
     if ( newRobots)
     {
@@ -3485,7 +3483,7 @@ void CLoggerWidget::cursorIncrement(){
             if(DType<0 && DType>-32768){
                 DType+=65536;
                 if((DType & type1) > 32768)
-                typeState=true;
+                    typeState=true;
 
             }
             else if(DType<32768 && (DType & type)){
@@ -3645,7 +3643,7 @@ CLogTagWidget::~CLogTagWidget(){
 void CLogTagWidget::StartLogfunc(){
     this->close();
     QString totalDescription;
-     QChar cc = '0';
+    QChar cc = '0';
     QString baseFileName = QString("%1%2%3-%4%5%6")
             .arg(QString::number(QDate::currentDate().year()) , 4 , cc)
             .arg(QString::number(QDate::currentDate().month()) , 2 , cc)
@@ -3690,6 +3688,8 @@ CNewProfilerWidget::CNewProfilerWidget(QWidget* parent):QDialog(parent){
     ProfilerLayout=new QVBoxLayout;
     profTxt=new QLabel("select active Robots to be profiled:",this);
     repeatTxt=new QLabel("repeat:",this);
+    filenamelable=new QLabel("JSON file name:" , this);
+    fileName = new QLineEdit("MahiProfiler.json" , this);
     repeatNum=new QLineEdit("3",this);
     startProf=new QPushButton("start Profiling",this);
     profilerRobotsList->setLayout(ProfilerLayout);
@@ -3714,7 +3714,9 @@ CNewProfilerWidget::CNewProfilerWidget(QWidget* parent):QDialog(parent){
     l->addWidget(profilerRobotsList,2,1);
     l->addWidget(repeatTxt,3,1);
     l->addWidget(repeatNum,3,2);
-    l->addWidget(startProf,4,1);
+    l->addWidget(filenamelable,4,1);
+    l->addWidget(fileName,4,2);
+    l->addWidget(startProf,5,1);
     this->setLayout(l);
 
 
@@ -3734,6 +3736,7 @@ void CNewProfilerWidget::startProfFunc(){
             i++;
         }
     }
+    //collectKickProfile->filename=fileName->text();
     collectKickProfile->repeat=repeatNum->text().toInt();
     this->close();
     ProfilerExecute=true;
@@ -3882,7 +3885,7 @@ void PlayFileHightlighter::highlightBlock(const QString &text)
 }
 
 MyTreeView::MyTreeView(QTextEdit* _txt, QWidget *parent) : QTreeView(parent)
-{    
+{
     txt = _txt;
 }
 
@@ -3917,7 +3920,7 @@ MyTextEdit::MyTextEdit(QWidget *parent) : QTextEdit(parent)
 }
 
 void MyTextEdit::keyPressEvent(QKeyEvent *e)
-{    
+{
     QTextEdit::keyPressEvent(e);
     if (e->text().count() > 0) emit modified();
     if (e->key() == Qt::Key_Control) ctrl = true;

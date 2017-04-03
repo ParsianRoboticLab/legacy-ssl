@@ -860,7 +860,7 @@ void CAgent::generateRobotCommand()
         outputBuffer[7] = vangularAbs & 0x7F;
 
         requestBit = true; // change to release mode command
-        if (requestBit)
+        if (requestBit && knowledge->getGameState() != CKnowledge::Halt)
         {
             outputBuffer[8] |= 0x01;
         }

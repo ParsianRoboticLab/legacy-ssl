@@ -18,6 +18,8 @@ public:
     int angleDegreeThr = 0;
     int angleDegreeThrNotStop = 0;
     int angleDegreeThrNotStopAHZ = 0;
+    QList <QString> markRoles;
+    double ballCircleR = 0.5;
     ///////////////////////////////////////////////////
     ////Filtered Variables
     bool weOwnBall;

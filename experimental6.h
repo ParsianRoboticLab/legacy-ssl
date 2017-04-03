@@ -11,7 +11,7 @@
 clock_t t;
 //#define speedTest
 
-#define kickTest
+//#define kickTest
 QList <Vector2D> agentpath;
 
 struct VectorIndex {
@@ -35,7 +35,7 @@ void CMainApplication::Experimental6()
         stopFlag = false;
     if(knowledge->joystick->getButton4())
         stopFlag = true;
-    int skillAgent = 7;
+    int skillAgent = 3;
 
 
 
@@ -46,11 +46,36 @@ void CMainApplication::Experimental6()
     mmkick.setShotToEmptySpot(false);
     mmkick.setKickSpeed(1000);
     mmkick.setGoalieMode(false);
+    mmkick.setPassProfiler(false);
+    mmkick.setGoalieMode(true);
 
     if(!stopFlag)
         mmkick.execute();
     return;
 #endif
+
+    static CSkillDribble mpass(soccer->agents[skillAgent]);
+    Circle2D opFak(wm->opp[2]->pos + wm->opp[2]->dir.norm()*0.08,0.07);
+    static CSkillKick passKick(soccer->agents[skillAgent]);
+
+    draw(Circle2D(wm->opp[knowledge->getNearestOppToPoint(wm->ball->pos)]->pos,0.1),QColor(Qt::cyan));
+    passKick.setKickSpeed(500);
+    passKick.setTarget(soccer->agents[5]->pos());
+
+    mpass.setKickSpeed(500);
+    mpass.setInitialLook(wm->opp[2]->pos);
+    mpass.setDoPass(true);
+    mpass.setTarget(soccer->agents[5]->pos());
+
+
+    if(!stopFlag)
+    {
+        if(opFak.contains(wm->ball->pos))
+        mpass.execute();
+        else
+            passKick.execute();
+    }
+    return;
 
     static bool catchTheBall = false;
     static CSkillGotoPointAvoid mGP(soccer->agents[skillAgent]);

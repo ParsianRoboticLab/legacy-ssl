@@ -21,7 +21,7 @@ void CMasterPlay::initMaster(){
     playMakeAgent = NULL;
     positionAgents.clear();
     if(knowledge->getGameState() != CKnowledge::Start)
-    markAgents.clear();
+        markAgents.clear();
     stopAgents.clear();
     masterStaticPoints.clear();
     staticInited = false;
@@ -333,19 +333,18 @@ void CMasterPlay::execPlay(){
 
     if( knowledge->getGameState() != CKnowledge::Start )
     {
-        //	if( positionAgents.size() ){
-        ///////// added to prevent Segmentatino fault! //////////
-        if( editData->count(formationName) == 0 ){
-            //			debug(QString("Invalid Formation Name: %1").arg(formationName) , D_ERROR);
-            formationName = "Stop6";
+        if( positionAgents.size() ){
+            ///////// added to prevent Segmentatino fault! //////////
+            if( editData->count(formationName) == 0 ){
+                debug(QString("Invalid Formation Name: %1").arg(formationName) , D_ERROR);
+                formationName = "Stop6";
+            }
+            /////////////////////////////////////////////////////////
+            position.init(positionAgents , (*editData)[formationName],formationName);
+            if( staticInited ){
+                position.staticInit(masterStaticPoints);
+            }
+            position.execute();
         }
-        /////////////////////////////////////////////////////////
-        //		qDebug() << formationName;
-        /*	position.init(positionAgents , (*editData)[formationName],formationName);
-                if( staticInited ){
-                        position.staticInit(masterStaticPoints);
-                }
-                position.execute();*/
-        //	}
     }
 }
