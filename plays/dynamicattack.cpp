@@ -974,15 +974,22 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
         } else {
             tempIndex = maxHorizontalDistID(valids);
         }
-        if(_points.at(tempIndex).dist(ballPos) < 0.2)
-            roleAgentPM->setNoKick(true);
+        if(tempIndex == -1)
+            for(int i = 0; i < temp.size(); i++)
+                if(tempIndex == -1 || temp[i].x > temp[tempIndex].x)
+                    tempIndex = i;
+            /*currentPlan.passPos = wm->field->oppGoal();*/
+       /* if(valids.at(tempIndex).dist(ballPos) < 0.2)
+            roleAgentPM->setNoKick(true);*/
     }
 
-    if(tempIndex < temp.size()) {
+    if(0 <= tempIndex && tempIndex < temp.size()) {
         currentPlan.passPos = _points.at(tempIndex);
     }
-
+    else
+        currentPlan.passPos = Vector2D(_FIELD_WIDTH / 2, mahiPlayMaker->pos().y);
 }
+
 double CDynamicAttack::getDynamicValue(const Vector2D &_dynamicPos) const {
     double defMoveAngle, openAngle;
     defMoveAngle = Vector2D::angleOf(ballPos, OppGoal, _dynamicPos).degree();
@@ -1119,15 +1126,15 @@ void CDynamicAttack::checkPoints(QList<Vector2D>& _points) {
 }
 
 int CDynamicAttack::minHorizontalDistID(const QList<Vector2D> &_points) {
-    double tempDist,minDist = 1000;
-    int tempIndex;
+    double tempDist,minDist = 100000;
+    int tempIndex = -1;
 
-    for(size_t i = 0;i < _points.size();i++) {
+    for(size_t i = 0; i < _points.size();i++) {
         tempDist = fabs(ballPos.y - _points.at(i).y);
         if (lastPassPos == i) {
             tempDist -= 1;
         }
-        if(tempDist < minDist) {
+        if(tempDist < minDist && fabs(ballPos.y - _points.at(i).y) > 0.2) {
             minDist = tempDist;
             tempIndex = i;
         }
@@ -1138,14 +1145,14 @@ int CDynamicAttack::minHorizontalDistID(const QList<Vector2D> &_points) {
 
 int CDynamicAttack::maxHorizontalDistID(const QList<Vector2D> &_points) {
     double tempDist,maxDist = -1;
-    int tempIndex;
+    int tempIndex = -1;
 
     for(size_t i = 0;i < _points.size();i++) {
         tempDist = fabs(ballPos.y - _points.at(i).y);
         if (lastPassPos == i) {
             tempDist += 1;
         }
-        if(tempDist > maxDist) {
+        if(tempDist > maxDist && fabs(ballPos.y - _points.at(i).y) > 0.2) {
             maxDist = tempDist;
             tempIndex = i;
         }
