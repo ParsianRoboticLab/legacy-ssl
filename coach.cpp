@@ -1666,7 +1666,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     int symmetry = 1;
     QList<NGameOff::SPlan*> validPlans;
     QList<NGameOff::SPlan*> plans = m_planLoader->getPlans(); // Get All of The Plans
-
+    QList<int> chances;
     if (plans.isEmpty()) {
         debug("There's No Plan", D_ERROR);
         return;
@@ -1728,6 +1728,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
             }
 
             validPlans.append(plan);
+            chances.append(static_cast<int>(plan->common.chance));
         }
     }
 
@@ -1738,17 +1739,31 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
         if (nearestPlan != NULL) {
             nearestPlan->execution.symmetry = symmetry;
             validPlans.append(nearestPlan);
+            chances.append(1);
             debug("[Warning] playoff -> nearset plan matched", D_ERROR, QColor(Qt::red));
         }
     }
 
     if (validPlans.isEmpty()) {
         debug ("[coach] WE DONT HAVE PLAN AT ALL", D_MAHI);
+
         return;
     }
 
     RNG randomNumberGenerator;
+    int sum = 0;
+    for(int i = 0; i < chances.size(); i++)
+        sum += chances.at(i);
     int randNo = randomNumberGenerator.uniformInt() % validPlans.size();
+    sum = 0;
+    for(int i = 0; i < chances.size(); i++)
+        if(sum <= randNo && randNo < sum + chances[i])
+        {
+            randNo = i;
+            break;
+        }
+        else
+            sum += chances[i];
     NGameOff::SPlan* thePlan = validPlans[randNo]; //chooseMostSuccecfull(validPlans); //Choose Best valid Plan
     debug (QString("Plan Number : %1").arg(randNo), D_DEBUG);
     matchPlan(thePlan, _ourplayers); //Match The Plan
