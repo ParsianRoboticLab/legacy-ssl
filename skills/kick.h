@@ -262,6 +262,7 @@ public:
     SkillProperty(CSkillKick, bool, GoalieMode, goalieMode);
     SkillProperty(CSkillKick, bool, AlternateMode, alternateMode);
     SkillProperty(CSkillKick, double,KickAngTol, kickAngTol);
+    SkillProperty(CSkillKick, bool,KickWithCenterOfDribbler, kickWithCenterOfDribbler);
 
 };
 
