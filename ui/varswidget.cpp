@@ -338,6 +338,8 @@ CPolicyWidget::CPolicyWidget()
 
     ADD_VALUE(Mark, Bool, OmmitNearestToBallPlayon, false, "Ommit Nearest To ball Playon");
 
+    ADD_VALUE(Mark, Bool , IntelligentMarkType, false, "Intelligent Mark Type");
+    ADD_VALUE(Mark, Bool , IntelligentMarkPrediction, true, "Intelligent Mark Prediction");
 
     globalWorld=VarXML::read(globalWorld,"policy.xml");
 
@@ -573,6 +575,8 @@ IMPL_VALUE(CPolicyWidget, Mark, double, Double, ShootRatioBlock)
 IMPL_VALUE(CPolicyWidget, Mark, double, Double, PassRatioBlock)
 IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , OmmitNearestToBallPlayon)
 
+IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , IntelligentMarkType)
+IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , IntelligentMarkPrediction)
 
 
 

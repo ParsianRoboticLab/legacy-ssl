@@ -133,8 +133,7 @@ protected:
     bool stopMode;
     bool limitBetweenAHZAndHMD;
     bool limitBetweenHMDAndAHZ;
-    bool changeInMarkPlanFlag;
-    bool changeInTSMode;
+    bool changeInMarkPlanFlag;    
     int lastOpponentAgentsToBeMarkSize;
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;
