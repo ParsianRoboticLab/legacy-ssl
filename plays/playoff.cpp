@@ -2431,7 +2431,7 @@ bool CPlayOff::isMoveDone(const CRolePlayOff * _roleAgent) {
         }
     } else {
         // TODO : vartypes this
-        if (_roleAgent->getAgent()->pos().dist(_roleAgent->getTarget()) < max(0.3,_roleAgent->getEventDist())) {
+        if (_roleAgent->getAgent()->pos().dist(_roleAgent->getTarget()) < max(0.3,_roleAgent->getEventDist()/100)) {
             return true;
         }
     }
