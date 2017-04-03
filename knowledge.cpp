@@ -131,7 +131,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
 
 
-    profiler->load(JSON  , "MahiProfiler_0_3_repeat4_11.1.96.json");
+    profiler->load(JSON  , "chip.json");
 
     QList<double> values;
     QList<int> keys;
@@ -216,9 +216,9 @@ int CKnowledge::getProfile(int agentId, double realParameter, bool isKick, bool 
     double profiledParameter=0;
     int type;
 
-    if(wm->getIsSimulMode()){
-        return (int)realParameter;
-    }
+//    if(wm->getIsSimulMode()){
+//        return (int)realParameter;
+//    }
 
     if(isKick && !spinOn)
     {
