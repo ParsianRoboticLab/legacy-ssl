@@ -132,13 +132,16 @@ public:
     Rect2D   oppPenaltyRect();
     bool isInField(Vector2D point);
 	bool isInOurPenaltyArea(Vector2D point);
-	bool isInOppPenaltyArea(Vector2D point);
+    bool isInOppPenaltyArea(Vector2D point);
     Rect2D   getRegion(Region region, double k=0.25);
     Rect2D   getRegion(QString name, double k=0.25);
     Rect2D   getCircleRegion(int n, int i);
     QList<Vector2D> ourBigPAreaIntersect(Line2D line, float scale=-1, float bias=0);
     QList<Vector2D> ourPAreaIntersect(Line2D line);
     QList<Vector2D> ourPAreaIntersect(Segment2D segment);
+    /////////////////////////////// Added by AHZ ///////////////////////
+    QList<Vector2D> AHZOurPAreaIntersect(Segment2D segment);
+    /////////////////////////////////////////////////////////////////////
     QList<Vector2D> ourPAreaIntersect(Circle2D circle);
     QList<Vector2D> oppPAreaIntersect(Line2D line);
     QList<Vector2D> oppPAreaIntersect(Segment2D segment);

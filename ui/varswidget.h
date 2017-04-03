@@ -289,6 +289,9 @@ class CPolicyWidget : public QWidget
             DEF_VALUE(Mark, double, Double, ShootRatioBlock)
             DEF_VALUE(Mark, double, Double, PassRatioBlock)
             DEF_VALUE(Mark, bool, Bool, OmmitNearestToBallPlayon)
+            DEF_VALUE(Mark, bool, Bool, IntelligentMarkType)
+            DEF_VALUE(Mark, bool, Bool, IntelligentMarkPrediction)
+
 
 
   public slots:
