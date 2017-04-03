@@ -680,7 +680,9 @@ void CGameLogger::drawData(){
 						"OurPenaltyKick",
 						"TheirPenaltyKick",
 						"Start",
-						"NormalStart"};
+                                                "NormalStart",
+                                                "OurBallPlacement",
+                                                "TheirBallPlacement"};
 
     for( int j=0 ; j<lastLogData.N ; j++ )
 	{

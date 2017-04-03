@@ -3,7 +3,6 @@
 
 #include"masterplay.h"
 
-#define SEMIDYNAMIC
 //#define _MAX_REGION 7
 
 struct SDynamicAgent {
@@ -56,12 +55,22 @@ public:
     void setFast(bool _fast);
     void setPlayMake(int _playMake);
     void setCritical(bool _critical);
+    void setBallInOppJaw(bool _ballInOppJaw);
+
+    SDynamicPlan currentPlan;
+
+    CAgent* getMahiPlayMaker();
 
 private:
+    Vector2D lastPassPosLoc;
+    int lastGuards[6];
+    int guardSize;
+    QTime positioningIntention;
+    double positioningIntentionInterval;
 
     void playMake();
     void choosePlayMaker();
-    void positioning();
+    void positioning(QList <Vector2D> _points);
     void globalExecute(int agentSize);
     void dynamicPlanner(int agentSize);
 
@@ -99,7 +108,7 @@ private:
     void assignLocations_6();
     bool isRightTimeToPass();
     int farGuardFromPoint(const int& _guardIndex, const Vector2D& _point);
-    void chooseBestPosForPass();
+    void chooseBestPosForPass(QList<Vector2D>);
     void chooseBestPositons();
     void chooseMarkPos();
     double getDynamicValue(const Vector2D& _dynamicPos) const;
@@ -124,15 +133,14 @@ private:
 
     void ballLocation();
 
-    QString getString(const DynamicEnums::DynamicMode& _mode) const;    
+    QString getString(const DynamicEnums::DynamicMode& _mode) const;
 
     CRoleDynamic *roleAgents[5];
     CRoleDynamic *roleAgentPM;
-    SDynamicPlan currentPlan;
 
     ////////Plan Making
     bool isDefenseClearing,isWeHaveBall,noPlanException;
-    bool directShot,fast,critical;
+    bool directShot,fast,critical,ballInOppJaw;
     ////////////////////
 
     double shotProb,shotAngle;
@@ -147,7 +155,7 @@ private:
     int mahiAgentsID[5];
     bool isBallInOurField;
 
-    int playmakeID;
+    int playmakeID = -1;
 
     Vector2D ballPos;
     Vector2D ballVel;
@@ -158,7 +166,7 @@ private:
 
 
     bool keepOrNot();
-
+    int lastPassPos;
     /////////Intentions
 //    int intenHighProb;
 

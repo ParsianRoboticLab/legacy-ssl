@@ -30,6 +30,7 @@
 #include "mergeCamerasExperiment.h"
 #include "joystickhandy.h"
 #include "kickprofiler.h"
+#include "autoballplacement.h"
 
 
 QString startUpMode;
@@ -326,6 +327,11 @@ CMainApplication::CMainApplication(QWidget *parent)
     setJsHandy->setChecked((experimental==9));
     setJsHandy->setShortcut(QKeySequence(tr("Ctrl+J","JoyStick Handy Controller")));
 
+    /////////////////////////////////////////////////auto ball placement
+    setAutoBallPlacement = new QAction("Auto Ball Placement", this);
+    setAutoBallPlacement->setCheckable(true);
+    setAutoBallPlacement->setChecked((experimental==12));
+
     ////////////////////////////////////////////////
     setTechnicalChallengeAct = new QAction("TechnicalChallenge", this);
     setTechnicalChallengeAct->setCheckable(true);
@@ -386,6 +392,7 @@ CMainApplication::CMainApplication(QWidget *parent)
     modeMenu->addAction(setExp5Act);
     modeMenu->addAction(setExp6Act);
     modeMenu->addAction(setJsHandy);
+    modeMenu->addAction(setAutoBallPlacement);
     modeMenu->addAction(setKProfiler);
     modeMenu->addAction(setFProfiler);
     modeMenu->addAction(setTechnicalChallengeAct);
@@ -665,6 +672,10 @@ void CMainApplication::customControl(bool &custom)
             if(ProfilerExecute)
                 collectKickProfile->start();
         }
+        if(experimental == 12)
+        {
+            autoBallPlacement();
+        }
 
     }
     else {
@@ -889,6 +900,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp4Act->setChecked(false);
         setExp5Act->setChecked(false);
         setExp6Act->setChecked(false);
+        setJsHandy->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
     }
@@ -908,6 +920,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp4Act->setChecked(false);
         setExp5Act->setChecked(false);
         setExp6Act->setChecked(false);
+        setJsHandy->setChecked(false);
         setTechnicalChallengeAct->setChecked(false);
         setFProfiler->setChecked(false);
     }
@@ -937,6 +950,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp5Act->setChecked(false);
         setExp6Act->setChecked(false);
         setJsHandy->setChecked(false);
+        setJsHandy->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
     }
@@ -954,9 +968,26 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setJsHandy->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
         setKProfiler->setChecked(false);
+        setJsHandy->setChecked(false);
         CNewProfilerWidget *profilerWidget;
         profilerWidget=new CNewProfilerWidget(this);
         profilerWidget->show();
+    }
+    else if (action->text() == setAutoBallPlacement->text())
+    {
+        experimental = 12;
+        if (setAutoBallPlacement->isChecked()) setAutoBallPlacement->setChecked(true);
+        else {setAutoBallPlacement->setChecked(false);experimental=0;}
+        setExp1Act->setChecked(false);
+        setExp2Act->setChecked(false);
+        setExp3Act->setChecked(false);
+        setExp4Act->setChecked(false);
+        setExp5Act->setChecked(false);
+        setExp6Act->setChecked(false);
+        setJsHandy->setChecked(false);
+        setMergeCamerasExperimentAct->setChecked(false);
+        setKProfiler->setChecked(false);
+        setJsHandy->setChecked(false);
     }
     /* Control Mode */
     CSoccer::ControlMode lastControlMode = soccer->getControlMode();
@@ -1237,6 +1268,7 @@ CMainApplication::~CMainApplication()
     delete keyboardWidget;
     delete plotWidget;
     delete statusWidget;
+    delete setAutoBallPlacement;
     delete skillWidget;
     delete roleWidget;
 
@@ -1451,25 +1483,26 @@ void haltAllRobots()
             if (flag) break;
         }
     }
+/////continue log in simulate mode
 
-    if( loggerMutex->tryLock(25) ){
-        gameLogger->closeLogger = true;
-        gameLogger->setIsLogMode(false);
-        gameLogger->logMode = false;
-        gameLogger->closeLogFiles(false);
-        loggerMutex->unlock();
-        QTime tm;
-        tm.start();
-        while( tm.elapsed() < 25 )
-        {
-            bool flag=false;
-            if( loggerMutex->tryLock(1) ){
-                flag = gameLogger->loggerClosed;
-                loggerMutex->unlock();
-            }
-            if (flag) break;
-        }
-    }
+//    if( loggerMutex->tryLock(25) ){
+//        gameLogger->closeLogger = true;
+//        gameLogger->setIsLogMode(false);
+//        gameLogger->logMode = false;
+//        gameLogger->closeLogFiles(false);
+//        loggerMutex->unlock();
+//        QTime tm;
+//        tm.start();
+//        while( tm.elapsed() < 25 )
+//        {
+//            bool flag=false;
+//            if( loggerMutex->tryLock(1) ){
+//                flag = gameLogger->loggerClosed;
+//                loggerMutex->unlock();
+//            }
+//            if (flag) break;
+//        }
+//    }
 
     char o[20];
     for (int k=0;k<100;k++)
@@ -1709,6 +1742,11 @@ void CMainApplication::loadFormationConfigs(){
     CCoach::editData["TheirPenaltyKick"]->openConf(prefix+"their_penalty_kick.conf");
     CCoach::editData["OurPenaltyKick"] = new EditData;
     CCoach::editData["OurPenaltyKick"]->openConf(prefix+"our_penalty_kick.conf");
+    CCoach::editData["TheirP"] = new EditData;
+    CCoach::editData["TheirP"]->openConf(prefix+"theirP.conf");
+    CCoach::editData["OurP"] = new EditData;
+    CCoach::editData["OurP"]->openConf(prefix+"ourP.conf");
+
 }
 
 

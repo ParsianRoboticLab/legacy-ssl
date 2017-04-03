@@ -26,4 +26,6 @@ public:
     SkillProperty(CSkillAutoBallPlacement, Vector2D, Target, target);
 };
 
+void autoBallPlacement();
+
 #endif // AUTOBALLPLACEMENT_H

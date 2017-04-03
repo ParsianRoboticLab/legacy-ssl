@@ -206,7 +206,8 @@ private:
     void findPosToGo();
     void findPosToGoAlt();
     double oneTouchAngle(Vector2D pos,Vector2D vel,Vector2D ballVel,Vector2D ballDir,Vector2D goal,double landa,double gamma);
-
+    Vector2D jTurnStartPos;
+    bool isJturn;
 
     CSkillGotoPointAvoid *gpa;
     CSkillIntercept *kickIntercept;
@@ -245,6 +246,7 @@ public:
     SkillProperty(CSkillKick, bool, Clear, clear);
     SkillProperty(CSkillKick, int, WaitFrames, waitFrames);
     SkillProperty(CSkillKick, bool, AvoidPenaltyArea, avoidPenaltyArea);
+    SkillProperty(CSkillKick, bool, AvoidOppPenaltyArea, avoidOppPenaltyArea);
     SkillProperty(CSkillKick, bool, InterceptMode, interceptMode);
     SkillProperty(CSkillKick, bool, DontKick, dontKick);
     SkillProperty(CSkillKick, bool, SagMode, sagMode);
@@ -260,6 +262,7 @@ public:
     SkillProperty(CSkillKick, bool, GoalieMode, goalieMode);
     SkillProperty(CSkillKick, bool, AlternateMode, alternateMode);
     SkillProperty(CSkillKick, double,KickAngTol, kickAngTol);
+    SkillProperty(CSkillKick, bool,KickWithCenterOfDribbler, kickWithCenterOfDribbler);
 
 };
 
@@ -410,6 +413,7 @@ private:
     double cirThresh;
     double kickCirThresh;
     double velThresh;
+    Vector2D findMostPossible();
 public:
     double ballRealVel;
     static Vector2D newOneTouchAng(CAgent *oneTouchAgent,Vector2D target,double kickSpeed,double alpha,double beta,double gama);
@@ -427,6 +431,7 @@ public:
     SkillProperty(CSkillKickOneTouch, bool, RecvChip, recvChip);
     SkillProperty(CSkillKickOneTouch, bool, AvoidPenaltyArea, avoidPenaltyArea);
     SkillProperty(CSkillKickOneTouch, bool, MoveTowardTheBall, moveTowardTheBall);
+    SkillProperty(CSkillKickOneTouch, bool, ShotToEmptySpot, shotToEmptySpot);
 };
 
 
