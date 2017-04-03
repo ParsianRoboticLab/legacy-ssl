@@ -138,11 +138,6 @@ void CDynamicAttack::makePlan(int agentSize) {
         currentPlan.positionAgents[i].skill  = DynamicEnums::NoSkill;
     }
 
-    // TODO : check below comment
-    //    if (playmakeID == -1) {
-    //        isDefenseClearing = true;
-    //    }
-
     /// Start Role Assigning
 
     if (isDefenseClearing) {
@@ -158,23 +153,23 @@ void CDynamicAttack::makePlan(int agentSize) {
     else if (knowledge->ballPossesion != CKnowledge::WEHAVETHEBALL) {
         currentPlan.mode = DynamicEnums::NotWeHaveBall;
 
-        currentPlan.playmake.init(DynamicEnums::CatchBall, DynamicEnums::Goal);
-        for(size_t i = 0;i < agentSize;i++) {
-            currentPlan.positionAgents[i].region = DynamicEnums::Supporter;
-            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
-        }
-    }
-    // if Defense isn't clearing and
-    // we have the ball
-    // ball is in our field
-    else if (ballPos.x < 0) {
-        currentPlan.mode = DynamicEnums::BallInOurField;
         currentPlan.playmake.init(DynamicEnums::Chip, DynamicEnums::Forward);
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Near;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
         }
     }
+//    // if Defense isn't clearing and
+//    // we have the ball
+//    // ball is in our field
+//    else if (ballPos.x < 0) {
+//        currentPlan.mode = DynamicEnums::BallInOurField;
+//        currentPlan.playmake.init(DynamicEnums::Chip, DynamicEnums::Forward);
+//        for(size_t i = 0;i < agentSize;i++) {
+//            currentPlan.positionAgents[i].region = DynamicEnums::Near;
+//            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+//        }
+//    }
     // if Defense isn't clearing and
     // we have ball and
     // shot prob is more than 50%
@@ -328,7 +323,9 @@ void CDynamicAttack::dynamicPlanner(int agentSize) {
         }
     }
     debug(QString("[DA] PM SKILL: %1").arg(roleAgentPM->getSelectedSkill()), D_MAHI, QColor(Qt::red));
-    roleAgentPM->execute();
+    if (playmakeID != -1) {
+        roleAgentPM->execute();
+    }
 
 
     for (int i = 0; i < semiDynamicPosition.size(); i++) {
@@ -367,7 +364,7 @@ void CDynamicAttack::playMake() {
 
     switch(currentPlan.playmake.skill) {
     case DynamicEnums::Pass:
-        roleAgentPM->setChip(chipOrNot(currentPlan.passPos, 0.5, 0.1));
+        roleAgentPM -> setChip(chipOrNot(currentPlan.passPos, 0.5, 0.1));
         roleAgentPM -> setTarget(currentPlan.passPos);
         roleAgentPM -> setEmptySpot(false);
         if(roleAgentPM->getChip()) {
@@ -411,7 +408,7 @@ void CDynamicAttack::playMake() {
 }
 
 void CDynamicAttack::positioning(QList<Vector2D> _points) {
-bool check = false;
+    bool check = false;
     for(size_t i = 0 ;i < currentPlan.agentSize;i++) {
         if(mahiAgentsID[i] >= 0) {
             roleAgents[i]->setAgentID(mahiAgentsID[i]);
