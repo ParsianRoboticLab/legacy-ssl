@@ -1424,6 +1424,7 @@ if(matchPoints.count() == ourAgents.count()){
 
             if(ourAgents[i]->pos().dist(matchPoints[matchResult[i]]) > 0.35)
                 matchPoints[matchResult[i]] = checkDefensePoint(ourAgents[i], matchPoints[matchResult[i]]);
+
             draw(Circle2D(matchPoints[matchResult[i]] , 0.05) , 0 , 360 , "black" , true);
 
             gpa[ourAgents[i]->id()]->setNoAvoid(true);
@@ -1595,7 +1596,7 @@ bool DefensePlan::defenseClearOrNot(){
         defenseClearIndex = lastClearID;
         if(knowledge->goalie != NULL) {
             for(int i=0; i < wm->our.activeAgentsCount(); i++){
-                if (defenseAgents[defenseClearIndex]->id() != wm->our.active(i)->id && wm->our.active(i)->id != knowledge->goalie->id() ){
+                if (defenseAgents[defenseClearIndex]->id() && false != wm->our.active(i)->id && wm->our.active(i)->id != knowledge->goalie->id() ){
                     if((defenseAgents[defenseClearIndex]->distToBall().length() - 0.3) > wm->our.active(i)->pos.dist(ballPos)|| defenseAgents[defenseClearIndex]->distToBall().length() > 1.5 + defClearThr)
                         return false;
                 }
@@ -2798,7 +2799,7 @@ Vector2D CDefPos::getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Seg
     Vector2D fOurGoal(- _FIELD_WIDTH/2.0 , 0.0);
     double PAreaOffset = _tempBestRadius - 1.37;
     if(PAreaOffset < 0.12) {
-        PAreaOffset = 0.12;
+        PAreaOffset = 0.15;
     }
     Circle2D c1(wm->field->ourGoal() + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD + PAreaOffset);
     Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD + PAreaOffset);
@@ -3140,7 +3141,7 @@ void DefensePlan::inteliDecideMarkType(){
 }
 
 void DefensePlan::findPos(int _markAgentSize){
-    double xLimitForblockingPass = -2;
+    double xLimitForblockingPass = 0;
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
     bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)|| (knowledge->getGameState() == CKnowledge::TheirKickOff)|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     bool MantoManAllTransientFlag = policy()->Mark_ManToManAllTransiant();
