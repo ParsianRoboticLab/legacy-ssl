@@ -1520,6 +1520,9 @@ void DefensePlan::execute()
                 matchingDefPos(realDefSize);
             }
         }
+        else{
+            draw("Vision Problem", Vector2D(0,0),"red");
+        }
     }
     return;
 
