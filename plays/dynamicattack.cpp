@@ -214,7 +214,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     // it's needed to be fast
     else if(fast) {
         currentPlan.mode = DynamicEnums::Fast;
-        currentPlan.playmake.init(DynamicEnums::Pass, DynamicEnums::Near);
+        currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Near;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
@@ -384,11 +384,11 @@ void CDynamicAttack::playMake() {
     case DynamicEnums::Chip:
         roleAgentPM->setNoKick(false);
         if (currentPlan.playmake.region == DynamicEnums::Goal) {
-            roleAgentPM ->setTarget(wm->field->oppGoal()); // TODO : check it can change with emptySpot
-            roleAgentPM ->setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip()); // TODO : check it can change
+            roleAgentPM ->setTarget(wm->field->oppGoal());
+            roleAgentPM ->setKickRealSpeed(policy()->DynamicPlay_MediumSpeedChip());
         } else if (currentPlan.playmake.region == DynamicEnums::Forward) {
             roleAgentPM->setTarget(Vector2D(1000, 0));
-            roleAgentPM->setKickRealSpeed(policy()->DynamicPlay_MediumSpeedChip()); // TODO : check it can change
+            roleAgentPM->setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip());
         } else {
             roleAgentPM->setTarget(wm->field->oppGoal());
             roleAgentPM->setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip());
