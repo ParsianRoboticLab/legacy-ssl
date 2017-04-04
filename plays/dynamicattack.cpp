@@ -954,7 +954,7 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
             tempIndex = maxHorizontalDistID(temp);
         }
     } else {
-        /*QList <Vector2D> valids;
+        QList <Vector2D> valids;
         for(int i = 0; i < temp.size(); i++)
         {
             int matchAgent    = mahiPoisitionAgents.at(i)->id();
@@ -969,7 +969,7 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
 //            debug(QString("agent is %1").arg(matchAgent), D_PARSA);
 //            debug(QString("valids %1 %2").arg(valids[i].x).arg(valids[i].y), D_PARSA);
 
-        }*/
+        }
         if(policy()->DynamicPlay_NearForward()) {
             tempIndex = minHorizontalDistID(temp);
         } else {
@@ -1337,9 +1337,9 @@ void CDynamicAttack::assignLocations_1() {
     guardLocations[1][0][1].assign(_FIELD_WIDTH/4, 0);
     guardLocations[1][0][2].assign(_FIELD_WIDTH/2 - 0.5, -_FIELD_HEIGHT/4 - 0.5);*/
     guardLocations[1][0][0].assign(1, 2);
-    guardLocations[1][0][1].assign(_FIELD_WIDTH/4, 0);
-    guardLocations[1][0][2].assign(_FIELD_WIDTH/2 - 0.5, -_FIELD_HEIGHT/4 - 0.5);*/
-    guardLocations[1][0][0].assign(2, 2);
+//    guardLocations[1][0][1].assign(_FIELD_WIDTH/4, 0);
+//    guardLocations[1][0][2].assign(_FIELD_WIDTH/2 - 0.5, -_FIELD_HEIGHT/4 - 0.5);
+    //guardLocations[1][0][0].assign(2, 2);
     guardLocations[1][0][1].assign(0, 0);
     guardLocations[1][0][2].assign(2, -2);
 }
