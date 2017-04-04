@@ -520,9 +520,7 @@ void CPlayOff::dynamicPlayKhafan() {
         roleAgent[0] -> setAvoidCenterCircle(false);
         roleAgent[0] -> setAvoidPenaltyArea(true);
         roleAgent[0] -> setChip(true);
-
-        roleAgent[0] -> setKickSpeed(policy()->DynamicPlay_LowSpeedChip()); // Vartypes This
-
+        roleAgent[0] -> setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip()); // Vartypes This
         roleAgent[0] -> setTarget(wm->field->oppGoal());
         roleAgent[0] -> setDoPass(false);
         roleAgent[0] -> setIntercept(false);
