@@ -359,7 +359,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         }
         else
         {
-            preferedDefenseCounts = 2;
+            preferedDefenseCounts = 0;
         }
 
     }

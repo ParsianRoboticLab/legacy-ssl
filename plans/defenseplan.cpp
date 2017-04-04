@@ -3222,7 +3222,7 @@ void DefensePlan::inteliDecideMarkType(){
 }
 
 void DefensePlan::findPos(int _markAgentSize){
-    double xLimitForblockingPass = 0;
+    double xLimitForblockingPass = 4.5;
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
     bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)|| (knowledge->getGameState() == CKnowledge::TheirKickOff)|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     bool MantoManAllTransientFlag = policy()->Mark_ManToManAllTransiant();
@@ -3232,7 +3232,7 @@ void DefensePlan::findPos(int _markAgentSize){
     if(MantoManAllTransientFlag)
     {
         if(knowledge->transientFlag){
-            segmentpershoot = 0.3;
+            segmentpershoot = 0.1;
         }
         else
             segmentpershoot = policy()->Mark_ShootRatioBlock() / 100;
