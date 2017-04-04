@@ -772,7 +772,7 @@
                 "x": 4.071693448702101,
                 "y": -2.7138157894736841
             },
-            "chance": 1,
+            "chance": 100,
             "lastDist": 1.5,
             "planMode": "INDIRECT",
             "tags": [

@@ -29,6 +29,8 @@ CollectProfileData::CollectProfileData()
     spinOn = false;
     ChipPosCalculated = false;
     chipAgain = false;
+
+    filename = "KickProfiler.json";
 }
 
 void CollectProfileData::init(int p1 , int p2){
@@ -68,7 +70,7 @@ void CollectProfileData::init(int p1 , int p2){
 
     counter1 = -2;
     counter2 = -2;
-    speedStep = 150;
+    speedStep = 140;
 
     // low speed positioning
     lowPosX1 = -2.66;
@@ -335,7 +337,6 @@ void CollectProfileData::HighSpeed(){
 
     switch(kickStat){
     case prfl1_Iskicking:
-        knowledge->getAgent(prfl1->getAgentID())->setRoller(4);
         if(wm->ball->vel.length() < 0.1){           // ball is in downTri and its velocity is near 0 so agent1 kicks the ball
 
             if(kickerWait.elapsed() > 2000 || kickSpeed1 < waitKickSpeed){
@@ -367,7 +368,7 @@ void CollectProfileData::HighSpeed(){
 
 
     case prfl2_Iskicking:
-        knowledge->getAgent(prfl2->getAgentID())->setRoller(4);
+
 
         if(wm->ball->vel.length() < 0.1){           // ball is in upTri and its velocity is near 0 so agent2 kicks the ball
 
@@ -573,6 +574,7 @@ void CollectProfileData::start(){
 
     case InitState:
         if(activeRobots[activeRobotsCount]!=-1){
+            profiler->save(JSON , filename);
             if(activeRobots[activeRobotsCount+1]!= -1){
                 init(activeRobots[activeRobotsCount],activeRobots[activeRobotsCount+1]);
             }
@@ -602,7 +604,8 @@ void CollectProfileData::start(){
         break;
 
     case goOutState:
-        positioning(-_FIELD_WIDTH/2+0.2 , 2.0*p1/3.0+0.1 , -_FIELD_WIDTH/2+0.2 , 2.0*p2/3.0+0.1 );
+
+        positioning( -0.5 , -0.8, 0.2 , 0.2 );
         if( Circle2D(knowledge->getAgent(prfl2->getAgentID())->pos() , 0.4).contains(prfl2->getTarget()) &&
                 Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.4).contains(prfl1->getTarget()) ){
             prfState=InitState;

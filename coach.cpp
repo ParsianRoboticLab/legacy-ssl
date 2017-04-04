@@ -1448,7 +1448,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
         debug(QString("playmake : %1").arg(playmakeId),D_MHMMD);
     }
 
-    Circle2D ourDefenseArea(wm->field->ourGoal() + Vector2D(-0.2 , 0),1.6);
+    Circle2D ourDefenseArea(wm->field->ourGoal(), 1.6);
 
     if (knowledge->variables["clearing"] == "true"
     || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length() < 1)) {
@@ -1501,36 +1501,20 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
         ourPlayers = lastPlayers;
 
     } else {
+        qSort(ourPlayers.begin(), ourPlayers.end());
         if(ourPlayers.count()) {
             if (MarkNum == 2) {
-                for (int i = 0; i < ourPlayers.size(); i++) {
-                    selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(i)));
+                selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
+                ourPlayers.removeFirst();
+                if (ourPlayers.count()) {
+                    selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
+                    ourPlayers.removeFirst();
                 }
-                ourPlayers.clear();
+
+
             } else if (MarkNum == 1) {
                 selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
                 ourPlayers.removeFirst();
-//                if(ourPlayers.count() > 1) {
-//                    int x = -1000;
-//                    int bestX = -1;
-//                    for(int i = 0; i < ourPlayers.count(); i++) {
-//                        if(wm->our[ourPlayers.at(i)]->pos.x > x) {
-//                            x = wm->our[ourPlayers.at(i)]->pos.x;
-//                            bestX = ourPlayers.at(i);
-//                        }
-//                    }
-//                    for(int i =0 ; i < ourPlayers.count() ; i++) {
-//                        if(ourPlayers[i]  != bestX) {
-//                            selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(i)));
-//                        }
-//                    }
-//                    ourPlayers.clear();
-//                    ourPlayers.append(bestX);
-//                } else {
-//                    selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
-//                    ourPlayers.clear();
-
-//                }
             }
         }
     }
@@ -1682,7 +1666,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     int symmetry = 1;
     QList<NGameOff::SPlan*> validPlans;
     QList<NGameOff::SPlan*> plans = m_planLoader->getPlans(); // Get All of The Plans
-
+    QList<int> chances;
     if (plans.isEmpty()) {
         debug("There's No Plan", D_ERROR);
         return;
@@ -1744,6 +1728,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
             }
 
             validPlans.append(plan);
+            chances.append(static_cast<int>(plan->common.chance));
         }
     }
 
@@ -1754,17 +1739,31 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
         if (nearestPlan != NULL) {
             nearestPlan->execution.symmetry = symmetry;
             validPlans.append(nearestPlan);
+            chances.append(1);
             debug("[Warning] playoff -> nearset plan matched", D_ERROR, QColor(Qt::red));
         }
     }
 
     if (validPlans.isEmpty()) {
         debug ("[coach] WE DONT HAVE PLAN AT ALL", D_MAHI);
+
         return;
     }
 
     RNG randomNumberGenerator;
+    int sum = 0;
+    for(int i = 0; i < chances.size(); i++)
+        sum += chances.at(i);
     int randNo = randomNumberGenerator.uniformInt() % validPlans.size();
+    sum = 0;
+    for(int i = 0; i < chances.size(); i++)
+        if(sum <= randNo && randNo < sum + chances[i])
+        {
+            randNo = i;
+            break;
+        }
+        else
+            sum += chances[i];
     NGameOff::SPlan* thePlan = validPlans[randNo]; //chooseMostSuccecfull(validPlans); //Choose Best valid Plan
     debug (QString("Plan Number : %1").arg(randNo), D_DEBUG);
     matchPlan(thePlan, _ourplayers); //Match The Plan
