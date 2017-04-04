@@ -6,6 +6,7 @@ CDynamicAttack::CDynamicAttack() {
     for(int i = 0; i < 6; i++)
         lastGuards[i] = -1;
     positioningIntentionInterval = 500;
+    shotInPass = false;
 
     for(size_t i = 0;i  < 6;i++) {
         roleAgents[i] = new CRoleDynamic();
@@ -973,10 +974,17 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
         }
         if(tempIndex == -1)
         {
-            Vector2D target     = wm->field->oppGoalR() + Vector2D(0, 0.2);
-            Vector2D target2    = target - ballPos;
-            currentPlan.passPos = 10 * target2 + ballPos;
+            tempIndex = 0;
+            for(int i = 0; i < temp.size(); i++)
+                if(temp[i].x > temp[tempIndex].x)
+                    tempIndex = i;
         }
+//        else if(shotInPass)
+//        {
+//            shotInPass = (ballPos.dist(mahiPlayMaker->pos()) < 0.4);
+
+//        }
+        debug(QString("shot in pass : %1").arg(shotInPass), D_PARSA);
             /*currentPlan.passPos = wm->field->oppGoal();*/
        /* if(valids.at(tempIndex).dist(ballPos) < 0.2)
             roleAgentPM->setNoKick(true);*/
