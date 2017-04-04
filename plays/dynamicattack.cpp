@@ -384,13 +384,13 @@ void CDynamicAttack::playMake() {
         roleAgentPM->setNoKick(false);
         if (currentPlan.playmake.region == DynamicEnums::Goal) {
             roleAgentPM ->setTarget(wm->field->oppGoal()); // TODO : check it can change with emptySpot
-            roleAgentPM ->setKickSpeed(policy()->DynamicPlay_LowSpeedChip()); // TODO : check it can change
+            roleAgentPM ->setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip()); // TODO : check it can change
         } else if (currentPlan.playmake.region == DynamicEnums::Forward) {
             roleAgentPM->setTarget(Vector2D(1000, 0));
-            roleAgentPM->setKickSpeed(policy()->DynamicPlay_MediumSpeedChip()); // TODO : check it can change
+            roleAgentPM->setKickRealSpeed(policy()->DynamicPlay_MediumSpeedChip()); // TODO : check it can change
         } else {
             roleAgentPM->setTarget(wm->field->oppGoal());
-            roleAgentPM->setKickSpeed(policy()->DynamicPlay_LowSpeedChip());
+            roleAgentPM->setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip());
         }
         roleAgentPM->setChip(true);
         roleAgentPM->setSelectedSkill(DynamicEnums::Chip);// Skill Chip
@@ -401,8 +401,8 @@ void CDynamicAttack::playMake() {
         roleAgentPM->setChip(false);
         roleAgentPM->setNoKick(false);
         roleAgentPM->setTarget(wm->field->oppGoal());
-        roleAgentPM->setKickSpeed(1023); // TODO : 8m/s by profiller
-        roleAgentPM->setSelectedSkill(DynamicEnums::Shot);// Skill Kick
+        roleAgentPM->setKickRealSpeed(8); // TODO : 8m/s by profiller
+        roleAgentPM->setSelectedSkill(DynamicEnums::Shot); // Skill Kick
         break;
     }
 }
@@ -972,9 +972,11 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
             tempIndex = maxHorizontalDistID(valids);
         }
         if(tempIndex == -1)
-            for(int i = 0; i < temp.size(); i++)
-                if(tempIndex == -1 || temp[i].x > temp[tempIndex].x)
-                    tempIndex = i;
+        {
+            Vector2D target     = wm->field->oppGoalR() + Vector2D(0, 0.2);
+            Vector2D target2    = target - ballPos;
+            currentPlan.passPos = 10 * target2 + ballPos;
+        }
             /*currentPlan.passPos = wm->field->oppGoal();*/
        /* if(valids.at(tempIndex).dist(ballPos) < 0.2)
             roleAgentPM->setNoKick(true);*/
@@ -983,8 +985,8 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
     if(0 <= tempIndex && tempIndex < temp.size()) {
         currentPlan.passPos = _points.at(tempIndex);
     }
-    else
-        currentPlan.passPos = Vector2D(_FIELD_WIDTH / 2, mahiPlayMaker->pos().y);
+//    else
+//        currentPlan.passPos = Vector2D(_FIELD_WIDTH / 2, mahiPlayMaker->pos().y);
 }
 
 double CDynamicAttack::getDynamicValue(const Vector2D &_dynamicPos) const {
