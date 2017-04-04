@@ -59,14 +59,9 @@ public:
     inline void setRoleUpdate (bool _updated) {roleUpdate = _updated;}
     inline bool getRoleUpdate () {return roleUpdate;}
 
-    CRolePlayOff* setRealKickSpeed(double speed) {
-        kickSpeed = knowledge->getProfile(agent->id(), speed, !chip, false);
-        updated = true;
-        return this;
-    }
-
-    CRolePlayOff* setAddRealKickSpeed(double speed) {
-        kickSpeed = knowledge->getProfile(agent->id(), agent->pos().dist(target) + speed, !chip, false);
+    CRolePlayOff* setKickRealSpeed(double val) {
+        kickSpeed = knowledge -> getProfile(agent->id(), val, !chip, false);
+        debug(QString("[playoffrole] setkickrealspeed : %1 %2").arg(val).arg(kickSpeed), D_MAHI);
         updated = true;
         return this;
     }
