@@ -1634,12 +1634,10 @@ void CMarkPlan::execute()
 
     if( knowledge->getGameState() == CKnowledge::Start )
     {
-        if(1||policy()->Mark_PlayOnManToMan()){
+        if(policy()->Mark_PlayOnManToMan()){
             manToManMarkInPlayOnBlockPass(oppAgentsToMarkPos , agents.count() , policy()->Mark_PassRatioBlock() / 100);
         }
-        if(0){
-            //debug(QString("Play on Marking"), D_MAHI);
-            //debug(QString("Agents.cout%1").arg(agents.count()),D_MAHI);
+        else{
             markPoses.clear();
             markAngs.clear();
             //oppAgentsToMarkPos.clear();
@@ -1647,8 +1645,6 @@ void CMarkPlan::execute()
             //Circle2D TheirArea(wm->field->oppGoal(), _GOAL_RAD);
             OopPosDanger.clear();
             OopPosDanger = sortdangerpassplayon(oppAgentsToMarkPos);
-            // debug(QString("Oppposdamnger %1").arg(agents.count()),D_MAHI);
-            //debug(QString("Number of OopPosDanger%1 and %2").arg(oppAgentsToMarkPos.first().x).arg(oppAgentsToMarkPos.last().x),D_MAHI);
 
             for(int i=0; i<oppAgentsToMarkPos.count(); i++)
             {
@@ -1662,12 +1658,6 @@ void CMarkPlan::execute()
             Segment2D temp;
             QList<QPair<Vector2D, double>  > temp2; // Qlist of First:MarkAgents     Second:Distance
             QPair<Vector2D, double> temp3;
-
-            for(int i=0; i < oppPosDangerShoot.count(); i++)
-            {
-                //draw(QString("this is contain%1"),oppPosDangerShoot[i].first + Vector2D(0,.2),QColor(Qt::blue));
-                //draw(oppPosDangerShoot[i].first);
-            }
 
             if(agents.count() == 1)
             {
