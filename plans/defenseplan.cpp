@@ -337,15 +337,32 @@ void DefensePlan::tempFindPos(int _markAgentSize){
     /////////////////////////// Added by AHZ for Intelligent Mark //////////////
     if((playOn && !knowledge->transientFlag) || knowledge->isStop()){
         sol.clear();
+        AHZCount = 0;
     }
     if(playOff){
         tenLastOpponentDirection.append(wm->opp[knowledge->nearestOppToBall]->dir);
+        if(AHZCount > 10){
+            tenLastOpponentDirection.removeFirst();
+        }
+        AHZCount++;
     }
     if(LastTS != knowledge->transientFlag && LastTS == 0){
-        for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - 9 ; i--){
-            sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
+        if(AHZCount < 10){
+            for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - (AHZCount - 1) ; i--){
+                sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
+            }
         }
-        opponentPasserDirection = sumOfLastOpponentDirection / 10;
+        else{
+            for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - 9 ; i--){
+                sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
+            }
+        }
+        if(AHZCount < 10){
+            opponentPasserDirection = sumOfLastOpponentDirection / AHZCount;
+        }
+        else{
+            opponentPasserDirection = sumOfLastOpponentDirection / 10;
+        }
         opponentPasserPossition = wm->opp[knowledge->nearestOppToBall]->pos;
         tenLastOpponentDirection.clear();
         sumOfLastOpponentDirection = Vector2D(0,0);
@@ -1479,7 +1496,7 @@ void DefensePlan::execute()
             runGoalie();
             executeGoalie();
         }
-        if(defenseAgents.size() > 0){
+        if(defenseAgents.size() > 0 && wm->our.activeAgentsCount() < 7){
             if(playOn){
                 checkDefenseExeptions();
                 if(defExeptions.active){
@@ -1502,6 +1519,9 @@ void DefensePlan::execute()
                 tempDefPos = defPos.getDefPositions(ballPrediction(false), realDefSize, 1.5, 2.5);
                 matchingDefPos(realDefSize);
             }
+        }
+        else{
+            draw("Vision Problem", Vector2D(0,0),"red");
         }
     }
     return;

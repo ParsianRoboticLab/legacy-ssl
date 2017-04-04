@@ -109,18 +109,19 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
     //////////////////////////////fill ProfilerResult
     profiler = new CNewProfiler();
-    QVector< QVector<double> > *KickCoeff = new QVector< QVector<double> >();
-    QVector< QVector<double> > *ChipCoeff = new QVector< QVector<double> >();
+    QVector< QVector<double> > KickCoeff;
+    QList< QVector<double> > ChipCoeff;
 
     CPolynomialRegression ProRes;
-
+    CPolynomialFit Proregg;
+    QList< QPair<double, double> > dataSet;
 
     for(int i=0; i< 16; i++)
         for(int j=0; j<4; j++)
             for(int k=0; k<81; k++)
                 ProfilerResult[i][j][k] = -1000;
 
-    refRobotID = 2;
+    refRobotID = 0;
 
     // initialize robotCoeff
     for(int i=0; i< 16; i++)
@@ -139,6 +140,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
     //    ProfilerResult[robotID][0:kick , 1:chip , 2:SpinKick , 3:SpinChip][10*distance(0-80)] ---> contains needed voltage for this distance
 
+
     // kick regression
 
     for(int q=0; q<16; q++){
@@ -146,17 +148,17 @@ CKnowledge::CKnowledge(CAgent** _agents)
         values.insert(0 , 0);
         keys = profiler->robotsProfile[q].finalKickMap.keys();
         keys.insert(0 , 0);
-        KickCoeff->append(ProRes.PolynomialRegression(values , keys, 2));
+        KickCoeff.append(ProRes.PolynomialRegression(values , keys, 2));
     }
 
     for(int q=0; q<16; q++){
         if(profiler->robotsProfile[q].finalKickMap.keys().size() > 0)
-            if(KickCoeff->at(q).count()>2)
+            if(KickCoeff.at(q).count()>2)
                 for(int dis=0; dis<81; dis++){
                     tempRes = (double)
-                            KickCoeff->at(q).at(0) +
-                            KickCoeff->at(q).at(1)*((double)dis/10) +
-                            KickCoeff->at(q).at(2)*((double)dis/10)*((double)dis/10);
+                            KickCoeff.at(q).at(0) +
+                            KickCoeff.at(q).at(1)*((double)dis/10) +
+                            KickCoeff.at(q).at(2)*((double)dis/10)*((double)dis/10);
                     if(tempRes != 0 )
                         ProfilerResult[q][0][dis] = tempRes;
                     else
@@ -168,30 +170,85 @@ CKnowledge::CKnowledge(CAgent** _agents)
     keys.clear();
     values.clear();
 
+
     // chip regression
+
+    //    QPair<double,double> pair;
+    //    pair.first = 0.0;
+    //    pair.second = 0.0;
+    //    dataSet.append(pair);
+
+    //    for(int i=0; i< profiler->robotsProfile[2].finalChipMap.keys().size(); i++){
+    //        pair.first=profiler->robotsProfile[2].finalChipMap.keys().at(i);
+    //        pair.second=profiler->robotsProfile[2].finalChipMap.values().at(i);
+    //        dataSet.append(pair);
+    //    }
+    //    Proregg.fitToDataSet(dataSet);
+
+    //    for(int dis=0; dis<1023; dis+=32){
+    //        debug(QString("dist : %1 , %2").arg(dis).arg(Proregg.val(dis)) , D_FATEMEH);
+    //    }
 
     for(int q=0; q<16; q++){
         values = profiler->robotsProfile[q].finalChipMap.values();
         values.insert(0 , 0);
         keys = profiler->robotsProfile[q].finalChipMap.keys();
         keys.insert(0 , 0);
-        ChipCoeff->append(ProRes.PolynomialRegression(values , keys, 3));
+        ChipCoeff.append(ProRes.PolynomialRegression(values , keys, 3));
+
+        QString("coeff %5 : %1  , %2 , %3  %4").arg(
+                    ChipCoeff.at(q).at(0)).arg(ChipCoeff.at(q).at(1)).arg(
+                    ChipCoeff.at(q).at(2)).arg(ChipCoeff.at(q).at(3)).arg(q);
+
+        //        qDebug()<<ChipCoeff.at(q).at(0)<<ChipCoeff.at(q).at(1)<<ChipCoeff.at(q).at(2)<<ChipCoeff.at(q).at(3);
     }
 
     for(int q=0; q<16; q++){
         if(profiler->robotsProfile[q].finalChipMap.keys().size() > 0)
-            if(ChipCoeff->at(q).count()>3)
+            if(ChipCoeff.at(q).count()>3)
                 for(int dis=0; dis<81; dis++){
                     tempRes = (double)
-                            ChipCoeff->at(q).at(0) +
-                            ChipCoeff->at(q).at(1)*((double)dis/10) +
-                            ChipCoeff->at(q).at(2)*((double)dis/10)*((double)dis/10) +
-                            ChipCoeff->at(q).at(3)*((double)dis/10)*((double)dis/10)*((double)dis/10);
+                            ChipCoeff.at(q).at(0) + ChipCoeff.at(q).at(1)*((double)dis/10) +
+                            ChipCoeff.at(q).at(2)*((double)dis/10)*((double)dis/10) +
+                            ChipCoeff.at(q).at(3)*((double)dis/10)*((double)dis/10)*((double)dis/10) ;
                     if(tempRes != 0 )
                         ProfilerResult[q][1][dis] = tempRes;
                     else
                         ProfilerResult[q][1][dis] = -1000;
                 }
+    }
+
+
+    for(int q=0; q<2; q++)
+        //    int q=1;
+    {
+        debug("\n" , D_FATEMEH);
+        debug(QString("robot %1_____________________________________________").arg(q) , D_FATEMEH);
+        debug(QString("coeff : %1  , %2 , %3  %4").arg(ChipCoeff.at(q).at(0)).arg(ChipCoeff.at(q).at(1)).arg(ChipCoeff.at(q).at(2)).arg(ChipCoeff.at(q).at(3)),D_FATEMEH);
+
+        //        for(int dis=0; dis<51; dis+=10)
+        //            debug(QString("data : %1,").arg(dis) , D_FATEMEH);
+        //        debug("\n" , D_FATEMEH);
+        //        for(int dis=0; dis<81; dis+=3)
+        //            debug(QString("dataaa : %1,").arg(ProfilerResult[q][1][dis]) , D_FATEMEH);
+
+
+        for(int dis=0; dis<81; dis+=10){
+            debug(QString("reg : %1 , %2").arg(dis/10.0).arg(ProfilerResult[q][1][dis])  , D_FATEMEH);
+        }
+
+        //        debug(QString("raw data robot %1____________________________________").arg(q) , D_FATEMEH);
+
+        //        for(int i=0; i < profiler->robotsProfile[q].finalChipMap.size(); i++)
+        //            debug(QString("%1,").arg(profiler->robotsProfile[q].finalChipMap.keys().at(i)), D_FATEMEH);
+        //        debug("\n" , D_FATEMEH);
+        //        for(int i=0; i < profiler->robotsProfile[q].finalChipMap.size(); i++)
+        //            debug(QString("%1,").arg(profiler->robotsProfile[q].finalChipMap.values().at(i)) , D_FATEMEH);
+
+        //        for(int i=0; i < profiler->robotsProfile[q].finalChipMap.size(); i++)
+        //            debug(QString("%1 , %2").arg(
+        //                      profiler->robotsProfile[q].finalChipMap.keys().at(i)).arg(
+        //                      profiler->robotsProfile[q].finalChipMap.values().at(i)), D_FATEMEH);
     }
 
 
@@ -211,14 +268,16 @@ Vector2D CKnowledge::getStaticPoses(int num)
 
 }
 
-int CKnowledge::getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
+int CKnowledge::
+getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
 
     double profiledParameter=0;
     int type;
 
-//    if(wm->getIsSimulMode()){
-//        return (int)realParameter;
-//    }
+    if(wm->getIsSimulMode()){
+        return (int)realParameter;
+    }
+
 
     if(isKick && !spinOn)
     {

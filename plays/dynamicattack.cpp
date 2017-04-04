@@ -1,6 +1,7 @@
 #include "dynamicattack.h"
 
 CDynamicAttack::CDynamicAttack() {
+    isShotInPass = false;
     lastPassPosLoc = Vector2D(5000, 5000);
     guardSize = 3;
     for(int i = 0; i < 6; i++)
@@ -173,7 +174,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     // if Defense isn't clearing and
     // we have ball and
     // shot prob is more than 50%
-    else if (directShot) {
+    else if (directShot || isShotInPass) {
         currentPlan.mode = DynamicEnums::HighProb;
         currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
         for(size_t i = 0;i < agentSize;i++) {
@@ -384,13 +385,13 @@ void CDynamicAttack::playMake() {
         roleAgentPM->setNoKick(false);
         if (currentPlan.playmake.region == DynamicEnums::Goal) {
             roleAgentPM ->setTarget(wm->field->oppGoal()); // TODO : check it can change with emptySpot
-            roleAgentPM ->setKickSpeed(policy()->DynamicPlay_LowSpeedChip()); // TODO : check it can change
+            roleAgentPM ->setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip()); // TODO : check it can change
         } else if (currentPlan.playmake.region == DynamicEnums::Forward) {
             roleAgentPM->setTarget(Vector2D(1000, 0));
-            roleAgentPM->setKickSpeed(policy()->DynamicPlay_MediumSpeedChip()); // TODO : check it can change
+            roleAgentPM->setKickRealSpeed(policy()->DynamicPlay_MediumSpeedChip()); // TODO : check it can change
         } else {
             roleAgentPM->setTarget(wm->field->oppGoal());
-            roleAgentPM->setKickSpeed(policy()->DynamicPlay_LowSpeedChip());
+            roleAgentPM->setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip());
         }
         roleAgentPM->setChip(true);
         roleAgentPM->setSelectedSkill(DynamicEnums::Chip);// Skill Chip
@@ -401,8 +402,8 @@ void CDynamicAttack::playMake() {
         roleAgentPM->setChip(false);
         roleAgentPM->setNoKick(false);
         roleAgentPM->setTarget(wm->field->oppGoal());
-        roleAgentPM->setKickSpeed(1023); // TODO : 8m/s by profiller
-        roleAgentPM->setSelectedSkill(DynamicEnums::Shot);// Skill Kick
+        roleAgentPM->setKickRealSpeed(8); // TODO : 8m/s by profiller
+        roleAgentPM->setSelectedSkill(DynamicEnums::Shot); // Skill Kick
         break;
     }
 }
@@ -543,7 +544,7 @@ int CDynamicAttack::appropriateChipSpeed() {
 void CDynamicAttack::chooseBestPositons()
 {
     //it has three code of choosing best position that only one of them must be uncommented
-    int agentSize = activeAgents.size();
+    /*int agentSize = activeAgents.size();
     Vector2D ans;
     Vector2D passPos;
     bool farChoice = false;
@@ -681,7 +682,12 @@ void CDynamicAttack::chooseBestPositons()
             positioningIntention.restart();
         }
 //        debug(QString(""), D_PARSA);
-    }
+    }*/
+
+
+
+
+
 
     /*second type of choosing and very new but not good and is not tested well
      maybe it cause segment error
@@ -805,8 +811,6 @@ void CDynamicAttack::chooseBestPositons()
 
     //third type of choosing and the old one
 
-    /*draw(Segment2D(ballPos,wm->field->oppGoalL()), QColor(Qt::black));
-    draw(Segment2D(ballPos,wm->field->oppGoalR()), QColor(Qt::black));
     int tempIndex = 0;
     double tempDist, minDist;
 
@@ -834,14 +838,14 @@ void CDynamicAttack::chooseBestPositons()
                     [tempIndex]);
         }
         else if(currentPlan.mode == DynamicEnums::DefenseClear) {
-            semiDynamicPosition.append(Vector2D(0, 0));
+            semiDynamicPosition.append(Vector2D(0.5, ballPos.y));
         }
         else {
             semiDynamicPosition.append(guardLocations[currentPlan.agentSize]
                     [currentPlan.agentSize - 1]
                     [tempIndex]);
         }
-    }*/
+    }
 
 //    Vector2D poses[5], bp = ballPos;
 //    double -x = 1, -y = 0.8;
@@ -961,20 +965,29 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
                 valids.append(temp[i]);
             else
                 valids.append(ballPos);
-            /*debug(QString("nextPos : %1 %2").arg(nextPos.x).arg(nextPos.y), D_PARSA);
-            debug(QString("agent is %1").arg(matchAgent), D_PARSA);
-            debug(QString("valids %1 %2").arg(valids[i].x).arg(valids[i].y), D_PARSA);*/
+//            debug(QString("nextPos : %1 %2").arg(nextPos.x).arg(nextPos.y), D_PARSA);
+//            debug(QString("agent is %1").arg(matchAgent), D_PARSA);
+//            debug(QString("valids %1 %2").arg(valids[i].x).arg(valids[i].y), D_PARSA);
 
         }
         if(policy()->DynamicPlay_NearForward()) {
-            tempIndex = minHorizontalDistID(valids);
+            tempIndex = minHorizontalDistID(temp);
         } else {
-            tempIndex = maxHorizontalDistID(valids);
+            tempIndex = maxHorizontalDistID(temp);
         }
         if(tempIndex == -1)
-            for(int i = 0; i < temp.size(); i++)
-                if(tempIndex == -1 || temp[i].x > temp[tempIndex].x)
-                    tempIndex = i;
+        {
+            isShotInPass = true;
+        }
+        else if(isShotInPass)
+        {
+            bool same = true;
+            for(int i = 0; i < temp.size() && same; i++)
+                if(temp[i] != valids[i])
+                    same = false;
+            if(same || ballPos.dist(mahiPlayMaker->pos()) > 0.4)
+                isShotInPass = false;
+        }
             /*currentPlan.passPos = wm->field->oppGoal();*/
        /* if(valids.at(tempIndex).dist(ballPos) < 0.2)
             roleAgentPM->setNoKick(true);*/
@@ -983,8 +996,8 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
     if(0 <= tempIndex && tempIndex < temp.size()) {
         currentPlan.passPos = _points.at(tempIndex);
     }
-    else
-        currentPlan.passPos = Vector2D(_FIELD_WIDTH / 2, mahiPlayMaker->pos().y);
+//    else
+//        currentPlan.passPos = Vector2D(_FIELD_WIDTH / 2, mahiPlayMaker->pos().y);
 }
 
 double CDynamicAttack::getDynamicValue(const Vector2D &_dynamicPos) const {
@@ -1320,58 +1333,101 @@ void CDynamicAttack::assignLocations_0() {
 
 void CDynamicAttack::assignLocations_1() {
     //Opp Feild
-    guardLocations[1][0][0].assign(_FIELD_WIDTH/2 - 0.5, _FIELD_HEIGHT/4 + 0.5);
+    /*guardLocations[1][0][0].assign(_FIELD_WIDTH/2 - 0.5, _FIELD_HEIGHT/4 + 0.5);
     guardLocations[1][0][1].assign(_FIELD_WIDTH/4, 0);
-    guardLocations[1][0][2].assign(_FIELD_WIDTH/2 - 0.5, -_FIELD_HEIGHT/4 - 0.5);
+    guardLocations[1][0][2].assign(_FIELD_WIDTH/2 - 0.5, -_FIELD_HEIGHT/4 - 0.5);*/
+    guardLocations[1][0][0].assign(1, 2);
+//    guardLocations[1][0][1].assign(_FIELD_WIDTH/4, 0);
+//    guardLocations[1][0][2].assign(_FIELD_WIDTH/2 - 0.5, -_FIELD_HEIGHT/4 - 0.5);
+    //guardLocations[1][0][0].assign(2, 2);
+    guardLocations[1][0][1].assign(0, 0);
+    guardLocations[1][0][2].assign(2, -2);
 }
 
 void CDynamicAttack::assignLocations_2() {
     //Top Opp Half
-    guardLocations[2][0][0].assign(1.15, 1.15);
+    /*guardLocations[2][0][0].assign(1.15, 1.15);
     guardLocations[2][0][1].assign(2.1 , 1.65);
     guardLocations[2][0][2].assign(3.65, 2);
 
     //Bottom Opp Half
     guardLocations[2][1][0].assign(1.15, -1.15);
     guardLocations[2][1][1].assign(2.1 , -1.65);
-    guardLocations[2][1][2].assign(3.65, -2  );
+    guardLocations[2][1][2].assign(3.65, -2  );*/
+    guardLocations[2][0][0].assign(1, 1);
+    guardLocations[2][0][1].assign(2, 1.5);
+    guardLocations[2][0][2].assign(3.5, 2);
+
+    guardLocations[2][1][0].assign(0.5, -0.5);
+    guardLocations[2][1][1].assign(1, -1.75);
+    guardLocations[2][1][2].assign(2.5, -2);
 }
 
 void CDynamicAttack::assignLocations_3() {
     //Top Opp Tertium
-    guardLocations[3][0][0].assign(1   , 1.5);
+    /*guardLocations[3][0][0].assign(1   , 1.5);
     guardLocations[3][0][1].assign(2.25, 2);
     guardLocations[3][0][2].assign(3.65, 1.85);
     //Middle Opp Tertium
-    guardLocations[3][1][0].assign(0.5 , 0);
-    guardLocations[3][1][1].assign(1.75, 0);
-    guardLocations[3][1][2].assign(2.75, 0);
+    guardLocations[3][1][0].assign(2, 1.25);
+    guardLocations[3][1][1].assign(2, 0);
+    guardLocations[3][1][2].assign(2, -1.25);
     //Bottom Opp Tertium
     guardLocations[3][2][0].assign(1   , -1.5);
     guardLocations[3][2][1].assign(2.25, -2);
-    guardLocations[3][2][2].assign(3.65, -1.85);
+    guardLocations[3][2][2].assign(3.65, -1.85);*/
+
+    guardLocations[3][0][0].assign(1, 1.5);
+    guardLocations[3][0][1].assign(2, 2);
+    guardLocations[3][0][2].assign(3, 2);
+
+    guardLocations[3][1][0].assign(0.5 , 0);
+    guardLocations[3][1][1].assign(2.25, 0.5);
+    guardLocations[3][1][2].assign(2.25, -0.5);
+
+    guardLocations[3][2][0].assign(2   , -1.5);
+    guardLocations[3][2][1].assign(2.5, -2);
+    guardLocations[3][2][2].assign(4, -2.5);
 }
 
 void CDynamicAttack::assignLocations_4() {
     // Top Opp 1/4
-    guardLocations[4][0][0].assign(1.35, 2.05);
-    guardLocations[4][0][1].assign(2.5 , 2.25);
-    guardLocations[4][0][2].assign(3.85, 2.00);
+//    guardLocations[4][0][0].assign(1.35, 2.05);
+//    guardLocations[4][0][1].assign(2.5 , 2.25);
+//    guardLocations[4][0][2].assign(3.85, 2.00);
+//    // Mid-Top Opp 1/4
+
+//    guardLocations[4][1][0].assign(0.65, 0.9);
+//    guardLocations[4][1][1].assign(2.03, 0.95);
+//    guardLocations[4][1][2].assign(3.05, 0.9);
+//    // Mid-Bottom Opp 1/4
+
+//    guardLocations[4][2][0].assign(0.65, -0.9);
+//    guardLocations[4][2][1].assign(2.03, -0.95);
+//    guardLocations[4][2][2].assign(3.05, -0.9);
+
+//    // Bottom Opp 1/4
+//    guardLocations[4][3][0].assign(1.35, -2.05);
+//    guardLocations[4][3][1].assign(2.5 , -2.25);
+//    guardLocations[4][3][2].assign(3.85, -2.00);
+    guardLocations[4][0][0].assign(3.25, 0.5);
+    guardLocations[4][0][1].assign(3.25 , 0);
+    guardLocations[4][0][2].assign(3.25, -0.5);
     // Mid-Top Opp 1/4
 
-    guardLocations[4][1][0].assign(0.65, 0.9);
-    guardLocations[4][1][1].assign(2.03, 0.95);
-    guardLocations[4][1][2].assign(3.05, 0.9);
+    guardLocations[4][1][0].assign(2.75, 1.25);
+    guardLocations[4][1][1].assign(2.75, 0);
+    guardLocations[4][1][2].assign(2.75, -1.25);
     // Mid-Bottom Opp 1/4
 
-    guardLocations[4][2][0].assign(0.65, -0.9);
-    guardLocations[4][2][1].assign(2.03, -0.95);
-    guardLocations[4][2][2].assign(3.05, -0.9);
+    guardLocations[4][2][0].assign(1.5, 1.75);
+    guardLocations[4][2][1].assign(1.5, 0);
+    guardLocations[4][2][2].assign(1.5, -1.75);
 
     // Bottom Opp 1/4
-    guardLocations[4][3][0].assign(1.35, -2.05);
-    guardLocations[4][3][1].assign(2.5 , -2.25);
-    guardLocations[4][3][2].assign(3.85, -2.00);
+    guardLocations[4][3][0].assign(0, 1);
+    guardLocations[4][3][1].assign(0 , 0);
+    guardLocations[4][3][2].assign(0, -1);
 }
 
 void CDynamicAttack::assignLocations_5() {
