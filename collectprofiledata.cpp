@@ -26,6 +26,7 @@ CollectProfileData::CollectProfileData()
     MaxSpeed = 1023;
 
     isChip = false;
+    spinOn = false;
     ChipPosCalculated = false;
     chipAgain = false;
 }
@@ -41,7 +42,7 @@ void CollectProfileData::init(int p1 , int p2){
     prfl1->setIsActive(true);
     prfl1->setChip(isChip);
     prfl1->setSlow(true);
-    prfl1->setSpin(spinOn);
+    prfl1->setSpin(0);
 
     prfl2->setAgent(knowledge->getAgent(p2));
     prfl2->setAgentID(p2);
@@ -51,7 +52,7 @@ void CollectProfileData::init(int p1 , int p2){
     prfl2->setIsActive(true);
     prfl2->setChip(isChip);
     prfl2->setSlow(true);
-    prfl1->setSpin(spinOn);
+    prfl1->setSpin(0);
 
     kickerPos = knowledge->getAgent(prfl1->getAgentID())->pos();
 
@@ -601,7 +602,7 @@ void CollectProfileData::start(){
         break;
 
     case goOutState:
-        positioning(-0.6 , -0.7 , -0.6 , 0.4 );
+        positioning(-_FIELD_WIDTH/2+0.2 , 2.0*p1/3.0+0.1 , -_FIELD_WIDTH/2+0.2 , 2.0*p2/3.0+0.1 );
         if( Circle2D(knowledge->getAgent(prfl2->getAgentID())->pos() , 0.4).contains(prfl2->getTarget()) &&
                 Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.4).contains(prfl1->getTarget()) ){
             prfState=InitState;
