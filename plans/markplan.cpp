@@ -1634,7 +1634,7 @@ void CMarkPlan::execute()
 
     if( knowledge->getGameState() == CKnowledge::Start )
     {
-        if(1||policy()->Mark_PlayOnManToMan()){
+        if(policy()->Mark_PlayOnManToMan()){
             manToManMarkInPlayOnBlockPass(oppAgentsToMarkPos , agents.count() , policy()->Mark_PassRatioBlock() / 100);
         }
         if(0){

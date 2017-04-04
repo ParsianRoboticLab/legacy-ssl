@@ -54,6 +54,12 @@ public:
 
 
 public:
+    CRolePlayOff* setKickRealSpeed(double val) {
+        kickSpeed = knowledge -> getProfile(agent->id(), val, !chip, false);
+        debug(QString("setkickrealspeed : %1 %2").arg(val).arg(kickSpeed), D_MAHI);
+        updated = true;
+        return this;
+    }
     void setUpdated(bool _updated);
     bool getUpdated();
     inline void setRoleUpdate (bool _updated) {roleUpdate = _updated;}
