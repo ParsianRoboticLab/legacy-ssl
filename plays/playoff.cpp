@@ -520,7 +520,9 @@ void CPlayOff::dynamicPlayKhafan() {
         roleAgent[0] -> setAvoidCenterCircle(false);
         roleAgent[0] -> setAvoidPenaltyArea(true);
         roleAgent[0] -> setChip(true);
+
         roleAgent[0] -> setKickSpeed(policy()->DynamicPlay_LowSpeedChip()); // Vartypes This
+
         roleAgent[0] -> setTarget(wm->field->oppGoal());
         roleAgent[0] -> setDoPass(false);
         roleAgent[0] -> setIntercept(false);
@@ -558,6 +560,17 @@ void CPlayOff::dynamicPlayKhafan() {
         roleAgent[1] -> setTargetDir(wm->field->oppGoal());
         roleAgent[1] -> setSelectedSkill(roleSkill::Kick);
         shot = false;
+
+        roleAgent[0] -> setAvoidPenaltyArea(true);
+        roleAgent[0] -> setAvoidBall(true);
+        roleAgent[0] -> setTimeBased(false);
+        roleAgent[0] -> setTarget(Vector2D(0,-2));
+        roleAgent[0] -> setTargetDir(wm->field->oppGoal() - roleAgent[0]->getAgent()->pos());
+        roleAgent[0] -> setEventDist(0.3);
+        roleAgent[0] -> setSlow(false);
+        roleAgent[0] -> setSelectedSkill(roleSkill::GotopointAvoid);
+
+
     }
 
 }

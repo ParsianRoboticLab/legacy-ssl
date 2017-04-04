@@ -1,11 +1,13 @@
 #include "dynamicattack.h"
 
 CDynamicAttack::CDynamicAttack() {
+    //isShotInPass = false;
     lastPassPosLoc = Vector2D(5000, 5000);
     guardSize = 3;
     for(int i = 0; i < 6; i++)
         lastGuards[i] = -1;
     positioningIntentionInterval = 500;
+    shotInPass = false;
 
     for(size_t i = 0;i  < 6;i++) {
         roleAgents[i] = new CRoleDynamic();
@@ -213,7 +215,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     // it's needed to be fast
     else if(fast) {
         currentPlan.mode = DynamicEnums::Fast;
-        currentPlan.playmake.init(DynamicEnums::Pass, DynamicEnums::Near);
+        currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Near;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
@@ -383,14 +385,14 @@ void CDynamicAttack::playMake() {
     case DynamicEnums::Chip:
         roleAgentPM->setNoKick(false);
         if (currentPlan.playmake.region == DynamicEnums::Goal) {
-            roleAgentPM ->setTarget(wm->field->oppGoal()); // TODO : check it can change with emptySpot
-            roleAgentPM ->setKickSpeed(policy()->DynamicPlay_LowSpeedChip()); // TODO : check it can change
+            roleAgentPM ->setTarget(wm->field->oppGoal());
+            roleAgentPM ->setKickRealSpeed(policy()->DynamicPlay_MediumSpeedChip());
         } else if (currentPlan.playmake.region == DynamicEnums::Forward) {
             roleAgentPM->setTarget(Vector2D(1000, 0));
-            roleAgentPM->setKickSpeed(policy()->DynamicPlay_MediumSpeedChip()); // TODO : check it can change
+            roleAgentPM->setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip());
         } else {
             roleAgentPM->setTarget(wm->field->oppGoal());
-            roleAgentPM->setKickSpeed(policy()->DynamicPlay_LowSpeedChip());
+            roleAgentPM->setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip());
         }
         roleAgentPM->setChip(true);
         roleAgentPM->setSelectedSkill(DynamicEnums::Chip);// Skill Chip
@@ -401,8 +403,8 @@ void CDynamicAttack::playMake() {
         roleAgentPM->setChip(false);
         roleAgentPM->setNoKick(false);
         roleAgentPM->setTarget(wm->field->oppGoal());
-        roleAgentPM->setKickSpeed(1023); // TODO : 8m/s by profiller
-        roleAgentPM->setSelectedSkill(DynamicEnums::Shot);// Skill Kick
+        roleAgentPM->setKickRealSpeed(8); // TODO : 8m/s by profiller
+        roleAgentPM->setSelectedSkill(DynamicEnums::Shot); // Skill Kick
         break;
     }
 }
@@ -1129,7 +1131,7 @@ int CDynamicAttack::minHorizontalDistID(const QList<Vector2D> &_points) {
     for(size_t i = 0; i < _points.size();i++) {
         tempDist = fabs(ballPos.y - _points.at(i).y);
         if (lastPassPos == i) {
-            tempDist -= 1;
+            tempDist -= 2;
         }
         if(tempDist < minDist && fabs(ballPos.y - _points.at(i).y) > 0.2) {
             minDist = tempDist;
@@ -1147,7 +1149,7 @@ int CDynamicAttack::maxHorizontalDistID(const QList<Vector2D> &_points) {
     for(size_t i = 0;i < _points.size();i++) {
         tempDist = fabs(ballPos.y - _points.at(i).y);
         if (lastPassPos == i) {
-            tempDist += 1;
+            tempDist += 2;
         }
         if(tempDist > maxDist && fabs(ballPos.y - _points.at(i).y) > 0.2) {
             maxDist = tempDist;

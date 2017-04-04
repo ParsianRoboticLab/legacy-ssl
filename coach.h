@@ -97,7 +97,13 @@ private:
     void savePostAssignment();
     void loadPostAssignment();
     void checkRoleAssignments();
-
+    ///////manage over number of agents
+    ///
+    ///
+    QList <int> robotsIdHist;
+    bool first;
+    QList <int> missMatchIds;
+     ///////////////////////////////////////
     int lastSelected;
     int cyclesWaitAfterballMoved;
     QList <CAgent*> lastDefenseAgents;

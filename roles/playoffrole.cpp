@@ -67,8 +67,10 @@ void CRolePlayOff::update() {
 //            tempK = knowledge->getProfile(agent->id(), static_cast<double>(kickSpeed)/100.0, !chip, false);
 //        }
         debug(QString("[playoffRole] profiler kickSpeed : %1").arg(tempK), D_MAHI);
+
         //debug(QString("[playoffRole] profile kickSpeed : %1 %2").arg(agent->id()).arg(knowledge->getProfile(agent->id(), static_cast<double>(kickSpeed)/130.0, !chip, false)), D_MAHI);
         kickSkill->setKickSpeed(kickSpeed);
+
         kickSkill->setChip(chip);
         kickSkill->setAgent(agent);
         kickSkill->setDontKick(!doPass);
