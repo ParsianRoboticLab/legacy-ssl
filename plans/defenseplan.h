@@ -143,6 +143,7 @@ protected:
     Vector2D opponentPasserPossition;
     Vector2D sumOfLastOpponentDirection;
     Vector2D sumOfLastOpponentPosition;
+    int AHZCount;
     ///////////////////////////////////////////////////
     void executeGoalie();
     Vector2D blockTheBall();
