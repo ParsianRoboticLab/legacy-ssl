@@ -45,7 +45,7 @@ private:
 
 public:
     CRoleDynamic* setKickRealSpeed(double val) {
-        kickSpeed = knowledge -> getProfile(agent->id(), val, chip, false);
+        kickSpeed = knowledge -> getProfile(agent->id(), val, !chip, false);
         debug(QString("setkickrealspeed : %1 %2").arg(val).arg(kickSpeed), D_MAHI);
         updated = true;
         return this;
@@ -53,7 +53,7 @@ public:
 
 
     CRoleDynamic* setAddKickRealSpeed(double val) {
-        kickSpeed = knowledge -> getProfile(agent->id(), agent->pos().dist(target) + val, chip, false);
+        kickSpeed = knowledge -> getProfile(agent->id(), agent->pos().dist(target) + val, !chip, false);
         updated = true;
         return this;
     }

@@ -544,7 +544,7 @@ int CDynamicAttack::appropriateChipSpeed() {
 void CDynamicAttack::chooseBestPositons()
 {
     //it has three code of choosing best position that only one of them must be uncommented
-    int agentSize = activeAgents.size();
+    /*int agentSize = activeAgents.size();
     Vector2D ans;
     Vector2D passPos;
     bool farChoice = false;
@@ -682,7 +682,12 @@ void CDynamicAttack::chooseBestPositons()
             positioningIntention.restart();
         }
 //        debug(QString(""), D_PARSA);
-    }
+    }*/
+
+
+
+
+
 
     /*second type of choosing and very new but not good and is not tested well
      maybe it cause segment error
@@ -806,8 +811,6 @@ void CDynamicAttack::chooseBestPositons()
 
     //third type of choosing and the old one
 
-    /*draw(Segment2D(ballPos,wm->field->oppGoalL()), QColor(Qt::black));
-    draw(Segment2D(ballPos,wm->field->oppGoalR()), QColor(Qt::black));
     int tempIndex = 0;
     double tempDist, minDist;
 
@@ -835,14 +838,14 @@ void CDynamicAttack::chooseBestPositons()
                     [tempIndex]);
         }
         else if(currentPlan.mode == DynamicEnums::DefenseClear) {
-            semiDynamicPosition.append(Vector2D(0, 0));
+            semiDynamicPosition.append(Vector2D(0.5, ballPos.y));
         }
         else {
             semiDynamicPosition.append(guardLocations[currentPlan.agentSize]
                     [currentPlan.agentSize - 1]
                     [tempIndex]);
         }
-    }*/
+    }
 
 //    Vector2D poses[5], bp = ballPos;
 //    double -x = 1, -y = 0.8;
@@ -951,7 +954,7 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
             tempIndex = maxHorizontalDistID(temp);
         }
     } else {
-        QList <Vector2D> valids;
+        /*QList <Vector2D> valids;
         for(int i = 0; i < temp.size(); i++)
         {
             int matchAgent    = mahiPoisitionAgents.at(i)->id();
@@ -962,15 +965,15 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
                 valids.append(temp[i]);
             else
                 valids.append(ballPos);
-            /*debug(QString("nextPos : %1 %2").arg(nextPos.x).arg(nextPos.y), D_PARSA);
-            debug(QString("agent is %1").arg(matchAgent), D_PARSA);
-            debug(QString("valids %1 %2").arg(valids[i].x).arg(valids[i].y), D_PARSA);*/
+//            debug(QString("nextPos : %1 %2").arg(nextPos.x).arg(nextPos.y), D_PARSA);
+//            debug(QString("agent is %1").arg(matchAgent), D_PARSA);
+//            debug(QString("valids %1 %2").arg(valids[i].x).arg(valids[i].y), D_PARSA);
 
-        }
+        }*/
         if(policy()->DynamicPlay_NearForward()) {
-            tempIndex = minHorizontalDistID(valids);
+            tempIndex = minHorizontalDistID(temp);
         } else {
-            tempIndex = maxHorizontalDistID(valids);
+            tempIndex = maxHorizontalDistID(temp);
         }
         if(tempIndex == -1)
         {
@@ -1335,7 +1338,10 @@ void CDynamicAttack::assignLocations_1() {
     guardLocations[1][0][2].assign(_FIELD_WIDTH/2 - 0.5, -_FIELD_HEIGHT/4 - 0.5);*/
     guardLocations[1][0][0].assign(1, 2);
     guardLocations[1][0][1].assign(_FIELD_WIDTH/4, 0);
-    guardLocations[1][0][2].assign(_FIELD_WIDTH/2 - 0.5, -_FIELD_HEIGHT/4 - 0.5);
+    guardLocations[1][0][2].assign(_FIELD_WIDTH/2 - 0.5, -_FIELD_HEIGHT/4 - 0.5);*/
+    guardLocations[1][0][0].assign(2, 2);
+    guardLocations[1][0][1].assign(0, 0);
+    guardLocations[1][0][2].assign(2, -2);
 }
 
 void CDynamicAttack::assignLocations_2() {
@@ -1363,9 +1369,9 @@ void CDynamicAttack::assignLocations_3() {
     guardLocations[3][0][1].assign(2.25, 2);
     guardLocations[3][0][2].assign(3.65, 1.85);
     //Middle Opp Tertium
-    guardLocations[3][1][0].assign(0.5 , 0);
-    guardLocations[3][1][1].assign(1.75, 0);
-    guardLocations[3][1][2].assign(2.75, 0);
+    guardLocations[3][1][0].assign(2, 1.25);
+    guardLocations[3][1][1].assign(2, 0);
+    guardLocations[3][1][2].assign(2, -1.25);
     //Bottom Opp Tertium
     guardLocations[3][2][0].assign(1   , -1.5);
     guardLocations[3][2][1].assign(2.25, -2);
@@ -1386,24 +1392,42 @@ void CDynamicAttack::assignLocations_3() {
 
 void CDynamicAttack::assignLocations_4() {
     // Top Opp 1/4
-    guardLocations[4][0][0].assign(1.35, 2.05);
-    guardLocations[4][0][1].assign(2.5 , 2.25);
-    guardLocations[4][0][2].assign(3.85, 2.00);
+//    guardLocations[4][0][0].assign(1.35, 2.05);
+//    guardLocations[4][0][1].assign(2.5 , 2.25);
+//    guardLocations[4][0][2].assign(3.85, 2.00);
+//    // Mid-Top Opp 1/4
+
+//    guardLocations[4][1][0].assign(0.65, 0.9);
+//    guardLocations[4][1][1].assign(2.03, 0.95);
+//    guardLocations[4][1][2].assign(3.05, 0.9);
+//    // Mid-Bottom Opp 1/4
+
+//    guardLocations[4][2][0].assign(0.65, -0.9);
+//    guardLocations[4][2][1].assign(2.03, -0.95);
+//    guardLocations[4][2][2].assign(3.05, -0.9);
+
+//    // Bottom Opp 1/4
+//    guardLocations[4][3][0].assign(1.35, -2.05);
+//    guardLocations[4][3][1].assign(2.5 , -2.25);
+//    guardLocations[4][3][2].assign(3.85, -2.00);
+    guardLocations[4][0][0].assign(3.25, 0.5);
+    guardLocations[4][0][1].assign(3.25 , 0);
+    guardLocations[4][0][2].assign(3.25, -0.5);
     // Mid-Top Opp 1/4
 
-    guardLocations[4][1][0].assign(0.65, 0.9);
-    guardLocations[4][1][1].assign(2.03, 0.95);
-    guardLocations[4][1][2].assign(3.05, 0.9);
+    guardLocations[4][1][0].assign(2.75, 1.25);
+    guardLocations[4][1][1].assign(2.75, 0);
+    guardLocations[4][1][2].assign(2.75, -1.25);
     // Mid-Bottom Opp 1/4
 
-    guardLocations[4][2][0].assign(0.65, -0.9);
-    guardLocations[4][2][1].assign(2.03, -0.95);
-    guardLocations[4][2][2].assign(3.05, -0.9);
+    guardLocations[4][2][0].assign(1.5, 1.75);
+    guardLocations[4][2][1].assign(1.5, 0);
+    guardLocations[4][2][2].assign(1.5, -1.75);
 
     // Bottom Opp 1/4
-    guardLocations[4][3][0].assign(1.35, -2.05);
-    guardLocations[4][3][1].assign(2.5 , -2.25);
-    guardLocations[4][3][2].assign(3.85, -2.00);
+    guardLocations[4][3][0].assign(0, 1);
+    guardLocations[4][3][1].assign(0 , 0);
+    guardLocations[4][3][2].assign(0, -1);
 }
 
 void CDynamicAttack::assignLocations_5() {

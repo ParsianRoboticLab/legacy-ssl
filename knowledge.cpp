@@ -211,7 +211,8 @@ Vector2D CKnowledge::getStaticPoses(int num)
 
 }
 
-int CKnowledge::getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
+int CKnowledge::
+getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
 
     double profiledParameter=0;
     int type;
