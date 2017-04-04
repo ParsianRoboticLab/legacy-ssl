@@ -67,6 +67,7 @@ private:
     int guardSize;
     QTime positioningIntention;
     double positioningIntentionInterval;
+    bool isShotInPass;
 
     void playMake();
     void choosePlayMaker();

@@ -1,6 +1,7 @@
 #include "dynamicattack.h"
 
 CDynamicAttack::CDynamicAttack() {
+    isShotInPass = false;
     lastPassPosLoc = Vector2D(5000, 5000);
     guardSize = 3;
     for(int i = 0; i < 6; i++)
@@ -173,7 +174,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     // if Defense isn't clearing and
     // we have ball and
     // shot prob is more than 50%
-    else if (directShot) {
+    else if (directShot || isShotInPass) {
         currentPlan.mode = DynamicEnums::HighProb;
         currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
         for(size_t i = 0;i < agentSize;i++) {
@@ -973,9 +974,16 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
         }
         if(tempIndex == -1)
         {
-            Vector2D target     = wm->field->oppGoalR() + Vector2D(0, 0.2);
-            Vector2D target2    = target - ballPos;
-            currentPlan.passPos = 10 * target2 + ballPos;
+            isShotInPass = true;
+        }
+        else if(isShotInPass)
+        {
+            bool same = true;
+            for(int i = 0; i < temp.size() && same; i++)
+                if(temp[i] != valids[i])
+                    same = false;
+            if(same || ballPos.dist(mahiPlayMaker->pos()) > 0.4)
+                isShotInPass = false;
         }
             /*currentPlan.passPos = wm->field->oppGoal();*/
        /* if(valids.at(tempIndex).dist(ballPos) < 0.2)
@@ -1322,26 +1330,36 @@ void CDynamicAttack::assignLocations_0() {
 
 void CDynamicAttack::assignLocations_1() {
     //Opp Feild
-    guardLocations[1][0][0].assign(_FIELD_WIDTH/2 - 0.5, _FIELD_HEIGHT/4 + 0.5);
+    /*guardLocations[1][0][0].assign(_FIELD_WIDTH/2 - 0.5, _FIELD_HEIGHT/4 + 0.5);
+    guardLocations[1][0][1].assign(_FIELD_WIDTH/4, 0);
+    guardLocations[1][0][2].assign(_FIELD_WIDTH/2 - 0.5, -_FIELD_HEIGHT/4 - 0.5);*/
+    guardLocations[1][0][0].assign(1, 2);
     guardLocations[1][0][1].assign(_FIELD_WIDTH/4, 0);
     guardLocations[1][0][2].assign(_FIELD_WIDTH/2 - 0.5, -_FIELD_HEIGHT/4 - 0.5);
 }
 
 void CDynamicAttack::assignLocations_2() {
     //Top Opp Half
-    guardLocations[2][0][0].assign(1.15, 1.15);
+    /*guardLocations[2][0][0].assign(1.15, 1.15);
     guardLocations[2][0][1].assign(2.1 , 1.65);
     guardLocations[2][0][2].assign(3.65, 2);
 
     //Bottom Opp Half
     guardLocations[2][1][0].assign(1.15, -1.15);
     guardLocations[2][1][1].assign(2.1 , -1.65);
-    guardLocations[2][1][2].assign(3.65, -2  );
+    guardLocations[2][1][2].assign(3.65, -2  );*/
+    guardLocations[2][0][0].assign(1, 1);
+    guardLocations[2][0][1].assign(2, 1.5);
+    guardLocations[2][0][2].assign(3.5, 2);
+
+    guardLocations[2][1][0].assign(0.5, -0.5);
+    guardLocations[2][1][1].assign(1, -1.75);
+    guardLocations[2][1][2].assign(2.5, -2);
 }
 
 void CDynamicAttack::assignLocations_3() {
     //Top Opp Tertium
-    guardLocations[3][0][0].assign(1   , 1.5);
+    /*guardLocations[3][0][0].assign(1   , 1.5);
     guardLocations[3][0][1].assign(2.25, 2);
     guardLocations[3][0][2].assign(3.65, 1.85);
     //Middle Opp Tertium
@@ -1351,7 +1369,19 @@ void CDynamicAttack::assignLocations_3() {
     //Bottom Opp Tertium
     guardLocations[3][2][0].assign(1   , -1.5);
     guardLocations[3][2][1].assign(2.25, -2);
-    guardLocations[3][2][2].assign(3.65, -1.85);
+    guardLocations[3][2][2].assign(3.65, -1.85);*/
+
+    guardLocations[3][0][0].assign(1, 1.5);
+    guardLocations[3][0][1].assign(2, 2);
+    guardLocations[3][0][2].assign(3, 2);
+
+    guardLocations[3][1][0].assign(0.5 , 0);
+    guardLocations[3][1][1].assign(2.25, 0.5);
+    guardLocations[3][1][2].assign(2.25, -0.5);
+
+    guardLocations[3][2][0].assign(2   , -1.5);
+    guardLocations[3][2][1].assign(2.5, -2);
+    guardLocations[3][2][2].assign(4, -2.5);
 }
 
 void CDynamicAttack::assignLocations_4() {
