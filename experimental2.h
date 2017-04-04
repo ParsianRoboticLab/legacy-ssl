@@ -11,7 +11,7 @@ void CMainApplication::Experimental2()
     int id=6;
 
     if(flag){
-        for(id=0; id < 9; id++){
+        for(id=0; id < 3; id++){
         debug(QString("%1________________chip_______________").arg(id) , D_FATEMEH);
 
         for(int i=-5; i<45; i+=1){
@@ -27,18 +27,18 @@ void CMainApplication::Experimental2()
                       knowledge->profiler->robotsProfile[id].finalChipMap.values().at(i)) , D_FATEMEH);
 
 
-//        debug(QString("%1________________kick_______________").arg(id) , D_FATEMEH);
-//        for(int i=-5; i<90; i+=10){
-//            debug(QString("kick: %1 , real : %2").arg(knowledge->getProfile(id , (double)i/10 , true , false)).arg((double)i/10) ,
-//                  D_FATEMEH);
-//        }
+        debug(QString("%1________________kick_______________").arg(id) , D_FATEMEH);
+        for(int i=-5; i<90; i+=5){
+            debug(QString("kick: %1 , real : %2").arg(knowledge->getProfile(id , (double)i/10 , true , false)).arg((double)i/10) ,
+                  D_FATEMEH);
+        }
 
-//        debug(QString("\nregression %1: ").arg(id) , D_FATEMEH);
+        debug(QString("\nregression %1: ").arg(id) , D_FATEMEH);
 
-//        for(int i=0; i < knowledge->profiler->robotsProfile[id].finalKickMap.size(); i++)
-//            debug(QString("key : %1 , value : %2").arg(
-//                      knowledge->profiler->robotsProfile[id].finalKickMap.keys().at(i)).arg(
-//                      knowledge->profiler->robotsProfile[id].finalKickMap.values().at(i)) , D_FATEMEH);
+        for(int i=0; i < knowledge->profiler->robotsProfile[id].finalKickMap.size(); i++)
+            debug(QString("key : %1 , value : %2").arg(
+                      knowledge->profiler->robotsProfile[id].finalKickMap.keys().at(i)).arg(
+                      knowledge->profiler->robotsProfile[id].finalKickMap.values().at(i)) , D_FATEMEH);
 
 
         }

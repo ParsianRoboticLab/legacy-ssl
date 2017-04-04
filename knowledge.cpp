@@ -130,9 +130,26 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
     // now fill proper data for RobotsCoeff : e.g. RobotsCoeff[3][0] = 1.32537;
 
+    RobotsCoeff[0][1] = 0.22;
+    RobotsCoeff[1][1] = 0.36;
+    RobotsCoeff[2][1] = 0.4;
+    RobotsCoeff[3][1] = 0.07;
+    RobotsCoeff[4][1] = 0.22;
+    RobotsCoeff[5][1] = -0.03;
+    RobotsCoeff[6][1] = 0.55;
+    RobotsCoeff[7][1] = 0.06;
+
+    RobotsCoeff[0][0] = 710;
+    RobotsCoeff[1][0] = 750;
+    RobotsCoeff[2][0] = 940;
+    RobotsCoeff[3][0] = 990;
+    RobotsCoeff[4][0] = 780;
+    RobotsCoeff[5][0] = 780;
+    RobotsCoeff[6][0] = 780;
+    RobotsCoeff[7][0] = 800;
 
 
-    profiler->load(JSON  , "chip.json");
+    profiler->load(JSON);
 
     QList<double> values;
     QList<int> keys;
@@ -278,7 +295,6 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
         return (int)realParameter;
     }
 
-
     if(isKick && !spinOn)
     {
         type =0;
@@ -300,40 +316,60 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
     if(agentId > 15)  // dummy user
         return 0;
 
-    if(realParameter*10 > 80)   // out of index, return max speed
-        return 1023;
 
-    profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
-
-    if(profiledParameter != -1000)
+    if(type==1)    //chip
     {
+        realParameter+=RobotsCoeff[agentId][1];
 
-        if(profiledParameter > 1023)
-            return 1023;
-        else if(profiledParameter > 0)
-            return (int)profiledParameter;
-        else
-            return 1;
+        profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
+
+        if(profiledParameter != -1000)
+        {
+
+            if(profiledParameter > 1023)
+                return 1023;
+            else if(profiledParameter > 0)
+                return (int)profiledParameter;
+            else
+                return 1;
+        }
+        else // no data is saved for this robot
+        {
+            if(ProfilerResult[refRobotID][type][(int)round(realParameter*10)] != -1000){    // get data from reference robot
+                profiledParameter= RobotsCoeff[agentId][type] * knowledge->getProfile(refRobotID , realParameter , isKick , spinOn);
+            }
+            else{   // Linear
+                profiledParameter= realParameter*128;
+                if(type == 1)
+                    profiledParameter*=2;
+            }
+
+            if(profiledParameter > 1023)
+                return 1023;
+            else if(profiledParameter > 0)
+                return (int)profiledParameter;
+            else{
+                return 1;
+            }
+
+        }
     }
-    else // no data is saved for this robot
+    else if(type==0)    //kick
     {
-        if(ProfilerResult[refRobotID][type][(int)round(realParameter*10)] != -1000){    // get data from reference robot
-            profiledParameter= RobotsCoeff[agentId][type] * knowledge->getProfile(refRobotID , realParameter , isKick , spinOn);
-        }
-        else{   // Linear
-            profiledParameter= realParameter*128;
-            if(type == 1)
-                profiledParameter*=2;
-        }
+        if(realParameter >= 8.0)
+            return RobotsCoeff[agentId][0];
+
+        profiledParameter= realParameter*128;
 
         if(profiledParameter > 1023)
             return 1023;
+        else if(profiledParameter > RobotsCoeff[agentId][0])
+            return RobotsCoeff[agentId][0];
         else if(profiledParameter > 0)
             return (int)profiledParameter;
         else{
-            return 1;
+            return 12;
         }
-
     }
 
 }
