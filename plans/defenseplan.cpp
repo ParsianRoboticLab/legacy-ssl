@@ -1496,7 +1496,9 @@ void DefensePlan::execute()
             runGoalie();
             executeGoalie();
         }
-        if(defenseAgents.size() > 0 && wm->our.activeAgentsCount() < 7){
+        if(defenseAgents.size() > 0 )
+            if(wm->our.activeAgentsCount() < 7){
+                debug(QString("Active agents are %1").arg(wm->our.activeAgentsCount()),D_HAMED);
             if(playOn){
                 checkDefenseExeptions();
                 if(defExeptions.active){
