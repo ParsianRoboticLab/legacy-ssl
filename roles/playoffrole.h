@@ -58,6 +58,19 @@ public:
     bool getUpdated();
     inline void setRoleUpdate (bool _updated) {roleUpdate = _updated;}
     inline bool getRoleUpdate () {return roleUpdate;}
+
+    CRolePlayOff* setRealKickSpeed(double speed) {
+        kickSpeed = knowledge->getProfile(agent->id(), speed, !chip, false);
+        updated = true;
+        return this;
+    }
+
+    CRolePlayOff* setAddRealKickSpeed(double speed) {
+        kickSpeed = knowledge->getProfile(agent->id(), agent->pos().dist(target) + speed, !chip, false);
+        updated = true;
+        return this;
+    }
+
 protected:
 };
 
