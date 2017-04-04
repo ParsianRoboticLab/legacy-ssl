@@ -24,6 +24,7 @@ CCoach::CCoach(CAgent**_agents)
     lastBallPos = Vector2D(0,0);
     passPos = Vector2D(0,0);
     passPlayMake = false;
+    first = true;
 
     ///////////////////////////////////
     goalieTimer.start();
@@ -263,6 +264,51 @@ void CCoach::doIntention(){
 
 void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
 
+    if(first)
+    {
+        if(wm->our.activeAgentsCount())
+        {
+            robotsIdHist.clear();
+            for(int i = 0 ; i < wm->our.activeAgentsCount() ; i++)
+            {
+                robotsIdHist.append(wm->our.active(i)->id);
+            }
+            first = false;
+        }
+    }
+
+    if(knowledge->isStop() || knowledge->getGameState() == CKnowledge::Halt)
+    {
+        if(wm->our.activeAgentsCount())
+        {
+            robotsIdHist.clear();
+            for(int i = 0 ; i < wm->our.activeAgentsCount() ; i++)
+            {
+                robotsIdHist.append(wm->our.active(i)->id);
+            }
+        }
+
+    }
+
+
+    if(wm->our.activeAgentsCount() > 6)
+    {
+        missMatchIds.clear();
+        for(int i = 0 ; i < wm->our.activeAgentsCount() ; i++)
+        {
+            for(int k = 0 ; k < robotsIdHist.count() ; k++)
+            {
+                if(robotsIdHist.at(k) == wm->our.active(i)->id)
+                {
+                    break;
+                }
+                if(k == robotsIdHist.count() - 1)
+                {
+                    missMatchIds.append(wm->our.active(i)->id);
+                }
+            }
+        }
+    }
 
     if (policy()->Formation_GoalieFromGUI()) {
         preferedGoalieAgent = policy()->Formation_Goalie();
@@ -304,12 +350,16 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         } else if( knowledge->isOurNonPlayOnKick() ) {
             preferedDefenseCounts = 0;
 
-        } else if( knowledge->isTheirNonPlayOnKick()) {
-            preferedDefenseCounts = max(agentsCount - 1, 0);
+        } else if( knowledge->isTheirNonPlayOnKick() && knowledge->getGameState() != CKnowledge::TheirKickOff) {
+            preferedDefenseCounts = max(agentsCount - 1 - missMatchIds.count(), 0);
         } else if (transientFlag
                    &&  knowledge->getGameState() != CKnowledge::TheirKickOff) {
-            preferedDefenseCounts = agentsCount;
+            preferedDefenseCounts = agentsCount- missMatchIds.count();
             debug("[coach] harchi robot mobat darim rikhtim tu defa", D_MAHI);
+        }
+        else
+        {
+            preferedDefenseCounts = 0;
         }
 
     }
@@ -1462,9 +1512,10 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     if(wm->our[playmakeId] != NULL)
     {
         bool goodForKick = findMostPossible(wm->our[playmakeId]->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr);
-        if(goodForKick) {
+        if(goodForKick)
+        {
             dynamicAttack->setDirectShot(true);
-            shotToGoalthr = 0.6;
+            shotToGoalthr = policy()->DynamicPlay_DirectTrsh() - 0.2;
         } else {
             dynamicAttack->setDirectShot(false);
             shotToGoalthr = 0;

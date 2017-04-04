@@ -7,6 +7,7 @@ CDynamicAttack::CDynamicAttack() {
     for(int i = 0; i < 6; i++)
         lastGuards[i] = -1;
     positioningIntentionInterval = 500;
+    shotInPass = false;
 
     for(size_t i = 0;i  < 6;i++) {
         roleAgents[i] = new CRoleDynamic();
@@ -214,7 +215,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     // it's needed to be fast
     else if(fast) {
         currentPlan.mode = DynamicEnums::Fast;
-        currentPlan.playmake.init(DynamicEnums::Pass, DynamicEnums::Near);
+        currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Near;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
@@ -384,11 +385,11 @@ void CDynamicAttack::playMake() {
     case DynamicEnums::Chip:
         roleAgentPM->setNoKick(false);
         if (currentPlan.playmake.region == DynamicEnums::Goal) {
-            roleAgentPM ->setTarget(wm->field->oppGoal()); // TODO : check it can change with emptySpot
-            roleAgentPM ->setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip()); // TODO : check it can change
+            roleAgentPM ->setTarget(wm->field->oppGoal());
+            roleAgentPM ->setKickRealSpeed(policy()->DynamicPlay_MediumSpeedChip());
         } else if (currentPlan.playmake.region == DynamicEnums::Forward) {
             roleAgentPM->setTarget(Vector2D(1000, 0));
-            roleAgentPM->setKickRealSpeed(policy()->DynamicPlay_MediumSpeedChip()); // TODO : check it can change
+            roleAgentPM->setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip());
         } else {
             roleAgentPM->setTarget(wm->field->oppGoal());
             roleAgentPM->setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip());
@@ -977,17 +978,17 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
         }
         if(tempIndex == -1)
         {
-            isShotInPass = true;
+            tempIndex = 0;
+            for(int i = 0; i < temp.size(); i++)
+                if(temp[i].x > temp[tempIndex].x)
+                    tempIndex = i;
         }
-        else if(isShotInPass)
-        {
-            bool same = true;
-            for(int i = 0; i < temp.size() && same; i++)
-                if(temp[i] != valids[i])
-                    same = false;
-            if(same || ballPos.dist(mahiPlayMaker->pos()) > 0.4)
-                isShotInPass = false;
-        }
+//        else if(shotInPass)
+//        {
+//            shotInPass = (ballPos.dist(mahiPlayMaker->pos()) < 0.4);
+
+//        }
+        debug(QString("shot in pass : %1").arg(shotInPass), D_PARSA);
             /*currentPlan.passPos = wm->field->oppGoal();*/
        /* if(valids.at(tempIndex).dist(ballPos) < 0.2)
             roleAgentPM->setNoKick(true);*/
