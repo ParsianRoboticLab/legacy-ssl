@@ -497,6 +497,7 @@ QVector<double> CPolynomialRegression::PolynomialRegression(QList<double> value,
     double B[n+1][n+2];
     double Y[n+1];
     int j , k, N=value.count();
+    coefs.clear();
     QVector<double> coefs(QVector<double>(n+1));
     if(value.count()>key.count())
         N=key.count();

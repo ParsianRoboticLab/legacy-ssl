@@ -26,8 +26,11 @@ CollectProfileData::CollectProfileData()
     MaxSpeed = 1023;
 
     isChip = false;
+    spinOn = false;
     ChipPosCalculated = false;
     chipAgain = false;
+
+    filename = "KickProfiler.json";
 }
 
 void CollectProfileData::init(int p1 , int p2){
@@ -41,7 +44,7 @@ void CollectProfileData::init(int p1 , int p2){
     prfl1->setIsActive(true);
     prfl1->setChip(isChip);
     prfl1->setSlow(true);
-    prfl1->setSpin(spinOn);
+    prfl1->setSpin(0);
 
     prfl2->setAgent(knowledge->getAgent(p2));
     prfl2->setAgentID(p2);
@@ -51,7 +54,7 @@ void CollectProfileData::init(int p1 , int p2){
     prfl2->setIsActive(true);
     prfl2->setChip(isChip);
     prfl2->setSlow(true);
-    prfl1->setSpin(spinOn);
+    prfl1->setSpin(0);
 
     kickerPos = knowledge->getAgent(prfl1->getAgentID())->pos();
 
@@ -67,7 +70,7 @@ void CollectProfileData::init(int p1 , int p2){
 
     counter1 = -2;
     counter2 = -2;
-    speedStep = 150;
+    speedStep = 140;
 
     // low speed positioning
     lowPosX1 = -2.66;
@@ -334,7 +337,6 @@ void CollectProfileData::HighSpeed(){
 
     switch(kickStat){
     case prfl1_Iskicking:
-        knowledge->getAgent(prfl1->getAgentID())->setRoller(4);
         if(wm->ball->vel.length() < 0.1){           // ball is in downTri and its velocity is near 0 so agent1 kicks the ball
 
             if(kickerWait.elapsed() > 2000 || kickSpeed1 < waitKickSpeed){
@@ -366,7 +368,7 @@ void CollectProfileData::HighSpeed(){
 
 
     case prfl2_Iskicking:
-        knowledge->getAgent(prfl2->getAgentID())->setRoller(4);
+
 
         if(wm->ball->vel.length() < 0.1){           // ball is in upTri and its velocity is near 0 so agent2 kicks the ball
 
@@ -572,6 +574,7 @@ void CollectProfileData::start(){
 
     case InitState:
         if(activeRobots[activeRobotsCount]!=-1){
+            profiler->save(JSON , filename);
             if(activeRobots[activeRobotsCount+1]!= -1){
                 init(activeRobots[activeRobotsCount],activeRobots[activeRobotsCount+1]);
             }
@@ -601,7 +604,8 @@ void CollectProfileData::start(){
         break;
 
     case goOutState:
-        positioning(-0.6 , -0.7 , -0.6 , 0.4 );
+
+        positioning( -0.5 , -0.8, 0.2 , 0.2 );
         if( Circle2D(knowledge->getAgent(prfl2->getAgentID())->pos() , 0.4).contains(prfl2->getTarget()) &&
                 Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.4).contains(prfl1->getTarget()) ){
             prfState=InitState;
