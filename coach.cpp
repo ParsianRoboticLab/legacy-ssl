@@ -365,7 +365,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
     }
 
     ////
-    if (knowledge->isStart()) {
+    if (knowledge->isStart() && !transientFlag) {
         preferedDefenseCounts = 2;
     }
 
