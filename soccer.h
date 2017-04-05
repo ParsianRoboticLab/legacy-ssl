@@ -76,7 +76,6 @@ private:
     SSL_Referee::Command last_command;
     int last_yellow_ycards, last_blue_ycards;
     unsigned int last_yellow_rcards, last_blue_rcards;
-
     /////////////////mhmmd thread
     skillsThread *thSkill[6];
     QTime tempTime[6];

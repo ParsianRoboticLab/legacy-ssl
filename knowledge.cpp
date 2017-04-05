@@ -136,7 +136,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
     RobotsCoeff[3][1] = 0.07;
     RobotsCoeff[4][1] = 0.22;
     RobotsCoeff[5][1] = -0.03;
-    RobotsCoeff[6][1] = 0.55;
+    RobotsCoeff[6][1] = -0.15;
     RobotsCoeff[7][1] = 0.06;
 
     RobotsCoeff[0][0] = 710;

@@ -1662,7 +1662,7 @@ void CCoach::selectPlayOffMode(int agentSize, NGameOff::EMode &_mode) {
             ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
         _mode = NGameOff::StaticPlay;
 
-    } else if (wm->ball->pos.x > 1) {
+    } else if (wm->ball->pos.x > -1) {
         _mode = NGameOff::StaticPlay;
     } else {
         _mode = NGameOff::DynamicPlay;
