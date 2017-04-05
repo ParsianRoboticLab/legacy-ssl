@@ -1513,11 +1513,11 @@ void CSkillKick::execute()
         }
     }
 
-    if(agentPos.dist(jTurnStartPos) > 0.5 && !slow && !penaltyKick )
-    {
-        agent->setChip(1);
-        jTurnStartPos = agentPos;
-    }
+//    if(agentPos.dist(jTurnStartPos) > 0.5 && !slow && !penaltyKick )
+//    {
+//        agent->setChip(1);
+//        jTurnStartPos = agentPos;
+//    }
 
 
     if(kickerOn && (!knowledge->isOurNonPlayOnKick() || penaltyKick))

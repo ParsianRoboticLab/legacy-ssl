@@ -1208,8 +1208,8 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
     bool changePassChoose   = true;
 
     for(int i = 0 ; i < ourPlayers.count() ; i++) {
-        double t = wm->our[ourPlayers[i]]->pos.dist(wm->ball->pos + wm->ball->vel * agentVelCoef);
-        double t2 = wm->our[ourPlayers[i]]->pos.dist(wm->ball->pos);
+        double t  = (wm->our[ourPlayers[i]]->pos + wm->our[ourPlayers[i]]->vel*agentVelCoef ).dist(wm->ball->pos + wm->ball->vel * agentVelCoef);
+        double t2 = (wm->our[ourPlayers[i]]->pos + wm->our[ourPlayers[i]]->vel*agentVelCoef ).dist(wm->ball->pos);
         if(t < nearestDistvel)
             nearestDistvel = t;
         if(t2 < nearestDist)
