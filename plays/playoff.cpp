@@ -711,17 +711,13 @@ Vector2D CPlayOff::getDynamicTarget(int i) {
     case 1:
         return first;
     case 2:
-        if(first.y < -_FIELD_HEIGHT / 6) return Vector2D(3,  2.25);
-        if(first.y > _FIELD_HEIGHT  / 6) return Vector2D(3, -2.25);
-        return Vector2D(3, -2.25);
+
+        return Vector2D(3.2, 0);
     case 3:
-        if(first.y < -_FIELD_HEIGHT / 6) return Vector2D(2,  1);
-        if(first.y > _FIELD_HEIGHT  / 6) return Vector2D(2, -1);
-        return Vector2D(3,  2.25);
+
+        return Vector2D(3.2,  0.3);
     case 4:
-        if(first.y < -_FIELD_HEIGHT / 6) return Vector2D(2,  0);
-        if(first.y > _FIELD_HEIGHT  / 6) return Vector2D(2, -0);
-        return Vector2D(3,  0);
+        return Vector2D(3.2,  -0.3);
     default:
         return Vector2D::INVALIDATED;
         break;
@@ -1806,7 +1802,7 @@ Vector2D CPlayOff::getMoveTarget(const SPositioningArg& _posArg) {
             tempTarget = position + Vector2D::polar2vector(dist,ang);
 
             ////should check
-            if(wm->field->isInOppPenaltyArea(tempTarget + (wm->field->oppGoal() - tempTarget).norm() * 0.2))
+            if(wm->field->isInOppPenaltyArea(tempTarget + (wm->field->oppGoal() - tempTarget).norm() * 0.3))
                 continue;
             for(int i = 0; i < wm->opp.activeAgentsCount();i++) {
                 if(Circle2D(wm->opp.active(i)->pos,0.07).contains(tempTarget)) {
