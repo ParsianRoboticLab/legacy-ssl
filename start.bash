@@ -3,5 +3,5 @@
 while true;
 do
 ./ai mode real ref s
-killall ai
+#killall ai
 done;

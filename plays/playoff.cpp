@@ -398,7 +398,7 @@ void CPlayOff::staticExecute() {
 void CPlayOff::dynamicExecute() {
 
 
-    if (dynamicSelect == CHIP) {
+    if (dynamicSelect == CHIP || true) {
         dynamicPlayChipToGoal();
         checkEndChipToGoal();
     } else if (dynamicSelect == KHAFAN) {
