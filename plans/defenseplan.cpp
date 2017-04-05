@@ -32,8 +32,7 @@ Segment2D DefensePlan::getBisectorSegment(Vector2D firstPoint , Vector2D originP
 void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsToBeMarkPossition , int ourMarkAgentsSize , double proportionOfDistance){
     ////////////////////////// Variables of this function //////////////////////
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
-    bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick) || (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
-    bool intelligentMarkType = policy()->Mark_IntelligentMarkType();
+    bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)/*|| (knowledge->getGameState() == CKnowledge::TheirKickOff)*/|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     int i;
     int j;
     Vector2D ourCenterOfGoalPossition = wm->field->ourGoal();
@@ -420,7 +419,7 @@ Vector2D DefensePlan::getPointInDirection(Vector2D firstPoint , Vector2D secondP
 /////////////////////////////// end of AHZ /////////////////////////////////////
 void DefensePlan::tempFindPos(int _markAgentSize){
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
-    bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)|| (knowledge->getGameState() == CKnowledge::TheirKickOff)|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
+    bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)/*|| (knowledge->getGameState() == CKnowledge::TheirKickOff)*/|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     bool intelligentMarkType = policy()->Mark_IntelligentMarkType();
     int count;
     QList <Vector2D> sol;
@@ -1455,7 +1454,7 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     QList <Vector2D> matchPoints;
     QList <int> matchResult;
     bool playOnMode = knowledge->getGameMode() == CKnowledge::Start;
-    bool playOffMode = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)|| (knowledge->getGameState() == CKnowledge::TheirKickOff)|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
+    bool playOffMode = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)/*|| (knowledge->getGameState() == CKnowledge::TheirKickOff)*/|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     stopMode = knowledge->isStop();
     ourAgents.clear();
     ourAgents.append(defenseAgents);
@@ -3107,6 +3106,7 @@ int DefensePlan::decideNumOfMarks(double _overDef)
         }
 
     }
+
     return 0;
 }
 
@@ -3242,7 +3242,7 @@ void DefensePlan::inteliDecideMarkType(){
 void DefensePlan::findPos(int _markAgentSize){
     double xLimitForblockingPass = 0;
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
-    bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)|| (knowledge->getGameState() == CKnowledge::TheirKickOff)|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
+    bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)/*|| (knowledge->getGameState() == CKnowledge::TheirKickOff)*/|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     bool MantoManAllTransientFlag = policy()->Mark_ManToManAllTransiant();
     bool manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
     stopMode = knowledge->isStop();
@@ -3355,6 +3355,20 @@ void DefensePlan::findOppAgentsToMark(QList <Vector2D> _realDefTargets)
     oppAgentsMarkedByDef.clear();
     oppAgentsToMark.append(knowledge->toBeMopps);
     oppAgentsToMarkPos.clear();
+    if(knowledge->getGameState() == CKnowledge::TheirKickOff)
+    {
+        for(int i = 0; i < oppAgentsToMark.count(); i++)
+        {
+            if(oppAgentsToMark[i]->pos.x > policy()->Mark_OppOmitLimitKickOff()){
+                oppAgentsToMark.removeOne(oppAgentsToMark[i]);
+                // TODO: chage the transeint this flag
+                /*if(oppAgentsToMark[i]->vel.length() > 1)
+                    HMDtransient = 1;*/
+                i--;
+            }
+        }
+    }
+    else{
     for(int i = 0; i < oppAgentsToMark.count(); i++)
     {
         if(oppAgentsToMark[i]->pos.x > policy()->Mark_OppOmitLimitPlayoff()){
@@ -3364,6 +3378,7 @@ void DefensePlan::findOppAgentsToMark(QList <Vector2D> _realDefTargets)
                 HMDtransient = 1;*/
             i--;
         }
+    }
     }
 
     for(int i = 0; i<oppAgentsToMark.count(); i++)

@@ -40,6 +40,7 @@ void CRolePlayOff::reset()
     timer.start();
     agentID = -1;
     lookForward = true;
+    ballIsNear = false;
 }
 
 void CRolePlayOff::update() {
@@ -124,6 +125,7 @@ void CRolePlayOff::execute() {
         break;
     case roleSkill::Kick:
         kickSkill->execute();
+        debug(QString("[playoffrole] setkickrealspeed : %2").arg(kickSpeed), D_MAHI);
         break;
     case roleSkill::Mark:
         break;

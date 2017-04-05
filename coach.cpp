@@ -359,9 +359,18 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         }
         else
         {
-            preferedDefenseCounts = 0;
+            preferedDefenseCounts = 2;
         }
 
+    }
+
+    ////
+    if (knowledge->isStart()) {
+        preferedDefenseCounts = 2;
+    }
+
+    if (knowledge->isOurNonPlayOnKick() && wm->ball->pos.x < -0.5) {
+        preferedDefenseCounts = 2;
     }
 
     lastPreferredDefenseCounts = preferedDefenseCounts;
@@ -599,14 +608,14 @@ CKnowledge::ballPossesionState CCoach::isBallOurs()
     if(wm->ball->pos.x > 0.5) {
         decidePState = CKnowledge::WEHAVETHEBALL;
 
-    } else if (wm->ball->pos.x < -0.5){
+    } else if (wm->ball->pos.x < 0.1){
         decidePState = CKnowledge::WEDONTHAVETHEBALL;
     } else {
         decidePState = lastBallPossesionState;
     }
 
     if (wm->field->isInOurPenaltyArea(wm->ball->pos)
-    &&  wm->ball->vel.length() < 0.2) {
+    &&  wm->ball->vel.length() < 0.1) {
         decidePState = CKnowledge::SOSOTHEIR;
     }
 
@@ -1052,7 +1061,7 @@ void CCoach::virtualTheirPlayOffState()
 {
     CKnowledge::State currentState;
     currentState = knowledge->getGameState();
-    if(lastState == CKnowledge::TheirDirectKick || lastState == CKnowledge::TheirIndirectKick || lastState == CKnowledge::TheirKickOff) {
+    if(lastState == CKnowledge::TheirDirectKick || lastState == CKnowledge::TheirIndirectKick /*|| lastState == CKnowledge::TheirKickOff*/) {
         if(currentState == CKnowledge::Start) {
             transientFlag = true;
         }
@@ -1662,7 +1671,7 @@ void CCoach::selectPlayOffMode(int agentSize, NGameOff::EMode &_mode) {
             ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
         _mode = NGameOff::StaticPlay;
 
-    } else if (wm->ball->pos.x > 1) {
+    } else if (wm->ball->pos.x > -1) {
         _mode = NGameOff::StaticPlay;
     } else {
         _mode = NGameOff::DynamicPlay;
