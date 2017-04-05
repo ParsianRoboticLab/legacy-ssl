@@ -748,8 +748,8 @@ void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelax
                 double ttt = 1;
                 if (mywma.our[j].vel.length() >= 0.5 )
                     ttt = ((mywma.our[j].vel.length()-vvv)/mywma.our[j].vel.length());
-                //obs.add_circle(mywma.our[j].pos.x+mywma.our[j].vel.x*vvv*obstVelFactor , mywma.our[j].pos.y+mywma.our[j].vel.y*vvv*obstVelFactor , (CRobot::robot_radius_new+0.03)*ttt , mywma.our[j].vel.x , mywma.our[j].vel.y);
-                obs.add_circle(mywma.our[j].pos.x , mywma.our[j].pos.y , (CRobot::robot_radius_new+0.03) , mywma.our[j].vel.x , mywma.our[j].vel.y);
+                obs.add_circle(mywma.our[j].pos.x+mywma.our[j].vel.x*vvv*obstVelFactor , mywma.our[j].pos.y+mywma.our[j].vel.y*vvv*obstVelFactor , (CRobot::robot_radius_new+0.05)*ttt , mywma.our[j].vel.x , mywma.our[j].vel.y);
+                //obs.add_circle(mywma.our[j].pos.x , mywma.our[j].pos.y , (CRobot::robot_radius_new+0.03) , mywma.our[j].vel.x , mywma.our[j].vel.y);
 
             }
         }
@@ -760,13 +760,13 @@ void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelax
         if( oppRelaxList.contains(mywma.opp[j].id) == false )
         {
 
-            double obstVelFactor = 0.06;
+            double obstVelFactor = 0.12;
             for(double vvv = 0; vvv <= mywma.opp[j].vel.length(); vvv+=0.5)
             {
                 double ttt = 1;
                 if (mywma.opp[j].vel.length() >= 0.5 )
                     ttt = ((mywma.opp[j].vel.length()-vvv)/mywma.opp[j].vel.length());
-                obs.add_circle(mywma.opp[j].pos.x+mywma.opp[j].vel.x*vvv*obstVelFactor , mywma.opp[j].pos.y+mywma.opp[j].vel.y*vvv*obstVelFactor , (CRobot::robot_radius_new+0.03)*ttt , mywma.opp[j].vel.x , mywma.opp[j].vel.y);
+                obs.add_circle(mywma.opp[j].pos.x+mywma.opp[j].vel.x*vvv*obstVelFactor , mywma.opp[j].pos.y+mywma.opp[j].vel.y*vvv*obstVelFactor , (CRobot::robot_radius_new+0.05)*ttt , mywma.opp[j].vel.x , mywma.opp[j].vel.y);
             }
 
             //			obs.add_circle(mywma.opp[j].pos.x , mywma.opp[j].pos.y , opp.active(j)->robotRadius()+0.03 , mywma.opp[j].vel.x , mywma.opp[j].vel.y);
