@@ -1443,9 +1443,27 @@ void CMarkPlan::findOppAgentsToMark()
             }
         }
 
+        //ommiting nearest to ball
+        debug(QString("Ommit nearest to ball kick off"),D_MAHI);
+        int nearestToBall = -1;
+        double nearestToBallDist = 100000;
+
+        for(int i = 0 ; i < oppAgentsToMark.count() ; i++)
+        {
+            if((oppAgentsToMark[i]->pos/*+ oppAgentsToMark[i]->vel*/).dist(wm->ball->pos /*+  wm->ball->vel*/) < nearestToBallDist)
+            {
+                nearestToBall = i;
+                nearestToBallDist = oppAgentsToMark[i]->pos.dist(wm->ball->pos);
+                debug(QString("the nearest id is:%1").arg(oppAgentsToMark[i]->id),D_MAHI);
+                draw(oppAgentsToMark[i]->pos + oppAgentsToMark[i]->vel);
+            }
+        }
+        if(nearestToBall != -1)
+            oppAgentsToMark.removeOne(oppAgentsToMark[nearestToBall]);
+
     }
 
-    if(policy()->Mark_OmmitNearestToBallPlayon())
+    if(policy()->Mark_OmmitNearestToBallPlayon() && knowledge->getGameState()!= CKnowledge::TheirKickOff)
     {
         debug(QString("Ommit nearest to ball"),D_MAHI);
         int nearestToBall = -1;
@@ -1814,7 +1832,7 @@ void CMarkPlan::execute()
     }
     else if(knowledge->getGameState() == CKnowledge::TheirKickOff)
     {
-        segmentper = policy()->Mark_ShootRatioBlock() / 100;
+        segmentper = 0.3;
         markPoses.clear();
         markAngs.clear();
         debug(QString("Its TheirKickoff"),D_MAHI);
