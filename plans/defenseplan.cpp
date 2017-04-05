@@ -103,17 +103,7 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
             }
         }
     }
-    if(intelligentMarkType){
-        if(knowledge->transientFlag){
-            sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
-            if(sol.size()){
-                segmentpershoot = 0.9;
-            }
-            else{
-                segmentpershoot = 0.05;
-            }
-        }
-    }
+
     LastTS = knowledge->transientFlag;
     ////////////////////////////////////////////////////////////////////////////
     debug(QString("Mark Agents Count : %1").arg(ourMarkAgentsSize) , D_SEPEHR , QColor(Qt::red));
