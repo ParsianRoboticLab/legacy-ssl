@@ -1032,7 +1032,7 @@ void CSkillKick::jTurn()
     draw(robotKickArea);
 
     double reduce = 0.5;
-    reduce += 2*agentPos.dist(ballPos) ;
+    reduce += 1.7*agentPos.dist(ballPos) ;
     reduce = max(reduce,0.7);
     if(passProfiler || (wm->field->isInOppPenaltyArea(ballPos + (wm->field->oppGoal() - ballPos).norm()*0.15) && (agentPos.dist(ballPos) <0.3) || robotKickArea.contains(ballPos)))
     {
