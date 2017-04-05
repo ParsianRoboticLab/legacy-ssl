@@ -63,7 +63,7 @@ void CRolePlayOff::update() {
         kickSkill->setAvoidPenaltyArea(avoidPenaltyArea);
         kickSkill->setInterceptMode(intercept);
         //debug(QString("[playoffRole] profile kickSpeed : %1 %2").arg(agent->id()).arg(knowledge->getProfile(agent->id(), static_cast<double>(kickSpeed)/130.0, !chip, false)), D_MAHI);
-        kickSkill->setKickSpeed(kickSpeed);
+        kickSkill->setKickSpeed(max(kickSpeed,350));
         kickSkill->setChip(chip);
         kickSkill->setAgent(agent);
         kickSkill->setDontKick(!doPass);
