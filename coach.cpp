@@ -263,7 +263,7 @@ void CCoach::doIntention(){
 }
 
 void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
-
+    missMatchIds.clear();
     if(first)
     {
         if(wm->our.activeAgentsCount())
