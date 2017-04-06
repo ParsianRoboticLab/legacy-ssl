@@ -83,7 +83,7 @@ void CRolePlayOff::update() {
         oneTouchSkill->setChip(false);
         oneTouchSkill->setShotToEmptySpot(false);
         if (wm->getIsSimulMode()) oneTouchSkill->setKickSpeed(8);
-        else oneTouchSkill->setKickSpeed(kickSpeed);
+        else oneTouchSkill->setKickSpeed(1023);
         oneTouchSkill->setAgent(agent);
         updated = false;
         break;
