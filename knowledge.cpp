@@ -195,6 +195,7 @@ int CKnowledge::getProfile(int agentId, double realParameter, bool isKick, bool 
         type =3;
     }
 
+    debug(QString("profDat%1").arg(profiledParameter),D_NADIA);
 
         if(wm->getIsSimulMode()){
             return (int)realParameter;
@@ -207,6 +208,7 @@ int CKnowledge::getProfile(int agentId, double realParameter, bool isKick, bool 
         return 1023;
 
     profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
+
 
     if(profiledParameter != -1000){
 

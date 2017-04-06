@@ -31,6 +31,7 @@
 #include "joystickhandy.h"
 #include "kickprofiler.h"
 #include "autoballplacement.h"
+#include "chipkick.h"
 
 
 QString startUpMode;
@@ -49,6 +50,8 @@ CMainApplication::CMainApplication(QWidget *parent)
 
     //profiler
     collectKickProfile=new CollectProfileData();
+    //TCChipKick
+    chipKickRobot=new chipKick();
 
     /* Init Workspace */
 
@@ -315,6 +318,10 @@ CMainApplication::CMainApplication(QWidget *parent)
     setFProfiler = new QAction("CollectProfileData", this);
     setFProfiler->setCheckable(true);
     setFProfiler->setChecked((experimental==11));
+
+    setTC_chipKick = new QAction("TC_chipKick", this);
+    setTC_chipKick->setCheckable(true);
+    setTC_chipKick->setChecked((experimental==13));
     ///////////////////////////////////////////////////////////////profiler
     setKProfiler = new QAction("Kick Profiler", this);
     setKProfiler->setCheckable(true);
@@ -395,6 +402,7 @@ CMainApplication::CMainApplication(QWidget *parent)
     modeMenu->addAction(setAutoBallPlacement);
     modeMenu->addAction(setKProfiler);
     modeMenu->addAction(setFProfiler);
+    modeMenu->addAction(setTC_chipKick);
     modeMenu->addAction(setTechnicalChallengeAct);
     modeMenu->addAction(setMergeCamerasExperimentAct);
     modeMenu->addAction(setMixedAct);
@@ -676,6 +684,10 @@ void CMainApplication::customControl(bool &custom)
         {
             autoBallPlacement();
         }
+        if(experimental == 13)
+        {
+            chipKickRobot->stateController();
+        }
 
     }
     else {
@@ -823,6 +835,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp6Act->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
+        setTC_chipKick->setChecked(false);
     }
     else if (action->text() == setExp2Act->text())
     {
@@ -836,6 +849,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp6Act->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
+        setTC_chipKick->setChecked(false);
     }
     else if (action->text() == setExp3Act->text())
     {
@@ -849,6 +863,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp6Act->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
+        setTC_chipKick->setChecked(false);
     }
     else if (action->text() == setExp4Act->text())
     {
@@ -862,6 +877,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp6Act->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
+        setTC_chipKick->setChecked(false);
     }
     else if (action->text() == setExp5Act->text())
     {
@@ -875,6 +891,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp6Act->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
+        setTC_chipKick->setChecked(false);
     }
     else if (action->text() == setExp6Act->text())
     {
@@ -888,6 +905,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp5Act->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
+        setTC_chipKick->setChecked(false);
     }
     else if (action->text() == setTechnicalChallengeAct->text())
     {
@@ -903,6 +921,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setJsHandy->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
+        setTC_chipKick->setChecked(false);
     }
     else if (action->text() == setMergeCamerasExperimentAct->text())
     {
@@ -923,6 +942,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setJsHandy->setChecked(false);
         setTechnicalChallengeAct->setChecked(false);
         setFProfiler->setChecked(false);
+        setTC_chipKick->setChecked(false);
     }
     else if (action->text() == setJsHandy->text())
     {
@@ -937,6 +957,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setExp6Act->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
+        setTC_chipKick->setChecked(false);
     }
     else if (action->text() == setKProfiler->text())
     {
@@ -953,6 +974,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setJsHandy->setChecked(false);
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
+        setTC_chipKick->setChecked(false);
     }
     else if (action->text() == setFProfiler->text())
     {
@@ -969,6 +991,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setMergeCamerasExperimentAct->setChecked(false);
         setKProfiler->setChecked(false);
         setJsHandy->setChecked(false);
+        setTC_chipKick->setChecked(false);
         CNewProfilerWidget *profilerWidget;
         profilerWidget=new CNewProfilerWidget(this);
         profilerWidget->show();
@@ -988,7 +1011,27 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setMergeCamerasExperimentAct->setChecked(false);
         setKProfiler->setChecked(false);
         setJsHandy->setChecked(false);
+        setTC_chipKick->setChecked(false);
     }
+    else if (action->text() == setTC_chipKick->text())
+    {
+        experimental = 13;
+        if (setTC_chipKick->isChecked()) setTC_chipKick->setChecked(true);
+        else {setTC_chipKick->setChecked(false);experimental=0;}
+        setExp1Act->setChecked(false);
+        setExp2Act->setChecked(false);
+        setExp3Act->setChecked(false);
+        setExp4Act->setChecked(false);
+        setExp5Act->setChecked(false);
+        setExp6Act->setChecked(false);
+        setJsHandy->setChecked(false);
+        setMergeCamerasExperimentAct->setChecked(false);
+        setKProfiler->setChecked(false);
+        setJsHandy->setChecked(false);
+        setFProfiler->setChecked(false);
+        setKProfiler->setChecked(false);
+    }
+
     /* Control Mode */
     CSoccer::ControlMode lastControlMode = soccer->getControlMode();
     if (action->text() == "AI" )
@@ -1292,6 +1335,7 @@ CMainApplication::~CMainApplication()
     delete setJsHandy;
     delete setKProfiler;
     delete setFProfiler;
+    delete setTC_chipKick;
     delete setTechnicalChallengeAct;
     delete setMergeCamerasExperimentAct;
     delete tabWidget;
