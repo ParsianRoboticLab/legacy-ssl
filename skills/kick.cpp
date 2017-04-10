@@ -713,7 +713,7 @@ kckMode CSkillKick::decideMode()
     else
     {
 
-        if((robotArea.intersection(ballpath,&tempVec1,&tempVec2) ==2 && ballRealVel > 0.5 ))
+        if((robotArea.intersection(ballpath,&tempVec1,&tempVec2) ==2 && ballRealVel > 1))
         {
 
             if( ( fabs(((target-agentPos).th().degree() - (ballPos-agentPos).th().degree() )) < 70 ))
@@ -1039,7 +1039,7 @@ void CSkillKick::jTurn()
         reduce = 0.3;
     }
 
-    reduce = min(reduce,1.7);
+    reduce = min(reduce,2);
     double movementDir = ((ballPos - agentPos).th() - kickFinalDir).degree();
     double robotDir = (ballPos - agentPos).th().radian() - agentDir.th().radian();
     double shift = 0;
@@ -1075,7 +1075,14 @@ void CSkillKick::jTurn()
     speedPidX->kd = 0;
     speedPidY->kd = 1;
     speedPidX->kp = 0;
-    speedPidY->kp = 0.4;
+    if(wm->ball->vel.length() > 0.5)
+    {
+        speedPidY->kp = 0.1;
+    }
+    else
+    {
+        speedPidY->kp = 0.4;
+    }
     if(knowledge->isOurNonPlayOnKick() && wm->ball->vel.length() < 0.1)
     {
         reduce = 0.5;
@@ -1108,7 +1115,7 @@ void CSkillKick::turnForKick()
         target = findMostPossible();
     agent->setRoller(0);
 
-    if(knowledge->isOurNonPlayOnKick())
+    if(0 && knowledge->isOurNonPlayOnKick())
     {
         if ((agentDir.th() - kickFinalDir).degree()  <- 10 )
         {
@@ -1530,7 +1537,7 @@ void CSkillKick::execute()
 
     else
     {
-        if(kickerOn && fabs((agentDir.th() - kickTargetDir).degree()) < tol || kickerOn && fabs((agentDir.th() - kickTargetDir).degree()) < 2)
+        if(kickerOn && fabs((agentDir.th() - kickTargetDir).degree()) < tol || kickerOn && fabs((agentDir.th() - kickTargetDir).degree()) < 3)
         {
 
             if(chip)
@@ -1734,7 +1741,7 @@ void CSkillKickOneTouch::execute()
     ballRealVel = knowledge->getRealBallVel();
     gotopointavoid->setAgent(agent);
     gotopointavoid->setOneTouchMode(true);
-    gotopointavoid->setNoAvoid(true);
+    gotopointavoid->setNoAvoid(false);
 
     if(shotToEmptySpot)
         target = findMostPossible();
@@ -1786,6 +1793,7 @@ void CSkillKickOneTouch::execute()
     }
     else if(oneTouchArea.intersection(ballPath,&sol1,&sol2) && wm->ball->vel.length() > 0.4)
     {
+        gotopointavoid->setNoAvoid(false);
         intersectPos = ballPath.nearestPoint(agentPos);
         if(wm->field->isInOppPenaltyArea(intersectPos) || oppPenaltyAreaWP.contains(waitpos))
         {
@@ -1797,7 +1805,6 @@ void CSkillKickOneTouch::execute()
                 }
                 intersectPos = sol1;
             }
-
         }
 
 
