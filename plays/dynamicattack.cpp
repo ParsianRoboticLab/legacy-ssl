@@ -152,10 +152,10 @@ void CDynamicAttack::makePlan(int agentSize) {
     }
     // if Defense isn't clearing and
     // we Don't have the ball
-    else if (knowledge->ballPossesion != CKnowledge::WEHAVETHEBALL) {
+    else if (wm->ball->pos.x < 0) {
         currentPlan.mode = DynamicEnums::NotWeHaveBall;
 
-        currentPlan.playmake.init(DynamicEnums::Chip, DynamicEnums::Forward);
+        currentPlan.playmake.init(DynamicEnums::Chip, DynamicEnums::Goal);
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Near;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
@@ -194,7 +194,7 @@ void CDynamicAttack::makePlan(int agentSize) {
         currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
 
         for(size_t i = 0;i < agentSize;i++) {
-            currentPlan.positionAgents[i].region = DynamicEnums::Supporter;
+            currentPlan.positionAgents[i].region = DynamicEnums::Best;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
         }
     }
@@ -217,7 +217,7 @@ void CDynamicAttack::makePlan(int agentSize) {
         currentPlan.mode = DynamicEnums::Fast;
         currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
         for(size_t i = 0;i < agentSize;i++) {
-            currentPlan.positionAgents[i].region = DynamicEnums::Near;
+            currentPlan.positionAgents[i].region = DynamicEnums::Best;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
         }
     }
@@ -386,7 +386,12 @@ void CDynamicAttack::playMake() {
         roleAgentPM->setNoKick(false);
         if (currentPlan.playmake.region == DynamicEnums::Goal) {
             roleAgentPM ->setTarget(wm->field->oppGoal());
-            roleAgentPM ->setKickRealSpeed(policy()->DynamicPlay_MediumSpeedChip());
+            if (wm->ball->pos.x < -2) {
+                roleAgentPM ->setKickRealSpeed(policy()->DynamicPlay_HighSpeedChip());
+            } else {
+                roleAgentPM ->setKickRealSpeed(policy()->DynamicPlay_MediumSpeedChip());
+
+            }
         } else if (currentPlan.playmake.region == DynamicEnums::Forward) {
             roleAgentPM->setTarget(Vector2D(1000, 0));
             roleAgentPM->setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip());
@@ -403,7 +408,7 @@ void CDynamicAttack::playMake() {
         roleAgentPM->setChip(false);
         roleAgentPM->setNoKick(false);
         roleAgentPM->setTarget(wm->field->oppGoal());
-        roleAgentPM->setKickRealSpeed(8); // TODO : 8m/s by profiller
+        roleAgentPM->setKickSpeed(1023); // TODO : 8m/s by profiller
         roleAgentPM->setSelectedSkill(DynamicEnums::Shot); // Skill Kick
         break;
     }
@@ -1334,9 +1339,12 @@ void CDynamicAttack::assignLocations_2() {
     guardLocations[2][0][2].assign(3.65, 2);
 
     //Bottom Opp Half
-    guardLocations[2][1][0].assign(1.15, -1.15);
-    guardLocations[2][1][1].assign(2.1 , -1.65);
-    guardLocations[2][1][2].assign(3.65, -2  );
+//    guardLocations[2][1][0].assign(1.15, -1.15);
+//    guardLocations[2][1][1].assign(2.1 , -1.65);
+//    guardLocations[2][1][2].assign(3.65, -2  );
+    guardLocations[2][1][0].assign(0, 0.3);
+    guardLocations[2][1][1].assign(0, 0);
+    guardLocations[2][1][2].assign(0, -0.3);
 }
 
 void CDynamicAttack::assignLocations_3() {
