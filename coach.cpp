@@ -108,7 +108,7 @@ CCoach::CCoach(CAgent**_agents)
     defenseTimeForVisionProblem[1].start();
     transientFlag = false;
     trasientTimeOut.start();
-    translationTimeOutTime =  4000;
+    translationTimeOutTime =  1500;
     exeptionPlayMake = NULL;
     exeptionPlayMakeThr = 0;
 
@@ -354,10 +354,16 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
             preferedDefenseCounts = max(agentsCount - 1 - missMatchIds.count(), 0);
         } else if (transientFlag
                    &&  knowledge->getGameState() != CKnowledge::TheirKickOff) {
-            preferedDefenseCounts = agentsCount- missMatchIds.count();
+            if (trasientTimeOut.elapsed() > 500) {
+                preferedDefenseCounts = min(0, agentsCount - missMatchIds.count() - 1);
+
+            } else {
+                preferedDefenseCounts = agentsCount - missMatchIds.count();
+
+            }
             debug("[coach] harchi robot mobat darim rikhtim tu defa", D_MAHI);
         }
-        else
+        else if(!knowledge->isStop())
         {
             preferedDefenseCounts = 2;
         }
@@ -1133,7 +1139,7 @@ void CCoach::updateAttackState()
 {
     Polygon2D robotCritArea;
     double safeRegion = 1;
-    double critLenth = 0.5;
+    double critLenth = 0.75;
     CAgent *ourNearestAgent;
     CRobot *oppNearest;
     if(wm->opp.activeAgentsCount() > 0) {
