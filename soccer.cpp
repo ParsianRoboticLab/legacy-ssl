@@ -118,7 +118,6 @@ CSoccer::CSoccer()
     mainLoopTimer->setInterval(16);
     mainLoopTimer->start();
     //connect(mainLoopTimer,SIGNAL(timeout()),this,SLOT(runMonitorUpdate()));
-
     /////////////////////////////////////////////////////////////////////////////////////////////////
 }
 
@@ -930,12 +929,18 @@ void CSoccer::refUpdate()
         wm->opp.updateGoaliID((int)referee.blue().goalie());
     }
 
-    if( cmdCnt == lastCmdCnt )
+    if( cmdCnt == lastCmdCnt)
         return;
+
     lastCmdCnt = cmdCnt;
     refCommand = gsp.cmd;
-
+    qDebug() << "REF: " << referee.command();
     qDebug() << "ref: " << refCommand;
+    QFile file("./REF.dat");
+    if (file.open(QIODevice::WriteOnly|QIODevice::Truncate)) {
+        QTextStream stream( &file );
+        stream << referee.command() << endl;
+    }
 
     wm->gs->transition(refCommand);
     debug(( "Referee : " + QString("%1 (%2)").arg(refCommand).arg((int) refCommand) + "  " + QString::number(wm->gs->get())), D_GAME);

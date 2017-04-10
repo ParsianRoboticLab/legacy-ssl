@@ -377,6 +377,7 @@ void CPlayOff::staticExecute() {
             newPosExecute();
             newCheckEndState();
 
+            debug(QString("sag id : %1").arg(roleAgent[0]->getAgent()->id()),D_MAHI);
             if(masterPlan->common.currentSize > 1 && havePassInPlan) {
                 passManager();
             }
@@ -397,7 +398,7 @@ void CPlayOff::staticExecute() {
 void CPlayOff::dynamicExecute() {
 
 
-    if (dynamicSelect == CHIP) {
+    if (dynamicSelect == CHIP || true) {
         dynamicPlayChipToGoal();
         checkEndChipToGoal();
     } else if (dynamicSelect == KHAFAN) {
@@ -519,7 +520,7 @@ void CPlayOff::dynamicPlayKhafan() {
         roleAgent[0] -> setAvoidCenterCircle(false);
         roleAgent[0] -> setAvoidPenaltyArea(true);
         roleAgent[0] -> setChip(true);
-        roleAgent[0] -> setRealKickSpeed(policy()->DynamicPlay_LowSpeedChip()); // Vartypes This
+        roleAgent[0] -> setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip()); // Vartypes This
         roleAgent[0] -> setTarget(wm->field->oppGoal());
         roleAgent[0] -> setDoPass(false);
         roleAgent[0] -> setIntercept(false);
@@ -703,24 +704,18 @@ void CPlayOff::checkEndChipToGoal() {
 }
 
 Vector2D CPlayOff::getDynamicTarget(int i) {
-    Vector2D first = wm->ball->pos*0.7 + wm->field->oppGoal()*0.3;
+    Vector2D first = wm->ball->pos+(wm->field->oppGoal() - wm->ball->pos).norm()*0.7;
     first.y += 0.3;
 
     switch (i) {
     case 1:
         return first;
     case 2:
-        if(first.y < -_FIELD_HEIGHT / 6) return Vector2D(3,  2.25);
-        if(first.y > _FIELD_HEIGHT  / 6) return Vector2D(3, -2.25);
-        return Vector2D(3, -2.25);
+        return Vector2D(3.2, 0.3);
     case 3:
-        if(first.y < -_FIELD_HEIGHT / 6) return Vector2D(2,  1);
-        if(first.y > _FIELD_HEIGHT  / 6) return Vector2D(2, -1);
-        return Vector2D(3,  2.25);
+        return Vector2D(3.2,  -0.3);
     case 4:
-        if(first.y < -_FIELD_HEIGHT / 6) return Vector2D(2,  0);
-        if(first.y > _FIELD_HEIGHT  / 6) return Vector2D(2, -0);
-        return Vector2D(3,  0);
+        return Vector2D(0,  0);
     default:
         return Vector2D::INVALIDATED;
         break;
@@ -1636,10 +1631,10 @@ void CPlayOff::assignPass(CRolePlayOff* _roleAgent, const SPositioningAgent& _po
     _roleAgent->setAvoidPenaltyArea(true);
     _roleAgent->setChip(chipOrNot(_posAgent.getArgs()));
     if (_roleAgent->getChip()) {
-        _roleAgent->setKickSpeed(_posAgent.getArgs().rightData);
+        _roleAgent->setKickRealSpeed(static_cast <double> (_posAgent.getArgs().rightData)/100);
 
     } else {
-        _roleAgent->setKickSpeed(_posAgent.getArgs().leftData);
+        _roleAgent->setKickRealSpeed(static_cast <double> (_posAgent.getArgs().leftData)/100);
 
     }
 
@@ -1664,7 +1659,7 @@ void CPlayOff::assignKick(CRolePlayOff* _roleAgent,
                           const SPositioningAgent& _posAgent, bool _chip) {
 
     _roleAgent->setChip(_chip);
-    _roleAgent->setKickSpeed(_posAgent.getArgs().leftData);
+    _roleAgent->setKickRealSpeed(static_cast<double>(_posAgent.getArgs().leftData)/100);
     _roleAgent->setTarget(getGoalTarget(_posAgent.getArgs().rightData));
     _roleAgent->setIntercept(false);
     _roleAgent->setSelectedSkill(roleSkill::Kick);
@@ -1691,7 +1686,7 @@ void CPlayOff::assignMove(CRolePlayOff* _roleAgent,
 
         _roleAgent -> setTimeBased(true);
         _roleAgent -> setTarget(wm->ball->pos - Vector2D(0.30, 0));
-        _roleAgent -> setTargetDir(Vector2D(1, 0));
+        _roleAgent -> setTargetDir(wm->ball->pos - _roleAgent->getAgent()->pos());
         _roleAgent -> setSlow(true);
         _roleAgent -> setMaxVelocity(1);
 
@@ -1798,14 +1793,17 @@ Vector2D CPlayOff::getMoveTarget(const SPositioningArg& _posArg) {
     escapeRad = _posArg.staticEscapeRadius;
     position  = _posArg.staticPos;
     finalTarget = position;
-    for(double dist=0.0 ; dist<=escapeRad ; dist+=0.2 ) {
+    for(double dist=0.0 ; dist<=0.5 ; dist+=0.2 ) {
 
         for(double ang=-180.0 ; ang<=180.0 ; ang+=60.0 ) {
 
             tempTarget = position + Vector2D::polar2vector(dist,ang);
 
+            ////should check
+            if(wm->field->isInOppPenaltyArea(tempTarget + (wm->field->oppGoal() - tempTarget).norm() * 0.3))
+                continue;
             for(int i = 0; i < wm->opp.activeAgentsCount();i++) {
-                if(Circle2D(wm->opp.active(i)->pos,0.02).contains(tempTarget)) {
+                if(Circle2D(wm->opp.active(i)->pos,0.07).contains(tempTarget)) {
                     oppCnt = 1;
                     break;
                 }
