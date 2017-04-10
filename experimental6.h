@@ -11,7 +11,7 @@
 clock_t t;
 //#define speedTest
 
-//#define kickTest
+#define kickTest
 QList <Vector2D> agentpath;
 
 struct VectorIndex {
@@ -19,6 +19,7 @@ struct VectorIndex {
     int index;
 };
 
+int id = 2;
 void CMainApplication::Experimental6()
 {
 #ifdef speedTest
@@ -28,14 +29,12 @@ void CMainApplication::Experimental6()
     draw(QString("speed2 :%1").arg(knowledge->mainLoopTime),Vector2D(1,1));
     return;
 #endif
-
-
     static bool stopFlag = true;
     if(knowledge->joystick->getButton3())
         stopFlag = false;
     if(knowledge->joystick->getButton4())
         stopFlag = true;
-    int skillAgent = 3;
+    int skillAgent = 6;
 
 
 
