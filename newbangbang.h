@@ -93,6 +93,7 @@ private:
         Vector2D movementTh;
         AngleDeg lastPath;
         double desiredVx,desiredVy;
+        double lastVx,lastVy;
         double velMax;
         _PID *posPid;
         _PID *angPid;

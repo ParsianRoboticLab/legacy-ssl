@@ -122,26 +122,26 @@ void CNewBangBang::trajectoryPlanner()
 
     if(smooth && (decidePlan() != _bangBangPosPID))
     {
-        if(((vDes)*cos(appliedTh) - agentVel.x) > 2)
+        if(((vDes)*cos(appliedTh) - lastVx) > 1)
         {
-            desiredVx = agentVel.x + 1.9;
+            desiredVx = lastVx + 0.085;
         }
-        else if(((vDes)*cos(appliedTh) - agentVel.x) < -2)
+        else if(((vDes)*cos(appliedTh) - agentVel.x) < -1)
         {
-            desiredVx = agentVel.x - 1.9;
+            desiredVx = lastVx - 0.085;
         }
         else
         {
             desiredVx = (vDes)*cos(appliedTh);
         }
 
-        if(((vDes)*sin(appliedTh) - agentVel.y) > 2)
+        if(((vDes)*sin(appliedTh) - lastVy) > 1)
         {
-            desiredVy = agentVel.y + 1.9;
+            desiredVy = lastVy + 0.1;
         }
-        else if(((vDes)*sin(appliedTh) - agentVel.y) < -2)
+        else if(((vDes)*sin(appliedTh) - lastVy) < -1)
         {
-            desiredVy = agentVel.y - 1.9;
+            desiredVy = lastVy - 0.1;
         }
         else
         {
@@ -182,7 +182,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     }
     else
     {
-        angPid->kp = 3;
+        angPid->kp = 5;
     }
     angPid->error = (dir2.th() -  agentDir.th()).radian();
 
@@ -191,7 +191,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
 
     if ( fabs((agentMovementTh - agentDir.th()).degree()) > 80 && fabs((agentMovementTh - agentDir.th()).degree()) < 100 )
     {
-        amax = 40;
+        amax = 70;
     }
     if(slow)
     {
@@ -202,7 +202,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     }
     else if(oneTouch)
     {
-        posPid->kp = 4.5;
+        posPid->kp = 6;
         amax = 50;
         posPid->kd = 7;
         posPid->ki = conf()->BangBang_posKI();
@@ -218,7 +218,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     thPid->kd = conf()->BangBang_thKD();
     //////////////////////// dec calculations
     double vp =(posPidDist*posPid->kp);
-    double moreDec = 0.7;
+    double moreDec = 0.83;
     double decOffset = 0.5;
 
 
@@ -261,6 +261,9 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     _Vx =  desiredVx;//(vDes)*cos(appliedTh);
     _Vy =  desiredVy;//(vDes)*sin(appliedTh);
     _W = angPid->PID_OUT();
+
+    lastVx = _Vx;
+    lastVy = _Vy;
     posPid->pError = posPid->error;
 
 }
