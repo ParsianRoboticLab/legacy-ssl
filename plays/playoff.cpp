@@ -711,13 +711,11 @@ Vector2D CPlayOff::getDynamicTarget(int i) {
     case 1:
         return first;
     case 2:
-
-        return Vector2D(3.2, 0);
+        return Vector2D(3.2, 0.3);
     case 3:
-
-        return Vector2D(3.2,  0.3);
-    case 4:
         return Vector2D(3.2,  -0.3);
+    case 4:
+        return Vector2D(0,  0);
     default:
         return Vector2D::INVALIDATED;
         break;
