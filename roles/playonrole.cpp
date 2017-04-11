@@ -48,7 +48,8 @@ void CRolePlayOn::initTask()
             kickSkill->setTolerance(tolerance);
             kickSkill->setChip(chip);
             kickSkill->setSpin(spin);
-            kickSkill->setKickSpeed(kickSpeed);
+            kickSkill->setKickSpeed(1023);
+            kickSkill->setPassProfiler(true);
             kickSkill->setAvoidPenaltyArea(avoidPenaltyArea);
             kickSkill->setIsGotoPointAvoid(isGotoPointAvoid);
             //fateme
@@ -66,7 +67,7 @@ void CRolePlayOn::initTask()
             oneTouchSkill->setAgent(agent);
             oneTouchSkill->setWaitPos(waitPos);
             oneTouchSkill->setTarget(target);
-            oneTouchSkill->setKickSpeed(kickSpeed);
+            oneTouchSkill->setKickSpeed(1023);
             oneTouchSkill->setChip(chip);
             oneTouchSkill->setAvoidPenaltyArea(avoidPenaltyArea);
         break;

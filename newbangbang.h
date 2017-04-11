@@ -73,7 +73,7 @@ public:
         PropertyGet(double, Velocity, v);
         PropertyGet(double, Acceleration, a);
         PropertyGet(double, TimeNeeded, t);
-        PropertyGet(bool, Smooth, smooth);
+        Property(bool, Smooth, smooth);
         Property(bool, AngInPath, angPath);
 
 private:
@@ -92,6 +92,8 @@ private:
         Vector2D agentDir;
         Vector2D movementTh;
         AngleDeg lastPath;
+        double desiredVx,desiredVy;
+        double lastVx,lastVy;
         double velMax;
         _PID *posPid;
         _PID *angPid;

@@ -2,7 +2,7 @@
 
 
 CRolePlayOff::CRolePlayOff() {
-    qDebug() << "HEY";
+    deleted = false;
     gotoPointAvoidSkill = new CSkillGotoPointAvoid(NULL);
     kickSkill = new CSkillKick(NULL);
     oneTouchSkill = new CSkillKickOneTouch(NULL);
@@ -11,6 +11,7 @@ CRolePlayOff::CRolePlayOff() {
     roleUpdate = false;
     timer.start();
     agentID = -1;
+    lookForward = true;
 }
 
 CRolePlayOff::~CRolePlayOff() {
@@ -20,10 +21,31 @@ CRolePlayOff::~CRolePlayOff() {
     delete receivePassSkill;
 }
 
+void CRolePlayOff::reset()
+{
+
+    // TODO : JUST FOR TEST ! IF NOTHING GOES WRONG WE'LL W+BE SAFE !
+//    delete gotoPointAvoidSkill;
+//    delete kickSkill;
+//    delete oneTouchSkill;
+//    delete receivePassSkill;
+//    gotoPointAvoidSkill = new CSkillGotoPointAvoid(NULL);
+//    kickSkill = new CSkillKick(NULL);
+//    oneTouchSkill = new CSkillKickOneTouch(NULL);
+//    receivePassSkill = new CSkillReceivePass(NULL);
+
+    updated = true;
+    deleted = false;
+    roleUpdate = false;
+    timer.start();
+    agentID = -1;
+    lookForward = true;
+    ballIsNear = false;
+}
+
 void CRolePlayOff::update() {
     switch(selectedSkill) {
     case roleSkill::Gotopoint:
-
         break;
     case roleSkill::GotopointAvoid:
         gotoPointAvoidSkill->setAgent(agent);
@@ -32,24 +54,22 @@ void CRolePlayOff::update() {
         gotoPointAvoidSkill->setMaxVelocity(maxVelocity);
         gotoPointAvoidSkill->setAvoidBall(avoidBall);
         gotoPointAvoidSkill->setBallObstacleRadius(1);
+        gotoPointAvoidSkill->setAgent(agent);
+
         updated = false;
         break;
     case roleSkill::Kick:
         kickSkill->setTarget(target);
         kickSkill->setAvoidPenaltyArea(avoidPenaltyArea);
         kickSkill->setInterceptMode(intercept);
-        if(wm->getIsSimulMode()) {
-            kickSkill->setKickSpeed(static_cast<int>(kickSpeed/170));
-
-        } else {
-            kickSkill->setKickSpeed(kickSpeed);
-
-        }
-
+        //debug(QString("[playoffRole] profile kickSpeed : %1 %2").arg(agent->id()).arg(knowledge->getProfile(agent->id(), static_cast<double>(kickSpeed)/130.0, !chip, false)), D_MAHI);
+        kickSkill->setKickSpeed(max(kickSpeed,350));
         kickSkill->setChip(chip);
         kickSkill->setAgent(agent);
         kickSkill->setDontKick(!doPass);
-        if(!doPass && !chip) {
+        kickSkill->setAgent(agent);
+
+        if(!doPass && !chip && lookForward) {
             kickSkill->setTarget(Vector2D(1000, 0));
         }
         updated = false;
@@ -59,8 +79,11 @@ void CRolePlayOff::update() {
     case roleSkill::OneTouch:
         oneTouchSkill->setTarget(target);
         oneTouchSkill->setWaitPos(waitPos);
+        oneTouchSkill->setAgent(agent);
+        oneTouchSkill->setChip(false);
+        oneTouchSkill->setShotToEmptySpot(false);
         if (wm->getIsSimulMode()) oneTouchSkill->setKickSpeed(8);
-        else oneTouchSkill->setKickSpeed(kickSpeed);
+        else oneTouchSkill->setKickSpeed(1023);
         oneTouchSkill->setAgent(agent);
         updated = false;
         break;
@@ -74,6 +97,7 @@ void CRolePlayOff::update() {
             receivePassSkill->setIATargetDir(targetDir);
             receivePassSkill->setIgnoreAngle(false);
         }
+        receivePassSkill->setAgent(agent);
         updated = false;
         break;
     default:
@@ -101,6 +125,7 @@ void CRolePlayOff::execute() {
         break;
     case roleSkill::Kick:
         kickSkill->execute();
+        debug(QString("[playoffrole] setkickrealspeed : %2").arg(kickSpeed), D_MAHI);
         break;
     case roleSkill::Mark:
         break;

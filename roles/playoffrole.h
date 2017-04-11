@@ -14,10 +14,11 @@ public:
 
     CRolePlayOff();
     ~CRolePlayOff();
+    void reset();
     void execute();
     int resetTime();
     int getElapsed() const;
-
+    bool deleted;
     CSkillKick *kickSkill;
     CSkillReceivePass *receivePassSkill;
     CSkillKickOneTouch *oneTouchSkill;
@@ -41,13 +42,15 @@ public:
     ClassProperty(CRolePlayOff, bool, Intercept, intercept, updated);
     ClassProperty(CRolePlayOff, bool, AvoidBall,avoidBall, updated);
     ClassProperty(CRolePlayOff, bool, IgnoreAngle, ignoreAngle, updated);
-
+    ClassProperty(CRolePlayOff, double, EventDist, eventDist, updated);
     ClassProperty(CRolePlayOff, bool, DoPass, doPass, updated);
+    ClassProperty(CRolePlayOff, bool, LookForward, lookForward, updated);
 
     ////////Not Executive Property
     ClassProperty(CRolePlayOff, long long, Time, time, dont);
     ClassProperty(CRolePlayOff, bool, BallIsNear, ballIsNear, dont);
     ClassProperty(CRolePlayOff, bool, TimeBased, timeBased, dont);
+    ClassProperty(CRolePlayOff, bool, FirstMove, firstMove, dont);
 
 
 public:
@@ -55,6 +58,14 @@ public:
     bool getUpdated();
     inline void setRoleUpdate (bool _updated) {roleUpdate = _updated;}
     inline bool getRoleUpdate () {return roleUpdate;}
+
+    CRolePlayOff* setKickRealSpeed(double val) {
+        kickSpeed = knowledge -> getProfile(agent->id(), val, !chip, false);
+        debug(QString("[playoffrole] setkickrealspeed : %1 %2").arg(val).arg(kickSpeed), D_MAHI);
+        updated = true;
+        return this;
+    }
+
 protected:
 };
 

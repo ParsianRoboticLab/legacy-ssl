@@ -30,7 +30,6 @@
 #define STANDARD_LOG_REPLAY_TIME 0.016666667
 
 #define SKILL_NAME_LEN 10
-
 struct SRobotInfo{
     Vector2D pos , vel;
     double dir;
@@ -65,6 +64,10 @@ struct SDebugData{
     qint16 type;
     QString debug;
 };
+struct SAnalyzeData{
+    QString key;
+    QVariant value;
+};
 
 struct SDrawData{
     qint32 type , color;
@@ -90,13 +93,15 @@ class CGameLogger;
 //CreateSmartPointer(CGameLogger);
 
 class CGameLogger: public QThread{
-    QFile logFile , debugFile , drawFile , infoFile;
-    QFile readLog , readDebug , readDraw , readInfo;
-    QDataStream logDS , debugDS , drawDS ,infoDS;
+    QFile logFile , debugFile , drawFile , infoFile , analyzeFile;
+    QFile readLog , readDebug , readDraw , readInfo , analyzeInfo;
+    QDataStream logDS , debugDS , drawDS ,infoDS ;
+    QTextStream AnalyzeDS;
     QDataStream readLogDS , readDebugDS , readDrawDS , readInfoDS;
     QList <SPacketData> packets;
     QList <SInfoData> infos;
     QMap <qint32 , QList<SDebugData> > debugs;
+    QMap <QString , QList<QVariant> > analyses;
     QMap <qint32 , QList<SDrawData> > draws;
     QList <qint32> logSeekList , drawSeekList , debugSeekList;
     QList <SDrawData> drawList;
@@ -115,6 +120,7 @@ class CGameLogger: public QThread{
     SPacketData encodePacket();
     void writePackets();
     void writeDebugs();
+    void writeAnalyses();
     void writeDraws();
     void writeInfo();
     void readLogPacket();
@@ -126,6 +132,7 @@ public:
     ~CGameLogger();
     void run();
     void addToDebugs(QString , qint16);
+    void AddToAnalyze(QString,QVariant,bool);
     void addToDraws(Vector2D , QColor );
     void addToDraws(Segment2D , QColor);
     void addToDraws(Circle2D , int , int , QColor , bool );

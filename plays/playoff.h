@@ -11,12 +11,6 @@
 
 #define POBALLPOS Vector2D(1234, 8456)
 
-#define ClassProperty(skill,type,name,local,chflag) \
-    public: inline type get##name() {return local;} \
-    public: inline skill* set##name(type val) {local = val;chflag = true;return this;} \
-    protected: type local
-
-
 struct robotAttr {
     int index;
     int agent;
@@ -58,6 +52,13 @@ enum POMODE {
     DIRECT   = 1,
     INDIRECT = 2,
     KICKOFF  = 3
+};
+
+enum DynamicSelect {
+    NOSELECT = 0,
+    KHAFAN = 1,
+    CHIP = 2,
+    BLOCKER = 3
 };
 
 struct STuneParams {
@@ -315,12 +316,9 @@ public:
     virtual QString whoami() {return "PlayOff";}
     bool firstTime = true;
     bool kickOffFirstTimeFlag = true;
+    bool deleted;
     //GUI
 
-    QList< QList<SPlayOffPlan*> > updatePlans();
-    QList< QList<SPlayOffPlan*> > loadSQLs(QList<QString> _directorys);
-    void addSQL(QString _directory);
-    QList< QList<SPlayOffPlan*> > addSQLs(QStringList _directorys);
     void debugDirs();
 
     QList<QString> dirList;
@@ -337,7 +335,7 @@ public:
 
     void setMasterMode(EMode _mode);
     EMode getMasterMode();
-
+    void reset();
     void setInitial(bool _init);
 private:
     bool initial = true;
@@ -378,9 +376,7 @@ private:
     /////////////////////////////////////////////////////////////////
     ////////////////////////////////////////KK SQL & MATCHIN'////////
     /////////////////////////////////////////////////////////////////
-    void setPlanDir(QString directory);
     void loadSQL();
-    int loadPlan();
     Vector2D convertPos(int _x, int _y, int _symmetry);
     void loadEachPlan(SPlayOffPlan *_plan, QString _name, int _symmetry);
     bool loadSQLtoStruct(QSqlQuery _query,
@@ -455,6 +451,8 @@ private:
     void oneRightOneCentre();
     void twoSidesOneCentre();
     void twoSideOneCentreOneDef();
+    void twoSideOneCentreTwoDef();
+    void twoSideOneCentreTwoDefAndGoalie();
     ////////////////////////////////////
     int matchKickOffID(int _agentSize);
     bool isFinalShotDone();
@@ -543,12 +541,29 @@ private:
     int findReciver(int _passer, int _state);
     QList<SBallOwner> ownerList;
     bool havePassInPlan;
+    ////Dynamic
+public:
+    int dynamicMatch[6];
+    DynamicSelect dynamicSelect;
+private:
+    void dynamicAssignID();
+    void dynamicPlayKhafan();
+    void dynamicPlayBlocker();
+    void dynamicPlayChipToGoal();
 
+    void checkEndKhafan();
+    void checkEndBlocker();
+    void checkEndChipToGoal();
+    Vector2D getDynamicTarget(int i);
+
+
+    int dynamicAgentSize;
+    bool ready,pass,shot;
+    int dynamicState;
+    long dynamicStartTime;
 protected:
-    void reset();
+
 };
-
-
 ///////////OverLoading Operators
 QDebug operator<< (QDebug d, const NGameOff::SPlan _plan);
 

@@ -179,7 +179,7 @@ public:
         int select();
         void setPassRecvTarget(int id);
     } playmakerSelector;
-    bool translationFlag;
+    bool transientFlag;
     int newFastestSelector(QList <CAgent*> _agents);
     int nonPlayOnFastestSelector(QList <CAgent*> _agents);
     void sortByX(QList <CAgent *> &_agents );
@@ -242,10 +242,14 @@ public:
     float oneTouchKickThreshold();
     float kickThreshold();
     float kickClosedAngle();
-    Vector2D getReflectPos(Vector2D goal);
+    Vector2D getReflectPos(Vector2D goal, double dist);
     ////////////////////////////////<Mahi>
     Vector2D getReturnPos(Vector2D _goal);
     ///////////////////////////////////</Mahi>
+
+    //////////////////////////////////<HMD>
+    QList<Vector2D> ToBeMark;
+    //////////////////////////////////</HMD>
     bool canSendPass(int sender, int receiver, Vector2D point, double factor);
     int getBallOwner(bool& ours);
     bool isBallOurs();
@@ -304,7 +308,7 @@ public:
     bool selectedOur;
     int shirjezan; //shirje zan e mrl
     double currentTime();
-    long getCurrentKKTime();
+    long getCurrentTime();
     void playChanged();
     double findDangerPercent(CRobot *);
     double getEmptyAngle(Vector2D p,Vector2D p1, Vector2D p2, QList<Circle2D> obs, double& percent, double &mostOpenAngle, double& biggestAngle, bool oppGoal = true, bool _draw = false);
@@ -312,6 +316,7 @@ public:
     void generateDefensePositions(int defenses, bool goalie, QList<Circle2D> avoidCircles, QList<Vector2D> &defendersPos, Vector2D &goaliePos, Vector2D goalieCurrentPos = Vector2D::INVALIDATED);
     void checkShootDanger();
     void Aminshoot(Vector2D ball, QList<Circle2D> obstacles, double& _empty, Vector2D& _best);
+    int getProfile(int agentId, double realParameter, bool isKick=true, bool spinOn=false);
     void calculateCommandFrameRate();
     double lastTimeCommandFPSCalced;
     FormationCounts formation;
@@ -350,7 +355,7 @@ public:
     int lastFramePAreaAvoided;
     int currentPlayAllowedAgents;
     FastestToBall findFastestToBall(QList<int> ourList=QList<int>(), QList<int> oppList=QList<int>());
-    NewFastestToBall newFastestToBall(double timeStep = 0.1, QList<int> ourList=wm->our.t->activeAgents, QList<int> oppList=wm->opp.t->activeAgents);
+    NewFastestToBall newFastestToBall(double timeStep = 0.1, QList<int> ourList=wm->our.data->activeAgents, QList<int> oppList=wm->opp.data->activeAgents);
     bool matchdebug;
     double loopTime, maxLoopTime, visionProcessTime;
     double *plotWidgetCustom;
@@ -383,7 +388,6 @@ public:
     PropertyGet(int, LastFramePlayChanged, lastFrameplaychanged);
     PropertyGet(CKnowledge::State, LastGameState, lastgamestate);
     PropertyGet(bool, GameStateChanged, gamestatechanged);
-
     Property(Vector2D, MousePos, mousePos);
     Property(int, NumOfAttackers, numofattackers);
     Property(int, NumOfDeffenders, numofdeffenders);
@@ -414,11 +418,15 @@ private:
     SRAgentArgs CRAgent[_MAX_NUM_PLAYERS];
     bool necessaryDefKick;
     QList<Vector2D> staticPoses;
+
+    int refRobotID;
+    double RobotsCoeff[16][4];
+    double ProfilerResult[16][4][81];
 public:
 
-    double ProfilerResult[16][4][81];
     //added by Mahi
     CNewProfiler *profiler;
+    double getKickSpeedProfile(int agentId,double kickSpeedInput);
 
     Vector2D getStaticPoses(int num);
     void setNecessaryDefKick(bool tempNcssryDefKick);

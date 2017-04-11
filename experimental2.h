@@ -5,21 +5,354 @@
 #include "trajectoryplanner.h"
 double dist=3,v=0;
 #include "skills/autoballplacement.h"
+#include "theirpenalty.h"
+#include "ourpenalty.h"
+#include "coach.h"
+#include "geom.h"
 
+COurPenalty *ourPenaltyTech;
+CTheirPenalty *TheirPenaltyTech;
+
+enum PenaltyState{
+    KICKK = 0,
+    KICK_SHOT = 1,
+    KICK_CHIP = 2
+};
+
+
+int countt = 0;
+Vector2D lastBallPos = Vector2D(0,0);
+bool start = true;
 void CMainApplication::Experimental2()
 {
+
+    //technicalChalenge Penalty
+
+    int id = 2;
+    int oppActiveIndx = 0;
+    draw(Vector2D(+1.5,0));
+
+    knowledge->updateGameState();
+
+    draw(Circle2D(Vector2D(-1.5, 0), 0.1), "cyan");
+
+//    draw(Segment2D (sol1, wm->field->ourGoal()-Vector2D(2,0)), QColor(Qt::darkYellow));
+
+    if( knowledge->getGameState() == CKnowledge::Stop ){
+
+        draw(QString("Stop"), Vector2D(-4, 2.5), "blue");
+        Vector2D sol1, sol2;
+        Line2D tempLine(wm->ball->pos, wm->field->oppGoal());
+//        draw(Circle2D(wm->ball->pos, 0.6), QColor(Qt::cyan));
+        Circle2D(wm->ball->pos, 0.6).intersection(tempLine, &sol1, &sol2);
+//        draw(Segment2D (sol1, wm->field->oppGoal()), QColor(Qt::darkYellow));
+//        draw(Segment2D (sol2, wm->field->oppGoal()), QColor(Qt::darkYellow));
+//        draw(Circle2D(sol1, 0.2), QColor(Qt::blue));
+//        draw(Circle2D(sol2, 0.2), QColor(Qt::blue));
+
+        Vector2D agentPos;
+        if( (wm->field->oppGoal()-sol1).length() < (wm->field->oppGoal()-sol2).length() ){
+            agentPos = sol2;
+        }
+        else
+            agentPos = sol1;
+
+        static CSkillGotoPointAvoid *stop = new CSkillGotoPointAvoid(knowledge->getAgent(id));
+        stop->init(agentPos, wm->ball->pos);
+        stop->setTargetLook(agentPos, wm->ball->pos);
+        stop->execute();
+
+    }
+    else if( knowledge->getGameState() == CKnowledge::OurPenaltyKick ){
+
+        draw(QString("ourPenalty"), Vector2D(-4, 2.5), "blue");
+
+        Vector2D sol1, sol2;
+        Line2D tempLine(wm->ball->pos, wm->field->oppGoal());
+        Circle2D(wm->ball->pos, 0.2).intersection(tempLine, &sol1, &sol2);
+
+        Vector2D agentPos;
+        if( (wm->field->oppGoal()-sol1).length() < (wm->field->oppGoal()-sol2).length() ){
+            agentPos = sol2;
+        }
+        else
+            agentPos = sol1;
+
+        static CSkillGotoPointAvoid *goBehindBall = new CSkillGotoPointAvoid(knowledge->getAgent(id));
+        goBehindBall->init(agentPos, wm->ball->pos);
+        goBehindBall->setTargetLook(agentPos, wm->ball->pos);
+        goBehindBall->execute();
+
+    }
+
+    else if( knowledge->getGameState() == CKnowledge::TheirPenaltyKick ){
+        draw(QString("theirPenalty"), Vector2D(-4, 2.5), "blue");
+//        draw(Circle2D(wm->field->ourGoal(), 0.5), QColor(Qt::blue));
+        static CSkillGotoPointAvoid *goToOurGoal = new CSkillGotoPointAvoid(knowledge->getAgent(id));
+
+//        goToOurGoal->init(wm->field->ourGoal(), wm->ball->pos);
+//        goToOurGoal->setTargetLook(wm->field->ourGoal(), wm->ball->pos);
+
+        //what should goalie do?
+
+        /*
+        //dar jahate opp and ball mimune
+        Line2D ourLine(wm->field->ourGoal() + Vector2D(0, 0.5), wm->field->ourGoal() + Vector2D(0, -0.5));
+        draw(Segment2D(wm->field->ourGoal() + Vector2D(0, 0.5), wm->field->ourGoal() + Vector2D(0, -0.5)), "red");
+        Line2D ballLine(wm->opp.active(oppActiveIndx)->pos, wm->ball->pos);
+        draw(Segment2D(wm->opp.active(oppActiveIndx)->pos, wm->ball->pos), "red");
+        Vector2D sol1;
+        sol1 = ourLine.intersection(ballLine);
+        draw(Circle2D(sol1, 0.2), "red");
+
+        Vector2D targetLook;
+        if( sol1.y > 0.5 ){
+            targetLook = Vector2D(-4.3, 0.3);
+        }
+        else if( sol1.y < -0.5 ){
+            targetLook = Vector2D(-4.3, -0.3);
+        }
+        else{
+            targetLook = sol1 + Vector2D(0.2, 0);
+        }
+
+        goToOurGoal->setTargetLook(targetLook, wm->ball->pos);
+        goToOurGoal->execute();
+        */
+
+
+/*
+        static CRolePlayOn *goalie = new CRolePlayOn();
+
+        goalie->setAgent(knowledge->getAgent(id));
+        goalie->setAgentID(id);
+//        goalie->setReceiveRadius(1);
+//        goalie->setTolerance(0.01);
+        goalie->setIsActive(true);
+//        goalie->setChip(false);
+        goalie->setSlow(true);
+*/
+
+
+
+        /*
+        if( !start ){
+
+            goalie->setSelectedSkill(roleSkill::GotopointAvoid);
+
+            if(Circle2D(Vector2D(-4.4, 0.4), 0.4).contains(knowledge->getAgent(id)->pos())){
+                goalie->setWaitPos(Vector2D(-4.4,-0.4));
+                goalie->setTarget(Vector2D(-4.4,-0.4));
+            }
+            if(Circle2D(Vector2D(-4.4,-0.5), 0.4).contains(knowledge->getAgent(id)->pos())){
+                goalie->setWaitPos(Vector2D(-4.4,0.4));
+                goalie->setTarget(Vector2D(-4.4,0.4));
+            }
+        }
+        else{
+            goalie->setSelectedSkill(roleSkill::GotopointAvoid);
+            goalie->setTarget(Vector2D(-4.4, 0.4));
+            goalie->setTargetDir(wm->ball->pos);
+            start = false;
+        }
+        */
+
+        /*
+        goalie->setSelectedSkill(roleSkill::Kick);
+        goalie->setTarget(Vector2D(0, -4));
+        goalie->setChip(true);
+        goalie->setKickSpeed(1000/100);
+
+        goalie->execute();
+        */
+
+
+        if( !Circle2D(wm->field->ourGoal()+Vector2D(6,0),0.5).contains(wm->ball->pos) ){//ball is not in 6 meters
+            debug("in circle", D_ATOUSA);
+            if( wm->ball->vel.length() < 1){//kick the ball
+
+                static CRolePlayOn *goalie = new CRolePlayOn();
+
+                goalie->setAgent(knowledge->getAgent(id));
+                goalie->setAgentID(id);
+                goalie->setIsActive(true);
+                goalie->setSlow(false);
+                goalie->setSelectedSkill(roleSkill::Kick);
+                goalie->setTarget(Vector2D(0, -4));
+                goalie->setChip(true);
+                goalie->setKickSpeed(1000);
+
+                goalie->execute();
+
+            }
+            else{ //dar tule darvaze dar jahate felan bashe
+//                if( countt == 10 ){
+                    static CSkillKickOneTouch mOT(knowledge->getAgent(id));
+                    Line2D ourLine(wm->field->ourGoal() + Vector2D(0, 0.5), wm->field->ourGoal() + Vector2D(0, -0.5));
+                    draw(Segment2D(wm->field->ourGoal() + Vector2D(0, 0.5), wm->field->ourGoal() + Vector2D(0, -0.5)), "red");
+                    Line2D ballLine(lastBallPos, wm->ball->pos);
+                    draw(Segment2D(lastBallPos, wm->ball->pos), "red");
+                    Vector2D sol1;
+                    sol1 = ourLine.intersection(ballLine);
+                    draw(Circle2D(sol1, 0.2), "red");
+
+                    Vector2D targetLook;
+                    if( sol1.y > 0.5 ){
+                        targetLook = Vector2D(-4.3, 0.3);
+                    }
+                    else if( sol1.y < -0.5 ){
+                        targetLook = Vector2D(-4.3, -0.3);
+                    }
+                    else{
+                        targetLook = sol1 + Vector2D(0.2, 0);
+                    }
+                    mOT.setWaitPos(targetLook);
+                    mOT.setTarget(Vector2D(10,10));
+                    mOT.setKickSpeed(1000);
+                    mOT.setChip(true);
+                    mOT.execute();
+
+                    //                }
+//                else
+//                    countt++;
+            }
+        }
+        else{// is in 6 meters
+//            debug("not in circle", D_ATOUSA);
+            static CSkillGotoPointAvoid *goToOurGoal = new CSkillGotoPointAvoid(knowledge->getAgent(id));
+            goToOurGoal->init(wm->field->ourGoal(),Vector2D(1,0));
+            goToOurGoal->execute();
+        }
+
+    }
+
+//    else if( knowledge->getGameState() == CKnowledge::Halt ){
+//        draw(QString("Halt"), Vector2D(-4, 2.5), "blue");
+//        haltAllRobots();//oke
+//    }
+
+//    else if( knowledge->getGameState() == CKnowledge::NormalStart ){
+
+//        if( knowledge->getGameMode() == CKnowledge::OurPenaltyKick ){
+//            draw(QString("ourPenaltyNormalStart"), Vector2D(-3,-2), "blue");
+
+////            //    KICK, KICK_SHOT, KICK_CHIP
+////            PenaltyState state = KICKK;
+////            switch(state){
+
+////            case KICKK:
+
+////                Vector2D targetGoal;
+////                double upY = abs(((wm->field->oppGoal() + Vector2D(0, 0.5))- wm->opp.active(oppActiveIndx)->pos).y);
+////                double downY = abs(((wm->field->oppGoal() + Vector2D(0, -0.5))- wm->opp.active(oppActiveIndx)->pos).y);
+////                if( upY < downY ){
+////                    targetGoal = wm->field->oppGoal() + Vector2D(0, -0.5) + Vector2D(0.05, downY/3);
+////                }
+////                else{
+////                    targetGoal = wm->field->oppGoal() + Vector2D(0,  0.5) + Vector2D(0.05, -1*(upY/3));
+////                }
+
+////                draw(Segment2D(targetGoal, knowledge->getAgent(id)->pos()), "cyan");
+
+////                static CSkillKick *kicker = new CSkillKick(knowledge->getAgent(id));
+////                kicker->setTarget(targetGoal);
+////                kicker->setKickSpeed(1000);
+////                //un circle ro chikar konm? ke vagti kck mkone nare donbalesh(??)
+////                if( !Circle2D(Vector2D(-1.5, 0), 0.5).contains(wm->ball->pos) )
+////                    kicker->setDontKick(true);
+////                else
+////                    kicker->setDontKick(false);
+////                kicker->execute();
+
+////                break;
+
+
+////            case KICK_SHOT:
+////                //
+////                break;
+////            case KICK_CHIP:
+
+////                break;
+////            }
+
+//            static CSkillKick mkick(knowledge->getAgent(id));
+//            mkick.setShotToEmptySpot(true);
+//            if(wm->ball->pos.x < 1)
+//            {
+//                mkick.setKickSpeed(50);
+//            }
+//            else
+//            {
+//                mkick.setKickSpeed(1000);
+//            }
+
+//            mkick.execute();
+//        }
+
+//    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//    static CSkillGotoPointAvoid *stop = new CSkillGotoPointAvoid(knowledge->getAgent(id));
+//    stop->init(Vector2D(0,0), wm->ball->pos);
+//    stop->execute();
+
+/*
+    static CRolePlayOn * skiiill= new CRolePlayOn();
+
+    id = 5;
+    skiiill->setAgent(knowledge->getAgent(id));
+    skiiill->setAgentID(id);
+    skiiill->setReceiveRadius(1.2);
+    skiiill->setTolerance(0.01);
+    skiiill->setIsActive(true);
+    skiiill->setChip(false);
+    skiiill->setSlow(true);
+
+    skiiill->setSelectedSkill(roleSkill::GotopointAvoid);
+
+    if(Circle2D(Vector2D(4,2.5), 0.4).contains(knowledge->getAgent(skiiill->getAgentID())->pos())){
+        skiiill->setWaitPos(Vector2D(-4,2.5));
+        skiiill->setTarget(Vector2D(-4,2.5));
+    }
+    if(Circle2D(Vector2D(-4,2.5), 0.4).contains(knowledge->getAgent(skiiill->getAgentID())->pos())){
+        skiiill->setWaitPos(Vector2D(4,2.5));
+        skiiill->setTarget(Vector2D(4,2.5));
+    }
+    skiiill->execute();
+*/
+
+    return;
+
     static COurBallPlacement *obp = new COurBallPlacement();
     QList<int> ag;
-//    ag.append(0);
+    //    ag.append(0);
     ag.append(1);
-//    ag.append(2);
-//    ag.append(3);
-//    ag.append(4);
+    //    ag.append(2);
+    //    ag.append(3);
+    //    ag.append(4);
     ag.append(5);
     obp->init(ag, NULL);
     obp->execute();
 
-/*
+    /*
     static CSkillAutoBallPlacement *abp = new CSkillAutoBallPlacement(knowledge->getAgent(0));
     abp->execute();
 */
@@ -42,16 +375,16 @@ void CMainApplication::Experimental2()
     draw(Circle2D(mousePos, wm->ball->radius), QColor(Qt::red));
 
 
-//    Circle2D tempCircle(wm->field->ourGoal()-Vector2D(0.2, 0), 1.33);
-//    draw(tempCircle, QColor(Qt::cyan));
-//    Vector2D tempVec = defPosTest.getXYByAngle(defAngle, defRadius);
+    //    Circle2D tempCircle(wm->field->ourGoal()-Vector2D(0.2, 0), 1.33);
+    //    draw(tempCircle, QColor(Qt::cyan));
+    //    Vector2D tempVec = defPosTest.getXYByAngle(defAngle, defRadius);
 
-//    draw(QString::number(defPosTest.getRobotAngle(defRadius)), Vector2D(-1, _FIELD_HEIGHT/2 - 0.2));
-//    draw(tempVec);
+    //    draw(QString::number(defPosTest.getRobotAngle(defRadius)), Vector2D(-1, _FIELD_HEIGHT/2 - 0.2));
+    //    draw(tempVec);
 
-//    kk2Angles tempAngles = defPosTest.getIntersections(mousePos);
+    //    kk2Angles tempAngles = defPosTest.getIntersections(mousePos);
 
-//    draw(QString("a1:%1, a2: %2").arg(tempAngles.angle1).arg(tempAngles.angle2), Vector2D(-1, _FIELD_HEIGHT/2 - 0.4));
+    //    draw(QString("a1:%1, a2: %2").arg(tempAngles.angle1).arg(tempAngles.angle2), Vector2D(-1, _FIELD_HEIGHT/2 - 0.4));
 
 
     kkDefPos tempDefPos = defPosTest.getDefPositions(mousePos, 2, 1.43, 2.5);
@@ -61,9 +394,9 @@ void CMainApplication::Experimental2()
     }
     return;
     /////////////////////////////////////////////////////////
-//    static CSkillNEWKeep *keepBall = new CSkillNEWKeep( soccer->agents[0] );
-//    keepBall->execute();
-//    return;
+    //    static CSkillNEWKeep *keepBall = new CSkillNEWKeep( soccer->agents[0] );
+    //    keepBall->execute();
+    //    return;
     for(int i = 0; i < 8; i++)
         knowledge->SRSetAgentArg(i, i, (rand()%1023)/100, 2, 3, 4, 5);
     return;
@@ -78,7 +411,7 @@ void CMainApplication::Experimental2()
 
     speed = wm->ball->pos.dist(lastPos)*1000/16;
     if(speed > 0.1)
-    debug(QString("speed : (%1)").arg(speed),D_MAHI);
+        debug(QString("speed : (%1)").arg(speed),D_MAHI);
     lastPos = wm->ball->pos;
 
     return;
@@ -92,8 +425,8 @@ void CMainApplication::Experimental2()
     tRole.setTask(PassDefensive);
     tRole.setTarget(Vector2D(2,2));
     tRole.setTolerance(0.1);
-        tRole.setChip(true);
-            tRole.setKickSpeed(10);
+    tRole.setChip(true);
+    tRole.setKickSpeed(10);
     tRole.setAvoidPenaltyArea(true);
     tRole.setAvoidCenterCircle(false);
     tRole.setIsGotoPointAvoid(true);

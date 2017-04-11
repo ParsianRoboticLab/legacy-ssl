@@ -946,6 +946,8 @@ void CRolePlayMake::executeOurPenalty()
         }
 
         kick->setTarget(penaltyTarget);
+        // TODO : Fix This Speed
+        // TODO : check this mhmmd
         kick->setKickSpeed(kick->getAgent()->kickSpeedValue(7.8,false));
         kick->setPenaltyKick(true);
         kick->setInterceptMode(false);
@@ -1000,7 +1002,7 @@ bool CRolePlayMake::canScoreGoal(){
     double region;
     QList <int> ourRelax;
     ourRelax.clear();
-    ourRelax.append(wm->our.t->activeAgents);
+    ourRelax.append(wm->our.data->activeAgents);
     if( knowledge->goalie != NULL && ourRelax.contains(knowledge->goalie->self()->id)){
         ourRelax.removeOne(knowledge->goalie->self()->id);
     }
@@ -1071,7 +1073,7 @@ void CRolePlayMake::execute()
     double region;
     QList <int> ourRelax;
     ourRelax.clear();
-    ourRelax.append(wm->our.t->activeAgents);
+    ourRelax.append(wm->our.data->activeAgents);
     if( knowledge->goalie != NULL && ourRelax.contains(knowledge->goalie->self()->id)){
         ourRelax.removeOne(knowledge->goalie->self()->id);
     }

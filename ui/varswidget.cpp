@@ -67,6 +67,7 @@ CVarsWidget::CVarsWidget()
             ADD_TO_ENUM(LocalSettings,OurTeamSide,"Left")
             ADD_TO_ENUM(LocalSettings,OurTeamSide,"Right")
             END_ENUM(LocalSettings,OurTeamSide)
+            ADD_VALUE(LocalSettings,Bool,ParsianWorkShop,false,"Parsian Workshop")
             ADD_TREE(Common,"Common",true)
             ADD_VALUE(Common,Int,Viewport_Width,800,"Viewport Width")
             ADD_VALUE(Common,Int,Command_Interval,10,"Command Sending Interval(ms)")
@@ -199,7 +200,7 @@ CVarsWidget::CVarsWidget()
             ADD_VALUE(Performance_Debug, Bool, debugMahmood, false, "Mahmood")
             ADD_VALUE(Performance_Debug, Bool, debugAtousa, false, "Atousa")
             ADD_VALUE(Performance_Debug, Bool, debugAmin, false, "Amin")
-            ADD_VALUE(Performance_Debug, Bool, debugAmiR, false, "Amir")
+            ADD_VALUE(Performance_Debug, Bool, debugParsa, false, "Parsa")
             ADD_VALUE(Performance_Debug, Bool, debugHamed, false, "Hamed")
             ADD_TREE(Experiments,"Experiments",false)
             ADD_PTREE(Experiments, AutoReferee, "Automated Referee")
@@ -262,6 +263,7 @@ CPolicyWidget::CPolicyWidget()
 
     ADD_TREE(Formation,"Formation",false);
     ADD_VALUE(Formation, Bool, StrictFormation, false, "Strict Formation");
+    ADD_VALUE(Formation, Bool, GoalieFromGUI, false, "Goalie from GUI");
     ADD_VALUE(Formation, Int, Goalie, 1, "Goalie ID");
     ADD_VALUE(Formation, Int, Defense, 1, "Defense Count");
     ADD_TREE(PlayMaker,"Play Maker",false);
@@ -305,20 +307,22 @@ CPolicyWidget::CPolicyWidget()
     ADD_VALUE(KKPlayOn, Int, KKChipSpeed, 550, "Chip Speed");
     ADD_VALUE(KKPlayOn, Int, KKShotSpeed, 1023, "Shot Speed");
     ADD_VALUE(KKPlayOn, Int, KKChipToGoalSpeed, 650, "Chip to Goal Speed");
-    ADD_TREE(KKPlayOff,"PlayOff",false);
-    ADD_VALUE(KKPlayOff, String, KKPOPlanSQL, QDir::currentPath().toStdString()+"/poplan.db3", "SQL Directory");
-    ADD_VALUE(KKPlayOff, Bool, KKPOSymmetry, false, "Symmetry");
-    ADD_VALUE(KKPlayOff, Bool, KKPOUseDef, false, "Use Def Robots");
+    ADD_TREE(PlayOff,"PlayOff",false);
+    ADD_VALUE(PlayOff, Bool, IDBasePasser, false, "ID Base Passer");
+    ADD_VALUE(PlayOff, Int, PasserID, 0, "Passer ID ");
+    ADD_VALUE(PlayOff, Bool, IDBaseOneToucher, false, "ID Base OneToucher");
+    ADD_VALUE(PlayOff, Int, OneToucherID, 0, "One Toucher ID ");
     ADD_TREE(DynamicPlay, "DynamicPlay", false);
-    ADD_VALUE(DynamicPlay, Int , LowSpeedPass   , 300, "Low Speed Pass");
-    ADD_VALUE(DynamicPlay, Int , MediumSpeedPass, 600, "Medium Speed Pass");
-    ADD_VALUE(DynamicPlay, Int , HighSpeedPass  , 800, "High Speed Pass");
-    ADD_VALUE(DynamicPlay, Int , LowSpeedChip   , 300, "Low Speed Chip");
-    ADD_VALUE(DynamicPlay, Int , MediumSpeedChip, 300, "Medium Speed Chip");
-    ADD_VALUE(DynamicPlay, Int , HighSpeedChip  , 300, "High Speed Chip");
+    ADD_VALUE(DynamicPlay, Double , LowSpeedPass   , 0, "Low Speed Pass");
+    ADD_VALUE(DynamicPlay, Double , MediumSpeedPass, 0, "Medium Speed Pass");
+    ADD_VALUE(DynamicPlay, Double , HighSpeedPass  , 0, "High Speed Pass");
+    ADD_VALUE(DynamicPlay, Double , LowSpeedChip   , 0, "Low Speed Chip");
+    ADD_VALUE(DynamicPlay, Double , MediumSpeedChip, 0, "Medium Speed Chip");
+    ADD_VALUE(DynamicPlay, Double , HighSpeedChip  , 0, "High Speed Chip");
     ADD_VALUE(DynamicPlay, Bool, FarForward , false, "Far Forward");
     ADD_VALUE(DynamicPlay, Bool, NearForward, false, "Near Forward");
     ADD_VALUE(DynamicPlay, Double, Area, 0.3, "Pass Area");
+    ADD_VALUE(DynamicPlay, Double, DirectTrsh, 0.7, "Pass/Shoot trsh");
 
     ADD_TREE(Mark, "Mark", false);
     ADD_VALUE(Mark, Bool , PlayOffManToMan   , false, "PlayOff Man To Man");
@@ -334,6 +338,8 @@ CPolicyWidget::CPolicyWidget()
 
     ADD_VALUE(Mark, Bool, OmmitNearestToBallPlayon, false, "Ommit Nearest To ball Playon");
 
+    ADD_VALUE(Mark, Bool , IntelligentMarkType, false, "Intelligent Mark Type");
+    ADD_VALUE(Mark, Bool , IntelligentMarkPrediction, true, "Intelligent Mark Prediction");
 
     globalWorld=VarXML::read(globalWorld,"policy.xml");
 
@@ -382,6 +388,7 @@ IMPL_VALUE(CVarsWidget,LocalSettings,bool,Bool,SharedRadioEnable)
 IMPL_VALUE(CVarsWidget,LocalSettings,bool,Bool,SharedRadioReceive)
 IMPL_ENUM(CVarsWidget,LocalSettings,std::string,OurTeamColor)
 IMPL_ENUM(CVarsWidget,LocalSettings,std::string,OurTeamSide)
+IMPL_VALUE(CVarsWidget,LocalSettings,bool,Bool,ParsianWorkShop)
 IMPL_VALUE(CVarsWidget,Common,int,Int,Viewport_Width)
 IMPL_VALUE(CVarsWidget,Common,int,Int,Command_Interval)
 IMPL_VALUE(CVarsWidget,Common,int,Int,Monitor_Interval)
@@ -491,7 +498,7 @@ IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugAHZ)
 IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugFatemeh)
 IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugAtousa)
 IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugAmin)
-IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugAmiR)
+IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugParsa)
 IMPL_VALUE(CVarsWidget,Performance_Debug, bool, Bool, debugHamed)
 
 
@@ -501,8 +508,10 @@ IMPL_VALUE(CVarsWidget,Experiments_AutoReferee, int, Int, autorefereefMulticastP
 
 
 IMPL_VALUE(CPolicyWidget,Formation, bool, Bool, StrictFormation)
+IMPL_VALUE(CPolicyWidget,Formation, bool, Bool, GoalieFromGUI)
 IMPL_VALUE(CPolicyWidget,Formation, int, Int, Goalie)
 IMPL_VALUE(CPolicyWidget,Formation, int, Int, Defense)
+
 IMPL_VALUE(CPolicyWidget,PlayMaker, bool, Bool, JustKickToGoal)
 IMPL_VALUE(CPolicyWidget,PlayMaker, bool, Bool, JustChipToGoalInBelowDist)
 IMPL_VALUE(CPolicyWidget,PlayMaker, double, Double, ChipToGoalDist)
@@ -538,20 +547,21 @@ IMPL_VALUE(CPolicyWidget,KKPlayOn, int, Int, KKChipSpeed)
 IMPL_VALUE(CPolicyWidget,KKPlayOn, int, Int, KKShotSpeed)
 IMPL_VALUE(CPolicyWidget,KKPlayOn, int, Int, KKChipToGoalSpeed)
 
-IMPL_VALUE(CPolicyWidget,KKPlayOff, std::string, String, KKPOPlanSQL)
-IMPL_VALUE(CPolicyWidget,KKPlayOff, bool, Bool, KKPOSymmetry)
-IMPL_VALUE(CPolicyWidget,KKPlayOff, bool, Bool, KKPOUseDef)
+IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, IDBasePasser)
+IMPL_VALUE(CPolicyWidget,PlayOff, int, Int, PasserID)
+IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, IDBaseOneToucher)
+IMPL_VALUE(CPolicyWidget,PlayOff, int, Int, OneToucherID)
 
-IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , LowSpeedPass)
-IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , MediumSpeedPass)
-IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , HighSpeedPass)
-IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , LowSpeedChip)
-IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , MediumSpeedChip)
-IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , HighSpeedChip)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , LowSpeedPass)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , MediumSpeedPass)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , HighSpeedPass)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , LowSpeedChip)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , MediumSpeedChip)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , HighSpeedChip)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, bool, Bool, FarForward)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, bool, Bool, NearForward)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, double, Double, Area)
-
+IMPL_VALUE(CPolicyWidget, DynamicPlay, double, Double, DirectTrsh)
 
 IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , PlayOffManToMan)
 IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , PlayOnManToMan)
@@ -565,6 +575,8 @@ IMPL_VALUE(CPolicyWidget, Mark, double, Double, ShootRatioBlock)
 IMPL_VALUE(CPolicyWidget, Mark, double, Double, PassRatioBlock)
 IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , OmmitNearestToBallPlayon)
 
+IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , IntelligentMarkType)
+IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , IntelligentMarkPrediction)
 
 
 

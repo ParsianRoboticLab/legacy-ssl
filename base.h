@@ -1,11 +1,12 @@
+
 #ifndef BASE_H
 #define BASE_H
 
 
 #define REVNUM "$Rev: 2484 $"
 
+// TODO : remove this macro
 #define KK_PLAYON
-#define PARSIANWORKSHOP
 //#define SIMULATION_MODE
 //#define GAME_MODE
 
@@ -58,25 +59,26 @@ enum DynamicMode {
     Fast,
     Critical,
     NotWeHaveBall,
-    Plan
+    Plan,
+    BallInOurField,
+    NoPositionAgent,
+    BallInOppJaw
+
 };
 
 enum DynamicSkill {
     NoSkill,
-    Ready,
+    //PlayMake Skills
     Pass,
-    Mark,
     CatchBall,
     Shot,
-    Move,
     Keep,
-    Chip
-};
-
-enum DynamicRole {
-    NoRole,
-    PlayMaker,
-    Position
+    Chip,
+    //Positioning
+    Ready,
+    OneTouch,
+    Move,
+    Dribble
 };
 
 enum DynamicRegion {
@@ -85,6 +87,7 @@ enum DynamicRegion {
     Forward,
     Far,
     Goal,
+    Reflect,
     Best,
     Supporter
 };
@@ -213,6 +216,7 @@ struct GameStatePacket
 #define _FIELD_PENALTY          1.000
 #define _GOAL_WIDTH             1.000
 #define _GOAL_RAD               1.000
+#define _AHZ_GOAL_RAD           1.150
 #define _GOAL_DEPTH             0.250
 #define _PENALTY_WIDTH          2.500
 #define _CENTER_CIRCLE_RAD      0.500
@@ -239,11 +243,3 @@ struct GameStatePacket
 #define for_visible_agents(AGENTS, i) for (int i=0;i<_NUM_PLAYERS;i++) if (AGENTS[i]->isVisible())
 
 #endif // BASE_H
-
-/*
-
-TODO
-
-* Referee: http://www.qtcentre.org/forum/archive/index.php/t-3347.html
-
-*/

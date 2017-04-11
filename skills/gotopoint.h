@@ -296,6 +296,8 @@ public:
     SkillProperty(CSkillGotoPoint, bool, ADiveMode, diveMode);
     SkillProperty(CSkillGotoPoint, bool, AvoidBall, avoidBall);
     SkillProperty(CSkillGotoPoint, bool, AvoidGoalPosts, avoidGoalPosts);
+    SkillProperty(CSkillGotoPoint, Vector2D, NextPos, nextPos);
+
     friend class CSkillFollowPoints;
 };
 

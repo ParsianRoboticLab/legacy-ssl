@@ -32,7 +32,10 @@ class CDefPos {
 public:
     CDefPos();
     kkDefPos getDefPositions(Vector2D _ballPos, int _size, double _limit1, double _limit2);
+    //HMD
     Vector2D getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Segment2D _seg);
+    bool isInPenaltyAreaDef(double _tempBestRadius , Vector2D vec);
+    //HMD Finish
     double nearRadius[2];
     bool isNearPenaltyArea;
 
@@ -40,8 +43,7 @@ private:
     Vector2D getXYByAngle(double _angle, double _radius);
     double getRobotAngle(double _radius);
     double getAngleByXY(Vector2D _point);
-    kk2Angles getIntersections(Vector2D _ballPos, double _radius);
-    double getBestRadiusBySize(double _openAngle, int _size);
+    kk2Angles getIntersections(Vector2D _ballPos, double _radius);    
     double findBestRadius(int _numOfDefs);
     double oneDefThr;
 
@@ -103,10 +105,10 @@ protected:
     void runGoalie();
     bool ballBehindGoalie, goalieOneTouch, goalieInPenaltyAreaPrediction, goalieClearMode, goalieStrictFollow, goalieFollow, ballIsOutOfField;
     double strictfollowThr;
-    double behindBallThr;
-    bool dangerForGoalieClear;
+    double behindBallThr;    
     bool besidePoleFlag;
-    int oneTouchCnt;
+    bool dangerForGoalieClear;
+    int oneTouchCnt;    
     ////////////////////////////// AHZ ///////////////////
     Vector2D getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion);
     Line2D getBisectorLine(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
@@ -114,9 +116,34 @@ protected:
     void manToManMarkInPlayOn(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void tempFindPos(int _markAgentSize);
-    int angleDegreeThr = 0;
+    void getIntersectionWithPenaltyAreaAHZ(Segment2D , Vector2D sol1 , Vector2D sol2);
+    bool isIndirectArea(Vector2D);
+    int angleDegreeThr = 0;    
     int angleDegreeThrNotStop = 0;
     int angleDegreeThrNotStopAHZ = 0;
+    double threshOld = 0.0;
+    double ballCircleR = 0.5;
+    bool isCrowdedInFrontOfPenaltyAreaByOurAgents;
+    bool isCrowdedInFrontOfPenaltyAreaByOppAgents;
+    bool ballISInpenaltyAreaAndDangerCircle;
+    bool ballIsNotInPenaltyAreaAndIsInDangerCircle;
+    bool ballIsInPenaltyAreaAndIsNotInDangerCircle;
+    bool dangerForGoalieClearByOurAgents;
+    bool dangerForGoalieClearByOppAgents;
+    bool stopMode;
+    bool limitBetweenAHZAndHMD;
+    bool limitBetweenHMDAndAHZ;
+    bool changeInMarkPlanFlag;    
+    int lastOpponentAgentsToBeMarkSize;
+    QList <QString> markRoles;
+    QList <QString> lastMarkRoles;
+    QList <Vector2D> tenLastOpponentDirection;
+    QList <Vector2D> tenLastOpponentPosition;
+    Vector2D opponentPasserDirection;
+    Vector2D opponentPasserPossition;
+    Vector2D sumOfLastOpponentDirection;
+    Vector2D sumOfLastOpponentPosition;
+    int AHZCount;
     ///////////////////////////////////////////////////
     void executeGoalie();
     Vector2D blockTheBall();
@@ -185,22 +212,25 @@ public:
 
     bool isAnyDefenderMarking() const;
     ///////Mhmmd///////////
-    void getDefencePoses(Vector2D *poses);
+    void fillDefencePositionsTo(Vector2D *poses);
     //////////////////////
 
     //////////////////HMD/////////////////
     QList<Vector2D> markPoses;
       QList<Vector2D> markAngs;
-
       double markRadius;
       double markRadiusStrict;
       double segmentpershoot;
       double segmentperpass;
+      bool MantoManAllTransientFlag;
+      bool LastTS;
+      Vector2D dir;
     ///////////////////////////////////
 
 
 private:
       ///////////////////////HMD///////////////
+      void inteliDecideMarkType();
       void findPos(int _markAgentSize);
        void findOppAgentsToMark(QList<Vector2D> _realDefTargets);
        QList<CRobot*> sortdanger(const QList<CRobot*> oppagent);
@@ -216,12 +246,10 @@ private:
        QList<Vector2D> indirectAvoidPass(Vector2D);
        int numberOfMarkers;
        QList<Vector2D> oppAgentsToMarkPos;
-       QList<Vector2D> obspos;
-       QList<Vector2D> opppos;
        QList<Vector2D> oppmarkedpos;
        QList<CRobot*>  oppAgentsToMark;
        QList<CRobot*>  oppAgentsMarkedByDef;
-       Vector2D posvel(CRobot*);
+       Vector2D posvel(CRobot*, double);
 
 
        QList<QPair<Vector2D, double> > sortdangerpassplayon(QList<Vector2D> oppposdanger);
@@ -291,16 +319,11 @@ private:
     bool oneTouchPointFlagG;
 
     bool isPathToOppGoalieClear();
-    Vector2D findBestPointForChipTarget(double &chipDist,bool isGoalie);
-
-    int checkOppPassDanger(QList<int> &arr);
-    bool doBlockPass;
-    double timeToReachPoint(double dist);
+    Vector2D findBestPointForChipTarget(double &chipDist,bool isGoalie);    
+    bool doBlockPass;    
     double timeToReach;
     Vector2D blockPassPoint;
-    QList<int> dangerousOpp;
-    long getCurrentTimeInMsec();
-    bool isPathClear(Segment2D line, int myDefID, double vel);
+    QList<int> dangerousOpp;    
 
     double goalieAreaHis;
     Vector2D goalieTargetDir;
@@ -341,7 +364,8 @@ private:
     bool defClearFlag;
 
     double overDefThr;
-
+    /////////////////////////MAHI
+    int decideNumOfMarksInPlayOff(int _defenseCount);
 };
 
 #endif // DEFENSE_H

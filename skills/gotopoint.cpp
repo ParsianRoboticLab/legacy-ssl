@@ -7,7 +7,6 @@
 #include <math.h>
 #include <varswidget.h>
 
-//#define PARSIANWORKSHOP
 #define EPS 1e-6
 
 
@@ -158,22 +157,22 @@ void CskillNewGotoPoint::execute()
     }
 
     //targetPos.x
-#ifdef PARSIANWORKSHOP
-    if(conf()->LocalSettings_OurTeamSide() == "Right")
-    {
-        if(targetPos.x < -0.35)
+    if (conf()->LocalSettings_ParsianWorkShop()) {
+        if(conf()->LocalSettings_OurTeamSide() == "Right")
         {
-            targetPos.x = -0.35;
+            if(targetPos.x < -0.35)
+            {
+                targetPos.x = -0.35;
+            }
+        }
+        else
+        {
+            if(targetPos.x > 4.35)
+            {
+                targetPos.x = 4.35;
+            }
         }
     }
-    else
-    {
-        if(targetPos.x > 4.35)
-        {
-            targetPos.x = 4.35;
-        }
-    }
-#endif
     kkVf = 0;
     agentDist = agent->pos().dist(targetPos) ;
     agentMovementTh = (targetPos-agent->pos()).th();
@@ -565,13 +564,13 @@ CSkillGotoPoint::CSkillGotoPoint(CAgent *_agent) : CSkill(_agent)
 
 CSkillGotoPoint::~CSkillGotoPoint()
 {
-//    delete speedPidX;
-//    delete speedPidY;
-//    delete posPid;
-//    delete angPid;
-//    delete posXpid;
-//    delete posYpid;
-//    delete thPid;
+    //    delete speedPidX;
+    //    delete speedPidY;
+    //    delete posPid;
+    //    delete angPid;
+    //    delete posXpid;
+    //    delete posYpid;
+    //    delete thPid;
 }
 
 void CSkillGotoPoint::init(Vector2D target, Vector2D _targetDir, Vector2D _targetVel, bool dynamicStart)
@@ -666,22 +665,22 @@ void CSkillGotoPoint::targetValidate()
     if (targetPos.y < wm->field->ourCornerR().y - 0.2) targetPos.y = wm->field->ourCornerR().y;
     if (targetPos.y > wm->field->ourCornerL().y + 0.2) targetPos.y = wm->field->ourCornerL().y;
 
-#ifdef PARSIANWORKSHOP
-    if(conf()->LocalSettings_OurTeamSide() == "Right")
-    {
-        if(targetPos.x < 0)
+    if (conf()->LocalSettings_ParsianWorkShop()) {
+        if(conf()->LocalSettings_OurTeamSide() == "Right")
         {
-            targetPos.x = 0;
+            if(targetPos.x < 0)
+            {
+                targetPos.x = 0;
+            }
+        }
+        else
+        {
+            if(targetPos.x > 4.5)
+            {
+                targetPos.x = 4.5;
+            }
         }
     }
-    else
-    {
-        if(targetPos.x > 4.5)
-        {
-            targetPos.x = 4.5;
-        }
-    }
-#endif
 
     if (lookat.valid())
     {
@@ -936,6 +935,7 @@ CSkillGotoPointAvoid::CSkillGotoPointAvoid(CAgent *_agent) : CSkillGotoPoint(_ag
     counting = 0;
     averageDir.assign(0 , 0);
     addVel.assign(0,0);
+    nextPos.invalidate();
 }
 
 CSkillGotoPointAvoid::~CSkillGotoPointAvoid()
@@ -1048,22 +1048,22 @@ void CSkillGotoPointAvoid::execute()
     if (targetPos.y < wm->field->ourCornerR().y - 0.2) targetPos.y = wm->field->ourCornerR().y;
     if (targetPos.y > wm->field->ourCornerL().y + 0.2) targetPos.y = wm->field->ourCornerL().y;
 
-#ifdef PARSIANWORKSHOP
-    if(conf()->LocalSettings_OurTeamSide() == "Right")
-    {
-        if(targetPos.x < 0)
+    if (conf()->LocalSettings_ParsianWorkShop()) {
+        if(conf()->LocalSettings_OurTeamSide() == "Right")
         {
-            targetPos.x = 0;
+            if(targetPos.x < 0)
+            {
+                targetPos.x = 0;
+            }
+        }
+        else
+        {
+            if(targetPos.x > 4.5)
+            {
+                targetPos.x = 4.5;
+            }
         }
     }
-    else
-    {
-        if(targetPos.x > 4.5)
-        {
-            targetPos.x = 4.5;
-        }
-    }
-#endif
 
     if (lookat.valid())
     {
@@ -1136,6 +1136,7 @@ void CSkillGotoPointAvoid::execute()
         }
     }
 
+
     if ( D > 2.0)
         vf = 4.2;
     if ( D < 0.5)
@@ -1165,10 +1166,28 @@ void CSkillGotoPointAvoid::execute()
     }
     /////////////////////
 
+
     if( noAvoid || result.size() < 3){
         lllll = targetPos;
         vf = 0;
     }
+
+    if(0&&nextPos.isValid())
+    {
+
+        if(nextPos != target)
+        {
+            if(lllll == targetPos)
+            {
+                alpha = fabs(Vector2D::angleBetween(targetPos - agentPos , nextPos - targetPos).degree());
+                vf = -1.0259280143 * log(alpha) + 5.8;
+                debug(QString("vf: %1").arg(vf),D_MHMMD);
+                vf = max(vf , 0.5);
+            }
+        }
+    }
+    debug(QString("vf: %1, %2").arg(vf).arg(agent->vel().length()),D_MHMMD);
+    bangBang->setSmooth(true);// = false;
     bangBang->bangBangSpeed(agentPos,agentVel,agent->dir(),lllll,targetDir,vf,0.016,dVx,dVy,dW);
     agent->setRobotAbsVel(dVx + addVel.x,dVy + addVel.y,dW);
     agent->_ACC = 0;

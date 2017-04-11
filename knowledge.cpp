@@ -20,6 +20,7 @@ CKnowledge *knowledge;
 
 CKnowledge::CKnowledge(CAgent** _agents)
 {
+
     //ABBAS
     refShortcuts = false;
     shirjeBlocking = false;
@@ -108,22 +109,165 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
     //////////////////////////////fill ProfilerResult
     profiler = new CNewProfiler();
-//    profiler->load(JSON);
-    QVector< QVector<double> > *KickCoeff = new QVector< QVector<double> >();
+    QVector< QVector<double> > KickCoeff;
+    QList< QVector<double> > ChipCoeff;
 
     CPolynomialRegression ProRes;
+    CPolynomialFit Proregg;
+    QList< QPair<double, double> > dataSet;
 
-    for(int q=0; q<16; q++)
-        KickCoeff->append(ProRes.PolynomialRegression(profiler->robotsProfile[q].finalKickMap.values() , profiler->robotsProfile[q].finalKickMap.keys(),2));
+    for(int i=0; i< 16; i++)
+        for(int j=0; j<4; j++)
+            for(int k=0; k<81; k++)
+                ProfilerResult[i][j][k] = -1000;
+
+    refRobotID = 0;
+
+    // initialize robotCoeff
+    for(int i=0; i< 16; i++)
+        for(int j=0; j<4; j++)
+            RobotsCoeff[i][j]=1;
+
+    // now fill proper data for RobotsCoeff : e.g. RobotsCoeff[3][0] = 1.32537;
+
+    RobotsCoeff[0][1] = 0.22;
+    RobotsCoeff[1][1] = 0.36;
+    RobotsCoeff[2][1] = 0.4;
+    RobotsCoeff[3][1] = 0.07;
+    RobotsCoeff[4][1] = 0.22;
+    RobotsCoeff[5][1] = -0.03;
+    RobotsCoeff[6][1] = -0.15;
+    RobotsCoeff[7][1] = 0.06;
+
+    RobotsCoeff[0][0] = 710;
+    RobotsCoeff[1][0] = 750;
+    RobotsCoeff[2][0] = 940;
+    RobotsCoeff[3][0] = 990;
+    RobotsCoeff[4][0] = 780;
+    RobotsCoeff[5][0] = 780;
+    RobotsCoeff[6][0] = 780;
+    RobotsCoeff[7][0] = 800;
+
+
+    profiler->load(JSON);
+
+    QList<double> values;
+    QList<int> keys;
+    double tempRes;
 
     //    ProfilerResult[robotID][0:kick , 1:chip , 2:SpinKick , 3:SpinChip][10*distance(0-80)] ---> contains needed voltage for this distance
 
-    for(int q=0; q<16; q++)
-        for(double dis=0; dis<=8; dis+=0.1){
-            if(KickCoeff->at(q).count()>0)
-                ProfilerResult[q][0][(int)(dis*10)] =(double)
-                        KickCoeff->at(q).at(0)+KickCoeff->at(q).at(1)*dis+KickCoeff->at(q).at(2)*dis*dis;
+
+    // kick regression
+
+    for(int q=0; q<16; q++){
+        values = profiler->robotsProfile[q].finalKickMap.values();
+        values.insert(0 , 0);
+        keys = profiler->robotsProfile[q].finalKickMap.keys();
+        keys.insert(0 , 0);
+        KickCoeff.append(ProRes.PolynomialRegression(values , keys, 2));
+    }
+
+    for(int q=0; q<16; q++){
+        if(profiler->robotsProfile[q].finalKickMap.keys().size() > 0)
+            if(KickCoeff.at(q).count()>2)
+                for(int dis=0; dis<81; dis++){
+                    tempRes = (double)
+                            KickCoeff.at(q).at(0) +
+                            KickCoeff.at(q).at(1)*((double)dis/10) +
+                            KickCoeff.at(q).at(2)*((double)dis/10)*((double)dis/10);
+                    if(tempRes != 0 )
+                        ProfilerResult[q][0][dis] = tempRes;
+                    else
+                        ProfilerResult[q][0][dis] = -1000;
+                }
+    }
+
+
+    keys.clear();
+    values.clear();
+
+
+    // chip regression
+
+    //    QPair<double,double> pair;
+    //    pair.first = 0.0;
+    //    pair.second = 0.0;
+    //    dataSet.append(pair);
+
+    //    for(int i=0; i< profiler->robotsProfile[2].finalChipMap.keys().size(); i++){
+    //        pair.first=profiler->robotsProfile[2].finalChipMap.keys().at(i);
+    //        pair.second=profiler->robotsProfile[2].finalChipMap.values().at(i);
+    //        dataSet.append(pair);
+    //    }
+    //    Proregg.fitToDataSet(dataSet);
+
+    //    for(int dis=0; dis<1023; dis+=32){
+    //        debug(QString("dist : %1 , %2").arg(dis).arg(Proregg.val(dis)) , D_FATEMEH);
+    //    }
+
+    for(int q=0; q<16; q++){
+        values = profiler->robotsProfile[q].finalChipMap.values();
+        values.insert(0 , 0);
+        keys = profiler->robotsProfile[q].finalChipMap.keys();
+        keys.insert(0 , 0);
+        ChipCoeff.append(ProRes.PolynomialRegression(values , keys, 3));
+
+        QString("coeff %5 : %1  , %2 , %3  %4").arg(
+                    ChipCoeff.at(q).at(0)).arg(ChipCoeff.at(q).at(1)).arg(
+                    ChipCoeff.at(q).at(2)).arg(ChipCoeff.at(q).at(3)).arg(q);
+
+        //        qDebug()<<ChipCoeff.at(q).at(0)<<ChipCoeff.at(q).at(1)<<ChipCoeff.at(q).at(2)<<ChipCoeff.at(q).at(3);
+    }
+
+    for(int q=0; q<16; q++){
+        if(profiler->robotsProfile[q].finalChipMap.keys().size() > 0)
+            if(ChipCoeff.at(q).count()>3)
+                for(int dis=0; dis<81; dis++){
+                    tempRes = (double)
+                            ChipCoeff.at(q).at(0) + ChipCoeff.at(q).at(1)*((double)dis/10) +
+                            ChipCoeff.at(q).at(2)*((double)dis/10)*((double)dis/10) +
+                            ChipCoeff.at(q).at(3)*((double)dis/10)*((double)dis/10)*((double)dis/10) ;
+                    if(tempRes != 0 )
+                        ProfilerResult[q][1][dis] = tempRes;
+                    else
+                        ProfilerResult[q][1][dis] = -1000;
+                }
+    }
+
+
+    for(int q=0; q<2; q++)
+        //    int q=1;
+    {
+        debug("\n" , D_FATEMEH);
+        debug(QString("robot %1_____________________________________________").arg(q) , D_FATEMEH);
+        debug(QString("coeff : %1  , %2 , %3  %4").arg(ChipCoeff.at(q).at(0)).arg(ChipCoeff.at(q).at(1)).arg(ChipCoeff.at(q).at(2)).arg(ChipCoeff.at(q).at(3)),D_FATEMEH);
+
+        //        for(int dis=0; dis<51; dis+=10)
+        //            debug(QString("data : %1,").arg(dis) , D_FATEMEH);
+        //        debug("\n" , D_FATEMEH);
+        //        for(int dis=0; dis<81; dis+=3)
+        //            debug(QString("dataaa : %1,").arg(ProfilerResult[q][1][dis]) , D_FATEMEH);
+
+
+        for(int dis=0; dis<81; dis+=10){
+            debug(QString("reg : %1 , %2").arg(dis/10.0).arg(ProfilerResult[q][1][dis])  , D_FATEMEH);
         }
+
+        //        debug(QString("raw data robot %1____________________________________").arg(q) , D_FATEMEH);
+
+        //        for(int i=0; i < profiler->robotsProfile[q].finalChipMap.size(); i++)
+        //            debug(QString("%1,").arg(profiler->robotsProfile[q].finalChipMap.keys().at(i)), D_FATEMEH);
+        //        debug("\n" , D_FATEMEH);
+        //        for(int i=0; i < profiler->robotsProfile[q].finalChipMap.size(); i++)
+        //            debug(QString("%1,").arg(profiler->robotsProfile[q].finalChipMap.values().at(i)) , D_FATEMEH);
+
+        //        for(int i=0; i < profiler->robotsProfile[q].finalChipMap.size(); i++)
+        //            debug(QString("%1 , %2").arg(
+        //                      profiler->robotsProfile[q].finalChipMap.keys().at(i)).arg(
+        //                      profiler->robotsProfile[q].finalChipMap.values().at(i)), D_FATEMEH);
+    }
+
 
 }
 
@@ -133,7 +277,101 @@ CKnowledge::~CKnowledge()
 }
 Vector2D CKnowledge::getStaticPoses(int num)
 {
-    return staticPoses.at(num);
+    if (num < staticPoses.size()) {
+        return staticPoses.at(num);
+    } else {
+        return Vector2D::INVALIDATED;
+    }
+
+}
+
+int CKnowledge::
+getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
+
+    double profiledParameter=0;
+    int type;
+
+    if(wm->getIsSimulMode()){
+        return (int)realParameter;
+    }
+
+    if(isKick && !spinOn)
+    {
+        type =0;
+    }
+    else if(!isKick && !spinOn)
+    {
+        type =1;
+    }
+    else if(isKick && spinOn){
+        type =2;
+    }
+    else if(!isKick && spinOn){
+        type =3;
+    }
+
+    if(realParameter < 0) // dummy user
+        return 0;
+
+    if(agentId > 15)  // dummy user
+        return 0;
+
+
+    if(type==1)    //chip
+    {
+        realParameter+=RobotsCoeff[agentId][1];
+
+        profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
+
+        if(profiledParameter != -1000)
+        {
+
+            if(profiledParameter > 1023)
+                return 1023;
+            else if(profiledParameter > 0)
+                return (int)profiledParameter;
+            else
+                return 1;
+        }
+        else // no data is saved for this robot
+        {
+            if(ProfilerResult[refRobotID][type][(int)round(realParameter*10)] != -1000){    // get data from reference robot
+                profiledParameter= RobotsCoeff[agentId][type] * knowledge->getProfile(refRobotID , realParameter , isKick , spinOn);
+            }
+            else{   // Linear
+                profiledParameter= realParameter*128;
+                if(type == 1)
+                    profiledParameter*=2;
+            }
+
+            if(profiledParameter > 1023)
+                return 1023;
+            else if(profiledParameter > 0)
+                return (int)profiledParameter;
+            else{
+                return 1;
+            }
+
+        }
+    }
+    else if(type==0)    //kick
+    {
+        if(realParameter >= 8.0)
+            return RobotsCoeff[agentId][0];
+
+        profiledParameter= realParameter*128;
+
+        if(profiledParameter > 1023)
+            return 1023;
+        else if(profiledParameter > RobotsCoeff[agentId][0])
+            return RobotsCoeff[agentId][0];
+        else if(profiledParameter > 0)
+            return (int)profiledParameter;
+        else{
+            return 12;
+        }
+    }
+
 }
 
 void CKnowledge::calculateCommandFrameRate()
@@ -279,7 +517,7 @@ double CKnowledge::currentTime()
     return CProfiler::getTime();
 }
 
-long CKnowledge::getCurrentKKTime()
+long CKnowledge::getCurrentTime()
 {
     return CProfiler::getKKTime();
 }
@@ -1542,16 +1780,15 @@ float CKnowledge::kickClosedAngle()
     return conf()->Coach_kickClosedAngle();
 }
 
-Vector2D CKnowledge::getReflectPos(Vector2D goal)
+Vector2D CKnowledge::getReflectPos(Vector2D goal, double dist)
 {
-
     Vector2D res;
     Vector2D ballPos(wm->ball->pos);
     Segment2D dummySeg(goal,goal+Vector2D(-5,0));
     Vector2D nearest(dummySeg.nearestPoint(ballPos));
     Vector2D sol1,sol2;
     Rect2D oppField(0,_FIELD_HEIGHT/2 -0.01,_FIELD_WIDTH/2 + 0.01,_FIELD_HEIGHT -0.01);
-    Circle2D oppCircle(Vector2D(_FIELD_WIDTH/2,0)- Vector2D(1,0),3);
+    Circle2D oppCircle(Vector2D(_FIELD_WIDTH/2,0)- Vector2D(1,0),dist);
 
 
 
@@ -4007,6 +4244,10 @@ bool CKnowledge::SRIsUpdated(int _id)
 {
     return CRAgent[_id].updated;
 }
+double CKnowledge::getKickSpeedProfile(int agentId,double kickSpeedInput){
+
+    return ProfilerResult[0][agentId][(int)round(kickSpeedInput*10)]/100;
+}
 
 void CKnowledge::setNecessaryDefKick(bool tempNcssryDefKick) {
     necessaryDefKick = tempNcssryDefKick;
@@ -4157,8 +4398,8 @@ void CKnowledge::Aminshoot(rcsc::Vector2D ball, QList<rcsc::Circle2D> obstacles,
 
 
     // Line2D bisectorLine (originPoint , AngleDeg::bisect((firstPoint - originPoint).th() , (thirdPoint - originPoint).th()));
-            draw(y2);
-            draw(y1);
+    draw(y2);
+    draw(y1);
     _empty = y1.y-y2.y;
 
     if((y1==wm->field->center() && y2 == wm->field->center()) || obstacles.isEmpty())

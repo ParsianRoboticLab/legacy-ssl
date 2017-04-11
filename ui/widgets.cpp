@@ -32,6 +32,7 @@
 #include <QFont>
 #include <algorithm>
 #include "simulation/simulator.h"
+#include "collectprofiledata.h"
 
 #include<QMenu>
 #include<QAction>
@@ -350,7 +351,7 @@ CSkillWidget::~CSkillWidget()
 }
 
 bool CSkillWidget::executeSkill()
-{    
+{
     if (!executing) return false;
     if(stopExecution) return false;
     CSkill *s = ((CSkillConfigWidget*) pagesWidget->currentWidget())->skill;
@@ -592,16 +593,14 @@ CProfilerWidget::~CProfilerWidget() {
 
 void CProfilerWidget::slt_insert() {
     ProfileMode tempMode = getMode(skillsCombo->currentIndex());
-    if(tempMode == PCHIP || tempMode == SCHIP)
-        knowledge->profiler->insertRecord(tempMode,
-                                          kickSpeed->text().toInt(),
-                                          theMean,
-                                          currentAgent);
-    else
-        knowledge->profiler->insertRecord(tempMode,
-                                          kickSpeed->text().toInt(),
-                                          ballSpeedAddedList,
-                                          currentAgent);
+    //    if(tempMode == PCHIP || tempMode == SCHIP)
+    //        knowledge->profiler->insertRecord(tempMode,
+    //                                          kickSpeed->text().toInt(),
+    //                                          theMean,
+    //                                          currentAgent);
+    //    else
+    knowledge->profiler->insertRecord(tempMode, kickSpeed->text().toInt(), ballSpeedAddedList, currentAgent);
+
     kickSpeed->setText("");
     realSpeed->setText("");
     theMeanLable->setText(QString("The Mean : "));
@@ -868,7 +867,7 @@ CPlayOffWidget::CPlayOffWidget(CLoadPlayOffJson* _loader, QWidget *parent) : QWi
     deactive->setEnabled(false);
     master->setEnabled(false);
 
-//    selection = columns->selectionModel();
+    //    selection = columns->selectionModel();
 
     model   = new QStandardItemModel();
     selection = new QItemSelectionModel(model);
@@ -1765,7 +1764,7 @@ void CMonitorWidget::drawText(double x, double y, QString text, QColor color, in
                text, font);
 }
 void CMonitorWidget::drawRobot(double x, double y, double ang, int ID, int comID, QColor color, QString str, bool newRobots)
-{    
+{
     double rad = newRobots ? CRobot::robot_radius_new : CRobot::robot_radius_old;
     if ( newRobots)
     {
@@ -3107,11 +3106,19 @@ CLoggerWidget::CLoggerWidget(){
     btnPlay = new QPushButton(this);
     btnPlay->setIcon(QIcon("./icons/Play-Hot-icon.png"));
     btnNextFrame = new QPushButton(this);
+    NextFrame = new QPushButton(this);
+
     btnNextFrame->setIcon(QIcon("./icons/Next-Hot-icon.png"));
     btnNextFrame->setShortcut(QKeySequence(tr("Right", "NextFrame")));
+    NextFrame->setShortcut(QKeySequence(tr("Ctrl+Right", "NextNextFrame")));
+    NextFrame->setIcon(QIcon("./icons/Next10.png"));
+
     btnPreviousFrame = new QPushButton(this);
     btnPreviousFrame->setIcon(QIcon("./icons/Previous-Hot-icon.png"));
     btnPreviousFrame->setShortcut(QKeySequence(tr("Left", "PreviousFrame")));
+    PreviousFrame = new QPushButton(this);
+    PreviousFrame->setIcon(QIcon("./icons/Previous10.png"));
+    PreviousFrame->setShortcut(QKeySequence(tr("Ctrl+Left", "PreviousFrame")));
     slider = new QSlider(Qt::Horizontal , this);
     dialog = new QFileDialog(this);
     btnBrowse = new QPushButton("Browse" , this);
@@ -3133,7 +3140,7 @@ CLoggerWidget::CLoggerWidget(){
     chbxDebug[6] = new QCheckBox("Mahmood" , this);
     chbxDebug[7] = new QCheckBox("AHZ" , this);
     chbxDebug[8] = new QCheckBox("Amin" , this);
-    chbxDebug[9] = new QCheckBox("AmiR" , this);
+    chbxDebug[9] = new QCheckBox("Parsa" , this);
     chbxDebug[10] = new QCheckBox("Game" , this);
     chbxDebug[11] = new QCheckBox("Ali" , this);
     chbxDebug[12] = new QCheckBox("Arash" , this);
@@ -3177,8 +3184,10 @@ CLoggerWidget::CLoggerWidget(){
     l->addWidget(lblFPS , 3 , 9);
     l->addWidget(btnPlay , 4 , 0);
     l->addWidget(lblTime , 4 , 1 , 1 , 3);
-    l->addWidget(btnPreviousFrame , 4 , 6);
-    l->addWidget(btnNextFrame , 4 , 7);
+    l->addWidget(PreviousFrame , 4 , 4);
+    l->addWidget(btnPreviousFrame , 4 , 5);
+    l->addWidget(btnNextFrame , 4 , 6);
+    l->addWidget(NextFrame , 4 , 7);
     l->addWidget(lblRefCmd , 4 , 8);
     l->addWidget(debugTexts , 5 , 0 , 7 , 8);
     QWidget* DebugNames=new QWidget();
@@ -3198,7 +3207,9 @@ CLoggerWidget::CLoggerWidget(){
     connect(btnBrowse , SIGNAL(pressed()) , this , SLOT(browseDialog()));
     connect(btnPlay , SIGNAL(pressed()) , this , SLOT(playLog()));
     connect(btnPreviousFrame , SIGNAL(pressed()) , this, SLOT(goPreviousFrame()));
+    connect(PreviousFrame , SIGNAL(pressed()) , this, SLOT(goPrevious10Frame()));
     connect(btnNextFrame , SIGNAL(pressed()) , this , SLOT(goNextFrame()));
+    connect(NextFrame , SIGNAL(pressed()) , this , SLOT(goNext10Frame()));
     connect(slider , SIGNAL(sliderMoved(int)) , this , SLOT(seekChange(int)));
     connect(timer , SIGNAL(timeout()) , this , SLOT(cursorIncrement()));
     connect(btnClear , SIGNAL(pressed()) , this , SLOT(clearDebugTexts()));
@@ -3367,6 +3378,48 @@ void CLoggerWidget::goPreviousFrame(){
     cursorIncrement();
 }
 
+void CLoggerWidget::goPrevious10Frame(){
+    if( pause == false ){
+        pause = true;
+        btnPlay->setIcon(QIcon("./icons/Play-Hot-icon.png"));
+        timer->stop();
+
+        loggerMutex->lock();
+        gameLogger->playPauseMode = false;
+        loggerMutex->unlock();
+    }
+    if( fBfStep != -10 ){
+        fBfStep = -10;
+        loggerMutex->lock();
+        gameLogger->playPauseMode = false;
+        gameLogger->fBfMode = true;
+        loggerMutex->unlock();
+    }
+    debugTexts->clear();
+    cursorIncrement();
+}
+
+void CLoggerWidget::goNext10Frame(){
+    if( pause == false ){
+        pause = true;
+        btnPlay->setIcon(QIcon("./icons/Play-Hot-icon.png"));
+        timer->stop();
+
+        loggerMutex->lock();
+        gameLogger->playPauseMode = false;
+        loggerMutex->unlock();
+    }
+    if( fBfStep != 10 ){
+        fBfStep = 10;
+        loggerMutex->lock();
+        gameLogger->playPauseMode = false;
+        gameLogger->fBfMode = true;
+        loggerMutex->unlock();
+    }
+
+    debugTexts->clear();
+    cursorIncrement();
+}
 void CLoggerWidget::goNextFrame(){
     if( pause == false ){
         pause = true;
@@ -3430,7 +3483,7 @@ void CLoggerWidget::cursorIncrement(){
             if(DType<0 && DType>-32768){
                 DType+=65536;
                 if((DType & type1) > 32768)
-                typeState=true;
+                    typeState=true;
 
             }
             else if(DType<32768 && (DType & type)){
@@ -3533,7 +3586,7 @@ void CLoggerWidget::debugTypeChanged(){
         type1 |= D_AMIN;
     }
     if( chbxDebug[9]->isChecked() ){
-        type1 |= D_AMIR;
+        type1 |= D_PARSA;
     }
 
 
@@ -3585,10 +3638,12 @@ CLogTagWidget::CLogTagWidget(QWidget* parent):QDialog(parent){
 
 CLogTagWidget::~CLogTagWidget(){
 }
+
+
 void CLogTagWidget::StartLogfunc(){
     this->close();
     QString totalDescription;
-     QChar cc = '0';
+    QChar cc = '0';
     QString baseFileName = QString("%1%2%3-%4%5%6")
             .arg(QString::number(QDate::currentDate().year()) , 4 , cc)
             .arg(QString::number(QDate::currentDate().month()) , 2 , cc)
@@ -3625,6 +3680,67 @@ QString CLogTagWidget::getTagsInThisLog(){
     return this->TagsInThisLog->text();
 }
 
+
+
+CNewProfilerWidget::CNewProfilerWidget(QWidget* parent):QDialog(parent){
+    profilerRobotsList=new QWidget();
+    l = new QGridLayout(this);
+    ProfilerLayout=new QVBoxLayout;
+    profTxt=new QLabel("select active Robots to be profiled:",this);
+    repeatTxt=new QLabel("repeat:",this);
+    filenamelable=new QLabel("JSON file name:" , this);
+    fileName = new QLineEdit("MahiProfiler.json" , this);
+    repeatNum=new QLineEdit("3",this);
+    startProf=new QPushButton("start Profiling",this);
+    profilerRobotsList->setLayout(ProfilerLayout);
+    chbxProf[0]=new QCheckBox("0",this);
+    chbxProf[1]=new QCheckBox("1",this);
+    chbxProf[2]=new QCheckBox("2",this);
+    chbxProf[3]=new QCheckBox("3",this);
+    chbxProf[4]=new QCheckBox("4",this);
+    chbxProf[5]=new QCheckBox("5",this);
+    chbxProf[6]=new QCheckBox("6",this);
+    chbxProf[7]=new QCheckBox("7",this);
+    chbxProf[8]=new QCheckBox("8",this);
+    chbxProf[9]=new QCheckBox("9",this);
+
+    for(int i =0;i<10;i++)
+    {
+
+        chbxProf[i]->setChecked(false);
+        ProfilerLayout->addWidget(chbxProf[i]);
+    }
+    l->addWidget(profTxt,1,1);
+    l->addWidget(profilerRobotsList,2,1);
+    l->addWidget(repeatTxt,3,1);
+    l->addWidget(repeatNum,3,2);
+    l->addWidget(filenamelable,4,1);
+    l->addWidget(fileName,4,2);
+    l->addWidget(startProf,5,1);
+    this->setLayout(l);
+
+
+
+
+    connect(startProf , SIGNAL(pressed()) , this , SLOT(startProfFunc()));
+}
+
+
+CNewProfilerWidget::~CNewProfilerWidget(){
+}
+void CNewProfilerWidget::startProfFunc(){
+    int i=0;
+    for(int j=0;j<10;j++){
+        if(chbxProf[j]->isChecked()){
+            collectKickProfile->activeRobots[i]=j;
+            i++;
+        }
+    }
+    collectKickProfile->filename=fileName->text();
+    collectKickProfile->repeat=repeatNum->text().toInt();
+    this->close();
+    ProfilerExecute=true;
+}
 
 
 class PlayFileHightlighter : public QSyntaxHighlighter
@@ -3769,7 +3885,7 @@ void PlayFileHightlighter::highlightBlock(const QString &text)
 }
 
 MyTreeView::MyTreeView(QTextEdit* _txt, QWidget *parent) : QTreeView(parent)
-{    
+{
     txt = _txt;
 }
 
@@ -3804,7 +3920,7 @@ MyTextEdit::MyTextEdit(QWidget *parent) : QTextEdit(parent)
 }
 
 void MyTextEdit::keyPressEvent(QKeyEvent *e)
-{    
+{
     QTextEdit::keyPressEvent(e);
     if (e->text().count() > 0) emit modified();
     if (e->key() == Qt::Key_Control) ctrl = true;

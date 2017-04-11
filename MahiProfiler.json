@@ -1,0 +1,1352 @@
+{
+        "PROFILER" : [
+        {
+            "robot_0" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                {
+                    "chipSpeed" : 100,
+                    "distance" : [
+                      0.43
+                    ]
+                },
+                {
+                    "chipSpeed" : 200,
+                    "distance" : [
+                      0.73
+                    ]
+                },
+                {
+                    "chipSpeed" : 300,
+                    "distance" : [
+                      0.97
+                    ]
+                },
+                {
+                    "chipSpeed" : 400,
+                    "distance" : [
+                      1.2
+                    ]
+                },
+                {
+                    "chipSpeed" : 500,
+                    "distance" : [
+                      1.57
+                    ]
+                },
+                {
+                    "chipSpeed" : 600,
+                    "distance" : [
+                      1.94
+                    ]
+                },
+                {
+                    "chipSpeed" : 700,
+                    "distance" : [
+                      2.17
+                    ]
+                },
+                {
+                    "chipSpeed" : 800,
+                    "distance" : [
+                      2.43
+                    ]
+                },
+                                {
+                    "chipSpeed" : 900,
+                    "distance" : [
+                      2.62
+                    ]
+                },
+                                {
+                    "chipSpeed" : 1000,
+                    "distance" : [
+                      2.8
+                    ]
+                },
+                {
+                    "chipSpeed" : 1023,
+                    "distance" : [
+                      2.83
+                    ]
+                }                
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "",
+                    "kick" : ""
+                },
+                "kick" : [
+     {
+      "kickSpeed" : 300,
+      "realSpeed" : [
+3.98146,
+3.55249,
+3.886,
+3.93018,
+3.64232
+      ]
+     },
+     {
+      "kickSpeed" : 450,
+      "realSpeed" : [
+5.4037,
+5.40725,
+4.76345,
+4.65108,
+4.56777
+      ]
+     },
+     {
+      "kickSpeed" : 600,
+      "realSpeed" : [
+6.04472,
+5.66833,
+6.4383,
+6.42506,
+6.42058
+      ]
+     },
+     {
+      "kickSpeed" : 750,
+      "realSpeed" : [
+7.40068,
+7.18931,
+7.26023,
+7.10223,
+7.44816
+      ]
+     },
+     {
+      "kickSpeed" : 900,
+      "realSpeed" : [
+8.24824,
+7.96313,
+8.14127,
+7.92486,
+7.56607
+      ]
+     }
+                ]
+            }
+        },
+        {
+            "robot_1" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                {
+                    "chipSpeed" : 100,
+                    "distance" : [
+                      0.465
+                    ]
+                },
+                {
+                    "chipSpeed" : 200,
+                    "distance" : [
+                      0.84
+                    ]
+                },
+                {
+                    "chipSpeed" : 300,
+                    "distance" : [
+                      1.31
+                    ]
+                },
+                {
+                    "chipSpeed" : 400,
+                    "distance" : [
+                      1.65
+                    ]
+                },
+                {
+                    "chipSpeed" : 500,
+                    "distance" : [
+                      2.01
+                    ]
+                },
+                {
+                    "chipSpeed" : 600,
+                    "distance" : [
+                      2.32
+                    ]
+                },
+                {
+                    "chipSpeed" : 700,
+                    "distance" : [
+                      2.74
+                    ]
+                },
+                {
+                    "chipSpeed" : 800,
+                    "distance" : [
+                      2.95
+                    ]
+                },
+                {
+                    "chipSpeed" : 900,
+                    "distance" : [
+                      3.42
+                    ]
+                },
+                {
+                    "chipSpeed" : 1000,
+                    "distance" : [
+                      3.63
+                    ]
+                },
+                {
+                    "chipSpeed" : 1023,
+                    "distance" : [
+                      3.67
+                    ]
+                }
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "",
+                    "kick" : ""
+                },
+                "kick" : [
+     {
+      "kickSpeed" : 300,
+      "realSpeed" : [
+3.67998,
+3.201,
+3.70373,
+3.97313,
+3.46541
+      ]
+     },
+     {
+      "kickSpeed" : 450,
+      "realSpeed" : [
+4.85715,
+5.03614,
+4.74328,
+5.01764,
+5.28409
+      ]
+     },
+     {
+      "kickSpeed" : 600,
+      "realSpeed" : [
+5.89205,
+6.02571,
+6.40347,
+6.15248,
+5.98589
+      ]
+     },
+     {
+      "kickSpeed" : 750,
+      "realSpeed" : [
+6.6576,
+6.4785,
+6.77683,
+6.59514,
+6.74074
+      ]
+     },
+     {
+      "kickSpeed" : 900,
+      "realSpeed" : [
+7.82515,
+7.7303,
+7.56211,
+6.78734,
+7.35534
+      ]
+     }                
+                ]
+            }
+        },
+        {
+            "robot_2" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                {
+                    "chipSpeed" : 100,
+                    "distance" : [
+                      0.43
+                    ]
+                },
+                {
+                    "chipSpeed" : 200,
+                    "distance" : [
+                      0.7
+                    ]
+                },
+                {
+                    "chipSpeed" : 300,
+                    "distance" : [
+                      1.04
+                    ]
+                },
+                {
+                    "chipSpeed" : 400,
+                    "distance" : [
+                      1.24
+                    ]
+                },
+                {
+                    "chipSpeed" : 500,
+                    "distance" : [
+                      1.665
+                    ]
+                },
+                {
+                    "chipSpeed" : 600,
+                    "distance" : [
+                      1.89
+                    ]
+                },
+                {
+                    "chipSpeed" : 700,
+                    "distance" : [
+                      2.4
+                    ]
+                },
+                {
+                    "chipSpeed" : 800,
+                    "distance" : [
+                      2.54
+                    ]
+                },
+                                {
+                    "chipSpeed" : 900,
+                    "distance" : [
+                      2.77
+                    ]
+                },
+                                {
+                    "chipSpeed" : 1000,
+                    "distance" : [
+                      2.85
+                    ]
+                }       
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "",
+                    "kick" : ""
+                },
+                "kick" : [
+     {
+      "kickSpeed" : 300,
+      "realSpeed" : [
+3.10575,
+2.91638,
+3.12911,
+3.00718,
+2.73115
+      ]
+     },
+     {
+      "kickSpeed" : 440,
+      "realSpeed" : [
+4.44786,
+4.39355,
+4.2231,
+4.50364,
+3.97274
+      ]
+     },
+     {
+      "kickSpeed" : 580,
+      "realSpeed" : [
+5.05408,
+5.2984,
+5.25881,
+4.8466,
+5.09685
+      ]
+     },
+     {
+      "kickSpeed" : 720,
+      "realSpeed" : [
+6.36371,
+3.20502,
+5.72232,
+6.06113,
+6.28679
+      ]
+     },
+     {
+      "kickSpeed" : 860,
+      "realSpeed" : [
+5.34803,
+7.14747,
+6.70106,
+6.9166,
+6.6898
+      ]
+     },
+     {
+      "kickSpeed" : 1000,
+      "realSpeed" : [
+7.40517,
+6.06889,
+7.03478,
+7.39526,
+6.2392
+      ]
+     }                
+                ]
+            }
+        },
+        {
+            "robot_3" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                {
+                    "chipSpeed" : 100,
+                    "distance" : [
+                     0.32 
+                    ]
+                },
+                {
+                    "chipSpeed" : 200,
+                    "distance" : [
+                      0.67
+                    ]
+                },
+                {
+                    "chipSpeed" : 300,
+                    "distance" : [
+                      1.15
+                    ]
+                },
+                {
+                    "chipSpeed" : 400,
+                    "distance" : [
+                      1.64
+                    ]
+                },
+                {
+                    "chipSpeed" : 500,
+                    "distance" : [
+                      2.06
+                    ]
+                },
+                {
+                    "chipSpeed" : 600,
+                    "distance" : [
+                      2.54
+                    ]
+                },
+                {
+                    "chipSpeed" : 700,
+                    "distance" : [
+                      2.87
+                    ]
+                },
+                {
+                    "chipSpeed" : 800,
+                    "distance" : [
+                      3.17
+                    ]
+                },
+                                {
+                    "chipSpeed" : 900,
+                    "distance" : [
+                      3.34
+                    ]
+                },
+                                {
+                    "chipSpeed" : 1000,
+                    "distance" : [
+                      3.48
+                    ]
+                }               
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "nice",
+                    "kick" : ""
+                },
+                "kick" : [
+     {
+      "kickSpeed" : 300,
+      "realSpeed" : [
+2.72178,
+2.65703,
+2.88848,
+3.06248,
+1.88043
+      ]
+     },
+     {
+      "kickSpeed" : 440,
+      "realSpeed" : [
+4.0237,
+4.14111,
+4.12138,
+3.98058,
+4.00105
+      ]
+     },
+     {
+      "kickSpeed" : 580,
+      "realSpeed" : [
+5.24308,
+5.23841,
+4.96616,
+4.82504,
+5.14774
+      ]
+     },
+     {
+      "kickSpeed" : 720,
+      "realSpeed" : [
+5.45525,
+5.19835,
+5.92775,
+5.93668,
+4.73511
+      ]
+     },
+     {
+      "kickSpeed" : 860,
+      "realSpeed" : [
+5.54249,
+6.60255,
+5.124,
+6.02135,
+6.54402
+      ]
+     },
+     {
+      "kickSpeed" : 1000,
+      "realSpeed" : [
+5.98702,
+4.1692,
+7.19975,
+5.56452,
+6.96632
+      ]
+     }                
+                ]
+            }
+        },
+        {
+            "robot_4" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                {
+                    "chipSpeed" : 100,
+                    "distance" : [
+                      0.45
+                    ]
+                },
+                {
+                    "chipSpeed" : 200,
+                    "distance" : [
+                      0.88
+                    ]
+                },
+                {
+                    "chipSpeed" : 300,
+                    "distance" : [
+                      1.3
+                    ]
+                },
+                {
+                    "chipSpeed" : 400,
+                    "distance" : [
+                      1.62
+                    ]
+                },
+                {
+                    "chipSpeed" : 500,
+                    "distance" : [
+                      2.11
+                    ]
+                },
+                {
+                    "chipSpeed" : 600,
+                    "distance" : [
+                      2.61
+                    ]
+                },
+                {
+                    "chipSpeed" : 700,
+                    "distance" : [
+                      2.93
+                    ]
+                },
+                {
+                    "chipSpeed" : 800,
+                    "distance" : [
+                      3.3
+                    ]
+                },
+                {
+                    "chipSpeed" : 900,
+                    "distance" : [
+                      3.6
+                    ]
+                },
+                {
+                    "chipSpeed" : 1000,
+                    "distance" : [
+                      3.86
+                    ]
+                }                                
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "nice",
+                    "kick" : ""
+                },
+                "kick" : [
+     {
+      "kickSpeed" : 300,
+      "realSpeed" : [
+3.84594,
+3.91327,
+3.98378,
+3.83897,
+3.67707
+      ]
+     },
+     {
+      "kickSpeed" : 440,
+      "realSpeed" : [
+4.99507,
+5.1638,
+5.57801,
+5.2046,
+5.32491
+      ]
+     },
+     {
+      "kickSpeed" : 580,
+      "realSpeed" : [
+6.18213,
+6.11852,
+5.23338,
+4.32713,
+5.96139
+      ]
+     },
+     {
+      "kickSpeed" : 720,
+      "realSpeed" : [
+7.00427,
+5.32559,
+7.01782,
+6.57786,
+6.98394
+      ]
+     },
+     {
+      "kickSpeed" : 860,
+      "realSpeed" : [
+7.18857,
+5.25217,
+3.10563,
+7.16138,
+7.14386
+      ]
+     },
+     {
+      "kickSpeed" : 1000,
+      "realSpeed" : [
+4.93369,
+6.57064,
+7.87115,
+8.11147,
+8.04398
+      ]
+     }                
+                ]
+            }
+        },
+        {
+            "robot_5" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                {
+                    "chipSpeed" : 100,
+                    "distance" : [
+                      0.47
+                    ]
+                },
+                {
+                    "chipSpeed" : 200,
+                    "distance" : [
+                      0.77
+                    ]
+                },
+                {
+                    "chipSpeed" : 300,
+                    "distance" : [
+                      1.1
+                    ]
+                },
+                {
+                    "chipSpeed" : 400,
+                    "distance" : [
+                      1.54
+                    ]
+                },
+                {
+                    "chipSpeed" : 500,
+                    "distance" : [
+                      2.18
+                    ]
+                },
+                {
+                    "chipSpeed" : 600,
+                    "distance" : [
+                      2.45
+                    ]
+                },
+                {
+                    "chipSpeed" : 700,
+                    "distance" : [
+                      3.02
+                    ]
+                },
+                {
+                    "chipSpeed" : 800,
+                    "distance" : [
+                      3.16
+                    ]
+                },
+                {
+                    "chipSpeed" : 900,
+                    "distance" : [
+                      3.87
+                    ]
+                },
+                {
+                    "chipSpeed" : 1000,
+                    "distance" : [
+                      4.1
+                    ]
+                }                
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "bad in high speeds",
+                    "kick" : ""
+                },
+                "kick" : [
+     {
+      "kickSpeed" : 300,
+      "realSpeed" : [
+3.80057,
+3.7103,
+3.87878,
+3.73785,
+4.0507
+      ]
+     },
+     {
+      "kickSpeed" : 440,
+      "realSpeed" : [
+4.38063,
+4.49326,
+4.61987,
+4.88557,
+5.20457
+      ]
+     },
+     {
+      "kickSpeed" : 580,
+      "realSpeed" : [
+3.52551,
+6.14463,
+5.83471,
+5.85821,
+5.30974
+      ]
+     },
+     {
+      "kickSpeed" : 720,
+      "realSpeed" : [
+6.58908,
+5.9991,
+7.15456,
+6.69473,
+6.99691
+      ]
+     },
+     {
+      "kickSpeed" : 860,
+      "realSpeed" : [
+7.05356,
+7.5103,
+7.07808,
+7.56609,
+7.46199
+      ]
+     },
+     {
+      "kickSpeed" : 1000,
+      "realSpeed" : [
+8.29864,
+7.49689,
+7.6221,
+8.17108,
+7.95622
+      ]
+     }                
+                ]
+            }
+        },
+        {
+            "robot_6" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                {
+                    "chipSpeed" : 100,
+                    "distance" : [
+                      0.56
+                    ]
+                },
+                {
+                    "chipSpeed" : 200,
+                    "distance" : [
+                      0.92
+                    ]
+                },
+                {
+                    "chipSpeed" : 300,
+                    "distance" : [
+                      1.445
+                    ]
+                },
+                {
+                    "chipSpeed" : 400,
+                    "distance" : [
+                      1.63
+                    ]
+                },
+                {
+                    "chipSpeed" : 500,
+                    "distance" : [
+                      2.15
+                    ]
+                },
+                {
+                    "chipSpeed" : 600,
+                    "distance" : [
+                      2.72
+                    ]
+                },
+                {
+                    "chipSpeed" : 700,
+                    "distance" : [
+                      3.01
+                    ]
+                },
+                {
+                    "chipSpeed" : 800,
+                    "distance" : [
+                      3.26
+                    ]
+                },
+                {
+                    "chipSpeed" : 900,
+                    "distance" : [
+                      3.6
+                    ]
+                },
+                {
+                    "chipSpeed" : 1000,
+                    "distance" : [
+                      3.8
+                    ]
+                }            
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "",
+                    "kick" : ""
+                },
+                "kick" : [
+     {
+      "kickSpeed" : 300,
+      "realSpeed" : [
+3.80581,
+3.70034,
+3.86159,
+3.91677,
+3.83024
+      ]
+     },
+     {
+      "kickSpeed" : 440,
+      "realSpeed" : [
+4.84617,
+5.38053,
+5.01583,
+5.09781,
+4.91932
+      ]
+     },
+     {
+      "kickSpeed" : 580,
+      "realSpeed" : [
+6.13423,
+5.61923,
+6.00905,
+6.1048,
+5.93112
+      ]
+     },
+     {
+      "kickSpeed" : 720,
+      "realSpeed" : [
+4.36355,
+7.11403,
+6.93022,
+3.41267,
+2.69394
+      ]
+     },
+     {
+      "kickSpeed" : 860,
+      "realSpeed" : [
+8.07741,
+8.13971,
+7.33309,
+7.56015,
+8.23462
+      ]
+     },
+     {
+      "kickSpeed" : 1000,
+      "realSpeed" : [
+8.8297,
+14.5157,
+9.07541,
+12.0411,
+8.08119
+      ]
+     }
+                
+                ]
+            }
+        },
+        {
+            "robot_7" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                {
+                    "chipSpeed" : 100,
+                    "distance" : [
+                      0.58
+                    ]
+                },
+                {
+                    "chipSpeed" : 200,
+                    "distance" : [
+                      1.01
+                    ]
+                },
+                {
+                    "chipSpeed" : 300,
+                    "distance" : [
+                      1.52
+                    ]
+                },
+                {
+                    "chipSpeed" : 400,
+                    "distance" : [
+                      1.90
+                    ]
+                },
+                {
+                    "chipSpeed" : 500,
+                    "distance" : [
+                      2.45
+                    ]
+                },
+                {
+                    "chipSpeed" : 600,
+                    "distance" : [
+                      2.72
+                    ]
+                },
+                {
+                    "chipSpeed" : 700,
+                    "distance" : [
+                      3.09
+                    ]
+                },
+                {
+                    "chipSpeed" : 800,
+                    "distance" : [
+                      3.35
+                    ]
+                },
+                {
+                    "chipSpeed" : 900,
+                    "distance" : [
+                      3.67
+                    ]
+                },
+                {
+                    "chipSpeed" : 1000,
+                    "distance" : [
+                      4.08
+                    ]
+                }                
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "",
+                    "kick" : ""
+                },
+                "kick" : [
+     {
+      "kickSpeed" : 300,
+      "realSpeed" : [
+3.84521,
+3.78489,
+3.91847,
+3.89828,
+3.21844
+      ]
+     },
+     {
+      "kickSpeed" : 440,
+      "realSpeed" : [
+4.58485,
+4.96676,
+4.86501,
+4.58323,
+4.66983
+      ]
+     },
+     {
+      "kickSpeed" : 580,
+      "realSpeed" : [
+5.9076,
+5.59093,
+5.86481,
+5.85205,
+5.75005
+      ]
+     },
+     {
+      "kickSpeed" : 720,
+      "realSpeed" : [
+6.81252,
+6.59317,
+6.86887,
+6.70311,
+6.90348
+      ]
+     },
+     {
+      "kickSpeed" : 860,
+      "realSpeed" : [
+7.49536,
+5.84171,
+6.11483,
+6.94107,
+6.92756
+      ]
+     },
+     {
+      "kickSpeed" : 1000,
+      "realSpeed" : [
+6.28401,
+8.11721,
+7.86166,
+5.60019,
+7.45872
+      ]
+     }                
+                ]
+            }
+        },
+        {
+            "robot_8" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                {
+                    "chipSpeed" : 100,
+                    "distance" : [
+                      0.36
+                    ]
+                },
+                {
+                    "chipSpeed" : 200,
+                    "distance" : [
+                      0.67
+                    ]
+                },
+                {
+                    "chipSpeed" : 300,
+                    "distance" : [
+                      1.01
+                    ]
+                },
+                {
+                    "chipSpeed" : 400,
+                    "distance" : [
+                      1.38
+                    ]
+                },
+                {
+                    "chipSpeed" : 500,
+                    "distance" : [
+                      1.68
+                    ]
+                },
+                {
+                    "chipSpeed" : 600,
+                    "distance" : [
+                      1.94
+                    ]
+                },
+                {
+                    "chipSpeed" : 700,
+                    "distance" : [
+                      2.25
+                    ]
+                },
+                {
+                    "chipSpeed" : 800,
+                    "distance" : [
+                      2.48
+                    ]
+                },
+                {
+                    "chipSpeed" : 900,
+                    "distance" : [
+                      2.645
+                    ]
+                },
+                {
+                    "chipSpeed" : 1000,
+                    "distance" : [
+                      2.83
+                    ]
+                }                                
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "",
+                    "kick" : ""
+                },
+                "kick" : [
+                
+                ]
+            }
+        },
+        {
+            "robot_9" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "",
+                    "kick" : ""
+                },
+                "kick" : [
+                
+                ]
+            }
+        },
+        {
+            "robot_10" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "",
+                    "kick" : ""
+                },
+                "kick" : [
+                
+                ]
+            }
+        },
+        {
+            "robot_11" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "",
+                    "kick" : ""
+                },
+                "kick" : [
+                
+                ]
+            }
+        },
+        {
+            "robot_12" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "",
+                    "kick" : ""
+                },
+                "kick" : [
+                
+                ]
+            }
+        },
+        {
+            "robot_13" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "",
+                    "kick" : ""
+                },
+                "kick" : [
+                
+                ]
+            }
+        },
+        {
+            "robot_14" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "",
+                    "kick" : ""
+                },
+                "kick" : [
+                
+                ]
+            }
+        },
+        {
+            "robot_15" :    {
+                "SpinChip" : [
+                
+                ],
+                "SpinKick" : [
+                
+                ],
+                "chip" : [
+                
+                ],
+                "extraDetail" :     {
+                    "SpinChip" : "",
+                    "SpinKick" : "",
+                    "chip" : "",
+                    "kick" : ""
+                },
+                "kick" : [
+                
+                ]
+            }
+        }
+        ]
+    }

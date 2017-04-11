@@ -17,13 +17,15 @@ public:
 
 private:
     CSkillKick           *shotSkill;
+    CSkillDribble        *dribbleSkill;
     CSkillKeep           *keepSkill;
     CSkillNewPass        *passSkill;
     CSkillReceivePass    *receiveSkill;
     CSkillGotoPointAvoid *moveSkill;
+    CSkillKickOneTouch   *oneTouchSkill;
     // CSKill "KEEP"
 
-
+    void update();
     bool updated;
 
     ClassProperty(CRoleDynamic, CAgent*, Agent, agent, updated);
@@ -40,6 +42,21 @@ private:
     ClassProperty(CRoleDynamic, bool, EmptySpot, emptySpot, updated);
     ClassProperty(CRoleDynamic, bool, NoKick, noKick, updated);
     ClassProperty(CRoleDynamic, int, AgentID, agentID, updated);
+
+public:
+    CRoleDynamic* setKickRealSpeed(double val) {
+        kickSpeed = knowledge -> getProfile(agent->id(), val, !chip, false);
+        debug(QString("setkickrealspeed : %1 %2").arg(val).arg(kickSpeed), D_MAHI);
+        updated = true;
+        return this;
+    }
+
+
+    CRoleDynamic* setAddKickRealSpeed(double val) {
+        kickSpeed = knowledge -> getProfile(agent->id(), agent->pos().dist(target) + val, !chip, false);
+        updated = true;
+        return this;
+    }
 
 };
 
