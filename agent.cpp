@@ -144,6 +144,8 @@ CAgent::CAgent(short int _ID)
     vforward  = 0;
     vnormal   = 0;
     vangular  = 0;
+    lastVf =0;
+    lastVn = 0;
     lowSpeedMode = false;
     starter = false;
     beep = false;
@@ -170,6 +172,7 @@ CAgent::CAgent(short int _ID)
     intention = NULL;
     _ACC = 0;
     _DEC = 0;
+    agentStopTime.start();
 }
 
 void CAgent::loadProfiles()
@@ -423,554 +426,166 @@ bool CAgent::trajectory(double& vf,double& vn,double& va,double w1,double w2,dou
 
 void CAgent::accelerationLimiter()
 {
-    if(self()->id == 3)
+    ////first Stage Accelerate Limit
+    double veltan= (vel().x)*cos(dir().th().radian()) + (vel().y)*sin(dir().th().radian());
+    double velnorm= -1*(vel().x)*sin(dir().th().radian()) + (vel().y)*cos(dir().th().radian());
+
+
+//    if(fabs(veltan - lastVf) > 3)
+//    {
+//        lastVf = veltan;
+//    }
+//    if(fabs(velnorm - lastVn) > 3)
+//    {
+//        lastVn = velnorm;
+//    }
+
+    if(vel().length() > 0.2)
     {
-        static bool getVel = true;
-        static double bvf = 0;
-        static double bvn = 0;
-        static double bva = 0;
-        static double velx = 0;
-        static double vely = 0;
-        static double velw = 0;
-        if( getVel ){
-            double angle = wm->our[self()->id]->dir.th().radian();
-            velx = (cos(-angle) * wm->our[self()->id]->vel.x) - (sin(-angle) * wm->our[self()->id]->vel.y);
-            vely = (sin(-angle) * wm->our[self()->id]->vel.x) + (cos(-angle) * wm->our[self()->id]->vel.y);
-            velw = wm->our[self()->id]->angularVel;
-            getVel = false;
-            bvf = vforward - velx;
-            bvn = vnormal - vely;
-            bva = vangular - velw;
-        }
-        const double decay_x = 0.2;
-        const double decay_y = 0.2;
-        const double decay_w = 20;
-        bool transition = false;
-        if( fabs(bvf) > decay_x )
-        {
-            bvf -= decay_x*sign(bvf);
-            vforward -= bvf;
-            transition = true;
-        }
-        else
-        {
-            bvf = 0.0;
-        }
-        if( fabs(bvn) > decay_y )
-        {
-            bvn -= decay_y*sign(bvn);
-            vnormal -= bvn;
-            transition = true;
-        }
-        else
-        {
-            bvn = 0.0;
-        }
-        if( fabs(bva) > decay_w )
-        {
-            bva -= decay_w*sign(bva);
-            vangular -= bva;
-            transition = true;
-        }
-        else
-        {
-            bva = 0.0;
-        }
-        if( !transition )
-        {
-            getVel = true;
-        }
+        agentStopTime.restart();
+        timerReset = false;
     }
+    if(agentStopTime.elapsed() > 100 && timerReset == false)
+    {
+        lastVn = velnorm;
+        lastVf = veltan;
+        agentStopTime.restart();
+        timerReset = true;
+    }
+
+    double lastV,commandV;
+    double vCoef = 1;
+    double tempVf = vforward , tempVn = vnormal;
+
+    commandV = sqrt((vforward*vforward)+(vnormal*vnormal));
+    lastV = sqrt((lastVf*lastVf)+(lastVn*lastVn));
+
+    if(commandV > (lastV + conf()->BangBang_AccMax()* 0.0166667))
+    {
+        commandV = lastV + (conf()->BangBang_AccMax() * 0.0166667);
+    }
+    vforward = commandV * sin(atan2(tempVf,tempVn));
+    vnormal = commandV * cos(atan2(tempVf,tempVn));
+    debug(QString("command V: %1").arg(commandV),D_MHMMD);
+    debug(QString("vf: %1 , Vn :%2").arg(vforward).arg(vnormal),D_MHMMD);
+    debug(QString("Vvf: %1 , VVn :%2").arg(veltan).arg(velnorm),D_MHMMD);
+    if(vforward - lastVf > 1)
+    {
+        vforward = lastVf + 0.085;
+    }
+    else if(vforward - lastVf < - 1)
+    {
+        vforward = lastVf - 0.085;
+    }
+
+
+//    if(vnormal - lastVn > 1)
+//    {
+//        vnormal = lastVn + 0.085;
+//    }
+//    else if(vnormal - lastVn < - 1)
+//    {
+//        vnormal = lastVn - 0.085;
+//    }
+
+   debug(QString("avf: %1 , aVn :%2").arg(vforward).arg(vnormal),D_MHMMD);
+
+
+
+    lastVf = vforward;
+    lastVn = vnormal;
 }
 
 void CAgent::generateRobotCommand()
 {
-    if(commandID == new_com_test_robot_id)
+
+    //accelerationLimiter();
+    double veltan= (vel().x)*cos(dir().th().radian()) + (vel().y)*sin(dir().th().radian());
+    double velnorm= -1*(vel().x)*sin(dir().th().radian()) + (vel().y)*cos(dir().th().radian());
+//    debug(QString("vf: %1 , Vn :%2").arg(vforward).arg(vnormal),D_MHMMD);
+
+    calibrated++;
+    for( int i = 0; i < _PACKET_SIZE; i++)
+        outputBuffer[i] = 0x00;
+    if ( isnan(vangular)){
+        draw(QString("Vel : %1").arg(vangular),Vector2D(0,0),"brown",18);
+        vangular = 0.0;
+    }
+    outputBuffer[0] = 0x99;
+    outputBuffer[1] = commandID & 0x0F;
+    int kickNumber = round(kickSpeed);//*160.0;
+    if (roller != 0)
+        outputBuffer[1] = outputBuffer[1] | ((roller & 0x07) << 4);
+    outputBuffer[2] = kickNumber & 0x7F;
+    outputBuffer[3] = (kickNumber >> 7) & 0x07;
+
+    double ang=-dir().th().radian();
+
+    //setting BU for kalman
+    self()->kalman_velocs.vx = (vforward*cos(ang)) + (vnormal*sin(ang));
+
+    self()->kalman_velocs.vy = -(vforward*sin(ang)) + (vnormal*cos(ang));
+    self()->kalman_velocs.vw = vangular;
+
+    int vforwardI = floor(vforward * 487.0);
+    int vnormalI  = floor(vnormal * 487.0);
+    int vangularI  = ((double)vangular) * ((double)256.0 / (double) 360.0);
+
+    if (vforwardI > 2047) vforwardI = 2047;
+    if (vforwardI < -2047) vforwardI = -2047;
+
+    if (vnormalI > 2047) vnormalI = 2047;
+    if (vnormalI < -2047) vnormalI = -2047;
+
+    if (vangularI > 2047) vangularI = 2047;
+    if (vangularI < -2047) vangularI = -2047;
+
+    int vangularAbs = abs(vangularI);
+    int vforwardAbs = abs(vforwardI);
+    int vnormalAbs  = abs(vnormalI);
+
+    outputBuffer[3] = (((vangularAbs >> 7) & 0x0F) << 3) | outputBuffer[3];
+
+    outputBuffer[4] = vforwardAbs & 0x7F;
+    outputBuffer[5] = vnormalAbs & 0x7F;
+    outputBuffer[6] = (vforwardAbs >> 7) & 0x0F;
+    if (vforwardI < 0) outputBuffer[6] = outputBuffer[6] | 0x10;
+    if (vnormalI < 0) outputBuffer[6] = outputBuffer[6] | 0x20;
+
+    outputBuffer[7] = vangularAbs & 0x7F;
+
+    requestBit = true; // change to release mode command
+    if (requestBit && knowledge->getGameState() != CKnowledge::Halt)
     {
-        int s1=0,s2=0,s3=0,s4=0;
-        static double vf=-.5,vn=-.5,va=-50;
-        wh1=0;wh2=0;wh3=0;wh4=0;
-        for( int i = 0; i < _PACKET_SIZE; i++)
-            outputBuffer[i] = 0x00;
-        float robotRadius = 0.0795;
-        float wheelRadius = 0.0275;
-        // Calculate Motor Speeds
-        double motorAlpha[4] = {60.0 * _DEG2RAD, 135.0 * _DEG2RAD, 225.0 * _DEG2RAD, 300 * _DEG2RAD};
-        static bool stop = false;
-        double speed_thr = (Vector2D(vf,vn).r2()/(2.0*sqrt(decay_x*decay_x+decay_y*decay_y)))*0.016;
-
-        static bool out_of_field_flag = false;
-        static double gtp_dirx;
-        static double gtp_diry;
-        static double gtp_targetx;
-        static double gtp_targety;
-
-        if( out_of_field_flag ){
-            counter = 0;
-            static CSkillGotoPoint* gtp1 = new CSkillGotoPoint(this);
-            static Vector2D des1;
-            des1 = Vector2D(gtp_targetx,gtp_targety);
-            gtp1->setAgent(this);
-            gtp1->setMaxVelocity(0.5);
-            gtp1->init(des1,Vector2D(gtp_dirx,gtp_diry));
-            if( wm->our[new_com_test_robot_id]->pos.dist(des1) > 0.01 )
-            {
-                gtp1->execute();
-                wh1 =  (1.0 / wheelRadius) * (( (robotRadius * vangular*_DEG2RAD) - (vforward * sin(motorAlpha[0])) + (vnormal * cos(motorAlpha[0]))) );
-                wh2 =  (1.0 / wheelRadius) * (( (robotRadius * vangular*_DEG2RAD) - (vforward * sin(motorAlpha[1])) + (vnormal * cos(motorAlpha[1]))) );
-                wh3 =  (1.0 / wheelRadius) * (( (robotRadius * vangular*_DEG2RAD) - (vforward * sin(motorAlpha[2])) + (vnormal * cos(motorAlpha[2]))) );
-                wh4 =  (1.0 / wheelRadius) * (( (robotRadius * vangular*_DEG2RAD) - (vforward * sin(motorAlpha[3])) + (vnormal * cos(motorAlpha[3]))) );
-            }
-            else
-            {
-                out_of_field_flag = false;
-            }
-        }
-
-        if( out_of_field_flag == false )
-        {
-            if( ( wm->our[new_com_test_robot_id]->pos.absX() > 2.5 - speed_thr ||
-                  wm->our[new_com_test_robot_id]->pos.absY() > 1.5 - speed_thr )  && !stopTrain && startTrain )
-            {
-                counter = 0;
-                stop = false;
-                for(int i=0 ; i<errlen ; i++)
-                {
-                    lastVelx[i] = lastVely[i] = lastOmega[i] = 0;
-                }
-                bool end_of_move = false;
-                if( fabs(bvf) > decay_x )
-                {
-                    bvf -= decay_x*sign(bvf);
-                    end_of_move = true;
-                }
-                else
-                {
-                    bvf = 0.0;
-                }
-                if( fabs(bvn) > decay_y )
-                {
-                    bvn -= decay_y*sign(bvn);
-                    end_of_move = true;
-                }
-                else
-                {
-                    bvn = 0.0;
-                }
-                if( fabs(bva) > decay_w )
-                {
-                    bva -= decay_w*sign(bva);
-                    end_of_move = true;
-                }
-                else
-                {
-                    bva = 0.0;
-                }
-
-                if( end_of_move )
-                {
-                    wh1 =  (1.0 / wheelRadius) * (( (robotRadius * bva*_DEG2RAD) - (bvf * sin(motorAlpha[0])) + (bvn * cos(motorAlpha[0]))) );
-                    wh2 =  (1.0 / wheelRadius) * (( (robotRadius * bva*_DEG2RAD) - (bvf * sin(motorAlpha[1])) + (bvn * cos(motorAlpha[1]))) );
-                    wh3 =  (1.0 / wheelRadius) * (( (robotRadius * bva*_DEG2RAD) - (bvf * sin(motorAlpha[2])) + (bvn * cos(motorAlpha[2]))) );
-                    wh4 =  (1.0 / wheelRadius) * (( (robotRadius * bva*_DEG2RAD) - (bvf * sin(motorAlpha[3])) + (bvn * cos(motorAlpha[3]))) );
-                }
-                else
-                {
-                    out_of_field_flag = true;
-                    gtp_dirx = 2*drand48()-1;
-                    gtp_diry = 2*drand48()-1;
-                    gtp_targetx = 2*drand48()-1;
-                    gtp_targety = 2*drand48()-1;
-                }
-            }
-
-            else if( !stopTrain && startTrain )
-            {
-                bool end_of_move = false;
-                if( stop )
-                {
-                    if( fabs(bvf) > decay_x )
-                    {
-                        bvf -= decay_x*sign(bvf);
-                        end_of_move = true;
-                    }
-                    else
-                    {
-                        bvf = 0.0;
-                    }
-                    if( fabs(bvn) > decay_y )
-                    {
-                        bvn -= decay_y*sign(bvn);
-                        end_of_move = true;
-                    }
-                    else
-                    {
-                        bvn = 0.0;
-                    }
-                    if( fabs(bva) > decay_w )
-                    {
-                        bva -= decay_w*sign(bva);
-                        end_of_move = true;
-                    }
-                    else
-                    {
-                        bva = 0.0;
-                    }
-                }
-
-                if( end_of_move )
-                {
-                    counter = 0;
-                    for(int i=0 ; i<errlen ; i++)
-                    {
-                        lastVelx[i] = lastVely[i] = lastOmega[i] = 0;
-                    }
-                    wh1 =  (1.0 / wheelRadius) * (( (robotRadius * bva*_DEG2RAD) - (bvf * sin(motorAlpha[0])) + (bvn * cos(motorAlpha[0]))) );
-                    wh2 =  (1.0 / wheelRadius) * (( (robotRadius * bva*_DEG2RAD) - (bvf * sin(motorAlpha[1])) + (bvn * cos(motorAlpha[1]))) );
-                    wh3 =  (1.0 / wheelRadius) * (( (robotRadius * bva*_DEG2RAD) - (bvf * sin(motorAlpha[2])) + (bvn * cos(motorAlpha[2]))) );
-                    wh4 =  (1.0 / wheelRadius) * (( (robotRadius * bva*_DEG2RAD) - (bvf * sin(motorAlpha[3])) + (bvn * cos(motorAlpha[3]))) );
-                }
-                else
-                {
-                    stop = false;
-                    bool first_of_move = false;
-                    if( fabs(bvf) + decay_x < fabs(vf) )
-                    {
-                        first_of_move = true;
-                        bvf += decay_x*sign(vf);
-                    }
-                    else
-                    {
-                        bvf = vf;
-                    }
-                    if( fabs(bvn) + decay_y < fabs(vn) )
-                    {
-                        first_of_move = true;
-                        bvn += decay_y*sign(vn);
-                    }
-                    else
-                    {
-                        bvn = vn;
-                    }
-                    if( fabs(bva) + decay_w < fabs(va) )
-                    {
-                        first_of_move = true;
-                        bva += decay_w*sign(va);
-                    }
-                    else
-                    {
-                        bva = va;
-                    }
-
-                    if( first_of_move )
-                    {
-                        counter = 0;
-                        for(int i=0 ; i<errlen ; i++)
-                        {
-                            lastVelx[i] = lastVely[i] = lastOmega[i] = 0;
-                        }
-                        wh1 =  (1.0 / wheelRadius) * (( (robotRadius * bva*_DEG2RAD) - (bvf * sin(motorAlpha[0])) + (bvn * cos(motorAlpha[0]))) );
-                        wh2 =  (1.0 / wheelRadius) * (( (robotRadius * bva*_DEG2RAD) - (bvf * sin(motorAlpha[1])) + (bvn * cos(motorAlpha[1]))) );
-                        wh3 =  (1.0 / wheelRadius) * (( (robotRadius * bva*_DEG2RAD) - (bvf * sin(motorAlpha[2])) + (bvn * cos(motorAlpha[2]))) );
-                        wh4 =  (1.0 / wheelRadius) * (( (robotRadius * bva*_DEG2RAD) - (bvf * sin(motorAlpha[3])) + (bvn * cos(motorAlpha[3]))) );
-                    }
-                    else
-                    {
-#ifdef skuba_control
-                        Matrix command(4,1) , jacob(4,3) , earth(3,1);
-
-                        for( int i=0 ; i<4 ; i++ ){
-                            jacob.e(i , 0) = -1*sin(motorAlpha[i])/wheelRadius;
-                            jacob.e(i , 1) = +1*cos(motorAlpha[i])/wheelRadius;
-                            jacob.e(i , 2) = +1*(robotRadius/wheelRadius)*_DEG2RAD;
-                        }
-
-                        earth.e(0 , 0) = vf;
-                        earth.e(1 , 0) = vn;
-                        earth.e(2 , 0) = va;
-
-                        command = jacob * earth;
-
-                        Matrix eps(3 , 4);
-                        eps.e(0 , 0) = Epsilon.e(0,0); eps.e(0 , 1) = Epsilon.e(1,0); eps.e(0 , 2) = Epsilon.e(2,0);  eps.e(0 , 3) = Epsilon.e(3,0);
-                        eps.e(1 , 0) = Epsilon.e(4,0); eps.e(1 , 1) = Epsilon.e(5,0); eps.e(1 , 2) = Epsilon.e(6,0);  eps.e(1 , 3) = Epsilon.e(7,0);
-                        eps.e(2 , 0) = Epsilon.e(8,0); eps.e(2 , 1) = Epsilon.e(9,0); eps.e(2 , 2) = Epsilon.e(10,0); eps.e(2 , 3) = Epsilon.e(11,0);
-
-                        Matrix temp = pseudoinverse(jacob)+eps;
-                        earth = temp * command;
-                        command = jacob * earth;
-
-                        wh1 = command.e(0 , 0);
-                        wh2 = command.e(1 , 0);
-                        wh3 = command.e(2 , 0);
-                        wh4 = command.e(3 , 0);
-#endif
-                        wh1 =  (1.0 / wheelRadius) * (( (robotRadius * va*_DEG2RAD) - (vf * sin(motorAlpha[0])) + (vn * cos(motorAlpha[0]))) );
-                        wh2 =  (1.0 / wheelRadius) * (( (robotRadius * va*_DEG2RAD) - (vf * sin(motorAlpha[1])) + (vn * cos(motorAlpha[1]))) );
-                        wh3 =  (1.0 / wheelRadius) * (( (robotRadius * va*_DEG2RAD) - (vf * sin(motorAlpha[2])) + (vn * cos(motorAlpha[2]))) );
-                        wh4 =  (1.0 / wheelRadius) * (( (robotRadius * va*_DEG2RAD) - (vf * sin(motorAlpha[3])) + (vn * cos(motorAlpha[3]))) );
-
-                        static bool callTrajectory = false;
-                        if( !callTrajectory )
-                        {
-                            callTrajectory = trajectory(vf,vn,va,wh1,wh2,wh3,wh4,stop);
-                        }
-                        else
-                        {
-                            stopTrain = true;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                counter = 0;
-                for(int i=0 ; i<errlen ; i++)
-                {
-                    lastVelx[i] = lastVely[i] = lastOmega[i] = 0;
-                }
-                bvf = bvn = bva = 0.0;
-
-                //				vf = (((double)(qrand()%201))/50.0)-2.0;
-                //				vn = (((double)(qrand()%201))/50.0)-2.0;
-                vf = (((double)(qrand()%201))/100.0)-1.0;
-                vn = (((double)(qrand()%201))/100.0)-1.0;
-                double speed = Vector2D(vf,vn).r();
-                if( speed < 0.5 )
-                {
-                    speed = 0.5;
-                }
-                va = boundTo((((((double)(qrand()%181))*2)-180.0)/(speed)),-180.0,180.0);
-                decay_x = fabs(vf) / decay_accel;
-                decay_y = fabs(vn) / decay_accel;
-                decay_w = fabs(va) / decay_accel;
-
-#ifdef use_ANN
-                Matrix input(3,1),output(4,1);
-                input.e(0,0) = vforward;
-                input.e(1,0) = vnormal;
-                input.e(2,0) = vangular;
-                output = ANN_forward( input );
-
-                wh1 = output.e(0,0);
-                wh2 = output.e(1,0);
-                wh3 = output.e(2,0);
-                wh4 = output.e(3,0);
-#else
-                wh1 =  (1.0 / wheelRadius) * (( (robotRadius * vangular*_DEG2RAD) - (vforward * sin(motorAlpha[0])) + (vnormal * cos(motorAlpha[0]))) );
-                wh2 =  (1.0 / wheelRadius) * (( (robotRadius * vangular*_DEG2RAD) - (vforward * sin(motorAlpha[1])) + (vnormal * cos(motorAlpha[1]))) );
-                wh3 =  (1.0 / wheelRadius) * (( (robotRadius * vangular*_DEG2RAD) - (vforward * sin(motorAlpha[2])) + (vnormal * cos(motorAlpha[2]))) );
-                wh4 =  (1.0 / wheelRadius) * (( (robotRadius * vangular*_DEG2RAD) - (vforward * sin(motorAlpha[3])) + (vnormal * cos(motorAlpha[3]))) );
-#endif
-            }
-        }
-
-        s1 = (wh1 < 0) ? 1 : 0;
-        s2 = (wh2 < 0) ? 1 : 0;
-        s3 = (wh3 < 0) ? 1 : 0;
-        s4 = (wh4 < 0) ? 1 : 0;
-        wh1 = (wh1 < 0) ? -1.0 * wh1 : wh1;
-        wh2 = (wh2 < 0) ? -1.0 * wh2 : wh2;
-        wh3 = (wh3 < 0) ? -1.0 * wh3 : wh3;
-        wh4 = (wh4 < 0) ? -1.0 * wh4 : wh4;
-        wh1 *= 10;
-        wh2 *= 10;
-        wh3 *= 10;
-        wh4 *= 10;
-        wh1 = (wh1 > 1023) ? 1023: wh1;
-        wh2 = (wh2 > 1023) ? 1023: wh2;
-        wh3 = (wh3 > 1023) ? 1023: wh3;
-        wh4 = (wh4 > 1023) ? 1023: wh4;
-
-        outputBuffer[0] = 0x99;
-        outputBuffer[1] = commandID & 0x0F;
-        outputBuffer[2] = ((int)wh1) & 0x7F;
-        outputBuffer[3] = ((int)wh2) & 0x7F;
-        outputBuffer[4] = ((int)wh3) & 0x7F;
-        outputBuffer[5] = ((int)wh4) & 0x7F;
-        outputBuffer[6] = (((int)wh1) >> 7) & 0x07;
-        outputBuffer[6] = outputBuffer[6] | ((((int)wh2) >> 4) & 0x38);
-        outputBuffer[6] = outputBuffer[6] | ( (s2 & 0x01) << 6 );
-        outputBuffer[7] = (((int)wh3) >> 7) & 0x07;
-        outputBuffer[7] = outputBuffer[7] | ((((int)wh4) >> 4) & 0x38);
-        outputBuffer[7] = outputBuffer[7] | ( (s4 & 0x01) << 6 );
-        outputBuffer[1] = outputBuffer[1] | ( (s1 & 0x01) << 4 );
-        outputBuffer[1] = outputBuffer[1] | ( (s3 & 0x01) << 5 );
-        return;
+        outputBuffer[8] |= 0x01;
     }
-    if(1) {//commandID == _NewProtocolRobot) {
-        ///////////////////////////main
-        calibrated++;
 
-        for( int i = 0; i < _PACKET_SIZE; i++)
-            outputBuffer[i] = 0x00;
-
-        if ( isnan(vangular)){
-            draw(QString("Vel : %1").arg(vangular),Vector2D(0,0),"brown",18);
-            vangular = 0.0;
-        }
-
-
-        outputBuffer[0] = 0x99;
-        outputBuffer[1] = commandID & 0x0F;
-
-        int kickNumber = round(kickSpeed);//*160.0;
-
-        if (roller != 0)
-            outputBuffer[1] = outputBuffer[1] | ((roller & 0x07) << 4);
-
-        outputBuffer[2] = kickNumber & 0x7F;
-
-        outputBuffer[3] = (kickNumber >> 7) & 0x07;
-
-
-        double ang=-dir().th().radian();
-
-        //setting BU for kalman
-        self()->kalman_velocs.vx = (vforward*cos(ang)) + (vnormal*sin(ang));
-
-        self()->kalman_velocs.vy = -(vforward*sin(ang)) + (vnormal*cos(ang));
-        self()->kalman_velocs.vw = vangular;
-
-        int vforwardI = floor(vforward * 487.0);
-        int vnormalI  = floor(vnormal * 487.0);
-        int vangularI  = ((double)vangular) * ((double)256.0 / (double) 360.0);
-
-        if (vforwardI > 2047) vforwardI = 2047;
-        if (vforwardI < -2047) vforwardI = -2047;
-
-        if (vnormalI > 2047) vnormalI = 2047;
-        if (vnormalI < -2047) vnormalI = -2047;
-
-        if (vangularI > 2047) vangularI = 2047;
-        if (vangularI < -2047) vangularI = -2047;
-
-        int vangularAbs = abs(vangularI);
-        int vforwardAbs = abs(vforwardI);
-        int vnormalAbs  = abs(vnormalI);
-
-        outputBuffer[3] = (((vangularAbs >> 7) & 0x0F) << 3) | outputBuffer[3];
-
-        outputBuffer[4] = vforwardAbs & 0x7F;
-        outputBuffer[5] = vnormalAbs & 0x7F;
-        outputBuffer[6] = (vforwardAbs >> 7) & 0x0F;
-        if (vforwardI < 0) outputBuffer[6] = outputBuffer[6] | 0x10;
-        if (vnormalI < 0) outputBuffer[6] = outputBuffer[6] | 0x20;
-
-        outputBuffer[7] = vangularAbs & 0x7F;
-
-        requestBit = true; // change to release mode command
-        if (requestBit && knowledge->getGameState() != CKnowledge::Halt)
-        {
-            outputBuffer[8] |= 0x01;
-        }
-
-        if (chip)
-            outputBuffer[8] = outputBuffer[8] | 0x02;
-        if (vangularI < 0)
-            outputBuffer[8] = outputBuffer[8] | 0x04;
-        outputBuffer[8] = outputBuffer[8] | (((vnormalAbs >> 7) & 0x0F) << 3);
-        outputBuffer[9] =  (int)(_ACC*5) & (0x7F);
-        outputBuffer[10] = (int)(_DEC*5) & (0x7F);
-
-        double veltan= (vel().x)*cos(dir().th().radian()) + (vel().y)*sin(dir().th().radian());
-        double velnorm= -1*(vel().x)*sin(dir().th().radian()) + (vel().y)*cos(dir().th().radian());
-
-        unsigned int velTanSend = (int)(fabs(veltan)*100);
-
-        unsigned int velNormSend = (int)(fabs(velnorm)*100);
-        outputBuffer[11] = velTanSend & 0x3F;
-        outputBuffer[12] = ((velTanSend >> 6 ) & 0X07) | ((velNormSend & 0x0F) << 3);
-        outputBuffer[13] = (velNormSend >> 4) & 0x1F;
-
-        if(veltan < 0)
-            outputBuffer[11] |= 0x40;
-        else
-            outputBuffer[11] &= 0xBF;
-
-        if( velnorm < 0)
-            outputBuffer[13] |= 0x40;
-        else
-            outputBuffer[13] &= 0xBF;
+    if (chip)
+        outputBuffer[8] = outputBuffer[8] | 0x02;
+    if (vangularI < 0)
+        outputBuffer[8] = outputBuffer[8] | 0x04;
+    outputBuffer[8] = outputBuffer[8] | (((vnormalAbs >> 7) & 0x0F) << 3);
+    //    outputBuffer[9] =  (int)(_ACC*5) & (0x7F);
+    //    outputBuffer[10] = (int)(_DEC*5) & (0x7F);
 
 
 
-    }
+    unsigned int velTanSend = (int)(fabs(veltan)*100);
+
+    unsigned int velNormSend = (int)(fabs(velnorm)*100);
+    outputBuffer[11] = velTanSend & 0x3F;
+    outputBuffer[12] = ((velTanSend >> 6 ) & 0X07) | ((velNormSend & 0x0F) << 3);
+    outputBuffer[13] = (velNormSend >> 4) & 0x1F;
+
+    if(veltan < 0)
+        outputBuffer[11] |= 0x40;
     else
-    {
-        ///////////////////////////main
-        calibrated++;
+        outputBuffer[11] &= 0xBF;
 
-        for( int i = 0; i < _PACKET_SIZE; i++)
-            outputBuffer[i] = 0x00;
-
-        if ( isnan(vangular)){
-            draw(QString("Vel : %1").arg(vangular),Vector2D(0,0),"brown",18);
-            vangular = 0.0;
-        }
-
-
-        outputBuffer[0] = 0x99;
-        outputBuffer[1] = commandID & 0x0F;
-
-        int kickNumber = round(kickSpeed);//*160.0;
-
-        if (roller != 0)
-            outputBuffer[1] = outputBuffer[1] | ((roller & 0x07) << 4);
-
-        outputBuffer[2] = kickNumber & 0x7F;
-
-        outputBuffer[3] = (kickNumber >> 7) & 0x07;
-
-
-        double ang=-dir().th().radian();
-
-        //setting BU for kalman
-        self()->kalman_velocs.vx = (vforward*cos(ang)) + (vnormal*sin(ang));
-
-        self()->kalman_velocs.vy = -(vforward*sin(ang)) + (vnormal*cos(ang));
-        self()->kalman_velocs.vw = vangular;
-
-        int vforwardI = floor(vforward * 487.0);
-        int vnormalI  = floor(vnormal * 487.0);
-        int vangularI  = ((double)vangular) * ((double)256.0 / (double) 360.0);
-
-        if (vforwardI > 2047) vforwardI = 2047;
-        if (vforwardI < -2047) vforwardI = -2047;
-
-        if (vnormalI > 2047) vnormalI = 2047;
-        if (vnormalI < -2047) vnormalI = -2047;
-
-        if (vangularI > 2047) vangularI = 2047;
-        if (vangularI < -2047) vangularI = -2047;
-
-        int vangularAbs = abs(vangularI);
-        int vforwardAbs = abs(vforwardI);
-        int vnormalAbs  = abs(vnormalI);
-
-        outputBuffer[3] = (((vangularAbs >> 7) & 0x0F) << 3) | outputBuffer[3];
-
-        outputBuffer[4] = vforwardAbs & 0x7F;
-        outputBuffer[5] = vnormalAbs & 0x7F;
-        outputBuffer[6] = (vforwardAbs >> 7) & 0x0F;
-        if (vforwardI < 0) outputBuffer[6] = outputBuffer[6] | 0x10;
-        if (vnormalI < 0) outputBuffer[6] = outputBuffer[6] | 0x20;
-
-        outputBuffer[7] = vangularAbs & 0x7F;
-
-        requestBit = true; // change to release mode command
-        if (requestBit)
-        {
-            outputBuffer[8] |= 0x01;
-        }
-
-        if (chip)
-            outputBuffer[8] = outputBuffer[8] | 0x02;
-        if (vangularI < 0)
-            outputBuffer[8] = outputBuffer[8] | 0x04;
-        outputBuffer[8] = outputBuffer[8] | (((vnormalAbs >> 7) & 0x0F) << 3);
-
-    }
+    if( velnorm < 0)
+        outputBuffer[13] |= 0x40;
+    else
+        outputBuffer[13] &= 0xBF;
 }
 
 char* CAgent::getOutputBuffer()
@@ -1125,7 +740,7 @@ char CAgent::getRoller()
 float CAgent::getMotorMaxRadPerSec()
 {
 
-return 1000*2*M_PI/60.0f;
+    return 1000*2*M_PI/60.0f;
 }
 
 float CAgent::getvLimit()

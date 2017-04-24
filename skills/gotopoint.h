@@ -264,6 +264,7 @@ private:
     CMotionProfile *prof;
     bool pathRestarted;
     CNewBangBang *bangBang;
+
 protected:
     int stucked;
     Vector2D lastPoint;

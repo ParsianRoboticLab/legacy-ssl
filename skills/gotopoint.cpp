@@ -1,5 +1,4 @@
-#include "gotopoint.h"
-#include <QDebug>
+#include "gotopoint.h" #include <QDebug>
 #include "knowledge.h"
 #include <QFile>
 #include <mathtools.h>
@@ -798,7 +797,7 @@ void CSkillGotoPoint::execute()
 
 
 
-    debug(QString("dive %1").arg(diveMode),D_MHMMD);
+//    debug(QString("dive %1").arg(diveMode),D_MHMMD);
 
     angPid->kp = 3;
     angPid->kd = 1;
@@ -924,7 +923,7 @@ CSkillGotoPointAvoid::CSkillGotoPointAvoid(CAgent *_agent) : CSkillGotoPoint(_ag
     keeplooking = false;
     extendStep = -1.0;
     gotopoint = new CSkillGotoPoint(_agent);
-    bangBang = new CNewBangBang;
+    bangBang = new CNewBangBang();
     dynamicStart = true;
     plan2 = false;
     prof = NULL;
@@ -1080,7 +1079,7 @@ void CSkillGotoPointAvoid::execute()
         result.append(agent->pathPlannerResult[i]);
     }
 
-    debug(QString("no avoid : %1 size :%2").arg(noAvoid).arg(result.size()),D_MHMMD);
+//    debug(QString("no avoid : %1 size :%2").arg(noAvoid).arg(result.size()),D_MHMMD);
     if(noAvoid)
     {
         result.clear();
@@ -1122,7 +1121,7 @@ void CSkillGotoPointAvoid::execute()
             }
             else{
                 alpha = fabs(Vector2D::angleBetween(result[i] - result[0] , result[i+1] - result[i]).degree());
-                vf = -1.0259280143 * log(alpha) + 4.370475303;
+                vf = -1.0259280143 * log(alpha) + 4.970475303;
                 vf = max(vf , 0.5);
 
             }
@@ -1181,17 +1180,17 @@ void CSkillGotoPointAvoid::execute()
             {
                 alpha = fabs(Vector2D::angleBetween(targetPos - agentPos , nextPos - targetPos).degree());
                 vf = -1.0259280143 * log(alpha) + 5.8;
-                debug(QString("vf: %1").arg(vf),D_MHMMD);
+//                debug(QString("vf: %1").arg(vf),D_MHMMD);
                 vf = max(vf , 0.5);
             }
         }
     }
-    debug(QString("vf: %1, %2").arg(vf).arg(agent->vel().length()),D_MHMMD);
+//    debug(QString("vf: %1, %2").arg(vf).arg(agent->vel().length()),D_MHMMD);
     bangBang->setSmooth(true);// = false;
     bangBang->bangBangSpeed(agentPos,agentVel,agent->dir(),lllll,targetDir,vf,0.016,dVx,dVy,dW);
     agent->setRobotAbsVel(dVx + addVel.x,dVy + addVel.y,dW);
-    agent->_ACC = 0;
-    agent->_DEC = 0;
+    agent->accelerationLimiter();
+
 
 
     counter ++;

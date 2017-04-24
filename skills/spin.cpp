@@ -59,7 +59,7 @@ void CSkillDribble::spinDribble()
     else
         readyForPass = false;
 
-    debug(QString("readyForPass : %1").arg(readyForPass),D_MHMMD);
+//    debug(QString("readyForPass : %1").arg(readyForPass),D_MHMMD);
     if(readyForPass && doPass)
         kick->setKickSpeed(kickSpeed);
     else

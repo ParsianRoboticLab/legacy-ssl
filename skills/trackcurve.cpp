@@ -6,7 +6,7 @@ INIT_SKILL(CSkillTrackCurve, "trackcurve");
 
 CSkillTrackCurve::CSkillTrackCurve(CAgent *_agent) : CSkill(_agent)
 {
-    bangBang = new CNewBangBang;
+    bangBang = new CNewBangBang();
     curvePID = new _PID(1,0,0,0,0);
 }
 
