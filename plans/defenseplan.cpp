@@ -9,7 +9,7 @@ using namespace std;
 #define CHIP_POWER 1023
 #define LONG_CHIP_POWER 1023
 #define KICK_POWER 600
-
+///////////////// AHZ is writing for testing ... ;) ////////////////////////////////////
 float getDegree(Vector2D pos1, Vector2D pos2, Vector2D pos3)
 {
     Vector2D v1 = pos1 - pos2, v2 = pos3 - pos2;
