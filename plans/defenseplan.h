@@ -101,8 +101,8 @@ protected:
     //////changes for roboccup 2016////////
     Vector2D getIntersectionWithPenaltyAreaGk(Segment2D _seg);
     /////////////////////////////////////
-    void checkGoalieState();
-    void runGoalie();
+    void setGoalKeeperState();
+    void setGaolKeeperTargetPoint();
     bool ballBehindGoalie, goalieOneTouch, goalieInPenaltyAreaPrediction, goalieClearMode, goalieStrictFollow, goalieFollow, ballIsOutOfField;
     double strictfollowThr;
     double behindBallThr;    
@@ -115,7 +115,7 @@ protected:
     Segment2D getBisectorSegment(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
     void manToManMarkInPlayOn(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
-    void tempFindPos(int _markAgentSize);
+    void manToManMarkInPlayOffBlockShot(int _markAgentSize);
     void getIntersectionWithPenaltyAreaAHZ(Segment2D , Vector2D sol1 , Vector2D sol2);
     bool isIndirectArea(Vector2D);
     int angleDegreeThr = 0;    
@@ -206,7 +206,7 @@ protected:
 public:
     DefensePlan();
     void execute();
-    void initGoalie(CAgent *_goalieAgent = NULL);
+    void initGoalKeeper(CAgent *_goalieAgent = NULL);
     void initDefense(const QList <CAgent*> &_defenseAgents = QList<CAgent*>());
     int getNumberofThreeDefense();
 
@@ -235,7 +235,6 @@ private:
        void findOppAgentsToMark(QList<Vector2D> _realDefTargets);
        QList<CRobot*> sortdanger(const QList<CRobot*> oppagent);
 
-       void markExecute(int _markAgentSize);
        bool checkIndirectAreaShoot(Vector2D);
        bool checkIndirectAreaPass(Vector2D);
        void markPosRefinePlayoff();

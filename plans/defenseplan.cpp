@@ -10,31 +10,41 @@ using namespace std;
 #define LONG_CHIP_POWER 1023
 #define KICK_POWER 600
 ///////////////// AHZ is writing for testing ... ;) ////////////////////////////////////
-float getDegree(Vector2D pos1, Vector2D pos2, Vector2D pos3)
-{
-    Vector2D v1 = pos1 - pos2, v2 = pos3 - pos2;
+float getDegree(Vector2D pos1, Vector2D origin, Vector2D pos3){
+    //// get the angle of between two vector that
+    //// is made up by this 3 points
+    Vector2D v1 = pos1 - origin;
+    Vector2D v2 = pos3 - origin;
     return (v1.th() - v2.th()).degree();
 }
-
 ///////////////////////////////// AHZ ////////////////////////////////////////
-
 bool DefensePlan::isIndirectArea(Vector2D aPoint){
+    //// check that a point is in the circle around the ball
+    //// with 50cm radius or not.
     bool localFlag = Circle2D(wm->ball->pos , ballCircleR).contains(aPoint) ?   1 : 0;
     return localFlag;
 }
 
 Line2D DefensePlan::getBisectorLine(Vector2D firstPoint , Vector2D originPoint , Vector2D thirdPoint){
+    //// get the bisector line of an angle
+    //// that is made up by this 3 points
     Line2D bisectorLine (originPoint , AngleDeg::bisect((firstPoint - originPoint).th() , (thirdPoint - originPoint).th()));
     return bisectorLine;
 }
-
 Segment2D DefensePlan::getBisectorSegment(Vector2D firstPoint , Vector2D originPoint , Vector2D thirdPoint){
+    //// get the bisector segment of an angle
+    //// that is made up by this 3 points
     Line2D bisectorLine (originPoint , AngleDeg::bisect((firstPoint - originPoint).th() , (thirdPoint - originPoint).th()));
     Segment2D bisectorSegment(originPoint , Segment2D (thirdPoint , firstPoint).intersection(bisectorLine));
     return bisectorSegment;
 }
 
 void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsToBeMarkPossition , int ourMarkAgentsSize , double proportionOfDistance){
+    //// This function blocking the lines that are between ball &&
+    //// opponent agents by a variable ratio along these lines.
+    //// This is one of the mark plan for defending more flexible
+
+
     ////////////////////////// Variables of this function //////////////////////
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
     bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)/*|| (knowledge->getGameState() == CKnowledge::TheirKickOff)*/|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
@@ -392,13 +402,20 @@ void DefensePlan::manToManMarkInPlayOffBlockPass(QList<Vector2D> opponentAgentsT
 }
 
 Vector2D DefensePlan::getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion){
+    //// This function gets a point along the lines that
+    //// is made up by 2 points.The position of this point varies
+    //// in according to the "ratio" that is given to the function.
     firstPoint = firstPoint + (secondPoint - firstPoint).norm() * proportion * (Segment2D(secondPoint , firstPoint).length());
     return firstPoint;
 }
 
 /////////////////////////////// end of AHZ /////////////////////////////////////
 
-void DefensePlan::tempFindPos(int _markAgentSize){
+void DefensePlan::manToManMarkInPlayOffBlockShot(int _markAgentSize){
+    //// This function blocking the lines that are between center of our goal &&
+    //// opponent agents by a variable ratio along these lines.
+    //// This is one of the mark plan for defending more flexible
+
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
     bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)/*|| (knowledge->getGameState() == CKnowledge::TheirKickOff)*/|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     bool intelligentMarkType = policy()->Mark_IntelligentMarkType();
@@ -586,11 +603,6 @@ void DefensePlan::tempFindPos(int _markAgentSize){
     for(int i = 0 ; i < markPoses.size() ; i++){
         draw(markRoles.at(i) , markPoses.at(i) - Vector2D(0,0.4) , "white");
     }
-    markExecute(_markAgentSize);
-}
-
-void DefensePlan::markExecute(int _markAgentSize)
-{
     for(int i =0;i<markPoses.count(); i++)
     {
         if(i < _markAgentSize) {
@@ -600,8 +612,19 @@ void DefensePlan::markExecute(int _markAgentSize)
     }
 }
 
-void DefensePlan::checkGoalieState()
+void DefensePlan::setGoalKeeperState()
 {
+    //// In this function,we determine the specific states that goalkeeper must
+    //// have a logical behavior by good conditions.In other word we have some
+    //// exceptions mode for goalkeeper.These modes are :
+    //// 1- ball is behind the goalkeeper,
+    //// 2- One touch mode(goalkeeper diving mode) ,
+    //// 3- Goalkeeper is in penalty area prediction ,
+    //// 4- Throw out the ball from penalty area (Clear mode) ,
+    //// 5- Strict following the ball ,
+    //// 6- Following the ball ,
+    //// 7- Ball is out of the field.
+
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
     Rect2D fieldRect(Vector2D(- _FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0) - Vector2D(-0.02,-0.02),Vector2D(_FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0)-Vector2D(+0.02,+0.02));
 
@@ -628,8 +651,6 @@ void DefensePlan::checkGoalieState()
             Vector2D openAngGoalIntersectionTop(AZTopOfOpenSeg.intersection(goalLine));
             Vector2D openAngGoalIntersectionBottom(AZBottomOfOpenSeg.intersection(goalLine));
 
-            ///////////////////////////////////////////////
-            ///////Check if ball is behind goalie or not////////////else we should check other states
             if(goaliePos.x + behindBallThr > BallPos.x && (penaltyArea.contains(BallPos) || !penaltyArea.contains(goaliePos))) {
                 ballBehindGoalie = true ;
                 goalieOneTouch = false, goalieInPenaltyAreaPrediction = false, goalieClearMode = false, goalieStrictFollow = false, goalieFollow = false, ballIsOutOfField = false;
@@ -660,7 +681,6 @@ void DefensePlan::checkGoalieState()
                 strictfollowThr = 0;
                 return;
             }
-
             else if (openAngGoalIntersectionTop.dist(openAngGoalIntersectionBottom) > 0.6 - strictfollowThr || defenseAgents.size() == 1) {
                 ballBehindGoalie = false, goalieOneTouch = false, goalieInPenaltyAreaPrediction = false, goalieClearMode = false, goalieStrictFollow = true, goalieFollow = false, ballIsOutOfField = false;
                 strictfollowThr = 0.15;
@@ -683,7 +703,10 @@ void DefensePlan::checkGoalieState()
     }
 }
 
-void DefensePlan::runGoalie(){
+void DefensePlan::setGaolKeeperTargetPoint(){
+    //// This function determine the target point that goalkeeper must go to it.
+    //// For producing the target point, we certainly consider the states that
+    //// is result from the "setGoalKeeperState" function.  :)
 
     ///////////////////////////// Variables of this function ////////////////////////////////
     Vector2D ballPos;
@@ -691,8 +714,7 @@ void DefensePlan::runGoalie(){
     Vector2D predictedBall;
     Vector2D goaliePos;
     Vector2D Solutions[2];
-    Vector2D goalKeeperTargetOffSet = Vector2D(0.2 , 0.0);
-    Segment2D goalLine(wm->field->ourGoalL() + Vector2D(0.2 , 0.1) , wm->field->ourGoalR() + Vector2D(0.2 , -0.1));
+    Vector2D goalKeeperTargetOffSet = Vector2D(0.2 , 0.0);    
     bool playOnMode = knowledge->getGameMode() == CKnowledge::Start;
     stopMode = knowledge->isStop();
     ////////////////////////// Added Danger Mode && edited by AHZ //////////////////////////
@@ -892,22 +914,30 @@ void DefensePlan::runGoalie(){
 }
 
 void DefensePlan::assignSkill(CAgent *_agent , CSkill *_skill){
+    //// For run any skill,for example: kick , we must initialize
+    //// some main variables for each
+    //// agent that are effective to run a skill.
+    //// This function is called anywhere that we need to run a skill.
     _agent->skill = _skill;
     _agent->skillName = _skill->getName();
     _skill->setAgent(_agent);
 
 }
 
-void DefensePlan::initGoalie(CAgent *_goalieAgent){
+void DefensePlan::initGoalKeeper(CAgent *_goalieAgent){
+    //// This function determines the goalkeeper agent. Actually this function
+    //// is used in Coach.cpp && in "decideDefense"function to determine the
+    //// goalkeeper agent.
     goalieAgent = _goalieAgent;
     agents.clear();
-    if( _goalieAgent )
+    if(_goalieAgent){
         agents.append(_goalieAgent);
-
-
+    }
 }
 
 void DefensePlan::initDefense(const QList <CAgent*> &_defenseAgents){
+    //// Just like the "initGoalKeeper" function , for inializing the defense
+    //// agent , we have a function like this. :)
     defenseAgents.clear();
     defenseAgents.append(_defenseAgents);
     agents.append(_defenseAgents);
@@ -915,7 +945,7 @@ void DefensePlan::initDefense(const QList <CAgent*> &_defenseAgents){
 
 void DefensePlan::setPointToKick()
 {
-    if( oneToucher < 0 || oneToucher >= defenseAgents.size() )
+    if(oneToucher < 0 || oneToucher >= defenseAgents.size() )
         oneToucher = 0;
     Vector2D ballPos = wm->ball->pos;
     Line2D ballLine(wm->ball->pos , wm->ball->pos + wm->ball->vel.norm());
@@ -1566,8 +1596,8 @@ void DefensePlan::execute()
     }
     else {
         if(knowledge->goalie != NULL) {
-            checkGoalieState();
-            runGoalie();
+            setGoalKeeperState();
+            setGaolKeeperTargetPoint();
             executeGoalie();
         }
         if(defenseAgents.size() > 0 )
@@ -3253,11 +3283,11 @@ void DefensePlan ::findPos(int _markAgentSize){
         }
         else if(playOn){
             changeInMarkPlanFlag = false;
-            tempFindPos(_markAgentSize);
+            manToManMarkInPlayOffBlockShot(_markAgentSize);
         }
         else if(stopMode){
             changeInMarkPlanFlag = false;
-            tempFindPos(_markAgentSize);
+            manToManMarkInPlayOffBlockShot(_markAgentSize);
         }
     }
     /////////////////////////////////////////////
@@ -3269,7 +3299,7 @@ void DefensePlan ::findPos(int _markAgentSize){
         /////////////// Added By AHZ for transient mode :) ////////////////////
         if(knowledge->transientFlag){
             if(limitBetweenHMDAndAHZ){
-                tempFindPos(_markAgentSize);
+                manToManMarkInPlayOffBlockShot(_markAgentSize);
             }
             else{
                 manToManMarkInPlayOffBlockPass(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
@@ -3277,11 +3307,11 @@ void DefensePlan ::findPos(int _markAgentSize){
         }
         else if(playOn){
             limitBetweenHMDAndAHZ = false;
-            tempFindPos(_markAgentSize);
+            manToManMarkInPlayOffBlockShot(_markAgentSize);
         }
         else if(stopMode){
             limitBetweenHMDAndAHZ = false;
-            tempFindPos(_markAgentSize);
+            manToManMarkInPlayOffBlockShot(_markAgentSize);
         }
     }
     else {
@@ -3293,13 +3323,13 @@ void DefensePlan ::findPos(int _markAgentSize){
             else{
                 limitBetweenAHZAndHMD = false;
                 limitBetweenHMDAndAHZ = true;
-                tempFindPos(_markAgentSize);
+                manToManMarkInPlayOffBlockShot(_markAgentSize);
             }
         }
         else{
             limitBetweenAHZAndHMD = false;
             limitBetweenHMDAndAHZ = true;
-            tempFindPos(_markAgentSize);
+            manToManMarkInPlayOffBlockShot(_markAgentSize);
         }
     }
 }

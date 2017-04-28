@@ -1100,11 +1100,11 @@ void CCoach::decideDefense(){
 
     if( knowledge->getGameState() == CKnowledge::TheirPenaltyKick ){
         defenseAgents.clear();
-        defenses.initGoalie(goalieAgent);
+        defenses.initGoalKeeper(goalieAgent);
         defenses.initDefense(defenseAgents);
         defenses.execute();
     } else {
-        defenses.initGoalie(goalieAgent);
+        defenses.initGoalKeeper(goalieAgent);
         defenses.initDefense(defenseAgents);
         defenses.execute();
 //        defenses.debugAgents("Defense");
