@@ -766,13 +766,13 @@ void CMainApplication::setQuiescentMode(QAction *action)
     bool comChanged = false;
     if( action->text() == "Simulation" )
     {
-        if (!soccer->robotCom->send->isUdpConnected())
+        if (!soccer->robotCom->isUdpConnected())
         {
             soccer->connectSimulation();
-            if (!soccer->robotCom->send->errorOccured())
+            if (!soccer->robotCom->errorOccured())
                 printer->textBuffer.enqueue(CStatusText("Connected to simulator command socket: " + QString(conf()->LocalSettings_SimulatorAddr().c_str()) + QString(":%1").arg(conf()->LocalSettings_SimulatorPort()), QColor("green")));
         }
-        else if (!soccer->robotCom->send->errorOccured())
+        else if (!soccer->robotCom->errorOccured())
             printer->textBuffer.enqueue(CStatusText("Using simulator UDP socket", QColor("green")));
         haltAllRobots();
         soccer->setMode(CSoccer::Simulation);
@@ -786,13 +786,13 @@ void CMainApplication::setQuiescentMode(QAction *action)
     }
     else if( action->text() == "Real" )
     {
-        if (!soccer->robotCom->send->isSerialConnected())
+        if (!soccer->robotCom->isSerialConnected())
         {
             soccer->connectSerial();
-            if (!soccer->robotCom->send->errorOccured())
+            if (!soccer->robotCom->errorOccured())
                 printer->textBuffer.enqueue(CStatusText("Send COM Port : " + QString(conf()->LocalSettings_SerialDev().c_str()) + " Succesfully configured", QColor("green")));
         }
-        else if (!soccer->robotCom->send->errorOccured())
+        else if (!soccer->robotCom->errorOccured())
             printer->textBuffer.enqueue(CStatusText("Send Using COM Port", QColor("green")));
         soccer->setMode(CSoccer::Real);
         setSpyModeAct->setChecked(false);
@@ -1465,45 +1465,7 @@ void CMainApplication::updateCoach()
 }
 
 void haltAllRobots()
-{
-    if( recvThreadMutex->tryLock(25) ){
-        mainapp->soccer->robotCom->recvThread->deactivateSerial();
-        mainapp->soccer->robotCom->recvThread->deactivateUdp();
-        mainapp->soccer->robotCom->recvThread->closeRecv = true;
-        recvThreadMutex->unlock();
-        QTime tm;
-        tm.start();
-        while( tm.elapsed() < 25 )
-        {
-            bool flag=false;
-            if( recvThreadMutex->tryLock(1) ){
-                flag = mainapp->soccer->robotCom->recvThread->recvClosed;
-                recvThreadMutex->unlock();
-            }
-            if (flag) break;
-        }
-    }
-/////continue log in simulate mode
-
-//    if( loggerMutex->tryLock(25) ){
-//        gameLogger->closeLogger = true;
-//        gameLogger->setIsLogMode(false);
-//        gameLogger->logMode = false;
-//        gameLogger->closeLogFiles(false);
-//        loggerMutex->unlock();
-//        QTime tm;
-//        tm.start();
-//        while( tm.elapsed() < 25 )
-//        {
-//            bool flag=false;
-//            if( loggerMutex->tryLock(1) ){
-//                flag = gameLogger->loggerClosed;
-//                loggerMutex->unlock();
-//            }
-//            if (flag) break;
-//        }
-//    }
-
+{    
     char o[20];
     for (int k=0;k<100;k++)
     {
@@ -1513,7 +1475,7 @@ void haltAllRobots()
             o[0] = 0x99;
             o[1] = id & 0x0F;
             o[3] =o[4] =o[5] =o[6] =o[7] =o[8]=o[2] = 0x00;
-            mainapp->soccer->robotCom->send->sendString(o, 14);
+            mainapp->soccer->robotCom->sendString(o, 14);
         }
     }
 }

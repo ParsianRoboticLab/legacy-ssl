@@ -11,7 +11,7 @@
 clock_t t;
 //#define speedTest
 
-#define kickTest
+//#define kickTest
 QList <Vector2D> agentpath;
 
 struct VectorIndex {
@@ -53,6 +53,33 @@ void CMainApplication::Experimental6()
     return;
 #endif
 
+    debug(QString("shootSen4 : %1").arg(knowledge->getAgent(4)->shootSensor()),D_MHMMD);
+    debug(QString("shootSen7 : %1").arg(knowledge->getAgent(7)->shootSensor()),D_MHMMD);
+    debug(QString("shootSen1 : %1").arg(knowledge->getAgent(1)->shootSensor()),D_MHMMD);
+    debug(QString("shootSen0 : %1").arg(knowledge->getAgent(0)->shootSensor()),D_MHMMD);
+    debug(QString("shootSen3 : %1").arg(knowledge->getAgent(3)->shootSensor()),D_MHMMD);
+    debug(QString("shootSen2 : %1").arg(knowledge->getAgent(2)->shootSensor()),D_MHMMD);
+
+    double maxAcc = 4;
+    double maxVel = 4;
+    Polygon2D obs;
+    Vector2D p0,v0;
+    Vector2D acc;
+    p0 = (mousePos);
+    v0.assign(1,1);
+    double _t = 0.5;
+    double ang;
+    for(int i = 0 ; i < 36 ; i ++)
+    {
+        ang = i*10*_DEG2RAD;
+        acc = maxAcc * Vector2D(cos(ang),sin(ang));
+        obs.addVertex(p0 + v0*_t + 0.5*_t*_t*acc);
+    }
+
+    draw(mousePos);
+    draw(obs);
+
+    return;
     static CSkillDribble mpass(soccer->agents[skillAgent]);
     Circle2D opFak(wm->opp[2]->pos + wm->opp[2]->dir.norm()*0.08,0.07);
     static CSkillKick passKick(soccer->agents[skillAgent]);
