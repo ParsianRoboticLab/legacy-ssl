@@ -51,6 +51,7 @@ public slots:
 private:
         char a;
         QTimer *recTime;
+        QTime onlineRobotsTimer[12];
         QByteArray recDataFlow;
         unsigned char rPack[13];
         unsigned char robotPacket[16][13];

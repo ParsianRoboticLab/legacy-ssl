@@ -112,6 +112,11 @@ CBaseCommunicator::CBaseCommunicator() : QObject()
             robotPacket[i][j]=0;
         }
     }
+
+    for(int i = 0 ; i < 12 ; i++)
+    {
+        onlineRobotsTimer[i].start();
+    }
     //connect(p->serial_port,SIGNAL(readyRead()),this,SLOT(readData()));
 }
 
@@ -148,6 +153,7 @@ void CBaseCommunicator::readData()
                     for(int j = i-1 ; j >= i - 12 ; j--)
                     {
                         robotPacket[recDataFlow[i-12]][j] = recDataFlow[j];
+                        onlineRobotsTimer[recDataFlow[i-12]].restart();
                     }
                     if (!recDataFlow.isEmpty())
                     {
@@ -169,9 +175,19 @@ void CBaseCommunicator::readData()
         }
     }
 
+    knowledge->onlineRobots.clear();
+    for(int i = 0 ; i < 12 ; i++)
+    {
+        knowledge->onlineRobots.append(i);
+        if(onlineRobotsTimer[i].elapsed() > 200)
+        {
+            knowledge->onlineRobots.removeOne(i);
+        }
+    }
+
     debug(QString("id : %1").arg((int)robotPacket[4][1]), D_MHMMD);
     for (int i = 0; i < _MAX_NUM_PLAYERS; i++)
-        wm->our[i]->shootSensor = (robotPacket[i][1]);
+        knowledge->getAgent(i)->setShootSensor(robotPacket[i][1]);
 }
 
 CBaseCommunicator::~CBaseCommunicator()
