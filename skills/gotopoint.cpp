@@ -966,7 +966,7 @@ void CSkillGotoPointAvoid::execute()
     agentPos = agent->pos();
     agentVel = agent->vel();
     double dVx,dVy,dW;
-    bangBang->setAccMax(conf()->BangBang_AccMax()*10);
+    bangBang->setAccMax(conf()->BangBang_AccMaxForward());
     bangBang->setDecMax(conf()->BangBang_DecMax());
     bangBang->setOneTouch(oneTouchMode || diveMode);
     if(slowMode || slow)
