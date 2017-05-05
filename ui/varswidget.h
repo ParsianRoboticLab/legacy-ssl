@@ -265,6 +265,7 @@ class CPolicyWidget : public QWidget
             DEF_VALUE(PlayOff, int, Int, PasserID)
             DEF_VALUE(PlayOff, bool, Bool, IDBaseOneToucher)
             DEF_VALUE(PlayOff, int, Int, OneToucherID)
+            DEF_VALUE(PlayOff, bool, Bool, UseFastPlay)
     DEF_TREE(DynamicPlay)
             DEF_VALUE(DynamicPlay, double , Double , LowSpeedPass)
             DEF_VALUE(DynamicPlay, double , Double , MediumSpeedPass)
