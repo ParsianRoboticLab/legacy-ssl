@@ -112,9 +112,10 @@ CCoach::CCoach(CAgent**_agents)
     exeptionPlayMake = NULL;
     exeptionPlayMakeThr = 0;
 
-
+    staticPlayoffPlansCounter = 0;
     m_planLoader = new CLoadPlayOffJson(QDir::currentPath() + QString("/playoff"));
     goalieAgent = NULL;
+    firstPlay = true;
 }
 
 CCoach::~CCoach()
@@ -1497,7 +1498,13 @@ void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
         selectPlayOffMode(_ourplayers.size(), tempMode);
         initPlayOffMode(tempMode, _mode, _ourplayers);
         ourPlayOff->setMasterMode(tempMode);
-        firstTime = false;
+        if (firstPlay) {
+            firstPlay = false;
+
+        } else {
+            firstTime = false;
+
+        }
         qDebug() << "[Coach] first time config done";
     } else {
         setPlayOff( ourPlayOff->getMasterMode() );
@@ -1669,12 +1676,19 @@ NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& pla
     return bestPlans[rand()%bestPlans.size()];
 }
 
-void CCoach::selectPlayOffMode(int agentSize, NGameOff::EMode &_mode) {
-    // TODO : a real one needed
+void CCoach::selectPlayOffMode(int agentSize, NGameOff::EMode &_mode) {     
     if (agentSize < 2) {
         _mode = NGameOff::DynamicPlay;
+    } else if (firstPlay) {
+        if (isFastPlay()) {
+            _mode = NGameOff::FastPlay;
+        } else {
+            _mode = NGameOff::FirstPlay;
+
+        }
+
     } else if (knowledge->getGameState() == CKnowledge::OurKickOff
-            ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
+           ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
         _mode = NGameOff::StaticPlay;
 
     } else if (wm->ball->pos.x > -1) {
@@ -1816,22 +1830,34 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
         return;
     }
 
-    RNG randomNumberGenerator;
-    int sum = 0;
-    for(int i = 0; i < chances.size(); i++)
-        sum += chances.at(i);
-    int randNo = randomNumberGenerator.uniformInt() % validPlans.size();
-    sum = 0;
-    for(int i = 0; i < chances.size(); i++)
-        if(sum <= randNo && randNo < sum + chances[i])
-        {
-            randNo = i;
-            break;
-        }
-        else
-            sum += chances[i];
-    NGameOff::SPlan* thePlan = validPlans[randNo]; //chooseMostSuccecfull(validPlans); //Choose Best valid Plan
-    debug (QString("Plan Number : %1").arg(randNo), D_DEBUG);
+    /** RANDOM PLAN SELECTION**/
+//    RNG randomNumberGenerator;
+//    int sum = 0;
+//    for(int i = 0; i < chances.size(); i++)
+//        sum += chances.at(i);
+
+//    int randNo = randomNumberGenerator.uniformInt() % validPlans.size();
+//    sum = 0;
+//    for(int i = 0; i < chances.size(); i++) {
+//        if(sum <= randNo && randNo < sum + chances[i])
+//        {
+//            randNo = i;
+//            break;
+//        } else {
+//            sum += chances[i];
+//        }
+//    }
+//    NGameOff::SPlan* thePlan = validPlans[randNo]; //chooseMostSuccecfull(validPlans); //Choose Best valid Plan
+//    debug (QString("Plan Number : %1").arg(randNo), D_DEBUG);
+
+    /** COUNTER PLAN SELECTION**/
+    if (staticPlayoffPlansCounter > validPlans.size()) {
+        staticPlayoffPlansCounter = 0;
+    }
+    NGameOff::SPlan* thePlan = validPlans[staticPlayoffPlansCounter]; //chooseMostSuccecfull(validPlans); //Choose Best valid Plan
+    debug (QString("Plan Number : %1 ==> ").arg(staticPlayoffPlansCounter) + validPlans[staticPlayoffPlansCounter]->gui.planFile, D_DEBUG);
+    staticPlayoffPlansCounter++;
+
     matchPlan(thePlan, _ourplayers); //Match The Plan
     checkGUItoRefineMatch(thePlan, _ourplayers);
     ourPlayOff->setMasterPlan(thePlan);
@@ -2050,6 +2076,7 @@ void CCoach::decideHalt(QList<int>& _ourPlayers) {
 
 void CCoach::decideStop(QList<int> & _ourPlayers) {
     firstTime = true;
+    firstPlay = true;
     cyclesWaitAfterballMoved = 0;
     lastPlayMake = -1;
     clearIntentions();
@@ -2156,4 +2183,10 @@ void CCoach::decideNull(QList<int> &_ourPlayers) {
         ourPlayOff->deleted = true;
     }
     debug(QString("Unexpected Game State: %1 %2").arg(knowledge->stateToString(knowledge->getGameState())).arg(knowledge->getGameState()) , D_ERROR , "red");
+}
+
+bool CCoach::isFastPlay() {
+    if (policy()->PlayOff_UseFastPlay()) {
+        return true; // TODO : fix this by condidering that opp agents
+    }
 }

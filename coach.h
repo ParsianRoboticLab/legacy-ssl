@@ -163,7 +163,7 @@ private:
     void setFirstPlay();
     void setFastPlay();
     CLoadPlayOffJson* m_planLoader;
-    bool firstTime;
+    bool firstTime, firstPlay;
 
     bool isTagsMatched(const QStringList& base, const QStringList& required);
     bool isRegionMatched(const Vector2D& _ball, const double& _radius = 1.0); //circular Matching
@@ -194,6 +194,8 @@ private:
     void decideTheirBallPlacement (QList<int>&);
     void decideNull               (QList<int>&);
     /////////////////////////////////////
+    unsigned int staticPlayoffPlansCounter;
+    bool isFastPlay();
 };
 
 #define GetRole(Role, number) static_cast<Role*> (getRole(Role::Name, number))
