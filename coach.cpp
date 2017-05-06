@@ -116,6 +116,7 @@ CCoach::CCoach(CAgent**_agents)
     m_planLoader = new CLoadPlayOffJson(QDir::currentPath() + QString("/playoff"));
     goalieAgent = NULL;
     firstPlay = true;
+    firstIsFinished = false;
 }
 
 CCoach::~CCoach()
@@ -1498,13 +1499,20 @@ void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
         selectPlayOffMode(_ourplayers.size(), tempMode);
         initPlayOffMode(tempMode, _mode, _ourplayers);
         ourPlayOff->setMasterMode(tempMode);
-        if (firstPlay && policy()->PlayOff_UseFirstPlay()) {
-            firstPlay = false;
+        if ( policy()->PlayOff_UseFirstPlay() ) {
+            if (firstPlay) {
+                firstPlay = false;
+            } else if (firstIsFinished) {
+                firstTime = false;
+                firstPlay = false;
+            } else {
+                firstTime = true;
+            }
 
         } else {
             firstTime = false;
-
         }
+
         qDebug() << "[Coach] first time config done";
     } else {
         setPlayOff( ourPlayOff->getMasterMode() );
@@ -1703,17 +1711,16 @@ void CCoach::initPlayOffMode(const NGameOff::EMode _mode,
                              const QList<int>& _ourplayers) {
     switch(_mode) {
     case NGameOff::StaticPlay:
-
         initStaticPlay(_gameMode, _ourplayers);
         break;
     case NGameOff::DynamicPlay:
         initDynamicPlay(_ourplayers);
         break;
     case NGameOff::FastPlay:
-        initFastPlay();
+        initFastPlay(_ourplayers);
         break;
     case NGameOff::FirstPlay:
-        initFirstPlay();
+        initFirstPlay(_ourplayers);
         break;
     default:
         initStaticPlay(_gameMode, _ourplayers);
@@ -1850,6 +1857,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
 //    }
 //    NGameOff::SPlan* thePlan = validPlans[randNo]; //chooseMostSuccecfull(validPlans); //Choose Best valid Plan
 //    debug (QString("Plan Number : %1").arg(randNo), D_DEBUG);
+    /** RANDOM PLAN SELECTION**/
 
     /** COUNTER PLAN SELECTION**/
     if (staticPlayoffPlansCounter > validPlans.size()) {
@@ -1858,6 +1866,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     NGameOff::SPlan* thePlan = validPlans[staticPlayoffPlansCounter]; //chooseMostSuccecfull(validPlans); //Choose Best valid Plan
     debug (QString("Plan Number : %1 ==> ").arg(staticPlayoffPlansCounter) + validPlans[staticPlayoffPlansCounter]->gui.planFile, D_DEBUG);
     staticPlayoffPlansCounter++;
+    /** COUNTER PLAN SELECTION**/
 
     matchPlan(thePlan, _ourplayers); //Match The Plan
     checkGUItoRefineMatch(thePlan, _ourplayers);
@@ -1890,11 +1899,13 @@ void CCoach::initDynamicPlay(QList<int> _ourplayers) {
 
 }
 
-void CCoach::initFastPlay() {
+void CCoach::initFastPlay(QList<int> _ourplayers) {
     // TODO : Initial Fast Play
 }
 
-void CCoach::initFirstPlay() {
+void CCoach::initFirstPlay(QList<int> _ourplayers) {
+    ourPlayOff->setInitial(true);
+    ourPlayOff->lockAgents = true;
     // TODO : Initial First Play
 }
 

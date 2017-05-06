@@ -1,4 +1,4 @@
-#include "plays/playoff.h"
+    #include "plays/playoff.h"
 
 
 CPlayOff::CPlayOff()
@@ -730,6 +730,15 @@ void CPlayOff::fastExecute() {
 }
 
 void CPlayOff::firstExecute() {
+    if (knowledge->getGameState() == CKnowledge::OurKickOff) {
+        kickOffStopModePlay(masterPlan->common.currentSize);
+        for (int i = 0; i < masterPlan->common.currentSize; i++) {
+            newRoleAgent[i]->execute();
+        }
+    } else {
+
+    }
+
     // TODO : Write first Execution (playoff)
 
 }

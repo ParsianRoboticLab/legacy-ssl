@@ -156,14 +156,14 @@ private:
     void setPlayOff(NGameOff::EMode _mode);
     void initStaticPlay(const POMODE _mode, const QList<int>& _agentSize);
     void initDynamicPlay(QList<int> _ourplayers);
-    void initFastPlay();
-    void initFirstPlay();
+    void initFastPlay(QList<int> _ourplayers);
+    void initFirstPlay(QList<int> _ourplayers);
     void setStaticPlay();
     void setDynamicPlay();
     void setFirstPlay();
     void setFastPlay();
     CLoadPlayOffJson* m_planLoader;
-    bool firstTime, firstPlay;
+    bool firstTime, firstPlay, firstIsFinished;
 
     bool isTagsMatched(const QStringList& base, const QStringList& required);
     bool isRegionMatched(const Vector2D& _ball, const double& _radius = 1.0); //circular Matching
