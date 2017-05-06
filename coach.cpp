@@ -1498,7 +1498,7 @@ void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
         selectPlayOffMode(_ourplayers.size(), tempMode);
         initPlayOffMode(tempMode, _mode, _ourplayers);
         ourPlayOff->setMasterMode(tempMode);
-        if (firstPlay) {
+        if (firstPlay && policy()->PlayOff_UseFirstPlay()) {
             firstPlay = false;
 
         } else {
@@ -1679,13 +1679,11 @@ NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& pla
 void CCoach::selectPlayOffMode(int agentSize, NGameOff::EMode &_mode) {     
     if (agentSize < 2) {
         _mode = NGameOff::DynamicPlay;
-    } else if (firstPlay) {
-        if (isFastPlay()) {
-            _mode = NGameOff::FastPlay;
-        } else {
-            _mode = NGameOff::FirstPlay;
+    } else if (isFastPlay()) {
+        _mode = NGameOff::FastPlay;
 
-        }
+    } else if (firstPlay && policy()->PlayOff_UseFirstPlay()) {
+        _mode = NGameOff::FirstPlay;
 
     } else if (knowledge->getGameState() == CKnowledge::OurKickOff
            ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
@@ -1693,8 +1691,10 @@ void CCoach::selectPlayOffMode(int agentSize, NGameOff::EMode &_mode) {
 
     } else if (wm->ball->pos.x > -1) {
         _mode = NGameOff::StaticPlay;
+
     } else {
         _mode = NGameOff::DynamicPlay;
+
     }
 }
 
@@ -1703,6 +1703,7 @@ void CCoach::initPlayOffMode(const NGameOff::EMode _mode,
                              const QList<int>& _ourplayers) {
     switch(_mode) {
     case NGameOff::StaticPlay:
+
         initStaticPlay(_gameMode, _ourplayers);
         break;
     case NGameOff::DynamicPlay:
