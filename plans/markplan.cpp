@@ -1412,8 +1412,6 @@ QList<QPair<Vector2D, double> > CMarkPlan::sortdangerpassplayon(QList<Vector2D> 
     QList<QPair<Vector2D, double> > output;
     for(int i = 0; i<oppposdanger.count(); i++) {
         temp.first = oppposdanger[i];
-
-
         angle = Vector2D::angleOf(wm->field->ourGoalR(), oppposdanger[i], wm->field->ourGoalL() ).degree();
         distancetoball =  (oppposdanger[i] - wm->ball->pos).length();
         distancetogoal =  (oppposdanger[i] - wm->field->ourGoal()).length();
@@ -1422,23 +1420,6 @@ QList<QPair<Vector2D, double> > CMarkPlan::sortdangerpassplayon(QList<Vector2D> 
         danger = (KA * fabs(angle) / RangeofAngle) + ( KDB * (1 - (distancetoball / RangeofDistancetoBall)) ) + (KDG * (1 -(distancetogoal / RangeofDistancetoGoal))) + (KAD * angleDef / RangeofAngleDef);
         temp.second = danger;
         output.append(temp);
-        // finding nearest to intersect
-        Segment2D tempsegment;
-        tempsegment.assign(oppposdanger[i],wm->field->ourGoal());
-
-        double mintempdis = 0.0;
-        if(wm->our.activeAgentsCount() != 0)
-            mintempdis = tempsegment.dist(wm->our.active(0)->pos);
-
-        for(int j=0; j<wm->our.activeAgentsCount(); j++)
-        {
-            if(tempsegment.dist(wm->our.active(j)->pos) < mintempdis)
-            {
-                mintempdis = tempsegment.dist(wm->our.active(j)->pos);
-            }
-
-        }
-
     }
 
     ///sorting the Qlist
@@ -1450,7 +1431,6 @@ QList<QPair<Vector2D, double> > CMarkPlan::sortdangerpassplayon(QList<Vector2D> 
                 output.swap(j, j+1);
         }
     }
-
     return output;
 }
 
@@ -1710,17 +1690,41 @@ QList<Vector2D> CMarkPlan::ShootBlockRatio(double ratio, Vector2D opp){
 }
 
 QList<Vector2D> CMarkPlan::PassBlockRatio(double ratio, Vector2D opp){
-    /*Segment2D tempSeg;
+    Segment2D tempSeg;
+    Segment2D isInPenaltyArea;
+    Vector2D sol;
     QList<Vector2D> tempQlist;
     tempQlist.clear();
-    tempSeg.assign(wm->ball->pos, wm->ball->pos + (opp - wm->ball->pos) * 10);
+    tempSeg.assign(wm->ball->pos, wm->ball->pos + (opp - wm->ball->pos) * 20);
     Vector2D pos = wm->ball->pos + (opp - wm->ball->pos) * ratio;
-    CDefPos test;
-    if((wm->field->ourGoal() - pos).length() < markRadiusStrict)
+    isInPenaltyArea.assign(wm->field->ourGoal(), pos);
+    QList<Vector2D> tempVec;
+    tempVec.clear();
+    if(wm->field->AHZOurPAreaIntersect(isInPenaltyArea).size())
     {
-        tempQlist.append(test.getIntersectionWithPenaltyAreaDef(2, tempSeg));
+        tempVec.append(wm->field->AHZOurPAreaIntersect(tempSeg));
+        if(!tempVec.size())
+        {
+            if(tempVec.size() == 1)
+            {
+                tempQlist.append(tempVec.first());
+            }
+            else if(tempVec.size() == 2)
+            {
+                if((tempVec.first() - wm->ball->pos).length() > (tempVec.last() - wm->ball->pos).length())
+                {
+                    sol = tempVec.first();
+                }
+                else if ((tempVec.last() - wm->ball->pos).length() > (tempVec.first() - wm->ball->pos).length())
+                {
+                    sol = tempVec.last();
+                }
+                tempQlist.append(sol);
+            }
 
-        tempQlist.append( wm->ball->pos - opp);
+            tempQlist.append( wm->ball->pos - opp);
+        }
+
         draw(tempSeg, "red");
         debug(QString("this is in the penalty area, Block pass Mode"), D_HAMED);
     }
@@ -1731,7 +1735,7 @@ QList<Vector2D> CMarkPlan::PassBlockRatio(double ratio, Vector2D opp){
         draw(tempSeg, "red");
     }
     return tempQlist;
-    */
+
 }
 
 
@@ -1893,7 +1897,7 @@ void CMarkPlan::execute()
 
             else if(agents.count() < oppAgentsToMarkPos.count())
             {
-                QList<QPair<Vector2D, double> >tempQlistQpair = sortdangerpassplayoff(oppAgentsToMarkPos);
+                QList<QPair<Vector2D, double> >tempQlistQpair = sortdangerpassplayon(oppAgentsToMarkPos);
                 for(int i=0; i<agents.count(); i++)
                 {
                     markPoses.append(ShootBlockRatio(segmentpershoot, tempQlistQpair[i].first).first());
@@ -1905,7 +1909,7 @@ void CMarkPlan::execute()
 
             else if(agents.count() > oppAgentsToMarkPos.count())
             {
-              QList<QPair<Vector2D, double> >tempQlistQpair = sortdangerpassplayoff(oppAgentsToMarkPos);
+              QList<QPair<Vector2D, double> >tempQlistQpair = sortdangerpassplayon(oppAgentsToMarkPos);
 
                 for(int i=0; i<oppAgentsToMarkPos.count(); i++)
                 {
@@ -1913,11 +1917,11 @@ void CMarkPlan::execute()
                     markAngs.append(ShootBlockRatio(segmentpershoot, oppAgentsToMarkPos[i]).last());
                 }
 
-                for(int i=0; i< agents.count() - oppAgentsToMarkPos.count(); i++)
+                for(int i=0; i < min(agents.count() - oppAgentsToMarkPos.count(), oppAgentsToMarkPos.count()); i++)
                 {
                     /*
-                    markPoses.append(PassBlockRatio(segmentperpass, tempQlistQpair[i].first).first());
-                    markAngs.append(PassBlockRatio(segmentperpass, tempQlistQpair[i].first).last());
+                    markPoses.append(PassBlockRatio(segmentperpass, oppAgentsToMarkPos[i]).first());
+                    markAngs.append(PassBlockRatio(segmentperpass, oppAgentsToMarkPos[i]).last());
                     */
                     markPoses.append(Vector2D(-1,-1));
                     markAngs.append(Vector2D(0,1));
