@@ -16,14 +16,21 @@ enum ProfilerState{
     StartLow,
     StartHigh,
     SaveProf,
-    IsChip,
-    endState
+    endState,
+    InitStateChip,
+    ChipStart
 };
 
 enum KickerStatus{
     prfl1_Iskicking,
     prfl2_Iskicking,
     ChangeStat
+};
+
+enum ChipStatus{
+    BallIsNearRobot,
+    FindPos,
+    PosSaved
 };
 
 class CollectProfileData : public QObject
@@ -42,8 +49,8 @@ public:
     Vector2D kickerPos;
     CNewProfiler *profiler;
 
-//    Triangle2D downTri;
-//    Triangle2D upTri;
+    QList<Vector2D> BallPos , SavedChipPos;
+    Vector2D FoundChipPos;
 
     int  realSpeed  , p1 , p2, g1, g2 , counter1 , counter2 , repeat;
 
@@ -53,18 +60,8 @@ public:
 //    double xpos2 , ypos2 , xpos1 , ypos1 , gx, gy;
     bool prfl1_Kicked;
 
-    double lowPosX1, lowPosY1, lowPosX2, lowPosY2;
 
-    double highPosX1, highPosY1, highPosX2, highPosY2;
-
-    double chipPosX , chipPosY;
-    double chipTargetX , chipTargetY;
-
-    bool isChip , spinOn, ChipPosCalculated ,chipAgain;
-
-    QString filename;
-
-    QTime kickerWait;
+    bool isChip;
 
     QList<double> p1RealSpeedRec , p2RealSpeedRec;
     QList<int> p1KickSpeed , p2KickSpeed;
@@ -73,9 +70,10 @@ public:
     CollectProfileData();
 
     void init(int p1 , int p2);
+    void ChipInit(int p1);
     void goOut();
     void positioning(double xpos1 , double ypos1 , double xpos2 , double ypos2);
-    void positioning(double xpos1 , double ypos1);
+    void positioning(double xpos , double ypos);
     void start();
     bool BallIsNear(CRolePlayOn * agent , double rad);
     void LowSpeed1();
@@ -83,11 +81,12 @@ public:
     void HighSpeed();
     void saveMaxBallSpeed();
     void profilerDraws();
-    void ChipProfiling();
-    void CalcChipPos();
+    bool FindChipPos();
+    void StartChip();
 
     ProfilerState prfState;
     KickerStatus kickStat;
+    ChipStatus ChipStat;
 
 signals:
 
