@@ -491,7 +491,9 @@ bool CollectProfileData::FindChipPos(){
 
 void CollectProfileData::StartChip(){
 
-    bool result = false;
+    double dist=0;
+    int posSize = 25;
+    bool result = false , chipped = true;
 
     if(fabs(wm->ball->pos.x - BallPos.last().x) > 0.02 && fabs(wm->ball->pos.y - BallPos.last().y) > 0.02 )
         BallPos.append(wm->ball->pos);
@@ -501,32 +503,71 @@ void CollectProfileData::StartChip(){
         prfl1->setSelectedSkill(roleSkill::Kick);
         prfl1->setKickSpeed(kickSpeed1);
 
-        if(wm->ball->vel.length() > 0.15)
+        if(wm->ball->vel.length() > 0.1)
             ChipStat = FindPos;
 
-        if(BallPos.size() > 20){
+        if(BallPos.size() > posSize){
             BallPos.removeFirst();
         }
 
         prfl1->execute();
 
+        if(chipped){
+            ChipStartPoint = wm->ball->pos;
+        }
+        chipped = false;
+
         break;
 
     case FindPos:
+        chipped = true;
+
+        prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
+        prfl1->setTarget(Vector2D(-0.4 , _FIELD_HEIGHT/2+0.4));
+        prfl1->execute();
+
         result = FindChipPos();
         if(result){
+            SavedChipPos.append(ChipStartPoint);
             SavedChipPos.append(FoundChipPos);
             ChipStat = PosSaved;
         }
-        if(BallPos.size() > 20){
+
+        result = false;
+
+        if(BallPos.size() > posSize){
             BallPos.removeFirst();
         }
 
         break;
 
     case PosSaved:
+        if(Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.1).contains(prfl1->getTarget()) &&
+                Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.08).contains(wm->ball->pos) ){
+            ChipStat = BallIsNearRobot;
+        }
 
         break;
+    }
+
+
+    for(int i=0; i<SavedChipPos.size();i+=2){
+        draw(Segment2D(SavedChipPos.at(i) , SavedChipPos.at(i+1)) , QColor(Qt::black));
+    }
+
+
+    Q_FOREACH(Vector2D v , BallPos)
+        draw(v , 0 , QColor(Qt::white) , 1);
+
+    if(SavedChipPos.size() > 7){
+        dist = 0;
+        for(int i=0; i<SavedChipPos.size();i+=2)
+            dist =+ SavedChipPos.at(i).dist(SavedChipPos.at(i+1));
+        dist/=(SavedChipPos.size()/2.0);
+        ChipResult.keys().append(kickSpeed1);
+        ChipResult.values().append(dist);
+        SavedChipPos.clear();
+        kickSpeed1+=speedStep;
     }
 
 }

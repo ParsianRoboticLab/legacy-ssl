@@ -50,7 +50,8 @@ public:
     CNewProfiler *profiler;
 
     QList<Vector2D> BallPos , SavedChipPos;
-    Vector2D FoundChipPos;
+    Vector2D ChipStartPoint , FoundChipPos;
+    QMap<int , double> ChipResult;
 
     int  realSpeed  , p1 , p2, g1, g2 , counter1 , counter2 , repeat;
 
