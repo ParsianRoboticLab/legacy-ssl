@@ -644,6 +644,7 @@ void CollectProfileData::start(){
     case SaveProf:
         profiler->save(JSON , filename);
         prfState=endState;
+        debug(QString("file name : %1").arg(filename) , D_NADIA);
 
         break;
 

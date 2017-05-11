@@ -1250,7 +1250,7 @@ CPlotWidget::CPlotWidget()
         cmbXYZ[i]->addItem("Y");
         cmbXYZ[i]->addItem("Lenght");
     }
-    GAIN = 35;
+    GAIN = 30;
 
     graph->graphSize.setWidth(680);
     graph->graphSize.setHeight(300);
@@ -1467,7 +1467,7 @@ void CPlotWidget::pauseClicked(){
 
 void CPlotWidget::savePicClicked()
 {
-    //    graph->save("cycle"+QString::number(cycleCounter)+".jpg",QSize(640,480));
+//        graph->save("plot/cycle"+QString::number(cycleCounter)+".jpg",QSize(640,480));
 }
 
 CMonitorWidget::CMonitorWidget(CDrawer *_drawerBuffer, QWidget *parent)
@@ -3736,7 +3736,7 @@ void CNewProfilerWidget::startProfFunc(){
             i++;
         }
     }
-    //collectKickProfile->filename=fileName->text();
+    collectKickProfile->filename=fileName->text();
     collectKickProfile->repeat=repeatNum->text().toInt();
     this->close();
     ProfilerExecute=true;

@@ -7,7 +7,34 @@ double dist=3,v=0;
 
 void CMainApplication::Experimental2()
 {
+
     static bool flag = true;
+
+    if(flag){
+        debug("2__________" , D_FATEMEH);
+        for(int i=0; i < knowledge->profiler->robotsProfile[2].finalKickMap.keys().size(); i++){
+            debug(QString("%3 : %1 , %2").arg(
+                      knowledge->profiler->robotsProfile[2].finalKickMap.keys().at(i)).arg(
+                      knowledge->profiler->robotsProfile[2].finalKickMap.values().at(i)).arg(i) , D_FATEMEH);
+        }
+        debug("6__________" , D_FATEMEH);
+        for(int i=0; i < knowledge->profiler->robotsProfile[6].finalKickMap.keys().size(); i++){
+            debug(QString("%3 : %1 , %2").arg(
+                      knowledge->profiler->robotsProfile[6].finalKickMap.keys().at(i)).arg(
+                      knowledge->profiler->robotsProfile[6].finalKickMap.values().at(i)).arg(i) , D_FATEMEH);
+        }
+        debug("____________________________" , D_FATEMEH);
+        for(int i=0; i<81 ;i+=4){
+            debug(QString("%2 : %1").arg(knowledge->getProfile(6 , i/10.0 , true , false)).arg(i) , D_FATEMEH);
+        }
+        for(int i=0; i<81 ;i+=4){
+            debug(QString("%2 : %1").arg(knowledge->getProfile(2 , i/10.0 , true , false)).arg(i) , D_FATEMEH);
+        }
+        flag = false;
+    }
+
+    return;
+
     int id=6;
 
     if(flag){

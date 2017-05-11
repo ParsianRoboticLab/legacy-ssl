@@ -130,7 +130,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
 
 
-    profiler->load(JSON  , "MahiProfiler_0_3_repeat4_11.1.96.json");
+    profiler->load(JSON , "MahiProfiler_2_6.json");
 
     QList<double> values;
     QList<int> keys;
@@ -159,6 +159,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
                         ProfilerResult[q][0][dis] = -1000;
                 }
     }
+
 }
 
 CKnowledge::~CKnowledge()
@@ -197,9 +198,9 @@ int CKnowledge::getProfile(int agentId, double realParameter, bool isKick, bool 
 
     debug(QString("profDat%1").arg(profiledParameter),D_NADIA);
 
-        if(wm->getIsSimulMode()){
-            return (int)realParameter;
-        }
+//        if(wm->getIsSimulMode()){
+//            return (int)realParameter;
+//        }
 
     if(realParameter < 0) // dummy user
         return 0;
@@ -224,7 +225,7 @@ int CKnowledge::getProfile(int agentId, double realParameter, bool isKick, bool 
         if(ProfilerResult[refRobotID][type][(int)round(realParameter*10)] != -1000){
             profiledParameter= RobotsCoeff[agentId][type] * knowledge->getProfile(refRobotID , realParameter , isKick , spinOn);
         }
-        else{
+        else{   // linear
             profiledParameter= realParameter*128;
         }
 
