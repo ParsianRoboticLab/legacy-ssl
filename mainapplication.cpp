@@ -1746,6 +1746,9 @@ void CMainApplication::loadFormationConfigs(){
     CCoach::editData["TheirP"]->openConf(prefix+"theirP.conf");
     CCoach::editData["OurP"] = new EditData;
     CCoach::editData["OurP"]->openConf(prefix+"ourP.conf");
+    CCoach::editData["OurF"] = new EditData;
+    CCoach::editData["OurF"]->openConf(prefix+"ourF.conf");
+
 
 }
 
