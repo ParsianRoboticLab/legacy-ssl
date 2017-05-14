@@ -413,6 +413,7 @@ private:
     void fastExecute();
     void firstExecute();
     void kickOffStopModePlay(int tagentSize);
+    void firstPlayForOppCorner(int _agentSize);
     POMODE getPlayOffMode();
     void assinID();
     int insertActiveAgentsToList();
@@ -568,6 +569,12 @@ private:
     int dynamicState;
     long dynamicStartTime;
 protected:
+
+
+////////////First
+public:
+protected:
+private:
 
 };
 ///////////OverLoading Operators

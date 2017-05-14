@@ -730,16 +730,16 @@ void CPlayOff::fastExecute() {
 }
 
 void CPlayOff::firstExecute() {
+    // TODO : Write first Execution (playoff)
     if (knowledge->getGameState() == CKnowledge::OurKickOff) {
         kickOffStopModePlay(masterPlan->common.currentSize);
-        for (int i = 0; i < masterPlan->common.currentSize; i++) {
-            newRoleAgent[i]->execute();
-        }
     } else {
-
+        firstPlayForOppCorner(agentsID.size());
     }
 
-    // TODO : Write first Execution (playoff)
+    for (int i = 0; i < masterPlan->common.currentSize; i++) {
+        newRoleAgent[i]->execute();
+    }
 
 }
 
@@ -776,6 +776,46 @@ void CPlayOff::kickOffStopModePlay(int tAgentsize) {
     }
 
     switch(tAgentsize) {
+    case 1:
+        oneBehindBall();
+        break;
+    case 2:
+        oneLeftOneCentre();
+        //            oneRightOneCentre();
+        break;
+    case 3:
+        twoSidesOneCentre();
+        break;
+    case 4:
+        twoSideOneCentreOneDef();
+        break;
+    case 5:
+        twoSideOneCentreTwoDef();
+        break;
+    case 6:
+        twoSideOneCentreTwoDefAndGoalie();
+        break;
+    default:
+        break;
+    }
+
+}
+
+void CPlayOff::firstPlayForOppCorner(int _agentSize) {
+
+    for (int i = 0; i < _agentSize; i++) {
+        if (newRoleAgent[i]->getRoleUpdate() == false) {
+            newRoleAgent[i]->setUpdated(true);
+            newRoleAgent[i]->setAgent(knowledge->getAgent(dynamicMatch[i]));
+            newRoleAgent[i]->setRoleUpdate(true);
+            newRoleAgent[i]->setAvoidBall(true);
+            newRoleAgent[i]->setAvoidPenaltyArea(true);
+            newRoleAgent[i]->setSelectedSkill(roleSkill::GotopointAvoid);
+
+        }
+    }
+
+    switch(_agentSize) {
     case 1:
         oneBehindBall();
         break;
