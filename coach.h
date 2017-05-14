@@ -85,6 +85,8 @@ private:
     CForceStart          *forceStart;
     CDynamicAttack       *dynamicAttack;
 
+    CStopPlay            *stopPlay;
+
 
     CRoleStop *stopRoles[_MAX_NUM_PLAYERS];
     QTime goalieTimer;

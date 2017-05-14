@@ -98,6 +98,9 @@ CCoach::CCoach(CAgent**_agents)
     ourPlayOff          = new CPlayOff;
     dynamicAttack       = new CDynamicAttack();
 
+    //Stop
+    stopPlay            = new CStopPlay();
+
     for( int i=0 ; i<_MAX_NUM_PLAYERS ; i++ ){
         stopRoles[i] = new CRoleStop(knowledge->getAgent(i));
     }
@@ -1415,7 +1418,7 @@ void CCoach::decideAttack()
 
     case CKnowledge::Stop:
         decideStop(ourPlayers);
-        return;
+//        return;
         break;
 
     case CKnowledge::OurKickOff:
@@ -1477,7 +1480,7 @@ void CCoach::decideAttack()
         break;
     case CKnowledge::TheirBallPlacement:
         decideStop(ourPlayers);
-        return;
+//        return;
         break;
     default:
         decideNull(ourPlayers);
@@ -1904,6 +1907,31 @@ void CCoach::initFastPlay(QList<int> _ourplayers) {
 }
 
 void CCoach::initFirstPlay(QList<int> _ourplayers) {
+
+    double minDist = _MAX_DIST;
+    int minID = -1;
+    int minOwner;
+    for (int i = 0; i < 6; i++) {
+
+        int tempID = _ourplayers.at(i);
+        double tempDist = knowledge->getAgent(tempID)->distToBall().length();
+        if (tempDist < minDist) {
+            minDist = tempDist;
+            minID = tempID;
+            minOwner = i;
+        }
+
+        if (i >= _ourplayers.size()) {
+            ourPlayOff->dynamicMatch[i] = -1;
+        } else {
+            ourPlayOff->dynamicMatch[i] = _ourplayers.at(i);
+        }
+    }
+    // fix passer :)
+    int tempID = ourPlayOff->dynamicMatch[0];
+    ourPlayOff->dynamicMatch[0] = minID;
+    ourPlayOff->dynamicMatch[minOwner] = tempID;
+
     ourPlayOff->setInitial(true);
     ourPlayOff->lockAgents = true;
     // TODO : Initial First Play
@@ -2092,16 +2120,18 @@ void CCoach::decideStop(QList<int> & _ourPlayers) {
     cyclesWaitAfterballMoved = 0;
     lastPlayMake = -1;
     clearIntentions();
-    CMasterPlay::position.reset();
-    for( int i=0 ; i < _ourPlayers.size() ; i++ ){
-        stopRoles[i]->assign(knowledge->getAgent(_ourPlayers.at(i)));
-    }
+//    CMasterPlay::position.reset();
+//    for( int i=0 ; i < _ourPlayers.size() ; i++ ){
+//        stopRoles[i]->assign(knowledge->getAgent(_ourPlayers.at(i)));
+//    }
     knowledge->setLastPlayExecuted(StopPlay);
     if(!ourPlayOff->deleted)
     {
         ourPlayOff->reset();
         ourPlayOff->deleted = true;
     }
+    selectedPlay = stopPlay;
+
 }
 
 void CCoach::decideOurKickOff(QList<int> &_ourPlayers) {
