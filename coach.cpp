@@ -120,6 +120,7 @@ CCoach::CCoach(CAgent**_agents)
     goalieAgent = NULL;
     firstPlay = true;
     firstIsFinished = false;
+    preferedDefenseCounts = 2;
 }
 
 CCoach::~CCoach()
@@ -315,21 +316,31 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         }
     }
 
+
+
+    int agentsCount = wm->our.data->activeAgents.count();
+    if (goalieAgent != NULL) {
+        if (goalieAgent->isVisible()) {
+            agentsCount--;
+        }
+    }
+
     if (policy()->Formation_GoalieFromGUI()) {
         preferedGoalieAgent = policy()->Formation_Goalie();
     } else {
         preferedGoalieAgent = wm->our.data->goalieID;
     }
 
-    preferedDefenseCounts = policy()->Formation_Defense(); // handle stop
-    if(!policy()->Formation_StrictFormation() || !knowledge->isStart()) {
+    // handle stop
+    if (wm->ball->pos.x < 0) {
+        preferedDefenseCounts = agentsCount - 1;
 
-        int agentsCount = wm->our.data->activeAgents.count();
-        if (goalieAgent != NULL) {
-            if (goalieAgent->isVisible()) {
-                agentsCount--;
-            }
-        }
+    } else if (wm->ball->pos.x > 1){
+        preferedDefenseCounts = policy() -> Formation_Defense();
+
+    }
+
+    if(!policy()->Formation_StrictFormation() || !knowledge->isStart()) {
 
         bool oppsAttack = false;
 
@@ -2115,23 +2126,23 @@ void CCoach::decideHalt(QList<int>& _ourPlayers) {
 }
 
 void CCoach::decideStop(QList<int> & _ourPlayers) {
+    CMasterPlay::position.reset();
     firstTime = true;
     firstPlay = true;
     cyclesWaitAfterballMoved = 0;
     lastPlayMake = -1;
     clearIntentions();
-//    CMasterPlay::position.reset();
-//    for( int i=0 ; i < _ourPlayers.size() ; i++ ){
-//        stopRoles[i]->assign(knowledge->getAgent(_ourPlayers.at(i)));
-//    }
     knowledge->setLastPlayExecuted(StopPlay);
     if(!ourPlayOff->deleted)
     {
         ourPlayOff->reset();
         ourPlayOff->deleted = true;
     }
-    selectedPlay = stopPlay;
 
+    if (!_ourPlayers.isEmpty()) {
+        stopRoles[0]->assign(knowledge->getAgent(_ourPlayers.at(0)));
+    }
+    selectedPlay = stopPlay;
 }
 
 void CCoach::decideOurKickOff(QList<int> &_ourPlayers) {

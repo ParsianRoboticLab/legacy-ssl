@@ -1,7 +1,11 @@
 #include "stopplay.h"
 
 CStopPlay::CStopPlay() : CMasterPlay() {
-
+    for (int i = 0; i < 6 ; i++) {
+        gpa[i] = new CSkillGotoPointAvoid(NULL);
+        gpa[i]->setSlowMode(true);
+        gpa[i]->setNoAvoid(false);
+    }
 }
 
 CStopPlay::~CStopPlay(){
@@ -26,8 +30,8 @@ void CStopPlay::init(QList<int> _agents, QMap<QString, EditData *> *_editData){
 
 void CStopPlay::stopPosition() {
     executedCycles++;
-    appendRemainingsAgents(positionAgents);
-    setFormation("OurF");
+    setFormation("Stop7");
+
 }
 
 void CStopPlay::execute_0(){

@@ -20,6 +20,9 @@ public:
 private:
     void stopPosition();
     void reset();
+
+    CSkillGotoPointAvoid *gpa[6];
+
 };
 
 #endif // CSTOPPLAY_H
