@@ -20,10 +20,10 @@ CollectProfileData::CollectProfileData()
 
     profiler = new CNewProfiler();
     prfState = InitState;
-    MinSpeed = 100;
+    MinSpeed = 300;
     middleSpeed = 500;
 
-    isChip = false;
+    isChip = true;
 }
 
 void CollectProfileData::init(int p1 , int p2){
@@ -68,9 +68,11 @@ void CollectProfileData::init(int p1 , int p2){
 }
 
 void CollectProfileData::ChipInit(int p1){
+    debug(QString("%1_________").arg(p1) , D_FATEMEH);
+
     prfl1->setAgent(knowledge->getAgent(p1));
     prfl1->setAgentID(p1);
-    prfl1->setKickSpeed(kickSpeed1/100);
+    prfl1->setKickSpeed(kickSpeed1);
     prfl1->setReceiveRadius(1.2);
     prfl1->setTolerance(0.01);
     prfl1->setIsActive(true);
@@ -491,9 +493,9 @@ bool CollectProfileData::FindChipPos(){
 
 void CollectProfileData::StartChip(){
 
-    double dist=0;
-    int posSize = 25;
-    bool result = false , chipped = true;
+    static double dist=0;
+    static int posSize = 25;
+    static bool result = false , chipped = true;
 
     if(fabs(wm->ball->pos.x - BallPos.last().x) > 0.02 && fabs(wm->ball->pos.y - BallPos.last().y) > 0.02 )
         BallPos.append(wm->ball->pos);
@@ -501,6 +503,9 @@ void CollectProfileData::StartChip(){
     switch(ChipStat){
     case BallIsNearRobot:
         prfl1->setSelectedSkill(roleSkill::Kick);
+        prfl1->setChip(true);
+        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.4 , _FIELD_HEIGHT/2-0.6));
+        draw(Vector2D(-_FIELD_WIDTH/2+0.4 , _FIELD_HEIGHT/2-0.6));
         prfl1->setKickSpeed(kickSpeed1);
 
         if(wm->ball->vel.length() > 0.1)
@@ -514,8 +519,8 @@ void CollectProfileData::StartChip(){
 
         if(chipped){
             ChipStartPoint = wm->ball->pos;
+            chipped = false;
         }
-        chipped = false;
 
         break;
 
@@ -523,7 +528,7 @@ void CollectProfileData::StartChip(){
         chipped = true;
 
         prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
-        prfl1->setTarget(Vector2D(-0.4 , _FIELD_HEIGHT/2+0.4));
+        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.6 , -_FIELD_HEIGHT/2+0.4));
         prfl1->execute();
 
         result = FindChipPos();
@@ -568,6 +573,8 @@ void CollectProfileData::StartChip(){
         ChipResult.values().append(dist);
         SavedChipPos.clear();
         kickSpeed1+=speedStep;
+
+        debug(QString("speed : %1 , dist : %2").arg(kickSpeed1).arg(dist) , D_FATEMEH);
     }
 
 }
@@ -593,6 +600,7 @@ void CollectProfileData::start(){
         }
         else        //chip
         {
+            debug("chip init" , D_FATEMEH);
             prfState = InitStateChip;
         }
 
@@ -666,16 +674,26 @@ void CollectProfileData::start(){
     //chip
     case InitStateChip:
         ChipInit(activeRobots[0]);
-        positioning(-0.4 , _FIELD_HEIGHT/2+0.4);
-        if(Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.1).contains(prfl1->getTarget()) &&
-                Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.08).contains(wm->ball->pos)){
-            prfState = ChipStart;
-            ChipStat = BallIsNearRobot;
+        positioning(-_FIELD_WIDTH/2+0.6 , -_FIELD_HEIGHT/2+0.4);
+        draw(Vector2D(-_FIELD_WIDTH/2+0.6 , -_FIELD_HEIGHT/2+0.4));
+
+//        positioning(-_FIELD_WIDTH/4 , _FIELD_HEIGHT/4);
+//        draw(Vector2D(-_FIELD_WIDTH/4 , _FIELD_HEIGHT/4));
+
+        debug("done with pos" , D_FATEMEH);
+
+        if(Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.15).contains(prfl1->getTarget())){
+            debug("robot in position" , D_FATEMEH);
+            if(Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 0.12).contains(wm->ball->pos)){
+                prfState = ChipStart;
+                ChipStat = BallIsNearRobot;
+            }
         }
 
         break;
 
     case ChipStart:
+        debug("start chip" , D_FATEMEH);
         StartChip();
         break;
 
