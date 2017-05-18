@@ -198,7 +198,31 @@ QList<Vector2D> ballposss;
 
 void CMainApplication::Experimental4(){
 
-//    static double moshtagh2=0;
+    static bool flagg = true;
+    CPolynomialRegression ProRes;
+    QVector<double> *Coeff = new  QVector<double>();
+
+    if(flagg){
+        QList<double> key;
+        QList<int> vals;
+        vals.append(2450);
+        vals.append(1200);
+        vals.append(1060);
+        vals.append(1023);
+        vals.append(1000);
+
+        key.append(2);
+        key.append(10);
+        key.append(18);
+        key.append(24);
+        key.append(34);
+
+        *Coeff=ProRes.PolynomialRegression(key,vals,2);
+
+        debug(QString("1: %1  ,   2: %2  ,   3: %3").arg(Coeff->at(0)).arg(Coeff->at(1)).arg(Coeff->at(2)),D_FATEMEH);
+        flagg = false;
+    }
+        return;
 //    analyze("kickspeed" , wm->ball->vel.length(),true);
 //    debug(QString("ball Speed :%1").arg(wm->ball->vel.length()),D_NADIA);
 //    analyze("moshtagh2",(wm->ball->vel.length()-moshtagh2)*1000,true);
