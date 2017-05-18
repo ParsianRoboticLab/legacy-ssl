@@ -312,10 +312,18 @@ CPolynomialRegression reg;
 bool newCycle = false;
 
 double refine(double x) {
-//    return x*x*3/40 - x*3 + 60;
-//    return 63.98 - x*1.01 + x*x*0.13;
-    return 63.43 - x*0.74 + x*x*0.085;
+//    return x*x*3/30 - x*2 + 70;
+    return x*x/1.5 - x*0.3 + 50;
+//    return 3.98 - x*1.01 + x*x*0.13;
+//    return 3.43 - x*0.74 + x*x*0.085;
 //    return 32;
+}
+double predictPos(){
+    double sum=0;
+    for(int i=1;i<prev_Ball_pos.length();i++)
+        sum+=prev_Ball_pos.at(i)-prev_Ball_pos.at((i-1));
+    sum/=(prev_Ball_pos.length()-1);
+    return sum;
 }
 
 void CMainApplication::Experimental3()
@@ -360,7 +368,7 @@ void CMainApplication::Experimental3()
 
     CPolynomialRegression ProRes;
 
-    if(wm->ball->vel.y < 0.1){
+    if(wm->ball->vel.y < 0.1 /*|| Circle2D(Vector2D(wm->ball->pos,0.03).contains()*/){
         counter=1;
         knowledge->plotWidgetCustom[1]=0;
         ballposes.clear();
@@ -369,12 +377,13 @@ void CMainApplication::Experimental3()
     }
     else{
         prev_Ball_pos.append(wm->ball->pos.y);
-        knowledge->plotWidgetCustom[1]=(wm->ball->pos.y-prevPos)*refine(counter)/(double)counter ;
-        ballposes.append(Vector2D(prevPosx,(wm->ball->pos.y-prevPos)*refine(counter)/(double)counter + prevPos));
+        knowledge->plotWidgetCustom[1]=(wm->ball->pos.y-prevPos)*32/(double)counter ;
+        ballposes.append(Vector2D(prevPosx,(((predictPos())*refine(counter)/(double)counter) + prevPos+1)));
         for(int i=0;i<ballposes.size();i+=1){
-            draw(ballposes.at(i));
-            if(i>7)
-                break;
+        draw(ballposes.at(i));
+        if(i>15)
+            break;
+
         }
 
         //    knowledge->plotWidgetCustom[2]=wm->ball->pos.y-prevPos+2;
