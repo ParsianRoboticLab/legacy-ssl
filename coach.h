@@ -164,16 +164,22 @@ private:
     void setDynamicPlay();
     void setFirstPlay();
     void setFastPlay();
+
+    QList<SPlan *> getMatchedPlans(const QStringList& _tags, const QList<SPlan *> &_plans);
+
     CLoadPlayOffJson* m_planLoader;
     bool firstTime, firstPlay, firstIsFinished;
 
     bool isTagsMatched(const QStringList& base, const QStringList& required);
+    bool isTagsNearMatched(const QStringList& base, const QStringList& required);
+
     bool isRegionMatched(const Vector2D& _ball, const double& _radius = 1.0); //circular Matching
     //TODO : squere or Liner matching
     NGameOff::SPlan* chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans);
     void matchPlan(NGameOff::SPlan* _plan, const QList<int>& _ourplayers);
     void checkGUItoRefineMatch(NGameOff::SPlan* _plan, const QList<int> &_ourplayers);
     QStringList currentTags;
+    QStringList guiTags; // TODO : add tags to gui playoffTab
 
     NGameOff::SPlan* lastPlan;
     QList<int> lastPlayers;
@@ -199,6 +205,8 @@ private:
     unsigned int staticPlayoffPlansCounter;
     bool isFastPlay();
 };
+
+
 
 #define GetRole(Role, number) static_cast<Role*> (getRole(Role::Name, number))
 #define GetRoleVar(var, Role, number) Role* var = static_cast<Role*> (getRole(Role::Name, number))

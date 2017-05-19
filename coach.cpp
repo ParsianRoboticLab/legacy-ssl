@@ -1678,6 +1678,13 @@ bool CCoach::isTagsMatched(const QStringList& base, const QStringList& required)
     return true;
 }
 
+bool CCoach::isTagsNearMatched(const QStringList& base, const QStringList& required) {
+    Q_FOREACH(QString tag, required)
+        if (base.contains(tag))
+            return true;
+    return false;
+}
+
 bool CCoach::isRegionMatched(const Vector2D &_ball, const double& regionRadius) {
 
     return (wm->ball->pos.dist(_ball) < regionRadius);
@@ -1685,10 +1692,14 @@ bool CCoach::isRegionMatched(const Vector2D &_ball, const double& regionRadius) 
 }
 
 NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans) {
-    QList<NGameOff::SPlan*> bestPlans;
+    QList<NGameOff::SPlan*> matchedPlan;
+    matchedPlan = getMatchedPlans(currentTags, plans);
+
+
     int bestScore = -1;
-    Q_FOREACH(NGameOff::SPlan* plan, plans) {
-        if (plan->common.succesRate > bestScore) {
+    QList<NGameOff::SPlan*> bestPlans;
+    Q_FOREACH(NGameOff::SPlan* plan, matchedPlan) {
+        if (plan->common.succesRate >= bestScore) {
             bestPlans.clear();
             bestPlans.append(plan);
         }
@@ -1698,7 +1709,7 @@ NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& pla
     }
     // TODO : remove randomize
     if (bestPlans.isEmpty()) {
-        bestPlans.append(plans);
+        bestPlans.append(matchedPlan);
     }
     return bestPlans[rand()%bestPlans.size()];
 }
@@ -1793,8 +1804,6 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
                 qDebug() << "[Coach] Chance is Valid";
             if (matching.common->lastDist >= 0)
                 qDebug() << "[Coach] LastDist is Valid";
-            if (isTagsMatched(matching.common->tags, currentTags))
-                qDebug() << "[Coach] Tags is Valid";
             if (isRegionMatched(matching.initPos.ball))
                 qDebug() << "[Coach] Ball is Valid";
             qDebug() << "<----------- plan END.";
@@ -1803,8 +1812,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
         if (matching.common->planMode  >= _mode
                 && matching.common->agentSize >= _ourplayers.size()
                 && matching.common->chance > 0
-                && matching.common->lastDist >= 0
-                && isTagsMatched(matching.common->tags, currentTags)) {
+                && matching.common->lastDist >= 0) {
 
             //check Ball matchig with symmetry
             plan->common.currentSize = _ourplayers.size();
@@ -1857,32 +1865,18 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
         return;
     }
 
-    /** RANDOM PLAN SELECTION**/
-//    RNG randomNumberGenerator;
-//    int sum = 0;
-//    for(int i = 0; i < chances.size(); i++)
-//        sum += chances.at(i);
+    NGameOff::SPlan* thePlan = NULL;
 
-//    int randNo = randomNumberGenerator.uniformInt() % validPlans.size();
-//    sum = 0;
-//    for(int i = 0; i < chances.size(); i++) {
-//        if(sum <= randNo && randNo < sum + chances[i])
-//        {
-//            randNo = i;
-//            break;
-//        } else {
-//            sum += chances[i];
-//        }
-//    }
-//    NGameOff::SPlan* thePlan = validPlans[randNo]; //chooseMostSuccecfull(validPlans); //Choose Best valid Plan
-//    debug (QString("Plan Number : %1").arg(randNo), D_DEBUG);
-    /** RANDOM PLAN SELECTION**/
+    /** new plan selector **/
+    thePlan = chooseMostSuccecfull(validPlans);
+
+    /**                   **/
 
     /** COUNTER PLAN SELECTION**/
     if (staticPlayoffPlansCounter >= validPlans.size()) {
         staticPlayoffPlansCounter = 0;
     }
-    NGameOff::SPlan* thePlan = validPlans[staticPlayoffPlansCounter]; //chooseMostSuccecfull(validPlans); //Choose Best valid Plan
+    thePlan = validPlans[staticPlayoffPlansCounter]; //chooseMostSuccecfull(validPlans); //Choose Best valid Plan
     debug (QString("Plan Number : %1 ==> ").arg(staticPlayoffPlansCounter) + validPlans[staticPlayoffPlansCounter]->gui.planFile, D_DEBUG);
     staticPlayoffPlansCounter++;
     /** COUNTER PLAN SELECTION**/
@@ -2250,4 +2244,29 @@ bool CCoach::isFastPlay() {
     if (policy()->PlayOff_UseFastPlay()) {
         return true; // TODO : fix this by condidering that opp agents
     }
+}
+
+QList<SPlan*> CCoach::getMatchedPlans(const QStringList &_tags, const QList<SPlan*>& _plans) {
+    QList<SPlan*> tempPlans;
+
+    // FULL MATCH
+    Q_FOREACH(SPlan* plan, _plans) {
+        if (isTagsMatched(plan->common.tags, _tags)) {
+            tempPlans.append(plan);
+        }
+    }
+
+    // JUST MATCH
+    if (tempPlans.isEmpty()) {
+        Q_FOREACH(SPlan* plan, _plans) {
+            if (isTagsNearMatched(plan->common.tags, _tags)) {
+                tempPlans.append(plan);
+            }
+        }
+    }
+
+    //NO MATCH
+    if (tempPlans.isEmpty()) return _plans;
+    else                     return tempPlans;
+
 }
