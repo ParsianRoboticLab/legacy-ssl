@@ -745,6 +745,10 @@ void CPlayOff::resetFirstPlayFinishedFlag() {
     firstStepEnums = Stay;
 }
 
+QStringList CPlayOff::getOppTags() {
+    return oppTags;
+}
+
 void CPlayOff::stayPoistioning() {
     newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(-0.3,0));
     newRoleAgent[0]->setTargetDir(wm->ball->pos);
@@ -801,6 +805,7 @@ void CPlayOff::fastExecute() {
 void CPlayOff::firstExecute() {
     // TODO : Write first Execution (playoff)
     if (initial) {
+        oppTags.clear();
 //        firstStepEnums = Stay;
 //        dynamicAssignIDNEW();
     }
@@ -810,6 +815,34 @@ void CPlayOff::firstExecute() {
     } else {
         firstPlayForOppCorner(agentsID.size());
     }
+
+    // TODO : a function that calculate opponent mark streategy :D
+    int shotBlocked = 0;
+    int passBlocked = 0;
+    Vector2D sol1,sol2;
+    for (int i = 0; i < wm->opp.activeAgentsCount(); i++) {
+        if (wm->opp.active(i)->id == wm->opp.data->goalieID) continue;
+        for (int j = 0; j < 6; j++) {
+            if (newRoleAgent[j]->getAgent() == NULL) continue;
+            if (Circle2D(wm->opp.active(i)->pos, 0.25).intersection(Segment2D(newRoleAgent[j]->getAgent()->pos(), wm->field->oppGoal()), &sol1, &sol2)) {
+                shotBlocked++;
+            }
+        }
+    }
+
+    for (int i = 0; i < wm->opp.activeAgentsCount(); i++) {
+        if (wm->opp.active(i)->id == wm->opp.data->goalieID) continue;
+        for (int j = 0; j < 6; j++) {
+            if (newRoleAgent[j]->getAgent() == NULL) continue;
+            if (Circle2D(wm->opp.active(i)->pos, 0.25).intersection(Segment2D(newRoleAgent[j]->getAgent()->pos(), wm->ball->pos), &sol1, &sol2)) {
+                passBlocked++;
+            }
+        }
+    }
+
+    oppTags << "man2man-pass" << "man2man-shot" << "zone";
+    debug(QString("PB : %1, SB : %2").arg(passBlocked).arg(shotBlocked), D_MAHI);
+
 
     for (int i = 0; i < 6; i++) {
         newRoleAgent[i]->execute();

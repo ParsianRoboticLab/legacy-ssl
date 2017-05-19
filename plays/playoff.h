@@ -579,11 +579,11 @@ protected:
 public:
     bool isFirstFinished();
     void resetFirstPlayFinishedFlag();
-
+    QStringList getOppTags();
 protected:
 private:
     FirstStep firstStepEnums;
-
+    QStringList oppTags;
     void stayPoistioning();
     void movePositioning();
     void donePositioning();
