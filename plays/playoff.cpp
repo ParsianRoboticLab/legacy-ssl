@@ -746,8 +746,8 @@ void CPlayOff::resetFirstPlayFinishedFlag() {
 }
 
 void CPlayOff::stayPoistioning() {
-    newRoleAgent[0]->setTarget(Vector2D(1, -.5));
-    newRoleAgent[0]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(-0.3,0));
+    newRoleAgent[0]->setTargetDir(wm->ball->pos);
     newRoleAgent[1]->setTarget(Vector2D(1, .5));
     newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
     newRoleAgent[2]->setTarget(Vector2D(1, -1.5));
@@ -761,8 +761,8 @@ void CPlayOff::stayPoistioning() {
 }
 
 void CPlayOff::movePositioning() {
-    newRoleAgent[0]->setTarget(Vector2D(2, .5));
-    newRoleAgent[0]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(-0.3,0));
+    newRoleAgent[0]->setTargetDir(wm->ball->pos);
     newRoleAgent[1]->setTarget(Vector2D(2, -.5));
     newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
     newRoleAgent[2]->setTarget(Vector2D(3.5, -1.5));
@@ -776,8 +776,8 @@ void CPlayOff::movePositioning() {
 }
 
 void CPlayOff::donePositioning() {
-    newRoleAgent[0]->setTarget(Vector2D(2, .5));
-    newRoleAgent[0]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(-0.3,0));
+    newRoleAgent[0]->setTargetDir(wm->ball->pos);
     newRoleAgent[1]->setTarget(Vector2D(2, -.5));
     newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
     newRoleAgent[2]->setTarget(Vector2D(3.5, -1.5));
