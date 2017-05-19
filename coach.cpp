@@ -1429,7 +1429,6 @@ void CCoach::decideAttack()
 
     case CKnowledge::Stop:
         decideStop(ourPlayers);
-//        return;
         break;
 
     case CKnowledge::OurKickOff:
@@ -1491,7 +1490,6 @@ void CCoach::decideAttack()
         break;
     case CKnowledge::TheirBallPlacement:
         decideStop(ourPlayers);
-//        return;
         break;
     default:
         decideNull(ourPlayers);
@@ -1508,23 +1506,30 @@ void CCoach::decideAttack()
 void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
 
     //Decide Plan
+    firstIsFinished = ourPlayOff->isFirstFinished();
     if (firstTime) {
         NGameOff::EMode tempMode;
         selectPlayOffMode(_ourplayers.size(), tempMode);
         initPlayOffMode(tempMode, _mode, _ourplayers);
         ourPlayOff->setMasterMode(tempMode);
         if ( policy()->PlayOff_UseFirstPlay() ) {
-            if (firstPlay) {
-                firstPlay = false;
-            } else if (firstIsFinished) {
-                firstTime = false;
-                firstPlay = false;
-            } else {
+            if (firstPlay && !firstIsFinished) {
                 firstTime = true;
+
+            } else if (firstPlay && firstIsFinished) {
+                firstTime = true;
+                firstPlay = false;
+
+            } else if (!firstPlay && firstIsFinished) {
+                firstTime = false;
+                firstPlay = true;
+                firstIsFinished = false;
+                ourPlayOff->resetFirstPlayFinishedFlag();
             }
 
         } else {
             firstTime = false;
+
         }
 
         qDebug() << "[Coach] first time config done";
@@ -1701,10 +1706,10 @@ NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& pla
 void CCoach::selectPlayOffMode(int agentSize, NGameOff::EMode &_mode) {     
     if (agentSize < 2) {
         _mode = NGameOff::DynamicPlay;
-    } else if (isFastPlay()) {
+    } else if (isFastPlay() && false) { // TODO : fastPlay should be completed!
         _mode = NGameOff::FastPlay;
 
-    } else if (firstPlay && policy()->PlayOff_UseFirstPlay()) {
+    } else if (!firstIsFinished && policy()->PlayOff_UseFirstPlay()) {
         _mode = NGameOff::FirstPlay;
 
     } else if (knowledge->getGameState() == CKnowledge::OurKickOff
@@ -1874,7 +1879,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     /** RANDOM PLAN SELECTION**/
 
     /** COUNTER PLAN SELECTION**/
-    if (staticPlayoffPlansCounter > validPlans.size()) {
+    if (staticPlayoffPlansCounter >= validPlans.size()) {
         staticPlayoffPlansCounter = 0;
     }
     NGameOff::SPlan* thePlan = validPlans[staticPlayoffPlansCounter]; //chooseMostSuccecfull(validPlans); //Choose Best valid Plan
@@ -1922,7 +1927,7 @@ void CCoach::initFirstPlay(QList<int> _ourplayers) {
     double minDist = _MAX_DIST;
     int minID = -1;
     int minOwner;
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < _ourplayers.size(); i++) {
 
         int tempID = _ourplayers.at(i);
         double tempDist = knowledge->getAgent(tempID)->distToBall().length();
@@ -1939,12 +1944,13 @@ void CCoach::initFirstPlay(QList<int> _ourplayers) {
         }
     }
     // fix passer :)
-    int tempID = ourPlayOff->dynamicMatch[0];
-    ourPlayOff->dynamicMatch[0] = minID;
-    ourPlayOff->dynamicMatch[minOwner] = tempID;
+    int tempID = ourPlayOff -> dynamicMatch[0];
+    ourPlayOff -> dynamicMatch[0] = minID;
+    ourPlayOff -> dynamicMatch[minOwner] = tempID;
 
-    ourPlayOff->setInitial(true);
-    ourPlayOff->lockAgents = true;
+    ourPlayOff -> setInitial(true);
+    ourPlayOff -> lockAgents = true;
+
     // TODO : Initial First Play
 }
 
@@ -1960,7 +1966,8 @@ void CCoach::setDynamicPlay() {
 
 void CCoach::setFirstPlay() {
     // TODO : Write First Play checker
-
+    ourPlayOff->setInitial(false);
+    firstIsFinished = false;
 }
 
 void CCoach::setFastPlay() {

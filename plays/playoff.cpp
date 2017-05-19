@@ -47,6 +47,7 @@ CPlayOff::CPlayOff()
     ready = pass = shot = false;
     dynamicStartTime = -1;
     dynamicSelect = NOSELECT;
+    firstStepEnums = Stay;
 }
 
 CPlayOff::~CPlayOff()
@@ -430,6 +431,19 @@ void CPlayOff::dynamicAssignID() {
     }
 }
 
+void CPlayOff::dynamicAssignIDNEW() {
+    dynamicAgentSize = 6;
+    for (int i = 0;i < 6;i++) {
+        if (dynamicMatch[i] != -1) {
+            newRoleAgent[i] -> setAgent(knowledge->getAgent(dynamicMatch[i]));
+            newRoleAgent[i] -> setAgentID(dynamicMatch[i]);
+        } else {
+            dynamicAgentSize = i;
+            break;
+        }
+    }
+}
+
 void CPlayOff::dynamicPlayChipToGoal() {
     if (initial) {
         dynamicAssignID();
@@ -722,6 +736,61 @@ Vector2D CPlayOff::getDynamicTarget(int i) {
     }
 }
 
+bool CPlayOff::isFirstFinished()
+{
+    return (firstStepEnums == Done);
+}
+
+void CPlayOff::resetFirstPlayFinishedFlag() {
+    firstStepEnums = Stay;
+}
+
+void CPlayOff::stayPoistioning() {
+    newRoleAgent[0]->setTarget(Vector2D(1, -.5));
+    newRoleAgent[0]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[1]->setTarget(Vector2D(1, .5));
+    newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[2]->setTarget(Vector2D(1, -1.5));
+    newRoleAgent[2]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[3]->setTarget(Vector2D(1, 1.5));
+    newRoleAgent[3]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[4]->setTarget(Vector2D(1, -2.5));
+    newRoleAgent[4]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[5]->setTarget(Vector2D(1, 2.5));
+    newRoleAgent[5]->setTargetDir(wm->field->oppGoal());
+}
+
+void CPlayOff::movePositioning() {
+    newRoleAgent[0]->setTarget(Vector2D(2, .5));
+    newRoleAgent[0]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[1]->setTarget(Vector2D(2, -.5));
+    newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[2]->setTarget(Vector2D(3.5, -1.5));
+    newRoleAgent[2]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[3]->setTarget(Vector2D(0, 1.5));
+    newRoleAgent[3]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[4]->setTarget(Vector2D(2, -2.5));
+    newRoleAgent[4]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[5]->setTarget(Vector2D(2, 2.5));
+    newRoleAgent[5]->setTargetDir(wm->field->oppGoal());
+}
+
+void CPlayOff::donePositioning() {
+    newRoleAgent[0]->setTarget(Vector2D(2, .5));
+    newRoleAgent[0]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[1]->setTarget(Vector2D(2, -.5));
+    newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[2]->setTarget(Vector2D(3.5, -1.5));
+    newRoleAgent[2]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[3]->setTarget(Vector2D(0, 1.5));
+    newRoleAgent[3]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[4]->setTarget(Vector2D(2, -2.5));
+    newRoleAgent[4]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[5]->setTarget(Vector2D(2, 2.5));
+    newRoleAgent[5]->setTargetDir(wm->field->oppGoal());
+
+}
+
 
 
 void CPlayOff::fastExecute() {
@@ -731,13 +800,18 @@ void CPlayOff::fastExecute() {
 
 void CPlayOff::firstExecute() {
     // TODO : Write first Execution (playoff)
+    if (initial) {
+//        firstStepEnums = Stay;
+//        dynamicAssignIDNEW();
+    }
+
     if (knowledge->getGameState() == CKnowledge::OurKickOff) {
         kickOffStopModePlay(masterPlan->common.currentSize);
     } else {
         firstPlayForOppCorner(agentsID.size());
     }
 
-    for (int i = 0; i < masterPlan->common.currentSize; i++) {
+    for (int i = 0; i < 6; i++) {
         newRoleAgent[i]->execute();
     }
 
@@ -815,28 +889,30 @@ void CPlayOff::firstPlayForOppCorner(int _agentSize) {
         }
     }
 
-    switch(_agentSize) {
-    case 1:
-        oneBehindBall();
+    switch(firstStepEnums) {
+    case Stay:
+        stayPoistioning();
         break;
-    case 2:
-        oneLeftOneCentre();
-        //            oneRightOneCentre();
+    case Move:
+        movePositioning();
         break;
-    case 3:
-        twoSidesOneCentre();
-        break;
-    case 4:
-        twoSideOneCentreOneDef();
-        break;
-    case 5:
-        twoSideOneCentreTwoDef();
-        break;
-    case 6:
-        twoSideOneCentreTwoDefAndGoalie();
+    case Done:
+        donePositioning();
         break;
     default:
         break;
+    }
+
+    int finisher = 0;
+    for (int i = 0; i < _agentSize; i++) {
+        if (newRoleAgent[i]->getTarget().dist(newRoleAgent[i]->getAgent()->pos()) < 0.4) {
+            finisher++;
+        }
+    }
+    if (finisher == _agentSize) {
+        if (firstStepEnums == Stay) firstStepEnums = Move;
+        else if (firstStepEnums == Move) firstStepEnums = Done;
+        else firstStepEnums = Done;
     }
 
 }
@@ -1111,11 +1187,9 @@ bool CPlayOff::isFinalShotDone() {
 
     if (positionAgent[tLastAgent].stateNumber == tLastState) {
         if (cir.contains(wm->ball->pos)) {
-
             isBallIn = true;
 
         } else if (isBallIn && !cir2.contains(wm->ball->pos)) {
-
             isBallIn = false;
             return true;
 

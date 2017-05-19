@@ -305,6 +305,9 @@ typedef QPair<NGameOff::AgentPoint, NGameOff::AgentPoint> AgentPair;
 
 using namespace NGameOff;
 
+enum FirstStep {Stay, Move, Done};
+
+
 class CPlayOff : public CMasterPlay {
 
 public:
@@ -460,7 +463,7 @@ private:
     void twoSideOneCentreOneDef();
     void twoSideOneCentreTwoDef();
     void twoSideOneCentreTwoDefAndGoalie();
-    ////////////////////////////////////
+    ////////////////////////////////////    
     int matchKickOffID(int _agentSize);
     bool isFinalShotDone();
 
@@ -554,6 +557,7 @@ public:
     DynamicSelect dynamicSelect;
 private:
     void dynamicAssignID();
+    void dynamicAssignIDNEW();
     void dynamicPlayKhafan();
     void dynamicPlayBlocker();
     void dynamicPlayChipToGoal();
@@ -573,8 +577,17 @@ protected:
 
 ////////////First
 public:
+    bool isFirstFinished();
+    void resetFirstPlayFinishedFlag();
+
 protected:
 private:
+    FirstStep firstStepEnums;
+
+    void stayPoistioning();
+    void movePositioning();
+    void donePositioning();
+
 
 };
 ///////////OverLoading Operators
