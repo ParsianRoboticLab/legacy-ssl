@@ -22,6 +22,7 @@ private:
     void reset();
 
     CSkillGotoPointAvoid *gpa[6];
+    Vector2D rolePosition[6];
 
 };
 

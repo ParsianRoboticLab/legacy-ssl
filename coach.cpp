@@ -2139,9 +2139,10 @@ void CCoach::decideStop(QList<int> & _ourPlayers) {
         ourPlayOff->deleted = true;
     }
 
-    if (!_ourPlayers.isEmpty()) {
-        stopRoles[0]->assign(knowledge->getAgent(_ourPlayers.at(0)));
+    for (int i = 0; i < _ourPlayers.size(); i++) {
+        stopRoles[i]->assign(knowledge->getAgent(_ourPlayers.at(i)));
     }
+    _ourPlayers.clear();
     selectedPlay = stopPlay;
 }
 
