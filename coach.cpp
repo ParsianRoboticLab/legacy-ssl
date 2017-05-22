@@ -1524,6 +1524,7 @@ void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
                 firstTime = false;
                 firstPlay = true;
                 firstIsFinished = false;
+                currentTags = ourPlayOff->getOppTags();
                 ourPlayOff->resetFirstPlayFinishedFlag();
             }
 
@@ -1885,7 +1886,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     checkGUItoRefineMatch(thePlan, _ourplayers);
     ourPlayOff->setMasterPlan(thePlan);
     ourPlayOff->analyseShoot(); // should call after setmasterplan
-    ourPlayOff->analysePass(); // should call after setmasterplan
+    ourPlayOff->analysePass();  // should call after setmasterplan
     ourPlayOff->setInitial(true);
     ourPlayOff->lockAgents = true;
     lastPlan = thePlan;

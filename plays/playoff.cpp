@@ -840,7 +840,8 @@ void CPlayOff::firstExecute() {
         }
     }
 
-    oppTags << "man2man-pass" << "man2man-shot" << "zone";
+    // TODO : fix tagging ;)
+//    oppTags << "man2man-pass" << "man2man-shot" << "zone";
     debug(QString("PB : %1, SB : %2").arg(passBlocked).arg(shotBlocked), D_MAHI);
 
 
