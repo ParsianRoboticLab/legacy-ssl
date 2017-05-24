@@ -295,12 +295,16 @@ public:
 
 #include "formation/edit_data.h"
 double nnn;
-QList<Vector2D> ballposes;
-int indexN=0;
-bool flagN=true;
+QList<Vector2D> ballposes , lastDirs;
+int indexN = 0;
+bool flagN = true , DirFound = false;
+int idd = 3;
 QList<double> prev_Ball_pos;
 QList<int> key;
 QVector<double> *Coeff = new  QVector<double>();
+Vector2D dir;
+Vector2D startChipPoint ;
+double startBallVel;
 double previousPos=0.0;
 double prevPos=0.0;
 double prevPosx=0.0;
@@ -312,29 +316,40 @@ CPolynomialRegression reg;
 bool newCycle = false;
 
 double refine(double x) {
-//    return x*x*3/30 - x*2 + 70;
+    //    return x*x*3/30 - x*2 + 70;
     return x*x/1.5 - x*0.3 + 50;
-//    return 3.98 - x*1.01 + x*x*0.13;
-//    return 3.43 - x*0.74 + x*x*0.085;
-//    return 32;
+    //    return 3.98 - x*1.01 + x*x*0.13;
+    //    return 3.43 - x*0.74 + x*x*0.085;
+    //    return 32;
 }
+double refineP(double x) {
+    //    return x*x*3/30 - x*2 + 70;
+    return x;
+    //    return 3.98 - x*1.01 + x*x*0.13;
+    //    return 3.43 - x*0.74 + x*x*0.085;
+    //    return 32;
+}
+
 double predictPos(){
     double sum=0;
-    for(int i=1;i<prev_Ball_pos.length();i++)
-        sum+=prev_Ball_pos.at(i)-prev_Ball_pos.at((i-1));
-    sum/=(prev_Ball_pos.length()-1);
+
+    //    for(int i=1; i<prev_Ball_pos.length(); i++)
+    //        sum += ( prev_Ball_pos.at(i) - prev_Ball_pos.at(i-1) );
+
+    sum = prev_Ball_pos.at(prev_Ball_pos.length() - 1) - prev_Ball_pos.at(0);
+    sum /= ( prev_Ball_pos.length()-1 );
+
+
     return sum;
 }
 
 void CMainApplication::Experimental3()
 {
 
-//    debug(QString("2.5: %1").arg(knowledge->getProfile(2 , 35/10.0 , true , false)),D_NADIA);
-//    knowledge->plotWidgetCustom[1]=wm->ball->vel.length()-4;
+    //    debug(QString("2.5: %1").arg(knowledge->getProfile(2 , 35/10.0 , true , false)),D_NADIA);
+    //    knowledge->plotWidgetCustom[1]=wm->ball->vel.length()-4;
 
-
-
-//    return;
+    //    return;
     //    debug(QString("fraumcount:%1").arg(counter),D_NADIA);
     //    if(wm->ball->vel.y < 0.5) {
     //        ballposes.clear();
@@ -366,47 +381,85 @@ void CMainApplication::Experimental3()
 
     //    if(wm->ball->pos.y-previousPos<0.03 || wm->ball->vel.y<0.1){
 
-    CPolynomialRegression ProRes;
+    if(Circle2D(wm->our[idd]->pos , 0.2).contains(wm->ball->pos)){
+        lastDirs.append(wm->our[idd]->dir);
+        if(lastDirs.count() > 10)
+            lastDirs.removeFirst();
+
+        startChipPoint = wm->our[idd]->pos;
+
+        // hshm
+        startBallVel = fabs(wm->ball->vel.y);
+    }
+    else{
+        DirFound=true;
+    }
+
+    if(DirFound)
+    {
+        dir = Vector2D(0,0);
+
+        for(int i=0; i<lastDirs.length()-5; i++){
+            dir+=lastDirs.at(i);
+        }
+        dir/=lastDirs.length();
+    }
+
+    draw(Segment2D(startChipPoint , wm->our[idd]->pos + dir*10));
 
     if(wm->ball->vel.y < 0.1 /*|| Circle2D(Vector2D(wm->ball->pos,0.03).contains()*/){
         counter=1;
         knowledge->plotWidgetCustom[1]=0;
+
         ballposes.clear();
         prev_Ball_pos.clear();
         prevPos=wm->ball->pos.y;
-    }
-    else{
-        prev_Ball_pos.append(wm->ball->pos.y);
-        knowledge->plotWidgetCustom[1]=(wm->ball->pos.y-prevPos)*32/(double)counter ;
-        ballposes.append(Vector2D(prevPosx,(((predictPos())*refine(counter)/(double)counter) + prevPos+1)));
-        for(int i=0;i<ballposes.size();i+=1){
-        draw(ballposes.at(i));
-        if(i>15)
-            break;
 
+    }
+    else
+    {
+        draw(startChipPoint,0,QColor(Qt::darkRed));
+//        prev_Ball_pos.append(wm->ball->pos.y);
+
+        prev_Ball_pos.append(( ((wm->ball->pos - startChipPoint).angleWith(dir - startChipPoint)).tan() )*(wm->ball->pos - startChipPoint).length());
+
+        ballposes.append( ((predictPos()*refine(counter)/(double)counter) + prevPos - 10*fabs(prev_Ball_pos.at(1) - prev_Ball_pos.at(0)) )*(-dir.norm())+startChipPoint);
+
+
+
+        knowledge->plotWidgetCustom[1]=(wm->ball->pos.y-prevPos)*32/(double)counter ;
+
+        for(int i=0;i<ballposes.size();i+=1){
+            draw(ballposes.at(i));
+            if(i>15)
+                break;
         }
 
         //    knowledge->plotWidgetCustom[2]=wm->ball->pos.y-prevPos+2;
 
-
         debug(QString("diff:    %1").arg((wm->ball->pos.y-prevPos)*32/(double)counter ),D_NADIA);
         debug(QString("counter: %1").arg(counter),D_NADIA);
+
+
     }
     knowledge->plotWidgetCustom[0]=wm->ball->pos.y;
     if(counter <2){
         prevPosx=wm->ball->pos.x;
     }
+    draw(dir);
     counter++;
+
     //    previousPos=wm->ball->pos.y;
 
-//    key.clear();
-//    for(int i=1; i<counter-1; i++){
-//        key.append(i);
-//    }
-//    debug(QString("keys:%1 _values:%2_").arg(prev_Ball_pos.length()).arg(counter),D_NADIA);
+    //    CPolynomialRegression ProRes;
+    //    key.clear();
+    //    for(int i=1; i<counter-1; i++){
+    //        key.append(i);
+    //    }
+    //    debug(QString("keys:%1 _values:%2_").arg(prev_Ball_pos.length()).arg(counter),D_NADIA);
 
-//    *Coeff=ProRes.PolynomialRegression(prev_Ball_pos,key,4);
-//    debug(QString("1:_%1_ 2:_%2_ 3:_%3_").arg(Coeff->at(0)).arg(Coeff->at(1)).arg(Coeff->at(2)),D_NADIA);
+    //    *Coeff=ProRes.PolynomialRegression(prev_Ball_pos,key,4);
+    //    debug(QString("1:_%1_ 2:_%2_ 3:_%3_").arg(Coeff->at(0)).arg(Coeff->at(1)).arg(Coeff->at(2)),D_NADIA);
 
     return;
     //    long i;

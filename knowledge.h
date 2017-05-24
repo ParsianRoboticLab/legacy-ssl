@@ -220,6 +220,13 @@ public:
     ///////////////AMIN
     Vector2D getBest();
     //////////////Mahmoud
+    //chip dir predict
+    Vector2D getChipDir();
+    double chipperDistance=100;
+    int chipperIDD=0,chipperID=0;
+    Vector2D prevBallPos;
+    QMap<int,QList<Vector2D> > lastDirs;
+    //
     Vector2D getBestPosToShootToGoal(Vector2D from, double &regionWidth, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, bool oppGaol);
     Vector2D getBestPosForPassReciever(Rect2D searchRegion, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, Rect2D avoidRect);
     Vector2D getBestPosForPassReciever(QList<Rect2D> searchRegions, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, QList<Rect2D> avoidRects,int passRecieverID, int passSenderID,double angleFactor,double angle0);
