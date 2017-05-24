@@ -14,5 +14,6 @@
 #include "plays/dynamicattack.h"
 #include "plays/ourballplacement.h"
 #include "plays/theirballplacement.h"
+#include "plays/stopplay.h"
 
 #endif // PLAYS_H

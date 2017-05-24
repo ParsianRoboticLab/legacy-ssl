@@ -157,7 +157,8 @@ SOURCES += main.cpp \
     skills/autoballplacement.cpp \ 
     util/timer.cpp \
     util/rng.cpp \
-    collectprofiledata.cpp
+    collectprofiledata.cpp \
+    plays/stopplay.cpp
 
 
 HEADERS += base.h \
@@ -328,7 +329,8 @@ HEADERS += base.h \
     util/timer.h \
     util/rng.h \
     util/vector2.h \
-    collectprofiledata.h
+    collectprofiledata.h \
+    plays/stopplay.h
 
 
 unix:INCLUDEPATH += "/usr/local/include"

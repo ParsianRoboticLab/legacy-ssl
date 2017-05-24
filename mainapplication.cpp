@@ -1736,6 +1736,10 @@ void CMainApplication::loadFormationConfigs(){
     CCoach::editData["PlayOnOffense"]->openConf(prefix+"play_on_offense.conf");
     CCoach::editData["Stop6"] = new EditData;
     CCoach::editData["Stop6"]->openConf(prefix+"stop_6.conf");
+    CCoach::editData["Stop7"] = new EditData;
+    CCoach::editData["Stop7"]->openConf(prefix+"stop_7.conf");
+    CCoach::editData["Stop4"] = new EditData;
+    CCoach::editData["Stop4"]->openConf(prefix+"stop_4.conf");
     CCoach::editData["OurKickOff"] = new EditData;
     CCoach::editData["OurKickOff"]->openConf(prefix+"our_kickoff.conf");
     CCoach::editData["TheirPenaltyKick"] = new EditData;
@@ -1746,6 +1750,9 @@ void CMainApplication::loadFormationConfigs(){
     CCoach::editData["TheirP"]->openConf(prefix+"theirP.conf");
     CCoach::editData["OurP"] = new EditData;
     CCoach::editData["OurP"]->openConf(prefix+"ourP.conf");
+    CCoach::editData["OurF"] = new EditData;
+    CCoach::editData["OurF"]->openConf(prefix+"ourF.conf");
+
 
 }
 
