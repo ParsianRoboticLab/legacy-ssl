@@ -325,6 +325,8 @@ void CPlayOff::globalExecute() {
     if (masterMode == NGameOff::StaticPlay) {
         Q_ASSERT(masterPlan != NULL);
         if(masterPlan != NULL) {
+            debug (QString("Plan Number : %1 ==> ").arg(masterPlan->gui.planFile), D_MAHI);
+
             if (initial) {
                 qDebug() << *masterPlan;
                 lastBallPos = wm->ball->pos;
@@ -410,11 +412,9 @@ void CPlayOff::dynamicExecute() {
         checkEndBlocker();
     }
 
-
-
-        for(int i = 0;i < dynamicAgentSize;i++) {
-            roleAgent[i]->execute();
-        }
+    for(int i = 0;i < dynamicAgentSize;i++) {
+        roleAgent[i]->execute();
+    }
 }
 
 
@@ -767,13 +767,13 @@ void CPlayOff::stayPoistioning() {
 void CPlayOff::movePositioning() {
     newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(-0.3,0));
     newRoleAgent[0]->setTargetDir(wm->ball->pos);
-    newRoleAgent[1]->setTarget(Vector2D(2, -.5));
+    newRoleAgent[1]->setTarget(Vector2D(1, -1.5));
     newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
-    newRoleAgent[2]->setTarget(Vector2D(3.5, -1.5));
+    newRoleAgent[2]->setTarget(Vector2D(1, .5));
     newRoleAgent[2]->setTargetDir(wm->field->oppGoal());
-    newRoleAgent[3]->setTarget(Vector2D(0, 1.5));
+    newRoleAgent[3]->setTarget(Vector2D(-.5, 1.5));
     newRoleAgent[3]->setTargetDir(wm->field->oppGoal());
-    newRoleAgent[4]->setTarget(Vector2D(2, -2.5));
+    newRoleAgent[4]->setTarget(Vector2D(2.5, -2.5));
     newRoleAgent[4]->setTargetDir(wm->field->oppGoal());
     newRoleAgent[5]->setTarget(Vector2D(2, 2.5));
     newRoleAgent[5]->setTargetDir(wm->field->oppGoal());
@@ -840,10 +840,30 @@ void CPlayOff::firstExecute() {
         }
     }
 
+
+    QQueue<int> oppMark = wm->opp.data->activeAgents;
+    oppMark.removeOne(wm->opp.data->goalieID);
+    oppMark.removeOne(knowledge->nearestOppToBall);
+    double sumDist = 0.0;
+    for (int i = 0; i < oppMark.size(); i++) {
+        sumDist += wm->opp[oppMark.at(i)]->pos.dist(wm->field->oppGoal());
+    }
+    sumDist /= oppMark.size();
+    oppTags.clear();
+    if (sumDist < 2) {
+        oppTags << "far";
+    } else if (sumDist > 3) {
+        oppTags << "kill";
+    } else {
+        oppTags << "near";
+    }
+
+
+
     // TODO : fix tagging ;)
 //    oppTags << "man2man-pass" << "man2man-shot" << "zone";
     debug(QString("PB : %1, SB : %2").arg(passBlocked).arg(shotBlocked), D_MAHI);
-
+    debug(oppTags.at(0), D_MAHI);
 
     for (int i = 0; i < 6; i++) {
         newRoleAgent[i]->execute();
@@ -1661,11 +1681,9 @@ void CPlayOff::newFillRoleProperties() {
                 newAssignTask(roleAgent[i], positionAgent[i]);
                 roleAgent[i]->setRoleUpdate(true);
             }
-
         }
     }
 }
-
 
 void CPlayOff::assignTask(int agentID, POffSkills agentSkill) {
     Vector2D tempVec = (wm->ball->pos - knowledge->getAgent(kkAgentsID[agentID])->pos()).norm();

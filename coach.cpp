@@ -1780,94 +1780,14 @@ void CCoach::setPlayOff(NGameOff::EMode _mode) {
 
 void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
 
-    NGameOff::SPlan* nearestPlan = NULL;
-    double minDist = _MAX_DIST;
-    int symmetry = 1;
-    QList<NGameOff::SPlan*> validPlans;
-    QList<NGameOff::SPlan*> plans = m_planLoader->getPlans(); // Get All of The Plans
-    QList<int> chances;
-    if (plans.isEmpty()) {
-        debug("There's No Plan", D_ERROR);
-        return;
-    }
 
-    Q_FOREACH(NGameOff::SPlan* plan, plans) { //Find Valid Plans
-        NGameOff::SMatching& matching = plan->matching;
-
-        // Just For Debugging
-        if (1) {
-            qDebug() << "-----------> plan name" << plan->gui.name;
-            if (matching.common->planMode  >= _mode)
-                qDebug() << "[Coach] Mode is Valid";
-            if (matching.common->agentSize >= _ourplayers.size())
-                qDebug() << "[Coach] AgentSize is Valid";
-            if (matching.common->chance >= 0)
-                qDebug() << "[Coach] Chance is Valid";
-            if (matching.common->lastDist >= 0)
-                qDebug() << "[Coach] LastDist is Valid";
-            if (isRegionMatched(matching.initPos.ball))
-                qDebug() << "[Coach] Ball is Valid";
-            qDebug() << "<----------- plan END.";
-        }
-
-        if (matching.common->planMode  >= _mode
-                && matching.common->agentSize >= _ourplayers.size()
-                && matching.common->chance > 0
-                && matching.common->lastDist >= 0) {
-
-            //check Ball matchig with symmetry
-            plan->common.currentSize = _ourplayers.size();
-            Vector2D symBall = Vector2D(matching.initPos.ball.x,
-                                        (-1) * matching.initPos.ball.y);
-
-            double tempDist    = wm->ball->pos.dist(matching.initPos.ball);
-            double tempSymDist = wm->ball->pos.dist(symBall);
-
-            if (tempDist < minDist) {
-                minDist  = tempDist;
-                symmetry = 1;
-                nearestPlan = plan;
-            }
-
-            if (tempSymDist < minDist) {
-                minDist  = tempSymDist;
-                symmetry = -1;
-                nearestPlan = plan;
-            }
-
-            if (isRegionMatched(matching.initPos.ball)) {
-                plan->execution.symmetry = 1;
-            } else if (isRegionMatched(symBall)) {
-                plan->execution.symmetry = -1;
-            } else {
-                continue;
-            }
-
-            validPlans.append(plan);
-            chances.append(static_cast<int>(plan->common.chance));
-        }
-    }
-
-    debug(QString("playoff -> there's %1 valid Plan").arg(validPlans.size()), D_DEBUG);
-    if (validPlans.isEmpty()) {
-        debug("[Warning] playoff -> there's no valid Plan", D_ERROR, QColor(Qt::red));
-        debug("[Warning] playoff -> matching nearset plan", D_ERROR, QColor(Qt::red));
-        if (nearestPlan != NULL) {
-            nearestPlan->execution.symmetry = symmetry;
-            validPlans.append(nearestPlan);
-            chances.append(1);
-            debug("[Warning] playoff -> nearset plan matched", D_ERROR, QColor(Qt::red));
-        }
-    }
-
+    QList<SPlan*> validPlans = getValidPlans(_mode, _ourplayers);
     if (validPlans.isEmpty()) {
         debug ("[coach] WE DONT HAVE PLAN AT ALL", D_MAHI);
-
         return;
     }
 
     NGameOff::SPlan* thePlan = NULL;
-
     /** new plan selector **/
     thePlan = chooseMostSuccecfull(validPlans);
 
@@ -1968,6 +1888,92 @@ void CCoach::setFirstPlay() {
 void CCoach::setFastPlay() {
     // TODO : Write Fast Play checker
 
+}
+
+QList<SPlan *> CCoach::getValidPlans(const POMODE _mode, const QList<int>& _ourPlayers) {
+
+    NGameOff::SPlan* nearestPlan = NULL;
+    double minDist = _MAX_DIST;
+    QList<NGameOff::SPlan*> allPlans = m_planLoader->getPlans(); // Get All of The Plans
+
+    QList<NGameOff::SPlan*> activePlans;
+    Q_FOREACH(SPlan* plan, allPlans) {
+        if (plan->gui.active) {
+            activePlans.append(plan);
+        }
+    }
+
+    QList<SPlan*> masterPlans;
+    Q_FOREACH(SPlan* plan, activePlans) {
+        if (plan->gui.master) {
+            masterPlans.append(plan);
+        }
+    }
+    if (!masterPlans.isEmpty()) {
+        activePlans.clear();
+        activePlans = masterPlans;
+    }
+
+
+    if (activePlans.isEmpty()) {
+        debug("There's No Plan", D_ERROR);
+        return activePlans;
+    }
+
+    int symmetry = 1;
+    QList<NGameOff::SPlan*> validPlans;
+    Q_FOREACH(NGameOff::SPlan* plan, activePlans) { //Find Valid Plans
+        NGameOff::SMatching& matching = plan->matching;
+
+        if (matching.common->planMode  >= _mode
+                && matching.common->agentSize >= _ourPlayers.size()
+                && matching.common->chance > 0
+                && matching.common->lastDist >= 0) {
+
+            //check Ball matchig with symmetry
+            plan->common.currentSize = _ourPlayers.size();
+            Vector2D symBall = Vector2D(matching.initPos.ball.x,
+                                        (-1) * matching.initPos.ball.y);
+
+            double tempDist    = wm->ball->pos.dist(matching.initPos.ball);
+            double tempSymDist = wm->ball->pos.dist(symBall);
+
+            if (tempDist < minDist) {
+                minDist  = tempDist;
+                symmetry = 1;
+                nearestPlan = plan;
+            }
+
+            if (tempSymDist < minDist) {
+                minDist  = tempSymDist;
+                symmetry = -1;
+                nearestPlan = plan;
+            }
+
+            if (isRegionMatched(matching.initPos.ball)) {
+                plan->execution.symmetry = 1;
+            } else if (isRegionMatched(symBall)) {
+                plan->execution.symmetry = -1;
+            } else {
+                continue;
+            }
+
+            validPlans.append(plan);
+        }
+    }
+
+    debug(QString("playoff -> there's %1 valid Plan").arg(validPlans.size()), D_DEBUG);
+    if (validPlans.isEmpty()) {
+        debug("[Warning] playoff -> there's no valid Plan", D_ERROR, QColor(Qt::red));
+        debug("[Warning] playoff -> matching nearset plan", D_ERROR, QColor(Qt::red));
+        if (nearestPlan != NULL) {
+            nearestPlan->execution.symmetry = symmetry;
+            validPlans.append(nearestPlan);
+            debug("[Warning] playoff -> nearset plan matched", D_ERROR, QColor(Qt::red));
+        }
+    }
+
+    return validPlans;
 }
 
 

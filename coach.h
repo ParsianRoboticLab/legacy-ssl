@@ -165,6 +165,8 @@ private:
     void setFirstPlay();
     void setFastPlay();
 
+    QList<SPlan*> getValidPlans(const POMODE _mode, const QList<int> &_ourPlayers);
+
     QList<SPlan *> getMatchedPlans(const QStringList& _tags, const QList<SPlan *> &_plans);
 
     CLoadPlayOffJson* m_planLoader;
