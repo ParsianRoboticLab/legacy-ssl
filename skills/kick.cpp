@@ -685,7 +685,7 @@ kckMode CSkillKick::decideMode()
     robotKickArea.addVertex(agentPos+agent->dir().norm()*0.35-agent->dir().rotate(90).norm()*0.01);
     robotKickArea.addVertex(agentPos+agent->dir().norm()*0.08-agent->dir().rotate(90).norm()*0.01);
 
-    if(passProfiler || kickWithCenterOfDribbler) {
+    if(1 || passProfiler || kickWithCenterOfDribbler) {
         if(dribblerArea.contains(ballPos) && robotKickArea.contains(ballPos))
             kickerOn = true;
         else
@@ -1106,7 +1106,7 @@ void CSkillKick::jTurn()
                            ,1 *bally + reduce*sin(kkMovementTheta)+ speedPidY->PID_OUT()
                            ,angPid->PID_OUT());
     }
-    agent->accelerationLimiter();
+    agent->accelerationLimiter(0);
     speedPidY->pError = speedPidY->error;
 }
 

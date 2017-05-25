@@ -424,7 +424,7 @@ bool CAgent::trajectory(double& vf,double& vn,double& va,double w1,double w2,dou
     return false;
 }
 
-void CAgent::accelerationLimiter()
+void CAgent::accelerationLimiter(double vf)
 {
     ////first Stage Accelerate Limit
     double veltan= (vel().x)*cos(dir().th().radian()) + (vel().y)*sin(dir().th().radian());
@@ -456,6 +456,10 @@ void CAgent::accelerationLimiter()
     double lastV,commandV;
     double vCoef = 1;
     double tempVf = vforward , tempVn = vnormal;
+    double decCoef = 2;
+
+    if(vf == 0)
+        decCoef = 2.5;
 #if 0
     commandV = sqrt((vforward*vforward)+(vnormal*vnormal));
     lastV = sqrt((lastVf*lastVf)+(lastVn*lastVn));
@@ -496,6 +500,10 @@ void CAgent::accelerationLimiter()
         {
             vforward = lastVf + (conf()->BangBang_AccMaxForward()* 0.0166667)*sign(vforward);
         }
+        if(vforward < (lastVf - decCoef*conf()->BangBang_DecMax()* 0.0166667))
+        {
+            vforward = lastVf - (decCoef*conf()->BangBang_DecMax()* 0.0166667);
+        }
     }
     else
     {
@@ -503,14 +511,22 @@ void CAgent::accelerationLimiter()
         {
             vforward = lastVf - (conf()->BangBang_AccMaxForward()* 0.0166667);
         }
+        if(vforward > (lastVf + decCoef*conf()->BangBang_DecMax()* 0.0166667))
+        {
+            vforward = lastVf + (decCoef*conf()->BangBang_DecMax()* 0.0166667);
+        }
     }
 
     debug(QString("vn: %1 , lVn :%2").arg(vnormal).arg(lastVn),D_MHMMD);
     if(vnormal >= 0)
     {
-        if(vnormal > (fabs(lastVn) + conf()->BangBang_AccMaxNormal()* 0.0166667))
+        if(vnormal > (lastVn + conf()->BangBang_AccMaxNormal()* 0.0166667))
         {
             vnormal = lastVn + (conf()->BangBang_AccMaxNormal()* 0.0166667)*sign(vnormal);
+        }
+        if(vnormal < (lastVn - decCoef*conf()->BangBang_DecMax()* 0.0166667))
+        {
+            vnormal = lastVn - (decCoef*conf()->BangBang_DecMax()* 0.0166667);
         }
     }
     else
@@ -519,9 +535,17 @@ void CAgent::accelerationLimiter()
         {
             vnormal = lastVn + (conf()->BangBang_AccMaxNormal()* 0.0166667)*sign(vnormal);
         }
+        if(vnormal > (lastVn + decCoef*conf()->BangBang_DecMax()* 0.0166667))
+        {
+            vnormal = lastVn + (decCoef*conf()->BangBang_DecMax()* 0.0166667);
+        }
     }
 
 
+    if(vforward - lastVf < - 1)
+        {
+            vforward = lastVf - 0.085;
+        }
 
 
     lastVf = vforward;
