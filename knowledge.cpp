@@ -4131,21 +4131,37 @@ Vector2D CKnowledge::getBest() {
 Vector2D CKnowledge::getChipDir(){
 
 
+
     for(int i=0;i<wm->opp.activeAgentsCount();i++){
         chipperIDD=wm->opp.activeAgentID(i);
-        if((wm->ball->pos-wm->opp[idd]->pos).length()<chipperDistance){
-            chipperID=chipperIDD;
-            chipperDistance=(wm->ball->pos-wm->opp[idd]->pos).length();
-        }
         if(Circle2D(wm->our[chipperIDD]->pos , 0.2).contains(wm->ball->pos)){
-            lastDirs.value(chipperIDD).append(wm->opp[chipperIDD]->dir);
-            if(lastDirs.value(chipperIDD).count() > 10)
-                lastDirs.value(chipperIDD).removeFirst();
+            if((wm->ball->pos-wm->opp[chipperIDD]->pos).length()<chipperDistance){
+                chipperID=chipperIDD;
+                chipperDistance=(wm->ball->pos-wm->opp[chipperIDD]->pos).length();
+            }
+            lastDirs[chipperIDD].append(wm->opp[chipperIDD]->dir);
+            if(lastDirs[chipperIDD].count() > 10)
+                lastDirs[chipperIDD].removeFirst();
         }
-        else if (chipperID=chipperIDD && wm->ball->vel) {
+        else if (chipperID==chipperIDD && (prevBallPos-wm->ball->pos).length()>0.03) {
+            DirFound=true;
+        }
 
-        }
     }
+if(DirFound)
+{
+
+    for(int i=4; 9; i++){
+        chipperDir+=lastDirs[chipperID].at(i);
+    }
+    chipperDir/=5;
+    return chipperDir;
+}
+else
+    return Vector2D(0,0);
+
+prevBallPos=wm->ball->pos;
+
 
 }
 

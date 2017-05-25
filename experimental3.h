@@ -345,6 +345,10 @@ double predictPos(){
 
 void CMainApplication::Experimental3()
 {
+    dir=knowledge->getChipDir();
+    draw(Segment2D(Vector2D(0,0) , dir));
+    debug(QString("dir_x:%1,dir_y:%2").arg(dir.x).arg(dir.y),D_NADIA);
+    return;
 
     //    debug(QString("2.5: %1").arg(knowledge->getProfile(2 , 35/10.0 , true , false)),D_NADIA);
     //    knowledge->plotWidgetCustom[1]=wm->ball->vel.length()-4;

@@ -223,9 +223,11 @@ public:
     //chip dir predict
     Vector2D getChipDir();
     double chipperDistance=100;
-    int chipperIDD=0,chipperID=0;
+    qint32 chipperIDD=-1,chipperID=-1;
+    bool DirFound=false;
+    Vector2D chipperDir=Vector2D(0,0);
     Vector2D prevBallPos;
-    QMap<int,QList<Vector2D> > lastDirs;
+    QMap<qint32,QList<Vector2D> > lastDirs;
     //
     Vector2D getBestPosToShootToGoal(Vector2D from, double &regionWidth, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, bool oppGaol);
     Vector2D getBestPosForPassReciever(Rect2D searchRegion, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, Rect2D avoidRect);
