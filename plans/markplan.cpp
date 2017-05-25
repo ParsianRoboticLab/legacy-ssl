@@ -1697,14 +1697,12 @@ QList<Vector2D> CMarkPlan::PassBlockRatio(double ratio, Vector2D opp){
     tempQlist.clear();
     tempSeg.assign(wm->ball->pos, wm->ball->pos + (opp - wm->ball->pos) * 20);
     Vector2D pos = wm->ball->pos + (opp - wm->ball->pos) * ratio;
-    isInPenaltyArea.assign(wm->field->ourGoal(), pos);
+    isInPenaltyArea.assign(opp, wm->ball->pos);
     QList<Vector2D> tempVec;
     tempVec.clear();
-    if(wm->field->AHZOurPAreaIntersect(isInPenaltyArea).size())
+    if(!wm->field->AHZOurPAreaIntersect(isInPenaltyArea).isEmpty())
     {
         tempVec.append(wm->field->AHZOurPAreaIntersect(tempSeg));
-        if(!tempVec.size())
-        {
             if(tempVec.size() == 1)
             {
                 tempQlist.append(tempVec.first());
@@ -1723,16 +1721,18 @@ QList<Vector2D> CMarkPlan::PassBlockRatio(double ratio, Vector2D opp){
             }
 
             tempQlist.append( wm->ball->pos - opp);
-        }
+
 
         draw(tempSeg, "red");
         debug(QString("this is in the penalty area, Block pass Mode"), D_HAMED);
     }
     else
     {
+        tempQlist.clear();
         tempQlist.append(pos);
         tempQlist.append( wm->ball->pos - opp);
-        draw(tempSeg, "red");
+        debug(QString("sag"), D_HAMED);
+        draw(tempSeg, "blue");
     }
     return tempQlist;
 
@@ -1903,8 +1903,7 @@ void CMarkPlan::execute()
                     markPoses.append(ShootBlockRatio(segmentpershoot, tempQlistQpair[i].first).first());
                     markAngs.append(ShootBlockRatio(segmentpershoot, tempQlistQpair[i].first).last());
                 }
-
-
+                debug(QString("size of temp qlist pair %1").arg(tempQlistQpair.size()), D_HAMED);
             }
 
             else if(agents.count() > oppAgentsToMarkPos.count())
@@ -1919,13 +1918,15 @@ void CMarkPlan::execute()
 
                 for(int i=0; i < min(agents.count() - oppAgentsToMarkPos.count(), oppAgentsToMarkPos.count()); i++)
                 {
-                    /*
-                    markPoses.append(PassBlockRatio(segmentperpass, oppAgentsToMarkPos[i]).first());
-                    markAngs.append(PassBlockRatio(segmentperpass, oppAgentsToMarkPos[i]).last());
-                    */
-                    markPoses.append(Vector2D(-1,-1));
-                    markAngs.append(Vector2D(0,1));
 
+                    markPoses.append(PassBlockRatio(segmentperpass, tempQlistQpair[i].first).first());
+                    markAngs.append(PassBlockRatio(segmentperpass, tempQlistQpair[i].first).last());
+
+                    debug(QString("size of temp qlist pair %1").arg(tempQlistQpair.size()), D_HAMED);
+
+                    /*markPoses.append(Vector2D(-1,-1));
+                    markAngs.append(Vector2D(0,1));
+                    */
                 }
 
             }
