@@ -86,6 +86,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
 
 
+
     staticPoses.clear();
     for(int _i = 0 ; _i < 5 ; _i++)
     {
@@ -4131,28 +4132,36 @@ Vector2D CKnowledge::getBest() {
 Vector2D CKnowledge::getChipDir(){
 
 
+    chipperDistance=100;
 
     for(int i=0;i<wm->opp.activeAgentsCount();i++){
         chipperIDD=wm->opp.activeAgentID(i);
-        if(Circle2D(wm->our[chipperIDD]->pos , 0.2).contains(wm->ball->pos)){
-            if((wm->ball->pos-wm->opp[chipperIDD]->pos).length()<chipperDistance){
+        if(!lastDirs.keys().contains(chipperIDD))
+            lastDirs[chipperIDD]=QList<Vector2D>();
+//        else
+//            lastDirs.remove(chipperIDD);
+
+        if(Circle2D(wm->opp[chipperIDD]->pos , 0.2).contains(wm->ball->pos)){
+            if((wm->ball->pos-wm->opp[chipperIDD]->pos).length()<chipperDistance && wm->ball->vel.length()<0.1){
                 chipperID=chipperIDD;
                 chipperDistance=(wm->ball->pos-wm->opp[chipperIDD]->pos).length();
+                chipperPoint=wm->opp[chipperID]->pos;
             }
             lastDirs[chipperIDD].append(wm->opp[chipperIDD]->dir);
             if(lastDirs[chipperIDD].count() > 10)
                 lastDirs[chipperIDD].removeFirst();
         }
-        else if (chipperID==chipperIDD && (prevBallPos-wm->ball->pos).length()>0.03) {
+        else if (chipperID==chipperIDD && wm->ball->vel.length()<0.1) {
             DirFound=true;
         }
-
+        else
+            DirFound=false;
     }
+    debug(QString("chipperID:%1").arg(chipperID),D_NADIA);
 if(DirFound)
 {
-
-    for(int i=4; 9; i++){
-        chipperDir+=lastDirs[chipperID].at(i);
+    for(int i=lastDirs[chipperID].count()-5; i>0; i--){
+        chipperDir+=lastDirs[chipperID].at(i-1);
     }
     chipperDir/=5;
     return chipperDir;
@@ -4160,8 +4169,13 @@ if(DirFound)
 else
     return Vector2D(0,0);
 
+
 prevBallPos=wm->ball->pos;
 
+}
+
+
+int CKnowledge::getChipPredict(){
 
 }
 

@@ -346,7 +346,7 @@ double predictPos(){
 void CMainApplication::Experimental3()
 {
     dir=knowledge->getChipDir();
-    draw(Segment2D(Vector2D(0,0) , dir));
+    draw(Segment2D(knowledge->chipperPoint , dir+knowledge->chipperPoint));
     debug(QString("dir_x:%1,dir_y:%2").arg(dir.x).arg(dir.y),D_NADIA);
     return;
 
