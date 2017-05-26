@@ -28,9 +28,9 @@ enum KickerStatus{
 };
 
 enum ChipStatus{
-    BallIsNearRobot,
-    FindPos,
-    PosSaved
+    Emplacement,
+    ChipKick,
+    SavingChipPos
 };
 
 class CollectProfileData : public QObject
