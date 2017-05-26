@@ -23,6 +23,7 @@ CNewBangBang::CNewBangBang()
     }
     vmax = 4;
     angPath = false;
+
 }
 
 /*
@@ -74,16 +75,9 @@ bangBangMode CNewBangBang::decidePlan()
 
     double _x3;
 
-    if(Vel2 == 0)
-    {
-        _x3 = ((posPidDist*posPid->kp) *(posPidDist*posPid->kp)  - currentVel*currentVel) / (-1.8 * fabs(dmax)) + 0.1*currentVel;
-    }
-    else
-    {
-        _x3 = (Vel2*Vel2 - currentVel*currentVel) / (-1.5 * fabs(dmax)) + 0.05 *currentVel;
-    }
+    _x3 = (Vel2*Vel2 - vmax*vmax) / (-2 * fabs(dmax)) ;
 
-    debug(QString("vel2: %1").arg(Vel2),D_MHMMD);
+//    debug(QString("vel2: %1").arg(Vel2),D_MHMMD);
     if(((agentPos.dist(pos2) < posPidDist + posPidThr) && (Vel2 == 0) )/* || (agentPos.dist(pos2) < 0.15)*/) {
         decThr = 0;
         constThr = 0;
@@ -92,19 +86,8 @@ bangBangMode CNewBangBang::decidePlan()
     }
     else {
         posPidThr = 0;
-        if((_x3 > 0) && (agentPos.dist(pos2) < _x3 + decThr) ) {
-            if(currentVel < 0.5)
-                decThr = 0;
-            else
-                decThr = 0.1;
-            constThr = 0;
+        if((_x3 > 0) && (agentPos.dist(pos2) < _x3) ) {
             return _bangBangDec;
-
-        }
-        else if((agentVel.length() >= velMax - constThr)) {
-            constThr = 0.3;
-            decThr = 0;
-            return _bangBangConst;
         }
         else {
             decThr=0;
@@ -120,42 +103,42 @@ void CNewBangBang::trajectoryPlanner()
 {
     velMax = vmax;
 
-    if(smooth && (decidePlan() != _bangBangPosPID))
-    {
-        if(((vDes)*cos(appliedTh) - lastVx) > 1)
-        {
-            desiredVx = lastVx + 0.085;
-        }
-        else if(((vDes)*cos(appliedTh) - agentVel.x) < -1)
-        {
-            desiredVx = lastVx - 0.085;
-        }
-        else
-        {
-            desiredVx = (vDes)*cos(appliedTh);
-        }
+//    if(smooth && (decidePlan() != _bangBangPosPID))
+//    {
+//        if(((vDes)*cos(appliedTh) - lastVx) > 1)
+//        {
+//            desiredVx = lastVx + 0.085;
+//        }
+//        else if(((vDes)*cos(appliedTh) - agentVel.x) < -1)
+//        {
+//            desiredVx = lastVx - 0.085;
+//        }
+//        else
+//        {
+//            desiredVx = (vDes)*cos(appliedTh);
+//        }
 
-        if(((vDes)*sin(appliedTh) - lastVy) > 1)
-        {
-            desiredVy = lastVy + 0.1;
-        }
-        else if(((vDes)*sin(appliedTh) - lastVy) < -1)
-        {
-            desiredVy = lastVy - 0.1;
-        }
-        else
-        {
-            desiredVy = (vDes)*sin(appliedTh);
-        }
+//        if(((vDes)*sin(appliedTh) - lastVy) > 1)
+//        {
+//            desiredVy = lastVy + 0.1;
+//        }
+//        else if(((vDes)*sin(appliedTh) - lastVy) < -1)
+//        {
+//            desiredVy = lastVy - 0.1;
+//        }
+//        else
+//        {
+//            desiredVy = (vDes)*sin(appliedTh);
+//        }
 
-    }
-    else
-    {
+//    }
+//    else
+//    {
         desiredVx = (vDes)*cos(appliedTh);
         desiredVy = (vDes)*sin(appliedTh);
-    }
+//    }
     ///////////////////////////////////////////// th pid
-    thPid->kp =0;
+    thPid->kp =0.4;
     thPid->error = (agentMovementTh - agentVel.norm().th()).radian();
     if(fabs(thPid->error > 1) || currentVel < 0.5 || agentPos.dist(pos2) >3 ||( fabs((agentMovementTh - agentDir.th()).degree()) > 80 && fabs((agentMovementTh - agentDir.th()).degree()) < 100 )   )
         thPid->error =0;
@@ -166,6 +149,7 @@ void CNewBangBang::trajectoryPlanner()
 }
 void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D _agentDir,Vector2D _pos2,Vector2D _dir2,double _V2,double dt,double & _Vx,double & _Vy, double & _W)
 {
+
     pos2 = _pos2;
     dir2 = _dir2;
     Vel2 = _V2;
@@ -182,7 +166,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     }
     else
     {
-        angPid->kp = 5;
+        angPid->kp = 2;
     }
     angPid->error = (dir2.th() -  agentDir.th()).radian();
 
@@ -213,6 +197,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
         posPid->kd = conf()->BangBang_posKD();
         posPid->ki = conf()->BangBang_posKI();
     }
+
     thPid->kp = conf()->BangBang_thKP();
     thPid->ki = conf()->BangBang_thKI();
     thPid->kd = conf()->BangBang_thKD();
@@ -223,8 +208,6 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
 
 
 
-
-
     switch(decidePlan())
     {
     case _bangBangPosPID:
@@ -232,32 +215,23 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
         vDes = min(posPid->PID_OUT(),velMax);
         break;
     case _bangBangConst:
-        vDes = vmax;
+        vDes = velMax;
         break;
     case _bangBangDec:
-        if(v2 == 0)
-        {
-            vDes = sqrt(fabs(2*dmax*(agentPos.dist(pos2))*moreDec) + vp *vp) - decOffset;
-        }
+        if(Vel2 == 0 )
+            vDes = sqrt(vp*vp + 2*dmax*agentPos.dist(pos2)*moreDec) - decOffset;
         else
-        {
-            vDes = sqrt(fabs(2*dmax*(agentPos.dist(pos2))*(moreDec+0.1)) + Vel2*Vel2)- decOffset;
-        }
+            vDes = sqrt(Vel2*Vel2 + 2*dmax*agentPos.dist(pos2)*moreDec) ;
         break;
     case _bangBangAcc:
-        if(0 && currentVel < 0.2)
-        {
-            vDes = 0.3;
-        }
-        else
-        {
-            vDes = currentVel + dt*(amax);
-        }
+
+        vDes = velMax;
         break;
     }
     trajectoryPlanner();
     lastPath = agentVel.th();
     /////////////////////th pid
+    debug(QString("vdes : %1").arg(vDes),D_MHMMD);
     _Vx =  desiredVx;//(vDes)*cos(appliedTh);
     _Vy =  desiredVy;//(vDes)*sin(appliedTh);
     _W = angPid->PID_OUT();
