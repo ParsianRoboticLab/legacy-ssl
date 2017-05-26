@@ -54,7 +54,8 @@ public:
     ///--- HMD ----///
     CMarkPlan();
     ~CMarkPlan();
-    double segmentper;
+    double segmentpershoot;
+    double segmentperpass;
     CSkillGotoPointAvoid *markGPA[6];
     void execute();
     void extractGameSituation();
@@ -63,6 +64,7 @@ public:
     void findBallOwnership();
     void markPosesRefinePlayon();
     QList<Vector2D> ShootBlockRatio(double, Vector2D);
+    QList<Vector2D> PassBlockRatio(double ratio, Vector2D opp);
     static bool sortBy(const Vector2D &robot1,const Vector2D &robot2);
     QList<CRobot*> sortdanger(const QList<CRobot*> oppagent);
     QList<QPair<Vector2D, double> > sortdangerpassplayoff(QList<Vector2D> oppposdanger);

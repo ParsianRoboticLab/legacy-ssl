@@ -76,9 +76,7 @@ CSoccer::CSoccer()
 
     visionThread = new CVisionThread;
     robotCom = new CCommunicator();
-    robotCom->send->setSerialParams(115200, 8, 0, 1);
-    recvThreadMutex = new QMutex();
-    robotCom->recvThread->setSerialParams(115200, 8, 0, 1);
+    robotCom->setSerialParams(115200, 8, 0, 1);
     mode = Simulation;
     controlMode = AI;
     teamColor = _COLOR_BLUE;
@@ -154,7 +152,6 @@ CSoccer::~CSoccer()
     gameLogger->quit();
     pathPlanner->quit();
     joystick->quit();
-    robotCom->recvThread->quit();
     visionThread->quit();
 
     qDebug () << "soccer closed";
@@ -179,34 +176,19 @@ CSoccer::~CSoccer()
 
 void CSoccer::connectSimulation()
 {
-    robotCom->send->connectUdp(conf()->LocalSettings_SimulatorAddr().c_str(),conf()->LocalSettings_SimulatorPort());
-    robotCom->send->activateUdp();
+    robotCom->connectUdp(conf()->LocalSettings_SimulatorAddr().c_str(),conf()->LocalSettings_SimulatorPort());
+    robotCom->activateUdp();
 }
 
 void CSoccer::connectSerial()
 {
-    if(robotCom->send->isSerialConnected())
+    if(robotCom->isSerialConnected())
     {
-        robotCom->send->closeSerial();
+        robotCom->closeSerial();
     }
 
-    recvThreadMutex->lock();
-    if(robotCom->recvThread->isSerialConnected())
-    {
-        robotCom->recvThread->closeSerial();
-    }
-    recvThreadMutex->unlock();
-
-    robotCom->send->connectSerial(conf()->LocalSettings_SerialDev().c_str());
-    robotCom->send->activateSerial();
-    //    robCom->connectUdp("127.0.0.1",8200);
-    //    robCom->activateUdp();
-
-    recvThreadMutex->lock();
-    robotCom->recvThread->connectSerial(conf()->LocalSettings_SerialRec().c_str());
-    robotCom->recvThread->activateSerial();
-    recvThreadMutex->unlock();
-
+    robotCom->connectSerial(conf()->LocalSettings_SerialDev().c_str());
+    robotCom->activateSerial();
 }
 
 void CSoccer::connectVision()
@@ -307,49 +289,20 @@ void CSoccer::setMode(GameMode _mode)
     visionSocketMutex.unlock();
     if (mode==Real)
     {
-        robotCom->send->activateSerial();
-        robotCom->send->deactivateUdp();
-
-        recvThreadMutex->lock();
-        robotCom->recvThread->activateSerial();
-        robotCom->recvThread->deactivateUdp();
-        if (robotCom->recvThread->isSerialConnected() && !robotCom->recvThread->isRunning()) {
-            robotCom->recvThread->start(QThread::LowPriority);
-        }
-        recvThreadMutex->unlock();
-
+        robotCom->activateSerial();
+        robotCom->deactivateUdp();
     }
     else if(mode==Simulation){
-        robotCom->send->deactivateSerial();
-        robotCom->send->activateUdp();
-
-        recvThreadMutex->lock();
-        robotCom->recvThread->deactivateSerial();
-        robotCom->recvThread->activateUdp();
-        if (robotCom->recvThread->isUdpConnected() && !robotCom->recvThread->isRunning()) {
-            robotCom->recvThread->start(QThread::LowPriority);
-        }
-        recvThreadMutex->unlock();
-
+        robotCom->deactivateSerial();
+        robotCom->activateUdp();
     }
     else{
-        robotCom->send->deactivateSerial();
-        robotCom->send->deactivateUdp();
-
-        recvThreadMutex->lock();
-        robotCom->recvThread->deactivateSerial();
-        robotCom->recvThread->deactivateUdp();
-        robotCom->recvThread->closeRecv = false;
-        recvThreadMutex->unlock();
+        robotCom->deactivateSerial();
+        robotCom->deactivateUdp();
     }
-    if (robotCom->send->errorOccured())
-        debug(QString(robotCom->send->getError()), D_ERROR, QColor("red"));
-
-    recvThreadMutex->lock();
-    if (robotCom->recvThread->errorOccured())
-        debug(QString(robotCom->recvThread->getError()), D_ERROR, QColor("red"));
-    recvThreadMutex->unlock();
-
+    if (robotCom->errorOccured()) {
+        debug(QString(robotCom->getError()), D_ERROR, QColor("red"));
+    }
 }
 
 void CSoccer::primaryDraws(){
@@ -555,8 +508,8 @@ void CSoccer::sendPacketToSimulator(){
     }
     std::string s;
     packet.SerializeToString(&s);
-    if (!robotCom->send->isSerialConnected())
-        robotCom->send->sendString(s.c_str(), s.size());
+    if (!robotCom->isSerialConnected())
+        robotCom->sendString(s.c_str(), s.size());
 }
 
 void CSoccer::sendPacketToRealWorld(){
@@ -599,7 +552,7 @@ void CSoccer::sendPacketToRealWorld(){
 
     for (int i=0;i<cmdPacket.count();i+=_NEW_PACKET_SIZE)
     {
-        robotCom->send->sendString(cmdPacket.data() + i, _NEW_PACKET_SIZE);
+        robotCom->sendString(cmdPacket.data() + i, _NEW_PACKET_SIZE);
     }
 #endif
 }
@@ -723,14 +676,6 @@ void CSoccer::run()
         //      debug(QString("%1) RunSoccer Time1: %2").arg(knowledge->frameCount).arg(timer.elapsed()) , D_MASOOD);
         //      timer.restart();
         //    }
-
-        if( recvThreadMutex->tryLock(1) ){
-            for (int i = 0; i < _MAX_NUM_PLAYERS; i++)
-                agents[i]->setShootSensor(robotCom->recvThread->shootSensor[i]);
-            recvThreadMutex->unlock();
-        }
-
-
         //    debug(QString("%1) RunSoccer Time2: %2").arg(knowledge->frameCount).arg(timer.elapsed()) , D_MASOOD);
         //    timer.restart();
         ///////////////////////////world model update////////////////////////////
@@ -832,25 +777,6 @@ void CSoccer::run()
 
     }
 
-
-
-    if( recvThreadMutex->tryLock(20) ){
-        robotCom->recvThread->deactivateSerial();
-        robotCom->recvThread->deactivateUdp();
-        robotCom->recvThread->closeRecv = true;
-        recvThreadMutex->unlock();
-        QTime tm;
-        tm.start();
-        while( tm.elapsed() < 20 )
-        {
-            bool flag=false;
-            if( recvThreadMutex->tryLock(1) ){
-                flag = robotCom->recvThread->recvClosed;
-                recvThreadMutex->unlock();
-            }
-            if (flag) break;
-        }
-    }
 
     if( loggerMutex->tryLock(20) ){
         gameLogger->closeLogger = true;

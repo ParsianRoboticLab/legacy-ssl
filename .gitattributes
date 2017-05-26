@@ -27,7 +27,8 @@
 *.tab text
 *.tsv text
 *.sql text
-*.json text #Added by Mahi
+#Added by Mahi
+*.json text
 
 # Graphics
 *.png binary
