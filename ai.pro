@@ -158,7 +158,8 @@ SOURCES += main.cpp \
     util/timer.cpp \
     util/rng.cpp \
     collectprofiledata.cpp \
-    plays/stopplay.cpp
+    plays/stopplay.cpp \
+    defpos.cpp
 
 
 HEADERS += base.h \
@@ -330,7 +331,8 @@ HEADERS += base.h \
     util/rng.h \
     util/vector2.h \
     collectprofiledata.h \
-    plays/stopplay.h
+    plays/stopplay.h \
+    defpos.h
 
 
 unix:INCLUDEPATH += "/usr/local/include"

@@ -9,6 +9,8 @@
 #include <QDebug>
 #include <QVector2D>
 
+#include "defpos.h"
+
 //#include "simulation/simulator.h"
 //#include <widgets.h>
 
@@ -96,9 +98,6 @@ struct SRAgentArgs {
     double SpinSpeed;
     bool updated;
 };
-
-
-
 
 
 class CKnowledge
