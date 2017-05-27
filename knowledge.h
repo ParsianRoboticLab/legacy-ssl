@@ -229,7 +229,23 @@ public:
     Vector2D prevBallPos,chipperPoint=Vector2D(0,0);
     QMap<qint32,QList<Vector2D> > lastDirs;
     //chip predict
-    int getChipPredict();
+    QList<Vector2D> predictedBallPoses;
+    bool flagN = true;
+    QList<double> prev_Ball_pos;
+    Vector2D dir;
+    Vector2D startChipPoint ;
+    double startBallVel;
+    double previousPos=0.0;
+    double prevPos=0.0;
+    double chipPredictCounter = 1;
+    Vector2D predictedPosition=Vector2D(0,0);
+    double refiner=1.3;
+
+    double refine(double x);
+    double predictPos();
+    Vector2D getChipPredict();
+    //
+    int getChipArea(double);
     //
     Vector2D getBestPosToShootToGoal(Vector2D from, double &regionWidth, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, bool oppGaol);
     Vector2D getBestPosForPassReciever(Rect2D searchRegion, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, Rect2D avoidRect);
