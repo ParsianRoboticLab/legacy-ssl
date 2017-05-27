@@ -382,6 +382,8 @@ private:
     bool isPassDoneflag;
     bool isFirstTime[6];
 
+
+    Vector2D getEmptyTarget(Vector2D _position, double _radius);
     /////////////////////////////////////////////////////////////////
     ////////////////////////////////////////KK SQL & MATCHIN'////////
     /////////////////////////////////////////////////////////////////
@@ -417,6 +419,7 @@ private:
     void firstExecute();
     void kickOffStopModePlay(int tagentSize);
     void firstPlayForOppCorner(int _agentSize);
+
     POMODE getPlayOffMode();
     void assinID();
     int insertActiveAgentsToList();
@@ -540,6 +543,12 @@ private:
     void assignMove     (CRolePlayOff*, const SPositioningAgent&);
     void assignOneTouch (CRolePlayOff*, const SPositioningAgent&);
     void assignAfterLife(CRolePlayOff*, const SPositioningAgent&);
+    void assignGoalie   (CRolePlayOff*, const SPositioningAgent&);
+    void assignDefense  (CRolePlayOff*, const SPositioningAgent&);
+    void assignMark     (CRolePlayOff*, const SPositioningAgent&);
+    void assignPosition (CRolePlayOff*, const SPositioningAgent&);
+    void assignSupport  (CRolePlayOff*, const SPositioningAgent&);
+
     void assignKick     (CRolePlayOff*, const SPositioningAgent&, bool _chip);
     void assignReceive  (CRolePlayOff*, const SPositioningAgent&, bool _ignoreAngle);
     int findFirstPasser();
