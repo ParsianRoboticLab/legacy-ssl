@@ -37,14 +37,14 @@ class CollectProfileData : public QObject
 {
     Q_OBJECT
 public:
-    CRolePlayOn *rcvr;
-    CRolePlayOn *pss;
+    CRolePlayOff *rcvr;
+    CRolePlayOff *pss;
 
-    CRolePlayOn * prfl1;
-    CRolePlayOn * prfl2;
+    CRolePlayOff * prfl1;
+    CRolePlayOff * prfl2;
 
-    CRolePlayOn * boroKenar1;
-    CRolePlayOn * boroKenar2;
+    CRolePlayOff * boroKenar1;
+    CRolePlayOff * boroKenar2;
 
     Vector2D kickerPos;
     CNewProfiler *profiler;
@@ -74,7 +74,7 @@ public:
     void positioning(double xpos1 , double ypos1 , double xpos2 , double ypos2);
     void positioning(double xpos , double ypos);
     void start();
-    bool BallIsNear(CRolePlayOn * agent , double rad);
+    bool BallIsNear(CRolePlayOff *agent , double rad);
     void LowSpeed1();
     void LowSpeed();
     void HighSpeed();
