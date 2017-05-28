@@ -53,12 +53,10 @@ public:
     Vector2D ChipStartPoint , FoundChipPos;
     QMap<int , double> ChipResult;
 
-    int  realSpeed  , p1 , p2, g1, g2 , counter1 , counter2 , repeat;
-
-    int activeRobots[10],activeRobotsCount;
-
-    double kickSpeed1 , kickSpeed2 , MaxSpeed , MinSpeed , speedStep , middleSpeed , ballSpeed , waitKickSpeed;
-//    double xpos2 , ypos2 , xpos1 , ypos1 , gx, gy;
+    int realSpeed, p1, p2, g1, g2, counter1, counter2, repeat;
+    int activeRobots[10], activeRobotsCount;
+    double kickSpeed1, kickSpeed2, MaxSpeed, MinSpeed, speedStep, middleSpeed, ballSpeed;
+    double xpos2, ypos2, xpos1, ypos1, gx, gy;
     bool prfl1_Kicked;
 
 
