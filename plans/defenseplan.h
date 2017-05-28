@@ -101,9 +101,10 @@ protected:
     Vector2D getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion);
     Line2D getBisectorLine(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
     Segment2D getBisectorSegment(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
-    void manToManMarkInPlayOn(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkBlockShotInPlayOff(int _markAgentSize);
+    bool isAgentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> stuckIndexs);
+    void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> stuckPositions , QList<int> stuckIndexs);
     void getIntersectionWithPenaltyAreaAHZ(Segment2D , Vector2D sol1 , Vector2D sol2);
     bool isIndirectArea(Vector2D);
     int angleDegreeThrNotStop = 0;
@@ -129,7 +130,7 @@ protected:
     Vector2D opponentPasserPossition;
     Vector2D sumOfLastOpponentDirection;
     Vector2D sumOfLastOpponentPosition;
-    int AHZCount;
+    int AHZCount;    
     ///////////////////////////////////////////////////
     void executeGoalKeeper();    
     Vector2D strictFollowBall(Vector2D _ballPos);

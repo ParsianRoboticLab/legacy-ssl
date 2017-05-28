@@ -9,8 +9,50 @@ using namespace std;
 #define CHIP_POWER 1023
 #define LONG_CHIP_POWER 1023
 #define KICK_POWER 1000
-///////////////// AHZ is writing, have you my voice? ... ;) //////////////////
 
+
+///////////////// AHZ is writing, have you my voice? ... ;) //////////////////
+/////////////////////////// Added for RC 2017 ///////////////////////////////
+bool DefensePlan::isAgentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> stuckIndexs){
+    //// This function checks that
+    QList<Circle2D> agentsCircle;
+    Vector2D sol[2];
+    for(int i = 0 ; i < agentsPosition.size() ; i++){
+        agentsCircle.append(Circle2D(agentsPosition.at(i) , CRobot::robot_radius_new));
+    }
+    for(int i = 0 ; i < agentsPosition.size() ; i++){
+        for(int j = 0 ; j < agentsPosition.size() ; j++){
+            if(i != j){
+                if(agentsCircle.at(i).intersection(agentsCircle.at(j) , &sol[0] , &sol[1])){
+                    stuckPositions.append(agentsPosition.at(i));
+                    stuckPositions.append(agentsPosition.at(j));
+                    stuckIndexs.append(i);
+                    stuckIndexs.append(j);
+                    return true;                    
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> stuckPositions , QList<int> stuckIndexs){
+    QList<Circle2D> stuckAgentsCircle;
+    Segment2D centerToCenter;    
+    for(int i = 0 ; i < stuckPositions.size() ; i++){
+        stuckAgentsCircle.append(Circle2D(stuckPositions.at(i) , CRobot::robot_radius_new));
+    }
+    centerToCenter = Segment2D(stuckAgentsCircle.at(0).center() , stuckAgentsCircle.at(1).center());
+    for(int i = 0 ; i < stuckPositions.size() ; i++){
+        for(int j = 0 ; j < agentsPosition.size() ; j++){
+            if(stuckPositions.at(i) == agentsPosition.at(j)){
+                agentsPosition.removeAt(j);
+                agentsPosition.append(stuckPositions.at(i) + (pow(-1,i)*(((2+ 0.2)*CRobot::robot_radius_new - centerToCenter.length()) / 2))*((stuckPositions.at(0) - stuckPositions.at(1)).norm()));
+            }
+        }
+    }
+}
+/////////////////////////////////////////////////////////////////////////////
 float getDegree(Vector2D pos1, Vector2D origin, Vector2D pos3){
     //// get the angle of between two vector that
     //// is made up by this 3 points.
@@ -1059,6 +1101,9 @@ void DefensePlan::matchingDefPos(int _defenseNum){
 
     QList <CAgent*> ourAgents;
     QList <Vector2D> matchPoints;
+    QList <Vector2D> tempDefensePoint;
+    QList <Vector2D> stuckPositions;
+    QList <int> stuckIndexs;
     QList <int> matchResult;
     stopMode = knowledge->isStop();
     ourAgents.clear();
@@ -1083,6 +1128,13 @@ void DefensePlan::matchingDefPos(int _defenseNum){
         for(int i = 0; i < defenseCount ; i++){
             defensePoints[i] = matchPoints[i];
         }
+        tempDefensePoint.append(matchPoints);
+        /////////////////////// Added for RC 2017 //////////////////////////////
+        if(isAgentsStuckTogether(matchPoints , stuckPositions , stuckIndexs)){
+            debug("Stuck together" , D_AHZ);
+            correctingTheAgentsAreStuckTogether(matchPoints , stuckPositions , stuckIndexs);
+        }
+        ////////////////////////////////////////////////////////////////////////
         for(int i = 0 ; i < matchPoints.count() && i < matchResult.count() ; i++){
             gpa[ourAgents[i]->id()]->noRelax();
             for(int j = 0; j < ourAgents.size(); j++){
@@ -1094,13 +1146,13 @@ void DefensePlan::matchingDefPos(int _defenseNum){
             if(ourAgents[i]->pos().dist(matchPoints[matchResult[i]]) > 0.35){
                 matchPoints[matchResult[i]] = checkDefensePoint(ourAgents[i], matchPoints[matchResult[i]]);
             }
+
             draw(Circle2D(matchPoints[matchResult[i]] , 0.05) , 0 , 360 , "black" , true);
             gpa[ourAgents[i]->id()]->setNoAvoid(true);
             gpa[ourAgents[i]->id()]->setSlowMode(false);
             gpa[ourAgents[i]->id()]->setAvoidPenaltyArea(false);
             gpa[ourAgents[i]->id()]->setAvoidBall(false);
             gpa[ourAgents[i]->id()]->setBallObstacleRadius(0);
-
             if(knowledge->getGameState() == CKnowledge::TheirIndirectKick){
                 gpa[ourAgents[i]->id()]->setNoAvoid(false);
                 gpa[ourAgents[i]->id()]->setSlowMode(false);

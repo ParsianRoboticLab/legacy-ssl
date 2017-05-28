@@ -36,13 +36,14 @@ struct NewFastestToBall
         oppF.clear();
     }
     int ourFastest(){
-        if( ourF.size() )
+        if(ourF.size())
             return ourF.first().second;
         return -1;
     }
     double ourFastestTime(){
-        if( ourF.size() )
+        if(ourF.size()){
             return ourF.first().first;
+        }
         return -1;
     }
     int oppFastest(){
@@ -51,7 +52,7 @@ struct NewFastestToBall
         return -1;
     }
     double oppFastestTime(){
-        if( oppF.size() )
+        if(oppF.size())
             return oppF.first().first;
         return -1;
     }
@@ -103,8 +104,6 @@ struct SRAgentArgs {
 
 class CKnowledge
 {
-
-
 private:
     //added
     Vector2D bpPosition;
@@ -217,8 +216,6 @@ public:
     int lastFrameShirjeBlock;
     bool isSimulMode;
     void updateGameState();
-    ///////////////AMIN
-    Vector2D getBest();
     //////////////Mahmoud
     Vector2D getBestPosToShootToGoal(Vector2D from, double &regionWidth, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, bool oppGaol);
     Vector2D getBestPosForPassReciever(Rect2D searchRegion, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, Rect2D avoidRect);
@@ -246,10 +243,6 @@ public:
     ////////////////////////////////<Mahi>
     Vector2D getReturnPos(Vector2D _goal);
     ///////////////////////////////////</Mahi>
-
-    //////////////////////////////////<HMD>
-    QList<Vector2D> ToBeMark;
-    //////////////////////////////////</HMD>
     bool canSendPass(int sender, int receiver, Vector2D point, double factor);
     int getBallOwner(bool& ours);
     bool isBallOurs();
@@ -262,7 +255,6 @@ public:
     Vector2D findBestPosToCatchTheBall(int agentID, Vector2D& lastBestPos);
     Vector2D getBestShadowPoint(Vector2D pos, Vector2D goal);
     QString getMarkableNumber();
-
     double matchPositions(QList<int> ids, QList<Vector2D> points, QList<int>& bestPermutation);
     int desiredDefCount;
     /* New Simple getOpen() for mani-thesis */

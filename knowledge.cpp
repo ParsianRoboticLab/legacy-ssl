@@ -564,21 +564,18 @@ double CKnowledge::getRealBallVel()
     return ballVelLowPass;
 }
 
-int CKnowledge::Matching(const QList <CAgent*> robots, const QList <Vector2D> pointsToMatch, QList <int> &matchPoints)
-{
+int CKnowledge::Matching(const QList <CAgent*> robots, const QList <Vector2D> pointsToMatch, QList <int> &matchPoints){
     QList <int> tempForMatch;
     tempForMatch.clear();
-    for(int i = 0 ; i< robots.count() ; i++)
+    for(int i = 0 ; i< robots.count() ; i++){
         tempForMatch.append(i);
+    }
     double D = 100000000000;
     double tempD = 0;
     QList<QList <int> > combo = generateCombinations(tempForMatch);
     matchPoints.clear();
-
-    if(robots.count() == pointsToMatch.count())
-    {
-        for(int i = 0 ; i < factorial(robots.count()) ; i++)
-        {
+    if(robots.count() == pointsToMatch.count()){
+        for(int i = 0 ; i < factorial(robots.count()) ; i++){
             tempD=0;
             for(int j=0 ; j < robots.count() ; j++)
             {
@@ -593,8 +590,7 @@ int CKnowledge::Matching(const QList <CAgent*> robots, const QList <Vector2D> po
         }
         return 1;
     }
-    else
-    {
+    else{
         return -1;
     }
 
@@ -1837,13 +1833,10 @@ Vector2D CKnowledge::goalVisiblity(int agentId, double &regionWidth, double unde
     return target;
 }
 
-Vector2D CKnowledge::getEmptyPosOnGoal(Vector2D from, double &regionWidth, bool oppGoal, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, double wOpenness, bool _draw)
-{
+Vector2D CKnowledge::getEmptyPosOnGoal(Vector2D from, double &regionWidth, bool oppGoal, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, double wOpenness, bool _draw){
     QList<Circle2D> c;
-    for (int i=0;i<wm->our.activeAgentsCount();i++)
-    {
-        if (!ourRelaxedIDs.contains(wm->our.active(i)->id))
-        {
+    for(int i=0;i<wm->our.activeAgentsCount();i++){
+        if (!ourRelaxedIDs.contains(wm->our.active(i)->id)){
             c.append(Circle2D(wm->our.active(i)->pos, wm->our.active(i)->robotRadius()));
         }
     }
@@ -1957,37 +1950,28 @@ Vector2D CKnowledge::getEmptyPosOnPoints(Vector2D from, double &regionWidth, QLi
     return Vector2D::INVALIDATED;
 }
 
-bool CKnowledge::isPointClear(Vector2D point, Vector2D from, double rad, bool considerRelaxedIDs, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs)
-{
+bool CKnowledge::isPointClear(Vector2D point, Vector2D from, double rad, bool considerRelaxedIDs, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs){
     Vector2D posIntersect1(Vector2D::ERROR_VALUE, Vector2D::ERROR_VALUE);
     Vector2D posIntersect2(Vector2D::ERROR_VALUE, Vector2D::ERROR_VALUE);
-
     Segment2D l(from, point);
-    for (int i = 0; i < wm->opp.activeAgentsCount(); i++)
-    {
-
-        if ((wm->opp.active(i)->inSight > 0.0))
-        {
-            if(considerRelaxedIDs && oppRelaxedIDs.contains(wm->opp.activeAgentID(i)))
+    for(int i = 0; i < wm->opp.activeAgentsCount(); i++){
+        if((wm->opp.active(i)->inSight > 0.0)){
+            if(considerRelaxedIDs && oppRelaxedIDs.contains(wm->opp.activeAgentID(i))){
                 continue;
-
+            }
             Circle2D c(wm->opp.active(i)->pos, rad);
-            if(c.intersection(l,&posIntersect1, &posIntersect2) != 0 )
-            {
+            if(c.intersection(l,&posIntersect1, &posIntersect2) != 0){
                 return false;
             }
         }
     }
-
-    for (int i = 0; i < wm->our.activeAgentsCount(); i++)
-    {
-        if (wm->our.active(i)->inSight > 0.0)
-        {
-            if(considerRelaxedIDs && ourRelaxedIDs.contains(wm->our.activeAgentID(i)))
+    for(int i = 0; i < wm->our.activeAgentsCount(); i++){
+        if (wm->our.active(i)->inSight > 0.0){
+            if(considerRelaxedIDs && ourRelaxedIDs.contains(wm->our.activeAgentID(i))){
                 continue;
+            }
             Circle2D c(wm->our.active(i)->pos, rad);
-            if(c.intersection(l,&posIntersect1, &posIntersect2) != 0 )
-            {
+            if(c.intersection(l,&posIntersect1, &posIntersect2) != 0){
                 return false;
             }
         }
@@ -3786,16 +3770,14 @@ FastestToBall CKnowledge::findFastestToBall(QList<int> ourList, QList<int> oppLi
     return f;
 }
 
-NewFastestToBall CKnowledge::newFastestToBall(double timeStep, QList<int> ourList, QList<int> oppList)
-{
+NewFastestToBall CKnowledge::newFastestToBall(double timeStep, QList<int> ourList, QList<int> oppList){
     ////
     ////Code By Sepehr
     ////
 
     // reset everything
     NewFastestToBall result;
-
-    if ( !wm->field->fieldRect().contains(wm->ball->pos))
+    if(!wm->field->fieldRect().contains(wm->ball->pos))
         return result;
 
     double t = 0;
@@ -4255,11 +4237,6 @@ void CKnowledge::setNecessaryDefKick(bool tempNcssryDefKick) {
 
 bool CKnowledge::getNecessaryDefKick() {
     return necessaryDefKick;
-}
-
-
-Vector2D CKnowledge::getBest() {
-
 }
 
 struct VectorIndex {
