@@ -3850,7 +3850,6 @@ void CNewProfilerWidget::startProfFunc(){
             i++;
         }
     }
-    collectKickProfile->filename=fileName->text();
     collectKickProfile->repeat=repeatNum->text().toInt();
     this->close();
     ProfilerExecute=true;

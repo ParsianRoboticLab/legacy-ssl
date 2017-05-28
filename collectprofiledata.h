@@ -10,7 +10,6 @@ enum ProfilerState{
     InitState,
     Pos1,
     Pos2,
-    Pos3,
     ChangeRobots,
     goOutState,
     StartLow,
