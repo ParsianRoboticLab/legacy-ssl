@@ -1,6 +1,7 @@
 #include "defenseplan.h"
 #include <cmath>
 #include <sstream>
+#include <QtAlgorithms>
 
 using namespace std;
 
@@ -14,7 +15,7 @@ using namespace std;
 ///////////////// AHZ is writing, have you my voice? ... ;) //////////////////
 /////////////////////////// Added for RC 2017 ///////////////////////////////
 bool DefensePlan::isAgentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> stuckIndexs){
-    //// This function checks that
+    //// If defense agents stuck together , this function
     QList<Circle2D> agentsCircle;
     Vector2D sol[2];
     for(int i = 0 ; i < agentsPosition.size() ; i++){
@@ -28,7 +29,7 @@ bool DefensePlan::isAgentsStuckTogether(QList<Vector2D> agentsPosition , QList<V
                     stuckPositions.append(agentsPosition.at(j));
                     stuckIndexs.append(i);
                     stuckIndexs.append(j);
-                    return true;                    
+                    return true;
                 }
             }
         }
@@ -36,9 +37,9 @@ bool DefensePlan::isAgentsStuckTogether(QList<Vector2D> agentsPosition , QList<V
     return false;
 }
 
-void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> stuckPositions , QList<int> stuckIndexs){
+void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> stuckPositions){
     QList<Circle2D> stuckAgentsCircle;
-    Segment2D centerToCenter;    
+    Segment2D centerToCenter;
     for(int i = 0 ; i < stuckPositions.size() ; i++){
         stuckAgentsCircle.append(Circle2D(stuckPositions.at(i) , CRobot::robot_radius_new));
     }
@@ -47,7 +48,7 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
         for(int j = 0 ; j < agentsPosition.size() ; j++){
             if(stuckPositions.at(i) == agentsPosition.at(j)){
                 agentsPosition.removeAt(j);
-                agentsPosition.append(stuckPositions.at(i) + (pow(-1,i)*(((2+ 0.2)*CRobot::robot_radius_new - centerToCenter.length()) / 2))*((stuckPositions.at(0) - stuckPositions.at(1)).norm()));
+                agentsPosition.append(stuckPositions.at(i) + (pow(-1,i)*(((2 + 0.2)*CRobot::robot_radius_new - centerToCenter.length()) / 2))*((stuckPositions.at(0) - stuckPositions.at(1)).norm()));
             }
         }
     }
@@ -919,8 +920,8 @@ void DefensePlan::setGaolKeeperTargetPoint(){
 #endif
 
         }
-        }
     }
+}
 }
 
 void DefensePlan::assignSkill(CAgent *_agent , CSkill *_skill){
@@ -1101,10 +1102,10 @@ void DefensePlan::matchingDefPos(int _defenseNum){
 
     QList <CAgent*> ourAgents;
     QList <Vector2D> matchPoints;
-    QList <Vector2D> tempDefensePoint;
     QList <Vector2D> stuckPositions;
     QList <int> stuckIndexs;
     QList <int> matchResult;
+    Vector2D tempPoint;
     stopMode = knowledge->isStop();
     ourAgents.clear();
     ourAgents.append(defenseAgents);
@@ -1124,15 +1125,40 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     draw(QString(" %1 %2").arg(matchPoints.count()).arg(_defenseNum),Vector2D(-2,2),"red");
     draw(QString("  %1").arg(ourAgents.count()),Vector2D(2,2),"red");
     knowledge->Matching(ourAgents,matchPoints,matchResult);
-    if(matchPoints.count() == ourAgents.count()){
+    Vector2D tempMatchPoints[matchPoints.size()];
+    //////////////////// Added for RC 2017 ///////////////////////////////////
+    if(ourAgents.size() > matchPoints.size()){
+        for(int i = 0 ; i < ourAgents.size() - matchPoints.size() ; i++){
+            ourAgents.removeAt(i);
+        }
+    }
+    else if(ourAgents.size() < matchPoints.size()){
+        for(int i = 0 ; i < matchPoints.size() ; i++){
+            tempMatchPoints[i] = matchPoints.at(i);
+        }
+        for(int i = 0 ; i < matchPoints.size() ; i++){
+            for(int j = 0 ; j < matchPoints.size() ; j++){
+                if(i != j){
+                    if(tempMatchPoints[i].x > tempMatchPoints[j].x){
+                        tempPoint = tempMatchPoints[i];
+                        tempMatchPoints[i] = tempMatchPoints[j];
+                        tempMatchPoints[j] = tempPoint;
+                    }
+                }
+            }
+        }
+        for(int i = matchPoints.size() - ourAgents.size() - 1 ; i >= 0 ; i--){
+            matchPoints.removeOne(tempMatchPoints[i]);
+        }
+    }
+    else{
         for(int i = 0; i < defenseCount ; i++){
             defensePoints[i] = matchPoints[i];
         }
-        tempDefensePoint.append(matchPoints);
         /////////////////////// Added for RC 2017 //////////////////////////////
         if(isAgentsStuckTogether(matchPoints , stuckPositions , stuckIndexs)){
-            debug("Stuck together" , D_AHZ);
-            correctingTheAgentsAreStuckTogether(matchPoints , stuckPositions , stuckIndexs);
+            debug("Agents Stuck together" , D_AHZ);
+            correctingTheAgentsAreStuckTogether(matchPoints , stuckPositions);
         }
         ////////////////////////////////////////////////////////////////////////
         for(int i = 0 ; i < matchPoints.count() && i < matchResult.count() ; i++){

@@ -104,9 +104,9 @@ protected:
     void manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkBlockShotInPlayOff(int _markAgentSize);
     bool isAgentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> stuckIndexs);
-    void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> stuckPositions , QList<int> stuckIndexs);
+    void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> stuckPositions);
     void getIntersectionWithPenaltyAreaAHZ(Segment2D , Vector2D sol1 , Vector2D sol2);
-    bool isIndirectArea(Vector2D);
+    bool isIndirectArea(Vector2D);    
     int angleDegreeThrNotStop = 0;
     double threshOld = 0.0;
     double ballCircleR = 0.5;
