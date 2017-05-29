@@ -432,13 +432,12 @@ bool CollectProfileData::FindChipPos(){
     }
 
     return result;
-
 }
 
 void CollectProfileData::StartChip(){
 
     static double dist=0;
-    static int posSize = 50, cnt = 0, rep = 1;
+    static int posSize = 40, cnt = 0, rep = 1;
     static bool result = false;
     //    static bool chipped = true;
 
@@ -457,7 +456,7 @@ void CollectProfileData::StartChip(){
     case Emplacement:
 
         prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
-        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+1, -_FIELD_HEIGHT/2+0.4));
+        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.4, -_FIELD_HEIGHT/2+0.4));
         prfl1->execute();
 
         if ( Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos(), 0.4).contains(wm->ball->pos) && wm->ball->vel.length() < 0.2)
@@ -476,18 +475,25 @@ void CollectProfileData::StartChip(){
 
         prfl1->setSelectedSkill(roleSkill::Kick);
         prfl1->setChip(true);
-        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+1, _FIELD_HEIGHT/2-0.4));
+        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.4, _FIELD_HEIGHT/2-0.4));
         prfl1->setKickSpeed(kickSpeed1);
         prfl1->setTolerance(0.02);
         prfl1->setDoPass(true);
         prfl1->execute();
 
-        if(!Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos(), 0.12).contains(wm->ball->pos) && wm->ball->vel.length() > 0.1)
-            ChipStat = SavingChipPos;
-
-        if(!Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos(), 0.3).contains(wm->ball->pos) && wm->ball->vel.length() > 0.2)
+        if(!Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos(), 0.1).contains(wm->ball->pos)
+                && wm->ball->vel.length() > 0.1)
         {
-            ChipStartPoint = wm->ball->pos;
+
+            ChipStartPoint = prfl1->getAgent()->pos();
+
+
+        }
+
+        if(!Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos(), 0.3).contains(wm->ball->pos)
+                && wm->ball->vel.length() > 0.2)
+        {
+            ChipStat = SavingChipPos;
 
             debug("done with chip kick", D_FATEMEH);
 
@@ -501,7 +507,7 @@ void CollectProfileData::StartChip(){
 
     case SavingChipPos:
         prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
-        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+1, -_FIELD_HEIGHT/2+0.4));
+        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.4, -_FIELD_HEIGHT/2+0.4));
         prfl1->execute();
 
         if(BallPos.size() == posSize)
@@ -651,8 +657,8 @@ void CollectProfileData::start(){
     case InitStateChip:
 
         ChipInit(activeRobots[0]);
-        positioning(-_FIELD_WIDTH/2+1, -_FIELD_HEIGHT/2+0.4);
-        draw(Vector2D(-_FIELD_WIDTH/2+1, -_FIELD_HEIGHT/2+0.4));
+        positioning(-_FIELD_WIDTH/2+0.4, -_FIELD_HEIGHT/2+0.4);
+        draw(Vector2D(-_FIELD_WIDTH/2+0.4, -_FIELD_HEIGHT/2+0.4));
 
         //        positioning(-_FIELD_WIDTH/4, _FIELD_HEIGHT/4);
         //        draw(Vector2D(-_FIELD_WIDTH/4, _FIELD_HEIGHT/4));
