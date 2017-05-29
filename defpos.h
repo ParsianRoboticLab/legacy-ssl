@@ -19,7 +19,7 @@ struct kkDefPos {
 class CDefPos {
 public:
     CDefPos();
-    static kkDefPos getDefPositions(Vector2D _ballPos, int _size, double _limit1, double _limit2);
+    kkDefPos getDefPositions(Vector2D _ballPos, int _size, double _limit1, double _limit2);
     //HMD
     Vector2D getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Segment2D _seg);
     bool isInPenaltyAreaDef(double _tempBestRadius , Vector2D vec);
