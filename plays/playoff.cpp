@@ -97,19 +97,19 @@ void CPlayOff::mainExecute() {
 
 void CPlayOff::staticExecute() {
     if (initial) {
-        newAssignTasks();
+        assignTasks();
 
     } else {
         if (knowledge->getGameState() != CKnowledge::OurKickOff) {
 
-            newFillRoleProperties();
-            newPosExecute();
-            newCheckEndState();
+            fillRoleProperties();
+            posExecute();
+            checkEndState();
 
             if(masterPlan->common.currentSize > 1 && havePassInPlan) {
                 passManager();
             }
-            if(newIsPlanEnd()) {
+            if(isPlanEnd()) {
                 playOnFlag = true;
             }
 
@@ -750,7 +750,7 @@ void CPlayOff::twoSideOneCentreTwoDefAndGoalie() {
     newRoleAgent[5]->setTargetDir(-newRoleAgent[5]->getAgent()->pos() + wm->field->oppGoal());
 }
 
-bool CPlayOff::newIsPlanEnd() {
+bool CPlayOff::isPlanEnd() {
 
     if (isPlanDone()) {
         debug("Plan Succeded", D_MAHI);
@@ -992,7 +992,7 @@ bool CPlayOff::isTaskDone(CRolePlayOff* _roleAgent){
     }
 }
 
-void CPlayOff::newPosExecute() {
+void CPlayOff::posExecute() {
     for(int i = 0;i < masterPlan->common.currentSize; i++) {
         if (roleAgent[i]->getAgent() != NULL) {
             roleAgent[i]->execute();
@@ -1000,7 +1000,7 @@ void CPlayOff::newPosExecute() {
     }
 }
 
-void CPlayOff::newCheckEndState() {
+void CPlayOff::checkEndState() {
 
     for(int i = 0;i < masterPlan->common.currentSize;i++) {
         if (roleAgent[i]->getAgent() == NULL) continue;
@@ -1024,7 +1024,7 @@ void CPlayOff::newCheckEndState() {
     }
 }
 
-void CPlayOff::newFillRoleProperties() {
+void CPlayOff::fillRoleProperties() {
     for(size_t i = 0;i < agentsID.size(); i++) {
         if (masterPlan->common.matchedID.contains(i)) {
             if (roleAgent[i]->getRoleUpdate() == false) {
@@ -1036,7 +1036,7 @@ void CPlayOff::newFillRoleProperties() {
                         positionAgent[i].stateNumber++;
                     }
                 }
-                newAssignTask(roleAgent[i], positionAgent[i]);
+                assignTask(roleAgent[i], positionAgent[i]);
                 roleAgent[i]->setRoleUpdate(true);
                 roleAgent[i]->resetTime();
             }
@@ -1045,14 +1045,14 @@ void CPlayOff::newFillRoleProperties() {
             qWarning() << "[Warning] coach -> Match function doesn't work :( ";
             if (roleAgent[i]->getRoleUpdate() == false) {
                 roleAgent[i]->setAgent(knowledge->getAgent(agentsID.at(i)));
-                newAssignTask(roleAgent[i], positionAgent[i]);
+                assignTask(roleAgent[i], positionAgent[i]);
                 roleAgent[i]->setRoleUpdate(true);
             }
         }
     }
 }
 
-void CPlayOff::newAssignTask(CRolePlayOff* _roleAgent, const SPositioningAgent& _positionAgent) {
+void CPlayOff::assignTask(CRolePlayOff* _roleAgent, const SPositioningAgent& _positionAgent) {
 
     switch(_positionAgent.getArgs().staticSkill) {
     case PassSkill:
@@ -1364,7 +1364,7 @@ bool CPlayOff::isPathClear(Vector2D _pos1,
     return true;
 }
 
-void CPlayOff::newAssignTasks() {
+void CPlayOff::assignTasks() {
     int& sym = masterPlan->execution.symmetry;
     for(size_t i = 0;i < masterPlan->common.currentSize; i++) {
         positionAgent[i].positionArg.clear();
@@ -1399,18 +1399,10 @@ void CPlayOff::newAssignTasks() {
     }
 }
 
-
-bool cmp(const Vector2D& a, const Vector2D b) {
-    return a.x < b.x;
-}
-
 int CPlayOff::findReciver(int _passer, int _state) {
     if (_state == 0) {
         return 0;
     }
-    QList<Vector2D> mmm;
-
-    qSort(mmm.begin(), mmm.end(),cmp);
     for (size_t i = _state; i < positionAgent[_passer].positionArg.size(); i++) {
         if (positionAgent[_passer].getArgs(i).staticSkill == PassSkill) {
             SBallOwner temp;
@@ -1502,10 +1494,6 @@ void CPlayOff::init(QList<int> _agents , QMap<QString , EditData*> *_editData){
     setEditData(_editData);
     initMaster();
 
-    //    if( knowledge->getLastPlayExecuted() != OurKickOffPlay ){
-    //        reset();
-    //    }
-    //    knowledge->setLastPlayExecuted(OurKickOffPlay);
 }
 
 void CPlayOff::execute_0(){

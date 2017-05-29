@@ -307,10 +307,9 @@ public:
     void reset();
     void setInitial(bool _init);
 private:
-    bool initial = true;
+    bool initial;
 
-    /////////////*NEW*/////////////
-    SPlan* masterPlan = NULL;
+    SPlan* masterPlan;
     EMode masterMode;
 
     void globalExecute();
@@ -402,15 +401,12 @@ private:
     bool isOneTouchDone(CRolePlayOff*);
     bool isMoveDone    (const CRolePlayOff*);
     bool isReceiveDone (const CRolePlayOff*);
-    //////////////////////////
-    //////////NEW ONE/////////
-    //////////////////////////
-    void newAssignTasks();
-    void newFillRoleProperties();
-    void newPosExecute();
-    void newCheckEndState();
-    bool newIsPlanEnd();
-    void newAssignTask  (CRolePlayOff*, const SPositioningAgent&);
+    void assignTasks();
+    void fillRoleProperties();
+    void posExecute();
+    void checkEndState();
+    bool isPlanEnd();
+    void assignTask     (CRolePlayOff*, const SPositioningAgent&);
     void assignPass     (CRolePlayOff*, const SPositioningAgent&);
     void assignMove     (CRolePlayOff*, const SPositioningAgent&);
     void assignOneTouch (CRolePlayOff*, const SPositioningAgent&);
