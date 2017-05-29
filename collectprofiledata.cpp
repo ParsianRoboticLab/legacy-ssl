@@ -413,7 +413,7 @@ bool CollectProfileData::FindChipPos(){
 //    BallPos.clear();
 //    return true;
 
-    int startIndex = 15;
+    int startIndex = kickSpeed1/80+7;
     Vector2D V = BallPos.at(startIndex);
     double tangent = V.th().tan();
     bool result = false;
@@ -445,7 +445,7 @@ void CollectProfileData::StartChip(){
     if(BallPos.size() == 0)
         BallPos.append(wm->ball->pos);
 
-    if(fabs(wm->ball->pos.x - BallPos.last().x) > 0.005 && fabs(wm->ball->pos.y - BallPos.last().y) > 0.005 )
+    if(/*fabs(wm->ball->pos.x - BallPos.last().x) > 0.005 &&*/ fabs(wm->ball->pos.y - BallPos.last().y) > 0.005 )
         BallPos.append(wm->ball->pos);
 
     if(BallPos.size() > posSize)
@@ -464,7 +464,6 @@ void CollectProfileData::StartChip(){
         {
             debug("done with emplacement", D_FATEMEH);
 
-            ChipStartPoint = wm->ball->pos;
             ChipStat = ChipKick;
 
             debug("________ball pos cleared in emplacement", D_FATEMEH);
@@ -477,17 +476,21 @@ void CollectProfileData::StartChip(){
 
         prfl1->setSelectedSkill(roleSkill::Kick);
         prfl1->setChip(true);
-        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.4, _FIELD_HEIGHT/2-0.6));
+        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+1, _FIELD_HEIGHT/2-0.4));
         prfl1->setKickSpeed(kickSpeed1);
         prfl1->setTolerance(0.02);
         prfl1->setDoPass(true);
         prfl1->execute();
 
+        if(!Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos(), 0.12).contains(wm->ball->pos) && wm->ball->vel.length() > 0.1)
+            ChipStat = SavingChipPos;
+
         if(!Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos(), 0.3).contains(wm->ball->pos) && wm->ball->vel.length() > 0.2)
         {
+            ChipStartPoint = wm->ball->pos;
+
             debug("done with chip kick", D_FATEMEH);
 
-            ChipStat = SavingChipPos;
             result = false;
 
             debug("________ball pos cleared", D_FATEMEH);
