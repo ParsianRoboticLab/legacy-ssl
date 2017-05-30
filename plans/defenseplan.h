@@ -78,7 +78,7 @@ protected:
     CDefPos defPos;
     Vector2D pointForKick, oneToucherDir;
     Vector2D topGoal, downGoal, midGoal, ballVel;
-    Vector2D goalieTarget, defensePoints[12], defenseTargets[12];
+    Vector2D goalieTarget, goalieDirection , defensePoints[12], defenseTargets[12];
     bool executeSkill[5];
     int blockPassID;
     int oneTouchPositioning();
@@ -90,7 +90,7 @@ protected:
     void checkGoalieTarget();
     Vector2D getIntersectionWithPenaltyAreaGk(Segment2D _seg);
     void setGoalKeeperState();
-    void setGaolKeeperTargetPoint();
+    void setGoalKeeperTargetPoint();
     bool ballBehindGoalie, goalieOneTouch, goalieInPenaltyAreaPrediction, goalieClearMode, goalieStrictFollow, goalieFollow, ballIsOutOfField;
     double strictfollowThr;
     double behindBallThr;    
@@ -117,10 +117,12 @@ protected:
     bool ballIsInPenaltyAreaAndIsNotInDangerCircle;
     bool dangerForGoalieClearByOurAgents;
     bool dangerForGoalieClearByOppAgents;
+    bool dangerForInsideOfThePenaltyArea;
     bool stopMode;
     bool limitBetweenAHZAndHMD;
     bool limitBetweenHMDAndAHZ;
-    bool changeInMarkPlanFlag;    
+    bool changeInMarkPlanFlag;
+    QString lastStateForGoalKeeper;
     int lastOpponentAgentsToBeMarkSize;
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;

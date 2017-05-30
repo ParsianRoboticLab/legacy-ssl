@@ -638,12 +638,19 @@ void DefensePlan::setGoalKeeperState(){
     //// 7- Ball is out of the field.
 
     ////////////////// Variables of this function //////////////////////////////
-    bool playOn = knowledge->getGameMode() == CKnowledge::Start;
+    dangerForGoalieClear = false;
+    dangerForInsideOfThePenaltyArea = false;
+    dangerForGoalieClearByOurAgents = false;
+    dangerForGoalieClearByOppAgents = false;
+    isCrowdedInFrontOfPenaltyAreaByOppAgents = false;
+    isCrowdedInFrontOfPenaltyAreaByOurAgents = false;
+    bool playOn = knowledge->isStart();
+    Vector2D Solutions[2];
     Rect2D fieldRect(Vector2D(- _FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0) - Vector2D(-0.02,-0.02),Vector2D(_FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0)-Vector2D(+0.02,+0.02));
     ////////////////////////////////////////////////////////////////////////////
     if(knowledge->goalie != NULL) {
         Vector2D BallPos = wm->ball->pos;
-        if(fieldRect.contains(BallPos)) {
+        if(fieldRect.contains(BallPos)){
             Vector2D BallVel = wm->ball->vel;
             Vector2D goaliePos = knowledge->goalie->pos();
             Vector2D Solutions[2];
@@ -662,7 +669,42 @@ void DefensePlan::setGoalKeeperState(){
             Vector2D openAngGoalIntersectionTop(AZTopOfOpenSeg.intersection(goalLine));
             Vector2D openAngGoalIntersectionBottom(AZBottomOfOpenSeg.intersection(goalLine));
 
-            if(goaliePos.x + behindBallThr > BallPos.x && (penaltyArea.contains(BallPos) || !penaltyArea.contains(goaliePos))) {
+            penaltyArea.intersection(Line2D(wm->ball->pos , wm->field->ourGoal()),&Solutions[0] , &Solutions[1]);
+            Circle2D dangerCircle = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.40);
+            Circle2D dangerCircle1 = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.13);
+            draw(dangerCircle , "yellow");
+            draw(dangerCircle1 , "yellow");
+
+            if(wm->our.activeAgentsCount() > 0 || wm->opp.activeAgentsCount() > 0){
+                for(int i = 0; i < wm->our.activeAgentsCount() ; i++){
+                    if(wm->our.active(i)->id != knowledge->goalie->id()){
+                        if(dangerCircle.contains(wm->our.active(i)->pos)){
+                            isCrowdedInFrontOfPenaltyAreaByOurAgents = true;
+                        }
+                    }
+                }
+                for(int i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
+                    if(dangerCircle.contains(wm->opp.active(i)->pos)){
+                        isCrowdedInFrontOfPenaltyAreaByOppAgents = true;
+                    }
+                }
+            }
+            if(isCrowdedInFrontOfPenaltyAreaByOurAgents){
+                debug("Crowded" , D_AHZ , "red");
+                if(dangerCircle.contains(wm->ball->pos)){
+                    dangerForGoalieClearByOurAgents = true;
+                }
+            }
+            if(isCrowdedInFrontOfPenaltyAreaByOppAgents){
+                if(dangerCircle1.contains(wm->ball->pos)){
+                    dangerForGoalieClearByOppAgents = true;
+                }
+            }
+            if(dangerForGoalieClearByOurAgents || dangerForGoalieClearByOppAgents){
+                dangerForGoalieClear = true;
+            }
+
+            if(goaliePos.x + behindBallThr > BallPos.x && (penaltyArea.contains(BallPos) || !penaltyArea.contains(goaliePos)) && !dangerForGoalieClear){
                 ballBehindGoalie = true ;
                 goalieOneTouch = false, goalieInPenaltyAreaPrediction = false, goalieClearMode = false, goalieStrictFollow = false, goalieFollow = false, ballIsOutOfField = false;
                 behindBallThr = 0.08;
@@ -717,7 +759,7 @@ void DefensePlan::setGoalKeeperState(){
     }
 }
 
-void DefensePlan::setGaolKeeperTargetPoint(){
+void DefensePlan::setGoalKeeperTargetPoint(){
     //// This function determine the target point that goalkeeper must go to it.
     //// For producing the target point, we certainly consider the states that
     //// is result from the "setGoalKeeperState" function.  :)
@@ -728,10 +770,11 @@ void DefensePlan::setGaolKeeperTargetPoint(){
     Vector2D predictedBall;
     Vector2D goaliePos;
     Vector2D Solutions[2];
-    Vector2D goalKeeperTargetOffSet = Vector2D(0.2 , 0.0);
-    bool playOnMode = knowledge->getGameMode() == CKnowledge::Start;
+    Vector2D goalKeeperTargetOffSet = Vector2D(0.2 , 0.0);    
+    bool playOnMode = knowledge->isStart();
     stopMode = knowledge->isStop();
     dangerForGoalieClear = false;
+    dangerForInsideOfThePenaltyArea = false;
     dangerForGoalieClearByOurAgents = false;
     dangerForGoalieClearByOppAgents = false;
     isCrowdedInFrontOfPenaltyAreaByOppAgents = false;
@@ -754,7 +797,7 @@ void DefensePlan::setGaolKeeperTargetPoint(){
         savedClearPos = findBestPointForChipTarget(savedClearDist,1);
         penaltyArea.intersection(Line2D(wm->ball->pos , wm->field->ourGoal()),&Solutions[0] , &Solutions[1]);
         Circle2D dangerCircle = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.40);
-        Circle2D dangerCircle1 = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.13);
+        Circle2D dangerCircle1 = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.40);
         draw(dangerCircle , "yellow");
         draw(dangerCircle1 , "yellow");
         for(int i = 0; i < wm->our.activeAgentsCount(); i++){
@@ -837,15 +880,32 @@ void DefensePlan::setGaolKeeperTargetPoint(){
                     dangerForGoalieClearByOppAgents = true;
                 }
             }
-            dangerForGoalieClear = dangerForGoalieClearByOurAgents || dangerForGoalieClearByOppAgents;
+            if(dangerForGoalieClearByOurAgents || dangerForGoalieClearByOppAgents){
+                dangerForGoalieClear = true;
+            }
             if(dangerForGoalieClear){
+                dangerForInsideOfThePenaltyArea = true;
+                debug(QString("inside : %1").arg(dangerForInsideOfThePenaltyArea) , D_AHZ);
                 if(dangerForGoalieClearByOppAgents){
-                    goalieTarget =  getPointInDirection(wm->ball->pos , wm->field->ourGoal() ,0.2);
+                   // goalieTarget =  getPointInDirection(wm->ball->pos , wm->field->ourGoal() ,0.2);
                 }
                 else if(dangerForGoalieClearByOurAgents){
                     debug("danger" , D_AHZ , "green");
-                    penaltyArea.intersection(Line2D(wm->ball->pos , wm->field->ourGoal()),&Solutions[0] , &Solutions[1]);
-                    goalieTarget = Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1];
+                    //                    penaltyArea.intersection(Line2D(wm->ball->pos , wm->field->ourGoal()),&Solutions[0] , &Solutions[1]);
+                    //                    goalieTarget = Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1];
+//                    dangerIntersection.append(wm->field->ourPAreaIntersect(Line2D(Vector2D(wm->ball->pos.x , -3) , Vector2D(wm->ball->pos.x , 3))));
+//                    if(!dangerIntersection.isEmpty()){
+//                        if(dangerIntersection.size() == 2){
+//                            goalieTarget = dangerIntersection.at(0).isValid()
+//                                    && (dangerIntersection.at(0).dist(wm->ball->pos) < dangerIntersection.at(1).dist(wm->ball->pos)) ? dangerIntersection.at(0) : dangerIntersection.at(1);
+//                            goalieDirection = wm->ball->pos - goalieTarget;
+//                            goalieTarget =  getPointInDirection(wm->ball->pos , wm->field->ourGoal() ,0.2);
+
+//                        }
+//                        else if(dangerIntersection.size() == 1){
+//                            goalieTarget = dangerIntersection.at(0);
+//                        }
+//                    }
                 }
             }
             /////////////// End of Danger Mode ///////////////////////////////
@@ -921,7 +981,7 @@ void DefensePlan::setGaolKeeperTargetPoint(){
 
         }
     }
-}
+    }
 }
 
 void DefensePlan::assignSkill(CAgent *_agent , CSkill *_skill){
@@ -1020,10 +1080,9 @@ DefensePlan::DefensePlan()
     lastMarkRoles.append(markRoles);
     sumOfLastOpponentDirection = Vector2D(0,0);
     sumOfLastOpponentPosition = Vector2D(0,0);
-    lastOpponentAgentsToBeMarkSize = 0;
+    lastOpponentAgentsToBeMarkSize = 0;    
     ////////////////////////////////
-    for (int i = 0; i < _MAX_NUM_PLAYERS; i++)
-    {
+    for (int i = 0; i < _MAX_NUM_PLAYERS; i++){
         lastMarker[i] = -1;
 
         gpa[i] = new CSkillGotoPointAvoid(NULL);
@@ -1119,6 +1178,7 @@ void DefensePlan::matchingDefPos(int _defenseNum){
         draw(tempDefPos.pos[i],0,QColor(Qt::blue));
         matchPoints.append(tempDefPos.pos[i]);
     }
+
     findOppAgentsToMark();
     findPos(decideNumOfMarks());
     matchPoints.append(markPoses);
@@ -1225,7 +1285,7 @@ void DefensePlan::execute(){
     //////////////////////////////////////
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
     if(knowledge->getGameState() == CKnowledge::TheirPenaltyKick){
-        if( goalieAgent != NULL ){
+        if(goalieAgent != NULL ){
             draw(QString("Penalty") , Vector2D(1,2) , "white");
             penaltyMode();
         }
@@ -1237,7 +1297,7 @@ void DefensePlan::execute(){
     else{
         if(knowledge->goalie != NULL){
             setGoalKeeperState();
-            setGaolKeeperTargetPoint();
+            setGoalKeeperTargetPoint();
             executeGoalKeeper();
         }
         if(defenseAgents.size() > 0){
@@ -1519,25 +1579,26 @@ void DefensePlan::executeGoalKeeper(){
         else if(goalieClearMode && !dangerForGoalieClear){
             debug("Clear Mode" , D_AHZ , "red");
             assignSkill(goalieAgent, kickSkill);
-            kickSkill->setKickSpeed(kickSkill->getAgent()->kickSpeedValue(7.2,false));
+            //kickSkill->setKickSpeed(kickSkill->getAgent()->kickSpeedValue(7.2,false));
+            //kickSkill->setKickSpeed(1023);
             kickSkill->setTolerance(1.5);
             kickSkill->setDontKick(false);
             kickSkill->setSlow(false);
-            kickSkill->setSpin(false);
-            kickSkill->setChip(false);
-            kickSkill->setAvoidPenaltyArea(false);
+            kickSkill->setSpin(false);            
+            kickSkill->setAvoidPenaltyArea(false);            
             kickSkill->setGoalieMode(true);
             kickSkill->setTarget(wm->field->oppGoal());
-            if(!isPathToOppGoalieClear()){
-                if(!savedClearPos.valid()){
-                    savedClearPos = findBestPointForChipTarget(savedClearDist,1);
-                }
-                kickSkill->setTarget(savedClearPos);
-                ///////// ??????????
-                kickSkill->getAgent()->chipDistanceValue(savedClearDist, false);
-                //////////////////
-                kickSkill->setChip(true);
-            }
+            kickSkill->setChip(true);
+//            if(!isPathToOppGoalieClear()){
+//                if(!savedClearPos.valid()){
+//                    savedClearPos = findBestPointForChipTarget(savedClearDist,1);
+//                }
+//                kickSkill->setTarget(savedClearPos);
+//                ///////// ??????????
+//                kickSkill->getAgent()->chipDistanceValue(savedClearDist, false);
+//                //////////////////
+//                kickSkill->setChip(true);
+//            }
         }
         else{
             assignSkill(goalieAgent , gpa[goalieAgent->id()]);
@@ -1549,12 +1610,27 @@ void DefensePlan::executeGoalKeeper(){
                 gpa[goalieAgent->id()]->init(goalieTarget, targetDir);
             }
             if(dangerForGoalieClear){
-                gpa[goalieAgent->id()]->setSlowMode(false);
-                gpa[goalieAgent->id()]->setADiveMode(false);
-                goalieAgent->setChip(0);
-                goalieAgent->setKick(0);
-                chipGKCounter = 0;
-                gpa[goalieAgent->id()]->init(goalieTarget,wm->ball->pos - wm->field->ourGoal());
+                if(dangerForInsideOfThePenaltyArea){
+                    debug("Danger Mode" , D_AHZ);                    
+                    assignSkill(goalieAgent, kickSkill);
+                    kickSkill->setTolerance(1.5);
+                    kickSkill->setDontKick(false);
+                    kickSkill->setSlow(true);
+                    kickSkill->setSpin(false);
+                    kickSkill->setChip(false);
+                    kickSkill->setAvoidPenaltyArea(false);
+                    kickSkill->setGoalieMode(true);
+                    kickSkill->setTarget(Vector2D(-4.5 , 6) - wm->field->ourGoal());
+                    kickSkill->setChip(true);
+                }
+                else{
+                    gpa[goalieAgent->id()]->setSlowMode(false);
+                    gpa[goalieAgent->id()]->setADiveMode(false);
+                    goalieAgent->setChip(0);
+                    goalieAgent->setKick(0);
+                    chipGKCounter = 0;
+                    gpa[goalieAgent->id()]->init(goalieTarget,wm->ball->pos - wm->field->ourGoal());
+                }
             }
             else{
                 //// strict follow
@@ -1567,7 +1643,8 @@ void DefensePlan::executeGoalKeeper(){
             }
             gpa[goalieAgent->id()]->setAvoidPenaltyArea(false);
             //// why noAvoid is TRUE? /////
-            gpa[goalieAgent->id()]->setNoAvoid(true);
+            //gpa[goalieAgent->id()]->setNoAvoid(true);
+            gpa[goalieAgent->id()]->setAvoidPenaltyArea(false);
             gpa[goalieAgent->id()]->execute();
             draw(Circle2D(goalieTarget , 0.05) , 0 , 360 , "black" , true);
         }
@@ -2226,6 +2303,7 @@ double CDefPos::findBestRadius(int _numOfDefs){
     Segment2D shorterBarSeg = (leftBarSeg.length() > rightBarSeg.length()) ? rightBarSeg : leftBarSeg;
     vatarKazeb = goalSeg.intersection(shorterBarSeg).dist(biggerBarSeg.nearestPoint(goalSeg.intersection(shorterBarSeg)));
     Line2D mainLine(goalSeg.intersection(shorterBarSeg),biggerBarSeg.nearestPoint(goalSeg.intersection(shorterBarSeg)));
+
     if(vatarKazeb > (_numOfDefs) * 2 * CRobot::robot_radius_new){
         mainLine = Line2D(Vector2D(BallPos.x-((_numOfDefs + 0.3) * 1.5 * CRobot::robot_radius_new * ballheight/vatarKazeb),BallPos.y),Vector2D(BallPos.x-((_numOfDefs + 0.3) * 1.5 * CRobot::robot_radius_new*ballheight/vatarKazeb),BallPos.y-0.1));
     }
@@ -2902,7 +2980,6 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
         //////////////////////////////// Appending circles on defense agents /////////////////////////////////////////
         for (g = 0; g < defenseAgents.count() ; g++){
             defs.append(Circle2D(defenseAgents[g]->pos(), CRobot::robot_radius_new));
-
             if(defenseAgents[g]->pos().dist(wm->ball->pos) < nearestDist2Ball) {
                 nearestDef2BallId = defenseAgents[g]->id();
                 nearestDist2Ball = defenseAgents[g]->pos().dist(wm->ball->pos);
@@ -3188,8 +3265,8 @@ kkDefPos CDefPos::getDefPositions(Vector2D _ballPos, int _size, double _limit1, 
             tempBestRadius = _limit2;
         }
         else if(_size == 1){
-            if(tempBestRadius > 4.5){
-                tempBestRadius = 4.5;
+            if(tempBestRadius > 3.5){
+                tempBestRadius = 3.5;
             }
         }
         isNearPenaltyArea = false;
