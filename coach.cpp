@@ -370,11 +370,6 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
 
     }
 
-    ////
-    if (knowledge->isStart() && !transientFlag) {
-        preferedDefenseCounts = 2;
-    }
-
     if (knowledge->isOurNonPlayOnKick() && wm->ball->pos.x < -0.5) {
         preferedDefenseCounts = 2;
     }
