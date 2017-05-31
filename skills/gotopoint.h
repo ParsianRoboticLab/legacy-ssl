@@ -276,6 +276,7 @@ protected:
     Vector2D averageDir;
 public:
     double timeStarted, timeEstimated; //for skill widget
+    static double timeNeeded(CAgent *agentT,Vector2D posT,double vMax);
     DEF_SKILL(CSkillGotoPointAvoid);
     CSkillGotoPointAvoid* noRelax();
     CSkillGotoPointAvoid* ourRelax(int element);

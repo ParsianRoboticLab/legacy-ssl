@@ -1364,7 +1364,7 @@ CPlotWidget::CPlotWidget()
         cmbXYZ[i]->addItem("Y");
         cmbXYZ[i]->addItem("Lenght");
     }
-    GAIN = 35;
+    GAIN = 30;
 
     graph->graphSize.setWidth(680);
     graph->graphSize.setHeight(300);

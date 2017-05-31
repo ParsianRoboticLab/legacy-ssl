@@ -59,8 +59,6 @@ void CSkillTrackCurve::execute()
     //////////////////start
 
     double dVx,dVy,dW;
-    bangBang->setAccMax(conf()->BangBang_AccMax()*10);
-    bangBang->setDecMax(conf()->BangBang_DecMax());
 
     if(slow)
     {
