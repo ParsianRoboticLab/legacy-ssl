@@ -26,7 +26,13 @@ enum POffSkills {
     ChipToGoalSkill = 4,
     OneTouchSkill = 5,
     MoveSkill = 6,
-    ReceivePassIASkill = 7
+    ReceivePassIASkill = 7,
+    //////////// Afterlife Roles
+    Defense = 8,
+    Support = 9,
+    Position = 10,
+    Goalie = 11,
+    Mark = 12
 };
 
 struct playOffSkill {
@@ -299,6 +305,9 @@ typedef QPair<NGameOff::AgentPoint, NGameOff::AgentPoint> AgentPair;
 
 using namespace NGameOff;
 
+enum FirstStep {Stay, Move, Done};
+
+
 class CPlayOff : public CMasterPlay {
 
 public:
@@ -407,6 +416,7 @@ private:
     void fastExecute();
     void firstExecute();
     void kickOffStopModePlay(int tagentSize);
+    void firstPlayForOppCorner(int _agentSize);
     POMODE getPlayOffMode();
     void assinID();
     int insertActiveAgentsToList();
@@ -453,7 +463,7 @@ private:
     void twoSideOneCentreOneDef();
     void twoSideOneCentreTwoDef();
     void twoSideOneCentreTwoDefAndGoalie();
-    ////////////////////////////////////
+    ////////////////////////////////////    
     int matchKickOffID(int _agentSize);
     bool isFinalShotDone();
 
@@ -547,6 +557,7 @@ public:
     DynamicSelect dynamicSelect;
 private:
     void dynamicAssignID();
+    void dynamicAssignIDNEW();
     void dynamicPlayKhafan();
     void dynamicPlayBlocker();
     void dynamicPlayChipToGoal();
@@ -562,6 +573,21 @@ private:
     int dynamicState;
     long dynamicStartTime;
 protected:
+
+
+////////////First
+public:
+    bool isFirstFinished();
+    void resetFirstPlayFinishedFlag();
+    QStringList getOppTags();
+protected:
+private:
+    FirstStep firstStepEnums;
+    QStringList oppTags;
+    void stayPoistioning();
+    void movePositioning();
+    void donePositioning();
+
 
 };
 ///////////OverLoading Operators

@@ -85,6 +85,8 @@ private:
     CForceStart          *forceStart;
     CDynamicAttack       *dynamicAttack;
 
+    CStopPlay            *stopPlay;
+
 
     CRoleStop *stopRoles[_MAX_NUM_PLAYERS];
     QTime goalieTimer;
@@ -156,22 +158,30 @@ private:
     void setPlayOff(NGameOff::EMode _mode);
     void initStaticPlay(const POMODE _mode, const QList<int>& _agentSize);
     void initDynamicPlay(QList<int> _ourplayers);
-    void initFastPlay();
-    void initFirstPlay();
+    void initFastPlay(QList<int> _ourplayers);
+    void initFirstPlay(QList<int> _ourplayers);
     void setStaticPlay();
     void setDynamicPlay();
     void setFirstPlay();
     void setFastPlay();
+
+    QList<SPlan*> getValidPlans(const POMODE _mode, const QList<int> &_ourPlayers);
+
+    QList<SPlan *> getMatchedPlans(const QStringList& _tags, const QList<SPlan *> &_plans);
+
     CLoadPlayOffJson* m_planLoader;
-    bool firstTime;
+    bool firstTime, firstPlay, firstIsFinished;
 
     bool isTagsMatched(const QStringList& base, const QStringList& required);
+    bool isTagsNearMatched(const QStringList& base, const QStringList& required);
+
     bool isRegionMatched(const Vector2D& _ball, const double& _radius = 1.0); //circular Matching
     //TODO : squere or Liner matching
     NGameOff::SPlan* chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans);
     void matchPlan(NGameOff::SPlan* _plan, const QList<int>& _ourplayers);
     void checkGUItoRefineMatch(NGameOff::SPlan* _plan, const QList<int> &_ourplayers);
     QStringList currentTags;
+    QStringList guiTags; // TODO : add tags to gui playoffTab
 
     NGameOff::SPlan* lastPlan;
     QList<int> lastPlayers;
@@ -194,7 +204,11 @@ private:
     void decideTheirBallPlacement (QList<int>&);
     void decideNull               (QList<int>&);
     /////////////////////////////////////
+    unsigned int staticPlayoffPlansCounter;
+    bool isFastPlay();
 };
+
+
 
 #define GetRole(Role, number) static_cast<Role*> (getRole(Role::Name, number))
 #define GetRoleVar(var, Role, number) Role* var = static_cast<Role*> (getRole(Role::Name, number))

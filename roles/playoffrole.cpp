@@ -3,6 +3,7 @@
 
 CRolePlayOff::CRolePlayOff() {
     deleted = false;
+    agent = NULL;
     gotoPointAvoidSkill = new CSkillGotoPointAvoid(NULL);
     kickSkill = new CSkillKick(NULL);
     oneTouchSkill = new CSkillKickOneTouch(NULL);

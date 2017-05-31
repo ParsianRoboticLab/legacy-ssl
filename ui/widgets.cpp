@@ -916,7 +916,7 @@ CPlayOffWidget::CPlayOffWidget(CLoadPlayOffJson* _loader, QWidget *parent) : QWi
     connect(update   , SIGNAL(clicked()), this, SLOT(slt_updatePlans()));
     connect(mode     , SIGNAL(clicked()), this, SLOT(slt_changeMode()));
     connect(active   , SIGNAL(clicked()), this, SLOT(slt_active()));
-    connect(master   , SIGNAL(clicked()), this, SLOT(slt_load()));
+    connect(master   , SIGNAL(clicked()), this, SLOT(slt_master()));
     connect(deactive , SIGNAL(clicked()), this, SLOT(slt_deactive()));
     connect(model    , SIGNAL(itemChanged(QStandardItem*)), this, SLOT(slt_edit(QStandardItem*)));
     connect(selection, SIGNAL(selectionChanged (const QItemSelection &, const QItemSelection &)),
@@ -985,11 +985,14 @@ void CPlayOffWidget::updateBtn(bool _debug) {
     if (_debug) {
         update   -> setEnabled(true);
         columns  -> setEnabled(true);
+        active   -> setEnabled(true);
+        master   -> setEnabled(true);
+        deactive -> setEnabled(true);
     } else {
-        active   ->setEnabled(false);
-        update   ->setEnabled(false);
-        deactive ->setEnabled(false);
-        master   ->setEnabled(false);
+        active   -> setEnabled(false);
+        update   -> setEnabled(false);
+        deactive -> setEnabled(false);
+        master   -> setEnabled(false);
     }
 }
 
@@ -1002,14 +1005,110 @@ void CPlayOffWidget::slt_updatePlans() {
 }
 
 void CPlayOffWidget::slt_active() {
-    // TODO : make this plan/package/file active one/ones
+    QModelIndexList modelList = m_itemSelected.indexes();
+    Q_FOREACH(QModelIndex model, modelList) {
+        if (model.parent().row() == -1) {
+            int i = -1;
+            while (model.child(++i, 0).data().toString() != "") {
+                int j = -1;
+                while (model.child(i, 0).child(++j, 0).data().toString() != "") {
+                    m_plans.at(model.child(i, 0).child(j, 0).data().toInt())->gui.active = true;
+                    m_plans.at(model.child(i, 0).child(j, 0).data().toInt())->gui.master = true;
+
+                }
+            }
+        } else if (model.parent().parent().row() == -1) {
+            details[0]->setText(QString("Type : File"));
+            int i = -1;
+            while (model.child(++i, 0).data().toString() != "") {
+                m_plans.at(model.child(i, 0).data().toInt())->gui.active = true;
+                m_plans.at(model.child(i, 0).data().toInt())->gui.master = false;
+
+            }
+        } else if (model.parent().parent().parent().row() == -1) {
+
+            int planIndex = model.data().toInt();
+
+            m_choosen = m_plans.at(planIndex);
+            m_choosen->gui.active = true;
+            m_choosen->gui.master = false;
+
+        }
+
+        active   -> setEnabled(false);
+        deactive -> setEnabled(true);
+        master   -> setEnabled(true);
+
+    }
 }
 void CPlayOffWidget::slt_deactive() {
-    // TODO : make this plan/package/file deactive one/ones
+    QModelIndexList modelList = m_itemSelected.indexes();
+    Q_FOREACH(QModelIndex model, modelList) {
+        if (model.parent().row() == -1) {
+            int i = -1;
+            while (model.child(++i, 0).data().toString() != "") {
+                int j = -1;
+                while (model.child(i, 0).child(++j, 0).data().toString() != "") {
+                    m_plans.at(model.child(i, 0).child(j, 0).data().toInt())->gui.master = false;
+                    m_plans.at(model.child(i, 0).child(j, 0).data().toInt())->gui.active = false;
+                }
+            }
+        } else if (model.parent().parent().row() == -1) {
+            details[0]->setText(QString("Type : File"));
+            int i = -1;
+            while (model.child(++i, 0).data().toString() != "") {
+                m_plans.at(model.child(i, 0).data().toInt())->gui.master = false;
+                m_plans.at(model.child(i, 0).data().toInt())->gui.active = false;
+            }
+        } else if (model.parent().parent().parent().row() == -1) {
+
+            int planIndex = model.data().toInt();
+
+            m_choosen = m_plans.at(planIndex);
+            m_choosen->gui.active = false;
+            m_choosen->gui.master = false;
+        }
+
+        active   -> setEnabled(true);
+        deactive -> setEnabled(false);
+        master   -> setEnabled(true);
+
+    }
 }
 
 void CPlayOffWidget::slt_master() {
-    // TODO : Make this plan/package/file master
+    QModelIndexList modelList = m_itemSelected.indexes();
+    Q_FOREACH(QModelIndex model, modelList) {
+        if (model.parent().row() == -1) {
+            int i = -1;
+            while (model.child(++i, 0).data().toString() != "") {
+                int j = -1;
+                while (model.child(i, 0).child(++j, 0).data().toString() != "") {
+                    m_plans.at(model.child(i, 0).child(j, 0).data().toInt())->gui.master = true;
+                    m_plans.at(model.child(i, 0).child(j, 0).data().toInt())->gui.active = true;
+                }
+            }
+        } else if (model.parent().parent().row() == -1) {
+            details[0]->setText(QString("Type : File"));
+            int i = -1;
+            while (model.child(++i, 0).data().toString() != "") {
+                m_plans.at(model.child(i, 0).data().toInt())->gui.master = true;
+                m_plans.at(model.child(i, 0).data().toInt())->gui.active = true;
+            }
+        } else if (model.parent().parent().parent().row() == -1) {
+
+            int planIndex = model.data().toInt();
+
+            m_choosen = m_plans.at(planIndex);
+            m_choosen->gui.active = true;
+            m_choosen->gui.master = true;
+        }
+
+        active   -> setEnabled(false);
+        deactive -> setEnabled(true);
+        master   -> setEnabled(false);
+
+    }
 }
 
 void CPlayOffWidget::slt_edit(QStandardItem *_item) {
@@ -1021,15 +1120,25 @@ void CPlayOffWidget::slt_selectionChanged(const QItemSelection & selected, const
     for(int i = 0;i < 8;i++) details[i]->setText("");
 
     m_choosen = NULL;
-
+    m_itemSelected = selected;
     QModelIndexList modelList = selected.indexes();
     Q_FOREACH(QModelIndex model, modelList) {
 
         if (model.parent().row() == -1) {
             details[0]->setText(QString("Type  : Package"));
+
+            active   -> setEnabled(true);
+            deactive -> setEnabled(true);
+            master   -> setEnabled(true);
+
         }
         else if (model.parent().parent().row() == -1) {
             details[0]->setText(QString("Type : File"));
+
+            active   -> setEnabled(true);
+            deactive -> setEnabled(true);
+            master   -> setEnabled(true);
+
         }
         else if (model.parent().parent().parent().row() == -1) {
 
@@ -1038,11 +1147,16 @@ void CPlayOffWidget::slt_selectionChanged(const QItemSelection & selected, const
             m_choosen = m_plans.at(planIndex);
 
             details[0]->setText(QString("Type       : Plan"));
-            details[1]->setText(QString("Agent Size : %1").arg(m_plans.at(planIndex)->common.agentSize));
-            details[2]->setText(QString("Plan Mode  : %1").arg(m_loader->getModeStr(m_plans.at(planIndex)->common.planMode)));
-            details[3]->setText(QString("Chance     : %1").arg(m_plans.at(planIndex)->common.chance));
-            details[4]->setText(QString("Last Dist  : %1").arg(m_plans.at(planIndex)->common.lastDist));
-            details[5]->setText(QString("Tags       : %1").arg(m_plans.at(planIndex)->common.tags.join(" - ")));
+            details[1]->setText(QString("Agent Size : %1").arg(m_choosen->common.agentSize));
+            details[2]->setText(QString("Plan Mode  : %1").arg(m_loader->getModeStr(m_choosen->common.planMode)));
+            details[3]->setText(QString("Chance     : %1").arg(m_choosen->common.chance));
+            details[4]->setText(QString("Last Dist  : %1").arg(m_choosen->common.lastDist));
+            details[5]->setText(QString("Tags       : %1").arg(m_choosen->common.tags.join(" - ")));
+
+            active   -> setEnabled(!m_choosen->gui.active);
+            deactive -> setEnabled(m_choosen->gui.active);
+            master   -> setEnabled(!m_choosen->gui.master);
+
         }
         else {
             details[0]->setText(QString("Type : SubPlan !!"));
