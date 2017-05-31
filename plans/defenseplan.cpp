@@ -659,7 +659,7 @@ void DefensePlan::setGoalKeeperState(){
             penaltyArea.intersection(ballLine, &Solutions[0], &Solutions[1]);
             QList<Circle2D> defs;
             double AZBisecOpenAngle=0,AZBigestOpenAngle=0,AZDangerPercent=0;
-            for (int g=0;g<defenseAgents.count();g++){
+            for(int g=0;g<defenseAgents.count();g++){
                 defs.append(Circle2D(defenseAgents[g]->pos(), CRobot::robot_radius_new));
             }
             knowledge->getEmptyAngle(BallPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,false);
@@ -730,7 +730,7 @@ void DefensePlan::setGoalKeeperState(){
                 strictfollowThr = 0;
                 return;
             }
-            else if (openAngGoalIntersectionTop.dist(openAngGoalIntersectionBottom) > 0.6 - strictfollowThr || defenseAgents.size() == 1) {
+            else if(openAngGoalIntersectionTop.dist(openAngGoalIntersectionBottom) > 0.6 - strictfollowThr || defenseAgents.size() == 1) {
                 ballBehindGoalie = false, goalieOneTouch = false, goalieInPenaltyAreaPrediction = false, goalieClearMode = false, goalieStrictFollow = true, goalieFollow = false, ballIsOutOfField = false;
                 strictfollowThr = 0.15;
                 behindBallThr = 0;
@@ -944,7 +944,7 @@ void DefensePlan::setGoalKeeperTargetPoint(){
             }
             if(dangerForGoalieClear){
                 debug("danger" , D_AHZ , QColor(Qt::blue));
-                goalieTarget = getPointInDirection(wm->ball->pos , wm->field->ourGoal() , 0.1);
+                goalieTarget = getPointInDirection(wm->ball->pos , wm->field->ourGoal() , 0.15);
                 if(!wm->field->isInOurPenaltyArea(goalieTarget)){
                     penaltyArea.intersection(Line2D(wm->ball->pos , wm->field->ourGoal()),&Solutions[0] , &Solutions[1]);
                     goalieTarget = Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1];
@@ -1577,7 +1577,7 @@ void DefensePlan::executeGoalKeeper(){
             assignSkill(goalieAgent, kickSkill);
             //kickSkill->setKickSpeed(kickSkill->getAgent()->kickSpeedValue(7.2,false));
             //kickSkill->setKickSpeed(1023);
-            kickSkill->setTolerance(1.5);
+            kickSkill->setTolerance(10);
             kickSkill->setDontKick(false);
             kickSkill->setSlow(false);
             kickSkill->setSpin(false);
@@ -1609,7 +1609,7 @@ void DefensePlan::executeGoalKeeper(){
                 if(dangerForInsideOfThePenaltyArea){
                     debug("Danger Mode" , D_AHZ);
                     assignSkill(goalieAgent, kickSkill);
-                    kickSkill->setTolerance(1.5);
+                    kickSkill->setTolerance(10);
                     kickSkill->setDontKick(false);
                     kickSkill->setSlow(true);
                     kickSkill->setSpin(false);
