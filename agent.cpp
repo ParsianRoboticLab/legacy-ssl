@@ -675,12 +675,12 @@ Vector2D CAgent::dir()
 
 bool CAgent::shootSensor()
 {
-    return wm->our[selfID]->shootSensor;
+    return 0 ; //wm->our[selfID]->shootSensor;
 }
 
 void CAgent::setShootSensor(bool b)
 {
-    wm->our[selfID]->shootSensor = b;
+    //wm->our[selfID]->shootSensor = b;
 }
 
 double CAgent::angularVel()
