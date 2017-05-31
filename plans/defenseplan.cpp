@@ -1183,31 +1183,32 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     knowledge->Matching(ourAgents,matchPoints,matchResult);
     Vector2D tempMatchPoints[matchPoints.size()];
     //////////////////// Added for RC 2017 ///////////////////////////////////
-    if(ourAgents.size() > matchPoints.size()){
-        for(int i = 0 ; i < ourAgents.size() - matchPoints.size() ; i++){
-            ourAgents.removeAt(i);
-        }
-    }
-    else if(ourAgents.size() < matchPoints.size()){
-        for(int i = 0 ; i < matchPoints.size() ; i++){
-            tempMatchPoints[i] = matchPoints.at(i);
-        }
-        for(int i = 0 ; i < matchPoints.size() ; i++){
-            for(int j = 0 ; j < matchPoints.size() ; j++){
-                if(i != j){
-                    if(tempMatchPoints[i].x > tempMatchPoints[j].x){
-                        tempPoint = tempMatchPoints[i];
-                        tempMatchPoints[i] = tempMatchPoints[j];
-                        tempMatchPoints[j] = tempPoint;
-                    }
-                }
-            }
-        }
-        for(int i = matchPoints.size() - ourAgents.size() - 1 ; i >= 0 ; i--){
-            matchPoints.removeOne(tempMatchPoints[i]);
-        }
-    }
-    else{
+//    if(ourAgents.size() > matchPoints.size()){
+//        for(int i = 0 ; i < ourAgents.size() - matchPoints.size() ; i++){
+//            ourAgents.removeAt(i);
+//        }
+//    }
+//    else if(ourAgents.size() < matchPoints.size()){
+//        for(int i = 0 ; i < matchPoints.size() ; i++){
+//            tempMatchPoints[i] = matchPoints.at(i);
+//        }
+//        for(int i = 0 ; i < matchPoints.size() ; i++){
+//            for(int j = 0 ; j < matchPoints.size() ; j++){
+//                if(i != j){
+//                    if(tempMatchPoints[i].x > tempMatchPoints[j].x){
+//                        tempPoint = tempMatchPoints[i];
+//                        tempMatchPoints[i] = tempMatchPoints[j];
+//                        tempMatchPoints[j] = tempPoint;
+//                    }
+//                }
+//            }
+//        }
+//        for(int i = matchPoints.size() - ourAgents.size() - 1 ; i >= 0 ; i--){
+//            matchPoints.removeOne(tempMatchPoints[i]);
+//        }
+//    }
+
+//    else{
         for(int i = 0; i < defenseCount ; i++){
             defensePoints[i] = matchPoints[i];
         }
@@ -1255,7 +1256,7 @@ void DefensePlan::matchingDefPos(int _defenseNum){
                 gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , markAngs.at(i - _defenseNum));
             }
         }
-    }
+//    }
 }
 
 void DefensePlan::execute(){
@@ -1314,7 +1315,6 @@ void DefensePlan::execute(){
                     defenseCount = defenseAgents.size();
                 }
                 if(defenseCount > 0){
-
                     realDefSize = defenseCount - decideNumOfMarks();
                     tempDefPos = defPos.getDefPositions(ballPrediction(false), realDefSize, 1.5, 2.5);
                     matchingDefPos(realDefSize);
