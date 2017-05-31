@@ -26,63 +26,14 @@ CNewBangBang::CNewBangBang()
 
 }
 
-/*
-double CNewBangBang::optimalAccOrDec(double agentDir, bool dec)
-{
-    double Vx = cos(agentDir);
-    double Vy = sin(agentDir);
-    double fWheels[4];
-    double biggest = 0.0;
-    double optimalAcc , optimalDec;
-    double Ff , Fn;
-    //////////////Calculate Jacobian Matrix//////////
-    fWheels[0] = -(Vx * 0.8660) + (Vy * 0.5);
-    fWheels[1] = -(Vx * 0.7071) - (Vy * 0.7071);
-    fWheels[2] =  (Vx * 0.7071) - (Vy * 0.7071);
-    fWheels[3] =  (Vx * 0.8660) + (Vy * 0.5);
-    ////////////////////////////////////////////////
-    ///////////find biggest value in Jacob//////////
-    for(int i = 0; i < 4 ; i++) {
-        if( fabs(fWheels[i]) > biggest ) {
-            biggest = fabs(fWheels[i]);
-        }
-    }
-    /////////////////////////////////////////////////
-    //////////normalize Jacob's Value////////////////
-    for(int i = 0; i < 4 ; i++) {
-
-        fWheels[i] = fWheels[i]/biggest;
-    }
-    /////////////////////////////////////////////////
-    ///////////calculate forward force vector and normal force vector////////////////////
-    Ff = ((fWheels[3]-fWheels[0])*(sqrt(3)/2)) + ((fWheels[2] - fWheels[1])*(sqrt(2)/2));
-    Fn = ((fWheels[3]+fWheels[0])*0.5) + (-1*(fWheels[2] + fWheels[1])*(sqrt(2)/2));
-    ////////////////////////////////////////////////////////////////////////////////////
-    /////////////////2.8868 is max of sum Ff and Fn and this derivation is for nomalization of Max Acc = _Acc/////////
-    optimalAcc = _Acc * sqrt((Ff*Ff) + (Fn*Fn))/2.8868;
-    optimalDec = _Dec * sqrt((Ff*Ff) + (Fn*Fn))/2.8868;
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////if boll dec = true the function return optimal dec///////////
-    if(dec) {
-        return optimalDec;
-    }
-    //////////otherwise return optimal acc//////////
-    return optimalAcc;
-}
-*/
 bangBangMode CNewBangBang::decidePlan()
 {
-
     double _x3;
-
     _x3 = (Vel2*Vel2 - vmax*vmax) / (-2 * fabs(dmax)) ;
-
-//    debug(QString("vel2: %1").arg(Vel2),D_MHMMD);
-    if(((agentPos.dist(pos2) < posPidDist + posPidThr) && (Vel2 == 0) )/* || (agentPos.dist(pos2) < 0.15)*/) {
+    if(((agentPos.dist(pos2) < posPidDist + posPidThr) && (Vel2 == 0))) {
         decThr = 0;
         constThr = 0;
         return _bangBangPosPID;
-
     }
     else {
         posPidThr = 0;
@@ -94,62 +45,24 @@ bangBangMode CNewBangBang::decidePlan()
             constThr = 0;
             return _bangBangAcc;
         }
-
-
     }
 }
 
 void CNewBangBang::trajectoryPlanner()
 {
     velMax = vmax;
-
-//    if(smooth && (decidePlan() != _bangBangPosPID))
-//    {
-//        if(((vDes)*cos(appliedTh) - lastVx) > 1)
-//        {
-//            desiredVx = lastVx + 0.085;
-//        }
-//        else if(((vDes)*cos(appliedTh) - agentVel.x) < -1)
-//        {
-//            desiredVx = lastVx - 0.085;
-//        }
-//        else
-//        {
-//            desiredVx = (vDes)*cos(appliedTh);
-//        }
-
-//        if(((vDes)*sin(appliedTh) - lastVy) > 1)
-//        {
-//            desiredVy = lastVy + 0.1;
-//        }
-//        else if(((vDes)*sin(appliedTh) - lastVy) < -1)
-//        {
-//            desiredVy = lastVy - 0.1;
-//        }
-//        else
-//        {
-//            desiredVy = (vDes)*sin(appliedTh);
-//        }
-
-//    }
-//    else
-//    {
-        desiredVx = (vDes)*cos(appliedTh);
-        desiredVy = (vDes)*sin(appliedTh);
-//    }
+    //    }
     ///////////////////////////////////////////// th pid
-    thPid->kp =0.4;
+    thPid->kp =0.1;
     thPid->error = (agentMovementTh - agentVel.norm().th()).radian();
     if(fabs(thPid->error > 1) || currentVel < 0.5 || agentPos.dist(pos2) >3 ||( fabs((agentMovementTh - agentDir.th()).degree()) > 80 && fabs((agentMovementTh - agentDir.th()).degree()) < 100 )   )
         thPid->error =0;
-
     appliedTh = agentMovementTh.radian() +thPid->PID_OUT();
-
-
+    desiredVx = (vDes)*cos(appliedTh);
+    desiredVy = (vDes)*sin(appliedTh);
 }
 void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D _agentDir,Vector2D _pos2,Vector2D _dir2,double _V2,double dt,double & _Vx,double & _Vy, double & _W)
 {
-
     pos2 = _pos2;
     dir2 = _dir2;
     Vel2 = _V2;
@@ -173,10 +86,6 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     draw(QString("vel2 : %1").arg(Vel2),Vector2D(2,1.5));
     agentMovementTh = movementTh.th();
 
-    if ( fabs((agentMovementTh - agentDir.th()).degree()) > 80 && fabs((agentMovementTh - agentDir.th()).degree()) < 100 )
-    {
-        amax = 70;
-    }
     if(slow)
     {
         posPid->kp = 2;
@@ -203,10 +112,8 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     thPid->kd = conf()->BangBang_thKD();
     //////////////////////// dec calculations
     double vp =(posPidDist*posPid->kp);
-    double moreDec = 0.83;
+    double moreDec = 0.79;
     double decOffset = 0.5;
-
-
 
     switch(decidePlan())
     {
@@ -235,9 +142,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     _Vx =  desiredVx;//(vDes)*cos(appliedTh);
     _Vy =  desiredVy;//(vDes)*sin(appliedTh);
     _W = angPid->PID_OUT();
-
     lastVx = _Vx;
     lastVy = _Vy;
     posPid->pError = posPid->error;
-
 }
