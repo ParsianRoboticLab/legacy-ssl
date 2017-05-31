@@ -585,7 +585,7 @@ void DefensePlan::manToManMarkBlockShotInPlayOff(int _markAgentSize){
         }
     }
     else if(_markAgentSize < oppAgentsToMarkPos.count()){
-        if(playOff || knowledge->transientFlag){
+        if(playOff || knowledge->transientFlag || knowledge->isStop()){
             QList<QPair<Vector2D, double> > tempsorted = sortdangerpassplayoff(oppAgentsToMarkPos);
             for(int i = 0; i<_markAgentSize; i++){
                 markRoles.append(QString("shotBlocker"));
@@ -614,6 +614,7 @@ void DefensePlan::manToManMarkBlockShotInPlayOff(int _markAgentSize){
             }
         }
     }
+
     for(int i = 0 ; i < markPoses.size() ; i++){
         draw(markRoles.at(i) , markPoses.at(i) - Vector2D(0,0.4) , "white");
     }
@@ -1009,6 +1010,7 @@ void DefensePlan::initDefense(const QList <CAgent*> &_defenseAgents){
 
     defenseAgents.clear();
     defenseAgents.append(_defenseAgents);
+    debug(QString(" sag to toohet: %1").arg(defenseAgents.size()) , D_AHZ);
     agents.append(_defenseAgents);
 }
 
@@ -1281,7 +1283,7 @@ void DefensePlan::execute(){
         ballPosHistory.removeLast();
     }
     //////////////////////////////////////
-    bool playOn = knowledge->getGameMode() == CKnowledge::Start;
+    bool playOn = knowledge->isStart();
     if(knowledge->getGameState() == CKnowledge::TheirPenaltyKick){
         if(goalieAgent != NULL ){
             draw(QString("Penalty") , Vector2D(1,2) , "white");
@@ -1314,10 +1316,12 @@ void DefensePlan::execute(){
                 }
                 else{
                     defenseCount = defenseAgents.size();
+                    debug(QString("defense count : %1").arg(defenseCount) , D_AHZ);
                 }
                 if(defenseCount > 0){
                     realDefSize = defenseCount - decideNumOfMarks();
                     tempDefPos = defPos.getDefPositions(ballPrediction(false), realDefSize, 1.5, 2.5);
+                    debug(QString("real def size : %1").arg(realDefSize) , D_AHZ);
                     matchingDefPos(realDefSize);
                 }
             }
@@ -2395,7 +2399,10 @@ int DefensePlan::decideNumOfMarks(){
     bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)
                     || (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     if(defenseCount > 0){
-        if(playOff){
+        if(knowledge->isStop()){
+            return defenseCount;
+        }
+        else if(playOff){
             return decideNumOfMarksInPlayOff(defenseCount);
         }
         else if(knowledge->transientFlag){
@@ -2584,6 +2591,8 @@ void DefensePlan::findPos(int _markAgentSize){
     bool MantoManAllTransientFlag = policy()->Mark_ManToManAllTransiant();
     bool manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
     stopMode = knowledge->isStop();
+    markPoses.clear();
+    markAngs.clear();
     ///////////////// Man To Man AllTransiant Mode for Mark ////////////////////
     if(MantoManAllTransientFlag){
         if(knowledge->transientFlag){
@@ -2610,7 +2619,7 @@ void DefensePlan::findPos(int _markAgentSize){
             manToManMarkBlockShotInPlayOff(_markAgentSize);
         }
         else if(stopMode){
-            manToManMarkBlockShotInPlayOff(_markAgentSize);
+            manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
         }
     }
     /////////////////////////////////////////////
@@ -2633,7 +2642,7 @@ void DefensePlan::findPos(int _markAgentSize){
         }
         else if(stopMode){
             limitBetweenHMDAndAHZ = false;
-            manToManMarkBlockShotInPlayOff(_markAgentSize);
+            manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
         }
     }
     else{
