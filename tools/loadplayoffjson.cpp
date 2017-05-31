@@ -177,6 +177,11 @@ QString CLoadPlayOffJson::getPackageName(QString _path) {
 
 POffSkills CLoadPlayOffJson::strToEnum(const QString& _str) {
     if       (_str == "NoSkill"           ) return NoSkill;
+    else if  (_str == "Mark"              ) return Mark;
+    else if  (_str == "Goalie"            ) return Goalie;
+    else if  (_str == "Support"           ) return Support;
+    else if  (_str == "Defense"           ) return Defense;
+    else if  (_str == "Position"          ) return Position;
     else if  (_str == "MoveSkill"         ) return MoveSkill;
     else if  (_str == "PassSkill"         ) return PassSkill;
     else if  (_str == "OneTouchSkill"     ) return OneTouchSkill;

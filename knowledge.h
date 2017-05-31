@@ -399,6 +399,7 @@ public:
 
 
 public:
+    QList <int> onlineRobots;
     QList <CRobot*> toBeMopps;
     QList <CRobot*> toBeMoppsPast;
     QList <int> agentsWithIntention;

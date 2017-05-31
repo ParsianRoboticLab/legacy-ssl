@@ -4,6 +4,7 @@
 #include <base.h>
 #include "logger.h"
 #include "varswidget.h"
+#include <skill.h>
 
 
 enum bangBangMode
@@ -41,6 +42,7 @@ class CNewBangBang
 {
 public:
     CNewBangBang();
+
         double plan(Vector2D _dir , double _x, double _v1, double _v2, double _amax, double _dmax, double _vmax, double _dt, double &a, double &t, int id,double _tDesired=-1, bool fastEnd=false, bool end = true, bool newGenerationRobots = true, bool _oneTouch = false, bool _slow = false, bool _NoPID = false);
 
         void bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D _agentDir,Vector2D _pos2,Vector2D _dir2,double _V2,double dt,double & _Vx,double & _Vy, double & _W);

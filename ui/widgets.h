@@ -348,6 +348,8 @@ protected:
     QColumnView *columns;
 
     bool debugMode = false;
+    QList< QList<bool> > activeGUI;
+    QList< QList<bool> > masterGUI;
 
     QStandardItemModel *model;
     QItemSelectionModel *selection;
@@ -362,6 +364,7 @@ protected:
     QLabel *details[8];
 
     NGameOff::SPlan* m_choosen;
+    QItemSelection m_itemSelected;
 private slots:
 
     void updateModel();
