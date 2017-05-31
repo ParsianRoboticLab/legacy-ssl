@@ -644,7 +644,7 @@ void DefensePlan::setGoalKeeperState(){
     dangerForGoalieClearByOppAgents = false;
     isCrowdedInFrontOfPenaltyAreaByOppAgents = false;
     isCrowdedInFrontOfPenaltyAreaByOurAgents = false;
-    bool playOn = knowledge->isStart();   
+    bool playOn = knowledge->isStart();
     Rect2D fieldRect(Vector2D(- _FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0) - Vector2D(-0.02,-0.02),Vector2D(_FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0)-Vector2D(+0.02,+0.02));
     ////////////////////////////////////////////////////////////////////////////
     if(knowledge->goalie != NULL) {
@@ -1077,6 +1077,8 @@ DefensePlan::DefensePlan()
     sumOfLastOpponentDirection = Vector2D(0,0);
     sumOfLastOpponentPosition = Vector2D(0,0);
     lastOpponentAgentsToBeMarkSize = 0;
+    dangerModeThresholdForClear = 0;
+    dangerModeThresholdForDanger = 0;
     ////////////////////////////////
     for (int i = 0; i < _MAX_NUM_PLAYERS; i++){
         lastMarker[i] = -1;
@@ -1174,7 +1176,6 @@ void DefensePlan::matchingDefPos(int _defenseNum){
         draw(tempDefPos.pos[i],0,QColor(Qt::blue));
         matchPoints.append(tempDefPos.pos[i]);
     }
-
     findOppAgentsToMark();
     findPos(decideNumOfMarks());
     matchPoints.append(markPoses);
@@ -1183,32 +1184,31 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     knowledge->Matching(ourAgents,matchPoints,matchResult);
     Vector2D tempMatchPoints[matchPoints.size()];
     //////////////////// Added for RC 2017 ///////////////////////////////////
-//    if(ourAgents.size() > matchPoints.size()){
-//        for(int i = 0 ; i < ourAgents.size() - matchPoints.size() ; i++){
-//            ourAgents.removeAt(i);
-//        }
-//    }
-//    else if(ourAgents.size() < matchPoints.size()){
-//        for(int i = 0 ; i < matchPoints.size() ; i++){
-//            tempMatchPoints[i] = matchPoints.at(i);
-//        }
-//        for(int i = 0 ; i < matchPoints.size() ; i++){
-//            for(int j = 0 ; j < matchPoints.size() ; j++){
-//                if(i != j){
-//                    if(tempMatchPoints[i].x > tempMatchPoints[j].x){
-//                        tempPoint = tempMatchPoints[i];
-//                        tempMatchPoints[i] = tempMatchPoints[j];
-//                        tempMatchPoints[j] = tempPoint;
-//                    }
-//                }
-//            }
-//        }
-//        for(int i = matchPoints.size() - ourAgents.size() - 1 ; i >= 0 ; i--){
-//            matchPoints.removeOne(tempMatchPoints[i]);
-//        }
-//    }
-
-//    else{
+    if(ourAgents.size() > matchPoints.size()){
+        for(int i = 0 ; i < ourAgents.size() - matchPoints.size() ; i++){
+            ourAgents.removeAt(i);
+        }
+    }
+    else if(ourAgents.size() < matchPoints.size()){
+        for(int i = 0 ; i < matchPoints.size() ; i++){
+            tempMatchPoints[i] = matchPoints.at(i);
+        }
+        for(int i = 0 ; i < matchPoints.size() ; i++){
+            for(int j = 0 ; j < matchPoints.size() ; j++){
+                if(i != j){
+                    if(tempMatchPoints[i].x > tempMatchPoints[j].x){
+                        tempPoint = tempMatchPoints[i];
+                        tempMatchPoints[i] = tempMatchPoints[j];
+                        tempMatchPoints[j] = tempPoint;
+                    }
+                }
+            }
+        }
+        for(int i = matchPoints.size() - ourAgents.size() - 1 ; i >= 0 ; i--){
+            matchPoints.removeOne(tempMatchPoints[i]);
+        }
+    }
+    else{
         for(int i = 0; i < defenseCount ; i++){
             defensePoints[i] = matchPoints[i];
         }
@@ -1256,8 +1256,9 @@ void DefensePlan::matchingDefPos(int _defenseNum){
                 gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , markAngs.at(i - _defenseNum));
             }
         }
-//    }
+    }
 }
+
 
 void DefensePlan::execute(){
     ///// All of the goalKeeper && defense functions are linked in this function.
@@ -1583,7 +1584,12 @@ void DefensePlan::executeGoalKeeper(){
             kickSkill->setSpin(false);
             kickSkill->setAvoidPenaltyArea(false);
             kickSkill->setGoalieMode(true);
-            kickSkill->setTarget(Vector2D(-4.5 , 6) - wm->field->ourGoal());
+            if(wm->ball->pos.y >= 0){
+                kickSkill->setTarget(Vector2D(-4.5 , -6) - wm->field->ourGoal());
+            }
+            else{
+                kickSkill->setTarget(Vector2D(-4.5 , 6) - wm->field->ourGoal());
+            }
             kickSkill->setChip(true);
             //            if(!isPathToOppGoalieClear()){
             //                if(!savedClearPos.valid()){
@@ -1595,7 +1601,7 @@ void DefensePlan::executeGoalKeeper(){
             //                //////////////////
             //                kickSkill->setChip(true);
             //            }
-        }        
+        }
         else{
             assignSkill(goalieAgent , gpa[goalieAgent->id()]);
             if(goalieOneTouch){
@@ -1616,7 +1622,13 @@ void DefensePlan::executeGoalKeeper(){
                     kickSkill->setChip(false);
                     kickSkill->setAvoidPenaltyArea(false);
                     kickSkill->setGoalieMode(true);
-                    kickSkill->setTarget(Vector2D(-4.5 , 6) - wm->field->ourGoal());
+                    if(wm->ball->pos.y >= 0){
+                        kickSkill->setTarget(Vector2D(-4.5 , -6) - wm->field->ourGoal());
+                    }
+                    else{
+                        dangerModeThresholdForDanger = 0;
+                        kickSkill->setTarget(Vector2D(-4.5 , 6) - wm->field->ourGoal());
+                    }
                     kickSkill->setChip(true);
                 }
                 else{

@@ -119,6 +119,8 @@ protected:
     bool dangerForGoalieClearByOppAgents;
     bool dangerForInsideOfThePenaltyArea;
     bool stopMode;
+    bool dangerModeThresholdForClear;
+    bool dangerModeThresholdForDanger;
     bool limitBetweenAHZAndHMD;
     bool limitBetweenHMDAndAHZ;
     bool changeInMarkPlanFlag;
@@ -132,7 +134,7 @@ protected:
     Vector2D opponentPasserPossition;
     Vector2D sumOfLastOpponentDirection;
     Vector2D sumOfLastOpponentPosition;
-    int AHZCount;    
+    int AHZCount;        
     ///////////////////////////////////////////////////
     void executeGoalKeeper();    
     Vector2D strictFollowBall(Vector2D _ballPos);
