@@ -3,7 +3,7 @@
 #include <knowledge.h>
 #include "geom/triangle_2d.h"
 #include "logger.h"
-
+#include "mathtools.h"
 
 CollectProfileData *collectKickProfile;
 bool ProfilerExecute=false;
@@ -436,10 +436,9 @@ bool CollectProfileData::FindChipPos(){
 
 void CollectProfileData::StartChip(){
 
-    static double dist=0;
-    static int posSize = 40, cnt = 0, rep = 1;
+    static int posSize = 40, cnt = 0;
     static bool result = false;
-    //    static bool chipped = true;
+    static QList<double> chipRes;
 
     if(BallPos.size() == 0)
         BallPos.append(wm->ball->pos);
@@ -456,7 +455,7 @@ void CollectProfileData::StartChip(){
     case Emplacement:
 
         prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
-        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.4, -_FIELD_HEIGHT/2+0.4));
+        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.6, -_FIELD_HEIGHT/2+0.4));
         prfl1->execute();
 
         if ( Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos(), 0.4).contains(wm->ball->pos) && wm->ball->vel.length() < 0.2)
@@ -475,7 +474,7 @@ void CollectProfileData::StartChip(){
 
         prfl1->setSelectedSkill(roleSkill::Kick);
         prfl1->setChip(true);
-        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.4, _FIELD_HEIGHT/2-0.4));
+        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.6, _FIELD_HEIGHT/2-0.4));
         prfl1->setKickSpeed(kickSpeed1);
         prfl1->setTolerance(0.02);
         prfl1->setDoPass(true);
@@ -507,7 +506,7 @@ void CollectProfileData::StartChip(){
 
     case SavingChipPos:
         prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
-        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.4, -_FIELD_HEIGHT/2+0.4));
+        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.6, -_FIELD_HEIGHT/2+0.4));
         prfl1->execute();
 
         if(BallPos.size() == posSize)
@@ -544,9 +543,6 @@ void CollectProfileData::StartChip(){
     }
 
 
-    for(int i=0; i<SavedChipPos.size();i+=2)
-        draw(Segment2D(SavedChipPos.at(i), SavedChipPos.at(i+1)), QColor(Qt::black));
-
     Q_FOREACH(Vector2D v, BallPos)
         draw(v, 0, QColor(Qt::cyan), 1);
 
@@ -554,31 +550,34 @@ void CollectProfileData::StartChip(){
     if(SavedChipPos.size()>1){
         draw(SavedChipPos.at(0));
         draw(SavedChipPos.at(1));
-
         sgm = Segment2D(SavedChipPos.at(SavedChipPos.size()-2), SavedChipPos.at(SavedChipPos.size()-1));
     }
     draw(sgm, QColor(Qt::darkRed));
 
-    if(SavedChipPos.size() == 2*rep){
-        dist = 0;
+
+    if(SavedChipPos.size() == 2*repeat){
+        chipRes.clear();
         for(int i=0; i<SavedChipPos.size();i+=2)
-            dist += SavedChipPos.at(i).dist(SavedChipPos.at(i+1));
-        dist/=(SavedChipPos.size()/2.0);
+            chipRes.append(SavedChipPos.at(i).dist(SavedChipPos.at(i+1)));
 
-        ChipResult.keys().append(kickSpeed1);
-        ChipResult.values().append(dist);
-
-        draw(SavedChipPos.at(0), 0, QColor(Qt::darkRed));
-        draw(SavedChipPos.at(1), 0, QColor(Qt::white));
+        profiler->robotsProfile[prfl1->getAgentID()].chipMap.insert(kickSpeed1-speedStep , chipRes);
 
         SavedChipPos.clear();
-        debug(QString("speed : %1, dist : %2").arg(kickSpeed1).arg(dist), D_FATEMEH);
+
+        ChipResult.keys().append(kickSpeed1);
+        ChipResult.values().append(AvgWithoutOutliers(chipRes , 0.9));
+
+
+//        profiler->robotsProfile[prfl1->getAgentID()].finalChipMap.insert(kickSpeed1-speedStep , AvgWithoutOutliers(chipRes , 0.9));
+
+//        draw(SavedChipPos.at(0), 0, QColor(Qt::darkRed));
+//        draw(SavedChipPos.at(1), 0, QColor(Qt::white));
+        debug(QString("speed : %1, dist : %2").arg(kickSpeed1-speedStep).arg(AvgWithoutOutliers(chipRes , 0.9)), D_FATEMEH);
     }
 
 }
 
 void CollectProfileData::start(){
-
 
     debug(QString("STATE : %1").arg(prfState), D_MAHI);
     switch(prfState){
@@ -650,6 +649,7 @@ void CollectProfileData::start(){
 
     case SaveProf:
         profiler->save(JSON);
+        debug("file saved" , D_FATEMEH);
         prfState=endState;
 
         break;
@@ -657,8 +657,8 @@ void CollectProfileData::start(){
     case InitStateChip:
 
         ChipInit(activeRobots[0]);
-        positioning(-_FIELD_WIDTH/2+0.4, -_FIELD_HEIGHT/2+0.4);
-        draw(Vector2D(-_FIELD_WIDTH/2+0.4, -_FIELD_HEIGHT/2+0.4));
+        positioning(-_FIELD_WIDTH/2+0.6, -_FIELD_HEIGHT/2+0.4);
+        draw(Vector2D(-_FIELD_WIDTH/2+0.6, -_FIELD_HEIGHT/2+0.4));
 
         //        positioning(-_FIELD_WIDTH/4, _FIELD_HEIGHT/4);
         //        draw(Vector2D(-_FIELD_WIDTH/4, _FIELD_HEIGHT/4));
