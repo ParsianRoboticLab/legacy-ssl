@@ -295,10 +295,10 @@ public:
     SkillProperty(CSkillGotoPointAvoid, bool, NoAvoid, noAvoid);
     SkillProperty(CSkillGotoPointAvoid, bool, AvoidCenterCircle, avoidCenterCircle);
     SkillProperty(CSkillGotoPointAvoid, double, BallObstacleRadius , ballObstacleRadius);
-    SkillProperty(CSkillGotoPoint, bool, ADiveMode, diveMode);
-    SkillProperty(CSkillGotoPoint, bool, AvoidBall, avoidBall);
-    SkillProperty(CSkillGotoPoint, bool, AvoidGoalPosts, avoidGoalPosts);
-    SkillProperty(CSkillGotoPoint, Vector2D, NextPos, nextPos);
+    SkillProperty(CSkillGotoPointAvoid, bool, ADiveMode, diveMode);
+    SkillProperty(CSkillGotoPointAvoid, bool, AvoidBall, avoidBall);
+    SkillProperty(CSkillGotoPointAvoid, bool, AvoidGoalPosts, avoidGoalPosts);
+    SkillProperty(CSkillGotoPointAvoid, Vector2D, NextPos, nextPos);
 
     friend class CSkillFollowPoints;
 };

@@ -424,7 +424,7 @@ bool CAgent::trajectory(double& vf,double& vn,double& va,double w1,double w2,dou
     return false;
 }
 
-void CAgent::accelerationLimiter(double vf)
+void CAgent::accelerationLimiter(double vf,bool diveMode)
 {
     ////first Stage Accelerate Limit
     double veltan= (vel().x)*cos(dir().th().radian()) + (vel().y)*sin(dir().th().radian());
@@ -520,22 +520,44 @@ void CAgent::accelerationLimiter(double vf)
     debug(QString("vn: %1 , lVn :%2").arg(vnormal).arg(lastVn),D_MHMMD);
     if(vnormal >= 0)
     {
-        if(vnormal > (lastVn + conf()->BangBang_AccMaxNormal()* 0.0166667))
+        if(diveMode)
         {
-            vnormal = lastVn + (conf()->BangBang_AccMaxNormal()* 0.0166667)*sign(vnormal);
+            if(vnormal > (lastVn + 10* 0.0166667))
+            {
+                vnormal = lastVn + (10* 0.0166667)*sign(vnormal);
+            }
         }
-        if(vnormal < (lastVn - decCoef*conf()->BangBang_DecMax()* 0.0166667))
+        else
+        {
+            if(vnormal > (lastVn + conf()->BangBang_AccMaxNormal()* 0.0166667))
+            {
+                vnormal = lastVn + (conf()->BangBang_AccMaxNormal()* 0.0166667)*sign(vnormal);
+            }
+        }
+
+        if(!diveMode&&(vnormal < (lastVn - decCoef*conf()->BangBang_DecMax()* 0.0166667)))
         {
             vnormal = lastVn - (decCoef*conf()->BangBang_DecMax()* 0.0166667);
         }
     }
     else
     {
-        if(vnormal < (lastVn - conf()->BangBang_AccMaxNormal()* 0.0166667))
+        if(diveMode)
         {
-            vnormal = lastVn + (conf()->BangBang_AccMaxNormal()* 0.0166667)*sign(vnormal);
+            if(vnormal < (lastVn - 10* 0.0166667))
+            {
+                vnormal = lastVn + (10* 0.0166667)*sign(vnormal);
+            }
         }
-        if(vnormal > (lastVn + decCoef*conf()->BangBang_DecMax()* 0.0166667))
+        else
+        {
+            if(vnormal < (lastVn - conf()->BangBang_AccMaxNormal()* 0.0166667))
+            {
+                vnormal = lastVn + (conf()->BangBang_AccMaxNormal()* 0.0166667)*sign(vnormal);
+            }
+        }
+
+        if(!diveMode&&(vnormal > (lastVn + decCoef*conf()->BangBang_DecMax()* 0.0166667)))
         {
             vnormal = lastVn + (decCoef*conf()->BangBang_DecMax()* 0.0166667);
         }
