@@ -1146,7 +1146,7 @@ void CSkillKick::jTurn()
 
     speedPidX->pError = speedPidX->error;
     speedPidY->pError = speedPidY->error;
-    agent->accelerationLimiter(0);
+    agent->accelerationLimiter(0,false);
 }
 
 void CSkillKick::turnForKick()
@@ -1780,7 +1780,7 @@ void CSkillKickOneTouch::execute()
 {
     ballRealVel = knowledge->getRealBallVel();
     gotopointavoid->setAgent(agent);
-    gotopointavoid->setOneTouchMode(true);
+    gotopointavoid->setOneTouchMode(false);
     gotopointavoid->setNoAvoid(false);
 
     if(shotToEmptySpot)
@@ -1794,7 +1794,7 @@ void CSkillKickOneTouch::execute()
     oneTouchMode = decideMode();
 
     Segment2D ballPath;
-    double stopParam = 0.085;
+    double stopParam = 0.09;
     ballPath.assign(ballPos,ballPos + wm->ball->vel.norm()*(agentPos.dist(ballPos) - stopParam + 0.01));
     Segment2D ballLine;
     ballLine.assign(ballPos,ballPos + wm->ball->vel.norm()*(15));
@@ -1809,7 +1809,7 @@ void CSkillKickOneTouch::execute()
     Vector2D addVec = (agentPos - target).norm()*stopParam;
     Vector2D intersectPos;
     Vector2D sol1,sol2;
-    double onetouchRad =1;
+    double onetouchRad =2;
     double onetouchKickRad = 0.5;
     Circle2D oneTouchArea;
     Circle2D oppPenaltyArea(wm->field->oppGoal() + Vector2D(0.15,0),1.35);
@@ -1827,9 +1827,7 @@ void CSkillKickOneTouch::execute()
         if(!waitpos.isValid())
             waitpos = agentPos;
         gotopointavoid->init(waitpos,oneTouchDir);
-        gotopointavoid->setADiveMode(false);
         gotopointavoid->execute();
-        //        debug(QString("wait"),D_MHMMD);
     }
     else if(oneTouchArea.intersection(ballPath,&sol1,&sol2) && wm->ball->vel.length() > 0.4)
     {
@@ -1849,7 +1847,7 @@ void CSkillKickOneTouch::execute()
 
 
         gotopointavoid->init(intersectPos +addVec,oneTouchDir);
-        gotopointavoid->setADiveMode(true);
+
         gotopointavoid->setOneTouchMode(true);
         gotopointavoid->execute();
         draw(intersectPos);
@@ -1865,8 +1863,6 @@ void CSkillKickOneTouch::execute()
             }
         }
         agent->setRoller(3);
-
-        //        debug(QString("intercept"),D_MHMMD);
     }
     else if(ballPos.dist(agentPos) < onetouchKickRad)
     {
@@ -1881,99 +1877,8 @@ void CSkillKickOneTouch::execute()
         if(!waitpos.isValid())
             waitpos = agentPos;
         gotopointavoid->init(waitpos,oneTouchDir);
-        gotopointavoid->setADiveMode(false);
         gotopointavoid->execute();
-        //        debug(QString("wait"),D_MHMMD);
     }
-
-
-
-
-
-
-
-
-
-
-
-    return;
-
-    Circle2D area;
-    Vector2D p1, p2;
-
-    area.assign(agent->pos(),2);
-    kick->setIsGotoPointAvoid(false);
-
-    if (ballRealVel < 0.1 )
-    {
-        if ((wm->ball->pos - agent->pos()).length() < 0.5)
-        {
-            kick->setSlow(false);
-            kick->setAgent(agent);
-            kick->setSlow(true);
-            kick->setInterceptMode(false);
-            kick->setTarget(target);
-            kick->setKickSpeed(kickSpeed);
-            kick->setAvoidPenaltyArea(avoidPenaltyArea);
-            kick->setThroughMode(false);
-            kick->execute();
-            /////
-            pidP->resetI();
-            pidW->resetI();
-            /////
-            return;
-        }
-        else {
-            if (waitpos.valid())
-            {
-                gotopointavoid->setFinalPos(waitpos);
-            }
-            else gotopointavoid->setFinalPos(agent->pos());
-            gotopointavoid->setLookAt(target);
-            gotopointavoid->setKeepLooking(true);
-            gotopointavoid->setFinalVel(Vector2D(0.0, 0.0));
-            gotopointavoid->setConstantVelocity(-1.0);
-            gotopointavoid->execute();
-            /////
-            pidP->resetI();
-            pidW->resetI();
-            /////
-        }
-    }
-    else if (agent->pos().dist(wm->ball->pos) < 2)
-    {
-        kick->setAgent(agent);
-        kick->setInterceptMode(true);
-        kick->setTarget(target);
-        kick->setSlow(true);
-        kick->setKickSpeed(kickSpeed);
-        kick->setAvoidPenaltyArea(avoidPenaltyArea);
-        kick->execute();
-        draw("one touched", Vector2D(0,0), "red", 50);
-        /////
-        pidP->resetI();
-        pidW->resetI();
-        /////-0.1
-        return;
-    }
-    else if(area.intersection(ballPath,&p1,&p2))
-    {
-        static Vector2D ballVelFiltered(0,0),memory(0,0);
-
-        Vector2D stopTarget;
-        ballVelFiltered = 0.5*ballVelFiltered + 0.25*wm->ball->vel.norm() + 0.25*memory;
-        stopTarget=ballPath.nearestPoint(agent->pos());- Vector2D(0.115*cos(target.th().radian()), 0.115*sin(target.th().radian()));
-
-
-        if(area.intersection(ballPath,&p1,&p2))
-        {
-            gotopointavoid->init(stopTarget,target-agent->pos());
-            gotopointavoid->setSlowMode(true);
-            gotopointavoid->execute();
-        }
-        memory = wm->ball->vel.norm();
-    }
-
 
 
 }
