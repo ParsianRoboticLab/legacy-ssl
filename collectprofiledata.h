@@ -58,6 +58,7 @@ public:
     double xpos2, ypos2, xpos1, ypos1, gx, gy;
     bool prfl1_Kicked;
 
+    double ChipGtpaX, ChipGtpaY, ChipTrgtX, ChipTrgtY;
 
     bool isChip;
 

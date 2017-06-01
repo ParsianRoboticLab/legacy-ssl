@@ -70,6 +70,11 @@ void CollectProfileData::ChipInit(int p1){
     speedStep = 100;
     counter1 = -2;
 
+    ChipGtpaX =  -_FIELD_WIDTH/2+0.5;
+    ChipGtpaY = -_FIELD_HEIGHT/2+0.2;
+    ChipTrgtX =  -_FIELD_WIDTH/2+0.5;
+    ChipTrgtY =  _FIELD_HEIGHT/2-0.2;
+
     BallPos.append(wm->ball->pos);
 }
 
@@ -409,9 +414,9 @@ void CollectProfileData::HighSpeed(){
 }
 
 bool CollectProfileData::FindChipPos(){
-//    FoundChipPos = BallPos.at(BallPos.size()/2);
-//    BallPos.clear();
-//    return true;
+    //    FoundChipPos = BallPos.at(BallPos.size()/2);
+    //    BallPos.clear();
+    //    return true;
 
     int startIndex = kickSpeed1/80+7;
     Vector2D V = BallPos.at(startIndex);
@@ -423,10 +428,9 @@ bool CollectProfileData::FindChipPos(){
         tangent = V.th().tan();
         V = BallPos.at(i) - BallPos.at(i+5);
 
-        if(tangent * V.th().tan() < 0 && fabs(tangent - V.th().tan()) > 0.6){
-            FoundChipPos = BallPos.at(i);
+        if(tangent * V.th().tan() < 0 && fabs(tangent - V.th().tan()) > 0.7){
+            FoundChipPos = BallPos.at(i+1);
             result = true;
-            debug("________ball pos cleared in func", D_FATEMEH);
             BallPos.clear();
         }
     }
@@ -439,6 +443,7 @@ void CollectProfileData::StartChip(){
     static int posSize = 40, cnt = 0;
     static bool result = false;
     static QList<double> chipRes;
+    static double lastAvg =0;
 
     if(BallPos.size() == 0)
         BallPos.append(wm->ball->pos);
@@ -455,16 +460,11 @@ void CollectProfileData::StartChip(){
     case Emplacement:
 
         prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
-        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.6, -_FIELD_HEIGHT/2+0.4));
+        prfl1->setTarget(Vector2D(ChipGtpaX, ChipGtpaY));
         prfl1->execute();
-
         if ( Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos(), 0.4).contains(wm->ball->pos) && wm->ball->vel.length() < 0.2)
         {
-            debug("done with emplacement", D_FATEMEH);
-
             ChipStat = ChipKick;
-
-            debug("________ball pos cleared in emplacement", D_FATEMEH);
             BallPos.clear();
         }
 
@@ -474,31 +474,21 @@ void CollectProfileData::StartChip(){
 
         prfl1->setSelectedSkill(roleSkill::Kick);
         prfl1->setChip(true);
-        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.6, _FIELD_HEIGHT/2-0.4));
-        prfl1->setKickSpeed(kickSpeed1);
-        prfl1->setTolerance(0.02);
+        prfl1->setTarget(Vector2D(ChipTrgtX, ChipTrgtY));
+//        prfl1->setKickSpeed(knowledge->getProfile(prfl1->getAgentID(), kickSpeed1/300.0, false, false));    //test
+        prfl1->setKickSpeed(kickSpeed1);  //collect
+        prfl1->setTolerance(0.05);
         prfl1->setDoPass(true);
         prfl1->execute();
 
         if(!Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos(), 0.1).contains(wm->ball->pos)
-                && wm->ball->vel.length() > 0.1)
-        {
-
+                && wm->ball->vel.length() > 0.1){
             ChipStartPoint = prfl1->getAgent()->pos();
-
-
         }
-
         if(!Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos(), 0.3).contains(wm->ball->pos)
-                && wm->ball->vel.length() > 0.2)
-        {
+                && wm->ball->vel.length() > 0.2){
             ChipStat = SavingChipPos;
-
-            debug("done with chip kick", D_FATEMEH);
-
             result = false;
-
-            debug("________ball pos cleared", D_FATEMEH);
             BallPos.clear();
         }
 
@@ -506,7 +496,7 @@ void CollectProfileData::StartChip(){
 
     case SavingChipPos:
         prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
-        prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.6, -_FIELD_HEIGHT/2+0.4));
+        prfl1->setTarget(Vector2D(ChipGtpaX, ChipGtpaY));
         prfl1->execute();
 
         if(BallPos.size() == posSize)
@@ -514,18 +504,18 @@ void CollectProfileData::StartChip(){
 
         if (result) // position is found;
         {
-            debug("pos saved", D_FATEMEH);
+            if(FoundChipPos.dist(ChipStartPoint) > lastAvg){
+                SavedChipPos.append(ChipStartPoint);
+                SavedChipPos.append(FoundChipPos);
+                cnt++;
+            }else{
+                debug(QString("speed : %1 , cnt : %2    ,   less than lastAvg").arg(kickSpeed1).arg(cnt) , D_FATEMEH);
+            }
 
-            SavedChipPos.append(ChipStartPoint);
-            SavedChipPos.append(FoundChipPos);
-            cnt++;
 
             if(cnt == repeat) {
                 kickSpeed1 += speedStep;
                 cnt = 0;
-            }
-            if (kickSpeed1 > 1023) {
-                prfState = SaveProf;
             }
 
             ChipStat = Emplacement;
@@ -535,10 +525,9 @@ void CollectProfileData::StartChip(){
                 && !result)   // ball is far enough and position isn't found, reset
         {
             BallPos.clear();
-            debug("________ball pos cleared, pos not found", D_FATEMEH);
+            debug("ball pos cleared, pos not found", D_FATEMEH);
             ChipStat = Emplacement;
         }
-
         break;
     }
 
@@ -548,8 +537,6 @@ void CollectProfileData::StartChip(){
 
     static Segment2D sgm ;
     if(SavedChipPos.size()>1){
-        draw(SavedChipPos.at(0));
-        draw(SavedChipPos.at(1));
         sgm = Segment2D(SavedChipPos.at(SavedChipPos.size()-2), SavedChipPos.at(SavedChipPos.size()-1));
     }
     draw(sgm, QColor(Qt::darkRed));
@@ -557,23 +544,29 @@ void CollectProfileData::StartChip(){
 
     if(SavedChipPos.size() == 2*repeat){
         chipRes.clear();
-        for(int i=0; i<SavedChipPos.size();i+=2)
+        for(int i=0; i<SavedChipPos.size();i+=2){
             chipRes.append(SavedChipPos.at(i).dist(SavedChipPos.at(i+1)));
+        }
+        SavedChipPos.clear();
 
         profiler->robotsProfile[prfl1->getAgentID()].chipMap.insert(kickSpeed1-speedStep , chipRes);
 
-        SavedChipPos.clear();
+//collect
+                debug(QString("speed : %1, dist : %2").arg(kickSpeed1-speedStep).arg(
+                  AvgWithoutOutliers(chipRes , 0.9)), D_FATEMEH);
 
-        ChipResult.keys().append(kickSpeed1);
-        ChipResult.values().append(AvgWithoutOutliers(chipRes , 0.9));
+//test
+//        debug(QString("reg : speed : %1 , estimated : %2 , measured : %3").arg(
+//                  knowledge->getProfile(prfl1->getAgentID(), (kickSpeed1-speedStep)/300.0, false, false)).arg(
+//                  (kickSpeed1-speedStep)/300.0).arg(AvgWithoutOutliers(chipRes , 0.9)) , D_FATEMEH);
 
-
-//        profiler->robotsProfile[prfl1->getAgentID()].finalChipMap.insert(kickSpeed1-speedStep , AvgWithoutOutliers(chipRes , 0.9));
-
-//        draw(SavedChipPos.at(0), 0, QColor(Qt::darkRed));
-//        draw(SavedChipPos.at(1), 0, QColor(Qt::white));
-        debug(QString("speed : %1, dist : %2").arg(kickSpeed1-speedStep).arg(AvgWithoutOutliers(chipRes , 0.9)), D_FATEMEH);
+        lastAvg = AvgWithoutOutliers(chipRes , 0.9)-0.2;
     }
+
+    if (kickSpeed1 > 1023) {
+        prfState = SaveProf;
+    }
+
 
 }
 
@@ -643,7 +636,7 @@ void CollectProfileData::start(){
         break;
 
     case StartHigh:
-            HighSpeed();
+        HighSpeed();
 
         break;
 
@@ -657,7 +650,7 @@ void CollectProfileData::start(){
     case InitStateChip:
 
         ChipInit(activeRobots[0]);
-        positioning(-_FIELD_WIDTH/2+0.6, -_FIELD_HEIGHT/2+0.4);
+        positioning(ChipGtpaX, ChipGtpaY);
         draw(Vector2D(-_FIELD_WIDTH/2+0.6, -_FIELD_HEIGHT/2+0.4));
 
         //        positioning(-_FIELD_WIDTH/4, _FIELD_HEIGHT/4);
