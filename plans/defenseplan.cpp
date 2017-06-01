@@ -1077,6 +1077,17 @@ DefensePlan::DefensePlan()
     lastOpponentAgentsToBeMarkSize = 0;
     dangerModeThresholdForClear = 0;
     dangerModeThresholdForDanger = 0;
+    /////////////// For Adding TS Mode in Mark ///////////////////////////////
+    xLimitForblockingPass = 0;
+    manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
+    if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass){
+        lastStateForMark = QString("BlockPass");
+        stateForMark = QString("BlockPass");
+    }
+    else{
+        lastStateForMark = QString("BlockShot");
+        stateForMark = QString("BlockShot");
+    }
     ////////////////////////////////
     for (int i = 0; i < _MAX_NUM_PLAYERS; i++){
         lastMarker[i] = -1;
@@ -1175,6 +1186,7 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     findOppAgentsToMark();
     findPos(decideNumOfMarks());
     matchPoints.append(markPoses);
+    debug(QString("TS Flag : %1").arg(knowledge->transientFlag) , D_AHZ);
     draw(QString(" %1 %2").arg(matchPoints.count()).arg(_defenseNum),Vector2D(-2,2),"red");
     draw(QString("  %1").arg(ourAgents.count()),Vector2D(2,2),"red");
     knowledge->Matching(ourAgents,matchPoints,matchResult);
@@ -1314,7 +1326,7 @@ void DefensePlan::execute(){
                 if(defenseCount > 0){
                     realDefSize = defenseCount - decideNumOfMarks();
                     tempDefPos = defPos.getDefPositions(ballPrediction(false), realDefSize, 1.5, 2.5);
-                    debug(QString("real def size : %1").arg(realDefSize) , D_AHZ);                    
+                    debug(QString("real def size : %1").arg(realDefSize) , D_AHZ);
                     matchingDefPos(realDefSize);
                 }
             }
@@ -2025,7 +2037,7 @@ bool DefensePlan::defenseClearOrNot(){
 #else
     double ourF = fastestToBall.ourFastestTime;
     double oppF = fastestToBall.oppFastestTime;
-#endif    
+#endif
     if(oppF != -1 && ourF == -1){
         isOurAgentNearestToTheBall = false;
     }
@@ -2578,15 +2590,17 @@ void DefensePlan::findPos(int _markAgentSize){
     //// conditions && states.Some flags are used to stay in previous state && for
     //// not switching between PlayOff && PlayOn.
 
-    double xLimitForblockingPass = 0;
     bool playOn = knowledge->isStart();
     bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)/*|| (knowledge->getGameState() == CKnowledge::TheirKickOff)*/|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     bool MantoManAllTransientFlag = policy()->Mark_ManToManAllTransiant();
-    bool manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
+    xLimitForblockingPass = 0;
+    manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
     stopMode = knowledge->isStop();
     markPoses.clear();
     markAngs.clear();
     ///////////////// Man To Man AllTransiant Mode for Mark ////////////////////
+    debug(lastStateForMark , D_AHZ , "red");
+    debug(stateForMark , D_AHZ , "blue");
     if(MantoManAllTransientFlag){
         if(knowledge->transientFlag){
             segmentpershoot = 0.1;
@@ -2601,60 +2615,40 @@ void DefensePlan::findPos(int _markAgentSize){
         segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
     }
     //////////////// Determine the plan of mark from GUI ////////////////////
-    if(manToManMarkBlockPassFlag){///////////// must be refine
-        if(playOff){
+
+    if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass){
+        if(playOff || stopMode){
+            stateForMark = QString("BlockPass");
             manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
         }
-        if(knowledge->transientFlag){
-            manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
-        }
-        else if(playOn){
-            manToManMarkBlockShotInPlayOff(_markAgentSize);
-        }
-        else if(stopMode){
-            manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
-        }
-    }
-    /////////////////////////////////////////////
-    else if(wm->ball->pos.x > xLimitForblockingPass){
-        limitBetweenAHZAndHMD = true;
-        if(playOff){
-            manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
-        }
-        if(knowledge->transientFlag){
-            if(limitBetweenHMDAndAHZ){
-                manToManMarkBlockShotInPlayOff(_markAgentSize);
-            }
-            else{
+        else if(knowledge->transientFlag){
+            if(lastStateForMark == QString("BlockPass")){
+                stateForMark = QString("BlockPass");
                 manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
             }
-        }
-        else if(playOn){
-            limitBetweenHMDAndAHZ = false;
-            manToManMarkBlockShotInPlayOff(_markAgentSize);
-        }
-        else if(stopMode){
-            limitBetweenHMDAndAHZ = false;
-            manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
+            else{
+                stateForMark = QString("BlockShot");
+                manToManMarkBlockShotInPlayOff(_markAgentSize);
+            }
         }
     }
     else{
-        if(knowledge->transientFlag){
-            if(limitBetweenAHZAndHMD){
-                manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
-            }
-            else{
-                limitBetweenAHZAndHMD = false;
-                limitBetweenHMDAndAHZ = true;
-                manToManMarkBlockShotInPlayOff(_markAgentSize);
-            }
-        }
-        else{
-            limitBetweenAHZAndHMD = false;
-            limitBetweenHMDAndAHZ = true;
+        if(playOff || stopMode){
+            stateForMark = QString("BlockShot");
             manToManMarkBlockShotInPlayOff(_markAgentSize);
         }
+        else{
+            if(lastStateForMark == QString("BlockShot")){
+                stateForMark = QString("BlockShot");
+                manToManMarkBlockShotInPlayOff(_markAgentSize);
+            }
+            else{
+                stateForMark = QString("BlockPass");
+                manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
+            }
+        }
     }
+    lastStateForMark = stateForMark;
 }
 
 QList<Vector2D> DefensePlan::ShootBlockRatio(double ratio, Vector2D opp){

@@ -110,6 +110,7 @@ protected:
     int angleDegreeThrNotStop = 0;
     double threshOld = 0.0;
     double ballCircleR = 0.5;
+    double xLimitForblockingPass;
     bool isCrowdedInFrontOfPenaltyAreaByOurAgents;
     bool isCrowdedInFrontOfPenaltyAreaByOppAgents;
     bool ballISInpenaltyAreaAndDangerCircle;
@@ -121,10 +122,11 @@ protected:
     bool stopMode;
     bool dangerModeThresholdForClear;
     bool dangerModeThresholdForDanger;
-    bool limitBetweenAHZAndHMD;
-    bool limitBetweenHMDAndAHZ;
     bool changeInMarkPlanFlag;
-    QString lastStateForGoalKeeper;
+    bool manToManMarkBlockPassFlag;
+    bool markBool;
+    QString lastStateForMark;
+    QString stateForMark;
     int lastOpponentAgentsToBeMarkSize;
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;
