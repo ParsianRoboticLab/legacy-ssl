@@ -967,7 +967,8 @@ void CSkillGotoPointAvoid::execute()
     agentVel = agent->vel();
     double dVx,dVy,dW;
     bangBang->setDecMax(conf()->BangBang_DecMax());
-    bangBang->setOneTouch(oneTouchMode || diveMode);
+    bangBang->setOneTouch(oneTouchMode );
+    bangBang->setDiveMode(diveMode);
     if(slowMode || slow)
     {
         bangBang->setVelMax(1.4);
@@ -1022,25 +1023,23 @@ void CSkillGotoPointAvoid::execute()
     debug(QString("speed: %1").arg(agentVel.length()),D_MHMMD);
     ///////////
     targetValidate();
-    agent->initPlanner(agent->id() , targetPos , ourRelaxList , oppRelaxList , avoidPenaltyArea , avoidCenterCircle , ballObstacleRadius);
-    result.clear();
-    for( int i=agent->pathPlannerResult.size()-1 ; i>=0 ; i-- )
-    {
-        result.append(agent->pathPlannerResult[i]);
-    }
     if(noAvoid)
     {
         result.clear();
     }
-
+    else
+    {
+        agent->initPlanner(agent->id() , targetPos , ourRelaxList , oppRelaxList , avoidPenaltyArea , avoidCenterCircle , ballObstacleRadius);
+        result.clear();
+        for( int i=agent->pathPlannerResult.size()-1 ; i>=0 ; i-- )
+        {
+            result.append(agent->pathPlannerResult[i]);
+        }
+    }
 
     double dist = 0.0;
-    double distN = 0, distT = 0;
-    double a,b;
     bool flag = false;
-    Vector2D mid(0,0);
     Vector2D dir(0,0);
-    Vector2D tempD, firstTempD;
 
     if( result.size() > 1 )
         dir = (result[1] - result[0]).norm();
@@ -1050,12 +1049,6 @@ void CSkillGotoPointAvoid::execute()
     if(result.count())
     {
         lllll= result.last();
-    }
-    double amm=9 , dmm = 6;
-    if (wm->getIsSimulMode())
-    {
-        amm = 4;
-        dmm = 4;
     }
 
 
@@ -1070,9 +1063,7 @@ void CSkillGotoPointAvoid::execute()
             else{
                 alpha = fabs(Vector2D::angleBetween(result[i] - result[0] , result[i+1] - result[i]).degree());
                 vf = -1.0259280143 * log(alpha) + 4.570475303;
-                //vf = 0.1;
                 vf = max(vf , 0.5);
-
             }
             D = result[i].dist(result[0]);
             lllll = result[i];
@@ -1087,11 +1078,6 @@ void CSkillGotoPointAvoid::execute()
 
     if ( D > 2.0)
         vf = 4.2;
-    if ( D < 0.5)
-    {
-        D = min(0.54 , dist);
-
-    }
 
 
     ////////////////////// avoid goal posts
@@ -1123,7 +1109,7 @@ void CSkillGotoPointAvoid::execute()
     bangBang->setSmooth(true);// = false;
     bangBang->bangBangSpeed(agentPos,agentVel,agent->dir(),lllll,targetDir,vf,0.016,dVx,dVy,dW);
     agent->setRobotAbsVel(dVx + addVel.x,dVy + addVel.y,dW);
-    agent->accelerationLimiter(vf);
+    agent->accelerationLimiter(vf,diveMode||oneTouchMode);
 
 
 

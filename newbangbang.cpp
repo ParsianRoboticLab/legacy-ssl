@@ -86,18 +86,30 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     draw(QString("vel2 : %1").arg(Vel2),Vector2D(2,1.5));
     agentMovementTh = movementTh.th();
 
+    if(oneTouch || diveMode)
+    {
+        posPidDist = 0.3;
+    }
+    else
+    {
+        posPidDist = 0.15;
+    }
     if(slow)
     {
         posPid->kp = 2;
-        amax = 10;
         posPid->kd = conf()->BangBang_posKD();
+        posPid->ki = conf()->BangBang_posKI();
+    }
+    else if(diveMode)
+    {
+        posPid->kp = 7;
+        posPid->kd = 20;
         posPid->ki = conf()->BangBang_posKI();
     }
     else if(oneTouch)
     {
-        posPid->kp = 6;
-        amax = 50;
-        posPid->kd = 7;
+        posPid->kp = 5;
+        posPid->kd = 20;
         posPid->ki = conf()->BangBang_posKI();
     }
     else
