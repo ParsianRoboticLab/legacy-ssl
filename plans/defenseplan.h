@@ -78,7 +78,7 @@ protected:
     CDefPos defPos;
     Vector2D pointForKick, oneToucherDir;
     Vector2D topGoal, downGoal, midGoal, ballVel;
-    Vector2D goalieTarget, goalieDirection , defensePoints[12], defenseTargets[12];
+    Vector2D goalKeeperTarget, goalieDirection , defensePoints[12], defenseTargets[12];
     bool executeSkill[5];
     int blockPassID;
     int oneTouchPositioning();
@@ -218,7 +218,7 @@ private:
     bool doubleMarking;
     bool isDefenseFastest;
     bool clearflag;
-    CAgent *goalieAgent;
+    CAgent *goalKeeperAgent;
     QList <CAgent *> defenseAgents;
     int oneDefUpOrDown;
     int twoDefCurState;
