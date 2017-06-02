@@ -715,7 +715,7 @@ void CollectProfileData::start(){
         break;
 
     case SaveProf:
-        profiler->save(JSON);
+        profiler->save(JSON , filename);
         debug("file saved" , D_FATEMEH);
         prfState=endState;
 

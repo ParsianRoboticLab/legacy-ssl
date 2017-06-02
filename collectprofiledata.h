@@ -54,6 +54,8 @@ public:
 
     QTime kickerWait;
 
+    QString filename;
+
     int realSpeed, p1, p2, g1, g2, counter1, counter2, repeat;
     int activeRobots[10], activeRobotsCount;
     double kickSpeed1, kickSpeed2, MaxSpeed, MinSpeed, speedStep, middleSpeed, ballSpeed;
