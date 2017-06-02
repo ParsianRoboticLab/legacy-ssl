@@ -52,12 +52,18 @@ public:
     Vector2D ChipStartPoint , FoundChipPos;
     QMap<int , double> ChipResult;
 
+    QTime kickerWait;
+
     int realSpeed, p1, p2, g1, g2, counter1, counter2, repeat;
     int activeRobots[10], activeRobotsCount;
     double kickSpeed1, kickSpeed2, MaxSpeed, MinSpeed, speedStep, middleSpeed, ballSpeed;
     double xpos2, ypos2, xpos1, ypos1, gx, gy;
     bool prfl1_Kicked;
 
+    double waitKickSpeed;
+
+    double lowPosX1, lowPosY1, lowPosX2, lowPosY2;
+    double highPosX1, highPosY1, highPosX2, highPosY2;
     double ChipGtpaX, ChipGtpaY, ChipTrgtX, ChipTrgtY;
 
     bool isChip;
