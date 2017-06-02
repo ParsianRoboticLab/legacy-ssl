@@ -295,8 +295,6 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         }
 
     }
-
-
     if(wm->our.activeAgentsCount() > 6)
     {
         missMatchIds.clear();
@@ -316,8 +314,6 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         }
     }
 
-
-
     int agentsCount = wm->our.data->activeAgents.count();
     if (goalieAgent != NULL) {
         if (goalieAgent->isVisible()) {
@@ -332,16 +328,14 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
     }
 
     // handle stop
-    if (wm->ball->pos.x < 0) {
+    if (wm->ball->pos.x < 0){
         preferedDefenseCounts = agentsCount - 1;
 
     } else if (wm->ball->pos.x > 1){
         preferedDefenseCounts = policy() -> Formation_Defense();
-
     }
 
-    if(!policy()->Formation_StrictFormation() || !knowledge->isStart()) {
-
+    if(!policy()->Formation_StrictFormation() || !knowledge->isStart()){
         bool oppsAttack = false;
 
         for(int i = 0 ; i < wm->opp.activeAgentsCount() ; i++) {
@@ -350,7 +344,6 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
 
         // TODO : should be fixed :)
         if( knowledge->isStart() && transientFlag == false) {
-
             if (agentsCount == 1) {
                 preferedDefenseCounts = 0; // just one playmake
             } else if (agentsCount == 2) {
@@ -363,7 +356,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
                 }
             }
 
-        } else if( knowledge->isOurNonPlayOnKick() ) {
+        } else if( knowledge->isOurNonPlayOnKick()){
             preferedDefenseCounts = 0;
 
         } else if( knowledge->isTheirNonPlayOnKick() && knowledge->getGameState() != CKnowledge::TheirKickOff) {
@@ -383,14 +376,10 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         {
             preferedDefenseCounts = 2;
         }
-
     }
-
-    ////
-    if (knowledge->isStart() && !transientFlag) {
+    if(knowledge->isStart() && !knowledge->transientFlag && !policy()->Formation_StrictFormation()){
         preferedDefenseCounts = 2;
     }
-
     if (knowledge->isOurNonPlayOnKick() && wm->ball->pos.x < -0.5) {
         preferedDefenseCounts = 2;
     }
