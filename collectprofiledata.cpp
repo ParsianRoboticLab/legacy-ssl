@@ -312,7 +312,11 @@ void CollectProfileData::saveMaxBallSpeed(){
             if(!(ballSpeed<=(kickSpeed1/300))){
                 p1RealSpeedRec.append(ballSpeed);
                 p1KickSpeed.append(kickSpeed1);
-                debug(QString("1 : max ball speed : %1, kSpeed : %2").arg(ballSpeed).arg(kickSpeed1), D_NADIA);
+//                debug(QString("1 : max ball speed : %1, kSpeed : %2").arg(ballSpeed).arg(kickSpeed1), D_NADIA);   //collect
+
+                debug(QString("1 : measured : %1  ,   estimated : %3 , kSpeed : %2").arg(ballSpeed).arg(    //test
+                                      knowledge->getProfile(prfl1->getAgentID(), kickSpeed1/125, true, false )).arg(
+                                      kickSpeed1/125), D_NADIA);
             }
             else
                 counter1--;
@@ -341,7 +345,11 @@ void CollectProfileData::saveMaxBallSpeed(){
             if(!(ballSpeed<=(kickSpeed2/300))){
                 p2RealSpeedRec.append(ballSpeed);
                 p2KickSpeed.append(kickSpeed2);
-                debug(QString("2 : max ball speed : %1, kSpeed : %2").arg(ballSpeed).arg(kickSpeed2), D_NADIA);
+//                debug(QString("2 : max ball speed : %1, kSpeed : %2").arg(ballSpeed).arg(kickSpeed2), D_NADIA);   //collect
+
+                debug(QString("2 : measured : %1  ,   estimated : %3 , kSpeed : %2").arg(ballSpeed).arg(    //test
+                                      knowledge->getProfile(prfl2->getAgentID(), kickSpeed2/125, true, false )).arg(
+                                      kickSpeed2/125), D_NADIA);
             }
             else counter2--;
         }
@@ -402,7 +410,9 @@ void CollectProfileData::HighSpeed(){
                 prfl2->setTarget( Vector2D(highPosX2 , highPosY2));
                 prfl2->setWaitPos(Vector2D(highPosX2 , highPosY2));
 
-                prfl1->setKickSpeed(kickSpeed1);
+//                prfl1->setKickSpeed(kickSpeed1);  //collect
+                prfl1->setKickSpeed(knowledge->getProfile(prfl1->getAgentID(), kickSpeed1/125, true, false ));  //test
+
             }
 
             if(!Circle2D(prfl1->getTarget() , 0.15).contains(knowledge->getAgent(prfl2->getAgentID())->pos()))  // agent1 wait until agent2 is in its target
@@ -431,15 +441,15 @@ void CollectProfileData::HighSpeed(){
                 prfl2->setSelectedSkill(roleSkill::Kick);
                 prfl1->setSelectedSkill(roleSkill::ReceivePass);
 
-
-
-
                 prfl2->setTarget(Vector2D(highPosX1 , highPosY1));
                 prfl1->setTarget(Vector2D(highPosX1 , highPosY1));
                 prfl2->setWaitPos(Vector2D(highPosX1 , highPosY1));
                 prfl1->setWaitPos(Vector2D(highPosX1 , highPosY1));
 
-                prfl2->setKickSpeed(kickSpeed2);
+//                prfl2->setKickSpeed(kickSpeed2);  //collect
+
+                prfl2->setKickSpeed(knowledge->getProfile(prfl2->getAgentID(), kickSpeed2/125, true, false ));  //test
+
             }
 
             if(!Circle2D(prfl2->getTarget() , 0.15).contains(knowledge->getAgent(prfl1->getAgentID())->pos()))  // agent2 wait until agent1 is in its target
@@ -543,6 +553,7 @@ bool CollectProfileData::FindChipPos(){
         if(tangent * V.th().tan() < 0 && fabs(tangent - V.th().tan()) > 0.7){
             FoundChipPos = BallPos.at(i+1);
             result = true;
+//            debug(QString("tangents : %1 , %2").arg(tangent ).arg(V.th().tan()) , D_FATEMEH);
             BallPos.clear();
         }
     }
@@ -587,8 +598,8 @@ void CollectProfileData::StartChip(){
         prfl1->setSelectedSkill(roleSkill::Kick);
         prfl1->setChip(true);
         prfl1->setTarget(Vector2D(ChipTrgtX, ChipTrgtY));
-//        prfl1->setKickSpeed(knowledge->getProfile(prfl1->getAgentID(), kickSpeed1/300.0, false, false));    //test
-        prfl1->setKickSpeed(kickSpeed1);  //collect
+        prfl1->setKickSpeed(knowledge->getProfile(prfl1->getAgentID(), kickSpeed1/300.0, false, false));    //test
+//        prfl1->setKickSpeed(kickSpeed1);  //collect
         prfl1->setTolerance(0.05);
         prfl1->setDoPass(true);
         prfl1->execute();
@@ -664,13 +675,13 @@ void CollectProfileData::StartChip(){
         profiler->robotsProfile[prfl1->getAgentID()].chipMap.insert(kickSpeed1-speedStep , chipRes);
 
 //collect
-                debug(QString("speed : %1, dist : %2").arg(kickSpeed1-speedStep).arg(
-                  AvgWithoutOutliers(chipRes , 0.9)), D_FATEMEH);
+//                debug(QString("speed : %1, dist : %2").arg(kickSpeed1-speedStep).arg(
+//                  AvgWithoutOutliers(chipRes , 0.9)), D_FATEMEH);
 
 //test
-//        debug(QString("reg : speed : %1 , estimated : %2 , measured : %3").arg(
-//                  knowledge->getProfile(prfl1->getAgentID(), (kickSpeed1-speedStep)/300.0, false, false)).arg(
-//                  (kickSpeed1-speedStep)/300.0).arg(AvgWithoutOutliers(chipRes , 0.9)) , D_FATEMEH);
+        debug(QString("reg : speed : %1 , estimated : %2 , measured : %3").arg(
+                  knowledge->getProfile(prfl1->getAgentID(), (kickSpeed1-speedStep)/300.0, false, false)).arg(
+                  (kickSpeed1-speedStep)/300.0).arg(AvgWithoutOutliers(chipRes , 0.9)) , D_FATEMEH);
 
         lastAvg = AvgWithoutOutliers(chipRes , 0.9)-0.2;
     }

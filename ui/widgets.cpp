@@ -3856,7 +3856,7 @@ void CNewProfilerWidget::startProfFunc(){
         isChip = QString("chip");
     else
         isChip = QString("kick");
-    collectKickProfile->filename=fileName->text()+"_"+isChip;
+    collectKickProfile->filename=fileName->text();
     this->close();
     ProfilerExecute=true;
 }
