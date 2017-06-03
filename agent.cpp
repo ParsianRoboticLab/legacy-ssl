@@ -120,7 +120,7 @@ Matrix ANN_forward( Matrix input )
 CAgent::CAgent(short int _ID)
 {
     srand48(time(0));
-
+    packetNum = 0;
     stopTrain=false;wh1=wh2=wh3=wh4=0.0;startTrain=false;
     selfID = _ID;
     skill = NULL;
@@ -651,7 +651,7 @@ void CAgent::generateRobotCommand()
     unsigned int velTanSend = (int)(fabs(veltan)*100);
 
     unsigned int velNormSend = (int)(fabs(velnorm)*100);
-    outputBuffer[11] = velTanSend & 0x3F;
+    outputBuffer[11] = packetNum & 0x07;
     outputBuffer[12] = ((velTanSend >> 6 ) & 0X07) | ((velNormSend & 0x0F) << 3);
     outputBuffer[13] = (velNormSend >> 4) & 0x1F;
 
@@ -664,6 +664,14 @@ void CAgent::generateRobotCommand()
         outputBuffer[13] |= 0x40;
     else
         outputBuffer[13] &= 0xBF;
+    if(packetNum < 8 )
+    {
+        packetNum ++;
+    }
+    else
+    {
+        packetNum = 0;
+    }
 }
 
 char* CAgent::getOutputBuffer()
