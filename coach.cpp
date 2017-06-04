@@ -121,6 +121,7 @@ CCoach::CCoach(CAgent**_agents)
     firstPlay = true;
     firstIsFinished = false;
     preferedDefenseCounts = 2;
+    preferedShotSpot = EveryWhere;
 }
 
 CCoach::~CCoach()
@@ -637,7 +638,7 @@ CKnowledge::ballPossesionState CCoach::isBallOurs()
     }
 
     if (wm->field->isInOurPenaltyArea(wm->ball->pos)
-    &&  wm->ball->vel.length() < 0.1) {
+            &&  wm->ball->vel.length() < 0.1) {
         decidePState = CKnowledge::SOSOTHEIR;
     }
 
@@ -1123,7 +1124,7 @@ void CCoach::decideDefense(){
         defenses.initGoalKeeper(goalieAgent);
         defenses.initDefense(defenseAgents);
         defenses.execute();
-//        defenses.debugAgents("Defense");
+        //        defenses.debugAgents("Defense");
     }
 }
 
@@ -1272,11 +1273,11 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
 
         lastPlayMake = playmakeId;
         lastBallPos = wm->ball->pos;
-//        debug(QString("now ball vel : %1 %2").arg(wm->ball->vel.x).arg(wm->ball->vel.y), D_PARSA);
+        //        debug(QString("now ball vel : %1 %2").arg(wm->ball->vel.x).arg(wm->ball->vel.y), D_PARSA);
         /*for(int i = 0; i < ourPlayers.count(); i++) {
             debug(QString(" %1 point is : %2 ").arg(ourPlayers[i]).arg(playMakeParam[i]), D_PARSA);
         }*/
-//        debug(QString("Here"), D_PARSA);
+        //        debug(QString("Here"), D_PARSA);
 
     } else {
 
@@ -1551,7 +1552,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     Circle2D ourDefenseArea(wm->field->ourGoal(), 1.6);
 
     if (knowledge->variables["clearing"] == "true"
-    || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length() < 1)) {
+            || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length() < 1)) {
         if(playmakeId != -1) {
             ourPlayers.append(playmakeId);
             dynamicAttack->setPlayMake(-1);
@@ -1596,8 +1597,8 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
 
     selectedPlay->markAgents.clear();
     if(wm->ball->pos.x >= 0
-    && selectedPlay->lockAgents
-    && lastPlayers.count() == ourPlayers.count()) {
+            && selectedPlay->lockAgents
+            && lastPlayers.count() == ourPlayers.count()) {
         ourPlayers.clear();
         ourPlayers = lastPlayers;
 
@@ -1672,6 +1673,73 @@ void CCoach::checkGUItoRefineMatch(SPlan *_plan, const QList<int>& _ourplayers) 
     qDebug() << "[coach] final Match : " << _plan->matching.common->matchedID;
 }
 
+ShotSpot CCoach::getShotSpot(const Vector2D &_ball, const Vector2D &_shotPos) {
+
+    Circle2D killZone(wm->field->oppGoal(), 1.6);
+
+    Rect2D nearCenter(-_FIELD_WIDTH/2,
+                      _PENALTY_WIDTH/2,
+                      2,
+                      _PENALTY_WIDTH);
+
+    Rect2D near1(-_FIELD_WIDTH/2,
+                 _FIELD_HEIGHT/2,
+                 2,
+                 1);
+
+    Rect2D near2(-_FIELD_WIDTH/2,
+                 -_FIELD_HEIGHT/2 - 1,
+                 2,
+                 1);
+
+    Rect2D far1(-_FIELD_WIDTH/2 + 2,
+                _FIELD_HEIGHT/2 - 4,
+                _FIELD_WIDTH/2 - 2,
+                2);
+
+    Rect2D farcenter(-_FIELD_WIDTH/2 + 2,
+                     _FIELD_HEIGHT/2 - 2,
+                     _FIELD_WIDTH/2 - 2,
+                     2);
+
+    Rect2D far2(-_FIELD_WIDTH/2 + 2,
+                _FIELD_HEIGHT/2,
+                _FIELD_WIDTH/2 - 2,
+                2);
+
+    ShotSpot tempSpot = EveryWhere;
+    if (killZone.contains(_shotPos)) {
+        tempSpot = KillSpot;
+
+    } else if (nearCenter.contains(_shotPos)) {
+        tempSpot = NearClose;
+
+    } else if (near1.contains(_shotPos) || near2.contains(_shotPos)) {
+        if (_shotPos.y*_ball.y < 0) {
+            tempSpot = NearFar;
+
+        } else {
+            tempSpot = NearClose;
+
+        }
+    } else if (farcenter.contains(_shotPos)) {
+        tempSpot = CenterFar;
+
+    } else if (far1.contains(_shotPos) || far2.contains(_shotPos)) {
+        if (_shotPos.y*_ball.y < 0) {
+            tempSpot = FarFar;
+
+        } else {
+            tempSpot = FarClose;
+
+        }
+    } else {
+        tempSpot = EveryWhere;
+    }
+
+    return tempSpot;
+}
+
 bool CCoach::isTagsMatched(const QStringList& base, const QStringList& required) {
     Q_FOREACH(QString tag, required)
         if (!base.contains(tag))
@@ -1694,7 +1762,11 @@ bool CCoach::isRegionMatched(const Vector2D &_ball, const double& regionRadius) 
 
 NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans) {
     QList<NGameOff::SPlan*> matchedPlan;
-    matchedPlan = getMatchedPlans(currentTags, plans);
+
+    matchedPlan = getMatchedPlans(preferedShotSpot, plans);
+
+    // Tag Matching old way
+    //    matchedPlan = getMatchedPlans(currentTags, plans);
 
 
     int bestScore = -1;
@@ -1725,7 +1797,7 @@ void CCoach::selectPlayOffMode(int agentSize, NGameOff::EMode &_mode) {
         _mode = NGameOff::FirstPlay;
 
     } else if (knowledge->getGameState() == CKnowledge::OurKickOff
-           ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
+               ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
         _mode = NGameOff::StaticPlay;
 
     } else if (wm->ball->pos.x > -1) {
@@ -2001,7 +2073,7 @@ void CCoach::execute()
     virtualTheirPlayOffState();
     decidePreferedDefenseAgentsCountAndGoalieAgent();
     debug(QString("TS : %1").arg(transientFlag), D_GAME);
-//    draw(QString("TS : %1").arg(transientFlag), Vector2D(2,-3));
+    //    draw(QString("TS : %1").arg(transientFlag), Vector2D(2,-3));
     /////////////////////////////////////// choose playmake
     double critAreaRadius = 1.6;
     Circle2D critArea(wm->field->ourGoal(), critAreaRadius);
@@ -2275,5 +2347,25 @@ QList<SPlan*> CCoach::getMatchedPlans(const QStringList &_tags, const QList<SPla
     //NO MATCH
     if (tempPlans.isEmpty()) return _plans;
     else                     return tempPlans;
+
+}
+
+QList<SPlan*> CCoach::getMatchedPlans(ShotSpot _shotSpot, const QList<SPlan*>& _plans) {
+    QList<SPlan*> tempPlans;
+    Q_FOREACH(SPlan* plan, _plans) {
+        Vector2D& tempPos  = plan->matching.shotPos;
+        Vector2D& tempBall = plan->matching.initPos.ball;
+        ShotSpot tempSpot  = getShotSpot(tempBall, tempPos);
+
+
+        if (_shotSpot == tempSpot) {
+            tempPlans.append(plan);
+        }
+
+    }
+
+    //NO MATCH
+    if (tempPlans.isEmpty() || _shotSpot == EveryWhere) return _plans;
+    else                                                return tempPlans;
 
 }

@@ -28,6 +28,17 @@ enum POffSkills {
     Mark = 12
 };
 
+enum ShotSpot {
+    EveryWhere = 0,
+    KillSpot = 1,
+    NearClose = 2,
+    CenterClose = 3,
+    FarClose = 4,
+    NearFar = 5,
+    CenterFar = 6,
+    FarFar = 7
+};
+
 struct playOffSkill {
     POffSkills name;
     int data[2];
