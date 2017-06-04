@@ -168,7 +168,7 @@ private:
     QList<SPlan*> getValidPlans(const POMODE _mode, const QList<int> &_ourPlayers);
 
     QList<SPlan *> getMatchedPlans(const QStringList& _tags, const QList<SPlan *> &_plans);
-    QList<SPlan *> getMatchedPlans(ShotSpot _shotSpot, const QList<SPlan*> &_plans);
+    QList<SPlan *> getMatchedPlans(int _shotSpot, const QList<SPlan*> &_plans);
 
     CLoadPlayOffJson* m_planLoader;
     bool firstTime, firstPlay, firstIsFinished;
@@ -183,7 +183,7 @@ private:
     void checkGUItoRefineMatch(NGameOff::SPlan* _plan, const QList<int> &_ourplayers);
     ShotSpot getShotSpot(const Vector2D& _ball, const Vector2D& _shotPos);
     QStringList currentTags;
-    ShotSpot preferedShotSpot;
+    int preferedShotSpot;
     QStringList guiTags; // TODO : add tags to gui playoffTab
 
     NGameOff::SPlan* lastPlan;

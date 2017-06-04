@@ -457,8 +457,8 @@ void CPlayOff::resetFirstPlayFinishedFlag() {
     firstStepEnums = Stay;
 }
 
-QStringList CPlayOff::getOppTags() {
-    return oppTags;
+int CPlayOff::getShotSpot() {
+    return shotSpot;
 }
 
 void CPlayOff::stayPoistioning() {
@@ -517,7 +517,6 @@ void CPlayOff::fastExecute() {
 void CPlayOff::firstExecute() {
     // TODO : Write first Execution (playoff)
     if (initial) {
-        oppTags.clear();
 //        firstStepEnums = Stay;
 //        dynamicAssignIDNEW();
     }
@@ -561,21 +560,19 @@ void CPlayOff::firstExecute() {
         sumDist += wm->opp[oppMark.at(i)]->pos.dist(wm->field->oppGoal());
     }
     sumDist /= oppMark.size();
-    oppTags.clear();
     if (sumDist < 2) {
-        oppTags << "far";
+        shotSpot = FarNear | FarFar | FarCenter;
     } else if (sumDist > 3) {
-        oppTags << "kill";
+        shotSpot = KillSpot;
     } else {
-        oppTags << "near";
+        shotSpot = EveryWhere;
     }
 
 
 
     // TODO : fix tagging ;)
-//    oppTags << "man2man-pass" << "man2man-shot" << "zone";
     debug(QString("PB : %1, SB : %2").arg(passBlocked).arg(shotBlocked), D_MAHI);
-    debug(oppTags.at(0), D_MAHI);
+    debug(QString("ShotSpot : %1 ").arg(shotSpot), D_MAHI);
 
     for (int i = 0; i < 6; i++) {
         newRoleAgent[i]->execute();

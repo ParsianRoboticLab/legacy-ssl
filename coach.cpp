@@ -1525,7 +1525,7 @@ void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
                 firstTime = false;
                 firstPlay = true;
                 firstIsFinished = false;
-                currentTags = ourPlayOff->getOppTags();
+                preferedShotSpot = ourPlayOff->getShotSpot();
                 ourPlayOff->resetFirstPlayFinishedFlag();
             }
 
@@ -1712,25 +1712,25 @@ ShotSpot CCoach::getShotSpot(const Vector2D &_ball, const Vector2D &_shotPos) {
         tempSpot = KillSpot;
 
     } else if (nearCenter.contains(_shotPos)) {
-        tempSpot = NearClose;
+        tempSpot = CloseNear;
 
     } else if (near1.contains(_shotPos) || near2.contains(_shotPos)) {
         if (_shotPos.y*_ball.y < 0) {
-            tempSpot = NearFar;
+            tempSpot = FarNear;
 
         } else {
-            tempSpot = NearClose;
+            tempSpot = CloseNear;
 
         }
     } else if (farcenter.contains(_shotPos)) {
-        tempSpot = CenterFar;
+        tempSpot = FarCenter;
 
     } else if (far1.contains(_shotPos) || far2.contains(_shotPos)) {
         if (_shotPos.y*_ball.y < 0) {
             tempSpot = FarFar;
 
         } else {
-            tempSpot = FarClose;
+            tempSpot = CloseFar;
 
         }
     } else {
@@ -2321,7 +2321,7 @@ void CCoach::decideNull(QList<int> &_ourPlayers) {
 
 bool CCoach::isFastPlay() {
     if (policy()->PlayOff_UseFastPlay()) {
-        return true; // TODO : fix this by condidering that opp agents
+        return true; // TODO : fix this by considering that opp agents
     }
 }
 
@@ -2350,15 +2350,14 @@ QList<SPlan*> CCoach::getMatchedPlans(const QStringList &_tags, const QList<SPla
 
 }
 
-QList<SPlan*> CCoach::getMatchedPlans(ShotSpot _shotSpot, const QList<SPlan*>& _plans) {
+QList<SPlan*> CCoach::getMatchedPlans(int _shotSpot, const QList<SPlan*>& _plans) {
     QList<SPlan*> tempPlans;
     Q_FOREACH(SPlan* plan, _plans) {
         Vector2D& tempPos  = plan->matching.shotPos;
         Vector2D& tempBall = plan->matching.initPos.ball;
         ShotSpot tempSpot  = getShotSpot(tempBall, tempPos);
 
-
-        if (_shotSpot == tempSpot) {
+        if (_shotSpot & tempSpot) {
             tempPlans.append(plan);
         }
 

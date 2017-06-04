@@ -29,14 +29,14 @@ enum POffSkills {
 };
 
 enum ShotSpot {
-    EveryWhere = 0,
-    KillSpot = 1,
-    NearClose = 2,
-    CenterClose = 3,
-    FarClose = 4,
-    NearFar = 5,
-    CenterFar = 6,
-    FarFar = 7
+    EveryWhere  = 0b11111111,
+    KillSpot    = 0b00000001,
+    CloseNear   = 0b00000010,
+    CloseCenter = 0b00000100,
+    CloseFar    = 0b00001000,
+    FarNear     = 0b00010000,
+    FarCenter   = 0b00100000,
+    FarFar      = 0b01000000
 };
 
 struct playOffSkill {
@@ -459,11 +459,11 @@ private:
 public:
     bool isFirstFinished();
     void resetFirstPlayFinishedFlag();
-    QStringList getOppTags();
+    int getShotSpot();
 protected:
 private:
     FirstStep firstStepEnums;
-    QStringList oppTags;
+    int shotSpot;
     void stayPoistioning();
     void movePositioning();
     void donePositioning();
