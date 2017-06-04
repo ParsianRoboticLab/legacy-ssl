@@ -3843,15 +3843,20 @@ CNewProfilerWidget::~CNewProfilerWidget(){
 }
 void CNewProfilerWidget::startProfFunc(){
     int i=0;
+    QString isChip;
     for(int j=0;j<10;j++){
         if(chbxProf[j]->isChecked()){
             collectKickProfile->activeRobots[i]=j;
             i++;
         }
     }
-    collectKickProfile->filename=fileName->text();
     collectKickProfile->repeat=repeatNum->text().toInt();
     collectKickProfile->isChip=chbxChip->isChecked();
+    if(chbxChip->isChecked())
+        isChip = QString("chip");
+    else
+        isChip = QString("kick");
+    collectKickProfile->filename=fileName->text();
     this->close();
     ProfilerExecute=true;
 }

@@ -1,4 +1,3 @@
-
 #include "collectprofiledata.h"
 #include <knowledge.h>
 #include "geom/triangle_2d.h"
@@ -24,6 +23,7 @@ CollectProfileData::CollectProfileData()
 
     MinSpeed = 300;
     middleSpeed = MinSpeed;
+    MaxSpeed = 1023;
 
     isChip = false;
 }
@@ -38,6 +38,8 @@ void CollectProfileData::init(int p1, int p2){
     prfl1->setTolerance(0.01);
     prfl1->setChip(false);
     prfl1->setSlow(true);
+
+
     prfl2->setAgent(knowledge->getAgent(p2));
     prfl2->setAgentID(p2);
     prfl2->setKickSpeed(kickSpeed2);
@@ -45,6 +47,7 @@ void CollectProfileData::init(int p1, int p2){
     prfl2->setTolerance(0.01);
     prfl2->setChip(false);
     prfl2->setSlow(true);
+
 
     kickerPos = knowledge->getAgent(prfl1->getAgentID())->pos();
 
@@ -164,12 +167,14 @@ void CollectProfileData::LowSpeed(){
             prfl2->setSelectedSkill(roleSkill::GotopointAvoid);
             prfl2->setTarget( Vector2D(highPosX2 , highPosY2));
             prfl2->setWaitPos(Vector2D(highPosX2 , highPosY2));
+
             kickStat = ChangeStat;
         }
         else{
             prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
             prfl1->setTarget( Vector2D(highPosX1 , highPosY1));
             prfl1->setWaitPos(Vector2D(highPosX1 , highPosY1));
+
             kickStat = ChangeStat;
         }
     }
@@ -181,6 +186,9 @@ void CollectProfileData::LowSpeed(){
             if(kickerWait.elapsed() > 2000){
                 prfl1->setSelectedSkill(roleSkill::Kick);
                 prfl2->setSelectedSkill(roleSkill::ReceivePass);
+
+
+
 
                 prfl1->setTarget( Vector2D(lowPosX2 , lowPosY2));
                 prfl2->setTarget( Vector2D(lowPosX2 , lowPosY2));
@@ -202,6 +210,7 @@ void CollectProfileData::LowSpeed(){
             prfl1->setWaitPos(Vector2D(lowPosX1 , lowPosY1));
             prfl1->setTarget( Vector2D(lowPosX1 , lowPosY1));
 
+
             prfl1_Kicked = true;
             kickStat = ChangeStat;
         }
@@ -215,6 +224,9 @@ void CollectProfileData::LowSpeed(){
             if(kickerWait.elapsed() > 2000){
                 prfl2->setSelectedSkill(roleSkill::Kick);
                 prfl1->setSelectedSkill(roleSkill::ReceivePass);
+
+
+
 
                 prfl2->setTarget( Vector2D(lowPosX1 , lowPosY1));
                 prfl1->setTarget( Vector2D(lowPosX1 , lowPosY1));
@@ -258,6 +270,7 @@ void CollectProfileData::LowSpeed(){
                     prfl2->setSelectedSkill(roleSkill::GotopointAvoid);
                     prfl2->setWaitPos(wm->ball->pos);
                     prfl2->setTarget(wm->ball->pos);
+
                 }
                 else{
                     saveMaxBallSpeed();
@@ -273,6 +286,7 @@ void CollectProfileData::LowSpeed(){
                     prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
                     prfl1->setWaitPos(wm->ball->pos);
                     prfl1->setTarget(wm->ball->pos);
+
                 }else{
                     saveMaxBallSpeed();
                     kickerPos = knowledge->getAgent(prfl1->getAgentID())->pos();
@@ -291,46 +305,65 @@ void CollectProfileData::LowSpeed(){
 }
 
 void CollectProfileData::saveMaxBallSpeed(){
-    if(prfl1_Kicked){
-        if(counter1 >= 0){
+    if(prfl1_Kicked)
+    {
+        if(counter1 >= 0)
+        {
             if(!(ballSpeed<=(kickSpeed1/300))){
                 p1RealSpeedRec.append(ballSpeed);
                 p1KickSpeed.append(kickSpeed1);
-                debug(QString("1 : max ball speed : %1, kSpeed : %2").arg(ballSpeed).arg(kickSpeed1), D_NADIA);
+//                debug(QString("1 : max ball speed : %1, kSpeed : %2").arg(ballSpeed).arg(kickSpeed1), D_NADIA);   //collect
+
+                debug(QString("1 : measured : %1  ,   estimated : %3 , kSpeed : %2").arg(ballSpeed).arg(    //test
+                                      knowledge->getProfile(prfl1->getAgentID(), kickSpeed1/125, true, false )).arg(
+                                      kickSpeed1/125), D_NADIA);
             }
             else
                 counter1--;
         }
         counter1++;
-        if(kickSpeed1==1000 && counter1==repeat){
+
+        if(kickSpeed1==1000 && counter1==repeat)
+        {
             counter1 = 0;
             profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1 , p1RealSpeedRec);
             p1RealSpeedRec.clear();
             kickSpeed1 = MaxSpeed;
         }
-        else if(counter1 == repeat && kickSpeed1<MaxSpeed+1){
+        else if(counter1 == repeat && kickSpeed1<MaxSpeed+1)
+        {
             counter1 = 0;
             profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1, p1RealSpeedRec);
             p1RealSpeedRec.clear();
             kickSpeed1 += speedStep;
         }
-    }else{
-        if(counter2 >= 0){
+    }
+    else    //prfl2_Kicked
+    {
+        if(counter2 >= 0)
+        {
             if(!(ballSpeed<=(kickSpeed2/300))){
                 p2RealSpeedRec.append(ballSpeed);
                 p2KickSpeed.append(kickSpeed2);
-                debug(QString("2 : max ball speed : %1, kSpeed : %2").arg(ballSpeed).arg(kickSpeed2), D_NADIA);
+//                debug(QString("2 : max ball speed : %1, kSpeed : %2").arg(ballSpeed).arg(kickSpeed2), D_NADIA);   //collect
+
+                debug(QString("2 : measured : %1  ,   estimated : %3 , kSpeed : %2").arg(ballSpeed).arg(    //test
+                                      knowledge->getProfile(prfl2->getAgentID(), kickSpeed2/125, true, false )).arg(
+                                      kickSpeed2/125), D_NADIA);
             }
             else counter2--;
         }
         counter2++;
-        if(kickSpeed2==1000  && counter1==repeat){
+
+        if(kickSpeed2==1000  && counter1==repeat)
+        {
             counter2 = 0;
             profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2 , p2RealSpeedRec);
             p2RealSpeedRec.clear();
             kickSpeed2 = MaxSpeed;
         }
-        else if(counter2 == repeat && kickSpeed2<MaxSpeed+1){
+        else if(counter2 == repeat && kickSpeed2<MaxSpeed+1)
+        {
             counter2 = 0;
             profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2, p2RealSpeedRec);
             p2RealSpeedRec.clear();
@@ -349,12 +382,14 @@ void CollectProfileData::HighSpeed(){
             prfl2->setSelectedSkill(roleSkill::GotopointAvoid);
             prfl2->setTarget( Vector2D(highPosX2 , highPosY2));
             prfl2->setWaitPos(Vector2D(highPosX2 , highPosY2));
+
             kickStat = ChangeStat;
         }
         else{
             prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
             prfl1->setTarget( Vector2D(highPosX1 , highPosY1));
             prfl1->setWaitPos(Vector2D(highPosX1 , highPosY1));
+
             kickStat = ChangeStat;
         }
     }
@@ -367,12 +402,17 @@ void CollectProfileData::HighSpeed(){
                 prfl1->setSelectedSkill(roleSkill::Kick);
                 prfl2->setSelectedSkill(roleSkill::ReceivePass);
 
+
+
+
                 prfl1->setTarget( Vector2D(highPosX2 , highPosY2));
                 prfl1->setWaitPos(Vector2D(highPosX2 , highPosY2));
                 prfl2->setTarget( Vector2D(highPosX2 , highPosY2));
                 prfl2->setWaitPos(Vector2D(highPosX2 , highPosY2));
 
-                prfl1->setKickSpeed(kickSpeed1);
+//                prfl1->setKickSpeed(kickSpeed1);  //collect
+                prfl1->setKickSpeed(knowledge->getProfile(prfl1->getAgentID(), kickSpeed1/125, true, false ));  //test
+
             }
 
             if(!Circle2D(prfl1->getTarget() , 0.15).contains(knowledge->getAgent(prfl2->getAgentID())->pos()))  // agent1 wait until agent2 is in its target
@@ -384,6 +424,7 @@ void CollectProfileData::HighSpeed(){
             prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
             prfl1->setWaitPos(Vector2D(highPosX1 , highPosY1));
             prfl1->setTarget( Vector2D(highPosX1 , highPosY1));
+
             prfl1_Kicked = true;
             kickStat = ChangeStat;
         }
@@ -405,7 +446,10 @@ void CollectProfileData::HighSpeed(){
                 prfl2->setWaitPos(Vector2D(highPosX1 , highPosY1));
                 prfl1->setWaitPos(Vector2D(highPosX1 , highPosY1));
 
-                prfl2->setKickSpeed(kickSpeed2);
+//                prfl2->setKickSpeed(kickSpeed2);  //collect
+
+                prfl2->setKickSpeed(knowledge->getProfile(prfl2->getAgentID(), kickSpeed2/125, true, false ));  //test
+
             }
 
             if(!Circle2D(prfl2->getTarget() , 0.15).contains(knowledge->getAgent(prfl1->getAgentID())->pos()))  // agent2 wait until agent1 is in its target
@@ -418,6 +462,8 @@ void CollectProfileData::HighSpeed(){
 
             prfl2->setWaitPos(Vector2D(highPosX2 , highPosY2));
             prfl2->setTarget( Vector2D(highPosX2 , highPosY2));
+
+
 
             prfl1_Kicked = false;
             kickStat = ChangeStat;
@@ -440,6 +486,7 @@ void CollectProfileData::HighSpeed(){
                     prfl2->setSelectedSkill(roleSkill::GotopointAvoid);
                     prfl2->setWaitPos(wm->ball->pos);
                     prfl2->setTarget(wm->ball->pos);
+
                 }
                 else{
                     saveMaxBallSpeed();
@@ -450,6 +497,7 @@ void CollectProfileData::HighSpeed(){
                     prfl2->setTarget(knowledge->getAgent(prfl2->getAgentID())->pos());
                     prfl2->setWaitPos(knowledge->getAgent(prfl2->getAgentID())->pos());
 
+
                     kickerWait.restart();
                 }
             }else{
@@ -458,6 +506,7 @@ void CollectProfileData::HighSpeed(){
                     prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
                     prfl1->setWaitPos(wm->ball->pos);
                     prfl1->setTarget(wm->ball->pos);
+
                 }else{
                     saveMaxBallSpeed();
                     kickerPos = knowledge->getAgent(prfl1->getAgentID())->pos();
@@ -466,6 +515,7 @@ void CollectProfileData::HighSpeed(){
                     prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
                     prfl1->setTarget(knowledge->getAgent(prfl1->getAgentID())->pos());
                     prfl1->setWaitPos(knowledge->getAgent(prfl1->getAgentID())->pos());
+
 
                     kickerWait.restart();
                 }
@@ -503,6 +553,7 @@ bool CollectProfileData::FindChipPos(){
         if(tangent * V.th().tan() < 0 && fabs(tangent - V.th().tan()) > 0.7){
             FoundChipPos = BallPos.at(i+1);
             result = true;
+//            debug(QString("tangents : %1 , %2").arg(tangent ).arg(V.th().tan()) , D_FATEMEH);
             BallPos.clear();
         }
     }
@@ -547,8 +598,8 @@ void CollectProfileData::StartChip(){
         prfl1->setSelectedSkill(roleSkill::Kick);
         prfl1->setChip(true);
         prfl1->setTarget(Vector2D(ChipTrgtX, ChipTrgtY));
-//        prfl1->setKickSpeed(knowledge->getProfile(prfl1->getAgentID(), kickSpeed1/300.0, false, false));    //test
-        prfl1->setKickSpeed(kickSpeed1);  //collect
+        prfl1->setKickSpeed(knowledge->getProfile(prfl1->getAgentID(), kickSpeed1/300.0, false, false));    //test
+//        prfl1->setKickSpeed(kickSpeed1);  //collect
         prfl1->setTolerance(0.05);
         prfl1->setDoPass(true);
         prfl1->execute();
@@ -624,13 +675,13 @@ void CollectProfileData::StartChip(){
         profiler->robotsProfile[prfl1->getAgentID()].chipMap.insert(kickSpeed1-speedStep , chipRes);
 
 //collect
-                debug(QString("speed : %1, dist : %2").arg(kickSpeed1-speedStep).arg(
-                  AvgWithoutOutliers(chipRes , 0.9)), D_FATEMEH);
+//                debug(QString("speed : %1, dist : %2").arg(kickSpeed1-speedStep).arg(
+//                  AvgWithoutOutliers(chipRes , 0.9)), D_FATEMEH);
 
 //test
-//        debug(QString("reg : speed : %1 , estimated : %2 , measured : %3").arg(
-//                  knowledge->getProfile(prfl1->getAgentID(), (kickSpeed1-speedStep)/300.0, false, false)).arg(
-//                  (kickSpeed1-speedStep)/300.0).arg(AvgWithoutOutliers(chipRes , 0.9)) , D_FATEMEH);
+        debug(QString("reg : speed : %1 , estimated : %2 , measured : %3").arg(
+                  knowledge->getProfile(prfl1->getAgentID(), (kickSpeed1-speedStep)/300.0, false, false)).arg(
+                  (kickSpeed1-speedStep)/300.0).arg(AvgWithoutOutliers(chipRes , 0.9)) , D_FATEMEH);
 
         lastAvg = AvgWithoutOutliers(chipRes , 0.9)-0.2;
     }

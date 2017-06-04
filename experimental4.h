@@ -198,6 +198,44 @@ QList<Vector2D> ballposss;
 
 void CMainApplication::Experimental4(){
 
+
+    static bool fff=true;
+
+    QMap<int, double> kick2, kick7, chip2;
+    kick2 = knowledge->profiler->robotsProfile[2].finalKickMap;
+    chip2 = knowledge->profiler->robotsProfile[2].finalChipMap;
+    kick7 = knowledge->profiler->robotsProfile[7].finalKickMap;
+
+    if(fff){
+        debug("kick 2\n\n" , D_FATEMEH);
+        for(int i=0; i<kick2.keys().size();i++){
+//            debug(QString("%1   ,   %2").arg(kick2.keys().at(i)).arg(kick2.values().at(i)) , D_FATEMEH);
+        }
+        debug("kick 7\n\n" , D_FATEMEH);
+        for(int i=0; i<kick7.keys().size();i++){
+//            debug(QString("%1   ,   %2").arg(kick7.keys().at(i)).arg(kick7.values().at(i)) , D_FATEMEH);
+        }
+
+        for(int i=0; i<20; i++){
+//            debug(QString("%1 , %2").arg(i).arg(knowledge->getProfile(2, i/10.0, true, false)) , D_FATEMEH);
+        }
+
+        debug("\n", D_FATEMEH);
+        for(int i=0; i<20; i++){
+//            debug(QString("%1 , %2").arg(i).arg(knowledge->getProfile(7, i/10.0, true, false)) , D_FATEMEH);
+        }
+
+        debug("chip 2\n\n" , D_FATEMEH);
+        for(int i=0; i<chip2.keys().size(); i++){
+            debug(QString("%1   ,   %2").arg(chip2.keys().at(i)).arg(chip2.values().at(i)) , D_FATEMEH);
+        }
+        debug("\n", D_FATEMEH);
+        for(int i=0; i<40; i++){
+            debug(QString("%1 , %2").arg(i).arg(knowledge->getProfile(2, i/10.0, false, false)) , D_FATEMEH);
+        }
+        fff = false;
+    }
+
 //    static double moshtagh2=0;
 //    analyze("kickspeed" , wm->ball->vel.length(),true);
 //    debug(QString("ball Speed :%1").arg(wm->ball->vel.length()),D_NADIA);

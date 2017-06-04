@@ -157,7 +157,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
 //    RobotsCoeff[7][0] = 800;
 
 
-    profiler->load(JSON, "chipProfiler.json");
+    profiler->load(JSON, "Chip_2_6.json");
 
     //    ProfilerResult[robotID][0:kick , 1:chip , 2:SpinKick , 3:SpinChip][10*distance(0-80)] ---> contains needed voltage for this distance
 
@@ -287,7 +287,8 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
         return 0;
 
 
-    if(type==1)    //chip
+    ///////////////////////// chip //////////////////////////////////////////////////
+    if(type==1)
     {
 //        realParameter+=RobotsCoeff[agentId][1];
 
@@ -325,10 +326,45 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
 
         }
     }
-    else if(type==0)    //kick
+    ///////////////////////// kick //////////////////////////////////////////////////
+    else if(type==0)
     {
-        if(realParameter >= 8.0)
+        profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
+
+        if(realParameter > 8.0)
             return RobotsCoeff[agentId][0];
+
+        profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
+
+        if(profiledParameter != -1000)
+        {
+            if(profiledParameter > 1023)
+                return 1023;
+            else if(profiledParameter > 0){
+                return (int)profiledParameter;
+            }
+            else
+                return 1;
+        }
+        else // no data is saved for this robot
+        {
+            debug("no data", D_FATEMEH);
+            if(ProfilerResult[refRobotID][type][(int)round(realParameter*10)] != -1000){    // get data from reference robot
+                profiledParameter= RobotsCoeff[agentId][type] * knowledge->getProfile(refRobotID , realParameter , isKick , spinOn);
+            }
+            else{   // Linear
+                profiledParameter= realParameter*128;
+            }
+
+            if(profiledParameter > 1023)
+                return 1023;
+            else if(profiledParameter > 0)
+                return (int)profiledParameter;
+            else{
+                return 1;
+            }
+
+        }
 
         profiledParameter= realParameter*128;
 
