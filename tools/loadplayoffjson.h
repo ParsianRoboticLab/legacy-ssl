@@ -36,6 +36,7 @@ protected:
     void fillGUI(NGameOff::SGUI& _gui, const QFileInfo& _fileInfo, bool* _parsedOk = 0);
     POffSkills strToEnum(const QString& _str);
     QString getPackageName(QString _path);
+    Vector2D findShotPos(SPlan* &_plan);
 
 private:
 

@@ -227,6 +227,7 @@ struct SMatching {
     };
     SInitPos initPos;
     SCommon *common;
+    Vector2D shotPos;
 };
 
 struct AgentPoint {

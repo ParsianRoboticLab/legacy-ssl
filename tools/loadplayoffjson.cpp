@@ -80,6 +80,10 @@ bool CLoadPlayOffJson::readPlan(const QVariantMap &_map, const QString& _file) {
         fillMatching(tempMatching, planMap, &parsedOk);
         fillExecution(tempExecution, planMap, &parsedOk);
         fillGUI(tempGui, fileInfo, &parsedOk);
+
+
+        tempMatching.shotPos = findShotPos(tempPlan);
+
         m_plans.append(tempPlan);
     }
 }
@@ -111,6 +115,7 @@ void CLoadPlayOffJson::fillMatching(NGameOff::SMatching& _matching, const QVaria
         _matching.initPos.agents.append(Vector2D(initPosMap.value("x").toDouble(_parsedOk),
                                                  initPosMap.value("y").toDouble(_parsedOk)));
     }
+
     if (!_parsedOk) {
         qWarning() << "Agent Init Pos did NOT parsed okey!";
         return;
@@ -173,6 +178,23 @@ QString CLoadPlayOffJson::getPackageName(QString _path) {
     packageName.append(_path);
     //    qDebug() << packageName;
     return packageName;
+}
+
+Vector2D CLoadPlayOffJson::findShotPos(SPlan *&_plan) {
+    QList<POffSkills> finisher;
+    finisher.append(ShotToGoalSkill);
+    finisher.append(ChipToGoalSkill);
+    finisher.append(OneTouchSkill);
+
+    Q_FOREACH(QList<playOffRobot> agentPlan, _plan->execution.AgentPlan) {
+        Q_FOREACH(playOffRobot agentTask, agentPlan) {
+            Q_FOREACH(playOffSkill agentSkill, agentTask.skill) {
+                if (finisher.contains(agentSkill.name)) {
+                    return agentTask.pos;
+                }
+            }
+        }
+    }
 }
 
 POffSkills CLoadPlayOffJson::strToEnum(const QString& _str) {
