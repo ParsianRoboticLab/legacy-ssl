@@ -1677,32 +1677,32 @@ ShotSpot CCoach::getShotSpot(const Vector2D &_ball, const Vector2D &_shotPos) {
 
     Circle2D killZone(wm->field->oppGoal(), 1.6);
 
-    Rect2D nearCenter(-_FIELD_WIDTH/2,
+    Rect2D nearCenter(_FIELD_WIDTH/2 - 2,
                       _PENALTY_WIDTH/2,
                       2,
                       _PENALTY_WIDTH);
 
-    Rect2D near1(-_FIELD_WIDTH/2,
+    Rect2D near1(_FIELD_WIDTH/2 - 2,
                  _FIELD_HEIGHT/2,
                  2,
-                 1);
+                 (_FIELD_HEIGHT-_PENALTY_WIDTH)/2);
 
-    Rect2D near2(-_FIELD_WIDTH/2,
-                 -_FIELD_HEIGHT/2 - 1,
+    Rect2D near2(_FIELD_WIDTH/2 - 2,
+                 -_PENALTY_WIDTH/2,
                  2,
-                 1);
+                 (_FIELD_HEIGHT-_PENALTY_WIDTH)/2);
 
-    Rect2D far1(-_FIELD_WIDTH/2 + 2,
+    Rect2D far1(0,
                 _FIELD_HEIGHT/2 - 4,
                 _FIELD_WIDTH/2 - 2,
                 2);
 
-    Rect2D farcenter(-_FIELD_WIDTH/2 + 2,
+    Rect2D farcenter(0,
                      _FIELD_HEIGHT/2 - 2,
                      _FIELD_WIDTH/2 - 2,
                      2);
 
-    Rect2D far2(-_FIELD_WIDTH/2 + 2,
+    Rect2D far2(0,
                 _FIELD_HEIGHT/2,
                 _FIELD_WIDTH/2 - 2,
                 2);

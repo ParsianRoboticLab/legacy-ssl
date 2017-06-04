@@ -30,6 +30,7 @@ public:
     double playOnTime;
     CCoach(CAgent** _agents);
     ~CCoach();
+    static ShotSpot getShotSpot(const Vector2D& _ball, const Vector2D& _shotPos);
     void execute();
     void saveGoalie();
     DefensePlan& getDefense();
@@ -181,7 +182,6 @@ private:
     NGameOff::SPlan* chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans);
     void matchPlan(NGameOff::SPlan* _plan, const QList<int>& _ourplayers);
     void checkGUItoRefineMatch(NGameOff::SPlan* _plan, const QList<int> &_ourplayers);
-    ShotSpot getShotSpot(const Vector2D& _ball, const Vector2D& _shotPos);
     QStringList currentTags;
     int preferedShotSpot;
     QStringList guiTags; // TODO : add tags to gui playoffTab
