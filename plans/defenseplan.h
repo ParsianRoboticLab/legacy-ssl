@@ -97,8 +97,7 @@ protected:
     bool besidePoleFlag;
     bool dangerForGoalieClear;
     int oneTouchCnt;    
-    ////////////////////////////// AHZ ///////////////////
-    Vector2D getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion);
+    ////////////////////////////// AHZ ///////////////////    
     Line2D getBisectorLine(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
     Segment2D getBisectorSegment(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
     void manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);

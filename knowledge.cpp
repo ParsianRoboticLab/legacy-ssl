@@ -136,25 +136,25 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
     // now fill proper data for RobotsCoeff : e.g. RobotsCoeff[3][0] = 1.32537;
 
-//    chip
-//    RobotsCoeff[0][1] = 0.22;
-//    RobotsCoeff[1][1] = 0.36;
-//    RobotsCoeff[2][1] = 0.4;
-//    RobotsCoeff[3][1] = 0.07;
-//    RobotsCoeff[4][1] = 0.22;
-//    RobotsCoeff[5][1] = -0.03;
-//    RobotsCoeff[6][1] = -0.15;
-//    RobotsCoeff[7][1] = 0.06;
+    //    chip
+    //    RobotsCoeff[0][1] = 0.22;
+    //    RobotsCoeff[1][1] = 0.36;
+    //    RobotsCoeff[2][1] = 0.4;
+    //    RobotsCoeff[3][1] = 0.07;
+    //    RobotsCoeff[4][1] = 0.22;
+    //    RobotsCoeff[5][1] = -0.03;
+    //    RobotsCoeff[6][1] = -0.15;
+    //    RobotsCoeff[7][1] = 0.06;
 
-//  kick
-//    RobotsCoeff[0][0] = 710;
-//    RobotsCoeff[1][0] = 750;
-//    RobotsCoeff[2][0] = 940;
-//    RobotsCoeff[3][0] = 990;
-//    RobotsCoeff[4][0] = 780;
-//    RobotsCoeff[5][0] = 780;
-//    RobotsCoeff[6][0] = 780;
-//    RobotsCoeff[7][0] = 800;
+    //  kick
+    //    RobotsCoeff[0][0] = 710;
+    //    RobotsCoeff[1][0] = 750;
+    //    RobotsCoeff[2][0] = 940;
+    //    RobotsCoeff[3][0] = 990;
+    //    RobotsCoeff[4][0] = 780;
+    //    RobotsCoeff[5][0] = 780;
+    //    RobotsCoeff[6][0] = 780;
+    //    RobotsCoeff[7][0] = 800;
 
 
     profiler->load(JSON, "Chip_2_6.json");
@@ -230,8 +230,8 @@ CKnowledge::CKnowledge(CAgent** _agents)
                             ChipCoeff.at(q).at(0) + ChipCoeff.at(q).at(1)*((double)dis/10) +
                             ChipCoeff.at(q).at(2)*((double)dis/10)*((double)dis/10) +
                             ChipCoeff.at(q).at(3)*((double)dis/10)*((double)dis/10)*((double)dis/10) ;
-//                    if(dis < 30)
-//                        debug(QString("reg res : %1 , %2").arg(dis).arg(tempRes) , D_FATEMEH);
+                    //                    if(dis < 30)
+                    //                        debug(QString("reg res : %1 , %2").arg(dis).arg(tempRes) , D_FATEMEH);
                     if(tempRes != 0 )
                         ProfilerResult[q][1][dis] = tempRes;
                     else
@@ -290,7 +290,7 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
     ///////////////////////// chip //////////////////////////////////////////////////
     if(type==1)
     {
-//        realParameter+=RobotsCoeff[agentId][1];
+        //        realParameter+=RobotsCoeff[agentId][1];
 
         profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
 
@@ -299,7 +299,7 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
             if(profiledParameter > 1023)
                 return 1023;
             else if(profiledParameter > 0){
-//                debug(QString("func : %1 , %2").arg(realParameter).arg(profiledParameter) , D_FATEMEH);
+                //                debug(QString("func : %1 , %2").arg(realParameter).arg(profiledParameter) , D_FATEMEH);
                 return (int)profiledParameter;
             }
             else
@@ -552,7 +552,14 @@ int CKnowledge::agentCount()
     return _NUM_PLAYERS;
 }
 
+Vector2D CKnowledge::getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion){
+    //// This function gets a point along the lines that
+    //// is made up by 2 points.The position of this point varies
+    //// in according to the "ratio" that is given to the function.
 
+    firstPoint = firstPoint + (secondPoint - firstPoint).norm() * proportion * (Segment2D(secondPoint , firstPoint).length());
+    return firstPoint;
+}
 int CKnowledge::factorial(int a)
 {
     int temp = 1;
