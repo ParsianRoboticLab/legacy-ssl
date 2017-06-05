@@ -2517,6 +2517,7 @@ void DefensePlan::findOppAgentsToMark(){
         for(int i = 0; i < oppAgentsToMark.count(); i++){
             if(oppAgentsToMark[i]->pos.x > policy()->Mark_OppOmitLimitPlayoff()){
                 oppAgentsToMark.removeOne(oppAgentsToMark[i]);
+                // a minor change
                 // TODO: chage the transeint this flag
                 /*if(oppAgentsToMark[i]->vel.length() > 1)
                 HMDtransient = 1;*/
