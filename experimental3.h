@@ -298,7 +298,7 @@ double nnn;
 QList<Vector2D> ballposes , lastDirs;
 int indexN = 0;
 bool flagN = true , DirFound = false;
-int idd = 3;
+CRobot * idd =new CRobot(0,true);
 QList<double> prev_Ball_pos;
 QList<int> key;
 QVector<double> *Coeff = new  QVector<double>();
@@ -309,6 +309,7 @@ double previousPos=0.0;
 double prevPos=0.0;
 double prevPosx=0.0;
 double counter = 1;
+double refiner=1.3;
 double mainCnt = 1;
 int countN=0;
 int cycleCnt = 5;
@@ -317,10 +318,11 @@ bool newCycle = false;
 
 double refine(double x) {
     //    return x*x*3/30 - x*2 + 70;
-    return x*x/1.5 - x*0.3 + 50;
+//    return x*x/1.5 - x*0.3 + 50;
+
     //    return 3.98 - x*1.01 + x*x*0.13;
     //    return 3.43 - x*0.74 + x*x*0.085;
-    //    return 32;
+        return 32;
 }
 double refineP(double x) {
     //    return x*x*3/30 - x*2 + 70;
@@ -345,10 +347,25 @@ double predictPos(){
 
 void CMainApplication::Experimental3()
 {
-    dir=knowledge->getChipDir();
-    draw(Segment2D(knowledge->chipperPoint , dir+knowledge->chipperPoint));
-    debug(QString("dir_x:%1,dir_y:%2").arg(dir.x).arg(dir.y),D_NADIA);
+    idd=wm->our.active(wm->our.activeAgentID(0));
+    static CSkillGotoPointAvoid *robot1 = new CSkillGotoPointAvoid(knowledge->getAgent(idd->id));
+    robot1->init(knowledge->getChipPredict(),wm->ball->pos-idd->pos);
+    robot1->execute();
+    debug(QString("y:%1").arg(knowledge->getChipPredict().y),D_NADIA);
+
+
+
+
+
     return;
+
+
+
+    dir=knowledge->getChipDir();
+    draw(Segment2D(knowledge->chipperPoint , dir*10+knowledge->chipperPoint));
+    debug(QString("dir_x:%1,dir_y:%2").arg(dir.x).arg(dir.y),D_NADIA);
+    idd=knowledge->chipperID;
+    startChipPoint=knowledge->chipperPoint;
 
     //    debug(QString("2.5: %1").arg(knowledge->getProfile(2 , 35/10.0 , true , false)),D_NADIA);
     //    knowledge->plotWidgetCustom[1]=wm->ball->vel.length()-4;
@@ -385,33 +402,32 @@ void CMainApplication::Experimental3()
 
     //    if(wm->ball->pos.y-previousPos<0.03 || wm->ball->vel.y<0.1){
 
-    if(Circle2D(wm->our[idd]->pos , 0.2).contains(wm->ball->pos)){
-        lastDirs.append(wm->our[idd]->dir);
-        if(lastDirs.count() > 10)
-            lastDirs.removeFirst();
+//    if(Circle2D(wm->our[idd]->pos , 0.2).contains(wm->ball->pos)){
+//        lastDirs.append(wm->our[idd]->dir);
+//        if(lastDirs.count() > 10)
+//            lastDirs.removeFirst();
 
-        startChipPoint = wm->our[idd]->pos;
+//        startChipPoint = wm->our[idd]->pos;
 
-        // hshm
-        startBallVel = fabs(wm->ball->vel.y);
-    }
-    else{
-        DirFound=true;
-    }
+//        // hshm
+//        startBallVel = fabs(wm->ball->vel.y);
+//    }
+//    else{
+//        DirFound=true;
+//    }
 
-    if(DirFound)
-    {
-        dir = Vector2D(0,0);
+//    if(DirFound)
+//    {
+//        dir = Vector2D(0,0);
 
-        for(int i=0; i<lastDirs.length()-5; i++){
-            dir+=lastDirs.at(i);
-        }
-        dir/=lastDirs.length();
-    }
+//        for(int i=0; i<lastDirs.length()-5; i++){
+//            dir+=lastDirs.at(i);
+//        }
+//        dir/=lastDirs.length();
+//    }
 
-    draw(Segment2D(startChipPoint , wm->our[idd]->pos + dir*10));
 
-    if(wm->ball->vel.y < 0.1 /*|| Circle2D(Vector2D(wm->ball->pos,0.03).contains()*/){
+    if(wm->ball->vel.length() < 0.1 /*|| Circle2D(Vector2D(wm->ball->pos,0.03).contains()*/){
         counter=1;
         knowledge->plotWidgetCustom[1]=0;
 
@@ -422,12 +438,15 @@ void CMainApplication::Experimental3()
     }
     else
     {
-        draw(startChipPoint,0,QColor(Qt::darkRed));
 //        prev_Ball_pos.append(wm->ball->pos.y);
 
-        prev_Ball_pos.append(( ((wm->ball->pos - startChipPoint).angleWith(dir - startChipPoint)).tan() )*(wm->ball->pos - startChipPoint).length());
+        prev_Ball_pos.append(/*( ((wm->ball->pos - startChipPoint).angleWith(dir - startChipPoint)).tan() )**/(wm->ball->pos - startChipPoint).length());
 
-        ballposes.append( ((predictPos()*refine(counter)/(double)counter) + prevPos - 10*fabs(prev_Ball_pos.at(1) - prev_Ball_pos.at(0)) )*(-dir.norm())+startChipPoint);
+        double x=predictPos()*refine(counter)/(double)counter;
+        debug(QString("predict pos:%1").arg(x),D_NADIA);
+        if(counter<2)
+            refiner=1+x*0.8;
+        ballposes.append(( x + 1 )*(refiner)*(dir.norm())+startChipPoint);
 
 
 
@@ -450,7 +469,6 @@ void CMainApplication::Experimental3()
     if(counter <2){
         prevPosx=wm->ball->pos.x;
     }
-    draw(dir);
     counter++;
 
     //    previousPos=wm->ball->pos.y;
