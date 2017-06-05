@@ -11,6 +11,7 @@
 
 #include <QApplication>
 
+#include <algorithm>
 QMap<QString, EditData*> CCoach::editData;
 
 CCoach::CCoach(CAgent**_agents)
@@ -116,6 +117,10 @@ CCoach::CCoach(CAgent**_agents)
     exeptionPlayMakeThr = 0;
 
     staticPlayoffPlansCounter = 0;
+    shuffleCounter = 0;
+    shuffleSize = 0;
+    shuffled = false;
+    staticPlayoffPlansShuffleIndexing.clear();
     m_planLoader = new CLoadPlayOffJson(QDir::currentPath() + QString("/playoff"));
     goalieAgent = NULL;
     firstPlay = true;
@@ -1760,6 +1765,19 @@ bool CCoach::isRegionMatched(const Vector2D &_ball, const double& regionRadius) 
 
 }
 
+void CCoach::ShufflePlanIndexing(QList<SPlan*> Plans){
+    for(int i=0; i<Plans.size(); i++){
+        debug(QString("plan%1 cahnce : %2").arg(i).arg(Plans.at(i)->common.chance) , D_FATEMEH);
+        shuffleSize += (int)Plans.at(i)->common.chance;
+        for(int j=0; j<(int)Plans.at(i)->common.chance; j++){
+            staticPlayoffPlansShuffleIndexing.append(i);
+        }
+    }
+
+    std::random_shuffle(staticPlayoffPlansShuffleIndexing.begin(), staticPlayoffPlansShuffleIndexing.end());
+    std::random_shuffle(staticPlayoffPlansShuffleIndexing.begin(), staticPlayoffPlansShuffleIndexing.end());
+}
+
 NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans) {
     QList<NGameOff::SPlan*> matchedPlan;
 
@@ -1864,6 +1882,24 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     thePlan = chooseMostSuccecfull(validPlans);
 
     /**                   **/
+
+
+    /** SHUFFLE PLAN SELECTION**/
+    if(!shuffled){
+        ShufflePlanIndexing(validPlans);
+        shuffled = true;
+    }
+
+    if (shuffleCounter >= shuffleSize) {
+        shuffleCounter = 0;
+        shuffled = false;
+    }
+    thePlan = validPlans[staticPlayoffPlansShuffleIndexing.at(shuffleCounter)];
+    debug(QString("chosen plan : %1").arg(staticPlayoffPlansShuffleIndexing.at(shuffleCounter)) , D_FATEMEH);
+    shuffleCounter++;
+    /** SHUFFLE PLAN SELECTION**/
+
+
 
     /** COUNTER PLAN SELECTION**/
     if (staticPlayoffPlansCounter >= validPlans.size()) {
