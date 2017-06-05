@@ -329,9 +329,15 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
 
     // handle stop
     if (wm->ball->pos.x < 0){
-        preferedDefenseCounts = agentsCount - 1;
+            if(agentsCount <=2){
+                preferedDefenseCounts = policy()->Formation_Defense();
+            }
+            else{
+                preferedDefenseCounts = agentsCount - 1;
+            }
 
-    } else if (wm->ball->pos.x > 1){
+        }
+    else if (wm->ball->pos.x > 1){
         preferedDefenseCounts = policy() -> Formation_Defense();
     }
 
