@@ -329,14 +329,8 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
 
     // handle stop
     if (wm->ball->pos.x < 0){
-            if(agentsCount <=2){
-                preferedDefenseCounts = policy()->Formation_Defense();
-            }
-            else{
-                preferedDefenseCounts = agentsCount - 1;
-            }
-
-        }
+        preferedDefenseCounts = agentsCount - 1;
+    }
     else if (wm->ball->pos.x > 1){
         preferedDefenseCounts = policy() -> Formation_Defense();
     }
@@ -389,7 +383,9 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
     if (knowledge->isOurNonPlayOnKick() && wm->ball->pos.x < -0.5) {
         preferedDefenseCounts = 2;
     }
-
+    if(policy()->Formation_StrictFormation()){
+        preferedDefenseCounts = policy()->Formation_Defense();
+    }
     lastPreferredDefenseCounts = preferedDefenseCounts;
 }
 
@@ -632,7 +628,7 @@ CKnowledge::ballPossesionState CCoach::isBallOurs()
     }
 
     if (wm->field->isInOurPenaltyArea(wm->ball->pos)
-    &&  wm->ball->vel.length() < 0.1) {
+            &&  wm->ball->vel.length() < 0.1) {
         decidePState = CKnowledge::SOSOTHEIR;
     }
 
@@ -1118,7 +1114,7 @@ void CCoach::decideDefense(){
         defenses.initGoalKeeper(goalieAgent);
         defenses.initDefense(defenseAgents);
         defenses.execute();
-//        defenses.debugAgents("Defense");
+        //        defenses.debugAgents("Defense");
     }
 }
 
@@ -1267,11 +1263,11 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
 
         lastPlayMake = playmakeId;
         lastBallPos = wm->ball->pos;
-//        debug(QString("now ball vel : %1 %2").arg(wm->ball->vel.x).arg(wm->ball->vel.y), D_PARSA);
+        //        debug(QString("now ball vel : %1 %2").arg(wm->ball->vel.x).arg(wm->ball->vel.y), D_PARSA);
         /*for(int i = 0; i < ourPlayers.count(); i++) {
             debug(QString(" %1 point is : %2 ").arg(ourPlayers[i]).arg(playMakeParam[i]), D_PARSA);
         }*/
-//        debug(QString("Here"), D_PARSA);
+        //        debug(QString("Here"), D_PARSA);
 
     } else {
 
@@ -1280,8 +1276,8 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
         //points by distance
         for(int i = 0 ; i < ourPlayers.count() ; i++) {
             playMakeParam[i] += 1 / max(0.1, ((wm->our[ourPlayers[i]]->pos +
-                                              wm->our[ourPlayers[i]]->vel * ballVelCoef / 3).dist
-                    (wm->ball->pos+wm->ball->vel*ballVelCoef)));
+                                               wm->our[ourPlayers[i]]->vel * ballVelCoef / 3).dist
+                                              (wm->ball->pos+wm->ball->vel*ballVelCoef)));
 
         }
 
@@ -1291,7 +1287,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
                     (passPos) < minDistForPass)
             {
                 minDistForPass = (wm->our[ourPlayers[i]]->pos +
-                        wm->our[ourPlayers[i]]->vel).dist
+                                  wm->our[ourPlayers[i]]->vel).dist
                         (passPos);
                 minDistForPassId = i;
             }
@@ -1319,10 +1315,10 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
 
         double passPosDisToPla = passPos.dist
                 (wm->our[ourPlayers[minDistForPassId]]->pos +
-                wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef / 3) ;
+                 wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef / 3) ;
         double ballMoveLineDisToPla = Line2D(wm->ball->pos,wm->ball->pos +
                                              wm->ball->vel).dist(wm->our[ourPlayers[minDistForPassId]]->pos +
-                wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef);
+                                                                 wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef);
         bool passPointGiven = false;
 
         if(passPosDisToPla < 1.1)
@@ -1546,7 +1542,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     Circle2D ourDefenseArea(wm->field->ourGoal(), 1.6);
 
     if (knowledge->variables["clearing"] == "true"
-    || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length() < 1)) {
+            || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length() < 1)) {
         if(playmakeId != -1) {
             ourPlayers.append(playmakeId);
             dynamicAttack->setPlayMake(-1);
@@ -1591,8 +1587,8 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
 
     selectedPlay->markAgents.clear();
     if(wm->ball->pos.x >= 0
-    && selectedPlay->lockAgents
-    && lastPlayers.count() == ourPlayers.count()) {
+            && selectedPlay->lockAgents
+            && lastPlayers.count() == ourPlayers.count()) {
         ourPlayers.clear();
         ourPlayers = lastPlayers;
 
@@ -1720,7 +1716,7 @@ void CCoach::selectPlayOffMode(int agentSize, NGameOff::EMode &_mode) {
         _mode = NGameOff::FirstPlay;
 
     } else if (knowledge->getGameState() == CKnowledge::OurKickOff
-           ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
+               ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
         _mode = NGameOff::StaticPlay;
 
     } else if (wm->ball->pos.x > -1) {
@@ -1996,7 +1992,7 @@ void CCoach::execute()
     virtualTheirPlayOffState();
     decidePreferedDefenseAgentsCountAndGoalieAgent();
     debug(QString("TS : %1").arg(transientFlag), D_GAME);
-//    draw(QString("TS : %1").arg(transientFlag), Vector2D(2,-3));
+    //    draw(QString("TS : %1").arg(transientFlag), Vector2D(2,-3));
     /////////////////////////////////////// choose playmake
     double critAreaRadius = 1.6;
     Circle2D critArea(wm->field->ourGoal(), critAreaRadius);

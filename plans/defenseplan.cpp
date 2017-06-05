@@ -3048,98 +3048,85 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
             }
             else{
                 if(AZBisecOpenSeg.intersection(aimLessLine).isValid()){
-                    if(Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourGoalL()).degree() < 10 + angleDegreeThrNotStop){
-                        Circle2D(wm->field->ourGoal() , 1.28).intersection(Segment2D(wm->ball->pos , AZBisecOpenSeg.intersection(aimLessLine)) , &sol1 , &sol2);
-                        target = knowledge->getPointInDirection(AZBisecOpenSeg.intersection((aimLessLine)) , sol1.dist(wm->field->ourGoal()) < sol2.dist(wm->field->ourGoal()) ? sol1 : sol2, 0.1);
-                        angleDegreeThrNotStop = 0;
+                    if(defenseCount == 2){
+                        if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 6.0 + threshOld){
+                            target = AZBisecOpenSeg.intersection((aimLessLine));
+                            threshOld = 0.0;
+                        }
+                        else{
+                            target = wm->field->ourGoal() + offsetGoalkeeperPosition;
+                            threshOld = 2.0;
+                        }
                     }
-                    else if(Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourGoalR()).degree() < 10 + angleDegreeThrNotStop){
-                        Circle2D(wm->field->ourGoal() , 1.28).intersection(Segment2D(wm->ball->pos , AZBisecOpenSeg.intersection(aimLessLine)) , &sol1 , &sol2);
-                        target = knowledge->getPointInDirection(AZBisecOpenSeg.intersection((aimLessLine)) , sol1.dist(wm->field->ourGoal()) < sol2.dist(wm->field->ourGoal()) ? sol1 : sol2, 0.1);
-                        angleDegreeThrNotStop = 0;
-                    }
-                    else{
-                        angleDegreeThrNotStop = 3;
-                        if(defenseCount == 2){
-                            if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 6.0 + threshOld){
-                                target = AZBisecOpenSeg.intersection((aimLessLine));
-                                threshOld = 0.0;
+                    else if(defenseCount == 1){
+                        if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 2.0 ){
+                            draw(QString("oneDef"), Vector2D(2,0),"red");
+                            //Circle2D(wm->field->ourGoal() , 1.28).intersection(Segment2D(wm->ball->pos , AZBisecOpenSeg.intersection(aimLessLine)) , &sol1 , &sol2);
+                            //target = knowledge->getPointInDirection(AZBisecOpenSeg.intersection((aimLessLine)) , sol1.dist(wm->field->ourGoal()) < sol2.dist(wm->field->ourGoal()) ? sol1 : sol2, 0.1);
+                            Vector2D ttarget = AZBisecOpenSeg.intersection((aimLessLine));
+                            //                            double targetToBallDist = ttarget.dist(ballPos);
+                            //                            double defToBallDist = defensePoints[0].dist(ballPos);
+                            //////////////////
+
+                            Circle2D goaliC(wm->field->ourGoal(), 1.35);
+                            draw(goaliC, "blue");
+                            if(!goaliC.contains(ttarget)){
+                                Vector2D inter1, inter2;
+                                goaliC.intersection(AZBisecOpenSeg, &inter1, &inter2);
+                                if( inter1.valid() && !inter2.valid() )
+                                    target = inter1;
+                                else if( !inter1.valid() && inter2.valid() )
+                                    target = inter2;
+                                else if( !inter1.valid() && !inter2.valid() )
+                                    target = knowledge->getPointInDirection(AZBisecOpenSeg.intersection((aimLessLine)) , sol1.dist(wm->field->ourGoal()) < sol2.dist(wm->field->ourGoal()) ? sol1 : sol2, 0.1);
+                                else
+                                    target = inter1.dist(defensePoints[0]) < inter2.dist(defensePoints[0]) ? inter1 : inter2;
                             }
                             else{
-                                target = wm->field->ourGoal() + offsetGoalkeeperPosition;
-                                threshOld = 2.0;
+                                target = ttarget;
                             }
-                        }
-                        else if(defenseCount == 1){
-                            if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 2.0 ){
-                                draw(QString("oneDef"), Vector2D(2,0),"red");
-                                //Circle2D(wm->field->ourGoal() , 1.28).intersection(Segment2D(wm->ball->pos , AZBisecOpenSeg.intersection(aimLessLine)) , &sol1 , &sol2);
-                                //target = knowledge->getPointInDirection(AZBisecOpenSeg.intersection((aimLessLine)) , sol1.dist(wm->field->ourGoal()) < sol2.dist(wm->field->ourGoal()) ? sol1 : sol2, 0.1);
-                                Vector2D ttarget = AZBisecOpenSeg.intersection((aimLessLine));
-                                //                            double targetToBallDist = ttarget.dist(ballPos);
-                                //                            double defToBallDist = defensePoints[0].dist(ballPos);
-                                //////////////////
+                            /*
+                                                if( targetToBallDist < defToBallDist ){
 
-                                Circle2D goaliC(wm->field->ourGoal(), 1.35);
-                                draw(goaliC, "blue");
-                                if(!goaliC.contains(ttarget)){
-                                    Vector2D inter1, inter2;
-                                    goaliC.intersection(AZBisecOpenSeg, &inter1, &inter2);
-                                    if( inter1.valid() && !inter2.valid() )
-                                        target = inter1;
-                                    else if( !inter1.valid() && inter2.valid() )
-                                        target = inter2;
-                                    else if( !inter1.valid() && !inter2.valid() )
-                                        target = knowledge->getPointInDirection(AZBisecOpenSeg.intersection((aimLessLine)) , sol1.dist(wm->field->ourGoal()) < sol2.dist(wm->field->ourGoal()) ? sol1 : sol2, 0.1);
-                                    else
-                                        target = inter1.dist(defensePoints[0]) < inter2.dist(defensePoints[0]) ? inter1 : inter2;
-                                }
-                                else{
-                                    target = ttarget;
-                                }
-                                /*
-                                                    if( targetToBallDist < defToBallDist ){
-
-                                                        QList<Vector2D> temp = wm->field->ourPAreaIntersect(AZBisecOpenSeg);
-                                                        double dist = 100;
-                                                        int t;
-                                                        for(int i = 0; i < temp.size() ; i++){
-                                                            if(temp.at(i).dist(ballPos) < dist)
-                                                                t = i;
-                                                        }
-                                                        target = temp.at(t);
-                                                        debug("jelotar", D_ATOUSA);
-
-                                                        Vector2D inter1, inter2;
-                                                        Circle2D ballCircleDefDist(ballPos, defToBallDist);
-                                                        ballCircleDefDist.intersection(AZBisecOpenSeg, &inter1, &inter2);
-                                                        if( inter1.valid() && !inter2.valid() )
-                                                            target = inter1;
-                                                        else if( !inter1.valid() && inter2.valid() )
-                                                            target = inter2;
-                                                        else if( !inter1.valid() && !inter2.valid() )
-                                                            target = knowledge->getPointInDirection(AZBisecOpenSeg.intersection((aimLessLine)) , sol1.dist(wm->field->ourGoal()) < sol2.dist(wm->field->ourGoal()) ? sol1 : sol2, 0.1);
-                                                        else
-                                                            target = inter1.dist(defensePoints[0]) < inter2.dist(defensePoints[0]) ? inter1 : inter2;
-
+                                                    QList<Vector2D> temp = wm->field->ourPAreaIntersect(AZBisecOpenSeg);
+                                                    double dist = 100;
+                                                    int t;
+                                                    for(int i = 0; i < temp.size() ; i++){
+                                                        if(temp.at(i).dist(ballPos) < dist)
+                                                            t = i;
                                                     }
-                                                    else{
-                                                        debug("ttarget", D_ATOUSA);
-                                                        target = ttarget;
-                                                    }
-                                                    */
+                                                    target = temp.at(t);
+                                                    debug("jelotar", D_ATOUSA);
 
-                                draw(target , 1 , "green");
-                                threshOld = 0.0;
-                            }
-                            else{
-                                target = wm->field->ourGoal() + offsetGoalkeeperPosition;
-                                threshOld = 2.0;
-                            }
+                                                    Vector2D inter1, inter2;
+                                                    Circle2D ballCircleDefDist(ballPos, defToBallDist);
+                                                    ballCircleDefDist.intersection(AZBisecOpenSeg, &inter1, &inter2);
+                                                    if( inter1.valid() && !inter2.valid() )
+                                                        target = inter1;
+                                                    else if( !inter1.valid() && inter2.valid() )
+                                                        target = inter2;
+                                                    else if( !inter1.valid() && !inter2.valid() )
+                                                        target = knowledge->getPointInDirection(AZBisecOpenSeg.intersection((aimLessLine)) , sol1.dist(wm->field->ourGoal()) < sol2.dist(wm->field->ourGoal()) ? sol1 : sol2, 0.1);
+                                                    else
+                                                        target = inter1.dist(defensePoints[0]) < inter2.dist(defensePoints[0]) ? inter1 : inter2;
+
+                                                }
+                                                else{
+                                                    debug("ttarget", D_ATOUSA);
+                                                    target = ttarget;
+                                                }
+                                                */
+
+                            draw(target , 1 , "green");
+                            threshOld = 0.0;
                         }
-                        if(!wm->field->isInOurPenaltyArea(target)){
-                            target = getIntersectionWithPenaltyAreaGk(AZBisecOpenSeg);
+                        else{
+                            target = wm->field->ourGoal() + offsetGoalkeeperPosition;
+                            threshOld = 2.0;
                         }
+                    }
+                    if(!wm->field->isInOurPenaltyArea(target)){
+                        target = getIntersectionWithPenaltyAreaGk(AZBisecOpenSeg);
                     }
                 }
                 else{
