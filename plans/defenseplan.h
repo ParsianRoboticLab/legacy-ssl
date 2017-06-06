@@ -129,8 +129,7 @@ protected:
     int lastOpponentAgentsToBeMarkSize;
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;
-    QList <Vector2D> tenLastOpponentDirection;
-    QList <Vector2D> tenLastOpponentPosition;
+    QList <Vector2D> tenLastOpponentDirection;    
     Vector2D opponentPasserDirection;
     Vector2D opponentPasserPossition;
     Vector2D sumOfLastOpponentDirection;

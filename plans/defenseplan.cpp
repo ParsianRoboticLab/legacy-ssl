@@ -11,7 +11,6 @@ using namespace std;
 #define LONG_CHIP_POWER 1023
 #define KICK_POWER 1000
 
-
 ///////////////// AHZ is writing, have you my voice? ... ;) //////////////////
 /////////////////////////// Added for RC 2017 ///////////////////////////////
 bool DefensePlan::isAgentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> stuckIndexs){
@@ -105,6 +104,7 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
     Vector2D sol5 , sol6;
     Vector2D sol7 , sol8;
     QList <Vector2D> sol;
+    QList <Vector2D> tempSol;
     double opponentAgentsCircleR = 0.2;
     QList<int> omittedOpp;
     QList<Circle2D> opponentAgentsCircle;
@@ -124,49 +124,64 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
     /////////////////// Intelligent mark plan ///////////////////////////////
     if((playOn && !knowledge->transientFlag) || knowledge->isStop()){
         sol.clear();
-        AHZCount = 0;
-    }
-    if(playOff){
-        tenLastOpponentDirection.append(wm->opp[knowledge->nearestOppToBall]->dir);
-        if(AHZCount > 10){
-            tenLastOpponentDirection.removeFirst();
-        }
-        AHZCount++;
-    }
-    if(LastTS != knowledge->transientFlag && LastTS == 0){
-        if(AHZCount < 10){
-            for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - (AHZCount - 1) ; i--){
-                sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
-            }
-        }
-        else{
-            for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - 9 ; i--){
-                sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
-            }
-        }
-        if(AHZCount < 10){
-            opponentPasserDirection = sumOfLastOpponentDirection / AHZCount;
-        }
-        else{
-            opponentPasserDirection = sumOfLastOpponentDirection / 10;
-        }
-        opponentPasserPossition = wm->opp[knowledge->nearestOppToBall]->pos;
         tenLastOpponentDirection.clear();
         sumOfLastOpponentDirection = Vector2D(0,0);
+        AHZCount = 0;
     }
+    debug(QString("ten last : %1").arg(tenLastOpponentDirection.size()) , D_AHZ);
+    debug(QString("ahz count : %1").arg(AHZCount) , D_AHZ);
     if(policy()->Mark_IntelligentMarkPrediction()){
+        if(playOff){
+            tenLastOpponentDirection.append(wm->opp[knowledge->nearestOppToBall]->dir);
+            if(AHZCount >= 10){
+                tenLastOpponentDirection.removeFirst();
+            }
+            AHZCount++;
+        }
+        if(LastTS != knowledge->transientFlag && LastTS == 0){
+            if(AHZCount < 10){
+                for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - (AHZCount - 1) ; i--){
+                    sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
+                }
+            }
+            else{
+                for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - 10 ; i--){
+                    sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
+                }
+            }
+            if(AHZCount < 10){
+                opponentPasserDirection = sumOfLastOpponentDirection / AHZCount;
+            }
+            else{
+                opponentPasserDirection = sumOfLastOpponentDirection / 10;
+            }
+            opponentPasserPossition = wm->opp[knowledge->nearestOppToBall]->pos;
+        }
         if(knowledge->transientFlag){
-            sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
-            if(sol.size()){
+            if(wm->field->isInOurPenaltyArea(wm->ball->pos)){
+                Segment2D ballPath(wm->ball->pos , wm->ball->pos + (wm->ball->vel.norm()*10));
+                tempSol.append(wm->field->AHZOurPAreaIntersect(ballPath));
+                if(tempSol.size() == 1){
+                    draw(Segment2D(wm->ball->pos , wm->ball->pos + (wm->ball->vel.norm()*10)) , "black");
+                    markPoses.append(tempSol.at(0));
+                    markRoles.append(QString("predictBlocker"));
+                    markAngs.append(wm->field->center() - wm->field->ourGoal());
+                    ourMarkAgentsSize--;
+                }
+            }
+            else{
                 sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
-                draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
-                markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
-                markRoles.append(QString("predictBlocker"));
-                markAngs.append(wm->field->center() - wm->field->ourGoal());
-                ourMarkAgentsSize--;
+                if(sol.size()){
+                    sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+                    draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
+                    markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
+                    markRoles.append(QString("predictBlocker"));
+                    markAngs.append(wm->field->center() - wm->field->ourGoal());
+                    ourMarkAgentsSize--;
+                }
             }
         }
-    }
+        }
     LastTS = knowledge->transientFlag;
     ////////////////////////////////////////////////////////////////////////////
     debug(QString("Mark Agents Count : %1").arg(ourMarkAgentsSize) , D_SEPEHR , QColor(Qt::red));
@@ -460,6 +475,7 @@ void DefensePlan::manToManMarkBlockShotInPlayOff(int _markAgentSize){
     bool intelligentMarkType = policy()->Mark_IntelligentMarkType();
     int count;
     QList <Vector2D> sol;
+    QList <Vector2D> tempSol;
     oppmarkedpos.clear();
     markPoses.clear();
     markRoles.clear();
@@ -467,60 +483,64 @@ void DefensePlan::manToManMarkBlockShotInPlayOff(int _markAgentSize){
     //////////// must be refine ///////////////////////////
     if((playOn && !knowledge->transientFlag) || knowledge->isStop()){
         sol.clear();
-        AHZCount = 0;
-    }
-    if(playOff){
-        tenLastOpponentDirection.append(wm->opp[knowledge->nearestOppToBall]->dir);
-        if(AHZCount > 10){
-            tenLastOpponentDirection.removeFirst();
-        }
-        AHZCount++;
-    }
-    if(LastTS != knowledge->transientFlag && LastTS == 0){
-        if(AHZCount < 10){
-            for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - (AHZCount - 1) ; i--){
-                sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
-            }
-        }
-        else{
-            for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - 9 ; i--){
-                sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
-            }
-        }
-        if(AHZCount < 10){
-            opponentPasserDirection = sumOfLastOpponentDirection / AHZCount;
-        }
-        else{
-            opponentPasserDirection = sumOfLastOpponentDirection / 10;
-        }
-        opponentPasserPossition = wm->opp[knowledge->nearestOppToBall]->pos;
+        tempSol.clear();
         tenLastOpponentDirection.clear();
         sumOfLastOpponentDirection = Vector2D(0,0);
+        AHZCount = 0;
     }
+    debug(QString("ten last : %1").arg(tenLastOpponentDirection.size()) , D_AHZ);
+    debug(QString("ahz count : %1").arg(AHZCount) , D_AHZ);
     if(policy()->Mark_IntelligentMarkPrediction()){
-        if(knowledge->transientFlag){
-            sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
-            if(sol.size()){
-                sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
-                draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
-                markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
-                markRoles.append(QString("predictBlocker"));
-                markAngs.append(wm->field->center() - wm->field->ourGoal());
-                _markAgentSize--;
+        if(playOff){
+            tenLastOpponentDirection.append(wm->opp[knowledge->nearestOppToBall]->dir);
+            if(AHZCount >= 10){
+                tenLastOpponentDirection.removeFirst();
             }
+            AHZCount++;
         }
-    }
-    if(intelligentMarkType){
-        if(knowledge->transientFlag){
-            sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
-            if(sol.size()){
-                segmentpershoot = 0.9;
+        if(LastTS != knowledge->transientFlag && LastTS == 0){
+            if(AHZCount < 10){
+                for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - (AHZCount - 1) ; i--){
+                    sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
+                }
             }
             else{
-                segmentpershoot = 0.05;
+                for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - 10 ; i--){
+                    sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
+                }
+            }
+            if(AHZCount < 10){
+                opponentPasserDirection = sumOfLastOpponentDirection / AHZCount;
+            }
+            else{
+                opponentPasserDirection = sumOfLastOpponentDirection / 10;
+            }
+            opponentPasserPossition = wm->opp[knowledge->nearestOppToBall]->pos;
+        }
+        if(knowledge->transientFlag){
+            if(wm->field->isInOurPenaltyArea(wm->ball->pos)){
+                Segment2D ballPath(wm->ball->pos , wm->ball->pos + (wm->ball->vel.norm()*10));
+                tempSol.append(wm->field->AHZOurPAreaIntersect(ballPath));
+                if(tempSol.size() == 1){
+                    draw(Segment2D(wm->ball->pos , wm->ball->pos + (wm->ball->vel.norm()*10)) , "black");
+                    markPoses.append(tempSol.at(0));
+                    markRoles.append(QString("predictBlocker"));
+                    markAngs.append(wm->field->center() - wm->field->ourGoal());
+                    _markAgentSize--;
+                }
+            }
+            else{
+                sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+                if(sol.size()){
+                    sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
+                    draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
+                    markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
+                    markRoles.append(QString("predictBlocker"));
+                    markAngs.append(wm->field->center() - wm->field->ourGoal());
+                    _markAgentSize--;
+                }
             }
         }
-
     }
     LastTS = knowledge->transientFlag;
     //////////////////////////////////////////////////////
@@ -646,7 +666,7 @@ void DefensePlan::setGoalKeeperState(){
             Vector2D Solutions[2];
             Circle2D penaltyArea(wm->field->ourGoal() - Vector2D(0.2,0) , 1.33);
             Segment2D ballLine(BallPos, BallPos + BallVel.norm()*10);
-            Segment2D goalLine(wm->field->ourGoal() + Vector2D(0 , 0.6) , wm->field->ourGoal() - Vector2D(0 , 0.6));
+            Segment2D goalLine(wm->field->ourGoal() + Vector2D(0 , 0.65) , wm->field->ourGoal() - Vector2D(0 , 0.65));
             penaltyArea.intersection(ballLine, &Solutions[0], &Solutions[1]);
             QList<Circle2D> defs;
             double AZBisecOpenAngle=0,AZBigestOpenAngle=0,AZDangerPercent=0;
@@ -698,7 +718,7 @@ void DefensePlan::setGoalKeeperState(){
                 strictfollowThr = 0;
                 return;
             }
-            else if(playOn && ((knowledge->getRealBallVel() > 0.25 || goalieOneTouch)) && (goalLine.intersection(ballLine).valid() || oneTouchCnt < 5)) {
+            else if(playOn && ((knowledge->getRealBallVel() > 0.4 || goalieOneTouch)) && (goalLine.intersection(ballLine).valid() || oneTouchCnt < 5)) {
                 ballBehindGoalie = false, goalieOneTouch = true, goalieInPenaltyAreaPrediction = false, goalieClearMode = false, goalieStrictFollow = false, goalieFollow = false, ballIsOutOfField = false;
                 behindBallThr = 0;
                 strictfollowThr = 0;
@@ -715,13 +735,13 @@ void DefensePlan::setGoalKeeperState(){
                 strictfollowThr = 0;
                 return;
             }
-            if(playOn && ((knowledge->getRealBallVel() < 0.5) || goalieClearMode) && penaltyArea.contains(BallPos)) {
+            if(playOn && ((knowledge->getRealBallVel() < 0.3) || goalieClearMode) && penaltyArea.contains(BallPos)){
                 ballBehindGoalie = false, goalieOneTouch = false, goalieInPenaltyAreaPrediction = false, goalieClearMode = true, goalieStrictFollow = false, goalieFollow = false, ballIsOutOfField = false;
                 behindBallThr = 0;
                 strictfollowThr = 0;
                 return;
             }
-            else if(openAngGoalIntersectionTop.dist(openAngGoalIntersectionBottom) > 0.6 - strictfollowThr || defenseAgents.size() == 1) {
+            else if(openAngGoalIntersectionTop.dist(openAngGoalIntersectionBottom) > 0.6 - strictfollowThr || defenseAgents.size() == 1){
                 ballBehindGoalie = false, goalieOneTouch = false, goalieInPenaltyAreaPrediction = false, goalieClearMode = false, goalieStrictFollow = true, goalieFollow = false, ballIsOutOfField = false;
                 strictfollowThr = 0.15;
                 behindBallThr = 0;
@@ -1177,7 +1197,6 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     findOppAgentsToMark();
     findPos(decideNumOfMarks());
     matchPoints.append(markPoses);
-    debug(QString("TS Flag : %1").arg(knowledge->transientFlag) , D_AHZ);
     draw(QString(" %1 %2").arg(matchPoints.count()).arg(_defenseNum),Vector2D(-2,2),"red");
     draw(QString("  %1").arg(ourAgents.count()),Vector2D(2,2),"red");
     knowledge->Matching(ourAgents,matchPoints,matchResult);
@@ -1265,7 +1284,6 @@ void DefensePlan::execute(){
     ///// Now,we identify the number of defense agents && then this number is
     ///// sent to "matchingDefPos()" function to match between the produced
     ///// points && our agents in defense plan.
-
     int realDefSize = 0;
     debug(QString("defense agents size %1").arg(defenseAgents.size()), D_HAMED);
     ////////////initialize////////////////
