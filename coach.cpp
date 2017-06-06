@@ -111,7 +111,7 @@ CCoach::CCoach(CAgent**_agents)
     defenseTimeForVisionProblem[1].start();
     transientFlag = false;
     trasientTimeOut.start();
-    translationTimeOutTime =  1500;
+    translationTimeOutTime = 1500;
     exeptionPlayMake = NULL;
     exeptionPlayMakeThr = 0;
 
@@ -363,7 +363,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
             preferedDefenseCounts = max(agentsCount - 1 - missMatchIds.count(), 0);
         } else if (transientFlag
                    &&  knowledge->getGameState() != CKnowledge::TheirKickOff) {
-            if (trasientTimeOut.elapsed() > 500) {
+            if (trasientTimeOut.elapsed() > 500 && !wm->field->isInOurPenaltyArea(wm->ball->pos)) {
                 preferedDefenseCounts = min(0, agentsCount - missMatchIds.count() - 1);
 
             } else {
@@ -1049,16 +1049,16 @@ void CCoach::assignDefenseAgents(int defenseCount){
     knowledge->defenseAgents.clear();
     knowledge->defenseAgents.append(defenseAgents);
 }
-bool CCoach::isBallcollide()
-{
+bool CCoach::isBallcollide(){
     // TODO : change this :P
     Circle2D dummyCircle;
     Vector2D sol1,sol2;
-    Segment2D ballPath(wm->ball->pos,wm->ball->pos+wm->ball->vel);
-    for(int i = 0 ; i < wm->our.activeAgentsCount() ; i++) {
+    Segment2D ballPath(wm->ball->pos,wm->ball->pos+wm->ball->vel);    
+    debug("ball is colliding" , D_AHZ);
+    for(int i = 0 ; i < wm->our.activeAgentsCount() ; i++){
         dummyCircle.assign(wm->our.active(i)->pos,0.08);
-        if(dummyCircle.intersection(ballPath,&sol1,&sol2) && wm->our.active(i)->pos.dist(wm->ball->pos) < 0.14 && fabs ((wm->ball->vel - lastBallVel).length()) > 0.5 )  {
-            lastBallVel = wm->ball->vel;
+        if(dummyCircle.intersection(ballPath,&sol1,&sol2) && wm->our.active(i)->pos.dist(wm->ball->pos) < 0.14 && fabs((wm->ball->vel - lastBallVel).length()) > 0.5){
+            lastBallVel = wm->ball->vel;            
             return true;
         }
         if(wm->ball->vel.length() < 0.5 && wm->our.active(i)->pos.dist(wm->ball->pos) < 0.13) {
@@ -1075,12 +1075,12 @@ void CCoach::virtualTheirPlayOffState()
     CKnowledge::State currentState;
     currentState = knowledge->getGameState();
     if(lastState == CKnowledge::TheirDirectKick || lastState == CKnowledge::TheirIndirectKick /*|| lastState == CKnowledge::TheirKickOff*/) {
-        if(currentState == CKnowledge::Start) {
+        if(currentState == CKnowledge::Start){
             transientFlag = true;
         }
     }
 
-    if(transientFlag == false) {
+    if(transientFlag == false){
         trasientTimeOut.restart();
     }
 
@@ -1095,7 +1095,7 @@ void CCoach::virtualTheirPlayOffState()
     if(isBallcollide() ){ // TODO : till we fix function && 0
         transientFlag = false;
     }
-
+    debug(QString("TS flag: %1").arg(transientFlag) , D_AHZ);
     knowledge->transientFlag = transientFlag;
     lastState  = currentState;
 
