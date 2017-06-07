@@ -198,31 +198,45 @@ QList<Vector2D> ballposss;
 
 void CMainApplication::Experimental4(){
 
-    static bool flagg = true;
-    CPolynomialRegression ProRes;
-    QVector<double> *Coeff = new  QVector<double>();
 
-    if(flagg){
-        QList<double> key;
-        QList<int> vals;
-        vals.append(2450);
-        vals.append(1200);
-        vals.append(1060);
-        vals.append(1023);
-        vals.append(1000);
+    static bool fff=true;
 
-        key.append(2);
-        key.append(10);
-        key.append(18);
-        key.append(24);
-        key.append(34);
+    QMap<int, double> kick2, kick7, chip2;
+    kick2 = knowledge->profiler->robotsProfile[2].finalKickMap;
+    chip2 = knowledge->profiler->robotsProfile[2].finalChipMap;
+    kick7 = knowledge->profiler->robotsProfile[7].finalKickMap;
 
-        *Coeff=ProRes.PolynomialRegression(key,vals,2);
+    if(fff){
+        debug("kick 2\n\n" , D_FATEMEH);
+        for(int i=0; i<kick2.keys().size();i++){
+//            debug(QString("%1   ,   %2").arg(kick2.keys().at(i)).arg(kick2.values().at(i)) , D_FATEMEH);
+        }
+        debug("kick 7\n\n" , D_FATEMEH);
+        for(int i=0; i<kick7.keys().size();i++){
+//            debug(QString("%1   ,   %2").arg(kick7.keys().at(i)).arg(kick7.values().at(i)) , D_FATEMEH);
+        }
 
-        debug(QString("1: %1  ,   2: %2  ,   3: %3").arg(Coeff->at(0)).arg(Coeff->at(1)).arg(Coeff->at(2)),D_FATEMEH);
-        flagg = false;
+        for(int i=0; i<20; i++){
+//            debug(QString("%1 , %2").arg(i).arg(knowledge->getProfile(2, i/10.0, true, false)) , D_FATEMEH);
+        }
+
+        debug("\n", D_FATEMEH);
+        for(int i=0; i<20; i++){
+//            debug(QString("%1 , %2").arg(i).arg(knowledge->getProfile(7, i/10.0, true, false)) , D_FATEMEH);
+        }
+
+        debug("chip 2\n\n" , D_FATEMEH);
+        for(int i=0; i<chip2.keys().size(); i++){
+            debug(QString("%1   ,   %2").arg(chip2.keys().at(i)).arg(chip2.values().at(i)) , D_FATEMEH);
+        }
+        debug("\n", D_FATEMEH);
+        for(int i=0; i<40; i++){
+            debug(QString("%1 , %2").arg(i).arg(knowledge->getProfile(2, i/10.0, false, false)) , D_FATEMEH);
+        }
+        fff = false;
     }
-        return;
+
+//    static double moshtagh2=0;
 //    analyze("kickspeed" , wm->ball->vel.length(),true);
 //    debug(QString("ball Speed :%1").arg(wm->ball->vel.length()),D_NADIA);
 //    analyze("moshtagh2",(wm->ball->vel.length()-moshtagh2)*1000,true);

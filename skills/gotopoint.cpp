@@ -1,5 +1,4 @@
-#include "gotopoint.h"
-#include <QDebug>
+#include "gotopoint.h" #include <QDebug>
 #include "knowledge.h"
 #include <QFile>
 #include <mathtools.h>
@@ -798,7 +797,7 @@ void CSkillGotoPoint::execute()
 
 
 
-    debug(QString("dive %1").arg(diveMode),D_MHMMD);
+    //    debug(QString("dive %1").arg(diveMode),D_MHMMD);
 
     angPid->kp = 3;
     angPid->kd = 1;
@@ -924,7 +923,7 @@ CSkillGotoPointAvoid::CSkillGotoPointAvoid(CAgent *_agent) : CSkillGotoPoint(_ag
     keeplooking = false;
     extendStep = -1.0;
     gotopoint = new CSkillGotoPoint(_agent);
-    bangBang = new CNewBangBang;
+    bangBang = new CNewBangBang();
     dynamicStart = true;
     plan2 = false;
     prof = NULL;
@@ -967,9 +966,9 @@ void CSkillGotoPointAvoid::execute()
     agentPos = agent->pos();
     agentVel = agent->vel();
     double dVx,dVy,dW;
-    bangBang->setAccMax(conf()->BangBang_AccMax()*10);
     bangBang->setDecMax(conf()->BangBang_DecMax());
-    bangBang->setOneTouch(oneTouchMode || diveMode);
+    bangBang->setOneTouch(oneTouchMode );
+    bangBang->setDiveMode(diveMode);
     if(slowMode || slow)
     {
         bangBang->setVelMax(1.4);
@@ -980,8 +979,6 @@ void CSkillGotoPointAvoid::execute()
         bangBang->setSlow(false);
         bangBang->setVelMax(conf()->BangBang_VelMax());
     }
-    double maxAcc, maxDec, maxAccNormal, maxDecNormal, velMax, velMaxNorm;
-    double slowDown = 1.0;
     if (!targetPos.valid())
     {
         agent->waitHere();
@@ -991,54 +988,6 @@ void CSkillGotoPointAvoid::execute()
     }
     if (!targetVel.valid())
         vel2.assign(0,0);
-
-
-    gotopoint->setAgent(agent);
-    gotopoint->setLookAt(lookat);
-    gotopoint->setDiveMode(diveMode);
-    if(slow ||slowMode)
-        gotopoint->setSlowMode(true);
-    else
-        gotopoint->setSlowMode(false);
-
-    //    gotopoint->setMaxAcceleration(getMaxAcceleration());
-    //    gotopoint->setMaxDeceleration(getMaxDeceleration());
-    //    gotopoint->setMaxAccelerationNormal(getMaxAccelerationNormal());
-    //    gotopoint->setMaxDecelerationNormal(getMaxDecelerationNormal());
-    //    gotopoint->setMaxVelocity(getMaxVelocity());
-    //    gotopoint->setMaxVelocityNormal(getMaxVelocityNormal());
-    //    gotopoint->setConstantVelocity(getConstantVelocity());
-    //    gotopoint->setDynamicStart(dynamicStart);
-    //    gotopoint->setBiasVel(biasVel);
-    //    gotopoint->setBallMode(ballMode);
-    //    gotopoint->setFasterEnd(fasterEnd);
-    //    gotopoint->setShotTarget(target);
-    //    gotopoint->setSlowShot(slow);
-    //    gotopoint->setmoveLookingTarget(lootTarget);
-    //    gotopoint->setInterceptMode(getInterceptMode());
-    //    gotopoint->setFastW(fastw);
-    //    gotopoint->setOneTouchMode( oneTouchMode);
-    //    gotopoint->setSlowMode( slow);
-    //    gotopoint->setPenaltyKick(penaltyKick);
-
-
-    //    if(noAvoid)
-    //    {
-    //        gotopoint->init(targetPos,targetDir);
-    //        gotopoint->execute();
-    //        return;
-    //    }
-
-    //    if (!inited)
-    //    {
-    //        inited = true;
-    //    }
-    //    if( noAvoid ){
-    //        result.clear();
-    //        result.append(agent->pos());
-    //        result.append(targetPos);
-    //    }
-    //    else{
 
 
 
@@ -1070,30 +1019,27 @@ void CSkillGotoPointAvoid::execute()
         targetDir = (lookat - agentPos).norm();
     }
 
-
+    knowledge->plotWidgetCustom[1] = agentVel.length();
+    debug(QString("speed: %1").arg(agentVel.length()),D_MHMMD);
     ///////////
     targetValidate();
-    agent->initPlanner(agent->id() , targetPos , ourRelaxList , oppRelaxList , avoidPenaltyArea , avoidCenterCircle , ballObstacleRadius);
-    result.clear();
-    for( int i=agent->pathPlannerResult.size()-1 ; i>=0 ; i-- )
-    {
-        result.append(agent->pathPlannerResult[i]);
-    }
-
-    debug(QString("no avoid : %1 size :%2").arg(noAvoid).arg(result.size()),D_MHMMD);
     if(noAvoid)
     {
         result.clear();
     }
-
+    else
+    {
+        agent->initPlanner(agent->id() , targetPos , ourRelaxList , oppRelaxList , avoidPenaltyArea , avoidCenterCircle , ballObstacleRadius);
+        result.clear();
+        for( int i=agent->pathPlannerResult.size()-1 ; i>=0 ; i-- )
+        {
+            result.append(agent->pathPlannerResult[i]);
+        }
+    }
 
     double dist = 0.0;
-    double distN = 0, distT = 0;
-    double a,b;
     bool flag = false;
-    Vector2D mid(0,0);
     Vector2D dir(0,0);
-    Vector2D tempD, firstTempD;
 
     if( result.size() > 1 )
         dir = (result[1] - result[0]).norm();
@@ -1103,12 +1049,6 @@ void CSkillGotoPointAvoid::execute()
     if(result.count())
     {
         lllll= result.last();
-    }
-    double amm=9 , dmm = 6;
-    if (wm->getIsSimulMode())
-    {
-        amm = 4;
-        dmm = 4;
     }
 
 
@@ -1122,9 +1062,8 @@ void CSkillGotoPointAvoid::execute()
             }
             else{
                 alpha = fabs(Vector2D::angleBetween(result[i] - result[0] , result[i+1] - result[i]).degree());
-                vf = -1.0259280143 * log(alpha) + 4.370475303;
+                vf = -1.0259280143 * log(alpha) + 4.570475303;
                 vf = max(vf , 0.5);
-
             }
             D = result[i].dist(result[0]);
             lllll = result[i];
@@ -1139,11 +1078,6 @@ void CSkillGotoPointAvoid::execute()
 
     if ( D > 2.0)
         vf = 4.2;
-    if ( D < 0.5)
-    {
-        D = min(0.54 , dist);
-
-    }
 
 
     ////////////////////// avoid goal posts
@@ -1172,26 +1106,11 @@ void CSkillGotoPointAvoid::execute()
         vf = 0;
     }
 
-    if(0&&nextPos.isValid())
-    {
-
-        if(nextPos != target)
-        {
-            if(lllll == targetPos)
-            {
-                alpha = fabs(Vector2D::angleBetween(targetPos - agentPos , nextPos - targetPos).degree());
-                vf = -1.0259280143 * log(alpha) + 5.8;
-                debug(QString("vf: %1").arg(vf),D_MHMMD);
-                vf = max(vf , 0.5);
-            }
-        }
-    }
-    debug(QString("vf: %1, %2").arg(vf).arg(agent->vel().length()),D_MHMMD);
     bangBang->setSmooth(true);// = false;
     bangBang->bangBangSpeed(agentPos,agentVel,agent->dir(),lllll,targetDir,vf,0.016,dVx,dVy,dW);
     agent->setRobotAbsVel(dVx + addVel.x,dVy + addVel.y,dW);
-    agent->_ACC = 0;
-    agent->_DEC = 0;
+    agent->accelerationLimiter(vf,diveMode||oneTouchMode);
+
 
 
     counter ++;
@@ -1221,6 +1140,52 @@ CSkillGotoPointAvoid* CSkillGotoPointAvoid::setTarget(Vector2D finalPos, Vector2
     setLookAt(Vector2D::INVALIDATED);
     setKeepLooking(false);
     return this;
+}
+
+double CSkillGotoPointAvoid::timeNeeded(CAgent *_agentT,Vector2D posT,double vMax)
+{
+    double _x3;
+    double acc = conf()->BangBang_AccMaxForward();
+    double dec = conf()->BangBang_DecMax();
+    double xSat;
+    Vector2D tAgentVel = _agentT->vel();
+    Vector2D tAgentDir = _agentT->dir();
+    double veltan= (tAgentVel.x)*cos(tAgentDir.th().radian()) + (tAgentVel.y)*sin(tAgentDir.th().radian());
+    double velnorm= -1*(tAgentVel.x)*sin(tAgentDir.th().radian()) + (tAgentVel.y)*cos(tAgentDir.th().radian());
+    if(tAgentVel.length() < 0.2)
+    {
+        acc = (conf()->BangBang_AccMaxForward() + conf()->BangBang_AccMaxNormal())/2;
+    }
+    else
+    {
+        acc = conf()->BangBang_AccMaxForward()*(fabs(veltan)/tAgentVel.length()) + conf()->BangBang_AccMaxNormal()*(fabs(velnorm)/tAgentVel.length());
+    }
+
+    double vMaxReal = sqrt(((_agentT->pos().dist(posT)  + (tAgentVel.length()*tAgentVel.length()/2*acc))*2*acc*dec)/(acc+dec));
+    vMaxReal = min(vMaxReal,4);
+    vMax = min(vMax,vMaxReal);
+    xSat = ((vMax*vMax)-(tAgentVel.length()*tAgentVel.length()))/acc + (vMax*vMax)/dec;
+    _x3 = ( -1* tAgentVel.length()*tAgentVel.length()) / (-2 * fabs(conf()->BangBang_DecMax())) ;
+
+    if(_agentT->pos().dist(posT) < _x3 ) {
+        return (tAgentVel.length()/conf()->BangBang_DecMax());
+    }
+    else if(tAgentVel.length() < (vMax)){
+        if(_agentT->pos().dist(posT) < xSat)
+        {
+            return vMax/dec + (vMax-tAgentVel.length())/acc + (_agentT->pos().dist(posT) - ((vMax*vMax/(2*dec)) + ((vMax+tAgentVel.length())*(vMax-tAgentVel.length())/acc))/2)/vMax;
+        }
+        else
+        {
+            return vMax/dec + (vMax-tAgentVel.length())/acc;
+        }
+    }
+    else
+    {
+        return vMax/dec + (_agentT->pos().dist(posT) - ((vMax*vMax/(2*dec)) ))/vMax;
+
+    }
+
 }
 
 //------------------------------------------------------------

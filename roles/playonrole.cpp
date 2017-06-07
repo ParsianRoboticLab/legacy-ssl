@@ -45,15 +45,15 @@ void CRolePlayOn::initTask()
         case roleSkill::Kick:
             kickSkill->setAgent(agent);
             kickSkill->setTarget(target);
-            kickSkill->setTolerance(tolerance);
+            kickSkill->setTolerance(1);
             kickSkill->setChip(chip);
             kickSkill->setSpin(spin);
-            kickSkill->setKickSpeed(kickSpeed);
+            kickSkill->setKickSpeed(1023);
             kickSkill->setPassProfiler(true);
             kickSkill->setAvoidPenaltyArea(avoidPenaltyArea);
             kickSkill->setIsGotoPointAvoid(isGotoPointAvoid);
             //fateme
-            kickSkill->setDontKick(dontKick);
+            kickSkill->setPassProfiler(false);
         break;
         case roleSkill::ReceivePass:
             receivePassSkill->setAgent(agent);
@@ -67,7 +67,7 @@ void CRolePlayOn::initTask()
             oneTouchSkill->setAgent(agent);
             oneTouchSkill->setWaitPos(waitPos);
             oneTouchSkill->setTarget(target);
-            oneTouchSkill->setKickSpeed(kickSpeed);
+            oneTouchSkill->setKickSpeed(1023);
             oneTouchSkill->setChip(chip);
             oneTouchSkill->setAvoidPenaltyArea(avoidPenaltyArea);
         break;
@@ -89,6 +89,7 @@ void CRolePlayOn::execute()
     else if(selectedSkill == roleSkill::Kick)
     {
             kickSkill->execute();
+            debug(QString("kick speed : %1").arg(kickSkill->getKickSpeed()), D_MAHI);
      }
      else if(selectedSkill == roleSkill::ReceivePass)
      {

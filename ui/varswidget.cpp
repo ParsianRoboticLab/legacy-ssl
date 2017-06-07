@@ -76,7 +76,8 @@ CVarsWidget::CVarsWidget()
             ADD_VALUE(Common,Bool,KickSensor,true,"Consider received Kick Sensor")
             ///////////////////////////////////////////////////////bang bang
             ADD_TREE(BangBang,"Bang Bang",false)
-            ADD_VALUE(BangBang,Double,AccMax,3.5,"Acc")
+            ADD_VALUE(BangBang,Double,AccMaxForward,4.5,"Acc Max Forward")
+            ADD_VALUE(BangBang,Double,AccMaxNormal,3.5,"Acc Max Normal")
             ADD_VALUE(BangBang,Double,DecMax,3.5,"Dec")
             ADD_VALUE(BangBang,Double,VelMax,3.5,"Max Vel")
             ADD_VALUE(BangBang,Double,posKP,3,"POS PID KP")
@@ -312,6 +313,9 @@ CPolicyWidget::CPolicyWidget()
     ADD_VALUE(PlayOff, Int, PasserID, 0, "Passer ID ");
     ADD_VALUE(PlayOff, Bool, IDBaseOneToucher, false, "ID Base OneToucher");
     ADD_VALUE(PlayOff, Int, OneToucherID, 0, "One Toucher ID ");
+    ADD_VALUE(PlayOff, Bool, UseFastPlay, false, "Use Fast Play");
+    ADD_VALUE(PlayOff, Bool, UseFirstPlay, false, "Use First Play");
+
     ADD_TREE(DynamicPlay, "DynamicPlay", false);
     ADD_VALUE(DynamicPlay, Double , LowSpeedPass   , 0, "Low Speed Pass");
     ADD_VALUE(DynamicPlay, Double , MediumSpeedPass, 0, "Medium Speed Pass");
@@ -338,6 +342,8 @@ CPolicyWidget::CPolicyWidget()
 
     ADD_VALUE(Mark, Bool, OmmitNearestToBallPlayon, false, "Ommit Nearest To ball Playon");
 
+    ADD_VALUE(Mark, Bool , IntelligentMarkType, false, "Intelligent Mark Type");
+    ADD_VALUE(Mark, Bool , IntelligentMarkPrediction, true, "Intelligent Mark Prediction");
 
     globalWorld=VarXML::read(globalWorld,"policy.xml");
 
@@ -393,7 +399,8 @@ IMPL_VALUE(CVarsWidget,Common,int,Int,Monitor_Interval)
 IMPL_VALUE(CVarsWidget,Common,int,Int,Main_Loop_Interval)
 IMPL_VALUE(CVarsWidget,Common,bool,Bool,KickSensor)
 ////////////////////////////////////////////////////bang bang
-IMPL_VALUE(CVarsWidget,BangBang,double,Double,AccMax)
+IMPL_VALUE(CVarsWidget,BangBang,double,Double,AccMaxForward)
+IMPL_VALUE(CVarsWidget,BangBang,double,Double,AccMaxNormal)
 IMPL_VALUE(CVarsWidget,BangBang,double,Double,DecMax)
 IMPL_VALUE(CVarsWidget,BangBang,double,Double,VelMax)
 IMPL_VALUE(CVarsWidget,BangBang,double,Double,posKP)
@@ -549,6 +556,8 @@ IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, IDBasePasser)
 IMPL_VALUE(CPolicyWidget,PlayOff, int, Int, PasserID)
 IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, IDBaseOneToucher)
 IMPL_VALUE(CPolicyWidget,PlayOff, int, Int, OneToucherID)
+IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, UseFastPlay)
+IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, UseFirstPlay)
 
 IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , LowSpeedPass)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , MediumSpeedPass)
@@ -573,6 +582,8 @@ IMPL_VALUE(CPolicyWidget, Mark, double, Double, ShootRatioBlock)
 IMPL_VALUE(CPolicyWidget, Mark, double, Double, PassRatioBlock)
 IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , OmmitNearestToBallPlayon)
 
+IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , IntelligentMarkType)
+IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , IntelligentMarkPrediction)
 
 
 

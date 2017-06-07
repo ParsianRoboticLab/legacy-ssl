@@ -264,6 +264,7 @@ private:
     CMotionProfile *prof;
     bool pathRestarted;
     CNewBangBang *bangBang;
+
 protected:
     int stucked;
     Vector2D lastPoint;
@@ -275,6 +276,7 @@ protected:
     Vector2D averageDir;
 public:
     double timeStarted, timeEstimated; //for skill widget
+    static double timeNeeded(CAgent *agentT,Vector2D posT,double vMax);
     DEF_SKILL(CSkillGotoPointAvoid);
     CSkillGotoPointAvoid* noRelax();
     CSkillGotoPointAvoid* ourRelax(int element);
@@ -293,10 +295,10 @@ public:
     SkillProperty(CSkillGotoPointAvoid, bool, NoAvoid, noAvoid);
     SkillProperty(CSkillGotoPointAvoid, bool, AvoidCenterCircle, avoidCenterCircle);
     SkillProperty(CSkillGotoPointAvoid, double, BallObstacleRadius , ballObstacleRadius);
-    SkillProperty(CSkillGotoPoint, bool, ADiveMode, diveMode);
-    SkillProperty(CSkillGotoPoint, bool, AvoidBall, avoidBall);
-    SkillProperty(CSkillGotoPoint, bool, AvoidGoalPosts, avoidGoalPosts);
-    SkillProperty(CSkillGotoPoint, Vector2D, NextPos, nextPos);
+    SkillProperty(CSkillGotoPointAvoid, bool, ADiveMode, diveMode);
+    SkillProperty(CSkillGotoPointAvoid, bool, AvoidBall, avoidBall);
+    SkillProperty(CSkillGotoPointAvoid, bool, AvoidGoalPosts, avoidGoalPosts);
+    SkillProperty(CSkillGotoPointAvoid, Vector2D, NextPos, nextPos);
 
     friend class CSkillFollowPoints;
 };

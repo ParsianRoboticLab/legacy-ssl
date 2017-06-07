@@ -158,7 +158,8 @@ SOURCES += main.cpp \
     util/timer.cpp \
     util/rng.cpp \
     collectprofiledata.cpp \
-    chipkick.cpp
+    chipkick.cpp \
+    plays/stopplay.cpp
 
 
 HEADERS += base.h \
@@ -330,7 +331,8 @@ HEADERS += base.h \
     util/rng.h \
     util/vector2.h \
     collectprofiledata.h \
-    chipkick.h
+    chipkick.h \
+    plays/stopplay.h
 
 
 unix:INCLUDEPATH += "/usr/local/include"
@@ -411,24 +413,3 @@ INCLUDEPATH += $$PWD/intentions/
 
 RESOURCES +=
 CONFIG += c++11
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

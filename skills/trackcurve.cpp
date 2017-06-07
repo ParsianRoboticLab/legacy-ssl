@@ -6,7 +6,7 @@ INIT_SKILL(CSkillTrackCurve, "trackcurve");
 
 CSkillTrackCurve::CSkillTrackCurve(CAgent *_agent) : CSkill(_agent)
 {
-    bangBang = new CNewBangBang;
+    bangBang = new CNewBangBang();
     curvePID = new _PID(1,0,0,0,0);
 }
 
@@ -59,8 +59,6 @@ void CSkillTrackCurve::execute()
     //////////////////start
 
     double dVx,dVy,dW;
-    bangBang->setAccMax(conf()->BangBang_AccMax()*10);
-    bangBang->setDecMax(conf()->BangBang_DecMax());
 
     if(slow)
     {

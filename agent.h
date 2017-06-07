@@ -36,8 +36,10 @@ public:
     IntentionBlock blockIntent;
     IntentionPosition positionIntent;
     Vector2D homePos;
-
+ void accelerationLimiter(double vf,bool diveMode = false);
     double goalVisibility;
+    QTime agentStopTime;
+    bool timerReset;
     CAgent(short int _ID);
     bool startTrain;bool stopTrain;double wh1,wh2,wh3,wh4;
     bool starter;
@@ -131,8 +133,8 @@ private:
     void jacobian(double _vx, double _vy, double _w, double &v1, double &v2, double &v3, double &v4);
     void jacobianInverse(double _v1, double _v2, double _v3, double _v4,double &_vx, double &_vy, double &_w);
     bool calibrateGyro;
-    void accelerationLimiter();
 
+    double lastVf,lastVn;
 
     char outputBuffer[_NEW_PACKET_SIZE];
     short int selfID;
