@@ -111,7 +111,7 @@ CCoach::CCoach(CAgent**_agents)
     defenseTimeForVisionProblem[1].start();
     transientFlag = false;
     trasientTimeOut.start();
-    translationTimeOutTime = 1500;
+    translationTimeOutTime = 4500;
     exeptionPlayMake = NULL;
     exeptionPlayMakeThr = 0;
 
@@ -363,7 +363,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
             preferedDefenseCounts = max(agentsCount - 1 - missMatchIds.count(), 0);
         } else if (transientFlag
                    &&  knowledge->getGameState() != CKnowledge::TheirKickOff) {
-            if (trasientTimeOut.elapsed() > 500 && !wm->field->isInOurPenaltyArea(wm->ball->pos)) {
+            if (trasientTimeOut.elapsed() > 4500 && !wm->field->isInOurPenaltyArea(wm->ball->pos)) {
                 preferedDefenseCounts = min(0, agentsCount - missMatchIds.count() - 1);
 
             } else {
@@ -1093,7 +1093,7 @@ void CCoach::virtualTheirPlayOffState()
     }
 
     if(isBallcollide() ){ // TODO : till we fix function && 0
-        transientFlag = false;
+       // transientFlag = false;
     }
     debug(QString("TS flag: %1").arg(transientFlag) , D_AHZ);
     knowledge->transientFlag = transientFlag;

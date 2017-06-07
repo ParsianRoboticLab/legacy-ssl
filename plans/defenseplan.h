@@ -123,7 +123,7 @@ protected:
     bool dangerModeThresholdForDanger;
     bool changeInMarkPlanFlag;
     bool manToManMarkBlockPassFlag;
-    bool markBool;
+    bool ballBool;
     QString lastStateForMark;
     QString stateForMark;
     int lastOpponentAgentsToBeMarkSize;
@@ -133,6 +133,7 @@ protected:
     Vector2D opponentPasserDirection;
     Vector2D opponentPasserPossition;
     Vector2D sumOfLastOpponentDirection;
+    Vector2D tempAHZ;
     Vector2D sumOfLastOpponentPosition;
     int AHZCount;        
     ///////////////////////////////////////////////////
