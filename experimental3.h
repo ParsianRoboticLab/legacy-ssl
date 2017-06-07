@@ -347,9 +347,9 @@ double predictPos(){
 
 void CMainApplication::Experimental3()
 {
-    idd=wm->our.active(wm->our.activeAgentID(0));
-    static CSkillGotoPointAvoid *robot1 = new CSkillGotoPointAvoid(knowledge->getAgent(idd->id));
-    robot1->init(knowledge->getChipPredict(),wm->ball->pos-idd->pos);
+    static CAgent* agent = knowledge->getAgent(wm->our.activeAgentID(0));
+    static CSkillGotoPointAvoid *robot1 = new CSkillGotoPointAvoid(agent);
+    robot1->init(knowledge->getChipPredict() - Vector2D(0,0.3),Vector2D(0,1));
     robot1->execute();
     debug(QString("y:%1").arg(knowledge->getChipPredict().y),D_NADIA);
 
@@ -364,7 +364,7 @@ void CMainApplication::Experimental3()
     dir=knowledge->getChipDir();
     draw(Segment2D(knowledge->chipperPoint , dir*10+knowledge->chipperPoint));
     debug(QString("dir_x:%1,dir_y:%2").arg(dir.x).arg(dir.y),D_NADIA);
-    idd=knowledge->chipperID;
+//    idd=knowledge->chipperID;
     startChipPoint=knowledge->chipperPoint;
 
     //    debug(QString("2.5: %1").arg(knowledge->getProfile(2 , 35/10.0 , true , false)),D_NADIA);
