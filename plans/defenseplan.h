@@ -33,16 +33,17 @@ public:
     //HMD
     Vector2D getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Segment2D _seg);    
     //HMD Finish
+
+    kk2Angles getIntersections(Vector2D _ballPos, double _radius);
+    double getRobotAngle(double _radius);
+    Vector2D getXYByAngle(double _angle, double _radius);
+    double findBestRadius(int _numOfDefs);
     double nearRadius[2];
     double farRadius[2];
     bool isNearPenaltyArea;
 
 private:
-    Vector2D getXYByAngle(double _angle, double _radius);
-    double getRobotAngle(double _radius);
     double getAngleByXY(Vector2D _point);
-    kk2Angles getIntersections(Vector2D _ballPos, double _radius);    
-    double findBestRadius(int _numOfDefs);
     double oneDefThr;
     double penaltyAreaOffset;
     double penaltyAreaRadius;
@@ -107,6 +108,10 @@ protected:
     void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> stuckPositions);
     void getIntersectionWithPenaltyAreaAHZ(Segment2D , Vector2D sol1 , Vector2D sol2);
     bool isIndirectArea(Vector2D);    
+
+    //atousa
+    Vector2D getGoaliePositionInOneDef(Vector2D _ballPos, double _limit1, double _limit2);
+
     int angleDegreeThrNotStop = 0;
     double threshOld = 0.0;
     double ballCircleR = 0.5;
