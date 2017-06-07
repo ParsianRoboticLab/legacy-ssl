@@ -4248,10 +4248,6 @@ bool CKnowledge::getNecessaryDefKick() {
 }
 
 
-Vector2D CKnowledge::getBest() {
-
-}
-
 Vector2D CKnowledge::getChipDir(){
 
 
