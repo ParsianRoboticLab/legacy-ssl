@@ -41,10 +41,10 @@ public:
     double nearRadius[2];
     double farRadius[2];
     bool isNearPenaltyArea;
+    double oneDefThr;
 
 private:
     double getAngleByXY(Vector2D _point);
-    double oneDefThr;
     double penaltyAreaOffset;
     double penaltyAreaRadius;
     Circle2D penaltyAreaCircle;

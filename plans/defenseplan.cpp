@@ -2381,12 +2381,12 @@ kk2Angles CDefPos::getIntersections(Vector2D _ballPos, double _radius){
         tempSwap = tempAngles.angle1;
         tempAngles.angle1 = tempAngles.angle2;
         tempAngles.angle2 = tempSwap;
-        draw(QString("* %1").arg(tempAngles.angle1), inter2, "cyan");
-        draw(QString("* %1").arg(tempAngles.angle2), inter1, "cyan");
+        //draw(QString("* %1").arg(tempAngles.angle1), inter2, "cyan");
+        //draw(QString("* %1").arg(tempAngles.angle2), inter1, "cyan");
     }
     else{
-        draw(QString("* %1").arg(tempAngles.angle1), inter1, "cyan");
-        draw(QString("* %1").arg(tempAngles.angle2), inter2, "cyan");
+        //draw(QString("* %1").arg(tempAngles.angle1), inter1, "cyan");
+        //draw(QString("* %1").arg(tempAngles.angle2), inter2, "cyan");
     }
     return tempAngles;
 }
@@ -3090,9 +3090,11 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
                                 threshOld = 2.0;
                             }
                         }
-                        if(!wm->field->isInOurPenaltyArea(target)){
+
+                        if( !(defenseCount == 1) && !wm->field->isInOurPenaltyArea(target)){
                             target = getIntersectionWithPenaltyAreaGk(AZBisecOpenSeg);
                         }
+
                     }
                 }
                 else{
@@ -3343,7 +3345,7 @@ kkDefPos CDefPos::getDefPositions(Vector2D _ballPos, int _size, double _limit1, 
             if(isNearPenaltyArea){
                 tempBestRadius = nearRadius[0];
             }
-            if(_ballPos.y < 0 ){
+            if(_ballPos.y < 0 + oneDefThr){
                 tempDefPos.pos[0] = getXYByAngle(tempAngles.angle1+agentAngle/2, tempBestRadius);
                 oneDefThr = 1;
             }
