@@ -9,6 +9,8 @@
 #include <QDebug>
 #include <QVector2D>
 
+#include "defpos.h"
+
 //#include "simulation/simulator.h"
 //#include <widgets.h>
 
@@ -97,9 +99,6 @@ struct SRAgentArgs {
     double SpinSpeed;
     bool updated;
 };
-
-
-
 
 
 class CKnowledge
@@ -217,6 +216,33 @@ public:
     bool isSimulMode;
     void updateGameState();
     //////////////Mahmoud
+    //chip dir predict
+    Vector2D getChipDir();
+    double chipperDistance=100;
+    qint32 chipperIDD=-1,chipperID=-1;
+    bool DirFound=false;
+    Vector2D chipperDir=Vector2D(0,0);
+    Vector2D prevBallPos,chipperPoint=Vector2D(0,0);
+    QMap<qint32,QList<Vector2D> > lastDirs;
+    //chip predict
+    QList<Vector2D> predictedBallPoses;
+    bool flagN = true;
+    QList<double> prev_Ball_pos;
+    Vector2D dir;
+    Vector2D startChipPoint ;
+    double startBallVel;
+    double previousPos=0.0;
+    double prevPos=0.0;
+    double chipPredictCounter = 1;
+    Vector2D predictedPosition=Vector2D(0,0);
+    double refiner=1.3;
+
+    double refine(double x);
+    double predictPos();
+    Vector2D getChipPredict();
+    //
+    int getChipArea(double);
+    //
     Vector2D getBestPosToShootToGoal(Vector2D from, double &regionWidth, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, bool oppGaol);
     Vector2D getBestPosForPassReciever(Rect2D searchRegion, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, Rect2D avoidRect);
     Vector2D getBestPosForPassReciever(QList<Rect2D> searchRegions, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, QList<Rect2D> avoidRects,int passRecieverID, int passSenderID,double angleFactor,double angle0);
