@@ -72,6 +72,10 @@ protected:
     void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> stuckPositions);
     void getIntersectionWithPenaltyAreaAHZ(Segment2D , Vector2D sol1 , Vector2D sol2);
     bool isIndirectArea(Vector2D);    
+
+    //atousa
+    Vector2D getGoaliePositionInOneDef(Vector2D _ballPos, double _limit1, double _limit2);
+
     int angleDegreeThrNotStop = 0;
     double threshOld = 0.0;
     double ballCircleR = 0.5;

@@ -11,6 +11,7 @@ using namespace std;
 #define LONG_CHIP_POWER 1023
 #define KICK_POWER 1000
 
+//double CDefPos::oneDefThr = 0;
 
 ///////////////// AHZ is writing, have you my voice? ... ;) //////////////////
 /////////////////////////// Added for RC 2017 ///////////////////////////////
@@ -2903,62 +2904,7 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
                         else if(defenseCount == 1){
                             if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 2.0 ){
                                 draw(QString("oneDef"), Vector2D(2,0),"red");
-                                //Circle2D(wm->field->ourGoal() , 1.28).intersection(Segment2D(wm->ball->pos , AZBisecOpenSeg.intersection(aimLessLine)) , &sol1 , &sol2);
-                                //target = getPointInDirection(AZBisecOpenSeg.intersection((aimLessLine)) , sol1.dist(wm->field->ourGoal()) < sol2.dist(wm->field->ourGoal()) ? sol1 : sol2, 0.1);
-                                Vector2D ttarget = AZBisecOpenSeg.intersection((aimLessLine));
-                                //                            double targetToBallDist = ttarget.dist(ballPos);
-                                //                            double defToBallDist = defensePoints[0].dist(ballPos);
-                                //////////////////
-
-                                Circle2D goaliC(wm->field->ourGoal(), 1.35);
-                                draw(goaliC, "blue");
-                                if(!goaliC.contains(ttarget)){
-                                    Vector2D inter1, inter2;
-                                    goaliC.intersection(AZBisecOpenSeg, &inter1, &inter2);
-                                    if( inter1.valid() && !inter2.valid() )
-                                        target = inter1;
-                                    else if( !inter1.valid() && inter2.valid() )
-                                        target = inter2;
-                                    else if( !inter1.valid() && !inter2.valid() )
-                                        target = getPointInDirection(AZBisecOpenSeg.intersection((aimLessLine)) , sol1.dist(wm->field->ourGoal()) < sol2.dist(wm->field->ourGoal()) ? sol1 : sol2, 0.1);
-                                    else
-                                        target = inter1.dist(defensePoints[0]) < inter2.dist(defensePoints[0]) ? inter1 : inter2;
-                                }
-                                else{
-                                    target = ttarget;
-                                }
-                                /*
-                                                    if( targetToBallDist < defToBallDist ){
-
-                                                        QList<Vector2D> temp = wm->field->ourPAreaIntersect(AZBisecOpenSeg);
-                                                        double dist = 100;
-                                                        int t;
-                                                        for(int i = 0; i < temp.size() ; i++){
-                                                            if(temp.at(i).dist(ballPos) < dist)
-                                                                t = i;
-                                                        }
-                                                        target = temp.at(t);
-                                                        debug("jelotar", D_ATOUSA);
-
-                                                        Vector2D inter1, inter2;
-                                                        Circle2D ballCircleDefDist(ballPos, defToBallDist);
-                                                        ballCircleDefDist.intersection(AZBisecOpenSeg, &inter1, &inter2);
-                                                        if( inter1.valid() && !inter2.valid() )
-                                                            target = inter1;
-                                                        else if( !inter1.valid() && inter2.valid() )
-                                                            target = inter2;
-                                                        else if( !inter1.valid() && !inter2.valid() )
-                                                            target = getPointInDirection(AZBisecOpenSeg.intersection((aimLessLine)) , sol1.dist(wm->field->ourGoal()) < sol2.dist(wm->field->ourGoal()) ? sol1 : sol2, 0.1);
-                                                        else
-                                                            target = inter1.dist(defensePoints[0]) < inter2.dist(defensePoints[0]) ? inter1 : inter2;
-
-                                                    }
-                                                    else{
-                                                        debug("ttarget", D_ATOUSA);
-                                                        target = ttarget;
-                                                    }
-                                                    */
-
+                                target = getGoaliePositionInOneDef(ballPos, 0.1, 1.35);
                                 draw(target , 1 , "green");
                                 threshOld = 0.0;
                             }
@@ -2967,22 +2913,63 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
                                 threshOld = 2.0;
                             }
                         }
-                        if(!wm->field->isInOurPenaltyArea(target)){
+
+                        if( !(defenseCount == 1) && !wm->field->isInOurPenaltyArea(target)){
                             target = getIntersectionWithPenaltyAreaGk(AZBisecOpenSeg);
                         }
+
                     }
                 }
-                    else{
-                        target = getIntersectionWithPenaltyAreaGk(AZBisecOpenSeg);
-                    }
-            }
-            if((!wm->field->isInField(target) || target.x < -4.4) && defenseCount == 2){
-                target = AZBisecOpenSeg.intersection(goalLine) + offsetGoalkeeperPosition;
+                else{
+                    target = getIntersectionWithPenaltyAreaGk(AZBisecOpenSeg);
+                }
             }
         }
-        return target;
+        if((!wm->field->isInField(target) || target.x < -4.4) && defenseCount == 2){
+            target = AZBisecOpenSeg.intersection(goalLine) + offsetGoalkeeperPosition;
+        }
     }
+    return target;
 }
+
+
+Vector2D DefensePlan::getGoaliePositionInOneDef(Vector2D _ballPos, double _limit1, double _limit2){
+    CDefPos *tempCDef = new CDefPos();
+    Vector2D goalieTarget;
+    double tempBestRadius = _ballPos.dist(wm->field->ourGoal())/2;
+    if(tempCDef->findBestRadius(tempDefPos.size) != -1){
+        tempBestRadius = tempCDef->findBestRadius(tempDefPos.size);
+    }
+    if(tempBestRadius > _limit2){
+        tempBestRadius = _limit2;
+    }
+    else if(tempBestRadius < _limit1){
+        tempBestRadius = _limit1;
+    }
+
+    kk2Angles tempAngles = tempCDef->getIntersections(wm->ball->pos, tempBestRadius);
+    //double tempOpenAngle = fabs(tempAngles.angle2 - tempAngles.angle1);
+    //draw(QString::number(tempBestRadius), Vector2D(-1, -_FIELD_HEIGHT/2 - 0.2));
+
+    double agentAngle = tempCDef->getRobotAngle(tempBestRadius);
+    draw(QString::number(agentAngle), Vector2D(-1, -_FIELD_HEIGHT/2 - 0.4));
+    //double openAngleAfterPositioning = tempOpenAngle - (agentAngle * _size);
+
+    //draw(Circle2D(wm->field->ourGoal(), tempBestRadius), "yellow");
+
+    if(wm->ball->pos.y < 0){
+//    if(wm->ball->pos.y < 0 + CDefPos::oneDefThr){
+        goalieTarget = tempCDef->getXYByAngle(tempAngles.angle2-agentAngle/2, tempBestRadius);
+        //oneDefThr = 1;
+    }
+    else{
+        goalieTarget = tempCDef->getXYByAngle(tempAngles.angle1+agentAngle/2, tempBestRadius);
+        //oneDefThr = -1;
+    }
+
+    return goalieTarget;
+}
+
 
 Vector2D DefensePlan::followBall(Vector2D _ballPos){
     ////////////////////////////// Variables of this function //////////////////////////

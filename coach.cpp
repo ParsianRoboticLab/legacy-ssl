@@ -390,6 +390,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         preferedDefenseCounts = 2;
     }
 
+    preferedDefenseCounts = 1;
     lastPreferredDefenseCounts = preferedDefenseCounts;
 }
 
