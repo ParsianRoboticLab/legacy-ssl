@@ -55,6 +55,15 @@ CPlayOff::~CPlayOff()
 void CPlayOff::globalExecute() {
 
     if (masterMode == NGameOff::StaticPlay) {
+
+        debug(QString("lastTime : %1").arg(knowledge->getCurrentTime() - lastTime), D_MAHI);
+        if (knowledge->getCurrentTime() - lastTime > 1000 && !initial) {
+            // TODO : write critical play here
+            playOnFlag = true;
+            return;
+        }
+
+
         Q_ASSERT(masterPlan != NULL);
         if(masterPlan != NULL) {
             debug (QString("Plan Number : %1 ==> ").arg(masterPlan->gui.planFile), D_MAHI);
@@ -62,6 +71,7 @@ void CPlayOff::globalExecute() {
             if (initial) {
                 qDebug() << *masterPlan;
                 lastBallPos = wm->ball->pos;
+                lastTime = knowledge->getCurrentTime();
             }
             staticExecute();
         } else {
@@ -1156,7 +1166,7 @@ void CPlayOff::assignMove(CRolePlayOff* _roleAgent,
     if (_posAgent.getArgs().staticPos == POBALLPOS) { // First Passer
 
         _roleAgent -> setTimeBased(true);
-        _roleAgent -> setTarget(wm->ball->pos - Vector2D(0.30, 0));
+        _roleAgent -> setTarget(wm->ball->pos - Vector2D(0.20, 0));
         _roleAgent -> setTargetDir(wm->ball->pos - _roleAgent->getAgent()->pos());
         _roleAgent -> setSlow(true);
         _roleAgent -> setMaxVelocity(1);
