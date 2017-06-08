@@ -437,7 +437,6 @@ void CPolynomialRegression::fitToDataSet(QList<QPair<double, double> > newDataSe
     A.resize(n + 1, 1);
     B.resize(n + 1, n + 1);
     B.e(0,0)=DataSet.count();
-
     for(int i=0; i<=2*n; i++)
     {
         double sum = 0;

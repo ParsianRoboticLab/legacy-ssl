@@ -86,6 +86,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
 
 
+
     staticPoses.clear();
     for(int _i = 0 ; _i < 5 ; _i++)
     {
@@ -4244,6 +4245,116 @@ void CKnowledge::setNecessaryDefKick(bool tempNcssryDefKick) {
 
 bool CKnowledge::getNecessaryDefKick() {
     return necessaryDefKick;
+}
+
+
+Vector2D CKnowledge::getChipDir(){
+
+
+    chipperDistance=100;
+
+    for(int i=0;i<wm->opp.activeAgentsCount();i++){
+        chipperIDD=wm->opp.activeAgentID(i);
+        if(!lastDirs.keys().contains(chipperIDD))
+            lastDirs[chipperIDD]=QList<Vector2D>();
+//        else
+//            lastDirs.remove(chipperIDD);
+
+        if(Circle2D(wm->opp[chipperIDD]->pos , 0.2).contains(wm->ball->pos)){
+            if((wm->ball->pos-wm->opp[chipperIDD]->pos).length()<chipperDistance && wm->ball->vel.length()<0.1){
+                chipperID=chipperIDD;
+                chipperDistance=(wm->ball->pos-wm->opp[chipperIDD]->pos).length();
+                chipperPoint=wm->opp[chipperID]->pos;
+            }
+            lastDirs[chipperIDD].append(wm->opp[chipperIDD]->dir);
+            if(lastDirs[chipperIDD].count() > 10)
+                lastDirs[chipperIDD].removeFirst();
+        }
+        else if (chipperID==chipperIDD && wm->ball->vel.length()>0.1) {
+            DirFound=true;
+        }
+        if(wm->ball->vel.length()<0.1)
+            DirFound=false;
+    }
+    debug(QString("chipperID:%1").arg(chipperID),D_NADIA);
+if(DirFound)
+{
+    chipperDir=Vector2D(0,0);
+    for(int i=lastDirs[chipperID].count()-2; i>3; i--){
+        chipperDir+=lastDirs[chipperID].at(i-1);
+    }
+    chipperDir/=5;
+    return chipperDir;
+}
+else
+    return Vector2D(0,0);
+
+
+prevBallPos=wm->ball->pos;
+
+}
+
+double CKnowledge::refine(double x) {
+    //    return x*x*3/30 - x*2 + 70;
+    return x*x/1.5 - x*0.3 + 50;
+    //    return 3.98 - x*1.01 + x*x*0.13;
+    //    return 3.43 - x*0.74 + x*x*0.085;
+    //    return 32;
+}
+
+double CKnowledge::predictPos(){
+    double sum=0;
+    sum = prev_Ball_pos.at(prev_Ball_pos.length() - 1) - prev_Ball_pos.at(0);
+    sum /= ( prev_Ball_pos.length()-1 );
+    return sum;
+}
+
+
+Vector2D CKnowledge::getChipPredict(){
+    dir=knowledge->getChipDir();
+    draw(Segment2D(knowledge->chipperPoint , dir*10+knowledge->chipperPoint));
+    debug(QString("dir_x:%1,dir_y:%2").arg(dir.x).arg(dir.y),D_NADIA);
+    startChipPoint=knowledge->chipperPoint;
+
+
+
+
+    if(wm->ball->vel.length() < 0.1 /*|| Circle2D(Vector2D(wm->ball->pos,0.03).contains()*/){
+        chipPredictCounter=1;
+        predictedBallPoses.clear();
+        prev_Ball_pos.clear();
+
+    }
+    else
+    {
+//        prev_Ball_pos.append(wm->ball->pos.y);
+
+        prev_Ball_pos.append(/*( ((wm->ball->pos - startChipPoint).angleWith(dir - startChipPoint)).tan() )**/(wm->ball->pos - startChipPoint).length());
+
+        double x=predictPos()*refine(chipPredictCounter)/(double)chipPredictCounter;
+        debug(QString("predict pos:%1").arg(x),D_NADIA);
+        if(chipPredictCounter<2)
+            refiner=1+x*0.8;
+        predictedBallPoses.append(( x + 1 )*(refiner)*(dir.norm())+startChipPoint);
+
+        predictedPosition=Vector2D(0,0);
+
+        for(int i=0;i<predictedBallPoses.size();i+=1){
+            if(i>14)
+                break;
+            predictedPosition+=predictedBallPoses.at(i);
+            draw(predictedBallPoses.at(i));
+        }
+        if(predictedBallPoses.size()<15)
+            predictedPosition/=predictedBallPoses.size();
+        else
+            predictedPosition/=15;
+
+        debug(QString("counter: %1").arg(chipPredictCounter),D_NADIA);
+
+    }
+    chipPredictCounter++;
+    return predictedPosition;
 }
 
 struct VectorIndex {

@@ -1581,7 +1581,7 @@ void CPlotWidget::pauseClicked(){
 
 void CPlotWidget::savePicClicked()
 {
-    //    graph->save("cycle"+QString::number(cycleCounter)+".jpg",QSize(640,480));
+//        graph->save("plot/cycle"+QString::number(cycleCounter)+".jpg",QSize(640,480));
 }
 
 CMonitorWidget::CMonitorWidget(CDrawer *_drawerBuffer, QWidget *parent)

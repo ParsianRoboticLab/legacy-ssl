@@ -2524,6 +2524,7 @@ void DefensePlan::findOppAgentsToMark(){
         for(int i = 0; i < oppAgentsToMark.count(); i++){
             if(oppAgentsToMark[i]->pos.x > policy()->Mark_OppOmitLimitPlayoff()){
                 oppAgentsToMark.removeOne(oppAgentsToMark[i]);
+                // a minor change
                 // TODO: chage the transeint this flag
                 /*if(oppAgentsToMark[i]->vel.length() > 1)
                 HMDtransient = 1;*/
@@ -3144,6 +3145,7 @@ Vector2D DefensePlan::getGoaliePositionInOneDef(Vector2D _ballPos, double _limit
         goalieTarget = tempCDef->getXYByAngle(tempAngles.angle1+agentAngle/2, tempBestRadius);
         //oneDefThr = -1;
     }
+}
 
     return goalieTarget;
 }

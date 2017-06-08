@@ -685,7 +685,7 @@ kckMode CSkillKick::decideMode()
     robotKickArea.addVertex(agentPos+agent->dir().norm()*0.35-agent->dir().rotate(90).norm()*0.01);
     robotKickArea.addVertex(agentPos+agent->dir().norm()*0.08-agent->dir().rotate(90).norm()*0.01);
 
-    if(1 || passProfiler || kickWithCenterOfDribbler) {
+    if(passProfiler || kickWithCenterOfDribbler) {
         if(dribblerArea.contains(ballPos) && robotKickArea.contains(ballPos))
             kickerOn = true;
         else
@@ -1155,7 +1155,7 @@ void CSkillKick::turnForKick()
         target = findMostPossible();
     agent->setRoller(0);
 
-    if(0 && knowledge->isOurNonPlayOnKick())
+    if( knowledge->isOurNonPlayOnKick())
     {
         if ((agentDir.th() - kickFinalDir).degree()  <- 10 )
         {
@@ -1164,9 +1164,9 @@ void CSkillKick::turnForKick()
             angPid->error = ((ballPos - agentPos).th() - agentDir.th()).radian();
             draw(QString("ang: %1 ").arg((ballPos - agentPos).th().radian() - _PI/2),Vector2D(0,0),"red");
             if(slow)
-                agent->setRobotVel( -0.17 + agentPos.dist(ballPos) ,-1,angPid->PID_OUT() +1.5);
+                agent->setRobotVel( -0.17 + agentPos.dist(ballPos) ,-1.2,angPid->PID_OUT() +1);
             else
-                agent->setRobotVel( -0.17 + agentPos.dist(ballPos) ,-1,angPid->PID_OUT() +1.5);
+                agent->setRobotVel( -0.17 + agentPos.dist(ballPos) ,-1.2,angPid->PID_OUT() +1);
 
 
         }
@@ -1178,9 +1178,9 @@ void CSkillKick::turnForKick()
             draw(QString("ang: %1 ").arg((ballPos - agentPos).th().radian() + _PI/2),Vector2D(0,0),"red");
 
             if(slow)
-                agent->setRobotVel( -0.17 + agentPos.dist(ballPos),1,angPid->PID_OUT() - 1.5);
+                agent->setRobotVel( -0.17 + agentPos.dist(ballPos),1.2,angPid->PID_OUT() - 1);
             else
-                agent->setRobotVel( -0.17 + agentPos.dist(ballPos),1,angPid->PID_OUT() - 1.5) ;
+                agent->setRobotVel( -0.17 + agentPos.dist(ballPos),1.2,angPid->PID_OUT() - 1) ;
 
 
         }

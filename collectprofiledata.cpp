@@ -769,6 +769,7 @@ void CollectProfileData::start(){
         profiler->save(JSON , filename);
         debug("file saved" , D_FATEMEH);
         prfState=endState;
+        debug(QString("file name : %1").arg(filename) , D_NADIA);
 
         break;
         //chip

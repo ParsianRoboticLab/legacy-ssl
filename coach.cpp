@@ -130,7 +130,7 @@ CCoach::~CCoach()
 
 void CCoach::saveGoalie()
 {
-    debug((QString("goalie under net timer : %1").arg(goalieTimer.elapsed())),D_MHMMD);
+//    debug((QString("goalie under net timer : %1").arg(goalieTimer.elapsed())),D_MHMMD);
     if(goalieTimer.elapsed() > 100 && knowledge->goalie != NULL)
     {
         knowledge->goalie->setRobotAbsVel(1,0,0);

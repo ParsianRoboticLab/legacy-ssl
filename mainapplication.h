@@ -222,6 +222,7 @@ public:
     QAction *setExp6Act;
     QAction *setJsHandy;
     QAction *setAutoBallPlacement;
+    QAction *setTC_chipKick;
     QAction *setFProfiler;
     QAction *setKProfiler;
     QAction *setTechnicalChallengeAct;
