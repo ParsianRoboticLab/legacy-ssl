@@ -11,6 +11,7 @@
 
 #include <QApplication>
 
+#include <algorithm>
 QMap<QString, EditData*> CCoach::editData;
 
 CCoach::CCoach(CAgent**_agents)
@@ -116,6 +117,10 @@ CCoach::CCoach(CAgent**_agents)
     exeptionPlayMakeThr = 0;
 
     staticPlayoffPlansCounter = 0;
+    shuffleCounter = 0;
+    shuffleSize = 0;
+    shuffled = false;
+    staticPlayoffPlansShuffleIndexing.clear();
     m_planLoader = new CLoadPlayOffJson(QDir::currentPath() + QString("/playoff"));
     goalieAgent = NULL;
     firstPlay = true;
@@ -1749,6 +1754,23 @@ bool CCoach::isRegionMatched(const Vector2D &_ball, const double& regionRadius) 
 
 }
 
+void CCoach::ShufflePlanIndexing(QList<SPlan*> Plans){
+    shuffleSize = 0;
+    staticPlayoffPlansShuffleIndexing.clear();
+
+    for(int i=0; i<Plans.size(); i++){
+        debug(QString("plan%1 cahnce : %2").arg(i).arg(Plans.at(i)->common.chance) , D_FATEMEH);
+        shuffleSize += (int)Plans.at(i)->common.chance;
+        for(int j=0; j<(int)Plans.at(i)->common.chance; j++){
+            staticPlayoffPlansShuffleIndexing.append(i);
+        }
+    }
+
+    std::random_shuffle(staticPlayoffPlansShuffleIndexing.begin(), staticPlayoffPlansShuffleIndexing.end());
+    std::random_shuffle(staticPlayoffPlansShuffleIndexing.begin(), staticPlayoffPlansShuffleIndexing.end());
+    shuffled = true;
+}
+
 NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans) {
     QList<NGameOff::SPlan*> matchedPlan;
 
@@ -1842,7 +1864,11 @@ void CCoach::setPlayOff(NGameOff::EMode _mode) {
 void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
 
 
-    QList<SPlan*> validPlans = getValidPlans(_mode, _ourplayers);
+    static QList<SPlan*> validPlans;
+    QList<SPlan*> prevPlans = validPlans;
+    validPlans.clear();
+    validPlans = validPlans = getValidPlans(_mode, _ourplayers);
+
     if (validPlans.isEmpty()) {
         debug ("[coach] WE DONT HAVE PLAN AT ALL", D_MAHI);
         return;
@@ -1853,6 +1879,43 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     thePlan = chooseMostSuccecfull(validPlans);
 
     /**                   **/
+
+
+    /** PLAN SELECTION BASED ON HISTORY **/
+    /** PLAN SELECTION BASED ON HISTORY **/
+
+
+    /** SHUFFLE PLAN SELECTION**/
+    bool equal = true;
+    if(prevPlans.size() == validPlans.size()){
+        foreach (SPlan* p, validPlans) {
+            if(!prevPlans.contains(p)){
+                equal = false;
+                break;
+            }
+        }
+    }
+    else{
+        equal = false;
+    }
+
+    if(!shuffled || !equal){
+        ShufflePlanIndexing(validPlans);
+        equal = true;
+    }
+
+    if (shuffleCounter >= shuffleSize) {
+        shuffleCounter = 0;
+        shuffled = false;
+    }
+    thePlan = validPlans[staticPlayoffPlansShuffleIndexing.at(shuffleCounter)];
+
+    debug(QString("chosen plan : %1").arg(staticPlayoffPlansShuffleIndexing.at(shuffleCounter)) , D_FATEMEH);
+
+    shuffleCounter++;
+    /** SHUFFLE PLAN SELECTION**/
+
+
 
     /** COUNTER PLAN SELECTION**/
     if (staticPlayoffPlansCounter >= validPlans.size()) {
