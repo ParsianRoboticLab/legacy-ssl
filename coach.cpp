@@ -1871,7 +1871,11 @@ void CCoach::setPlayOff(NGameOff::EMode _mode) {
 void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
 
 
-    QList<SPlan*> validPlans = getValidPlans(_mode, _ourplayers);
+    static QList<SPlan*> validPlans;
+    QList<SPlan*> prevPlans = validPlans;
+    validPlans.clear();
+    validPlans = validPlans = getValidPlans(_mode, _ourplayers);
+
     if (validPlans.isEmpty()) {
         debug ("[coach] WE DONT HAVE PLAN AT ALL", D_MAHI);
         return;
@@ -1885,7 +1889,21 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
 
 
     /** SHUFFLE PLAN SELECTION**/
-    if(!shuffled){
+    bool equal;
+    if(prevPlans.size() == validPlans.size()){
+        for(int i=0; i< validPlans.size(); i++) {
+            if(validPlans.at(i) != prevPlans.at(i)){
+                equal = false;
+                break;
+            }
+        }
+    }
+    else{
+        equal = false;
+    }
+
+    if(!shuffled || !equal){
+        shuffleSize = 0;
         ShufflePlanIndexing(validPlans);
         shuffled = true;
     }
@@ -1895,7 +1913,9 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
         shuffled = false;
     }
     thePlan = validPlans[staticPlayoffPlansShuffleIndexing.at(shuffleCounter)];
+
     debug(QString("chosen plan : %1").arg(staticPlayoffPlansShuffleIndexing.at(shuffleCounter)) , D_FATEMEH);
+
     shuffleCounter++;
     /** SHUFFLE PLAN SELECTION**/
 
