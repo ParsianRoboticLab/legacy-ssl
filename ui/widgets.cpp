@@ -1366,7 +1366,7 @@ CPlotWidget::CPlotWidget()
         cmbXYZ[i]->addItem("Y");
         cmbXYZ[i]->addItem("Lenght");
     }
-    GAIN = 35;
+    GAIN = 30;
 
     graph->graphSize.setWidth(680);
     graph->graphSize.setHeight(300);
@@ -1583,7 +1583,7 @@ void CPlotWidget::pauseClicked(){
 
 void CPlotWidget::savePicClicked()
 {
-    //    graph->save("cycle"+QString::number(cycleCounter)+".jpg",QSize(640,480));
+//        graph->save("plot/cycle"+QString::number(cycleCounter)+".jpg",QSize(640,480));
 }
 
 CMonitorWidget::CMonitorWidget(CDrawer *_drawerBuffer, QWidget *parent)
@@ -3809,6 +3809,7 @@ CNewProfilerWidget::CNewProfilerWidget(QWidget* parent):QDialog(parent){
     repeatNum=new QLineEdit("3",this);
     startProf=new QPushButton("start Profiling",this);
     profilerRobotsList->setLayout(ProfilerLayout);
+    chbxChip=new QCheckBox("Is Chip?",this);
     chbxProf[0]=new QCheckBox("0",this);
     chbxProf[1]=new QCheckBox("1",this);
     chbxProf[2]=new QCheckBox("2",this);
@@ -3832,11 +3833,9 @@ CNewProfilerWidget::CNewProfilerWidget(QWidget* parent):QDialog(parent){
     l->addWidget(repeatNum,3,2);
     l->addWidget(filenamelable,4,1);
     l->addWidget(fileName,4,2);
-    l->addWidget(startProf,5,1);
+    l->addWidget(chbxChip,5,1);
+    l->addWidget(startProf,6,1);
     this->setLayout(l);
-
-
-
 
     connect(startProf , SIGNAL(pressed()) , this , SLOT(startProfFunc()));
 }
@@ -3846,14 +3845,20 @@ CNewProfilerWidget::~CNewProfilerWidget(){
 }
 void CNewProfilerWidget::startProfFunc(){
     int i=0;
+    QString isChip;
     for(int j=0;j<10;j++){
         if(chbxProf[j]->isChecked()){
             collectKickProfile->activeRobots[i]=j;
             i++;
         }
     }
-    collectKickProfile->filename=fileName->text();
     collectKickProfile->repeat=repeatNum->text().toInt();
+    collectKickProfile->isChip=chbxChip->isChecked();
+    if(chbxChip->isChecked())
+        isChip = QString("chip");
+    else
+        isChip = QString("kick");
+    collectKickProfile->filename=fileName->text();
     this->close();
     ProfilerExecute=true;
 }

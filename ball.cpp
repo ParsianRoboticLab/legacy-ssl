@@ -108,7 +108,7 @@ double CBall::getVel()
 }
 Vector2D CBall::getPosInFuture(double _t)
 {
-    return pos + (-0.5*(0.23)*_t*_t + vel.length()*_t)*vel.norm();
+    return pos + (-0.5*(getBallAcc())*_t*_t + vel.length()*_t)*vel.norm();
 }
 
 double CBall::modelWhenIsObjAt(double dToObj)
@@ -158,7 +158,7 @@ Vector2D CBall::getDir()
 
 Vector2D CBall::getStopPos()
 {
-        return pos + vel.norm()*vel.r2() / (2.0*0.23);
+        return pos + vel.norm()*vel.r2() / (2.0*getBallAcc());
 //    if (modelC2<0) return modelObjStopPos;
 //    return Vector2D();
 }
@@ -337,6 +337,7 @@ Vector2D CBall::ballSpeedAt(double dist)
 
 double CBall::getBallAcc(){
   // return Gravity*BallFriction();
+    return 0.23;
         return this->acc.length();
 }
 

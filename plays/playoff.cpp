@@ -109,6 +109,7 @@ void CPlayOff::staticExecute() {
             if(masterPlan->common.currentSize > 1 && havePassInPlan) {
                 passManager();
             }
+
             if(isPlanEnd()) {
                 playOnFlag = true;
             }
@@ -673,7 +674,7 @@ void CPlayOff::firstPlayForOppCorner(int _agentSize) {
         }
     }
     if (finisher == _agentSize) {
-        if (firstStepEnums == Stay) firstStepEnums = Move;
+        if (firstStepEnums == Stay) firstStepEnums = Done;
         else if (firstStepEnums == Move) firstStepEnums = Done;
         else firstStepEnums = Done;
     }
@@ -1099,10 +1100,12 @@ void CPlayOff::assignPass(CRolePlayOff* _roleAgent, const SPositioningAgent& _po
     _roleAgent->setAvoidPenaltyArea(true);
     _roleAgent->setChip(chipOrNot(_posAgent.getArgs()));
     if (_roleAgent->getChip()) {
-        _roleAgent->setKickRealSpeed(static_cast <double> (_posAgent.getArgs().rightData)/100);
-
+//        _roleAgent->setKickSpeed(_posAgent.getArgs().rightData);
+        _roleAgent->setKickRealSpeed(static_cast <double> (_posAgent.getArgs().rightData)/200);
+        debug(QString("VALUE : %1").arg(static_cast <double> (_posAgent.getArgs().rightData)/200), D_MAHI);
     } else {
-        _roleAgent->setKickRealSpeed(static_cast <double> (_posAgent.getArgs().leftData)/100);
+        _roleAgent->setKickSpeed(_posAgent.getArgs().leftData);
+//        _roleAgent->setKickRealSpeed(static_cast <double> (_posAgent.getArgs().leftData)/100);
 
     }
 

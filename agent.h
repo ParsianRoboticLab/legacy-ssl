@@ -36,7 +36,7 @@ public:
     IntentionBlock blockIntent;
     IntentionPosition positionIntent;
     Vector2D homePos;
- void accelerationLimiter();
+ void accelerationLimiter(double vf,bool diveMode = false);
     double goalVisibility;
     QTime agentStopTime;
     bool timerReset;

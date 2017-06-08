@@ -159,8 +159,8 @@ SOURCES += main.cpp \
     util/rng.cpp \
     collectprofiledata.cpp \
     plays/stopplay.cpp \
-    defpos.cpp
-
+    defpos.cpp \
+    chipkick.cpp
 
 HEADERS += base.h \
     worldmodel.h \
@@ -332,8 +332,8 @@ HEADERS += base.h \
     util/vector2.h \
     collectprofiledata.h \
     plays/stopplay.h \
-    defpos.h
-
+    defpos.h \
+    chipkick.h
 
 unix:INCLUDEPATH += "/usr/local/include"
 unix:LIBS += -L/usr/local/include/qjson -lqjson
@@ -413,18 +413,3 @@ INCLUDEPATH += $$PWD/intentions/
 
 RESOURCES +=
 CONFIG += c++11
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

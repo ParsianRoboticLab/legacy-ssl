@@ -65,11 +65,12 @@ void CRolePlayOff::update() {
         kickSkill->setInterceptMode(intercept);
         //debug(QString("[playoffRole] profile kickSpeed : %1 %2").arg(agent->id()).arg(knowledge->getProfile(agent->id(), static_cast<double>(kickSpeed)/130.0, !chip, false)), D_MAHI);
         if (wm->getIsSimulMode()) kickSkill->setKickSpeed(4);
-        else kickSkill->setKickSpeed(max(kickSpeed,350));
+        else kickSkill->setKickSpeed(kickSpeed);
         kickSkill->setChip(chip);
         kickSkill->setAgent(agent);
         kickSkill->setDontKick(!doPass);
         kickSkill->setAgent(agent);
+        kickSkill->setTolerance(0.5);
 
         if(!doPass && !chip && lookForward) {
             kickSkill->setTarget(Vector2D(1000, 0));
@@ -121,7 +122,7 @@ void CRolePlayOff::execute() {
         break;
     case roleSkill::Kick:
         kickSkill->execute();
-        debug(QString("[playoffrole] setkickrealspeed : %2").arg(kickSpeed), D_MAHI);
+        debug(QString("[playoffrole] kickEXE : %2").arg(kickSpeed), D_MAHI);
         break;
     case roleSkill::Mark:
         break;
