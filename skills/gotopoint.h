@@ -276,6 +276,7 @@ protected:
     Vector2D averageDir;
 public:
     double timeStarted, timeEstimated; //for skill widget
+    static double timeNeeded(CAgent *_agentT, Vector2D posT, double vMax, QList <int> _ourRelax, QList <int> _oppRelax , bool avoidPenalty, double ballObstacleReduce, bool _noAvoid);
     DEF_SKILL(CSkillGotoPointAvoid);
     CSkillGotoPointAvoid* noRelax();
     CSkillGotoPointAvoid* ourRelax(int element);
@@ -294,10 +295,10 @@ public:
     SkillProperty(CSkillGotoPointAvoid, bool, NoAvoid, noAvoid);
     SkillProperty(CSkillGotoPointAvoid, bool, AvoidCenterCircle, avoidCenterCircle);
     SkillProperty(CSkillGotoPointAvoid, double, BallObstacleRadius , ballObstacleRadius);
-    SkillProperty(CSkillGotoPoint, bool, ADiveMode, diveMode);
-    SkillProperty(CSkillGotoPoint, bool, AvoidBall, avoidBall);
-    SkillProperty(CSkillGotoPoint, bool, AvoidGoalPosts, avoidGoalPosts);
-    SkillProperty(CSkillGotoPoint, Vector2D, NextPos, nextPos);
+    SkillProperty(CSkillGotoPointAvoid, bool, ADiveMode, diveMode);
+    SkillProperty(CSkillGotoPointAvoid, bool, AvoidBall, avoidBall);
+    SkillProperty(CSkillGotoPointAvoid, bool, AvoidGoalPosts, avoidGoalPosts);
+    SkillProperty(CSkillGotoPointAvoid, Vector2D, NextPos, nextPos);
 
     friend class CSkillFollowPoints;
 };

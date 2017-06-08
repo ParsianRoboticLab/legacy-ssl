@@ -86,6 +86,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
 
 
+
     staticPoses.clear();
     for(int _i = 0 ; _i < 5 ; _i++)
     {
@@ -116,6 +117,12 @@ CKnowledge::CKnowledge(CAgent** _agents)
     CPolynomialFit Proregg;
     QList< QPair<double, double> > dataSet;
 
+
+    QList<double> values , tempResult;
+    QList<int> keys;
+    QVector<double> coeffRes;
+    double tempRes;
+
     for(int i=0; i< 16; i++)
         for(int j=0; j<4; j++)
             for(int k=0; k<81; k++)
@@ -130,30 +137,28 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
     // now fill proper data for RobotsCoeff : e.g. RobotsCoeff[3][0] = 1.32537;
 
-    RobotsCoeff[0][1] = 0.22;
-    RobotsCoeff[1][1] = 0.36;
-    RobotsCoeff[2][1] = 0.4;
-    RobotsCoeff[3][1] = 0.07;
-    RobotsCoeff[4][1] = 0.22;
-    RobotsCoeff[5][1] = -0.03;
-    RobotsCoeff[6][1] = -0.15;
-    RobotsCoeff[7][1] = 0.06;
+//    chip
+//    RobotsCoeff[0][1] = 0.22;
+//    RobotsCoeff[1][1] = 0.36;
+//    RobotsCoeff[2][1] = 0.4;
+//    RobotsCoeff[3][1] = 0.07;
+//    RobotsCoeff[4][1] = 0.22;
+//    RobotsCoeff[5][1] = -0.03;
+//    RobotsCoeff[6][1] = -0.15;
+//    RobotsCoeff[7][1] = 0.06;
 
-    RobotsCoeff[0][0] = 710;
-    RobotsCoeff[1][0] = 750;
-    RobotsCoeff[2][0] = 940;
-    RobotsCoeff[3][0] = 990;
-    RobotsCoeff[4][0] = 780;
-    RobotsCoeff[5][0] = 780;
-    RobotsCoeff[6][0] = 780;
-    RobotsCoeff[7][0] = 800;
+//  kick
+//    RobotsCoeff[0][0] = 710;
+//    RobotsCoeff[1][0] = 750;
+//    RobotsCoeff[2][0] = 940;
+//    RobotsCoeff[3][0] = 990;
+//    RobotsCoeff[4][0] = 780;
+//    RobotsCoeff[5][0] = 780;
+//    RobotsCoeff[6][0] = 780;
+//    RobotsCoeff[7][0] = 800;
 
 
-    profiler->load(JSON);
-
-    QList<double> values;
-    QList<int> keys;
-    double tempRes;
+    profiler->load(JSON, "Chip_2_6.json");
 
     //    ProfilerResult[robotID][0:kick , 1:chip , 2:SpinKick , 3:SpinChip][10*distance(0-80)] ---> contains needed voltage for this distance
 
@@ -184,40 +189,38 @@ CKnowledge::CKnowledge(CAgent** _agents)
     }
 
 
-    keys.clear();
-    values.clear();
-
-
     // chip regression
 
-    //    QPair<double,double> pair;
-    //    pair.first = 0.0;
-    //    pair.second = 0.0;
-    //    dataSet.append(pair);
-
-    //    for(int i=0; i< profiler->robotsProfile[2].finalChipMap.keys().size(); i++){
-    //        pair.first=profiler->robotsProfile[2].finalChipMap.keys().at(i);
-    //        pair.second=profiler->robotsProfile[2].finalChipMap.values().at(i);
-    //        dataSet.append(pair);
-    //    }
-    //    Proregg.fitToDataSet(dataSet);
-
-    //    for(int dis=0; dis<1023; dis+=32){
-    //        debug(QString("dist : %1 , %2").arg(dis).arg(Proregg.val(dis)) , D_FATEMEH);
-    //    }
-
     for(int q=0; q<16; q++){
+        values.clear();
+        keys.clear();
+        dataSet.clear();
+        coeffRes.clear();
+        tempResult.clear();
+
         values = profiler->robotsProfile[q].finalChipMap.values();
         values.insert(0 , 0);
         keys = profiler->robotsProfile[q].finalChipMap.keys();
         keys.insert(0 , 0);
-        ChipCoeff.append(ProRes.PolynomialRegression(values , keys, 3));
 
-        QString("coeff %5 : %1  , %2 , %3  %4").arg(
+        for(int i=0; i<values.size(); i++){
+            QPair<double, double> p;
+            p.second = keys.at(i);
+            p.first = values.at(i);
+            dataSet.append(p);
+        }
+
+        ProRes.fitToDataSet(dataSet , 3);
+        tempResult = ProRes.getCoefs();
+        for(int i=0; i<tempResult.size(); i++){
+            coeffRes.append(tempResult.at(i));
+        }
+
+        ChipCoeff.append(coeffRes);
+
+        QString("coeff %5 : %1  , %2 , %3 , %4").arg(
                     ChipCoeff.at(q).at(0)).arg(ChipCoeff.at(q).at(1)).arg(
                     ChipCoeff.at(q).at(2)).arg(ChipCoeff.at(q).at(3)).arg(q);
-
-        //        qDebug()<<ChipCoeff.at(q).at(0)<<ChipCoeff.at(q).at(1)<<ChipCoeff.at(q).at(2)<<ChipCoeff.at(q).at(3);
     }
 
     for(int q=0; q<16; q++){
@@ -228,46 +231,14 @@ CKnowledge::CKnowledge(CAgent** _agents)
                             ChipCoeff.at(q).at(0) + ChipCoeff.at(q).at(1)*((double)dis/10) +
                             ChipCoeff.at(q).at(2)*((double)dis/10)*((double)dis/10) +
                             ChipCoeff.at(q).at(3)*((double)dis/10)*((double)dis/10)*((double)dis/10) ;
+//                    if(dis < 30)
+//                        debug(QString("reg res : %1 , %2").arg(dis).arg(tempRes) , D_FATEMEH);
                     if(tempRes != 0 )
                         ProfilerResult[q][1][dis] = tempRes;
                     else
                         ProfilerResult[q][1][dis] = -1000;
                 }
     }
-
-
-    for(int q=0; q<2; q++)
-        //    int q=1;
-    {
-        debug("\n" , D_FATEMEH);
-        debug(QString("robot %1_____________________________________________").arg(q) , D_FATEMEH);
-        debug(QString("coeff : %1  , %2 , %3  %4").arg(ChipCoeff.at(q).at(0)).arg(ChipCoeff.at(q).at(1)).arg(ChipCoeff.at(q).at(2)).arg(ChipCoeff.at(q).at(3)),D_FATEMEH);
-
-        //        for(int dis=0; dis<51; dis+=10)
-        //            debug(QString("data : %1,").arg(dis) , D_FATEMEH);
-        //        debug("\n" , D_FATEMEH);
-        //        for(int dis=0; dis<81; dis+=3)
-        //            debug(QString("dataaa : %1,").arg(ProfilerResult[q][1][dis]) , D_FATEMEH);
-
-
-        for(int dis=0; dis<81; dis+=10){
-            debug(QString("reg : %1 , %2").arg(dis/10.0).arg(ProfilerResult[q][1][dis])  , D_FATEMEH);
-        }
-
-        //        debug(QString("raw data robot %1____________________________________").arg(q) , D_FATEMEH);
-
-        //        for(int i=0; i < profiler->robotsProfile[q].finalChipMap.size(); i++)
-        //            debug(QString("%1,").arg(profiler->robotsProfile[q].finalChipMap.keys().at(i)), D_FATEMEH);
-        //        debug("\n" , D_FATEMEH);
-        //        for(int i=0; i < profiler->robotsProfile[q].finalChipMap.size(); i++)
-        //            debug(QString("%1,").arg(profiler->robotsProfile[q].finalChipMap.values().at(i)) , D_FATEMEH);
-
-        //        for(int i=0; i < profiler->robotsProfile[q].finalChipMap.size(); i++)
-        //            debug(QString("%1 , %2").arg(
-        //                      profiler->robotsProfile[q].finalChipMap.keys().at(i)).arg(
-        //                      profiler->robotsProfile[q].finalChipMap.values().at(i)), D_FATEMEH);
-    }
-
 
 }
 
@@ -291,9 +262,9 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
     double profiledParameter=0;
     int type;
 
-    if(wm->getIsSimulMode()){
-        return (int)realParameter;
-    }
+    //    if(wm->getIsSimulMode()){
+    //        return (int)realParameter;
+    //    }
 
     if(isKick && !spinOn)
     {
@@ -317,19 +288,21 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
         return 0;
 
 
-    if(type==1)    //chip
+    ///////////////////////// chip //////////////////////////////////////////////////
+    if(type==1)
     {
-        realParameter+=RobotsCoeff[agentId][1];
+//        realParameter+=RobotsCoeff[agentId][1];
 
         profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
 
         if(profiledParameter != -1000)
         {
-
             if(profiledParameter > 1023)
                 return 1023;
-            else if(profiledParameter > 0)
+            else if(profiledParameter > 0){
+//                debug(QString("func : %1 , %2").arg(realParameter).arg(profiledParameter) , D_FATEMEH);
                 return (int)profiledParameter;
+            }
             else
                 return 1;
         }
@@ -354,10 +327,45 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
 
         }
     }
-    else if(type==0)    //kick
+    ///////////////////////// kick //////////////////////////////////////////////////
+    else if(type==0)
     {
-        if(realParameter >= 8.0)
+        profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
+
+        if(realParameter > 8.0)
             return RobotsCoeff[agentId][0];
+
+        profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
+
+        if(profiledParameter != -1000)
+        {
+            if(profiledParameter > 1023)
+                return 1023;
+            else if(profiledParameter > 0){
+                return (int)profiledParameter;
+            }
+            else
+                return 1;
+        }
+        else // no data is saved for this robot
+        {
+            debug("no data", D_FATEMEH);
+            if(ProfilerResult[refRobotID][type][(int)round(realParameter*10)] != -1000){    // get data from reference robot
+                profiledParameter= RobotsCoeff[agentId][type] * knowledge->getProfile(refRobotID , realParameter , isKick , spinOn);
+            }
+            else{   // Linear
+                profiledParameter= realParameter*128;
+            }
+
+            if(profiledParameter > 1023)
+                return 1023;
+            else if(profiledParameter > 0)
+                return (int)profiledParameter;
+            else{
+                return 1;
+            }
+
+        }
 
         profiledParameter= realParameter*128;
 
@@ -564,21 +572,18 @@ double CKnowledge::getRealBallVel()
     return ballVelLowPass;
 }
 
-int CKnowledge::Matching(const QList <CAgent*> robots, const QList <Vector2D> pointsToMatch, QList <int> &matchPoints)
-{
+int CKnowledge::Matching(const QList <CAgent*> robots, const QList <Vector2D> pointsToMatch, QList <int> &matchPoints){
     QList <int> tempForMatch;
     tempForMatch.clear();
-    for(int i = 0 ; i< robots.count() ; i++)
+    for(int i = 0 ; i< robots.count() ; i++){
         tempForMatch.append(i);
+    }
     double D = 100000000000;
     double tempD = 0;
     QList<QList <int> > combo = generateCombinations(tempForMatch);
     matchPoints.clear();
-
-    if(robots.count() == pointsToMatch.count())
-    {
-        for(int i = 0 ; i < factorial(robots.count()) ; i++)
-        {
+    if(robots.count() == pointsToMatch.count()){
+        for(int i = 0 ; i < factorial(robots.count()) ; i++){
             tempD=0;
             for(int j=0 ; j < robots.count() ; j++)
             {
@@ -593,8 +598,7 @@ int CKnowledge::Matching(const QList <CAgent*> robots, const QList <Vector2D> po
         }
         return 1;
     }
-    else
-    {
+    else{
         return -1;
     }
 
@@ -1837,13 +1841,10 @@ Vector2D CKnowledge::goalVisiblity(int agentId, double &regionWidth, double unde
     return target;
 }
 
-Vector2D CKnowledge::getEmptyPosOnGoal(Vector2D from, double &regionWidth, bool oppGoal, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, double wOpenness, bool _draw)
-{
+Vector2D CKnowledge::getEmptyPosOnGoal(Vector2D from, double &regionWidth, bool oppGoal, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, double wOpenness, bool _draw){
     QList<Circle2D> c;
-    for (int i=0;i<wm->our.activeAgentsCount();i++)
-    {
-        if (!ourRelaxedIDs.contains(wm->our.active(i)->id))
-        {
+    for(int i=0;i<wm->our.activeAgentsCount();i++){
+        if (!ourRelaxedIDs.contains(wm->our.active(i)->id)){
             c.append(Circle2D(wm->our.active(i)->pos, wm->our.active(i)->robotRadius()));
         }
     }
@@ -1957,37 +1958,28 @@ Vector2D CKnowledge::getEmptyPosOnPoints(Vector2D from, double &regionWidth, QLi
     return Vector2D::INVALIDATED;
 }
 
-bool CKnowledge::isPointClear(Vector2D point, Vector2D from, double rad, bool considerRelaxedIDs, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs)
-{
+bool CKnowledge::isPointClear(Vector2D point, Vector2D from, double rad, bool considerRelaxedIDs, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs){
     Vector2D posIntersect1(Vector2D::ERROR_VALUE, Vector2D::ERROR_VALUE);
     Vector2D posIntersect2(Vector2D::ERROR_VALUE, Vector2D::ERROR_VALUE);
-
     Segment2D l(from, point);
-    for (int i = 0; i < wm->opp.activeAgentsCount(); i++)
-    {
-
-        if ((wm->opp.active(i)->inSight > 0.0))
-        {
-            if(considerRelaxedIDs && oppRelaxedIDs.contains(wm->opp.activeAgentID(i)))
+    for(int i = 0; i < wm->opp.activeAgentsCount(); i++){
+        if((wm->opp.active(i)->inSight > 0.0)){
+            if(considerRelaxedIDs && oppRelaxedIDs.contains(wm->opp.activeAgentID(i))){
                 continue;
-
+            }
             Circle2D c(wm->opp.active(i)->pos, rad);
-            if(c.intersection(l,&posIntersect1, &posIntersect2) != 0 )
-            {
+            if(c.intersection(l,&posIntersect1, &posIntersect2) != 0){
                 return false;
             }
         }
     }
-
-    for (int i = 0; i < wm->our.activeAgentsCount(); i++)
-    {
-        if (wm->our.active(i)->inSight > 0.0)
-        {
-            if(considerRelaxedIDs && ourRelaxedIDs.contains(wm->our.activeAgentID(i)))
+    for(int i = 0; i < wm->our.activeAgentsCount(); i++){
+        if (wm->our.active(i)->inSight > 0.0){
+            if(considerRelaxedIDs && ourRelaxedIDs.contains(wm->our.activeAgentID(i))){
                 continue;
+            }
             Circle2D c(wm->our.active(i)->pos, rad);
-            if(c.intersection(l,&posIntersect1, &posIntersect2) != 0 )
-            {
+            if(c.intersection(l,&posIntersect1, &posIntersect2) != 0){
                 return false;
             }
         }
@@ -3786,16 +3778,14 @@ FastestToBall CKnowledge::findFastestToBall(QList<int> ourList, QList<int> oppLi
     return f;
 }
 
-NewFastestToBall CKnowledge::newFastestToBall(double timeStep, QList<int> ourList, QList<int> oppList)
-{
+NewFastestToBall CKnowledge::newFastestToBall(double timeStep, QList<int> ourList, QList<int> oppList){
     ////
     ////Code By Sepehr
     ////
 
     // reset everything
     NewFastestToBall result;
-
-    if ( !wm->field->fieldRect().contains(wm->ball->pos))
+    if(!wm->field->fieldRect().contains(wm->ball->pos))
         return result;
 
     double t = 0;
@@ -3810,7 +3800,7 @@ NewFastestToBall CKnowledge::newFastestToBall(double timeStep, QList<int> ourLis
 
     // use the correct Robot acceleration and maximum Velocity below :
     double robotMaxVel = conf()->BangBang_VelMax();
-    double robotMAxAcc = conf()->BangBang_AccMax();
+    double robotMAxAcc = conf()->BangBang_AccMaxForward();
 
     while ( t < 20 && (result.ourF.size() < ourList.size() || result.oppF.size() < oppList.size()) )
     {
@@ -4258,8 +4248,113 @@ bool CKnowledge::getNecessaryDefKick() {
 }
 
 
-Vector2D CKnowledge::getBest() {
+Vector2D CKnowledge::getChipDir(){
 
+
+    chipperDistance=100;
+
+    for(int i=0;i<wm->opp.activeAgentsCount();i++){
+        chipperIDD=wm->opp.activeAgentID(i);
+        if(!lastDirs.keys().contains(chipperIDD))
+            lastDirs[chipperIDD]=QList<Vector2D>();
+//        else
+//            lastDirs.remove(chipperIDD);
+
+        if(Circle2D(wm->opp[chipperIDD]->pos , 0.2).contains(wm->ball->pos)){
+            if((wm->ball->pos-wm->opp[chipperIDD]->pos).length()<chipperDistance && wm->ball->vel.length()<0.1){
+                chipperID=chipperIDD;
+                chipperDistance=(wm->ball->pos-wm->opp[chipperIDD]->pos).length();
+                chipperPoint=wm->opp[chipperID]->pos;
+            }
+            lastDirs[chipperIDD].append(wm->opp[chipperIDD]->dir);
+            if(lastDirs[chipperIDD].count() > 10)
+                lastDirs[chipperIDD].removeFirst();
+        }
+        else if (chipperID==chipperIDD && wm->ball->vel.length()>0.1) {
+            DirFound=true;
+        }
+        if(wm->ball->vel.length()<0.1)
+            DirFound=false;
+    }
+    debug(QString("chipperID:%1").arg(chipperID),D_NADIA);
+if(DirFound)
+{
+    chipperDir=Vector2D(0,0);
+    for(int i=lastDirs[chipperID].count()-2; i>3; i--){
+        chipperDir+=lastDirs[chipperID].at(i-1);
+    }
+    chipperDir/=5;
+    return chipperDir;
+}
+else
+    return Vector2D(0,0);
+
+
+prevBallPos=wm->ball->pos;
+
+}
+
+double CKnowledge::refine(double x) {
+    //    return x*x*3/30 - x*2 + 70;
+    return x*x/1.5 - x*0.3 + 50;
+    //    return 3.98 - x*1.01 + x*x*0.13;
+    //    return 3.43 - x*0.74 + x*x*0.085;
+    //    return 32;
+}
+
+double CKnowledge::predictPos(){
+    double sum=0;
+    sum = prev_Ball_pos.at(prev_Ball_pos.length() - 1) - prev_Ball_pos.at(0);
+    sum /= ( prev_Ball_pos.length()-1 );
+    return sum;
+}
+
+
+Vector2D CKnowledge::getChipPredict(){
+    dir=knowledge->getChipDir();
+    draw(Segment2D(knowledge->chipperPoint , dir*10+knowledge->chipperPoint));
+    debug(QString("dir_x:%1,dir_y:%2").arg(dir.x).arg(dir.y),D_NADIA);
+    startChipPoint=knowledge->chipperPoint;
+
+
+
+
+    if(wm->ball->vel.length() < 0.1 /*|| Circle2D(Vector2D(wm->ball->pos,0.03).contains()*/){
+        chipPredictCounter=1;
+        predictedBallPoses.clear();
+        prev_Ball_pos.clear();
+
+    }
+    else
+    {
+//        prev_Ball_pos.append(wm->ball->pos.y);
+
+        prev_Ball_pos.append(/*( ((wm->ball->pos - startChipPoint).angleWith(dir - startChipPoint)).tan() )**/(wm->ball->pos - startChipPoint).length());
+
+        double x=predictPos()*refine(chipPredictCounter)/(double)chipPredictCounter;
+        debug(QString("predict pos:%1").arg(x),D_NADIA);
+        if(chipPredictCounter<2)
+            refiner=1+x*0.8;
+        predictedBallPoses.append(( x + 1 )*(refiner)*(dir.norm())+startChipPoint);
+
+        predictedPosition=Vector2D(0,0);
+
+        for(int i=0;i<predictedBallPoses.size();i+=1){
+            if(i>14)
+                break;
+            predictedPosition+=predictedBallPoses.at(i);
+            draw(predictedBallPoses.at(i));
+        }
+        if(predictedBallPoses.size()<15)
+            predictedPosition/=predictedBallPoses.size();
+        else
+            predictedPosition/=15;
+
+        debug(QString("counter: %1").arg(chipPredictCounter),D_NADIA);
+
+    }
+    chipPredictCounter++;
+    return predictedPosition;
 }
 
 struct VectorIndex {

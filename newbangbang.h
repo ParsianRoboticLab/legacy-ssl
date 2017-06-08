@@ -69,6 +69,7 @@ public:
         Property(bool, FastEnd, fastend);
         Property(bool, EndPoint, endPoint);
         Property(bool, OneTouch, oneTouch);
+        Property(bool, DiveMode, diveMode);
         Property(bool, Slow, slow);
         Property(bool, NoPid, noPid);
         Property(bool, NewRobots, newRobots);

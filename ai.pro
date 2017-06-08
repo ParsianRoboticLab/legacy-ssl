@@ -158,6 +158,7 @@ SOURCES += main.cpp \
     util/timer.cpp \
     util/rng.cpp \
     collectprofiledata.cpp \
+    chipkick.cpp \
     plays/stopplay.cpp
 
 
@@ -330,6 +331,7 @@ HEADERS += base.h \
     util/rng.h \
     util/vector2.h \
     collectprofiledata.h \
+    chipkick.h \
     plays/stopplay.h
 
 
@@ -411,18 +413,3 @@ INCLUDEPATH += $$PWD/intentions/
 
 RESOURCES +=
 CONFIG += c++11
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
