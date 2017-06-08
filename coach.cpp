@@ -1766,6 +1766,9 @@ bool CCoach::isRegionMatched(const Vector2D &_ball, const double& regionRadius) 
 }
 
 void CCoach::ShufflePlanIndexing(QList<SPlan*> Plans){
+    shuffleSize = 0;
+    staticPlayoffPlansShuffleIndexing.clear();
+
     for(int i=0; i<Plans.size(); i++){
         debug(QString("plan%1 cahnce : %2").arg(i).arg(Plans.at(i)->common.chance) , D_FATEMEH);
         shuffleSize += (int)Plans.at(i)->common.chance;
@@ -1776,6 +1779,7 @@ void CCoach::ShufflePlanIndexing(QList<SPlan*> Plans){
 
     std::random_shuffle(staticPlayoffPlansShuffleIndexing.begin(), staticPlayoffPlansShuffleIndexing.end());
     std::random_shuffle(staticPlayoffPlansShuffleIndexing.begin(), staticPlayoffPlansShuffleIndexing.end());
+    shuffled = true;
 }
 
 NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans) {
@@ -1888,11 +1892,15 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     /**                   **/
 
 
+    /** PLAN SELECTION BASED ON HISTORY **/
+    /** PLAN SELECTION BASED ON HISTORY **/
+
+
     /** SHUFFLE PLAN SELECTION**/
-    bool equal;
+    bool equal = true;
     if(prevPlans.size() == validPlans.size()){
-        for(int i=0; i< validPlans.size(); i++) {
-            if(validPlans.at(i) != prevPlans.at(i)){
+        foreach (SPlan* p, validPlans) {
+            if(!prevPlans.contains(p)){
                 equal = false;
                 break;
             }
@@ -1903,9 +1911,8 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     }
 
     if(!shuffled || !equal){
-        shuffleSize = 0;
         ShufflePlanIndexing(validPlans);
-        shuffled = true;
+        equal = true;
     }
 
     if (shuffleCounter >= shuffleSize) {
