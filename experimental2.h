@@ -366,33 +366,6 @@ void CMainApplication::Experimental2()
 
     //debug(QString("Hamed %1").arg(policy()->Mark_Test()), D_MAHI);
     return;
-
-    static CDefPos defPosTest;
-    Vector2D mousePos;
-
-    mousePos = knowledge->getMousePos();
-
-    draw(Circle2D(mousePos, wm->ball->radius), QColor(Qt::red));
-
-
-    //    Circle2D tempCircle(wm->field->ourGoal()-Vector2D(0.2, 0), 1.33);
-    //    draw(tempCircle, QColor(Qt::cyan));
-    //    Vector2D tempVec = defPosTest.getXYByAngle(defAngle, defRadius);
-
-    //    draw(QString::number(defPosTest.getRobotAngle(defRadius)), Vector2D(-1, _FIELD_HEIGHT/2 - 0.2));
-    //    draw(tempVec);
-
-    //    kk2Angles tempAngles = defPosTest.getIntersections(mousePos);
-
-    //    draw(QString("a1:%1, a2: %2").arg(tempAngles.angle1).arg(tempAngles.angle2), Vector2D(-1, _FIELD_HEIGHT/2 - 0.4));
-
-
-    kkDefPos tempDefPos = defPosTest.getDefPositions(mousePos, 2, 1.43, 2.5);
-    draw(QString::number(tempDefPos.overDef), Vector2D(-1, _FIELD_HEIGHT/2 - 0.6));
-    for (int i = 0; i < tempDefPos.size; i++) {
-        draw(Circle2D(tempDefPos.pos[i], CRobot::robot_radius_old), QColor(Qt::blue));
-    }
-    return;
     /////////////////////////////////////////////////////////
     //    static CSkillNEWKeep *keepBall = new CSkillNEWKeep( soccer->agents[0] );
     //    keepBall->execute();

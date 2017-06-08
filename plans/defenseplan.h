@@ -14,42 +14,6 @@
 
 enum { OneTouchState , ClearState , NoState };
 
-
-struct kk2Angles {
-    double angle1;
-    double angle2;
-};
-
-struct kkDefPos {
-    int size;
-    double overDef;
-    Vector2D pos[5];
-};
-
-class CDefPos {
-public:
-    CDefPos();
-    kkDefPos getDefPositions(Vector2D _ballPos, int _size, double _limit1, double _limit2);
-    //HMD
-    Vector2D getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Segment2D _seg);    
-    //HMD Finish
-
-    kk2Angles getIntersections(Vector2D _ballPos, double _radius);
-    double getRobotAngle(double _radius);
-    Vector2D getXYByAngle(double _angle, double _radius);
-    double findBestRadius(int _numOfDefs);
-    double nearRadius[2];
-    double farRadius[2];
-    bool isNearPenaltyArea;
-    double oneDefThr;
-
-private:
-    double getAngleByXY(Vector2D _point);
-    double penaltyAreaOffset;
-    double penaltyAreaRadius;
-    Circle2D penaltyAreaCircle;
-};
-
 class DefensePlan : public Plan
 {
 protected:

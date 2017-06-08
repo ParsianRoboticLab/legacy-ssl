@@ -158,9 +158,9 @@ SOURCES += main.cpp \
     util/timer.cpp \
     util/rng.cpp \
     collectprofiledata.cpp \
-    chipkick.cpp \
-    plays/stopplay.cpp
-
+    plays/stopplay.cpp \
+    defpos.cpp \
+    chipkick.cpp
 
 HEADERS += base.h \
     worldmodel.h \
@@ -331,9 +331,9 @@ HEADERS += base.h \
     util/rng.h \
     util/vector2.h \
     collectprofiledata.h \
-    chipkick.h \
-    plays/stopplay.h
-
+    plays/stopplay.h \
+    defpos.h \
+    chipkick.h
 
 unix:INCLUDEPATH += "/usr/local/include"
 unix:LIBS += -L/usr/local/include/qjson -lqjson
