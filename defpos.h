@@ -27,12 +27,12 @@ public:
     double nearRadius[2];
     bool isNearPenaltyArea;
 
-private:
     Vector2D getXYByAngle(double _angle, double _radius);
     double getRobotAngle(double _radius);
-    double getAngleByXY(Vector2D _point);
     kk2Angles getIntersections(Vector2D _ballPos, double _radius);
     double findBestRadius(int _numOfDefs);
+private:
+    double getAngleByXY(Vector2D _point);
     double oneDefThr;
     double penaltyAreaOffset;
     double penaltyAreaRadius;
