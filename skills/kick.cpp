@@ -1164,9 +1164,9 @@ void CSkillKick::turnForKick()
             angPid->error = ((ballPos - agentPos).th() - agentDir.th()).radian();
             draw(QString("ang: %1 ").arg((ballPos - agentPos).th().radian() - _PI/2),Vector2D(0,0),"red");
             if(slow)
-                agent->setRobotVel( -0.17 + agentPos.dist(ballPos) ,-1,angPid->PID_OUT() +1.5);
+                agent->setRobotVel( -0.17 + agentPos.dist(ballPos) ,-1.2,angPid->PID_OUT() +1);
             else
-                agent->setRobotVel( -0.17 + agentPos.dist(ballPos) ,-1,angPid->PID_OUT() +1.5);
+                agent->setRobotVel( -0.17 + agentPos.dist(ballPos) ,-1.2,angPid->PID_OUT() +1);
 
 
         }
@@ -1178,9 +1178,9 @@ void CSkillKick::turnForKick()
             draw(QString("ang: %1 ").arg((ballPos - agentPos).th().radian() + _PI/2),Vector2D(0,0),"red");
 
             if(slow)
-                agent->setRobotVel( -0.17 + agentPos.dist(ballPos),1,angPid->PID_OUT() - 1.5);
+                agent->setRobotVel( -0.17 + agentPos.dist(ballPos),1.2,angPid->PID_OUT() - 1);
             else
-                agent->setRobotVel( -0.17 + agentPos.dist(ballPos),1,angPid->PID_OUT() - 1.5) ;
+                agent->setRobotVel( -0.17 + agentPos.dist(ballPos),1.2,angPid->PID_OUT() - 1) ;
 
 
         }
