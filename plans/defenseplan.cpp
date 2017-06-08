@@ -11,6 +11,7 @@ using namespace std;
 #define LONG_CHIP_POWER 1023
 #define KICK_POWER 1000
 
+//double CDefPos::oneDefThr = 0;
 
 ///////////////// AHZ is writing, have you my voice? ... ;) //////////////////
 /////////////////////////// Added for RC 2017 ///////////////////////////////
@@ -3135,6 +3136,7 @@ Vector2D DefensePlan::getGoaliePositionInOneDef(Vector2D _ballPos, double _limit
     //draw(Circle2D(wm->field->ourGoal(), tempBestRadius), "yellow");
 
     if(wm->ball->pos.y < 0){
+//    if(wm->ball->pos.y < 0 + CDefPos::oneDefThr){
         goalieTarget = tempCDef->getXYByAngle(tempAngles.angle2-agentAngle/2, tempBestRadius);
         //oneDefThr = 1;
     }
@@ -3345,7 +3347,8 @@ kkDefPos CDefPos::getDefPositions(Vector2D _ballPos, int _size, double _limit1, 
             if(isNearPenaltyArea){
                 tempBestRadius = nearRadius[0];
             }
-            if(_ballPos.y < 0 + oneDefThr){
+            if(_ballPos.y < 0){
+            //if(_ballPos.y < 0 + oneDefThr){
                 tempDefPos.pos[0] = getXYByAngle(tempAngles.angle1+agentAngle/2, tempBestRadius);
                 oneDefThr = 1;
             }
