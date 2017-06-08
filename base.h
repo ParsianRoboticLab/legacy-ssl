@@ -7,15 +7,7 @@
 
 // TODO : remove this macro
 #define KK_PLAYON
-//#define SIMULATION_MODE
-//#define GAME_MODE
-
-//#define NAVIGATION_CHALLENGE
-//IMP the above line must be comamented
-
 /* Ennumerations */
-//#define velProblem1
-//#define velProblem2
 #include "geom.h"
 
 enum SKILLINITVAL{
@@ -170,8 +162,8 @@ struct GameStatePacket
 
 /* Defines */
 
-#define _NUM_PLAYERS    16
-#define _MAX_NUM_PLAYERS 16
+#define _NUM_PLAYERS    12
+#define _MAX_NUM_PLAYERS 12
 
 
 /* Mathematical */
@@ -201,7 +193,7 @@ struct GameStatePacket
 
 /* COM Port Constants */
 #define _SIM_COM_PORT   "/dev/ttyS6"
-#define _REAL_COM_PORT  "/dev/ttyS0"
+#define _REAL_COM_PORT  "/dev/ttyUSB0"
 
 
 /* Skills */
