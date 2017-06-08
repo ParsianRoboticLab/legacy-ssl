@@ -71,6 +71,8 @@ void CRolePlayOff::update() {
         kickSkill->setDontKick(!doPass);
         kickSkill->setAgent(agent);
         kickSkill->setTolerance(0.5);
+        kickSkill->setPassProfiler(false);
+        kickSkill->setKickWithCenterOfDribbler(false);
 
         if(!doPass && !chip && lookForward) {
             kickSkill->setTarget(Vector2D(1000, 0));
