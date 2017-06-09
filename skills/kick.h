@@ -234,6 +234,7 @@ public:
     Vector2D findMostPossible();
     virtual void generateFromConfig(CAgent *a);
     virtual CSkillConfigWidget* generateConfigWidget(QWidget *parent);
+    static double kickTimeEstimation(CAgent * _agent, Vector2D target);
     SkillProperty(CSkillKick, double, Tolerance, tol);
     SkillProperty(CSkillKick, bool, Chip, chip);
     SkillProperty(CSkillKick, int, KickSpeed, kickSpeed);
