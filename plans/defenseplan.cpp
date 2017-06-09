@@ -2942,6 +2942,7 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
             Segment2D AZBisecOpenSeg(ballPos , ballPos + Vector2D(cos(_PI*(AZBisecOpenAngle)/180),sin(_PI*(AZBisecOpenAngle)/180)).norm()*12);
             if(AZBisecOpenSeg.intersection(aimLessLine).isValid()){
                 if(defenseCount == 2){
+                    //debug(QString("x: %1 , y: %2").arg(target.x).arg(target.y), D_ATOUSA);
                     debug("hamishe" , D_AHZ);
                     if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 5){
                         target = AZBisecOpenSeg.intersection((aimLessLine));
@@ -2979,6 +2980,7 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
                     }
                 }
                 else if (defenseCount == 1){
+                    //debug(QString("x: %1 , y: %2").arg(target.x).arg(target.y), D_ATOUSA);
                     if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 2.0 ){
                         draw(QString("oneDef : %1").arg(defenseCount), Vector2D(2,0),"red");
                         target = getGoaliePositionInOneDef(ballPos, 0.1, 1.5);
@@ -2993,6 +2995,10 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
                 else{
                     target = getIntersectionWithPenaltyAreaGk(AZBisecOpenSeg);
                 }
+            }
+            else{
+                debug(QString("x: %1 , y: %2").arg(target.x).arg(target.y), D_ATOUSA);
+                target = wm->field->ourGoal() + offsetGoalkeeperPosition;
             }
         }
         if((!wm->field->isInField(target) || target.x < -4.4) && defenseCount == 2){
@@ -3010,12 +3016,12 @@ Vector2D DefensePlan::getGoaliePositionInOneDef(Vector2D _ballPos, double _limit
     if(tempCDef->findBestRadius(tempDefPos.size) != -1){
         if(wm->ball->pos.x < -2.5){
             tempBestRadius = tempDefPos.pos[0].dist(wm->field->ourGoal()) - 1;
+            debug(QString("radius:%1").arg(tempBestRadius), D_ATOUSA);
         }
         else{
             tempBestRadius = tempCDef->findBestRadius(tempDefPos.size);
         }
     }
-    debug(QString("radius:%1").arg(tempBestRadius), D_ATOUSA);
     if(tempBestRadius > _limit2){
         tempBestRadius = _limit2;
     }
