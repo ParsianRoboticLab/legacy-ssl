@@ -1267,6 +1267,19 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
 //              }
 //          }
           for(int i = 0; i < ourPlayers.size(); i++)
+              nearest[ourPlayers[i]] = CSkillKick::kickTimeEstimation(knowledge->getAgent(ourPlayers[i]), wm->field->oppGoal());
+          nearest[ourPlayers[lastPlayMake]] -= 0.2;
+          double minT = 1e8;
+          for(int i = 0; i < ourPlayers.size(); i++)
+          {
+              if(nearest[ourPlayers[i]] < minT)
+              {
+                  minT = nearest[ourPlayers[i]];
+                  playmakeId = ourPlayers[i];
+              }
+          }
+
+          for(int i = 0; i < ourPlayers.size(); i++)
               debug(QString("timeneeded of %3 is : %4 \n").arg(ourPlayers[i]).arg(nearest[ourPlayers[i]]), D_PARSA);
           lastPlayMake = playmakeId;
       }
