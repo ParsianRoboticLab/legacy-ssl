@@ -713,7 +713,7 @@ kckMode CSkillKick::decideMode()
     else
     {
 
-        if(0&&(robotArea.intersection(ballpath,&tempVec1,&tempVec2) ==2 && ballRealVel > 1))
+        if((robotArea.intersection(ballpath,&tempVec1,&tempVec2) ==2 && ballRealVel > 0.5))
         {
 
             if( ( fabs(((target-agentPos).th().degree() - (ballPos-agentPos).th().degree() )) < 70 ))
@@ -858,8 +858,8 @@ void CSkillKick::waitAndKick()
 
     }
     gpa->init(intersectPos +addVec,oneTouchDir);
-    gpa->setADiveMode(true);
-    gpa->setOneTouchMode(true);
+    gpa->setADiveMode(false);
+    gpa->setOneTouchMode(false);
     gpa->execute();
     draw(intersectPos);
     if(agentPos.dist(ballPos) < 1)
@@ -1356,18 +1356,42 @@ double CSkillKick::oneTouchAngle(Vector2D pos,
     return ang;
 }
 
-void CSkillKick::findPosToGo()
+double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
 {
-#define vRobotTemp 2
-    Circle2D ballArea(ballPos,0.2);
-    Vector2D sol1,sol2;
+    QList<int> ourRelax,oppRelax;
+    Vector2D finalPos;
     if(wm->ball->vel.length() > 0.2)
     {
         for(double i = 0 ; i < 5 ; i += 0.1)
         {
-            if(wm->ball->getPosInFuture(i).dist(agentPos)/vRobotTemp < i)
+
+            finalPos = wm->ball->getPosInFuture(i) - (_target-wm->ball->getPosInFuture(i)).norm()*0.11;
+            if(CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,false)< i)
             {
-                finalPos = wm->ball->getPosInFuture(i) - (target-wm->ball->getPosInFuture(i)).norm()*0.3;
+               return i;
+            }
+        }
+    }
+
+    finalPos = wm->ball->pos - (_target-wm->ball->pos).norm()*0.11;
+    return CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,false);
+
+}
+
+void CSkillKick::findPosToGo()
+{
+
+    Circle2D ballArea(ballPos,0.2);
+    Vector2D sol1,sol2;
+    QList<int> ourRelax,oppRelax;
+    if(wm->ball->vel.length() > 0.2)
+    {
+        for(double i = 0 ; i < 5 ; i += 0.1)
+        {
+
+            finalPos = wm->ball->getPosInFuture(i) - (target-wm->ball->getPosInFuture(i)).norm()*0.11;
+            if(CSkillGotoPointAvoid::timeNeeded(agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,!goalieMode,0.2,false)< i)
+            {
                 break;
             }
         }
@@ -1397,7 +1421,7 @@ void CSkillKick::findPosToGo()
     gpa->setNoAvoid(false);
 
     if(wm->ball->vel.length() > 0.3)
-        gpa->setBallObstacleRadius(0.15);
+        gpa->setBallObstacleRadius(0.12);
     else
         gpa->setBallObstacleRadius(0.4);
     if((fabs(((ballPos - agentPos).th() - kickFinalDir).degree()) < 60) && (agentPos.dist(ballPos) < 1) && (wm->ball->vel.length() > 0.2)) {
@@ -1406,6 +1430,8 @@ void CSkillKick::findPosToGo()
     }
 
     gpa->setSlowMode(slow);
+    gpa->setADiveMode(false);
+    gpa->setOneTouchMode(false);
     gpa->setAvoidPenaltyArea(true);
     gpa->execute();
 
