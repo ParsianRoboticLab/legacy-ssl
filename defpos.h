@@ -32,6 +32,7 @@ public:
     kk2Angles getIntersections(Vector2D _ballPos, double _radius);
     double findBestRadius(int _numOfDefs);
 private:
+    kkDefPos tempDefPos;
     double getAngleByXY(Vector2D _point);
     double oneDefThr;
     double penaltyAreaOffset;

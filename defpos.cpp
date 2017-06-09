@@ -79,7 +79,7 @@ kk2Angles CDefPos::getIntersections(Vector2D _ballPos, double _radius)
 
 kkDefPos CDefPos::getDefPositions(Vector2D _ballPos, int _size, double _limit1, double _limit2)
 {
-    kkDefPos tempDefPos;
+    //kkDefPos tempDefPos;
     tempDefPos.size = _size;
     if (_size <= 0) {
         return tempDefPos;
@@ -96,8 +96,8 @@ kkDefPos CDefPos::getDefPositions(Vector2D _ballPos, int _size, double _limit1, 
             tempBestRadius = _limit2;
         }
         else if(_size == 1){
-            if(tempBestRadius > 4.5){
-                tempBestRadius = 4.5;
+            if(tempBestRadius > 3){
+                tempBestRadius = 3;
             }
         }
         ///////////////////////////////////////////////////////////////////////
@@ -129,11 +129,11 @@ kkDefPos CDefPos::getDefPositions(Vector2D _ballPos, int _size, double _limit1, 
             }
             if (_ballPos.y < 0 + oneDefThr) {
                 tempDefPos.pos[0] = getXYByAngle(tempAngles.angle1+agentAngle/2, tempBestRadius);
-                oneDefThr = 1;
+                oneDefThr = 0.5;
             }
-            else {
+            else{
                 tempDefPos.pos[0] = getXYByAngle(tempAngles.angle2-agentAngle/2, tempBestRadius);
-                oneDefThr = -1;
+                oneDefThr = -0.5;
             }
         }
         else if(_size == 2 && isNearPenaltyArea){
