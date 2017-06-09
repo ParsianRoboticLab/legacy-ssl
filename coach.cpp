@@ -112,7 +112,7 @@ CCoach::CCoach(CAgent**_agents)
     defenseTimeForVisionProblem[1].start();
     transientFlag = false;
     trasientTimeOut.start();
-    translationTimeOutTime =  1500;
+    translationTimeOutTime = 4500;
     exeptionPlayMake = NULL;
     exeptionPlayMakeThr = 0;
 
@@ -336,8 +336,8 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
     // handle stop
     if (wm->ball->pos.x < 0){
         preferedDefenseCounts = agentsCount - 1;
-
-    } else if (wm->ball->pos.x > 1){
+    }
+    else if (wm->ball->pos.x > 1){
         preferedDefenseCounts = policy() -> Formation_Defense();
     }
 
@@ -369,7 +369,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
             preferedDefenseCounts = max(agentsCount - 1 - missMatchIds.count(), 0);
         } else if (transientFlag
                    &&  knowledge->getGameState() != CKnowledge::TheirKickOff) {
-            if (trasientTimeOut.elapsed() > 500) {
+            if (trasientTimeOut.elapsed() > 4500 && !wm->field->isInOurPenaltyArea(wm->ball->pos)) {
                 preferedDefenseCounts = min(0, agentsCount - missMatchIds.count() - 1);
 
             } else {
@@ -389,8 +389,9 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
     if (knowledge->isOurNonPlayOnKick() && wm->ball->pos.x < -0.5) {
         preferedDefenseCounts = 2;
     }
-
-    preferedDefenseCounts = 1;
+    if(policy()->Formation_StrictFormation()){
+        preferedDefenseCounts = policy()->Formation_Defense();
+    }
     lastPreferredDefenseCounts = preferedDefenseCounts;
 }
 
@@ -1054,16 +1055,16 @@ void CCoach::assignDefenseAgents(int defenseCount){
     knowledge->defenseAgents.clear();
     knowledge->defenseAgents.append(defenseAgents);
 }
-bool CCoach::isBallcollide()
-{
+bool CCoach::isBallcollide(){
     // TODO : change this :P
     Circle2D dummyCircle;
     Vector2D sol1,sol2;
-    Segment2D ballPath(wm->ball->pos,wm->ball->pos+wm->ball->vel);
-    for(int i = 0 ; i < wm->our.activeAgentsCount() ; i++) {
+    Segment2D ballPath(wm->ball->pos,wm->ball->pos+wm->ball->vel);    
+    debug("ball is colliding" , D_AHZ);
+    for(int i = 0 ; i < wm->our.activeAgentsCount() ; i++){
         dummyCircle.assign(wm->our.active(i)->pos,0.08);
-        if(dummyCircle.intersection(ballPath,&sol1,&sol2) && wm->our.active(i)->pos.dist(wm->ball->pos) < 0.14 && fabs ((wm->ball->vel - lastBallVel).length()) > 0.5 )  {
-            lastBallVel = wm->ball->vel;
+        if(dummyCircle.intersection(ballPath,&sol1,&sol2) && wm->our.active(i)->pos.dist(wm->ball->pos) < 0.14 && fabs((wm->ball->vel - lastBallVel).length()) > 0.5){
+            lastBallVel = wm->ball->vel;            
             return true;
         }
         if(wm->ball->vel.length() < 0.5 && wm->our.active(i)->pos.dist(wm->ball->pos) < 0.13) {
@@ -1080,12 +1081,12 @@ void CCoach::virtualTheirPlayOffState()
     CKnowledge::State currentState;
     currentState = knowledge->getGameState();
     if(lastState == CKnowledge::TheirDirectKick || lastState == CKnowledge::TheirIndirectKick /*|| lastState == CKnowledge::TheirKickOff*/) {
-        if(currentState == CKnowledge::Start) {
+        if(currentState == CKnowledge::Start){
             transientFlag = true;
         }
     }
 
-    if(transientFlag == false) {
+    if(transientFlag == false){
         trasientTimeOut.restart();
     }
 
@@ -1098,9 +1099,9 @@ void CCoach::virtualTheirPlayOffState()
     }
 
     if(isBallcollide() ){ // TODO : till we fix function && 0
-        transientFlag = false;
+       // transientFlag = false;
     }
-
+    debug(QString("TS flag: %1").arg(transientFlag) , D_AHZ);
     knowledge->transientFlag = transientFlag;
     lastState  = currentState;
 
@@ -1281,8 +1282,8 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
         //points by distance
         for(int i = 0 ; i < ourPlayers.count() ; i++) {
             playMakeParam[i] += 1 / max(0.1, ((wm->our[ourPlayers[i]]->pos +
-                                              wm->our[ourPlayers[i]]->vel * ballVelCoef / 3).dist
-                    (wm->ball->pos+wm->ball->vel*ballVelCoef)));
+                                               wm->our[ourPlayers[i]]->vel * ballVelCoef / 3).dist
+                                              (wm->ball->pos+wm->ball->vel*ballVelCoef)));
 
         }
 
@@ -1292,7 +1293,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
                     (passPos) < minDistForPass)
             {
                 minDistForPass = (wm->our[ourPlayers[i]]->pos +
-                        wm->our[ourPlayers[i]]->vel).dist
+                                  wm->our[ourPlayers[i]]->vel).dist
                         (passPos);
                 minDistForPassId = i;
             }
@@ -1320,10 +1321,10 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
 
         double passPosDisToPla = passPos.dist
                 (wm->our[ourPlayers[minDistForPassId]]->pos +
-                wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef / 3) ;
+                 wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef / 3) ;
         double ballMoveLineDisToPla = Line2D(wm->ball->pos,wm->ball->pos +
                                              wm->ball->vel).dist(wm->our[ourPlayers[minDistForPassId]]->pos +
-                wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef);
+                                                                 wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef);
         bool passPointGiven = false;
 
         if(passPosDisToPla < 1.1)

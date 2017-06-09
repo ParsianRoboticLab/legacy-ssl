@@ -206,9 +206,9 @@ public:
     Vector2D ballPosHis[5];
     double ballVelLowPass;
     /////////////////////////
-    ///////
-
-    ///////
+    ///////////////////////////////// AHZ //////////////////////////////////////
+    Vector2D getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion);
+    //////////////////////////////// end of AHZ
     QList<int> oppBlockers;
     QString stateToString(State s);
     int ourShirjeBlocker;

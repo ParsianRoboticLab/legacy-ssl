@@ -62,8 +62,7 @@ protected:
     bool besidePoleFlag;
     bool dangerForGoalieClear;
     int oneTouchCnt;    
-    ////////////////////////////// AHZ ///////////////////
-    Vector2D getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion);
+    ////////////////////////////// AHZ ///////////////////    
     Line2D getBisectorLine(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
     Segment2D getBisectorSegment(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
     void manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
@@ -93,17 +92,17 @@ protected:
     bool dangerModeThresholdForDanger;
     bool changeInMarkPlanFlag;
     bool manToManMarkBlockPassFlag;
-    bool markBool;
+    bool ballBool;
     QString lastStateForMark;
     QString stateForMark;
     int lastOpponentAgentsToBeMarkSize;
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;
-    QList <Vector2D> tenLastOpponentDirection;
-    QList <Vector2D> tenLastOpponentPosition;
+    QList <Vector2D> tenLastOpponentDirection;    
     Vector2D opponentPasserDirection;
     Vector2D opponentPasserPossition;
     Vector2D sumOfLastOpponentDirection;
+    Vector2D tempAHZ;
     Vector2D sumOfLastOpponentPosition;
     int AHZCount;        
     ///////////////////////////////////////////////////
