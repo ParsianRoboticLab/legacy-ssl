@@ -374,7 +374,11 @@ void CDynamicAttack::playMake() {
         } else {
             roleAgentPM->setKickRealSpeed(appropriatePassSpeed());
         }
-        roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
+        for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
+            if(ballPos.dist(wm->field->oppGoal()) < 0.7 && Circle2D(wm->opp[wm->opp.activeAgentID(i)]->pos + wm->opp[wm->opp.activeAgentID(i)]->dir.norm()*0.08,0.07).contains(ballPos))
+                roleAgentPM -> setSelectedSkill(DynamicEnums::Dribble); // skill Dribble
+            else
+                roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
         // TODO : fix this dastan
         /*if(isRightTimeToPass()) {
             roleAgentPM->setNoKick(false); //TEST

@@ -64,8 +64,10 @@ void CRolePlayOff::update() {
         kickSkill->setAvoidPenaltyArea(avoidPenaltyArea);
         kickSkill->setInterceptMode(intercept);
         //debug(QString("[playoffRole] profile kickSpeed : %1 %2").arg(agent->id()).arg(knowledge->getProfile(agent->id(), static_cast<double>(kickSpeed)/130.0, !chip, false)), D_MAHI);
-        if (wm->getIsSimulMode()) kickSkill->setKickSpeed(4);
-        else kickSkill->setKickSpeed(kickSpeed);
+        if (wm->getIsSimulMode())
+            kickSkill->setKickSpeed(4);
+        else
+            kickSkill->setKickSpeed(kickSpeed);
         kickSkill->setChip(chip);
         kickSkill->setAgent(agent);
         kickSkill->setDontKick(!doPass);
@@ -87,8 +89,10 @@ void CRolePlayOff::update() {
         oneTouchSkill->setAgent(agent);
         oneTouchSkill->setChip(false);
         oneTouchSkill->setShotToEmptySpot(false);
-        if (wm->getIsSimulMode()) oneTouchSkill->setKickSpeed(8);
-        else oneTouchSkill->setKickSpeed(1023);
+        if (wm->getIsSimulMode())
+            oneTouchSkill->setKickSpeed(8);
+        else
+            oneTouchSkill->setKickSpeed(1023);
         oneTouchSkill->setAgent(agent);
         updated = false;
         break;
