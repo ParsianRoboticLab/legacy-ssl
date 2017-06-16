@@ -1239,36 +1239,10 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
       else
       {
           double nearest[10] = {};
-//          Vector2D stopP[10];
-//          for(int i = 0; i < 10; i++)
-//              nearest[i] = 1e8;
-//          for(double t = 0.01; t <= 10; t += 0.01)
-//          {
-//              Vector2D ballPos = wm->ball->getPosInFuture(t);
-//              ballPos.x += 0.5;
-//              for(int i = 0; i < ourPlayers.size(); i++)
-//              {
-//                  double t2 = CSkillGotoPointAvoid::timeNeeded(knowledge->getAgent(ourPlayers[i]), ballPos, conf()->BangBang_VelMax(), e1, e2, true, 0.01, false);
-//                  if(nearest[ourPlayers[i]] > t2 && abs(t - t2) < 0.1)
-//                  {
-//                      nearest[ourPlayers[i]] = t2;
-//                      stopP  [ourPlayers[i]] = ballPos;
-//                  }
-//              }
-//          }
-//          nearest[lastPlayMake] -= playMakeTh;
-//          double minT = 1e8;
-//          for(int i = 0; i < ourPlayers.size(); i++)
-//          {
-//              if(nearest[ourPlayers[i]] < minT)
-//              {
-//                  minT = nearest[ourPlayers[i]];
-//                  playmakeId = ourPlayers[i];
-//              }
-//          }
           for(int i = 0; i < ourPlayers.size(); i++)
               nearest[ourPlayers[i]] = CSkillKick::kickTimeEstimation(knowledge->getAgent(ourPlayers[i]), wm->field->oppGoal());
-          nearest[ourPlayers[lastPlayMake]] -= 0.2;
+          if(lastPlayMake >= 0)
+              nearest[lastPlayMake] -= 0.2;
           double minT = 1e8;
           for(int i = 0; i < ourPlayers.size(); i++)
           {
