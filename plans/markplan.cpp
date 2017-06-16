@@ -1542,10 +1542,17 @@ void CMarkPlan::findOppAgentsToMark()
 
     }
 
-
+//setting the positions
     for(int i=0; i < oppAgentsToMark.count(); i++)
     {
+        if(knowledge->getGameState() == CKnowledge::Start)
+        {
         oppAgentsToMarkPos.append(oppAgentsToMark[i]->pos);
+        }
+        else if(knowledge->getGameState() == CKnowledge::TheirKickOff)
+        {
+            oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i]));
+        }
         draw(Circle2D(oppAgentsToMarkPos.last(),.1),Qt::yellow);
     }
 
