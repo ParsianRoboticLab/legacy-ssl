@@ -742,15 +742,15 @@ void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelax
     {
         if( ourRelaxList.contains(mywma.our[j].id) == false )
         {
-            double obstVelFactor = 0.06;
-            for(double vvv = 0; vvv <= mywma.our[j].vel.length(); vvv+=0.5)
+            double obstVelFactor = 0.15;
+            for(double vvv = 0; vvv <= mywma.our[j].vel.length()*2; vvv+=0.5)
             {
                 double ttt = 1;
                 if (mywma.our[j].vel.length() >= 0.5 )
-                    ttt = ((mywma.our[j].vel.length()-vvv)/mywma.our[j].vel.length());
-                obs.add_circle(mywma.our[j].pos.x+mywma.our[j].vel.x*vvv*obstVelFactor , mywma.our[j].pos.y+mywma.our[j].vel.y*vvv*obstVelFactor , (CRobot::robot_radius_new+0.05)*ttt , mywma.our[j].vel.x , mywma.our[j].vel.y);
+                    ttt = ((mywma.our[j].vel.length()-vvv*0.5)/mywma.our[j].vel.length());
+                obs.add_circle(mywma.our[j].pos.x+mywma.our[j].vel.x*vvv*obstVelFactor , mywma.our[j].pos.y+mywma.our[j].vel.y*vvv*obstVelFactor , (CRobot::robot_radius_new+0.07)*ttt , mywma.our[j].vel.x , mywma.our[j].vel.y);
                 //obs.add_circle(mywma.our[j].pos.x , mywma.our[j].pos.y , (CRobot::robot_radius_new+0.03) , mywma.our[j].vel.x , mywma.our[j].vel.y);
-
+//                draw(Circle2D(Vector2D(mywma.our[j].pos.x+mywma.our[j].vel.x*vvv*obstVelFactor , mywma.our[j].pos.y+mywma.our[j].vel.y*vvv*obstVelFactor),(CRobot::robot_radius_new+0.07)*ttt),QColor(Qt::blue),true);
             }
         }
     }
@@ -761,12 +761,12 @@ void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelax
         {
 
             double obstVelFactor = 0.12;
-            for(double vvv = 0; vvv <= mywma.opp[j].vel.length(); vvv+=0.5)
+            for(double vvv = 0; vvv <= mywma.opp[j].vel.length()*2; vvv+=0.5)
             {
                 double ttt = 1;
                 if (mywma.opp[j].vel.length() >= 0.5 )
-                    ttt = ((mywma.opp[j].vel.length()-vvv)/mywma.opp[j].vel.length());
-                obs.add_circle(mywma.opp[j].pos.x+mywma.opp[j].vel.x*vvv*obstVelFactor , mywma.opp[j].pos.y+mywma.opp[j].vel.y*vvv*obstVelFactor , (CRobot::robot_radius_new+0.05)*ttt , mywma.opp[j].vel.x , mywma.opp[j].vel.y);
+                    ttt = 0.5*((mywma.opp[j].vel.length()*2-vvv)/mywma.opp[j].vel.length());
+                obs.add_circle(mywma.opp[j].pos.x+mywma.opp[j].vel.x*vvv*obstVelFactor , mywma.opp[j].pos.y+mywma.opp[j].vel.y*vvv*obstVelFactor , (CRobot::robot_radius_new+0.07)*ttt , mywma.opp[j].vel.x , mywma.opp[j].vel.y);
             }
 
             //			obs.add_circle(mywma.opp[j].pos.x , mywma.opp[j].pos.y , opp.active(j)->robotRadius()+0.03 , mywma.opp[j].vel.x , mywma.opp[j].vel.y);

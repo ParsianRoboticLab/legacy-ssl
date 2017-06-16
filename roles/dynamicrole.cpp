@@ -43,10 +43,9 @@ void CRoleDynamic::update() {
        shotSkill->setShotToEmptySpot(emptySpot);
        shotSkill->setDontKick(false);
        if(wm->getIsSimulMode())
-           shotSkill->setKickSpeed(8);
+           shotSkill->setKickSpeed(kickSpeed);
        else
            shotSkill->setKickSpeed(max(900, kickSpeed));
-
        break;
    case DynamicEnums::Chip:
        shotSkill->setAgent(agent);
