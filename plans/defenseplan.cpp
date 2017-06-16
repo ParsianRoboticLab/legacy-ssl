@@ -1083,6 +1083,8 @@ DefensePlan::DefensePlan()
 {
     //// Constructor function of DefensePlan class
 
+    goalieThr = 0.0;
+
     thr = 0;
     isOnetouch = 0;
     goalieClearFlag = 0;
@@ -2915,7 +2917,7 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
             return target;
         }
 #endif
-        if(knowledge->goalie->pos().dist(AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos())) > 0.2 + thr){
+        if(!(defenseCount == 1) && knowledge->goalie->pos().dist(AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos())) > 0.2 + thr){
             target = AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos());
             thr = 0;
         }
@@ -2957,9 +2959,8 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
                             }
                         }
                         else if(defenseCount == 1){
-                            if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 2.0 ){
-                                draw(QString("oneDef"), Vector2D(2,0),"red");
-                                target = getGoaliePositionInOneDef(ballPos, 0.1, 1.35);
+                            if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) >= 0.0 ){
+                                target = getGoaliePositionInOneDef(ballPos, 0.3, 1.5);
                                 draw(target , 1 , "green");
                                 threshOld = 0.0;
                             }
@@ -2975,15 +2976,34 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
 
                     }
                 }
+                else if (defenseCount == 1){
+                    if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) >= 0.0 ){
+                        //draw(QString("oneDef : %1").arg(defenseCount), Vector2D(2,0),"blue");
+                        target = getGoaliePositionInOneDef(ballPos, 0.3, 1.5);
+                        draw(target , 1 , "green");
+                        threshOld = 0.0;
+                    }
+                    else{
+                        target = wm->field->ourGoal() + offsetGoalkeeperPosition;
+                        threshOld = 2.0;
+                    }
+                }
                 else{
                     target = getIntersectionWithPenaltyAreaGk(AZBisecOpenSeg);
                 }
+            }
+            else{
+                if(defenseCount == 2)
+                    target = wm->field->ourGoal() + offsetGoalkeeperPosition;
+                else if(defenseCount == 1)
+                    target = getGoaliePositionInOneDef(wm->ball->pos, 0.3, 1.5);
             }
         }
         if((!wm->field->isInField(target) || target.x < -4.4) && defenseCount == 2){
             target = AZBisecOpenSeg.intersection(goalLine) + offsetGoalkeeperPosition;
         }
     }
+    debug(QString("x: %1 , y: %2").arg(target.x).arg(target.y), D_ATOUSA);
     return target;
 }
 
@@ -2993,7 +3013,13 @@ Vector2D DefensePlan::getGoaliePositionInOneDef(Vector2D _ballPos, double _limit
     Vector2D goalieTarget;
     double tempBestRadius = _ballPos.dist(wm->field->ourGoal())/2;
     if(tempCDef->findBestRadius(tempDefPos.size) != -1){
-        tempBestRadius = tempCDef->findBestRadius(tempDefPos.size);
+        if(wm->ball->pos.x < -2.5){
+            tempBestRadius = tempDefPos.pos[0].dist(wm->field->ourGoal()) - 0.5;
+            debug(QString("radius:%1").arg(tempBestRadius), D_ATOUSA);
+        }
+        else{
+            tempBestRadius = tempCDef->findBestRadius(tempDefPos.size);
+        }
     }
     if(tempBestRadius > _limit2){
         tempBestRadius = _limit2;
@@ -3012,13 +3038,14 @@ Vector2D DefensePlan::getGoaliePositionInOneDef(Vector2D _ballPos, double _limit
 
     //draw(Circle2D(wm->field->ourGoal(), tempBestRadius), "yellow");
 
-    if(wm->ball->pos.y < 0){
-//    if(wm->ball->pos.y < 0 + CDefPos::oneDefThr){
+    if(wm->ball->pos.y < 0 + goalieThr){
         goalieTarget = tempCDef->getXYByAngle(tempAngles.angle2-agentAngle/2, tempBestRadius);
+        goalieThr = 0.5;
         //oneDefThr = 1;
     }
-    else{
+    else {
         goalieTarget = tempCDef->getXYByAngle(tempAngles.angle1+agentAngle/2, tempBestRadius);
+        goalieThr = -0.5;
         //oneDefThr = -1;
     }
 

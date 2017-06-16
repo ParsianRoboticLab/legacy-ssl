@@ -74,6 +74,7 @@ protected:
 
     //atousa
     Vector2D getGoaliePositionInOneDef(Vector2D _ballPos, double _limit1, double _limit2);
+    double goalieThr;
 
     int angleDegreeThrNotStop = 0;
     double threshOld = 0.0;
