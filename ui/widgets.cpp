@@ -3287,8 +3287,9 @@ CLoggerWidget::CLoggerWidget(){
     txtFPS->setMaximumSize(65 , 30);
     txtFPS->setFocusPolicy(Qt::ClickFocus);
     pause = true;
-    for( int i=0 ; i<8 ; i++ )
-        chbxDebug[i]->setChecked(true);
+    for( int i=0 ; i<20 ; i++ ) {
+        chbxDebug[i]->setChecked(false);
+    }
 
     QGridLayout *l = new QGridLayout(this);
     l->addWidget(btnBrowse , 1  , 0 , 1 , 3);
