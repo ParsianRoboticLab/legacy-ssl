@@ -653,7 +653,7 @@ void CSoccer::run()
     double lastMonitorUpdateTime=-1;
     pathPlanner->start(QThread::HighPriority);
 #ifndef NO_JS
-    joystick->start(QThread::LowPriority);
+//    joystick->start(QThread::LowPriority);
 #endif
 
     QTime timer;

@@ -713,7 +713,7 @@ kckMode CSkillKick::decideMode()
     else
     {
 
-        if(0&&(robotArea.intersection(ballpath,&tempVec1,&tempVec2) ==2 && ballRealVel > 0.5))
+        if((robotArea.intersection(ballpath,&tempVec1,&tempVec2) ==2 && ballRealVel > 0.5))
         {
 
             if( ( fabs(((target-agentPos).th().degree() - (ballPos-agentPos).th().degree() )) < 70 ))
@@ -1304,7 +1304,7 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
     Vector2D finalPos;
     if(wm->ball->vel.length() > 0.2)
     {
-        for(double i = 0 ; i < 5 ; i += 0.1)
+        for(double i = 0 ; i < 3 ; i += 0.15)
         {
 
             finalPos = wm->ball->getPosInFuture(i) - (_target-wm->ball->getPosInFuture(i)).norm()*0.11;

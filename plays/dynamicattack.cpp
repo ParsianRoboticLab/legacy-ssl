@@ -364,6 +364,8 @@ void CDynamicAttack::playMake() {
     roleAgentPM->setAgentID(mahiAgentsID[0]);
     roleAgentPM->setAvoidPenaltyArea(true);
 
+    bool flagT = false;
+
     switch(currentPlan.playmake.skill) {
     case DynamicEnums::Pass:
         roleAgentPM -> setChip(chipOrNot(currentPlan.passPos, 0.5, 0.1));
@@ -375,10 +377,20 @@ void CDynamicAttack::playMake() {
             roleAgentPM->setKickRealSpeed(appropriatePassSpeed());
         }
         for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
-            if(ballPos.dist(wm->field->oppGoal()) < 0.7 && Circle2D(wm->opp[wm->opp.activeAgentID(i)]->pos + wm->opp[wm->opp.activeAgentID(i)]->dir.norm()*0.08,0.07).contains(ballPos))
-                roleAgentPM -> setSelectedSkill(DynamicEnums::Dribble); // skill Dribble
-            else
-                roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
+            if(!wm->field->isInOppPenaltyArea(wm->ball->pos))
+            {
+                debug(QString("we are dribbling1111"), D_PARSA);
+                if(Circle2D(wm->opp.active(i)->pos + wm->opp.active(i)->dir.norm()*0.08,0.12).contains(ballPos))
+                {
+                    flagT = true;
+                    debug(QString("we are dribbling222"), D_PARSA);
+                    roleAgentPM -> setSelectedSkill(DynamicEnums::Dribble); // skill Dribble
+                }
+            }
+         if(!flagT)
+         {
+             roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
+         }
         // TODO : fix this dastan
         /*if(isRightTimeToPass()) {
             roleAgentPM->setNoKick(false); //TEST
@@ -386,6 +398,7 @@ void CDynamicAttack::playMake() {
             roleAgentPM->setNoKick(true);
         }*/
         break;
+
     case DynamicEnums::Chip:
         roleAgentPM->setNoKick(false);
         if (currentPlan.playmake.region == DynamicEnums::Goal) {
@@ -1343,12 +1356,12 @@ void CDynamicAttack::assignLocations_2() {
     guardLocations[2][0][2].assign(3.65, 2);
 
     //Bottom Opp Half
-//    guardLocations[2][1][0].assign(1.15, -1.15);
-//    guardLocations[2][1][1].assign(2.1 , -1.65);
-//    guardLocations[2][1][2].assign(3.65, -2  );
-    guardLocations[2][1][0].assign(0, 0.3);
-    guardLocations[2][1][1].assign(0, 0);
-    guardLocations[2][1][2].assign(0, -0.3);
+    guardLocations[2][1][0].assign(1.15, -1.15);
+    guardLocations[2][1][1].assign(2.1 , -1.65);
+    guardLocations[2][1][2].assign(3.65, -2  );
+//    guardLocations[2][1][0].assign(0, 0.3);
+//    guardLocations[2][1][1].assign(0, 0);
+//    guardLocations[2][1][2].assign(0, -0.3);
 }
 
 void CDynamicAttack::assignLocations_3() {

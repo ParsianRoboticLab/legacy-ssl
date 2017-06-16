@@ -159,9 +159,9 @@ void CskillNewGotoPoint::execute()
     if (conf()->LocalSettings_ParsianWorkShop()) {
         if(conf()->LocalSettings_OurTeamSide() == "Right")
         {
-            if(targetPos.x < -0.35)
+            if(targetPos.x < 0.35)
             {
-                targetPos.x = -0.35;
+                targetPos.x = 0.35;
             }
         }
         else
@@ -667,16 +667,16 @@ void CSkillGotoPoint::targetValidate()
     if (conf()->LocalSettings_ParsianWorkShop()) {
         if(conf()->LocalSettings_OurTeamSide() == "Right")
         {
-            if(targetPos.x < 0)
+            if(targetPos.x < 0.2)
             {
-                targetPos.x = 0;
+                targetPos.x = 0.2;
             }
         }
         else
         {
-            if(targetPos.x > 4.5)
+            if(targetPos.x > 4.3)
             {
-                targetPos.x = 4.5;
+                targetPos.x = 4.3;
             }
         }
     }
@@ -1002,16 +1002,16 @@ void CSkillGotoPointAvoid::execute()
     if (conf()->LocalSettings_ParsianWorkShop()) {
         if(conf()->LocalSettings_OurTeamSide() == "Right")
         {
-            if(targetPos.x < 0)
+            if(targetPos.x < 0.2)
             {
-                targetPos.x = 0;
+                targetPos.x = 0.2;
             }
         }
         else
         {
-            if(targetPos.x > 4.5)
+            if(targetPos.x > 4.3)
             {
-                targetPos.x = 4.5;
+                targetPos.x = 4.3;
             }
         }
     }
