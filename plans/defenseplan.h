@@ -14,41 +14,6 @@
 
 enum { OneTouchState , ClearState , NoState };
 
-
-struct kk2Angles {
-    double angle1;
-    double angle2;
-};
-
-struct kkDefPos {
-    int size;
-    double overDef;
-    Vector2D pos[5];
-};
-
-class CDefPos {
-public:
-    CDefPos();
-    kkDefPos getDefPositions(Vector2D _ballPos, int _size, double _limit1, double _limit2);
-    //HMD
-    Vector2D getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Segment2D _seg);    
-    //HMD Finish
-    double nearRadius[2];
-    double farRadius[2];
-    bool isNearPenaltyArea;
-
-private:
-    Vector2D getXYByAngle(double _angle, double _radius);
-    double getRobotAngle(double _radius);
-    double getAngleByXY(Vector2D _point);
-    kk2Angles getIntersections(Vector2D _ballPos, double _radius);    
-    double findBestRadius(int _numOfDefs);
-    double oneDefThr;
-    double penaltyAreaOffset;
-    double penaltyAreaRadius;
-    Circle2D penaltyAreaCircle;
-};
-
 class DefensePlan : public Plan
 {
 protected:
@@ -97,8 +62,7 @@ protected:
     bool besidePoleFlag;
     bool dangerForGoalieClear;
     int oneTouchCnt;    
-    ////////////////////////////// AHZ ///////////////////
-    Vector2D getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion);
+    ////////////////////////////// AHZ ///////////////////    
     Line2D getBisectorLine(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
     Segment2D getBisectorSegment(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
     void manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
@@ -107,6 +71,11 @@ protected:
     void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> stuckPositions);
     void getIntersectionWithPenaltyAreaAHZ(Segment2D , Vector2D sol1 , Vector2D sol2);
     bool isIndirectArea(Vector2D);    
+
+    //atousa
+    Vector2D getGoaliePositionInOneDef(Vector2D _ballPos, double _limit1, double _limit2);
+    double goalieThr;
+
     int angleDegreeThrNotStop = 0;
     double threshOld = 0.0;
     double ballCircleR = 0.5;
@@ -124,17 +93,17 @@ protected:
     bool dangerModeThresholdForDanger;
     bool changeInMarkPlanFlag;
     bool manToManMarkBlockPassFlag;
-    bool markBool;
+    bool ballBool;
     QString lastStateForMark;
     QString stateForMark;
     int lastOpponentAgentsToBeMarkSize;
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;
-    QList <Vector2D> tenLastOpponentDirection;
-    QList <Vector2D> tenLastOpponentPosition;
+    QList <Vector2D> tenLastOpponentDirection;    
     Vector2D opponentPasserDirection;
     Vector2D opponentPasserPossition;
     Vector2D sumOfLastOpponentDirection;
+    Vector2D tempAHZ;
     Vector2D sumOfLastOpponentPosition;
     int AHZCount;        
     ///////////////////////////////////////////////////

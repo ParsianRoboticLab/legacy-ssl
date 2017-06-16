@@ -11,6 +11,7 @@
 
 #include <QApplication>
 
+#include <algorithm>
 QMap<QString, EditData*> CCoach::editData;
 
 CCoach::CCoach(CAgent**_agents)
@@ -111,16 +112,21 @@ CCoach::CCoach(CAgent**_agents)
     defenseTimeForVisionProblem[1].start();
     transientFlag = false;
     trasientTimeOut.start();
-    translationTimeOutTime =  1500;
+    translationTimeOutTime = 4500;
     exeptionPlayMake = NULL;
     exeptionPlayMakeThr = 0;
 
     staticPlayoffPlansCounter = 0;
+    shuffleCounter = 0;
+    shuffleSize = 0;
+    shuffled = false;
+    staticPlayoffPlansShuffleIndexing.clear();
     m_planLoader = new CLoadPlayOffJson(QDir::currentPath() + QString("/playoff"));
     goalieAgent = NULL;
     firstPlay = true;
     firstIsFinished = false;
     preferedDefenseCounts = 2;
+    preferedShotSpot = EveryWhere;
 }
 
 CCoach::~CCoach()
@@ -330,8 +336,8 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
     // handle stop
     if (wm->ball->pos.x < 0){
         preferedDefenseCounts = agentsCount - 1;
-
-    } else if (wm->ball->pos.x > 1){
+    }
+    else if (wm->ball->pos.x > 1){
         preferedDefenseCounts = policy() -> Formation_Defense();
     }
 
@@ -363,7 +369,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
             preferedDefenseCounts = max(agentsCount - 1 - missMatchIds.count(), 0);
         } else if (transientFlag
                    &&  knowledge->getGameState() != CKnowledge::TheirKickOff) {
-            if (trasientTimeOut.elapsed() > 500) {
+            if (trasientTimeOut.elapsed() > 4500 && !wm->field->isInOurPenaltyArea(wm->ball->pos)) {
                 preferedDefenseCounts = min(0, agentsCount - missMatchIds.count() - 1);
 
             } else {
@@ -383,7 +389,9 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
     if (knowledge->isOurNonPlayOnKick() && wm->ball->pos.x < -0.5) {
         preferedDefenseCounts = 2;
     }
-
+    if(policy()->Formation_StrictFormation()){
+        preferedDefenseCounts = policy()->Formation_Defense();
+    }
     lastPreferredDefenseCounts = preferedDefenseCounts;
 }
 
@@ -626,7 +634,7 @@ CKnowledge::ballPossesionState CCoach::isBallOurs()
     }
 
     if (wm->field->isInOurPenaltyArea(wm->ball->pos)
-    &&  wm->ball->vel.length() < 0.1) {
+            &&  wm->ball->vel.length() < 0.1) {
         decidePState = CKnowledge::SOSOTHEIR;
     }
 
@@ -1047,16 +1055,16 @@ void CCoach::assignDefenseAgents(int defenseCount){
     knowledge->defenseAgents.clear();
     knowledge->defenseAgents.append(defenseAgents);
 }
-bool CCoach::isBallcollide()
-{
+bool CCoach::isBallcollide(){
     // TODO : change this :P
     Circle2D dummyCircle;
     Vector2D sol1,sol2;
-    Segment2D ballPath(wm->ball->pos,wm->ball->pos+wm->ball->vel);
-    for(int i = 0 ; i < wm->our.activeAgentsCount() ; i++) {
+    Segment2D ballPath(wm->ball->pos,wm->ball->pos+wm->ball->vel);    
+    debug("ball is colliding" , D_AHZ);
+    for(int i = 0 ; i < wm->our.activeAgentsCount() ; i++){
         dummyCircle.assign(wm->our.active(i)->pos,0.08);
-        if(dummyCircle.intersection(ballPath,&sol1,&sol2) && wm->our.active(i)->pos.dist(wm->ball->pos) < 0.14 && fabs ((wm->ball->vel - lastBallVel).length()) > 0.5 )  {
-            lastBallVel = wm->ball->vel;
+        if(dummyCircle.intersection(ballPath,&sol1,&sol2) && wm->our.active(i)->pos.dist(wm->ball->pos) < 0.14 && fabs((wm->ball->vel - lastBallVel).length()) > 0.5){
+            lastBallVel = wm->ball->vel;            
             return true;
         }
         if(wm->ball->vel.length() < 0.5 && wm->our.active(i)->pos.dist(wm->ball->pos) < 0.13) {
@@ -1073,12 +1081,12 @@ void CCoach::virtualTheirPlayOffState()
     CKnowledge::State currentState;
     currentState = knowledge->getGameState();
     if(lastState == CKnowledge::TheirDirectKick || lastState == CKnowledge::TheirIndirectKick /*|| lastState == CKnowledge::TheirKickOff*/) {
-        if(currentState == CKnowledge::Start) {
+        if(currentState == CKnowledge::Start){
             transientFlag = true;
         }
     }
 
-    if(transientFlag == false) {
+    if(transientFlag == false){
         trasientTimeOut.restart();
     }
 
@@ -1091,9 +1099,9 @@ void CCoach::virtualTheirPlayOffState()
     }
 
     if(isBallcollide() ){ // TODO : till we fix function && 0
-        transientFlag = false;
+       // transientFlag = false;
     }
-
+    debug(QString("TS flag: %1").arg(transientFlag) , D_AHZ);
     knowledge->transientFlag = transientFlag;
     lastState  = currentState;
 
@@ -1112,7 +1120,7 @@ void CCoach::decideDefense(){
         defenses.initGoalKeeper(goalieAgent);
         defenses.initDefense(defenseAgents);
         defenses.execute();
-//        defenses.debugAgents("Defense");
+        //        defenses.debugAgents("Defense");
     }
 }
 
@@ -1209,185 +1217,47 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
     }
 
     ////////////////////first we choose our playmake
+    // third version
+      double ballVel = wm->ball->vel.length();
+      Vector2D ballPos = wm->ball->pos;
+      if(ballVel < 0.4)
+      {
+          double maxD = -0.1;
+          for(int i = 0; i < ourPlayers.size(); i++)
+          {
+              double o = 1 / (knowledge->getAgent(ourPlayers[i])->pos().dist(ballPos) + 0.03);
+              if(ourPlayers[i] == lastPlayMake)
+                  o += playMakeTh;
+              if(o > maxD)
+              {
+                  maxD = o;
+                  playmakeId = ourPlayers[i];
+              }
+          }
+          lastPlayMake = playmakeId;
+      }
+      else
+      {
+          double nearest[10] = {};
+          for(int i = 0; i < ourPlayers.size(); i++)
+              nearest[ourPlayers[i]] = CSkillKick::kickTimeEstimation(knowledge->getAgent(ourPlayers[i]), wm->field->oppGoal());
+          if(lastPlayMake >= 0)
+              nearest[lastPlayMake] -= 0.2;
+          double minT = 1e8;
+          for(int i = 0; i < ourPlayers.size(); i++)
+          {
+              if(nearest[ourPlayers[i]] < minT)
+              {
+                  minT = nearest[ourPlayers[i]];
+                  playmakeId = ourPlayers[i];
+              }
+          }
 
-    double playMakeParam[6] = {0};
-    double biggestPoint     = -1000;
-    double ballVelCoef      = 0.4;
-    double agentVelCoef     = ballVelCoef / 3;
-    double nearestDistvel   = 1000;
-    double nearestDist      = 1000;
-    bool changePassChoose   = true;
+          for(int i = 0; i < ourPlayers.size(); i++)
+              debug(QString("timeneeded of %3 is : %4 \n").arg(ourPlayers[i]).arg(nearest[ourPlayers[i]]), D_PARSA);
+          lastPlayMake = playmakeId;
+      }
 
-    for(int i = 0 ; i < ourPlayers.count() ; i++) {
-        double t  = (wm->our[ourPlayers[i]]->pos + wm->our[ourPlayers[i]]->vel*agentVelCoef ).dist(wm->ball->pos + wm->ball->vel * agentVelCoef);
-        double t2 = (wm->our[ourPlayers[i]]->pos + wm->our[ourPlayers[i]]->vel*agentVelCoef ).dist(wm->ball->pos);
-        if(t < nearestDistvel)
-            nearestDistvel = t;
-        if(t2 < nearestDist)
-            nearestDist = t2;
-    }
-    if(dynamicAttack->getMahiPlayMaker() != NULL) {
-        if(dynamicAttack->getMahiPlayMaker()->pos().dist(wm->ball->pos) < 0.13) {
-            passPos = dynamicAttack->currentPlan.passPos;
-        }
-    }
-    /// if an agent is very close to the ball or ball is almost witout velocity
-    if(nearestDist < 0.3 || wm->ball->vel.length() < 0.1 || nearestDistvel < 0.1) {
-        for(int i = 0 ; i < ourPlayers.count() ; i++) {
-
-            const Vector2D& agentPos = wm->our[ourPlayers[i]]->pos;
-            const Vector2D& ballPos  = wm->ball->pos;
-
-            const Vector2D& agentVel = wm->our[ourPlayers[i]]->vel;
-            const Vector2D& ballVel  = wm->ball->vel;
-
-            const Vector2D& nextAgentPosition = agentPos + agentVel * agentVelCoef;
-            const Vector2D& nextBallPosition = ballPos + ballVel * ballVelCoef;
-
-            playMakeParam[i] += 1 / max(0.1, nextAgentPosition.dist(nextBallPosition));
-
-            for(int i = 0 ; i < ourPlayers.count(); i++)
-                if(ourPlayers[i] == lastPlayMake)
-                    if(wm->ball->pos.dist(lastBallPos) < 0.7)
-                        playMakeParam[i] += playMakeTh;
-        }
-
-        for(int i = 0 ; i < ourPlayers.count() ; i++) {
-            if(playMakeParam[i] > biggestPoint) {
-                biggestPoint = playMakeParam[i];
-                playmakeId = ourPlayers[i];
-            }
-        }
-
-        lastPlayMake = playmakeId;
-        lastBallPos = wm->ball->pos;
-//        debug(QString("now ball vel : %1 %2").arg(wm->ball->vel.x).arg(wm->ball->vel.y), D_PARSA);
-        /*for(int i = 0; i < ourPlayers.count(); i++) {
-            debug(QString(" %1 point is : %2 ").arg(ourPlayers[i]).arg(playMakeParam[i]), D_PARSA);
-        }*/
-//        debug(QString("Here"), D_PARSA);
-
-    } else {
-
-        double minDistForPass = 100000;
-        int minDistForPassId = -1;
-        //points by distance
-        for(int i = 0 ; i < ourPlayers.count() ; i++) {
-            playMakeParam[i] += 1 / max(0.1, ((wm->our[ourPlayers[i]]->pos +
-                                              wm->our[ourPlayers[i]]->vel * ballVelCoef / 3).dist
-                    (wm->ball->pos+wm->ball->vel*ballVelCoef)));
-
-        }
-
-        //finding nearest to passing position
-        for(int i = 0 ; i < ourPlayers.count() ; i++) {
-            if((wm->our[ourPlayers[i]]->pos + wm->our[ourPlayers[i]]->vel * (ballVelCoef / 5)).dist
-                    (passPos) < minDistForPass)
-            {
-                minDistForPass = (wm->our[ourPlayers[i]]->pos +
-                        wm->our[ourPlayers[i]]->vel).dist
-                        (passPos);
-                minDistForPassId = i;
-            }
-        }
-        // debug(QString("passPlayMake choosing is : %1").arg(passPlayMake), D_PARSA);
-
-        for(int i = 0 ; i < ourPlayers.count() ; i++) {
-            /*if(ourPlayers[i] == minDistForPassId)
-            playMakeParam[i] += playMakeTh;*/
-            /*if (ourPlayers[i] == lastPlayMake) {
-                debug(QString("pos dist : %1").arg(wm->ball->pos.dist(lastBallPos)), D_PARSA);
-                debug(QString("vel dist : %1").arg(wm->ball->vel.dist(lastBallVelPM)), D_PARSA);
-                debug(QString("passPlayMake choosing is : %1").arg(passPlayMake), D_PARSA);
-            }*/
-            if (ourPlayers[i] == lastPlayMake
-                    && passPlayMake
-                    && wm->ball->vel.dist(lastBallVelPM) < 0.6
-                    && wm->ball->pos.dist(lastBallPos)   < 0.5) {
-                //debug(QString("dictator point goes to : %1").arg(ourPlayers[i]), D_PARSA);
-                playMakeParam[i] += playMakeTh + 5;
-            } else {
-                changePassChoose = false;
-            }
-        }
-
-        double passPosDisToPla = passPos.dist
-                (wm->our[ourPlayers[minDistForPassId]]->pos +
-                wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef / 3) ;
-        double ballMoveLineDisToPla = Line2D(wm->ball->pos,wm->ball->pos +
-                                             wm->ball->vel).dist(wm->our[ourPlayers[minDistForPassId]]->pos +
-                wm->our[ourPlayers[minDistForPassId]]->vel * ballVelCoef);
-        bool passPointGiven = false;
-
-        if(passPosDisToPla < 1.1)
-            if(ballMoveLineDisToPla < 1.1)
-                if(wm->ball->pos.dist(passPos) >
-                        (wm->ball->pos + wm->ball->vel).dist
-                        (passPos)) {
-                    double timeToStopBall = wm->ball->vel.length() / 0.4;
-                    Vector2D distToStopBall = wm->ball->vel * timeToStopBall *
-                            timeToStopBall / 2 * -0.4 / wm->ball->vel.length() +
-                            timeToStopBall * wm->ball->vel;
-                    //  if(Segment2D(wm->ball->pos, wm->ball->pos + distToStopBall).dist(passPos) < 1) {
-                    //debug(QString("pass point goes to : %1").arg(ourPlayers[minDistForPassId]), D_PARSA);
-                    playMakeParam[minDistForPassId] += playMakeTh + 2;
-                    passPointGiven = true;
-                    // }
-                }
-
-
-        /*debug(QString("last ball pos : %1 %2").arg(lastBallPos.x).arg(lastBallPos.y), D_PARSA);
-        debug(QString("now ball pos : %1 %2").arg(wm->ball->pos.x).arg(wm->ball->pos.y), D_PARSA);*/
-        /*debug(QString("pos dist : %1").arg(wm->ball->pos.dist(lastBallPos)), D_PARSA);
-
-        debug(QString("last ball vel : %1 %2").arg(lastBallVelPM.x).arg(lastBallVelPM.y), D_PARSA);
-        debug(QString("now ball vel : %1 %2").arg(wm->ball->vel.x).arg(wm->ball->vel.y), D_PARSA);
-        debug(QString("vel dist : %1").arg(wm->ball->vel.dist(lastBallVelPM)), D_PARSA);
-
-        debug(QString("pass pos : %1 %2").arg(passPos.x).arg(passPos.y), D_PARSA);
-        debug(QString("passPlayMake choosing is : %1").arg(passPlayMake), D_PARSA);
-        debug(QString("mindistpassId is : %1").arg(ourPlayers[minDistForPassId]), D_PARSA);*/
-
-        for(int i = 0 ; i < ourPlayers.count(); i++)
-            if(ourPlayers[i] == lastPlayMake && !passPlayMake)
-                if(wm->ball->pos.dist(lastBallPos) < 0.7)
-                    playMakeParam[i] += playMakeTh;
-
-        for(int i = 0 ; i < ourPlayers.count() ; i++) {
-            if(playMakeParam[i] > biggestPoint) {
-                biggestPoint = playMakeParam[i];
-                playmakeId = ourPlayers[i];
-            }
-        }
-
-        if (playmakeId != lastPlayMake && !passPlayMake) {
-            if (playMakeIntention.elapsed() > playMakeIntentionInterval) {
-                playMakeIntention.restart();
-            } else {
-                playmakeId = lastPlayMake;
-            }
-        }
-
-        if(playmakeId == ourPlayers[minDistForPassId] && passPointGiven)
-            passPlayMake = true;
-
-        //debug(QString("passPlayMake choosing is : %1").arg(passPlayMake), D_PARSA);
-
-        lastPlayMake = playmakeId;
-        if(!passPointGiven)
-            passPlayMake = changePassChoose;
-        lastBallVelPM = wm->ball->vel;
-        lastBallPos = wm->ball->pos;
-
-
-        /*for(int i = 0; i < ourPlayers.count(); i++) {
-            debug(QString(" %1 point is : %2 ").arg(ourPlayers[i]).arg(playMakeParam[i]), D_PARSA);
-        }
-        debug(QString(""), D_PARSA);
-        debug(QString(""), D_PARSA);*/
-        //playmakeId = 11;
-
-    }
 }
 
 void CCoach::decideAttack()
@@ -1513,7 +1383,7 @@ void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
                 firstTime = false;
                 firstPlay = true;
                 firstIsFinished = false;
-                currentTags = ourPlayOff->getOppTags();
+                preferedShotSpot = ourPlayOff->getShotSpot();
                 ourPlayOff->resetFirstPlayFinishedFlag();
             }
 
@@ -1531,7 +1401,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
 
     CKnowledge::ballPossesionState ballPState = isBallOurs();
 
-    if(playmakeId != -1) {
+    if(playmakeId > -1 && playmakeId < 12) {
         dynamicAttack->setPlayMake(playmakeId);
         ourPlayers.removeOne(playmakeId);
         debug(QString("playmake : %1").arg(playmakeId),D_MHMMD);
@@ -1540,7 +1410,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     Circle2D ourDefenseArea(wm->field->ourGoal(), 1.6);
 
     if (knowledge->variables["clearing"] == "true"
-    || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length() < 1)) {
+            || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length() < 1)) {
         if(playmakeId != -1) {
             ourPlayers.append(playmakeId);
             dynamicAttack->setPlayMake(-1);
@@ -1585,8 +1455,8 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
 
     selectedPlay->markAgents.clear();
     if(wm->ball->pos.x >= 0
-    && selectedPlay->lockAgents
-    && lastPlayers.count() == ourPlayers.count()) {
+            && selectedPlay->lockAgents
+            && lastPlayers.count() == ourPlayers.count()) {
         ourPlayers.clear();
         ourPlayers = lastPlayers;
 
@@ -1661,6 +1531,73 @@ void CCoach::checkGUItoRefineMatch(SPlan *_plan, const QList<int>& _ourplayers) 
     qDebug() << "[coach] final Match : " << _plan->matching.common->matchedID;
 }
 
+ShotSpot CCoach::getShotSpot(const Vector2D &_ball, const Vector2D &_shotPos) {
+
+    Circle2D killZone(wm->field->oppGoal(), 1.6);
+
+    Rect2D nearCenter(_FIELD_WIDTH/2 - 2,
+                      _PENALTY_WIDTH/2,
+                      2,
+                      _PENALTY_WIDTH);
+
+    Rect2D near1(_FIELD_WIDTH/2 - 2,
+                 _FIELD_HEIGHT/2,
+                 2,
+                 (_FIELD_HEIGHT-_PENALTY_WIDTH)/2);
+
+    Rect2D near2(_FIELD_WIDTH/2 - 2,
+                 -_PENALTY_WIDTH/2,
+                 2,
+                 (_FIELD_HEIGHT-_PENALTY_WIDTH)/2);
+
+    Rect2D far1(0,
+                _FIELD_HEIGHT/2 - 4,
+                _FIELD_WIDTH/2 - 2,
+                2);
+
+    Rect2D farcenter(0,
+                     _FIELD_HEIGHT/2 - 2,
+                     _FIELD_WIDTH/2 - 2,
+                     2);
+
+    Rect2D far2(0,
+                _FIELD_HEIGHT/2,
+                _FIELD_WIDTH/2 - 2,
+                2);
+
+    ShotSpot tempSpot = EveryWhere;
+    if (killZone.contains(_shotPos)) {
+        tempSpot = KillSpot;
+
+    } else if (nearCenter.contains(_shotPos)) {
+        tempSpot = CloseNear;
+
+    } else if (near1.contains(_shotPos) || near2.contains(_shotPos)) {
+        if (_shotPos.y*_ball.y < 0) {
+            tempSpot = FarNear;
+
+        } else {
+            tempSpot = CloseNear;
+
+        }
+    } else if (farcenter.contains(_shotPos)) {
+        tempSpot = FarCenter;
+
+    } else if (far1.contains(_shotPos) || far2.contains(_shotPos)) {
+        if (_shotPos.y*_ball.y < 0) {
+            tempSpot = FarFar;
+
+        } else {
+            tempSpot = CloseFar;
+
+        }
+    } else {
+        tempSpot = EveryWhere;
+    }
+
+    return tempSpot;
+}
+
 bool CCoach::isTagsMatched(const QStringList& base, const QStringList& required) {
     Q_FOREACH(QString tag, required)
         if (!base.contains(tag))
@@ -1681,9 +1618,30 @@ bool CCoach::isRegionMatched(const Vector2D &_ball, const double& regionRadius) 
 
 }
 
+void CCoach::ShufflePlanIndexing(QList<SPlan*> Plans){
+    shuffleSize = 0;
+    staticPlayoffPlansShuffleIndexing.clear();
+
+    for(int i=0; i<Plans.size(); i++){
+        debug(QString("plan%1 cahnce : %2").arg(i).arg(Plans.at(i)->common.chance) , D_FATEMEH);
+        shuffleSize += (int)Plans.at(i)->common.chance;
+        for(int j=0; j<(int)Plans.at(i)->common.chance; j++){
+            staticPlayoffPlansShuffleIndexing.append(i);
+        }
+    }
+
+    std::random_shuffle(staticPlayoffPlansShuffleIndexing.begin(), staticPlayoffPlansShuffleIndexing.end());
+    std::random_shuffle(staticPlayoffPlansShuffleIndexing.begin(), staticPlayoffPlansShuffleIndexing.end());
+    shuffled = true;
+}
+
 NGameOff::SPlan* CCoach::chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans) {
     QList<NGameOff::SPlan*> matchedPlan;
-    matchedPlan = getMatchedPlans(currentTags, plans);
+
+    matchedPlan = getMatchedPlans(preferedShotSpot, plans);
+
+    // Tag Matching old way
+    //    matchedPlan = getMatchedPlans(currentTags, plans);
 
 
     int bestScore = -1;
@@ -1714,7 +1672,7 @@ void CCoach::selectPlayOffMode(int agentSize, NGameOff::EMode &_mode) {
         _mode = NGameOff::FirstPlay;
 
     } else if (knowledge->getGameState() == CKnowledge::OurKickOff
-           ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
+               ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
         _mode = NGameOff::StaticPlay;
 
     } else if (wm->ball->pos.x > -1) {
@@ -1770,7 +1728,11 @@ void CCoach::setPlayOff(NGameOff::EMode _mode) {
 void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
 
 
-    QList<SPlan*> validPlans = getValidPlans(_mode, _ourplayers);
+    static QList<SPlan*> validPlans;
+    QList<SPlan*> prevPlans = validPlans;
+    validPlans.clear();
+    validPlans = validPlans = getValidPlans(_mode, _ourplayers);
+
     if (validPlans.isEmpty()) {
         debug ("[coach] WE DONT HAVE PLAN AT ALL", D_MAHI);
         return;
@@ -1781,6 +1743,43 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     thePlan = chooseMostSuccecfull(validPlans);
 
     /**                   **/
+
+
+    /** PLAN SELECTION BASED ON HISTORY **/
+    /** PLAN SELECTION BASED ON HISTORY **/
+
+
+    /** SHUFFLE PLAN SELECTION**/
+    bool equal = true;
+    if(prevPlans.size() == validPlans.size()){
+        foreach (SPlan* p, validPlans) {
+            if(!prevPlans.contains(p)){
+                equal = false;
+                break;
+            }
+        }
+    }
+    else{
+        equal = false;
+    }
+
+    if(!shuffled || !equal){
+        ShufflePlanIndexing(validPlans);
+        equal = true;
+    }
+
+    if (shuffleCounter >= shuffleSize) {
+        shuffleCounter = 0;
+        shuffled = false;
+    }
+    thePlan = validPlans[staticPlayoffPlansShuffleIndexing.at(shuffleCounter)];
+
+    debug(QString("chosen plan : %1").arg(staticPlayoffPlansShuffleIndexing.at(shuffleCounter)) , D_FATEMEH);
+
+    shuffleCounter++;
+    /** SHUFFLE PLAN SELECTION**/
+
+
 
     /** COUNTER PLAN SELECTION**/
     if (staticPlayoffPlansCounter >= validPlans.size()) {
@@ -1990,7 +1989,7 @@ void CCoach::execute()
     virtualTheirPlayOffState();
     decidePreferedDefenseAgentsCountAndGoalieAgent();
     debug(QString("TS : %1").arg(transientFlag), D_GAME);
-//    draw(QString("TS : %1").arg(transientFlag), Vector2D(2,-3));
+    //    draw(QString("TS : %1").arg(transientFlag), Vector2D(2,-3));
     /////////////////////////////////////// choose playmake
     double critAreaRadius = 1.6;
     Circle2D critArea(wm->field->ourGoal(), critAreaRadius);
@@ -2238,7 +2237,7 @@ void CCoach::decideNull(QList<int> &_ourPlayers) {
 
 bool CCoach::isFastPlay() {
     if (policy()->PlayOff_UseFastPlay()) {
-        return true; // TODO : fix this by condidering that opp agents
+        return true; // TODO : fix this by considering that opp agents
     }
 }
 
@@ -2264,5 +2263,24 @@ QList<SPlan*> CCoach::getMatchedPlans(const QStringList &_tags, const QList<SPla
     //NO MATCH
     if (tempPlans.isEmpty()) return _plans;
     else                     return tempPlans;
+
+}
+
+QList<SPlan*> CCoach::getMatchedPlans(int _shotSpot, const QList<SPlan*>& _plans) {
+    QList<SPlan*> tempPlans;
+    Q_FOREACH(SPlan* plan, _plans) {
+        Vector2D& tempPos  = plan->matching.shotPos;
+        Vector2D& tempBall = plan->matching.initPos.ball;
+        ShotSpot tempSpot  = getShotSpot(tempBall, tempPos);
+
+        if (_shotSpot & tempSpot) {
+            tempPlans.append(plan);
+        }
+
+    }
+
+    //NO MATCH
+    if (tempPlans.isEmpty() || _shotSpot == EveryWhere) return _plans;
+    else                                                return tempPlans;
 
 }

@@ -1152,6 +1152,8 @@ void CPlayOffWidget::slt_selectionChanged(const QItemSelection & selected, const
             details[3]->setText(QString("Chance     : %1").arg(m_choosen->common.chance));
             details[4]->setText(QString("Last Dist  : %1").arg(m_choosen->common.lastDist));
             details[5]->setText(QString("Tags       : %1").arg(m_choosen->common.tags.join(" - ")));
+            details[6]->setText(QString("ShotPos    : (%1, %2)").arg(m_choosen->matching.shotPos.x).arg(m_choosen->matching.shotPos.y));
+            details[7]->setText(QString("ShotZone   : %1").arg(CCoach::getShotSpot(m_choosen->matching.initPos.ball, m_choosen->matching.shotPos)));
 
             active   -> setEnabled(!m_choosen->gui.active);
             deactive -> setEnabled(m_choosen->gui.active);
@@ -3285,8 +3287,9 @@ CLoggerWidget::CLoggerWidget(){
     txtFPS->setMaximumSize(65 , 30);
     txtFPS->setFocusPolicy(Qt::ClickFocus);
     pause = true;
-    for( int i=0 ; i<8 ; i++ )
-        chbxDebug[i]->setChecked(true);
+    for( int i=0 ; i<20 ; i++ ) {
+        chbxDebug[i]->setChecked(false);
+    }
 
     QGridLayout *l = new QGridLayout(this);
     l->addWidget(btnBrowse , 1  , 0 , 1 , 3);

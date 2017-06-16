@@ -42,8 +42,10 @@ void CRoleDynamic::update() {
        shotSkill->setVeryFine(veryFine);
        shotSkill->setShotToEmptySpot(emptySpot);
        shotSkill->setDontKick(false);
-       shotSkill->setKickSpeed(max(900, kickSpeed));
-
+       if(wm->getIsSimulMode())
+           shotSkill->setKickSpeed(kickSpeed);
+       else
+           shotSkill->setKickSpeed(max(900, kickSpeed));
        break;
    case DynamicEnums::Chip:
        shotSkill->setAgent(agent);
@@ -53,7 +55,10 @@ void CRoleDynamic::update() {
        shotSkill->setChip(true);
        shotSkill->setVeryFine(veryFine);
        shotSkill->setDontKick(false);
-       shotSkill->setKickSpeed(max(200, kickSpeed));
+       if(wm->getIsSimulMode())
+           shotSkill->setKickSpeed(kickSpeed);
+       else
+           shotSkill->setKickSpeed(max(200, kickSpeed));
        break;
    case DynamicEnums::Pass:
        shotSkill->setAgent(agent);
@@ -64,10 +69,12 @@ void CRoleDynamic::update() {
        shotSkill->setDontKick(noKick);
        shotSkill->setVeryFine(veryFine);
        shotSkill->setShotToEmptySpot(false);
-       if (chip) {
-           shotSkill->setKickSpeed(max(200, kickSpeed));
+       if(wm->getIsSimulMode())
+           shotSkill->setKickSpeed(kickSpeed);
+       else if (chip) {
+               shotSkill->setKickSpeed(max(200, kickSpeed));
        } else {
-           shotSkill->setKickSpeed(max(300, kickSpeed));
+               shotSkill->setKickSpeed(max(300, kickSpeed));
        }
        break;
    case DynamicEnums::CatchBall:

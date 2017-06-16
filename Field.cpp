@@ -354,6 +354,79 @@ QList<Vector2D> CField::AHZOurPAreaIntersect(Segment2D segment)
     return results;
 }
 
+QList<Vector2D> CField::AHZOurPAreaIntersect(Line2D line)
+{
+    QList<Vector2D> results;
+    results.clear();
+    Circle2D c1(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4),_AHZ_GOAL_RAD);
+    Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4),_AHZ_GOAL_RAD);
+    Segment2D s(fOurGoal + Vector2D(+_AHZ_GOAL_RAD,-_GOAL_WIDTH/4),fOurGoal + Vector2D(+_AHZ_GOAL_RAD,+_GOAL_WIDTH/4));
+    draw(c1,0,90,"blue",false);
+    draw(c2,90,180,"blue",false);
+    draw(s,"blue");
+    int n;
+    Vector2D vSol1,vSol2;
+    n = c1.intersection(line,&vSol1,&vSol2);
+    if(n==1)
+    {
+        double th = (vSol1 - c1.center()).th().degree();
+        if( (th < 0) && (th > -90) )
+        {
+            results.append(vSol1);
+        }
+    }
+    if(n==2)
+    {
+        double th;
+        th = (vSol1 - c1.center()).th().degree();
+        if( (th < 0) && (th > -90) )
+        {
+            results.append(vSol1);
+        }
+        th = (vSol2 - c1.center()).th().degree();
+        if( (th < 0) && (th > -90) )
+        {
+            results.append(vSol2);
+        }
+    }
+
+    n = c2.intersection(line,&vSol1,&vSol2);
+    if(n==1)
+    {
+        double th = (vSol1 - c2.center()).th().degree();
+        if( (th > 0) && (th < 90) )
+        {
+            results.append(vSol1);
+        }
+    }
+    if(n==2)
+    {
+        double th;
+        th = (vSol1 - c2.center()).th().degree();
+        if( (th > 0) && (th < 90) )
+        {
+            results.append(vSol1);
+        }
+        th = (vSol2 - c2.center()).th().degree();
+        if( (th > 0) && (th < 90) )
+        {
+            results.append(vSol2);
+        }
+    }
+
+    vSol1 = s.intersection(line);
+    if(vSol1.valid())
+    {
+        results.append(vSol1);
+    }
+
+    for(int i=0; i<results.count(); i++)
+    {
+        draw(Circle2D(results[i],0.05),0,360,"purple",true);
+    }
+
+    return results;
+}
 
 
 

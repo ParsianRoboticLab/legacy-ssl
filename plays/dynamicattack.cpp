@@ -215,7 +215,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     // it's needed to be fast
     else if(fast) {
         currentPlan.mode = DynamicEnums::Fast;
-        currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
+        currentPlan.playmake.init(DynamicEnums::Pass, DynamicEnums::Best);
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Best;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
@@ -374,7 +374,11 @@ void CDynamicAttack::playMake() {
         } else {
             roleAgentPM->setKickRealSpeed(appropriatePassSpeed());
         }
-        roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
+        for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
+            if(ballPos.dist(wm->field->oppGoal()) < 0.7 && Circle2D(wm->opp[wm->opp.activeAgentID(i)]->pos + wm->opp[wm->opp.activeAgentID(i)]->dir.norm()*0.08,0.07).contains(ballPos))
+                roleAgentPM -> setSelectedSkill(DynamicEnums::Dribble); // skill Dribble
+            else
+                roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
         // TODO : fix this dastan
         /*if(isRightTimeToPass()) {
             roleAgentPM->setNoKick(false); //TEST
@@ -571,7 +575,7 @@ void CDynamicAttack::chooseBestPositons()
     //this choose the points with maximum x that has a good one touch angle
     for(int i = 0; i < agentSize; i++)
     {
-        debug(QString("region %1").arg(i), D_PARSA);
+//        debug(QString("region %1").arg(i), D_PARSA);
         int best = -1;
         Vector2D  points  [guardSize];
         double tempAngle  [guardSize];

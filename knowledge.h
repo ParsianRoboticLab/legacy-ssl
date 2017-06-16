@@ -9,6 +9,8 @@
 #include <QDebug>
 #include <QVector2D>
 
+#include "defpos.h"
+
 //#include "simulation/simulator.h"
 //#include <widgets.h>
 
@@ -97,9 +99,6 @@ struct SRAgentArgs {
     double SpinSpeed;
     bool updated;
 };
-
-
-
 
 
 class CKnowledge
@@ -207,9 +206,9 @@ public:
     Vector2D ballPosHis[5];
     double ballVelLowPass;
     /////////////////////////
-    ///////
-
-    ///////
+    ///////////////////////////////// AHZ //////////////////////////////////////
+    Vector2D getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion);
+    //////////////////////////////// end of AHZ
     QList<int> oppBlockers;
     QString stateToString(State s);
     int ourShirjeBlocker;
