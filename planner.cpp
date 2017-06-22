@@ -852,7 +852,7 @@ void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelax
 
 
 
-     agentPath.assign(agentPos,agentGoal);
+    agentPath.assign(agentPos,agentGoal);
     Vector2D _center ,dummy1,dummy2;
     double rad = 0;
     for (int j=0;j<mywma.our.count();j++)
@@ -873,7 +873,7 @@ void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelax
 
             }
 
-            draw(Circle2D(_center,rad),QColor(Qt::blue),true);
+            // draw(Circle2D(_center,rad),QColor(Qt::blue),true);
 
         }
     }
@@ -883,16 +883,10 @@ void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelax
         if( oppRelaxList.contains(mywma.opp[j].id) == false )
         {
 
-            double obstVelFactor = 0.12;
-            for(double vvv = 0; vvv <= mywma.opp[j].vel.length()*2; vvv+=0.5)
-            {
-                double ttt = 1;
-                if (mywma.opp[j].vel.length() >= 0.5 )
-                    ttt = 0.5*((mywma.opp[j].vel.length()*2-vvv)/mywma.opp[j].vel.length());
-                obs.add_circle(mywma.opp[j].pos.x+mywma.opp[j].vel.x*vvv*obstVelFactor , mywma.opp[j].pos.y+mywma.opp[j].vel.y*vvv*obstVelFactor , (CRobot::robot_radius_new+0.07)*ttt , mywma.opp[j].vel.x , mywma.opp[j].vel.y);
-            }
-
-            //			obs.add_circle(mywma.opp[j].pos.x , mywma.opp[j].pos.y , opp.active(j)->robotRadius()+0.03 , mywma.opp[j].vel.x , mywma.opp[j].vel.y);
+            createObstacleProb(mywma.opp[j].pos,mywma.opp[j].vel,Vector2D(0,0),_center,rad,agentPos,agentVel,agentGoal,Vector2D(1,1));
+            double obstVelFactor = 0.15;
+            obs.add_circle(_center.x , _center.y , rad , 0 , 0);
+            obs.add_circle(mywma.opp[j].pos.x , mywma.opp[j].pos.y , 0.2 , 0 , 0);
         }
     }
 
