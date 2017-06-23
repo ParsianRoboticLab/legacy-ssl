@@ -992,7 +992,6 @@ void CSkillGotoPointAvoid::execute()
     if (!targetVel.valid())
         vel2.assign(0,0);
 
-drawPath = true;
     if(drawPath)
     {
         if(agentVel.length() < 0.1)
