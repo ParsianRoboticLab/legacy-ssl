@@ -270,6 +270,7 @@ protected:
     Vector2D lastPoint;
     CSkillGotoPoint* gotopoint;
     QList<int> ourRelaxList , oppRelaxList;
+    QList <Vector2D> pathPoints;
     int counter;
     bool inited;
     void followPath();
@@ -298,6 +299,8 @@ public:
     SkillProperty(CSkillGotoPointAvoid, bool, ADiveMode, diveMode);
     SkillProperty(CSkillGotoPointAvoid, bool, AvoidBall, avoidBall);
     SkillProperty(CSkillGotoPointAvoid, bool, AvoidGoalPosts, avoidGoalPosts);
+    SkillProperty(CSkillGotoPointAvoid, bool, DrawPath, drawPath);
+
     SkillProperty(CSkillGotoPointAvoid, Vector2D, NextPos, nextPos);
 
     friend class CSkillFollowPoints;
