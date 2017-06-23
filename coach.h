@@ -214,6 +214,9 @@ private:
     QList<int> staticPlayoffPlansShuffleIndexing;
 
     bool isFastPlay();
+    ///HMD
+    bool checkOverdef();
+    double overDefThr;
 };
 
 

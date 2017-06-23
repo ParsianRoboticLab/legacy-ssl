@@ -127,6 +127,8 @@ CCoach::CCoach(CAgent**_agents)
     firstIsFinished = false;
     preferedDefenseCounts = 2;
     preferedShotSpot = EveryWhere;
+    ///HMD
+    overDefThr = 0;
 }
 
 CCoach::~CCoach()
@@ -380,11 +382,22 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         }
         else if(!knowledge->isStop())
         {
-            preferedDefenseCounts = 2;
+            if(checkOverdef()){
+            preferedDefenseCounts = 1;
+            }
+            else{
+                preferedDefenseCounts = 2;
+            }
+
         }
     }
     if(knowledge->isStart() && !knowledge->transientFlag && !policy()->Formation_StrictFormation()){
-        preferedDefenseCounts = 2;
+        if(checkOverdef()){
+        preferedDefenseCounts = 1;
+        }
+        else{
+            preferedDefenseCounts = 2;
+        }
     }
     if (knowledge->isOurNonPlayOnKick() && wm->ball->pos.x < -0.5) {
         preferedDefenseCounts = 2;
@@ -1442,11 +1455,18 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     dynamicAttack->setCritical(ourAttackState == CRITICAL);
 
     //////////////////////////////////////////////assign agents
+    bool overdef;
+    overdef = checkOverdef();
     double MarkNum = 0;
     if(ballPState == CKnowledge::WEHAVETHEBALL) {
         MarkNum = 0;
     } else if(ballPState == CKnowledge::WEDONTHAVETHEBALL) {
-        MarkNum = 2;
+        if(overdef == true){
+            MarkNum = 3;
+        }
+        else{
+            MarkNum = 2;
+        }
     } else if(ballPState == CKnowledge::SOSOOUR) {
         MarkNum = 1;
     } else if(ballPState == CKnowledge::SOSOTHEIR) {
@@ -1463,6 +1483,19 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     } else {
         qSort(ourPlayers.begin(), ourPlayers.end());
         if(ourPlayers.count()) {
+            if (MarkNum == 3) {
+                selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
+                ourPlayers.removeFirst();
+                if (ourPlayers.count()) {
+                    selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
+                    ourPlayers.removeFirst();
+                }
+                if (ourPlayers.count()) {
+                    selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
+                    ourPlayers.removeFirst();
+                }
+            }
+
             if (MarkNum == 2) {
                 selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
                 ourPlayers.removeFirst();
@@ -2283,4 +2316,17 @@ QList<SPlan*> CCoach::getMatchedPlans(int _shotSpot, const QList<SPlan*>& _plans
     if (tempPlans.isEmpty() || _shotSpot == EveryWhere) return _plans;
     else                                                return tempPlans;
 
+}
+///HMD
+bool CCoach::checkOverdef(){
+    if((Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourCornerL()).abs() < 20 + overDefThr
+        ||Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourCornerR()).abs() < 20 + overDefThr)
+        && !Circle2D((wm->field->ourGoal() - Vector2D(0.2,0)),1.60).contains(wm->ball->pos)) {
+        overDefThr = 5;
+        return true;
+    }
+    else{
+        overDefThr = 0;
+        return false;
+    }
 }
