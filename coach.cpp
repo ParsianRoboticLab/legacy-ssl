@@ -1350,6 +1350,10 @@ void CCoach::decideAttack()
     case CKnowledge::TheirBallPlacement:
         decideStop(ourPlayers);
         break;
+    case CKnowledge::HalfTimeLineUp:
+
+
+        break;
     default:
         decideNull(ourPlayers);
         return;
@@ -2222,6 +2226,10 @@ void CCoach::decideOurBallPlacement(QList<int> &_ourPlayers) {
 
 void CCoach::decideTheirBallPlacement(QList<int> &_ourPlayers) {
     selectedPlay = theirBallPlacement;
+}
+
+void CCoach::decideHalfTimeLineUp(QList<int> &_ourPlayers) {
+    selectedPlay = halfTimeLineup;
 }
 
 void CCoach::decideNull(QList<int> &_ourPlayers) {

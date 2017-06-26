@@ -1000,6 +1000,10 @@ void CSoccer::refUpdate()
             {
                 wm->refCommand.enqueue("Their BallPlacement");
             }
+            else if (wm->gs->halfTimeLineUp())
+            {
+                wm->refCommand.enqueue("HalfTime LineUp");
+            }
 
             else
             {
@@ -1026,7 +1030,7 @@ char CSoccer::map_stage(SSL_Referee::Stage stage){
         case SSL_Referee::EXTRA_SECOND_HALF: return ' ';
         case SSL_Referee::PENALTY_SHOOTOUT_BREAK: return 'h';
         case SSL_Referee::PENALTY_SHOOTOUT: return 'a';
-        case SSL_Referee::POST_GAME: return 'H';
+        case SSL_Referee::POST_GAME: return 'h';
     }
     //return error
 }

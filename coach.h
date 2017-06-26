@@ -18,6 +18,7 @@
 #include "tools/planloader.h"
 #include "tools/loadplayoffjson.h"
 #include "util/rng.h"
+#include "chalftimelineup.h"
 
 class CCoach {
 
@@ -76,6 +77,11 @@ private:
     COurKickOff          *ourKickOff;
     COurIndirect         *ourIndirect;
     COurBallPlacement    *ourBallPlacement;
+    CHalftimeLineup      *halfTimeLineup;
+
+
+
+
     CTheirDirect         *theirDirect;
     CTheirPenalty        *theirPenalty;
     CTheirKickOff        *theirKickOff;
@@ -206,6 +212,7 @@ private:
     void decideStart              (QList<int>&);
     void decideOurBallPlacement   (QList<int>&);
     void decideTheirBallPlacement (QList<int>&);
+    void decideHalfTimeLineUp   (QList<int>&);
     void decideNull               (QList<int>&);
     /////////////////////////////////////
     unsigned int staticPlayoffPlansCounter;
