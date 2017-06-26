@@ -91,6 +91,7 @@ CCoach::CCoach(CAgent**_agents)
     theirPenalty        = new CTheirPenalty;
     theirIndirect       = new CTheirIndirect;
     ourBallPlacement    = new COurBallPlacement;
+    halfTimeLineup    = new CHalftimeLineup;
     theirBallPlacement  = new CTheirBallPlacement;
     ourDoubleSizeDirect = new CDoubleSizeOurDirect;
 
@@ -1351,7 +1352,7 @@ void CCoach::decideAttack()
         decideStop(ourPlayers);
         break;
     case CKnowledge::HalfTimeLineUp:
-
+        decideHalfTimeLineUp(ourPlayers);
 
         break;
     default:
@@ -2229,6 +2230,7 @@ void CCoach::decideTheirBallPlacement(QList<int> &_ourPlayers) {
 }
 
 void CCoach::decideHalfTimeLineUp(QList<int> &_ourPlayers) {
+
     selectedPlay = halfTimeLineup;
 }
 
