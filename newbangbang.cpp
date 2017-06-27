@@ -53,13 +53,25 @@ void CNewBangBang::trajectoryPlanner()
     velMax = vmax;
     //    }
     ///////////////////////////////////////////// th pid
-    thPid->kp =0.1;
     thPid->error = (agentMovementTh - agentVel.norm().th()).radian();
-    if(fabs(thPid->error > 1) || currentVel < 0.5 || agentPos.dist(pos2) >3 ||( fabs((agentMovementTh - agentDir.th()).degree()) > 80 && fabs((agentMovementTh - agentDir.th()).degree()) < 100 )   )
-        thPid->error =0;
+    if(agentVel.length() < 0.3)
+        thPid->error = 0;
+
+    double veltan= (cos(agentMovementTh.radian()))*cos(agentDir.th().radian()) + (sin(agentMovementTh.radian()))*sin(agentDir.th().radian());
+    double velnorm= -1*(cos(agentMovementTh.radian()))*sin(agentDir.th().radian()) + (sin(agentMovementTh.radian()))*cos(agentDir.th().radian());
+
+    double thPIDKCoef =  atan(fabs(veltan)/fabs(velnorm))/_PI*2;
+    thPid->kp = conf()->BangBang_thKP() * thPIDKCoef;
+    thPid->ki = conf()->BangBang_thKI();
+    thPid->kd = conf()->BangBang_thKD();
+//    if(fabs(thPid->error > 1) || currentVel < 0.5 || agentPos.dist(pos2) >3 ||( fabs((agentMovementTh - agentDir.th()).degree()) > 80 && fabs((agentMovementTh - agentDir.th()).degree()) < 100 )   )
+//        thPid->error =0;
+
     appliedTh = agentMovementTh.radian() +thPid->PID_OUT();
     desiredVx = (vDes)*cos(appliedTh);
     desiredVy = (vDes)*sin(appliedTh);
+
+    thPid->pError = thPid->error;
 }
 void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D _agentDir,Vector2D _pos2,Vector2D _dir2,double _V2,double dt,double & _Vx,double & _Vy, double & _W)
 {
@@ -92,7 +104,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     }
     else
     {
-        posPidDist = 0.15;
+        posPidDist = 0.3;
     }
     if(slow)
     {
@@ -119,12 +131,10 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
         posPid->ki = conf()->BangBang_posKI();
     }
 
-    thPid->kp = conf()->BangBang_thKP();
-    thPid->ki = conf()->BangBang_thKI();
-    thPid->kd = conf()->BangBang_thKD();
+
     //////////////////////// dec calculations
     double vp =(posPidDist*posPid->kp);
-    double moreDec = 0.79;
+    double moreDec = 0.7;
     double decOffset = 0.5;
 
     switch(decidePlan())
