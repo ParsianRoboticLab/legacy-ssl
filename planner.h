@@ -96,7 +96,7 @@ public:
 	~CPlannerThread();
     void generateObstacleSpace(CObstacles &obs, QList<int> &ourRelaxList, QList<int> &oppRelaxList, bool avoidPenaltyArea, bool avoidCenterCircle , double ballObstacleRadius, int id, Vector2D agentGoal);
     double timeEstimator(Vector2D _pos,Vector2D _vel,Vector2D _ang,Vector2D _goal);
-    void createObstacleProb(Vector2D _pos, Vector2D _vel, Vector2D _ang, Vector2D &_center, double &_rad,Vector2D agentPos,Vector2D agentVel, Vector2D agentGoal, Vector2D agentDir);
+    void createObstacleProb(CObstacles &obs, Vector2D _pos, Vector2D _vel, Vector2D _ang, Vector2D &_center, double &_rad, Vector2D agentPos, Vector2D agentVel, Vector2D agentGoal, Vector2D agentDir);
     void run();
 
 
