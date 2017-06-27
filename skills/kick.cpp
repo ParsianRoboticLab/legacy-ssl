@@ -1319,13 +1319,15 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
 {
     QList<int> ourRelax,oppRelax;
     Vector2D finalPos;
+    Vector2D ballPosInFuture;
     if(wm->ball->vel.length() > 0.2)
     {
-        for(double i = 0 ; i < 5 ; i += 0.1)
+        for(double i = 0 ; i < 3 ; i += 0.1)
         {
 
-            finalPos = wm->ball->getPosInFuture(i) - (_target-wm->ball->getPosInFuture(i)).norm()*0.11;
-            if(CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,false)< i)
+            ballPosInFuture = wm->ball->getPosInFuture(i);
+            finalPos = ballPosInFuture - (_target-ballPosInFuture).norm()*0.11;
+            if(CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,true)< i)
             {
                 draw(finalPos);
                 return i;
@@ -1369,7 +1371,7 @@ void CSkillKick::findPosToGo()
         for(double i = 0 ; i < 5 ; i += 0.1)
         {
 
-            finalPos = wm->ball->getPosInFuture(i);// - (target-wm->ball->getPosInFuture(i)).norm()*0.11;
+            finalPos = wm->ball->getPosInFuture(i);// - (target-wm->ball->getPosInFuture(i)).norm()*0.15;
             agentTime = CSkillGotoPointAvoid::timeNeeded(agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,!goalieMode,0.2,false);
             if(agentTime < i - 0.5)
             {
@@ -1388,7 +1390,7 @@ void CSkillKick::findPosToGo()
 
     else
     {
-        finalPos = ballPos - (target-ballPos).norm() * 0.15;
+        finalPos = ballPos - (target-finalPos).norm() * 0.15;
         finalDir = Vector2D(cos(kickFinalDir.radian()),sin(kickFinalDir.radian()));
     }
 
@@ -1433,14 +1435,37 @@ void CSkillKick::findPosToGo()
     {
         finalPos = finalPos - (target-finalPos).norm() * 0.1;
     }
+    Vector2D s1,s2;
+    Circle2D finalPosArea;
+    draw(finalPosArea,QColor(Qt::blue));
+
+    Segment2D directPath(agentPos,finalPos);
+    draw(directPath);
+         finalPosArea.assign(ballPos ,0.145);
+    if(finalPosArea.intersection(directPath,&s1,&s2))
+    {
+        finalPosArea.assign(ballPos ,0.245);
+
+        finalPosArea.tangent(agentPos,&s1,&s2);
+        if(s2.dist(target) >= s1.dist(target))
+            s1 = s2;
+        finalPos = s1;
+
+        gpa->setAddVel(wm->ball->vel);
+    }
+    else
+    {
+        gpa->setAddVel(Vector2D(0,0));
+    }
+
     gpa->init(finalPos,finalDir);
-    gpa->setAvoidBall(true);
+    gpa->setAvoidBall(false);
     gpa->setNoAvoid(false);
 
     if(wm->ball->vel.length() > 0.3)
-        gpa->setBallObstacleRadius(0.12);
+        gpa->setBallObstacleRadius(0);
     else
-        gpa->setBallObstacleRadius(0.4);
+        gpa->setBallObstacleRadius(0);
     if((fabs(((ballPos - agentPos).th() - kickFinalDir).degree()) < 60) && (agentPos.dist(ballPos) < 1) && (wm->ball->vel.length() > 0.2) || (agentPos.dist(ballPos)<0.4)) {
         if(fabs((kickFinalDir - agentDir.th()).degree()) > 40 && dribblerArea.contains(ballPos))
         {

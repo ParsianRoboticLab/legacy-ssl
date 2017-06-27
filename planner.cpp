@@ -782,7 +782,7 @@ double CPlannerThread::timeEstimator(Vector2D _pos, Vector2D _vel, Vector2D _dir
 
 }
 
-void CPlannerThread::createObstacleProb(Vector2D _pos, Vector2D _vel, Vector2D _ang, Vector2D &_center, double &_rad,Vector2D agentPos,Vector2D agentVel, Vector2D agentGoal, Vector2D agentDir)
+void CPlannerThread::createObstacleProb(CObstacles &obs,Vector2D _pos, Vector2D _vel, Vector2D _ang, Vector2D &_center, double &_rad,Vector2D agentPos,Vector2D agentVel, Vector2D agentGoal, Vector2D agentDir)
 {
     Segment2D obstaclePath;
     Vector2D intersectPoint;
@@ -808,15 +808,23 @@ void CPlannerThread::createObstacleProb(Vector2D _pos, Vector2D _vel, Vector2D _
             timeForObs *= agentPos.dist(intersectPoint)/agentPos.dist(agentGoal);
             timeForObs *=1;
             timeForObs = min(maxTime,timeForObs);
-            _center= _pos + _vel*timeForObs;
-            _rad = 0.7*maxA*timeForObs*timeForObs ;
+            for(double i = -0.2;i< 0.3 ; i+=0.05)
+            {
 
-            _rad = min(maxObstRad,_rad);
-            _rad +=CRobot::robot_radius_new;
-            draw(QString("t: %1").arg(timeForObs),Vector2D(2,0));
-            draw(intersectPoint);
-            draw(agentPath);
-            draw(obstaclePath);
+                timeForObs +=i;
+                _center= _pos + _vel*timeForObs;
+                _rad = 0.7*maxA*timeForObs*timeForObs ;
+
+                _rad = min(maxObstRad,_rad);
+                _rad = min(agentPos.dist(_center) - 0.3,_rad);
+                _rad = min(_pos.dist(_center) - 0.3 ,_rad );
+                _rad +=CRobot::robot_radius_new;
+                if(timeForObs >=0)
+                {
+                    obs.add_circle(_center.x , _center.y , _rad , 0 , 0);
+//                    draw(Circle2D(_center,_rad),QColor(Qt::blue),true);
+                }
+            }
         }
         else
         {
@@ -824,6 +832,9 @@ void CPlannerThread::createObstacleProb(Vector2D _pos, Vector2D _vel, Vector2D _
             _rad =CRobot::robot_radius_new;
         }
     }
+
+    obs.add_circle(_center.x , _center.y , _rad , 0 , 0);
+//    draw(Circle2D(_center,_rad),QColor(Qt::blue),true);
 }
 
 void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelaxList, QList<int> &oppRelaxList, bool avoidPenaltyArea, bool avoidCenterCircle , double ballObstacleRadius, int id,Vector2D agentGoal)
@@ -860,20 +871,20 @@ void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelax
         if( ourRelaxList.contains(mywma.our[j].id) == false )
         {
 
-            createObstacleProb(mywma.our[j].pos,mywma.our[j].vel,Vector2D(0,0),_center,rad,agentPos,agentVel,agentGoal,Vector2D(1,1));
+            createObstacleProb(obs,mywma.our[j].pos,mywma.our[j].vel,Vector2D(0,0),_center,rad,agentPos,agentVel,agentGoal,Vector2D(1,1));
 
 
             double obstVelFactor = 0.15;
 
-            obs.add_circle(_center.x , _center.y , rad , 0 , 0);
+            //obs.add_circle(_center.x , _center.y , rad , 0 , 0);
 
-            if(1 || Circle2D(mywma.our[j].pos,CRobot::robot_radius_new+0.05).intersection(agentPath,&dummy1,&dummy2) > 1)
+            if(1 || Circle2D(mywma.our[j].pos,CRobot::robot_radius_new+0.07).intersection(agentPath,&dummy1,&dummy2) > 1)
             {
                 obs.add_circle(mywma.our[j].pos.x , mywma.our[j].pos.y , 0.2 , 0 , 0);
 
             }
 
-            // draw(Circle2D(_center,rad),QColor(Qt::blue),true);
+
 
         }
     }
@@ -883,9 +894,9 @@ void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelax
         if( oppRelaxList.contains(mywma.opp[j].id) == false )
         {
 
-            createObstacleProb(mywma.opp[j].pos,mywma.opp[j].vel,Vector2D(0,0),_center,rad,agentPos,agentVel,agentGoal,Vector2D(1,1));
+            createObstacleProb(obs,mywma.opp[j].pos,mywma.opp[j].vel,Vector2D(0,0),_center,rad,agentPos,agentVel,agentGoal,Vector2D(1,1));
             double obstVelFactor = 0.15;
-            obs.add_circle(_center.x , _center.y , rad , 0 , 0);
+            //obs.add_circle(_center.x , _center.y , rad , 0 , 0);
             obs.add_circle(mywma.opp[j].pos.x , mywma.opp[j].pos.y , 0.2 , 0 , 0);
         }
     }
