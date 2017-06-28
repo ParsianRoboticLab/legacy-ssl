@@ -16,6 +16,9 @@ public:
     void init(QList <int> _agents , QMap<QString , EditData*> *_editData);
 private:
     void reset();
+    void lineUpAllAgents();
+    QList<CSkillGotoPointAvoid *> lineup;
+    CSkillGotoPointAvoid * lineupAgent;
 };
 
 #endif // CHALFTIMELINEUP_H

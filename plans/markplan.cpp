@@ -1553,7 +1553,7 @@ void CMarkPlan::findOppAgentsToMark()
         {
             oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i]));
         }
-        draw(Circle2D(oppAgentsToMarkPos.last(),.1),Qt::yellow);
+//        draw(Circle2D(oppAgentsToMarkPos.last(),.1),Qt::yellow);
     }
 
 

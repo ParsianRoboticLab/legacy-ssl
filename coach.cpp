@@ -394,6 +394,12 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         preferedDefenseCounts = policy()->Formation_Defense();
     }
     lastPreferredDefenseCounts = preferedDefenseCounts;
+
+    if(knowledge->getGameState()==CKnowledge::HalfTimeLineUp){
+        preferedGoalieAgent = -1;
+        preferedDefenseCounts = 0;
+    }
+
 }
 
 void CCoach::calcDesiredMarkCounts()
@@ -2230,6 +2236,7 @@ void CCoach::decideTheirBallPlacement(QList<int> &_ourPlayers) {
 }
 
 void CCoach::decideHalfTimeLineUp(QList<int> &_ourPlayers) {
+    qDebug()<<"half time /line up";
 
     selectedPlay = halfTimeLineup;
 }
