@@ -211,6 +211,8 @@ private:
     unsigned int staticPlayoffPlansCounter;
     unsigned int shuffleCounter, shuffleSize;
     bool shuffled;
+    unsigned int LFUPlanID,maxLFU, LFU;
+    bool firstPlanRepeatInit;
     QList<int> staticPlayoffPlansShuffleIndexing;
 
     bool isFastPlay();
