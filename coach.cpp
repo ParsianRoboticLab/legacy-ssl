@@ -128,16 +128,23 @@ CCoach::CCoach(CAgent**_agents)
     firstIsFinished = false;
     preferedDefenseCounts = 2;
     preferedShotSpot = EveryWhere;
+
+    palyoffPalselectionDataFile.setFileName("PlayoffPlanRepeat.txt");
+    palyoffPalselectionDataFile.open(QIODevice::ReadWrite | QIODevice::Truncate);
+    out.setDevice(&palyoffPalselectionDataFile);
+
+
 }
 
 CCoach::~CCoach()
 {
     savePostAssignment();
+    saveLFUReapeatData(LFUList);
 }
 
 void CCoach::saveGoalie()
 {
-//    debug((QString("goalie under net timer : %1").arg(goalieTimer.elapsed())),D_MHMMD);
+    //    debug((QString("goalie under net timer : %1").arg(goalieTimer.elapsed())),D_MHMMD);
     if(goalieTimer.elapsed() > 100 && knowledge->goalie != NULL)
     {
         knowledge->goalie->setRobotAbsVel(1,0,0);
@@ -1867,9 +1874,10 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
 
 
     static QList<SPlan*> validPlans;
-    QList<SPlan*> prevPlans = validPlans;
     validPlans.clear();
     validPlans = getValidPlans(_mode, _ourplayers);
+
+    LFUList = validPlans;
 
     if (validPlans.isEmpty()) {
         debug ("[coach] WE DONT HAVE PLAN AT ALL", D_MAHI);
@@ -1878,7 +1886,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
 
     NGameOff::SPlan* thePlan = NULL;
     /** new plan selector **/
-//    thePlan = chooseMostSuccecfull(validPlans);
+    //    thePlan = chooseMostSuccecfull(validPlans);
 
     /** new plan selector **/
 
@@ -1889,26 +1897,24 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
 
     /** LFU selection **/
 
-    maxLFU = 0;
-    for(int id=0; id< validPlans.count(); id++) {
-        int temp = (int)(validPlans.at(id)->common.chance - validPlans.at(id)->common.planRepeat);
-        if(temp > maxLFU){
-            maxLFU = temp;
-            LFUPlanID = id;
+    maxLFU=0;
+    for(int i=0;i<validPlans.size();i++){
+        LFU=validPlans.at(i)->common.chance/(double)(validPlans.at(i)->common.planRepeat+1);
+        if(maxLFU<LFU){
+            LFUPlanID=i;
+            maxLFU=LFU;
         }
     }
-
-    thePlan = validPlans.at(LFUPlanID);
+    validPlans[LFUPlanID]->common.planRepeat++;
+    thePlan=validPlans.at(LFUPlanID);
     debug(QString("LFUPlanID: %1, chance: %2, repeat: %3").arg(LFUPlanID).arg(
               thePlan->common.chance).arg(thePlan->common.planRepeat), D_NADIA);
+    debug(QString("paln name: %1, %2").arg(thePlan->gui.planFile).arg(*(thePlan->gui.index)), D_NADIA);
 
-    debug(QString("%1: %2").arg(thePlan->gui.planFile).arg(*(int*)thePlan->gui.index) , D_NADIA);
-    QFile file("PlayoffPlanRepeat.txt");
-    file.open(QIODevice::ReadWrite);
-    QTextStream out(&file);
-    file.flush();
-    out << QString(thePlan->gui.planFile);
-    out << ": "<<*(int*)thePlan->gui.index;
+    // write
+    //    out << QString(thePlan->gui.planFile);
+    //    out << ": " <<*(int*)thePlan->gui.index <<"\n";
+
     /** LFU selection **/
 
 
@@ -2042,18 +2048,57 @@ void CCoach::setFastPlay() {
 
 }
 
+void CCoach::saveLFUReapeatData(QList<SPlan*> plans){
+    palyoffPalselectionDataFile.flush();
+    foreach (SPlan* plan, plans) {
+        out << plan->gui.planFile << "\n";
+        out << plan->gui.index[2] << "\n";
+        out << plan->common.planRepeat << "\n";
+    }
+}
+
+void CCoach::LFUInit(){
+
+    QList<NGameOff::SPlan*> allPlans = m_planLoader->getPlans(); // Get All of The Plans
+
+    QString text;
+    QMap<QPair<QString, int> , int> loadLFUData;
+    QStringList l;
+    QPair<QString, int> p;
+
+    text = out.readAll();
+    text.remove(text.size()-1, text.size());
+    l = text.split("\n");
+
+    qDebug() << "l size: "<<l.size() << text.size();
+    if(text.size() > 0)
+        for(int i=0; i<l.size();i+=3){
+            p.first = l.at(i);
+            p.second = l.at(i+1).toInt();
+            loadLFUData.insert(p, l.at(i+2).toInt());
+        }
+
+    Q_FOREACH(SPlan* plan, allPlans) {
+        p.first = plan->gui.planFile;
+        p.second = *(plan->gui.index);
+        if(loadLFUData.value(p)){
+            plan->common.planRepeat = loadLFUData.value(p);
+        } else {
+            plan->common.planRepeat = 0;
+        }
+    }
+}
+
 QList<SPlan *> CCoach::getValidPlans(const POMODE _mode, const QList<int>& _ourPlayers) {
+
+    if(firstPlanRepeatInit){    // Initialize Plan Repeat
+        LFUInit();
+        firstPlanRepeatInit = false;
+    }
 
     NGameOff::SPlan* nearestPlan = NULL;
     double minDist = _MAX_DIST;
     QList<NGameOff::SPlan*> allPlans = m_planLoader->getPlans(); // Get All of The Plans
-
-    if(firstPlanRepeatInit){    // Initialize Plan Repeat
-        Q_FOREACH(SPlan* plan, allPlans) {
-            plan->common.planRepeat = 0;
-        }
-        firstPlanRepeatInit = false;
-    }
 
     QList<NGameOff::SPlan*> activePlans;
     Q_FOREACH(SPlan* plan, allPlans) {
@@ -2133,16 +2178,6 @@ QList<SPlan *> CCoach::getValidPlans(const POMODE _mode, const QList<int>& _ourP
         }
     }
 
-    if(validPlans.count() > 16){
-        validPlans.removeFirst();   validPlans.removeFirst();
-        validPlans.removeFirst();   validPlans.removeFirst();
-        validPlans.removeFirst();   validPlans.removeFirst();
-        validPlans.removeFirst();   validPlans.removeFirst();
-        validPlans.removeFirst();   validPlans.removeFirst();
-        validPlans.removeFirst();   validPlans.removeFirst();
-        validPlans.removeFirst();   validPlans.removeFirst();
-        validPlans.removeFirst();   validPlans.removeFirst();
-    }
     return validPlans;
 }
 

@@ -180,6 +180,8 @@ private:
     bool isRegionMatched(const Vector2D& _ball, const double& _radius = 1.0); //circular Matching
     //TODO : squere or Liner matching
     NGameOff::SPlan* chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans);
+    void LFUInit();
+    void saveLFUReapeatData(QList<SPlan*> plans);
     void ShufflePlanIndexing(QList<SPlan*> Plans);
     void matchPlan(NGameOff::SPlan* _plan, const QList<int>& _ourplayers);
     void checkGUItoRefineMatch(NGameOff::SPlan* _plan, const QList<int> &_ourplayers);
@@ -211,8 +213,11 @@ private:
     unsigned int staticPlayoffPlansCounter;
     unsigned int shuffleCounter, shuffleSize;
     bool shuffled;
-    unsigned int LFUPlanID,maxLFU, LFU;
+    double LFUPlanID,maxLFU, LFU;
+    QList<SPlan *> LFUList;
     bool firstPlanRepeatInit;
+    QTextStream out;
+    QFile palyoffPalselectionDataFile;
     QList<int> staticPlayoffPlansShuffleIndexing;
 
     bool isFastPlay();
