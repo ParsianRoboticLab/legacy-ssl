@@ -160,7 +160,9 @@ SOURCES += main.cpp \
     collectprofiledata.cpp \
     plays/stopplay.cpp \
     defpos.cpp \
-    chipkick.cpp
+    chipkick.cpp \
+    mixteamthread.cpp \
+    proto/multi_team_communication.pb.cc
 
 HEADERS += base.h \
     worldmodel.h \
@@ -333,7 +335,9 @@ HEADERS += base.h \
     collectprofiledata.h \
     plays/stopplay.h \
     defpos.h \
-    chipkick.h
+    chipkick.h \
+    mixteamthread.h \
+    proto/multi_team_communication.pb.h
 
 unix:INCLUDEPATH += "/usr/local/include"
 unix:LIBS += -L/usr/local/include/qjson -lqjson
@@ -413,3 +417,13 @@ INCLUDEPATH += $$PWD/intentions/
 
 RESOURCES +=
 CONFIG += c++11
+
+OTHER_FILES += \
+    proto/pb/multi_team_communication.proto
+
+
+
+
+
+
+
