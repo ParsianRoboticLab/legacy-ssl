@@ -1320,8 +1320,23 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
     QList<int> ourRelax,oppRelax;
     Vector2D finalPos;
     Vector2D ballPosInFuture;
+    Vector2D s1,s2;
+    Segment2D ballPath(wm->ball->pos,wm->ball->pos + wm->ball->vel.norm()*10);
+    Circle2D robotAreaNear (_agent->pos(),0.1);
     if(wm->ball->vel.length() > 0.2)
     {
+        if(robotAreaNear.intersection(ballPath,&s1,&s2))
+        {
+            for(double i = 0 ; i < 3 ; i += 0.1)
+            {
+
+                ballPosInFuture = wm->ball->getPosInFuture(i);
+                if(ballPosInFuture.dist(_agent->pos()) < 0.1)
+                {
+                    return i;
+                }
+            }
+        }
         for(double i = 0 ; i < 3 ; i += 0.1)
         {
 
@@ -1372,7 +1387,7 @@ void CSkillKick::findPosToGo()
         {
 
             finalPos = wm->ball->getPosInFuture(i);// - (target-wm->ball->getPosInFuture(i)).norm()*0.15;
-            agentTime = CSkillGotoPointAvoid::timeNeeded(agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,!goalieMode,0.2,false);
+            agentTime = CSkillGotoPointAvoid::timeNeeded(agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,!goalieMode,0.2,true);
             if(agentTime < i - 0.5)
             {
                 break;
