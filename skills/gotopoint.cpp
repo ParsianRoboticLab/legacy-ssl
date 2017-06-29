@@ -1178,6 +1178,7 @@ CSkillGotoPointAvoid* CSkillGotoPointAvoid::setTarget(Vector2D finalPos, Vector2
 
 double CSkillGotoPointAvoid::timeNeeded(CAgent *_agentT,Vector2D posT,double vMax,QList <int> _ourRelax,QList <int> _oppRelax ,bool avoidPenalty,double ballObstacleReduce,bool _noAvoid)
 {
+
     double _x3;
     double acc = conf()->BangBang_AccMaxForward();
     double dec = conf()->BangBang_DecMax();
@@ -1220,7 +1221,7 @@ double CSkillGotoPointAvoid::timeNeeded(CAgent *_agentT,Vector2D posT,double vMa
         distEffect += rrtAngSum*angCoef;
         distEffect = max(1,distEffect);
     }
-    debug(QString("angSum: %1 , rrt dist : %2 , dist effect : %3").arg(rrtAngSum).arg(dist).arg(distEffect),D_MHMMD);
+
 
     if(tAgentVel.length() < 0.2)
     {
