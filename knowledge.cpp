@@ -416,6 +416,7 @@ QString CKnowledge::stateToString(State s)
     //added
     if (s==OurBallPlacement) return "our ballplacement";
     if (s==TheirBallPlacement) return "their ballplacement";
+    if (s==HalfTimeLineUp) return "HalfTime LineUp";
 
     if (s==Start) return "start";
     if (s==NormalStart) return "normal start";
@@ -482,6 +483,7 @@ void CKnowledge::updateGameState()
     else if (wm->gs->theirPenaltyKick()) gamestate = TheirPenaltyKick;
     else if (wm->gs->ourBallPlacement()) gamestate = OurBallPlacement;//added
     else if (wm->gs->theirBallPlacement()) gamestate = TheirBallPlacement;//added
+    else if (wm->gs->halfTimeLineUp()) gamestate=HalfTimeLineUp;
     else gamestate = Stop;
     gamestatechanged = (lastgamestate != gamestate);
     if (gamestatechanged) lasttimegschanged = currentTime();

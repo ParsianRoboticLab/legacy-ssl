@@ -131,7 +131,8 @@ public:
         NormalStart = 11,
         //added
         OurBallPlacement = 12,
-        TheirBallPlacement = 13
+        TheirBallPlacement = 13,
+        HalfTimeLineUp=14
     };
     enum Support
     {

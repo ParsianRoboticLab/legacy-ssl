@@ -57,6 +57,8 @@ public:
     DEF_VALUE(LocalSettings,bool,Bool,SharedRadioReceive)
     DEF_ENUM(LocalSettings,std::string,OurTeamColor)
     DEF_ENUM(LocalSettings,std::string,OurTeamSide)
+    DEF_ENUM(LocalSettings,std::string,LineUpPosition)
+
     DEF_VALUE(LocalSettings,bool, Bool, ParsianWorkShop)
     DEF_TREE(Common)
     DEF_VALUE(Common,int,Int,Viewport_Width)

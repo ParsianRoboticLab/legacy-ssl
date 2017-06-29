@@ -91,6 +91,7 @@ CCoach::CCoach(CAgent**_agents)
     theirPenalty        = new CTheirPenalty;
     theirIndirect       = new CTheirIndirect;
     ourBallPlacement    = new COurBallPlacement;
+    halfTimeLineup    = new CHalftimeLineup;
     theirBallPlacement  = new CTheirBallPlacement;
     ourDoubleSizeDirect = new CDoubleSizeOurDirect;
 
@@ -403,6 +404,12 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         preferedDefenseCounts = policy()->Formation_Defense();
     }
     lastPreferredDefenseCounts = preferedDefenseCounts;
+
+    if(knowledge->getGameState()==CKnowledge::HalfTimeLineUp){
+        preferedGoalieAgent = -1;
+        preferedDefenseCounts = 0;
+    }
+
 }
 
 void CCoach::calcDesiredMarkCounts()
@@ -1359,6 +1366,10 @@ void CCoach::decideAttack()
         break;
     case CKnowledge::TheirBallPlacement:
         decideStop(ourPlayers);
+        break;
+    case CKnowledge::HalfTimeLineUp:
+        decideHalfTimeLineUp(ourPlayers);
+
         break;
     default:
         decideNull(ourPlayers);
@@ -2366,6 +2377,12 @@ void CCoach::decideOurBallPlacement(QList<int> &_ourPlayers) {
 
 void CCoach::decideTheirBallPlacement(QList<int> &_ourPlayers) {
     selectedPlay = theirBallPlacement;
+}
+
+void CCoach::decideHalfTimeLineUp(QList<int> &_ourPlayers) {
+    qDebug()<<"half time /line up";
+
+    selectedPlay = halfTimeLineup;
 }
 
 void CCoach::decideNull(QList<int> &_ourPlayers) {

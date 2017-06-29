@@ -16,6 +16,7 @@ enum PlaysEnum{
     OurDirectPlay,
     OurPenaltyPlay,
     OurBallPlacement,//added
+
     TheirKickOffPlay,
     TheirIndirectPlay,
     TheirDirectPlay,
@@ -23,7 +24,8 @@ enum PlaysEnum{
     TheirBallPlacement,//added
     StartPlay,
     StopPlay,
-    HaltPlay
+    HaltPlay,
+    HalfTimeLineUp
 };
 
 ////////////////////////IO 2016
