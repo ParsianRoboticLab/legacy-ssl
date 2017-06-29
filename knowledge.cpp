@@ -349,7 +349,6 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
         }
         else // no data is saved for this robot
         {
-            debug("no data", D_FATEMEH);
             if(ProfilerResult[refRobotID][type][(int)round(realParameter*10)] != -1000){    // get data from reference robot
                 profiledParameter= RobotsCoeff[agentId][type] * knowledge->getProfile(refRobotID , realParameter , isKick , spinOn);
             }
