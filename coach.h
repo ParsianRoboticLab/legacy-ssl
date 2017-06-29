@@ -157,6 +157,10 @@ private:
                          const POMODE _gameMode,
                          const QList<int>& _agentSize);
     void setPlayOff(NGameOff::EMode _mode);
+    int PlayoffLFUPolicy(QList<SPlan*> prevValidPlans, QList<SPlan*> validPlans);
+    int PlayoffShufflePolicy(QList<SPlan*> prevValidPlans, QList<SPlan*> validPlans);
+    int LFUPlan(QList<SPlan*> validPlans);
+    void MinChanceOfValidplans(QList<SPlan*> validPlans);
     void initStaticPlay(const POMODE _mode, const QList<int>& _agentSize);
     void initDynamicPlay(QList<int> _ourplayers);
     void initFastPlay(QList<int> _ourplayers);
@@ -180,7 +184,7 @@ private:
     bool isRegionMatched(const Vector2D& _ball, const double& _radius = 1.0); //circular Matching
     //TODO : squere or Liner matching
     NGameOff::SPlan* chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans);
-    void LFUInit();
+    void LFUInit(QList<NGameOff::SPlan*> allPlans);
     void saveLFUReapeatData(QList<SPlan*> plans);
     void ShufflePlanIndexing(QList<SPlan*> Plans);
     void matchPlan(NGameOff::SPlan* _plan, const QList<int>& _ourplayers);
@@ -217,8 +221,9 @@ private:
     QList<SPlan *> LFUList;
     bool firstPlanRepeatInit;
     QTextStream out;
-    QFile palyoffPalselectionDataFile;
+    QFile playoffPlanSelectionDataFile;
     QList<int> staticPlayoffPlansShuffleIndexing;
+    int minChance, minChanceRepeat;
 
     bool isFastPlay();
 };
