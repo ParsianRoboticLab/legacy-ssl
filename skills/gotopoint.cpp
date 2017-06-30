@@ -937,6 +937,7 @@ CSkillGotoPointAvoid::CSkillGotoPointAvoid(CAgent *_agent) : CSkillGotoPoint(_ag
     nextPos.invalidate();
     diveMode = false;
     oneTouchMode = false;
+    drawPath = false;
 }
 
 CSkillGotoPointAvoid::~CSkillGotoPointAvoid()
@@ -991,7 +992,25 @@ void CSkillGotoPointAvoid::execute()
     if (!targetVel.valid())
         vel2.assign(0,0);
 
-
+    if(drawPath)
+    {
+        if(agentVel.length() < 0.1)
+        {
+            pathPoints.clear();
+        }
+        else
+        {
+            pathPoints.append(agentPos);
+            for(int i = 0 ; i < pathPoints.size() ; i++)
+            {
+                draw(Circle2D(pathPoints[i],0.02),QColor(Qt::blue),true);
+            }
+        }
+    }
+    else
+    {
+        pathPoints.clear();
+    }
 
     /////////////////
     if (targetPos.x < wm->field->ourCornerL().x - 0.2) targetPos.x = wm->field->ourCornerL().x;
@@ -1031,7 +1050,7 @@ void CSkillGotoPointAvoid::execute()
     }
     else
     {
-        agent->initPlanner(agent->id() , targetPos , ourRelaxList , oppRelaxList , avoidPenaltyArea , avoidCenterCircle , ballObstacleRadius);
+        agent->initPlanner(agent->id() , targetPos , ourRelaxList , oppRelaxList , avoidPenaltyArea , avoidCenterCircle ,0);//avoidBall* ballObstacleRadius);
         result.clear();
         for( int i=agent->pathPlannerResult.size()-1 ; i>=0 ; i-- )
         {
@@ -1082,7 +1101,7 @@ void CSkillGotoPointAvoid::execute()
         alpha = fabs(Vector2D::angleBetween(result[1] - result[0] , result[2] - result[1]).degree());
         debug(QString("alpha : %1").arg(alpha),D_MHMMD);
         lllll = result[1];
-        vf = -1.0259280143 * log(alpha) + 4.570475303;
+        vf = -1.0259280143 * log(alpha) + 5.570475303;
         vf = max(vf , 0.5);
     }
     else
@@ -1159,6 +1178,7 @@ CSkillGotoPointAvoid* CSkillGotoPointAvoid::setTarget(Vector2D finalPos, Vector2
 
 double CSkillGotoPointAvoid::timeNeeded(CAgent *_agentT,Vector2D posT,double vMax,QList <int> _ourRelax,QList <int> _oppRelax ,bool avoidPenalty,double ballObstacleReduce,bool _noAvoid)
 {
+
     double _x3;
     double acc = conf()->BangBang_AccMaxForward();
     double dec = conf()->BangBang_DecMax();
@@ -1201,7 +1221,7 @@ double CSkillGotoPointAvoid::timeNeeded(CAgent *_agentT,Vector2D posT,double vMa
         distEffect += rrtAngSum*angCoef;
         distEffect = max(1,distEffect);
     }
-    debug(QString("angSum: %1 , rrt dist : %2 , dist effect : %3").arg(rrtAngSum).arg(dist).arg(distEffect),D_MHMMD);
+
 
     if(tAgentVel.length() < 0.2)
     {

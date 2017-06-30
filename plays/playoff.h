@@ -219,7 +219,7 @@ struct SCommon {
     QStringList tags;
     int succesRate = 0; // {},{},{},{},{},{},{}
     QMap<int, int> matchedID;
-
+    int planRepeat;
     void addHistory(const int _story) {
         int tempSucces = _story - succesRate;
         history.append(_story);
@@ -372,7 +372,7 @@ private:
     void twoSideOneCentreOneDef();
     void twoSideOneCentreTwoDef();
     void twoSideOneCentreTwoDefAndGoalie();
-    ////////////////////////////////////    
+    ////////////////////////////////////
     bool isFinalShotDone();
 
     Vector2D lastBallPos;

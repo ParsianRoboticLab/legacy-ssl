@@ -1491,6 +1491,26 @@ void CMarkPlan::findOppAgentsToMark()
                 i--;
             }
         }
+
+        if(policy()->Mark_OmmitNearestToBallPlayon())
+        {
+            debug(QString("Ommit nearest to ball"),D_MAHI);
+            int nearestToBall = -1;
+            double nearestToBallDist = 100000;
+
+            for(int i = 0 ; i < oppAgentsToMark.count() ; i++)
+            {
+                if((oppAgentsToMark[i]->pos).dist(wm->ball->pos) < nearestToBallDist)
+                {
+                    nearestToBall = i;
+                    nearestToBallDist = oppAgentsToMark[i]->pos.dist(wm->ball->pos);
+                    debug(QString("the nearest id is:%1").arg(oppAgentsToMark[i]->id),D_MAHI);
+                    draw(oppAgentsToMark[i]->pos + oppAgentsToMark[i]->vel);
+                }
+            }
+            if(nearestToBall != -1)
+                oppAgentsToMark.removeOne(oppAgentsToMark[nearestToBall]);
+        }
     }
     else if(knowledge->getGameState() == CKnowledge::TheirKickOff)
     {
@@ -1522,32 +1542,18 @@ void CMarkPlan::findOppAgentsToMark()
 
     }
 
-    if(policy()->Mark_OmmitNearestToBallPlayon() && knowledge->getGameState()!= CKnowledge::TheirKickOff)
-    {
-        debug(QString("Ommit nearest to ball"),D_MAHI);
-        int nearestToBall = -1;
-        double nearestToBallDist = 100000;
-
-        for(int i = 0 ; i < oppAgentsToMark.count() ; i++)
-        {
-            if((oppAgentsToMark[i]->pos/*+ oppAgentsToMark[i]->vel*/).dist(wm->ball->pos /*+  wm->ball->vel*/) < nearestToBallDist)
-            {
-                nearestToBall = i;
-                nearestToBallDist = oppAgentsToMark[i]->pos.dist(wm->ball->pos);
-                debug(QString("the nearest id is:%1").arg(oppAgentsToMark[i]->id),D_MAHI);
-                draw(oppAgentsToMark[i]->pos + oppAgentsToMark[i]->vel);
-            }
-        }
-        if(nearestToBall != -1)
-            oppAgentsToMark.removeOne(oppAgentsToMark[nearestToBall]);
-    }
-
-
-
+//setting the positions
     for(int i=0; i < oppAgentsToMark.count(); i++)
     {
+        if(knowledge->getGameState() == CKnowledge::Start)
+        {
         oppAgentsToMarkPos.append(oppAgentsToMark[i]->pos);
-        draw(Circle2D(oppAgentsToMarkPos.last(),.1),Qt::yellow);
+        }
+        else if(knowledge->getGameState() == CKnowledge::TheirKickOff)
+        {
+            oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i]));
+        }
+//        draw(Circle2D(oppAgentsToMarkPos.last(),.1),Qt::yellow);
     }
 
 
@@ -1622,7 +1628,7 @@ void CMarkPlan::markPosesRefinePlayon()
             }
         }
         // not invading the opponent field
-        for(int i=0; i<markPoses.count();i++)
+        for(int i=0; i < markPoses.count(); i++)
         {
             if(markPoses[i].x > xKickoff)
                 markPoses[i].x = xKickoff;
@@ -1765,127 +1771,6 @@ void CMarkPlan::execute()
         else{
             markPoses.clear();
             markAngs.clear();
-            /*
-            OopPosDanger.clear();
-            QList<QPair<Vector2D, double> > OopPosDanger;
-
-            OopPosDanger = sortdangerpassplayon(oppAgentsToMarkPos);
-
-            for(int i = 0; i < oppAgentsToMarkPos.count(); i++)
-            {
-                draw(Circle2D(oppAgentsToMarkPos[i],.2), QColor("cyan"));
-            }
-
-            QList<QPair<Vector2D, double> > oppPosDangerShoot;
-            oppPosDangerShoot.clear();
-
-            oppPosDangerShoot = sortdangershoot(1,0.2);
-            Segment2D temp;
-            QList<QPair<Vector2D, double>  > temp2; // Qlist of First:MarkAgents     Second:Distance
-            QPair<Vector2D, double> temp3;
-
-            if(agents.count() == 1)
-            {
-                if(!oppPosDangerShoot.isEmpty())
-                {
-
-                    temp.assign(oppPosDangerShoot[0].first,wm->field->ourGoal());
-
-
-                    //draw(temp, QColor(Qt::blue));
-
-                    for(int j=0; j<agents.count(); j++)
-                    {
-                        temp3.first = agents[j]->pos();
-                        temp3.second = temp.dist(agents[j]->pos());
-                        temp2.append(temp3);
-                    }
-
-
-                    /////---- sorting our Robot To find Best one to Go to The Mark Point
-
-
-                    for(int j=0; j<temp2.count(); j++)
-                    {
-                        for(int k=0; k<temp2.count() - 1 ; k++)
-                        {
-                            if(temp2[k].first.length() < temp2[k+1].first.length())
-                                temp2.swap(k, k+1);
-
-                        }
-                    }
-
-
-
-
-                    markPoses.append(temp.nearestPoint(temp2.last().first));
-                    markAngs.append(Vector2D(1,0));
-                    draw(QString("Danger"), oppPosDangerShoot[0].first, QColor(Qt::black));
-                    draw(QString("Here"), temp.nearestPoint(temp2.last().first));
-                }
-                else
-                {
-
-                    ZoneMark(OopPosDanger, 1);
-
-                }
-            }
-            else if(agents.count() == 2)
-            {
-                markPoses.clear();
-                markAngs.clear();
-                if(!oppPosDangerShoot.isEmpty())
-                {
-
-                    temp.assign(oppPosDangerShoot[0].first,wm->field->ourGoal());
-
-
-
-
-
-                    //draw(temp, QColor(Qt::blue));
-
-                    for(int j=0; j < agents.count(); j++)
-                    {
-                        temp3.first = agents[j]->pos();
-                        temp3.second = temp.dist(agents[j]->pos());
-                        temp2.append(temp3);
-                    }
-
-
-                    /////---- sorting our Robot To find Best one to Go to The Mark Point
-
-
-                    for(int j=0; j < temp2.count(); j++)
-                    {
-                        for(int k=0; k < temp2.count() - 1 ; k++)
-                        {
-                            if(temp2[k].first.length() < temp2[k+1].first.length())
-                                temp2.swap(k, k+1);
-
-                        }
-                    }
-
-
-
-
-                    markPoses.append(temp.nearestPoint(temp2.last().first));
-                    markAngs.append(Vector2D(1,0));
-                    draw(QString("Danger"), oppPosDangerShoot[0].first, QColor(Qt::black));
-                    draw(QString("Here"), temp.nearestPoint(temp2.last().first));
-                    ZoneMark(OopPosDanger,1);
-                }
-
-
-                else
-                {
-                    ZoneMark(OopPosDanger, 2);
-                }
-            }
-            //   draw(QString("temp2.last.first pos is %1").arg(temp2.last().first.absY()), Vector2D(0,0), QColor(Qt::blue));
-
-*/
-
             if(agents.count() == oppAgentsToMarkPos.count())
             {
                 for(int i = 0; i < oppAgentsToMarkPos.count(); i++)
@@ -2005,7 +1890,7 @@ void CMarkPlan::execute()
 
         else if(agents.count() < oppAgentsToMarkPos.count())
         {
-            QList<QPair<Vector2D, double> >tempQlistQpair = sortdangerpassplayoff(oppAgentsToMarkPos);
+            QList<QPair<Vector2D, double> >tempQlistQpair = sortdangerpassplayon(oppAgentsToMarkPos);
             for(int i=0; i<agents.count(); i++)
             {
                 markPoses.append(ShootBlockRatio(segmentpershoot, tempQlistQpair[i].first).first());

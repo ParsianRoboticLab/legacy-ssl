@@ -349,7 +349,6 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
         }
         else // no data is saved for this robot
         {
-            debug("no data", D_FATEMEH);
             if(ProfilerResult[refRobotID][type][(int)round(realParameter*10)] != -1000){    // get data from reference robot
                 profiledParameter= RobotsCoeff[agentId][type] * knowledge->getProfile(refRobotID , realParameter , isKick , spinOn);
             }
@@ -417,6 +416,7 @@ QString CKnowledge::stateToString(State s)
     //added
     if (s==OurBallPlacement) return "our ballplacement";
     if (s==TheirBallPlacement) return "their ballplacement";
+    if (s==HalfTimeLineUp) return "HalfTime LineUp";
 
     if (s==Start) return "start";
     if (s==NormalStart) return "normal start";
@@ -483,6 +483,7 @@ void CKnowledge::updateGameState()
     else if (wm->gs->theirPenaltyKick()) gamestate = TheirPenaltyKick;
     else if (wm->gs->ourBallPlacement()) gamestate = OurBallPlacement;//added
     else if (wm->gs->theirBallPlacement()) gamestate = TheirBallPlacement;//added
+    else if (wm->gs->halfTimeLineUp()) gamestate=HalfTimeLineUp;
     else gamestate = Stop;
     gamestatechanged = (lastgamestate != gamestate);
     if (gamestatechanged) lasttimegschanged = currentTime();
