@@ -55,6 +55,7 @@ public:
   //added
   static const int BALLPLACEMENT;
   static const int HALF_TIME;
+  static const int PENALTY_SHOOTOUT;
 
   int state;
 
@@ -107,6 +108,7 @@ public:
   bool ourBallPlacement();
   bool theirBallPlacement();
   bool halfTimeLineUp();
+  bool penalty_shootout();
 
 
 };

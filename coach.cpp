@@ -1359,6 +1359,8 @@ void CCoach::decideAttack()
         break;
     case CKnowledge::HalfTimeLineUp:
         decideHalfTimeLineUp(ourPlayers);
+    case CKnowledge::PenaltyShootout:
+        decidePenaltyShootout(ourPlayers);
 
         break;
     default:
@@ -2237,6 +2239,11 @@ void CCoach::decideTheirBallPlacement(QList<int> &_ourPlayers) {
 
 void CCoach::decideHalfTimeLineUp(QList<int> &_ourPlayers) {
     qDebug()<<"half time /line up";
+
+    selectedPlay = halfTimeLineup;
+}
+void CCoach::decidePenaltyShootout(QList<int> &_ourPlayers) {
+    qDebug()<<"penalty shootout";
 
     selectedPlay = halfTimeLineup;
 }

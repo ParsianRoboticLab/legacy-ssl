@@ -132,7 +132,8 @@ public:
         //added
         OurBallPlacement = 12,
         TheirBallPlacement = 13,
-        HalfTimeLineUp=14
+        HalfTimeLineUp=14,
+        PenaltyShootout=15
     };
     enum Support
     {

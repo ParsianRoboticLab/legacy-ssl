@@ -1004,6 +1004,10 @@ void CSoccer::refUpdate()
             {
                 wm->refCommand.enqueue("HalfTime LineUp");
             }
+            else if (wm->gs->penalty_shootout())
+            {
+                wm->refCommand.enqueue("Penalty Shootout");
+            }
 
             else
             {

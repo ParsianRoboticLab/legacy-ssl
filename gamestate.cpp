@@ -12,6 +12,7 @@ const int GameState::INDIRECT = (1 << 6);
 //added
 const int GameState::BALLPLACEMENT = (1 << 12);
 const int GameState::HALF_TIME=(1 << 13);
+const int GameState::PENALTY_SHOOTOUT=(1 << 14);
 
 
 const int GameState::RESTART = (KICKOFF | PENALTY | DIRECT | INDIRECT | BALLPLACEMENT);
@@ -69,6 +70,10 @@ if(ref_command == COMM_TIMEOUT_YELLOW
         || ref_command == COMM_TIMEOUT_BLUE
         || ref_command == COMM_HALF_TIME) {
     state=HALF_TIME; return; }
+
+if(ref_command == COMM_PENALTY_SHOOTOUT){
+    state || PENALTY_SHOOTOUT; return; }
+
 
 if (state & READY) {
   state = GAME_ON; return; }
@@ -138,6 +143,7 @@ bool GameState::ballPlacement() { return (state & BALLPLACEMENT); }
 bool GameState::ourBallPlacement() { return ballPlacement() && (state & color); }
 bool GameState::theirBallPlacement() { return ballPlacement() && ! (state & color); }
 bool GameState::halfTimeLineUp(){return state & HALF_TIME;}
+bool GameState::penalty_shootout() { return (state & PENALTY_SHOOTOUT); }
 
 
 bool GameState::canMove() { return (state != HALTED); }
