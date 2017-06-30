@@ -233,6 +233,9 @@ private:
     int minChance, minChanceRepeat;
 
     bool isFastPlay();
+    ///HMD
+    bool checkOverdef();
+    double overDefThr;
 };
 
 
