@@ -25,6 +25,27 @@ Vector2D lastBallPos = Vector2D(0,0);
 bool start = true;
 void CMainApplication::Experimental2()
 {
+    knowledge->getEmptyPosOnGoalForPenalty(0.2, true);
+    return;
+
+    Vector2D t=wm->field->oppGoal();
+    QList<int> temp;
+    double width;
+    t.x -= 1;
+    draw(t, 0, QColor(Qt::darkRed));
+
+    Vector2D target = knowledge->getEmptyPosOnGoal(t,width,true,temp, temp, 1.0, true);
+    draw(Segment2D(target, Vector2D(0,0)), QColor(Qt::black));
+
+    double empty;
+    Vector2D best;
+    QList<Circle2D> obs;
+//    obs.append(Circle2D(wm->opp.active(0)->pos, 0.1));
+    knowledge->Aminshoot(t,obs,empty, best);
+    draw(Segment2D(best, Vector2D(0,0)), QColor(Qt::red));
+    return;
+
+
 
     //technicalChalenge Penalty
 
