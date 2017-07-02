@@ -797,9 +797,10 @@ void CSkillKick::kWaitForTurn()
     Vector2D sol1;
 
     sol1 = ballpath.nearestPoint(agentPos);
-    agent->setRoller(0);
+    agent->setRoller(3);
     gpa->init(sol1,ballPos - agentPos);
     //gpa->setADiveMode(false);
+    gpa->setOneTouchMode(true);
     gpa->execute();
 }
 
@@ -1040,7 +1041,6 @@ void CSkillKick::jTurn()
     if(movementDir < 20 && movementDir > -20)
     {
         shift = 0;
-        //        if(agentPos.dist(ballPos) < 0.15)
         jTurnFromBack = false;
     }
     else if(movementDir > 50)
@@ -1340,7 +1340,7 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
             {
 
                 ballPosInFuture = wm->ball->getPosInFuture(i);
-                if(ballPosInFuture.dist(_agent->pos()) < 0.1)
+                if(ballPosInFuture.dist(_agent->pos()) <= 0.1)
                 {
                     return i;
                 }
@@ -1351,7 +1351,7 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
 
             ballPosInFuture = wm->ball->getPosInFuture(i);
             finalPos = ballPosInFuture - (_target-ballPosInFuture).norm()*0.11;
-            if(CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,true)< i)
+            if(CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,true)<= i+0.1)
             {
                 draw(finalPos);
                 return i;
@@ -1368,14 +1368,10 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
 void CSkillKick::findPosToGo()
 {
 
-    Circle2D ballArea(ballPos,0.2);
-    double oneTouchRad =1;
     Circle2D  agentNearArea(agentPos,0.15);
     Vector2D sol1,sol2;
     QList<int> ourRelax,oppRelax;
-    double bestPoint = 0;
     double agentTime = 0;
-    double diffTime = 0.5;
     Vector2D finalDir;
     Segment2D ballPath(ballPos,ballPos + wm->ball->vel.norm()*10);
     Circle2D dribblerArea(agentPos+agentDir.norm()*0.1,0.25);
@@ -1419,7 +1415,7 @@ void CSkillKick::findPosToGo()
     }
 
     Vector2D oneTouchPos = ballPath.nearestPoint(agentPos);
-
+    Segment2D kickerSeg(agentPos+agent->dir().norm()*0.08+agent->dir().rotate(90).norm()*0.2 ,agentPos+agent->dir().norm()*0.08-agent->dir().rotate(90).norm()*0.2 );
     bool canOneTouch = false;
     if(robotArea.intersection(ballPath,&sol1,&sol2) > 1 && wm->ball->vel.length() > 0.2 )
     {
@@ -1434,7 +1430,7 @@ void CSkillKick::findPosToGo()
                 }
             }
         }
-        if(canOneTouch)
+        if(canOneTouch || kickerSeg.intersection(ballPath).isValid())
         {
             if( ( fabs(((target-agentPos).th().degree() - (ballPos-agentPos).th().degree() )) < 70 ))
                 waitAndKick();
@@ -1469,12 +1465,10 @@ void CSkillKick::findPosToGo()
     if(finalPosArea.intersection(directPath,&s1,&s2))
     {
         finalPosArea.assign(ballPos ,0.245);
-
         finalPosArea.tangent(agentPos,&s1,&s2);
         if(s2.dist(target) >= s1.dist(target))
             s1 = s2;
         finalPos = s1;
-
         gpa->setAddVel(wm->ball->vel);
     }
     else
