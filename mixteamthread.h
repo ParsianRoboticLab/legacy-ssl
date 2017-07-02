@@ -14,7 +14,7 @@ public:
     virtual ~MixTeamThread();
     void run();
 
-    void HelloUDP();
+//    void HelloUDP();
     QMutex mutex;
     multi_team_comm::TeamPlan *packet;
     bool flag;

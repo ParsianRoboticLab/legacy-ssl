@@ -162,7 +162,9 @@ SOURCES += main.cpp \
     defpos.cpp \
     chipkick.cpp \
     mixteamthread.cpp \
-    proto/multi_team_communication.pb.cc
+    proto/multi_team_communication.pb.cc \
+    mixteamsender.cpp \
+    mixteamreader.cpp
 
 HEADERS += base.h \
     worldmodel.h \
@@ -337,7 +339,9 @@ HEADERS += base.h \
     defpos.h \
     chipkick.h \
     mixteamthread.h \
-    proto/multi_team_communication.pb.h
+    proto/multi_team_communication.pb.h \
+    mixteamsender.h \
+    mixteamreader.h
 
 unix:INCLUDEPATH += "/usr/local/include"
 unix:LIBS += -L/usr/local/include/qjson -lqjson
@@ -420,6 +424,10 @@ CONFIG += c++11
 
 OTHER_FILES += \
     proto/pb/multi_team_communication.proto
+
+
+
+
 
 
 

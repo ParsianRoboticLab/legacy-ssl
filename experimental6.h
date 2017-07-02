@@ -10,6 +10,8 @@
 #include <autoballplacement.h>
 #include <proto/multi_team_communication.pb.h>
 #include <mixteamthread.h>
+#include <mixteamsender.h>
+#include <mixteamreader.h>
 
 clock_t t;
 //#define speedTest
@@ -28,7 +30,10 @@ bool firstTime = true;
 void CMainApplication::Experimental6()
 {
 
-    static MixTeamThread *mthr = new MixTeamThread();
+//    static MixTeamSender *sender = new MixTeamSender();
+    static MixTeamReader *reader = new MixTeamReader();
+//    static MixTeamThread *mthr = new MixTeamThread();
+
     multi_team_comm::TeamPlan* example = new multi_team_comm::TeamPlan();
     multi_team_comm::RobotPlan *rp1 = example->add_plans();
     multi_team_comm::Pose *pose1 = rp1->mutable_nav_target();
@@ -47,8 +52,12 @@ void CMainApplication::Experimental6()
     pose2->set_heading(2.2);
     rp2->set_robot_id(2);
 
-    mthr->packet = example;
-    mthr->flag = true;
+//    sender->packet = example;
+//    sender->flag = true;
+
+
+//    mthr->packet = example;
+//    mthr->flag = true;
     /*
     if (firstTime) {
         firstTime = false;
