@@ -30,7 +30,7 @@ void MixTeamSender::sendData()
             qDebug() << "Serializing packet to array failed.";
         }
         mutex.lock();
-        quint64 bytes_sent = socket->writeDatagram(datagram, QHostAddress::LocalHost, 1234);
+        quint64 bytes_sent = socket->writeDatagram(datagram, QHostAddress::Any, 1234);
         qDebug() << "sent = " << bytes_sent << ",   real = " << datagram.size();
         mutex.unlock();
         if (bytes_sent != datagram.size()) {

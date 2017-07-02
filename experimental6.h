@@ -30,7 +30,7 @@ bool firstTime = true;
 void CMainApplication::Experimental6()
 {
 
-//    static MixTeamSender *sender = new MixTeamSender();
+    static MixTeamSender *sender = new MixTeamSender();
     static MixTeamReader *reader = new MixTeamReader();
 //    static MixTeamThread *mthr = new MixTeamThread();
 
@@ -52,8 +52,8 @@ void CMainApplication::Experimental6()
     pose2->set_heading(2.2);
     rp2->set_robot_id(2);
 
-//    sender->packet = example;
-//    sender->flag = true;
+    sender->packet = example;
+    sender->flag = true;
 
 
 //    mthr->packet = example;
