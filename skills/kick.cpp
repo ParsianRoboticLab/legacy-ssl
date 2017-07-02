@@ -691,7 +691,7 @@ kckMode CSkillKick::decideMode()
     robotKickArea.addVertex(agentPos+agent->dir().norm()*0.08-agent->dir().rotate(90).norm()*distCoef);
 
 
-    if(passProfiler || kickWithCenterOfDribbler) {
+    if(0&&(passProfiler || kickWithCenterOfDribbler)) {
         if(dribblerArea.contains(ballPos) && robotKickArea.contains(ballPos))
         {
             kickerOn = true;
@@ -807,63 +807,69 @@ void CSkillKick::kWaitForTurn()
 void CSkillKick::waitAndKick()
 {
 
-    gpa->setAgent(agent);
-    gpa->setNoAvoid(true);
-    if (!target.valid()) target = wm->field->oppGoal();
-
     Segment2D ballPath;
-    double stopParam = 0.07;
-    ballPath.assign(ballPos,ballPos + wm->ball->vel.norm()*(agentPos.dist(ballPos) - stopParam + 0.01));
-
+    double stopParam = 0.08;
+    ballPath.assign(ballPos,ballPos + wm->ball->vel.norm()*(15));
     Segment2D ballLine;
     ballLine.assign(ballPos,ballPos + wm->ball->vel.norm()*(15));
-
     draw(ballPath,"red");
 
+
+
     Vector2D oneTouchDir = Vector2D::unitVector(oneTouchAngle(agentPos, agent->vel(), wm->ball->vel, agentPos - ballPos, target, conf()->SkillsParams_KickOneTouch_Landa(), conf()->SkillsParams_KickOneTouch_Gamma()));
+    Vector2D kickerPoint = agentPos + agentDir.norm()*stopParam;
 
     Vector2D addVec = (agentPos - target).norm()*stopParam;
     Vector2D intersectPos;
     Vector2D sol1,sol2;
-    double onetouchRad =1.5;
+    double onetouchRad =2;
     double onetouchKickRad = 0.5;
     Circle2D oneTouchArea;
-    Circle2D oppPenaltyArea(wm->field->oppGoal() + Vector2D(0.15,0),1.30);
+    Circle2D oppPenaltyArea(wm->field->oppGoal() + Vector2D(0.15,0),1.35);
+    Circle2D oppPenaltyAreaWP(wm->field->oppGoal() + Vector2D(0.15,0),1.55);
+    draw(oppPenaltyAreaWP,QColor(Qt::red));
+    ///temp
+    draw(oppPenaltyArea,QColor(Qt::red));
 
     if(ballPos.dist(agentPos) <= onetouchRad)
         onetouchRad = ballPos.dist(agentPos)-0.08;
     oneTouchArea.assign(agentPos,onetouchRad);
 
-    intersectPos = ballPath.nearestPoint(agentPos);
-    if(wm->field->isInOppPenaltyArea(intersectPos))
-    {
-        if(oppPenaltyArea.intersection(ballLine,&sol1,&sol2))
+
+        gpa->setNoAvoid(false);
+        intersectPos = ballPath.nearestPoint(kickerPoint);
+        if(wm->field->isInOppPenaltyArea(intersectPos) )
         {
-            if(sol1.dist(agentPos) > sol2.dist(agentPos))
+            if(oppPenaltyArea.intersection(ballLine,&sol1,&sol2))
             {
-                sol1 = sol2;
+                if(sol1.dist(agentPos) > sol2.dist(agentPos))
+                {
+                    sol1 = sol2;
+                }
+                intersectPos = sol1;
             }
-            intersectPos = sol1;
         }
 
-    }
-    gpa->init(intersectPos +addVec,oneTouchDir);
-    gpa->setADiveMode(false);
-    gpa->setOneTouchMode(false);
-    gpa->execute();
-    draw(intersectPos);
-    if(agentPos.dist(ballPos) < 1)
-    {
-        if(chip)
+
+        gpa->init(intersectPos +addVec,oneTouchDir);
+
+        gpa->setOneTouchMode(true);
+        gpa->execute();
+        draw(intersectPos);
+        if(agentPos.dist(ballPos) < 1)
         {
-            agent->setChip(kickSpeed);
+            if(chip)
+            {
+                agent->setChip(kickSpeed);
+            }
+            else
+            {
+                agent->setKick(kickSpeed);
+            }
         }
-        else
-        {
-            agent->setKick(kickSpeed);
-        }
-    }
-    agent->setRoller(3);
+       // agent->setRoller(3);
+
+
 }
 
 
@@ -1334,19 +1340,7 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
     Circle2D robotAreaNear (_agent->pos(),0.1);
     if(wm->ball->vel.length() > 0.2)
     {
-        if(robotAreaNear.intersection(ballPath,&s1,&s2))
-        {
-            for(double i = 0 ; i < 3 ; i += 0.1)
-            {
-
-                ballPosInFuture = wm->ball->getPosInFuture(i);
-                if(ballPosInFuture.dist(_agent->pos()) <= 0.1)
-                {
-                    return i;
-                }
-            }
-        }
-        for(double i = 0 ; i < 3 ; i += 0.1)
+        for(double i = 0 ; i < 3 ; i += 0.01)
         {
 
             ballPosInFuture = wm->ball->getPosInFuture(i);
@@ -1377,6 +1371,7 @@ void CSkillKick::findPosToGo()
     Circle2D dribblerArea(agentPos+agentDir.norm()*0.1,0.25);
     Circle2D robotArea(agentPos,1);
 
+    gpa->setAddVel(Vector2D(0,0));
     if(agentPos.dist(ballPos) < 1.5) {
         robotArea.assign(agentPos,max(agentPos.dist(ballPos) - 0.1, 0.01));
     }
@@ -1415,15 +1410,15 @@ void CSkillKick::findPosToGo()
     }
 
     Vector2D oneTouchPos = ballPath.nearestPoint(agentPos);
-    Segment2D kickerSeg(agentPos+agent->dir().norm()*0.08+agent->dir().rotate(90).norm()*0.2 ,agentPos+agent->dir().norm()*0.08-agent->dir().rotate(90).norm()*0.2 );
+    Segment2D kickerSeg(agentPos+agent->dir().norm()*0.08+agent->dir().rotate(90).norm()*0.5 ,agentPos+agent->dir().norm()*0.08-agent->dir().rotate(90).norm()*0.5 );
     bool canOneTouch = false;
     if(robotArea.intersection(ballPath,&sol1,&sol2) > 1 && wm->ball->vel.length() > 0.2 )
     {
         for(double i = 0 ; i < 5 ; i+=0.1)
         {
-            if(wm->ball->getPosInFuture(i).dist(oneTouchPos) < 0.1)
+            if(wm->ball->getPosInFuture(i).dist(oneTouchPos) <= 0.2)
             {
-                if(CSkillGotoPointAvoid::timeNeeded(agent,oneTouchPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,!goalieMode,0,true) < i)
+                if(CSkillGotoPointAvoid::timeNeeded(agent,oneTouchPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,!goalieMode,0,true) <= i+0.1)
                 {
                     canOneTouch =true;
                     break;
@@ -1432,10 +1427,12 @@ void CSkillKick::findPosToGo()
         }
         if(canOneTouch || kickerSeg.intersection(ballPath).isValid())
         {
-            if( ( fabs(((target-agentPos).th().degree() - (ballPos-agentPos).th().degree() )) < 70 ))
+            debug("oneTOUCH",D_MHMMD);
+            if( ( fabs(((target-agentPos).th().degree() - (ballPos-agentPos).th().degree() )) < 60 ))
                 waitAndKick();
             else
                 kWaitForTurn();
+
 
             return;
         }
