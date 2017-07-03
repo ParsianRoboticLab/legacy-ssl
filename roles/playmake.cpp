@@ -826,15 +826,16 @@ void CRolePlayMake::stopBehindBall(bool penalty)
     }
     if( penalty)
     {
+
         //		draw("stopped !!!",Vector2D(0,0),"black",60);
         gotopoint->setAgent(agent);
         //		gotopoint->setPlan2(true);
         //gotopoint->setTargetLook( wm->ball->pos + Vector2D( wm->ball->pos - wm->field->oppGoalL()).norm()*0.15 , wm->field->oppGoalR());
-        gotopoint->init(wm->ball->pos + (wm->ball->pos - wm->field->oppGoalL()).norm()*0.12,wm->ball->pos - agent->pos());
+        gotopoint->init(wm->ball->pos + (wm->ball->pos - wm->field->oppGoal() + Vector2D(0,0.2)).norm()*(0.14),wm->ball->pos - agent->pos());
         gotopoint->setSlowMode(true);
         gotopoint->setNoAvoid(false);
         gotopoint->setPenaltyKick(true);
-        gotopoint->setAvoidPenaltyArea(true);
+        gotopoint->setAvoidPenaltyArea(false);
         gotopoint->setAvoidCenterCircle(false);
 
         gotopoint->execute();
@@ -922,42 +923,64 @@ void CRolePlayMake::executeOurKickOff()
 
 void CRolePlayMake::executeOurPenalty()
 {
+    kick->setAgent(agent);
+    kick->setAvoidPenaltyArea(false);
     if (knowledge->getGameMode()==CKnowledge::Stop)
     {
         cyclesExecuted--;
         srand(time(NULL));
-        stopBehindBall(true);
+        stopBehindBall(true);   //////// 14cm
         penaltyCounter = 0;
         penaltyTarget.invalidate();
     }
     else {
-        kick->setAgent(agent);
-        kick->setAvoidPenaltyArea(false);
         double w;
         Vector2D last = penaltyTarget;
 
+        const float goalLineExtra = 0.03;
+        const double xDiff = 0.10;
+        Line2D oppGoalLine(wm->field->oppGoalL() + Vector2D(+xDiff,+goalLineExtra),
+                       wm->field->oppGoalR() + Vector2D(+xDiff,-goalLineExtra));
+        Line2D ballRay(wm->ball->pos, wm->ball->pos + (wm->our[1]->dir));
+        Vector2D intersectionPoint = oppGoalLine.intersection(ballRay);
+
+        draw(intersectionPoint, 0, QColor(Qt::red));
+
+
         if (penaltyCounter<3)
         {
-            penaltyTarget = knowledge->goalVisiblity(agent->id(), w, 1.0);
+//            penaltyTarget = knowledge->goalVisiblity(agent->id(), w, 1.0);
+            penaltyTarget = knowledge->getEmptyPosOnGoalForPenalty(1.0/12.0, true);   //////// 1/12
+
             if (last.valid())
             {
                 if (last.y*penaltyTarget.y<0) penaltyCounter ++;
             }
         }
 
+
         kick->setTarget(penaltyTarget);
         // TODO : Fix This Speed
         // TODO : check this mhmmd
-        kick->setKickSpeed(kick->getAgent()->kickSpeedValue(7.8,false));
+//        kick->setKickSpeed(knowledge->getProfile(kick->getAgent()->id(),7.8 ,true, false);
+//        kick->setKickSpeed(kick->getAgent()->kickSpeedValue(7.8,false));
         kick->setPenaltyKick(true);
         kick->setInterceptMode(false);
         kick->setSpin(false);
         kick->setChip(false);
         kick->setVeryFine(false);
         kick->setWaitFrames(0);
-        kick->setKickSpeed(1023);
-        kick->setTolerance(20);
+        kick->setKickSpeed(1000);
+//        kick->setKickSpeed(3);
+        kick->setTolerance(20);   //////// 20
+//        kick->setSpin(5);
+        kick->setChip(false);
+
         kick->execute();
+
+        debug(QString("%1 %2").arg(kick->getKickSpeed()), D_FATEMEH);
+        debug(QString("%1").arg(kick->getDontKick()), D_FATEMEH);
+
     }
 }
 

@@ -1415,20 +1415,34 @@ void DefensePlan::penaltyMode(){
     Vector2D ballPos = wm->ball->pos;
     const float goalLineExtra = 0.03;
     const double xDiff = 0.10;
-    Line2D newLine(wm->field->ourGoalL() + Vector2D(+xDiff,+goalLineExtra),wm->field->ourGoalR()+Vector2D(+xDiff,-goalLineExtra));
+    Line2D goalLine(wm->field->ourGoalL() + Vector2D(+xDiff,+goalLineExtra),
+                   wm->field->ourGoalR() + Vector2D(+xDiff,-goalLineExtra));
     const double epsilon = 0.12;
     Vector2D target(-2.93, 0.0);
-    Line2D ballRay(ballPos, ballPos + (wm->opp[knowledge->nearestOppToBall]->dir));
-    Vector2D intersectionPoint = newLine.intersection(ballRay);
 
+    Line2D ballRay(ballPos, ballPos + wm->opp[knowledge->nearestOppToBall]->dir);
+
+    Vector2D intersectionPoint = goalLine.intersection(ballRay);
+    double ang = ballRay.a()*goalLine.b() - ballRay.b()*goalLine.a();
+
+    if(fabs(ang) > 0.01 && fabs(ang) < 0.95){
+        if(ang*intersectionPoint.y > 0)
+            intersectionPoint = wm->field->oppGoalR();
+        else if(ang*intersectionPoint.y < 0)
+            intersectionPoint = wm->field->oppGoalL();
+    }
+    if(ang >= 0.95)
+        intersectionPoint.y *= -1;
+    intersectionPoint.y *= (7.0/10.0);
 
     if(intersectionPoint.valid()){
         target = intersectionPoint;
-        draw(target , 0 , "black");
+        draw(target , 0 , "red");
     }
     else{
         target.y = 0.0;
     }
+
     target.y = min(max(target.y, wm->field->ourGoalR().y + epsilon), wm->field->ourGoalL().y - epsilon + 0.03);
     Vector2D targetDir(10, 10);
     targetDir.setDir(AngleDeg(60));

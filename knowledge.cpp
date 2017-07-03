@@ -1875,10 +1875,12 @@ Vector2D CKnowledge::getEmptyPosOnGoalForPenalty(double n, bool oppGoal){
 
     if(distanceR > distanceL && fabs(distanceL - distanceR) > 0.03) {
         target = Vector2D(goalieR.x, goalieR.y + n*distanceR);
-        draw(Segment2D(target, Vector2D(((goalieL+goalieR)/2).x-1, ((goalieL+goalieR)/2).y)), QColor(Qt::darkCyan));
+        draw(target, 0, QColor(Qt::black));
+//        draw(Segment2D(target, Vector2D(((goalieL+goalieR)/2).x-1, ((goalieL+goalieR)/2).y)), QColor(Qt::darkCyan));
     } else {
         target = Vector2D(goalieL.x, goalieL.y - n*distanceL);
-        draw(Segment2D(target, Vector2D(((goalieL+goalieR)/2).x-1, ((goalieL+goalieR)/2).y)), QColor(Qt::darkRed));
+        draw(target, 0, QColor(Qt::black));
+//        draw(Segment2D(target, Vector2D(((goalieL+goalieR)/2).x-1, ((goalieL+goalieR)/2).y)), QColor(Qt::darkRed));
     }
 
     return target;
