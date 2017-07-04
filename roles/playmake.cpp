@@ -836,36 +836,16 @@ void CRolePlayMake::stopBehindBall(bool penalty)
         //		draw("stopped !!!",Vector2D(0,0),"black",60);
         gotopoint->setAgent(agent);
         //		gotopoint->setPlan2(true);
-        Vector2D direction;
+        Vector2D direction, position;
 
-        if(timerStartFlag){
-            changeDirPenaltyStrikerTime.start();
-            timerStartFlag = false;
-        }
-        if(/*changeDirPenaltyStriker && */gotopoint->done()){
-            direction = Vector2D((wm->ball->pos - agent->pos()).x, (wm->ball->pos - agent->pos()).y*-1);
+        direction = wm->ball->pos - agent->pos();
+        position = wm->ball->pos + (wm->ball->pos - wm->field->oppGoal() + Vector2D(0,0.2)).norm()*(0.14);
+        gotopoint->init(position, direction);
 
-            debug("done", D_FATEMEH);
-        }
-        if(changeDirPenaltyStrikerTime.elapsed() > 3000)
-            direction = Vector2D((wm->ball->pos - agent->pos()).x, (wm->ball->pos - agent->pos()).y*1);
-        else{
-            direction = Vector2D((wm->ball->pos - agent->pos()).x, (wm->ball->pos - agent->pos()).y*-1);
-
-            debug("done", D_FATEMEH);
-        }
-
-        debug(QString("changeDirPenaltyStrikerTime: %1").arg(changeDirPenaltyStrikerTime.elapsed()), D_FATEMEH);
-
-        //gotopoint->setTargetLook( wm->ball->pos + Vector2D( wm->ball->pos - wm->field->oppGoalL()).norm()*0.15 , wm->field->oppGoalR());
-        gotopoint->init(wm->ball->pos + (wm->ball->pos - wm->field->oppGoal() + Vector2D(0,0.2)).norm()*(0.14),direction);
+//        gotopoint->setTargetLook( wm->ball->pos + Vector2D( wm->ball->pos - wm->field->oppGoalL()).norm()*0.15 , wm->field->oppGoalR());
 
 //        gotopoint->init(wm->ball->pos + (wm->ball->pos - wm->field->oppGoal() + Vector2D(0,0.2)).norm()*(0.24),
-//        Vector2D(wm->field->oppGoalL().x, wm->field->oppGoalL().y*7.0/10.0));
-
-        draw(Vector2D((wm->ball->pos - agent->pos()).x, (wm->ball->pos - agent->pos()).y*2), 0, "blue");
-        draw(Vector2D(0,0), 0, "blue");
-        draw(Vector2D((wm->ball->pos - agent->pos()).x, (wm->ball->pos - agent->pos()).y*-2), 0, "red");
+//                        Vector2D(wm->field->oppGoalL().x, wm->field->oppGoalL().y*7.0/10.0));
 
         gotopoint->setSlowMode(true);
         gotopoint->setNoAvoid(false);
@@ -967,58 +947,57 @@ void CRolePlayMake::executeOurPenalty()
         stopBehindBall(true);   //////// 14cm
         penaltyCounter = 0;
         penaltyTarget.invalidate();
+
+        changeDirPenaltyStrikerTime.restart();
+        timerStartFlag = true;
     }
     else {
         double w;
         Vector2D last = penaltyTarget;
 
-        const float goalLineExtra = 0.03;
-        const double xDiff = 0.10;
-        Line2D oppGoalLine(wm->field->oppGoalL() + Vector2D(+xDiff, +goalLineExtra),
-                       wm->field->oppGoalR() + Vector2D(+xDiff,-goalLineExtra));
-        Line2D ballRay(wm->ball->pos, wm->ball->pos + (wm->our[1]->dir));
-        Vector2D intersectionPoint = oppGoalLine.intersection(ballRay);
-
-        draw(intersectionPoint, 0, QColor(Qt::red));
-
-
-        if (penaltyCounter<3)
-        {
+        if (penaltyCounter<3){
 //            penaltyTarget = knowledge->goalVisiblity(agent->id(), w, 1.0);
             penaltyTarget = knowledge->getEmptyPosOnGoalForPenalty(1.0/12.0, true);   //////// 1/12
 
-            if (last.valid())
-            {
+            if(timerStartFlag){     // change robot direction before kicking
+                if(changeDirPenaltyStrikerTime.elapsed() < 3000){
+                    kick->setDontKick(true);
+                    penaltyTarget.y *= -1;
+                }
+                else{
+                    timerStartFlag = false;
+                }
+            }
+            else{
+                kick->setDontKick(false);
+            }
+
+            if (last.valid()){
                 if (last.y*penaltyTarget.y<0) penaltyCounter ++;
             }
         }
-
 
         kick->setTarget(penaltyTarget);
         // TODO : Fix This Speed
         // TODO : check this mhmmd
 //        kick->setKickSpeed(knowledge->getProfile(kick->getAgent()->id(),7.8 ,true, false);
 //        kick->setKickSpeed(kick->getAgent()->kickSpeedValue(7.8,false));
-        kick->setPenaltyKick(true);
+//        kick->setPenaltyKick(true);
         kick->setInterceptMode(false);
         kick->setSpin(false);
         kick->setChip(false);
         kick->setVeryFine(false);
         kick->setWaitFrames(0);
-        kick->setKickSpeed(1000);
-//        kick->setKickSpeed(3);
+        if(wm->getIsSimulMode())
+            kick->setKickSpeed(3);
+        else
+            kick->setKickSpeed(1000);
+        kick->setAvoidOppPenaltyArea(false);
         kick->setTolerance(20);   //////// 20
 //        kick->setSpin(5);
         kick->setChip(false);
 
         kick->execute();
-
-        changeDirPenaltyStrikerTime.restart();
-        timerStartFlag = true;
-
-        debug(QString("%1 %2").arg(kick->getKickSpeed()), D_FATEMEH);
-        debug(QString("%1").arg(kick->getDontKick()), D_FATEMEH);
-
     }
 }
 
