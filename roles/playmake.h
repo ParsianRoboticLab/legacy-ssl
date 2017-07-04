@@ -79,6 +79,9 @@ protected:
     int waitBeforePass;
     int orderRushInPlenalty;
     bool orderedRush;
+    QTime changeDirPenaltyStrikerTime;
+    bool timerStartFlag;
+
 public:
     DEF_ROLE(CRolePlayMake)
     void executeOurDirect();

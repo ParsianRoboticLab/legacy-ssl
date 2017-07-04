@@ -1422,6 +1422,7 @@ void DefensePlan::penaltyMode(){
 
     Line2D ballRay(ballPos, ballPos + wm->opp[knowledge->nearestOppToBall]->dir);
 
+
     Vector2D intersectionPoint = goalLine.intersection(ballRay);
     double ang = ballRay.a()*goalLine.b() - ballRay.b()*goalLine.a();
 
@@ -1435,6 +1436,7 @@ void DefensePlan::penaltyMode(){
         intersectionPoint.y *= -1;
     intersectionPoint.y *= (7.0/10.0);
 
+    
     if(intersectionPoint.valid()){
         target = intersectionPoint;
         draw(target , 0 , "red");
