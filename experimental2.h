@@ -25,6 +25,54 @@ Vector2D lastBallPos = Vector2D(0,0);
 bool start = true;
 void CMainApplication::Experimental2()
 {
+
+    const float goalLineExtra = 0.03;
+    const double xDiff = 0.10;
+
+    Line2D oppGoalLine(wm->field->oppGoalL() + Vector2D(+xDiff,+goalLineExtra),
+                       wm->field->oppGoalR() + Vector2D(+xDiff,-goalLineExtra));
+
+    //    draw(Segment2D(wm->field->oppGoalL(), wm->field->oppGoalR()), "yellow");
+
+
+    Line2D ballRay1(wm->ball->pos, wm->ball->pos + Vector2D(wm->opp[0]->dir.x, wm->opp[0]->dir.y));
+    Vector2D intersectionPoint1 = oppGoalLine.intersection(ballRay1);
+
+
+    Vector2D tune(wm->opp[0]->dir.x, wm->opp[0]->dir.y + wm->opp[0]->angularVel);
+
+    Line2D ballRay2(wm->ball->pos, wm->ball->pos + tune);
+    //    Vector2D intersectionPoint2 = oppGoalLine.intersection(ballRay2);
+
+    Vector2D intersectionPoint2 = intersectionPoint1;
+
+
+    double ang = ballRay2.a()*oppGoalLine.b() - ballRay2.b()*oppGoalLine.a();
+    debug(QString("ang: %1 , inter.y: %2").arg(ang).arg(intersectionPoint2.y), D_FATEMEH);
+    if(fabs(ang) > 0.01 && fabs(ang) < 0.95){
+        if(ang*intersectionPoint2.y > 0){
+            intersectionPoint2.y = wm->field->oppGoalR().y;
+        }else if(ang*intersectionPoint2.y < 0){
+            intersectionPoint2.y = wm->field->oppGoalL().y;
+        }
+    }
+
+    if(ang >= 0.95)
+        intersectionPoint2.y*=-1;
+    intersectionPoint1= intersectionPoint2;
+
+    intersectionPoint2.y*=(9.0/11.0);
+
+
+    draw(intersectionPoint2, 0, QColor(Qt::blue));  // adding angularVel
+    //    draw(Segment2D(wm->ball->pos, wm->ball->pos + tune), QColor(Qt::blue));
+
+    draw(intersectionPoint1, 0, QColor(Qt::red));
+    //    draw(Segment2D(wm->ball->pos, wm->ball->pos + Vector2D(wm->opp[1]->dir.x, wm->opp[1]->dir.y)), QColor(Qt::red));
+
+
+    return;
+
     static bool flag = true;
     static CAgent* myAgent = knowledge->getAgent(wm->our.activeAgentID(0));
     static CSkillGotoPointAvoid *robot1 = new CSkillGotoPointAvoid(myAgent);
@@ -45,49 +93,6 @@ void CMainApplication::Experimental2()
 
     return;
 
-    const float goalLineExtra = 0.03;
-    const double xDiff = 0.10;
-
-    Line2D oppGoalLine(wm->field->oppGoalL() + Vector2D(+xDiff,+goalLineExtra),
-                       wm->field->oppGoalR() + Vector2D(+xDiff,-goalLineExtra));
-
-    //    draw(Segment2D(wm->field->oppGoalL(), wm->field->oppGoalR()), "yellow");
-
-
-    Line2D ballRay1(wm->ball->pos, wm->ball->pos + Vector2D(wm->opp[1]->dir.x, wm->opp[1]->dir.y));
-    Vector2D intersectionPoint1 = oppGoalLine.intersection(ballRay1);
-
-
-    Vector2D tune(wm->opp[1]->dir.x, wm->opp[1]->dir.y + wm->opp[1]->angularVel);
-
-    Line2D ballRay2(wm->ball->pos, wm->ball->pos + tune);
-    //    Vector2D intersectionPoint2 = oppGoalLine.intersection(ballRay2);
-
-    Vector2D intersectionPoint2 = intersectionPoint1;
-
-
-    double ang = ballRay2.a()*oppGoalLine.b() - ballRay2.b()*oppGoalLine.a();
-    debug(QString("ang: %1 , inter.y: %2").arg(ang).arg(intersectionPoint2.y), D_FATEMEH);
-    if(fabs(ang) > 0.01 && fabs(ang) < 0.95){
-        if(ang*intersectionPoint2.y > 0)
-            intersectionPoint2 = wm->field->oppGoalR();
-        else if(ang*intersectionPoint2.y < 0)
-            intersectionPoint2 = wm->field->oppGoalL();
-    }
-    if(ang >= 0.95)
-        intersectionPoint2.y*=-1;
-    intersectionPoint1= intersectionPoint2;
-    intersectionPoint2.y*=(7.0/10.0);
-
-
-    draw(intersectionPoint2, 0, QColor(Qt::blue));  // adding angularVel
-    //    draw(Segment2D(wm->ball->pos, wm->ball->pos + tune), QColor(Qt::blue));
-
-    draw(intersectionPoint1, 0, QColor(Qt::red));
-    //    draw(Segment2D(wm->ball->pos, wm->ball->pos + Vector2D(wm->opp[1]->dir.x, wm->opp[1]->dir.y)), QColor(Qt::red));
-
-
-    return;
 
     knowledge->getEmptyPosOnGoalForPenalty(1.0/5.5, true);
     return;
