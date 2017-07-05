@@ -141,8 +141,22 @@ void CDynamicAttack::makePlan(int agentSize) {
     }
 
     /// Start Role Assigning
-
-    if (isDefenseClearing) {
+    /// if now is the opportunity of counter attack
+    int oppCnt = 0;
+    for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
+        if(wm->opp.active(i)->pos.x >= 0)
+            oppCnt++;
+    if(knowledge->ballPossesion == knowledge->ballPossesionState::isBallOurs() &&
+            oppCnt < 4)
+    {
+        currentPlan.mode = DynamicEnums::CounterAttack;
+        for (size_t i = 0; i < agentSize; i++) {
+            currentPlan.positionAgents[i].region = DynamicEnums::CounterAttack;
+            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+        }
+    }
+    //if defense is clearing
+    else if (isDefenseClearing) {
         currentPlan.mode = DynamicEnums::DefenseClear;
         for (size_t i = 0; i < agentSize; i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Near;

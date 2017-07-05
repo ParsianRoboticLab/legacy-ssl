@@ -1238,24 +1238,27 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
       }
       else
       {
-          double nearest[10] = {};
-          for(int i = 0; i < ourPlayers.size(); i++)
-              nearest[ourPlayers[i]] = CSkillKick::kickTimeEstimation(knowledge->getAgent(ourPlayers[i]), wm->field->oppGoal());
-          if(lastPlayMake >= 0)
-              nearest[lastPlayMake] -= 0.2;
-          double minT = 1e8;
-          for(int i = 0; i < ourPlayers.size(); i++)
+          Vector2D ballVel = wm->ball->vel;
+          if(lastBallVel.dist(ballVel) > 1)
           {
-              if(nearest[ourPlayers[i]] < minT)
-              {
-                  minT = nearest[ourPlayers[i]];
-                  playmakeId = ourPlayers[i];
-              }
+            double nearest[10] = {};
+            for(int i = 0; i < ourPlayers.size(); i++)
+                nearest[ourPlayers[i]] = CSkillKick::kickTimeEstimation(knowledge->getAgent(ourPlayers[i]), wm->field->oppGoal());
+            if(lastPlayMake >= 0)
+                nearest[lastPlayMake] -= 0.2;
+            double minT = 1e8;
+            for(int i = 0; i < ourPlayers.size(); i++)
+            {
+                if(nearest[ourPlayers[i]] < minT)
+                {
+                    minT = nearest[ourPlayers[i]];
+                    playmakeId = ourPlayers[i];
+                }
+            }
+            for(int i = 0; i < ourPlayers.size(); i++)
+                debug(QString("timeneeded of %1 is : %2 \n").arg(ourPlayers[i]).arg(nearest[ourPlayers[i]]), D_PARSA);
+            lastPlayMake = playmakeId;
           }
-
-          for(int i = 0; i < ourPlayers.size(); i++)
-              debug(QString("timeneeded of %3 is : %4 \n").arg(ourPlayers[i]).arg(nearest[ourPlayers[i]]), D_PARSA);
-          lastPlayMake = playmakeId;
       }
 
 }
