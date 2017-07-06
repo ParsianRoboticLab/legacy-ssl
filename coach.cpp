@@ -1268,7 +1268,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
       else
       {
           Vector2D ballVel = wm->ball->vel;
-          if(lastBallVel.dist(ballVel) > 1)
+          if(lastBallVel.dist(ballVel) > 0.5)
           {
             double nearest[10] = {};
             for(int i = 0; i < ourPlayers.size(); i++)
