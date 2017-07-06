@@ -989,7 +989,7 @@ void CRolePlayMake::executeOurPenalty()
         kick->setVeryFine(false);
         kick->setWaitFrames(0);
         if(wm->getIsSimulMode())
-            kick->setKickSpeed(3);
+            kick->setKickSpeed(7);
         else
             kick->setKickSpeed(1000);
         kick->setAvoidOppPenaltyArea(false);
@@ -1129,6 +1129,7 @@ void CRolePlayMake::execute()
         return;
     }
 
+    // TODO : penalty shootout if
     if (knowledge->getGameState()==CKnowledge::OurPenaltyKick || knowledge->getGameMode() == CKnowledge::OurPenaltyKick){
         executeOurPenalty();
         return;

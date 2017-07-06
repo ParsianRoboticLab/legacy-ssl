@@ -569,7 +569,7 @@ CSkillKick::CSkillKick(CAgent *_agent) : CSkill(_agent)
 {
 
     intercept = new CSkillIntercept(_agent);
-    kickSpeed = 3;
+    kickSpeed = 15;
     avoidOppPenaltyArea = true;
     chip = false;
     spin = false;

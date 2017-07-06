@@ -1358,6 +1358,8 @@ void DefensePlan::execute(){
     }
     //////////////////////////////////////
     bool playOn = knowledge->isStart();
+
+    // TODO : penalty shootout if
     if(knowledge->getGameState() == CKnowledge::TheirPenaltyKick){
         if(goalKeeperAgent != NULL ){
             draw(QString("Penalty") , Vector2D(1,2) , "white");
@@ -1433,11 +1435,14 @@ void DefensePlan::penaltyMode(){
             intersectionPoint.y = wm->field->oppGoalL().y;
     }
 
-    if(ang >= 0.95)
+    if(ang <= 0.95)
         intersectionPoint.y *= -1;
 
     intersectionPoint.y *= (9.0/11.0);
 
+    if(fabs(knowledge->getAgent(goalKeeperAgent->id())->pos().y) > fabs(wm->field->ourGoalR().y))
+        intersectionPoint.y += 1*knowledge->getAgent(goalKeeperAgent->id())->pos().dist(intersectionPoint)*knowledge->getAgent(goalKeeperAgent->id())->pos().dist(intersectionPoint)
+                *(fabs((intersectionPoint-knowledge->getAgent(goalKeeperAgent->id())->pos()).y)/(intersectionPoint-knowledge->getAgent(goalKeeperAgent->id())->pos()).y);   // sign
     
     if(intersectionPoint.valid()){
         target = intersectionPoint;
