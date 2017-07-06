@@ -1358,6 +1358,8 @@ void DefensePlan::execute(){
     }
     //////////////////////////////////////
     bool playOn = knowledge->isStart();
+
+    // TODO : penalty shootout if
     if(knowledge->getGameState() == CKnowledge::TheirPenaltyKick){
         if(goalKeeperAgent != NULL ){
             draw(QString("Penalty") , Vector2D(1,2) , "white");
@@ -1415,24 +1417,47 @@ void DefensePlan::penaltyMode(){
     Vector2D ballPos = wm->ball->pos;
     const float goalLineExtra = 0.03;
     const double xDiff = 0.10;
-    Line2D newLine(wm->field->ourGoalL() + Vector2D(+xDiff,+goalLineExtra),wm->field->ourGoalR()+Vector2D(+xDiff,-goalLineExtra));
+    Line2D goalLine(wm->field->ourGoalL() + Vector2D(+xDiff,+goalLineExtra),
+                   wm->field->ourGoalR() + Vector2D(+xDiff,-goalLineExtra));
     const double epsilon = 0.12;
     Vector2D target(-2.93, 0.0);
-    Line2D ballRay(ballPos, ballPos + (wm->opp[knowledge->nearestOppToBall]->dir));
-    Vector2D intersectionPoint = newLine.intersection(ballRay);
+
+    Line2D ballRay(ballPos, ballPos + wm->opp[knowledge->nearestOppToBall]->dir);
 
 
+    Vector2D intersectionPoint = goalLine.intersection(ballRay);
+    double ang = ballRay.a()*goalLine.b() - ballRay.b()*goalLine.a();
+
+    if(fabs(ang) > 0.01 && fabs(ang) < 0.95){
+        if(ang*intersectionPoint.y > 0)
+            intersectionPoint.y = wm->field->oppGoalR().y;
+        else if(ang*intersectionPoint.y < 0)
+            intersectionPoint.y = wm->field->oppGoalL().y;
+    }
+
+    if(ang <= 0.95)
+        intersectionPoint.y *= -1;
+
+    intersectionPoint.y *= (9.0/11.0);
+
+    if(fabs(knowledge->getAgent(goalKeeperAgent->id())->pos().y) > fabs(wm->field->ourGoalR().y))
+        intersectionPoint.y += 1*knowledge->getAgent(goalKeeperAgent->id())->pos().dist(intersectionPoint)*knowledge->getAgent(goalKeeperAgent->id())->pos().dist(intersectionPoint)
+                *(fabs((intersectionPoint-knowledge->getAgent(goalKeeperAgent->id())->pos()).y)/(intersectionPoint-knowledge->getAgent(goalKeeperAgent->id())->pos()).y);   // sign
+    
     if(intersectionPoint.valid()){
         target = intersectionPoint;
-        draw(target , 0 , "black");
+        draw(target , 0 , "red");
     }
     else{
         target.y = 0.0;
     }
-    target.y = min(max(target.y, wm->field->ourGoalR().y + epsilon), wm->field->ourGoalL().y - epsilon + 0.03);
+
+//    target.y = min(max(target.y, wm->field->ourGoalR().y + epsilon), wm->field->ourGoalL().y - epsilon + 0.03);
     Vector2D targetDir(10, 10);
     targetDir.setDir(AngleDeg(60));
     targetDir.setLength(1);
+
+    draw(target, 0, "blue");
 
     assignSkill(goalKeeperAgent , gpa[goalKeeperAgent->id()]);
     gpa[goalKeeperAgent->id()]->setSlowMode(false);

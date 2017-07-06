@@ -279,7 +279,6 @@ void CDynamicAttack::assignId() {
 
 void CDynamicAttack::assignTasks() {
     if (mahiPlayMaker != NULL) {
-        debug(QString("mahi %1").arg(mahiPlayMaker->id()), D_HAMED);
         playMake();
     }
 
@@ -376,21 +375,15 @@ void CDynamicAttack::playMake() {
         } else {
             roleAgentPM->setKickRealSpeed(appropriatePassSpeed());
         }
-        for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
-            if(!wm->field->isInOppPenaltyArea(wm->ball->pos))
-            {
-                debug(QString("we are dribbling1111"), D_PARSA);
-                if(Circle2D(wm->opp.active(i)->pos + wm->opp.active(i)->dir.norm()*0.08,0.12).contains(ballPos))
-                {
-                    flagT = true;
-                    debug(QString("we are dribbling222"), D_PARSA);
-                    roleAgentPM -> setSelectedSkill(DynamicEnums::Dribble); // skill Dribble
-                }
-            }
-         if(!flagT)
-         {
-             roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
-         }
+
+        roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
+
+/////////////////////////////// I HATE PARSA
+//        for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
+//            if(ballPos.dist(wm->field->oppGoal()) < 0.7 && Circle2D(wm->opp[wm->opp.activeAgentID(i)]->pos + wm->opp[wm->opp.activeAgentID(i)]->dir.norm()*0.08,0.07).contains(ballPos))
+//                roleAgentPM -> setSelectedSkill(DynamicEnums::Dribble); // skill Dribble
+//            else
+//                roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
         // TODO : fix this dastan
         /*if(isRightTimeToPass()) {
             roleAgentPM->setNoKick(false); //TEST
