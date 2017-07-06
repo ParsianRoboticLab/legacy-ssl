@@ -974,9 +974,11 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
         points[i] -= 4 - M;
         if(points[i] > points[ans])
             ans = i;
+        debug(QString("pass pos %1 %2 point is %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
     }
     currentPlan.passPos = temp[ans];
     lastPassPosLoc = currentPlan.passPos;
+    debug(QString("pass Pos %1 %2").arg(currentPlan.passPos.x).arg(currentPlan.passPos.y), D_PARSA);
 
     //the old one:
 //    QList <Vector2D> temp;
