@@ -65,6 +65,8 @@ CRolePlayMake::CRolePlayMake(CAgent *_agent) : CRole(_agent)
     waitBeforePass = 999999;
     orderRushInPlenalty = 999999;
     orderedRush = false;
+    timerStartFlag = true;
+
     //    spinPass = new CBehaviourSpinPass;
     initialPoint.invalidate();
     forceRedecide = false;
@@ -826,21 +828,35 @@ void CRolePlayMake::stopBehindBall(bool penalty)
     }
     if( penalty)
     {
+        if( knowledge->getGameState() == CKnowledge::Stop ){
+            debug("stop, reset changeDirPenaltyStriker flag", D_FATEMEH);
+
+        }
+
         //		draw("stopped !!!",Vector2D(0,0),"black",60);
         gotopoint->setAgent(agent);
         //		gotopoint->setPlan2(true);
-        //gotopoint->setTargetLook( wm->ball->pos + Vector2D( wm->ball->pos - wm->field->oppGoalL()).norm()*0.15 , wm->field->oppGoalR());
-        gotopoint->init(wm->ball->pos + (wm->ball->pos - wm->field->oppGoalL()).norm()*0.12,wm->ball->pos - agent->pos());
+        Vector2D direction, position;
+
+        direction = wm->ball->pos - agent->pos();
+        position = wm->ball->pos + (wm->ball->pos - wm->field->oppGoal() + Vector2D(0,0.2)).norm()*(0.14);
+        gotopoint->init(position, direction);
+
+//        gotopoint->setTargetLook( wm->ball->pos + Vector2D( wm->ball->pos - wm->field->oppGoalL()).norm()*0.15 , wm->field->oppGoalR());
+
+//        gotopoint->init(wm->ball->pos + (wm->ball->pos - wm->field->oppGoal() + Vector2D(0,0.2)).norm()*(0.24),
+//                        Vector2D(wm->field->oppGoalL().x, wm->field->oppGoalL().y*7.0/10.0));
+
         gotopoint->setSlowMode(true);
         gotopoint->setNoAvoid(false);
         gotopoint->setPenaltyKick(true);
-        gotopoint->setAvoidPenaltyArea(true);
+        gotopoint->setAvoidPenaltyArea(false);
         gotopoint->setAvoidCenterCircle(false);
 
         gotopoint->execute();
         gotopoint->setNoAvoid(false);
         gotopoint->setSlowMode(false);
-        debug(QString("saggggggg"),D_MHMMD);
+
     }
     else
     {
@@ -922,25 +938,41 @@ void CRolePlayMake::executeOurKickOff()
 
 void CRolePlayMake::executeOurPenalty()
 {
+    kick->setAgent(agent);
+    kick->setAvoidPenaltyArea(false);
     if (knowledge->getGameMode()==CKnowledge::Stop)
     {
         cyclesExecuted--;
         srand(time(NULL));
-        stopBehindBall(true);
+        stopBehindBall(true);   //////// 14cm
         penaltyCounter = 0;
         penaltyTarget.invalidate();
+
+        changeDirPenaltyStrikerTime.restart();
+        timerStartFlag = true;
     }
     else {
-        kick->setAgent(agent);
-        kick->setAvoidPenaltyArea(false);
         double w;
         Vector2D last = penaltyTarget;
 
-        if (penaltyCounter<3)
-        {
-            penaltyTarget = knowledge->goalVisiblity(agent->id(), w, 1.0);
-            if (last.valid())
-            {
+        if (penaltyCounter<3){
+//            penaltyTarget = knowledge->goalVisiblity(agent->id(), w, 1.0);
+            penaltyTarget = knowledge->getEmptyPosOnGoalForPenalty(1.0/12.0, true);   //////// 1/12
+
+            if(timerStartFlag){     // change robot direction before kicking
+                if(changeDirPenaltyStrikerTime.elapsed() < 3000){
+                    kick->setDontKick(true);
+                    penaltyTarget.y *= -1;
+                }
+                else{
+                    timerStartFlag = false;
+                }
+            }
+            else{
+                kick->setDontKick(false);
+            }
+
+            if (last.valid()){
                 if (last.y*penaltyTarget.y<0) penaltyCounter ++;
             }
         }
@@ -948,15 +980,23 @@ void CRolePlayMake::executeOurPenalty()
         kick->setTarget(penaltyTarget);
         // TODO : Fix This Speed
         // TODO : check this mhmmd
-        kick->setKickSpeed(kick->getAgent()->kickSpeedValue(7.8,false));
-        kick->setPenaltyKick(true);
+//        kick->setKickSpeed(knowledge->getProfile(kick->getAgent()->id(),7.8 ,true, false);
+//        kick->setKickSpeed(kick->getAgent()->kickSpeedValue(7.8,false));
+//        kick->setPenaltyKick(true);
         kick->setInterceptMode(false);
         kick->setSpin(false);
         kick->setChip(false);
         kick->setVeryFine(false);
         kick->setWaitFrames(0);
-        kick->setKickSpeed(1023);
-        kick->setTolerance(20);
+        if(wm->getIsSimulMode())
+            kick->setKickSpeed(7);
+        else
+            kick->setKickSpeed(1000);
+        kick->setAvoidOppPenaltyArea(false);
+        kick->setTolerance(20);   //////// 20
+//        kick->setSpin(5);
+        kick->setChip(false);
+
         kick->execute();
     }
 }
@@ -1089,6 +1129,7 @@ void CRolePlayMake::execute()
         return;
     }
 
+    // TODO : penalty shootout if
     if (knowledge->getGameState()==CKnowledge::OurPenaltyKick || knowledge->getGameMode() == CKnowledge::OurPenaltyKick){
         executeOurPenalty();
         return;

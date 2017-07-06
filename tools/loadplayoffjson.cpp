@@ -90,10 +90,11 @@ bool CLoadPlayOffJson::readPlan(const QVariantMap &_map, const QString& _file) {
 
 void CLoadPlayOffJson::fillCommon(NGameOff::SCommon& _common, const QVariantMap& _plan, bool* _parsedOk) {
 
-    _common.tags      = _plan.value("tags").toStringList();
-    _common.chance    = _plan.value("chance").toDouble(_parsedOk);
-    _common.lastDist  = _plan.value("lastDist").toDouble(_parsedOk);
-    _common.agentSize = _plan.value("agents").toList().size();
+    _common.tags       = _plan.value("tags").toStringList();
+    _common.chance     = _plan.value("chance").toDouble(_parsedOk);
+    _common.lastDist   = _plan.value("lastDist").toDouble(_parsedOk);
+    _common.agentSize  = _plan.value("agents").toList().size();
+    _common.planRepeat = 0;
 
     QString planMode = _plan.value("planMode").toString();
     if      (planMode == "KICKOFF" ) _common.planMode = KICKOFF;
