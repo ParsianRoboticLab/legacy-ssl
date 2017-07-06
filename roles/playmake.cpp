@@ -918,7 +918,60 @@ void CRolePlayMake::executeOurKickOff()
         }
     }
 }
+bool CRolePlayMake::ShootPenalty(){
+    Vector2D penaltyTarget;
+    double w;
+    QList<int> relax,empty;
+    relax.append(agent->id());
+    penaltyTarget = knowledge->getEmptyPosOnGoal(agent->pos(), w, true, relax, empty);
+    if(penaltyTarget == wm->field->oppGoal())
+        if(wm->opp.active(knowledge->oppGoalieIndex)->pos.y>0){
+            penaltyTarget=wm->field->oppGoalL()+ Vector2D(0,0.05);
+        }
+        else{
+            penaltyTarget=wm->field->oppGoalR() + Vector2D(0,0.05);
+        }
 
+        if(Segment2D(agent->pos(),penaltyTarget).dist(wm->opp.active(knowledge->oppGoalieIndex)->pos)
+                > abs(agent->pos().x-wm->opp.active(knowledge->oppGoalieIndex)->pos.x)/6)
+            return true;
+
+        else return false;
+}
+
+
+int CRolePlayMake::choosePenaltyStrategy(){
+
+    if(ShootPenalty()) return pshootDirect;
+    else if(!goalKeeperForward) return pgoaheadShoot;
+    else return pchipShoot;
+
+}
+
+void CRolePlayMake::executeOurPenaltyShootout(){
+
+    if (knowledge->getGameMode()==CKnowledge::Stop)
+    {
+        cyclesExecuted--;
+        srand(time(NULL));
+        stopBehindBall(true);
+        penaltyCounter = 0;
+    }
+    else {
+        switch(choosePenaltyStrategy()){
+        case pshootDirect:
+            break;
+        case pgoaheadShoot:
+            break;
+        case pchipShoot:
+            break;
+        }
+
+        kick->setAgent(agent);
+        kick->setAvoidPenaltyArea(false);
+    }
+
+}
 
 void CRolePlayMake::executeOurPenalty()
 {
@@ -929,6 +982,7 @@ void CRolePlayMake::executeOurPenalty()
         stopBehindBall(true);
         penaltyCounter = 0;
         penaltyTarget.invalidate();
+        penaltyTarget = knowledge->goalVisiblity(agent->id(), w, 1.0);
     }
     else {
         kick->setAgent(agent);
@@ -1089,13 +1143,20 @@ void CRolePlayMake::execute()
         return;
     }
 
-    if (knowledge->getGameState()==CKnowledge::OurPenaltyKick || knowledge->getGameMode() == CKnowledge::OurPenaltyKick){
-        executeOurPenalty();
-        return;
+    if(!wm->gs->penalty_shootout()){
+        if (knowledge->getGameState()==CKnowledge::OurPenaltyKick || knowledge->getGameMode() == CKnowledge::OurPenaltyKick){
+            executeOurPenalty();
+            return;
+        }
+        else if( knowledge->getGameState() == CKnowledge::OurKickOff || knowledge->getGameMode() == CKnowledge::OurKickOff ){
+            executeOurKickOff();
+            return;
+        }
     }
-    else if( knowledge->getGameState() == CKnowledge::OurKickOff || knowledge->getGameMode() == CKnowledge::OurKickOff ){
-        executeOurKickOff();
-        return;
+    else
+    {
+        if (knowledge->getGameState()==CKnowledge::OurPenaltyKick || knowledge->getGameMode() == CKnowledge::OurPenaltyKick)
+            executeOurPenaltyShootout();
     }
 
     if ( cyclesExecuted < cyclesToWait )

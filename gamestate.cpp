@@ -26,8 +26,8 @@ const int GameState::NOTREADY = (1 << 11);
 
 GameState::GameState()
 {
-  color = BLUE; state = GAME_OFF;
-  yellowscore=bluescore=0;
+    color = BLUE; state = GAME_OFF;
+    yellowscore=bluescore=0;
 }
 
 int GameState::ourScore()
@@ -54,62 +54,77 @@ void GameState::transition(char ref_command) {
     if (ref_command == COMM_SUBGOAL_BLUE) bluescore--;
     if (ref_command == COMM_GOAL_YELLOW) yellowscore++;
     if (ref_command == COMM_SUBGOAL_YELLOW) yellowscore--;
-if (ref_command == COMM_HALT) {
-  state = HALTED; return; }
+    if (ref_command == COMM_HALT) {
+        state = HALTED; return; }
+    if(state & PENALTY_SHOOTOUT)
+    {
+        if (ref_command == COMM_STOP) {
+            state = GAME_OFF; return; }
 
-if (ref_command == COMM_STOP) {
-  state = GAME_OFF; return; }
+        if (ref_command == COMM_START) {
+            state = GAME_ON; return; }
 
-if (ref_command == COMM_START) {
-  state = GAME_ON; return; }
+        if (ref_command == COMM_READY && state & NOTREADY) {
+            state &= ~NOTREADY; state |= READY; return; }
+        state |= PENALTY_SHOOTOUT;
+    }
+    else{
+        if (ref_command == COMM_STOP) {
+            state = GAME_OFF; return; }
 
-if (ref_command == COMM_READY && state & NOTREADY) {
-  state &= ~NOTREADY; state |= READY; return; }
+        if (ref_command == COMM_START) {
+            state = GAME_ON; return; }
 
-if(ref_command == COMM_TIMEOUT_YELLOW
-        || ref_command == COMM_TIMEOUT_BLUE
-        || ref_command == COMM_HALF_TIME) {
-    state=HALF_TIME; return; }
+        if (ref_command == COMM_READY && state & NOTREADY) {
+            state &= ~NOTREADY; state |= READY; return; }
+    }
 
-if(ref_command == COMM_PENALTY_SHOOTOUT){
-    state || PENALTY_SHOOTOUT; return; }
+    if(ref_command == COMM_TIMEOUT_YELLOW
+            || ref_command == COMM_TIMEOUT_BLUE
+            || ref_command == COMM_HALF_TIME) {
+        state=HALF_TIME; return; }
 
-
-if (state & READY) {
-  state = GAME_ON; return; }
-
-if (state == GAME_OFF) {
-  switch (ref_command) {
-  case COMM_KICKOFF_BLUE:
-    state = KICKOFF | BLUE | NOTREADY; return;
-  case COMM_KICKOFF_YELLOW:
-    state = KICKOFF | YELLOW | NOTREADY; return;
-
-  case COMM_PENALTY_BLUE:
-    state = PENALTY | BLUE | NOTREADY; return;
-  case COMM_PENALTY_YELLOW:
-    state = PENALTY | YELLOW | NOTREADY; return;
-
-  case COMM_DIRECT_BLUE:
-    state = DIRECT | BLUE | READY; return;
-  case COMM_DIRECT_YELLOW:
-    state = DIRECT | YELLOW | READY; return;
-
-  case COMM_INDIRECT_BLUE:
-    state = INDIRECT | BLUE | READY; return;
-  case COMM_INDIRECT_YELLOW:
-    state = INDIRECT | YELLOW | READY; return;
-
-//added
-  case COMM_BALLPLACEMENT_BLUE:
-    state = BALLPLACEMENT | BLUE | READY; return;
-  case COMM_BALLPLACEMENT_YELLOW:
-    state = BALLPLACEMENT | YELLOW | READY; return;
+    if(ref_command == COMM_PENALTY_SHOOTOUT){
+        state |= PENALTY_SHOOTOUT; return; }
 
 
-  default: break;
-  }
-}
+    if (state & READY) {
+        state = GAME_ON; return; }
+
+    if (state == GAME_OFF) {
+        switch (ref_command) {
+        case COMM_KICKOFF_BLUE:
+            state = KICKOFF | BLUE | NOTREADY; return;
+        case COMM_KICKOFF_YELLOW:
+            state = KICKOFF | YELLOW | NOTREADY; return;
+
+        case COMM_PENALTY_BLUE:
+            state = PENALTY | BLUE | NOTREADY; return;
+            state |= PENALTY_SHOOTOUT;
+        case COMM_PENALTY_YELLOW:
+            state = PENALTY | YELLOW | NOTREADY; return;
+            state |= PENALTY_SHOOTOUT;
+
+        case COMM_DIRECT_BLUE:
+            state = DIRECT | BLUE | READY; return;
+        case COMM_DIRECT_YELLOW:
+            state = DIRECT | YELLOW | READY; return;
+
+        case COMM_INDIRECT_BLUE:
+            state = INDIRECT | BLUE | READY; return;
+        case COMM_INDIRECT_YELLOW:
+            state = INDIRECT | YELLOW | READY; return;
+
+            //added
+        case COMM_BALLPLACEMENT_BLUE:
+            state = BALLPLACEMENT | BLUE | READY; return;
+        case COMM_BALLPLACEMENT_YELLOW:
+            state = BALLPLACEMENT | YELLOW | READY; return;
+
+
+        default: break;
+        }
+    }
 }
 
 bool GameState::gameOn() { return (state == GAME_ON); }
@@ -149,10 +164,10 @@ bool GameState::penalty_shootout() { return (state & PENALTY_SHOOTOUT); }
 bool GameState::canMove() { return (state != HALTED); }
 
 bool GameState::allowedNearBall() {
-return gameOn() || (state & color); }
+    return gameOn() || (state & color); }
 
 bool GameState::canKickBall() {
-return gameOn() || (ourRestart() && (state & READY)); }
+    return gameOn() || (ourRestart() && (state & READY)); }
 
 
 

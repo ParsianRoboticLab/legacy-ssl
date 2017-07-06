@@ -418,7 +418,7 @@ QString CKnowledge::stateToString(State s)
     if (s==OurBallPlacement) return "our ballplacement";
     if (s==TheirBallPlacement) return "their ballplacement";
     if (s==HalfTimeLineUp) return "HalfTime LineUp";
-    if (s==PenaltyShootout) return "Penalty Shootut";
+    if (s==PenaltyShootout) return "Penalty Shootout";
 
     if (s==Start) return "start";
     if (s==NormalStart) return "normal start";
@@ -486,7 +486,6 @@ void CKnowledge::updateGameState()
     else if (wm->gs->ourBallPlacement()) gamestate = OurBallPlacement;//added
     else if (wm->gs->theirBallPlacement()) gamestate = TheirBallPlacement;//added
     else if (wm->gs->halfTimeLineUp()) gamestate=HalfTimeLineUp;
-    else if (wm->gs->penalty_shootout()) gamestate=PenaltyShootout;
     else gamestate = Stop;
     gamestatechanged = (lastgamestate != gamestate);
     if (gamestatechanged) lasttimegschanged = currentTime();
@@ -1848,6 +1847,7 @@ Vector2D CKnowledge::goalVisiblity(int agentId, double &regionWidth, double unde
     Vector2D target = getEmptyPosOnGoal(agents[agentId]->pos(), regionWidth, true, relax, empty, underestimateTheirGoalie);
     if (!target.valid())
         target = wm->field->oppGoal();
+    draw(target,1,"yellow");
     draw(Circle2D(target, 0.05), 0, 360, "red", 1);
     return target;
 }

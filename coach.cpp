@@ -1286,6 +1286,7 @@ void CCoach::decideAttack()
         }
     }
 
+    qDebug()<<knowledge->getGameState();
     switch (knowledge->getGameState()) { // GAMESTATE
 
     case CKnowledge::Halt:
@@ -1341,6 +1342,7 @@ void CCoach::decideAttack()
             decideTheirKickOff(ourPlayers);
             break;
         case CKnowledge::OurPenaltyKick:
+
             decideOurPenalty(ourPlayers);
             break;
         case CKnowledge::TheirPenaltyKick:
@@ -1359,9 +1361,9 @@ void CCoach::decideAttack()
         break;
     case CKnowledge::HalfTimeLineUp:
         decideHalfTimeLineUp(ourPlayers);
+        break;
     case CKnowledge::PenaltyShootout:
         decidePenaltyShootout(ourPlayers);
-
         break;
     default:
         decideNull(ourPlayers);
