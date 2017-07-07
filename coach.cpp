@@ -1198,10 +1198,13 @@ void CCoach::updateAttackState()
     ids = wm->our.data->activeAgents;
     CRobot* PMA = wm->our.active(playmakeId);
 //    ourNearestAgent = knowledge->getAgent(knowledge->getNearestAgentToPoint(wm->ball->pos,&ids));
-    critCir         = Circle2D(PMA->pos, critLenth + 0.2);
-    robotCritArea.addVertex(PMA->pos);
-    robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(90) * critLenth);
-    robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(-90)* critLenth);
+    if(PMA != NULL)
+    {
+        critCir = Circle2D(PMA->pos, critLenth + 0.2);
+        robotCritArea.addVertex(PMA->pos);
+        robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(90) * critLenth);
+        robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(-90)* critLenth);
+    }
     draw(robotCritArea,QColor(Qt::cyan));
 
     if(robotCritArea.contains(oppNearest->pos)
@@ -1271,7 +1274,10 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
       else
       {
           if(playMakeIntention.elapsed() < playMakeIntentionInterval)
+          {
+              playmakeId = lastPlayMake;
               return;
+          }m
           else
               playMakeIntention.restart();
           //Vector2D ballVel = wm->ball->vel;
