@@ -4,7 +4,7 @@ MixTeamReader::MixTeamReader(QObject *parent) :
     QObject(parent)
 {
     socket = new QUdpSocket(this);
-    socket->bind(1234);//if we just use port, it can receive!
+    socket->bind(QHostAddress(QString::fromStdString(conf()->LocalSettings_MixTeamIP())),conf()->LocalSettings_MixTeamPort());
     connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 }
 

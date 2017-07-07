@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QUdpSocket>
 #include <proto/multi_team_communication.pb.h>
+#include <varswidget.h>
 
 class MixTeamSender : public QObject
 {

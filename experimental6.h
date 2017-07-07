@@ -55,19 +55,6 @@ void CMainApplication::Experimental6()
     sender->packet = example;
     sender->flag = true;
 
-
-//    mthr->packet = example;
-//    mthr->flag = true;
-    /*
-    if (firstTime) {
-        firstTime = false;
-        mthr->start();
-    }
-    */
-    //mthr->sendData();
-
-
-
     return;
 
 #ifdef speedTest
