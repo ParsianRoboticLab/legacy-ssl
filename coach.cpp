@@ -1286,7 +1286,6 @@ void CCoach::decideAttack()
         }
     }
 
-    qDebug()<<knowledge->getGameState();
     switch (knowledge->getGameState()) { // GAMESTATE
 
     case CKnowledge::Halt:
@@ -1361,9 +1360,6 @@ void CCoach::decideAttack()
         break;
     case CKnowledge::HalfTimeLineUp:
         decideHalfTimeLineUp(ourPlayers);
-        break;
-    case CKnowledge::PenaltyShootout:
-        decidePenaltyShootout(ourPlayers);
         break;
     default:
         decideNull(ourPlayers);
@@ -2240,15 +2236,9 @@ void CCoach::decideTheirBallPlacement(QList<int> &_ourPlayers) {
 }
 
 void CCoach::decideHalfTimeLineUp(QList<int> &_ourPlayers) {
-    qDebug()<<"half time /line up";
-
     selectedPlay = halfTimeLineup;
 }
-void CCoach::decidePenaltyShootout(QList<int> &_ourPlayers) {
-    qDebug()<<"penalty shootout";
 
-    selectedPlay = halfTimeLineup;
-}
 
 void CCoach::decideNull(QList<int> &_ourPlayers) {
     selectedPlay->markAgents.clear();

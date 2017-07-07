@@ -932,11 +932,11 @@ bool CRolePlayMake::ShootPenalty(){
             penaltyTarget=wm->field->oppGoalR() + Vector2D(0,0.05);
         }
 
-        if(Segment2D(agent->pos(),penaltyTarget).dist(wm->opp.active(knowledge->oppGoalieIndex)->pos)
-                > abs(agent->pos().x-wm->opp.active(knowledge->oppGoalieIndex)->pos.x)/6)
-            return true;
+    if(Segment2D(agent->pos(),penaltyTarget).dist(wm->opp.active(knowledge->oppGoalieIndex)->pos)
+            > abs(agent->pos().x-wm->opp.active(knowledge->oppGoalieIndex)->pos.x)/6)
+        return true;
 
-        else return false;
+    else return false;
 }
 
 
@@ -949,7 +949,6 @@ int CRolePlayMake::choosePenaltyStrategy(){
 }
 
 void CRolePlayMake::executeOurPenaltyShootout(){
-
     if (knowledge->getGameMode()==CKnowledge::Stop)
     {
         cyclesExecuted--;
@@ -1143,20 +1142,19 @@ void CRolePlayMake::execute()
         return;
     }
 
-    if(!wm->gs->penalty_shootout()){
-        if (knowledge->getGameState()==CKnowledge::OurPenaltyKick || knowledge->getGameMode() == CKnowledge::OurPenaltyKick){
-            executeOurPenalty();
-            return;
-        }
-        else if( knowledge->getGameState() == CKnowledge::OurKickOff || knowledge->getGameMode() == CKnowledge::OurKickOff ){
-            executeOurKickOff();
-            return;
-        }
+    if( knowledge->getGameState() == CKnowledge::OurKickOff || knowledge->getGameMode() == CKnowledge::OurKickOff ){
+        executeOurKickOff();
+        return;
     }
-    else
-    {
-        if (knowledge->getGameState()==CKnowledge::OurPenaltyKick || knowledge->getGameMode() == CKnowledge::OurPenaltyKick)
-            executeOurPenaltyShootout();
+    else if (!wm->gs->penalty_shootout()
+             && (knowledge->getGameState()==CKnowledge::OurPenaltyKick
+             || knowledge->getGameMode() == CKnowledge::OurPenaltyKick)){
+        executeOurPenalty();
+        return;
+    }
+    else if(knowledge->getGameState()==CKnowledge::OurPenaltyKick
+            || knowledge->getGameMode() == CKnowledge::OurPenaltyKick){
+        executeOurPenaltyShootout();
     }
 
     if ( cyclesExecuted < cyclesToWait )

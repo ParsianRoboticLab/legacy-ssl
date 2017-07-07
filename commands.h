@@ -84,7 +84,7 @@
 
 
 // acceptable referee commands
-#define COMM_CMD_STRING      "iIfFpPkKnrRyYdDgGcztTaoO2h1 HsS"
+#define COMM_CMD_STRING      "iIfFpPkKnrRyYdDgGcztTaoO2h1 HsSbB"
 
 #endif /* __COMMANDS_H__ */
 

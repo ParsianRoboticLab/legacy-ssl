@@ -213,7 +213,6 @@ private:
     void decideOurBallPlacement   (QList<int>&);
     void decideTheirBallPlacement (QList<int>&);
     void decideHalfTimeLineUp   (QList<int>&);
-    void decidePenaltyShootout   (QList<int>&);
     void decideNull               (QList<int>&);
     /////////////////////////////////////
     unsigned int staticPlayoffPlansCounter;

@@ -1,4 +1,5 @@
 #include "gamestate.h"
+#include "QDebug"
 
 //setup constants
 const int GameState::GAME_ON =  (1 << 0);
@@ -54,38 +55,28 @@ void GameState::transition(char ref_command) {
     if (ref_command == COMM_SUBGOAL_BLUE) bluescore--;
     if (ref_command == COMM_GOAL_YELLOW) yellowscore++;
     if (ref_command == COMM_SUBGOAL_YELLOW) yellowscore--;
+    if (ref_command == COMM_PENALTY_SHOOTOUT){
+        qDebug() << "penalty shoooooo";
+        gametimes=PENALTY_SHOOTOUT;
+    }
     if (ref_command == COMM_HALT) {
         state = HALTED; return; }
-    if(state & PENALTY_SHOOTOUT)
-    {
-        if (ref_command == COMM_STOP) {
-            state = GAME_OFF; return; }
+    if (ref_command == COMM_STOP) {
+        state = GAME_OFF; return; }
+    if (ref_command == COMM_START) {
+        state = GAME_ON; return; }
 
-        if (ref_command == COMM_START) {
-            state = GAME_ON; return; }
-
-        if (ref_command == COMM_READY && state & NOTREADY) {
-            state &= ~NOTREADY; state |= READY; return; }
-        state |= PENALTY_SHOOTOUT;
-    }
-    else{
-        if (ref_command == COMM_STOP) {
-            state = GAME_OFF; return; }
-
-        if (ref_command == COMM_START) {
-            state = GAME_ON; return; }
-
-        if (ref_command == COMM_READY && state & NOTREADY) {
-            state &= ~NOTREADY; state |= READY; return; }
-    }
+    if (ref_command == COMM_READY && state & NOTREADY) {
+        state &= ~NOTREADY; state |= READY; return; }
 
     if(ref_command == COMM_TIMEOUT_YELLOW
             || ref_command == COMM_TIMEOUT_BLUE
             || ref_command == COMM_HALF_TIME) {
         state=HALF_TIME; return; }
 
-    if(ref_command == COMM_PENALTY_SHOOTOUT){
-        state |= PENALTY_SHOOTOUT; return; }
+
+
+
 
 
     if (state & READY) {
@@ -100,10 +91,8 @@ void GameState::transition(char ref_command) {
 
         case COMM_PENALTY_BLUE:
             state = PENALTY | BLUE | NOTREADY; return;
-            state |= PENALTY_SHOOTOUT;
         case COMM_PENALTY_YELLOW:
             state = PENALTY | YELLOW | NOTREADY; return;
-            state |= PENALTY_SHOOTOUT;
 
         case COMM_DIRECT_BLUE:
             state = DIRECT | BLUE | READY; return;
@@ -125,6 +114,8 @@ void GameState::transition(char ref_command) {
         default: break;
         }
     }
+    if(ref_command == COMM_PENALTY_SHOOTOUT){
+        state |= PENALTY_SHOOTOUT; return; }
 }
 
 bool GameState::gameOn() { return (state == GAME_ON); }
@@ -158,7 +149,7 @@ bool GameState::ballPlacement() { return (state & BALLPLACEMENT); }
 bool GameState::ourBallPlacement() { return ballPlacement() && (state & color); }
 bool GameState::theirBallPlacement() { return ballPlacement() && ! (state & color); }
 bool GameState::halfTimeLineUp(){return state & HALF_TIME;}
-bool GameState::penalty_shootout() { return (state & PENALTY_SHOOTOUT); }
+bool GameState::penalty_shootout() { return gametimes & PENALTY_SHOOTOUT;}
 
 
 bool GameState::canMove() { return (state != HALTED); }

@@ -418,7 +418,6 @@ QString CKnowledge::stateToString(State s)
     if (s==OurBallPlacement) return "our ballplacement";
     if (s==TheirBallPlacement) return "their ballplacement";
     if (s==HalfTimeLineUp) return "HalfTime LineUp";
-    if (s==PenaltyShootout) return "Penalty Shootout";
 
     if (s==Start) return "start";
     if (s==NormalStart) return "normal start";

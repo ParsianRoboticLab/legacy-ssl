@@ -58,6 +58,7 @@ public:
   static const int PENALTY_SHOOTOUT;
 
   int state;
+  int gametimes;
 
   // The set of possible states are:
   //

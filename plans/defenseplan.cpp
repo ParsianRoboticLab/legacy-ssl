@@ -1358,7 +1358,8 @@ void DefensePlan::execute(){
     }
     //////////////////////////////////////
     bool playOn = knowledge->isStart();
-    if(knowledge->getGameState() == CKnowledge::TheirPenaltyKick){
+    if(knowledge->getGameState() == CKnowledge::TheirPenaltyKick
+            && !wm->gs->penalty_shootout()){
         if(goalKeeperAgent != NULL ){
             draw(QString("Penalty") , Vector2D(1,2) , "white");
             penaltyMode();
@@ -1367,6 +1368,10 @@ void DefensePlan::execute(){
             draw(QString("No Goalie!") , Vector2D(1,2) , "white");
         }
         return;
+    }
+    else if(knowledge->getGameState() == CKnowledge::TheirPenaltyKick){
+        //TO DO: add penalty goalie for penalty shootout
+
     }
     else{
         if(knowledge->goalie != NULL){
