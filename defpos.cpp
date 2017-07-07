@@ -129,11 +129,11 @@ kkDefPos CDefPos::getDefPositions(Vector2D _ballPos, int _size, double _limit1, 
             }
             if (_ballPos.y < 0 + oneDefThr) {
                 tempDefPos.pos[0] = getXYByAngle(tempAngles.angle1+agentAngle/2, tempBestRadius);
-                oneDefThr = 0.5;
+                oneDefThr = 0.15;
             }
             else{
                 tempDefPos.pos[0] = getXYByAngle(tempAngles.angle2-agentAngle/2, tempBestRadius);
-                oneDefThr = -0.5;
+                oneDefThr = -0.15;
             }
         }
         else if(_size == 2 && isNearPenaltyArea){
