@@ -142,21 +142,21 @@ void CDynamicAttack::makePlan(int agentSize) {
 
     /// Start Role Assigning
     /// if now is the opportunity of counter attack
-    int oppCnt = 0;
-    for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
-        if(wm->opp.active(i)->pos.x >= 0)
-            oppCnt++;
-    if(knowledge->ballPossesion == knowledge->ballPossesionState::isBallOurs() &&
-            oppCnt < 4)
-    {
-        currentPlan.mode = DynamicEnums::CounterAttack;
-        for (size_t i = 0; i < agentSize; i++) {
-            currentPlan.positionAgents[i].region = DynamicEnums::CounterAttack;
-            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
-        }
-    }
+//    int oppCnt = 0;
+//    for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
+//        if(wm->opp.active(i)->pos.x >= 0)
+//            oppCnt++;
+//    if(knowledge->ballPossesion == knowledge->ballPossesionState::isBallOurs() &&
+//            oppCnt < 4)
+//    {
+//        currentPlan.mode = DynamicEnums::CounterAttack;
+//        for (size_t i = 0; i < agentSize; i++) {
+//            currentPlan.positionAgents[i].region = DynamicEnums::CounterAttack;
+//            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+//        }
+//    }
     //if defense is clearing
-    else if (isDefenseClearing) {
+    if (isDefenseClearing) {
         currentPlan.mode = DynamicEnums::DefenseClear;
         for (size_t i = 0; i < agentSize; i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Near;
@@ -428,7 +428,8 @@ void CDynamicAttack::playMake() {
         roleAgentPM->setChip(false);
         roleAgentPM->setNoKick(false);
         roleAgentPM->setTarget(wm->field->oppGoal());
-        roleAgentPM->setKickSpeed(1023); // TODO : 8m/s by profiller
+        // Parsa : ino hamintory avaz kardam kar kard...
+        roleAgentPM->setKickSpeed(8); // TODO : 8m/s by profiller
         roleAgentPM->setSelectedSkill(DynamicEnums::Shot); // Skill Kick
         break;
     }
@@ -960,18 +961,23 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
     //the new one:
     QList <Vector2D> temp;
     int ans = 0;
-    points[10] = {};
+    double points[10] = {};
     for (int i = 0; i < _points.size(); i++)
         temp.append(_points.at(i));
     for(int i = 0; i < temp.size(); i++)
     {
         if(lastPassPosLoc == temp[i])
                 points[i] += 2;
-        points[i] -= (mahiPlayMaker->dir().angleOf(temp[i], mahiPlayMaker->pos(), wm->field->oppGoal()).degree()) / 10;
         double M = 100;
+        for(int j = 0; j < wm->opp.activeAgentsCount(); j++)
+            M = min(M, wm->opp.active(i)->pos.dist(ballPos));
+        if(mahiPlayMaker != NULL)
+            points[i] -= (mahiPlayMaker->dir().angleOf(temp[i], mahiPlayMaker->pos(), wm->field->oppGoal()).degree()) / 10 * 2 / M;
+        M = 100;
         for(int j = 0; j < wm->opp.activeAgentsCount(); j++)
             M = min(M, wm->opp.active(i)->pos.dist(temp[i]));
         points[i] -= 4 - M;
+        points[i] -= ballPos.dist(temp[i]) / 2;
         if(points[i] > points[ans])
             ans = i;
         debug(QString("pass pos %1 %2 point is %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
@@ -1382,12 +1388,12 @@ void CDynamicAttack::assignLocations_2() {
     guardLocations[2][0][2].assign(3.65, 2);
 
     //Bottom Opp Half
-//    guardLocations[2][1][0].assign(1.15, -1.15);
-//    guardLocations[2][1][1].assign(2.1 , -1.65);
-//    guardLocations[2][1][2].assign(3.65, -2  );
-    guardLocations[2][1][0].assign(0, 0.3);
-    guardLocations[2][1][1].assign(0, 0);
-    guardLocations[2][1][2].assign(0, -0.3);
+    guardLocations[2][1][0].assign(1.15, -1.15);
+    guardLocations[2][1][1].assign(2.1 , -1.65);
+    guardLocations[2][1][2].assign(3.65, -2  );
+//    guardLocations[2][1][0].assign(0, 0.3);
+//    guardLocations[2][1][1].assign(0, 0);
+//    guardLocations[2][1][2].assign(0, -0.3);
 }
 
 void CDynamicAttack::assignLocations_3() {

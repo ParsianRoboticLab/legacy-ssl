@@ -1370,9 +1370,9 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
         }
     }
 
-    finalPos = wm->ball->pos - (_target-wm->ball->pos).norm()*0.11;
+    finalPos = wm->ball->pos - (_target-wm->ball->pos).norm() * 0.11;
     draw(finalPos);
-    return CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,false);
+    return 10 - CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,false);
 
 }
 
