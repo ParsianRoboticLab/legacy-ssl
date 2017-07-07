@@ -45,6 +45,7 @@ namespace DynamicEnums {
 
 enum DynamicMode {
     NoMode,
+    CounterAttack,
     DefenseClear,
     NoPlanExeption,
     HighProb,

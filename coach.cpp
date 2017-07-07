@@ -1180,10 +1180,11 @@ double CCoach::findMostPossible(Vector2D agentPos)
 void CCoach::updateAttackState()
 {
     Polygon2D robotCritArea;
-    double safeRegion = 1;
-    double critLenth = 0.75;
-    CAgent *ourNearestAgent;
-    CRobot *oppNearest;
+    double    safeRegion = 1;
+    double    critLenth = 0.75;
+    Circle2D  critCir;
+    CAgent    *ourNearestAgent;
+    CRobot    *oppNearest;
     if(wm->opp.activeAgentsCount() > 0) {
         oppNearest = wm->opp[knowledge->getNearestOppToPoint(wm->ball->pos)];
     }
@@ -1195,20 +1196,22 @@ void CCoach::updateAttackState()
     QList<int> ids;
     Segment2D oppNearestPath(oppNearest->pos,oppNearest->pos + oppNearest->vel);
     ids = wm->our.data->activeAgents;
-    ourNearestAgent = knowledge->getAgent(knowledge->getNearestAgentToPoint(wm->ball->pos,&ids));
-    robotCritArea.addVertex(ourNearestAgent->pos());
-    robotCritArea.addVertex(ourNearestAgent->pos() + ourNearestAgent->dir().norm() * critLenth + ourNearestAgent->dir().norm().rotate(90)* critLenth );
-    robotCritArea.addVertex(ourNearestAgent->pos() + ourNearestAgent->dir().norm() * critLenth + ourNearestAgent->dir().norm().rotate(-90)* critLenth);
+    CRobot* PMA = wm->our.active(playmakeId);
+//    ourNearestAgent = knowledge->getAgent(knowledge->getNearestAgentToPoint(wm->ball->pos,&ids));
+    critCir         = Circle2D(PMA->pos, critLenth + 0.2);
+    robotCritArea.addVertex(PMA->pos);
+    robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(90) * critLenth);
+    robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(-90)* critLenth);
     draw(robotCritArea,QColor(Qt::cyan));
 
-
-    if(oppNearestPath.nearestPoint(wm->ball->pos).dist(wm->ball->pos) >= safeRegion) {
-        ourAttackState = SAFE;
-        debug(QString("Attack: safe"),D_MHMMD);
-    }
-    else if(robotCritArea.contains(oppNearest->pos)) {
+    if(robotCritArea.contains(oppNearest->pos)
+       || (ourAttackState == CRITICAL && critCir.contains(oppNearest->pos))) {
         ourAttackState = CRITICAL;
         debug(QString("Attack: critical"),D_MHMMD);
+    }
+    else if(oppNearestPath.nearestPoint(wm->ball->pos).dist(wm->ball->pos) >= safeRegion) {
+        ourAttackState = SAFE;
+        debug(QString("Attack: safe"),D_MHMMD);
     }
     else {
         ourAttackState = FAST;
@@ -1249,7 +1252,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
     // third version
       double ballVel = wm->ball->vel.length();
       Vector2D ballPos = wm->ball->pos;
-      if(ballVel < 0.4)
+      if(ballVel < 0.1)
       {
           double maxD = -0.1;
           for(int i = 0; i < ourPlayers.size(); i++)
@@ -1267,10 +1270,15 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
       }
       else
       {
+          if(playMakeIntention.elapsed() < playMakeIntentionInterval)
+              return;
+          else
+              playMakeIntention.restart();
+          //Vector2D ballVel = wm->ball->vel;
           double nearest[10] = {};
           for(int i = 0; i < ourPlayers.size(); i++)
               nearest[ourPlayers[i]] = CSkillKick::kickTimeEstimation(knowledge->getAgent(ourPlayers[i]), wm->field->oppGoal());
-          if(lastPlayMake >= 0)
+          if(lastPlayMake >= 0 && lastPlayMake <= 9)
               nearest[lastPlayMake] -= 0.2;
           double minT = 1e8;
           for(int i = 0; i < ourPlayers.size(); i++)
@@ -1281,12 +1289,10 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
                   playmakeId = ourPlayers[i];
               }
           }
-
           for(int i = 0; i < ourPlayers.size(); i++)
-              debug(QString("timeneeded of %3 is : %4 \n").arg(ourPlayers[i]).arg(nearest[ourPlayers[i]]), D_PARSA);
+              debug(QString("timeneeded of %1 is : %2 \n").arg(ourPlayers[i]).arg(nearest[ourPlayers[i]]), D_PARSA);
           lastPlayMake = playmakeId;
       }
-
 }
 
 void CCoach::decideAttack()
