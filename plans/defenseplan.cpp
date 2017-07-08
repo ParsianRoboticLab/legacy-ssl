@@ -1438,11 +1438,11 @@ void DefensePlan::penaltyMode(){
     if(ang <= 0.95)
         intersectionPoint.y *= -1;
 
-    intersectionPoint.y *= (9.0/11.0);
+    intersectionPoint.y *= (7.0/10.0);
 
-    if(fabs(knowledge->getAgent(goalKeeperAgent->id())->pos().y) > fabs(wm->field->ourGoalR().y))
-        intersectionPoint.y += 1*knowledge->getAgent(goalKeeperAgent->id())->pos().dist(intersectionPoint)*knowledge->getAgent(goalKeeperAgent->id())->pos().dist(intersectionPoint)
-                *(fabs((intersectionPoint-knowledge->getAgent(goalKeeperAgent->id())->pos()).y)/(intersectionPoint-knowledge->getAgent(goalKeeperAgent->id())->pos()).y);   // sign
+//    if(fabs(knowledge->getAgent(goalKeeperAgent->id())->pos().y) > fabs(wm->field->ourGoalR().y))
+//        intersectionPoint.y += 1*knowledge->getAgent(goalKeeperAgent->id())->pos().dist(intersectionPoint)*knowledge->getAgent(goalKeeperAgent->id())->pos().dist(intersectionPoint)
+//                *(fabs((intersectionPoint-knowledge->getAgent(goalKeeperAgent->id())->pos()).y)/(intersectionPoint-knowledge->getAgent(goalKeeperAgent->id())->pos()).y);   // sign
     
     if(intersectionPoint.valid()){
         target = intersectionPoint;
@@ -1453,8 +1453,8 @@ void DefensePlan::penaltyMode(){
     }
 
 //    target.y = min(max(target.y, wm->field->ourGoalR().y + epsilon), wm->field->ourGoalL().y - epsilon + 0.03);
-    Vector2D targetDir(10, 10);
-    targetDir.setDir(AngleDeg(60));
+    Vector2D targetDir(10, 5);
+    targetDir.setDir(AngleDeg(0));
     targetDir.setLength(1);
 
     draw(target, 0, "blue");
@@ -1463,6 +1463,7 @@ void DefensePlan::penaltyMode(){
     gpa[goalKeeperAgent->id()]->setSlowMode(false);
     gpa[goalKeeperAgent->id()]->setADiveMode(true);
     gpa[goalKeeperAgent->id()]->init(target , targetDir);
+
 }
 
 velAndAccByKK DefensePlan::getBallVelocityByPos(){
