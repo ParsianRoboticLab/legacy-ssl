@@ -28,6 +28,7 @@ const int GameState::NOTREADY = (1 << 11);
 GameState::GameState()
 {
     color = BLUE; state = GAME_OFF;
+    gametimes = GAME_ON;
     yellowscore=bluescore=0;
 }
 
@@ -56,8 +57,7 @@ void GameState::transition(char ref_command) {
     if (ref_command == COMM_GOAL_YELLOW) yellowscore++;
     if (ref_command == COMM_SUBGOAL_YELLOW) yellowscore--;
     if (ref_command == COMM_PENALTY_SHOOTOUT){
-        qDebug() << "penalty shoooooo";
-        gametimes=PENALTY_SHOOTOUT;
+        gametimes = PENALTY_SHOOTOUT;
     }
     if (ref_command == COMM_HALT) {
         state = HALTED; return; }
@@ -149,7 +149,8 @@ bool GameState::ballPlacement() { return (state & BALLPLACEMENT); }
 bool GameState::ourBallPlacement() { return ballPlacement() && (state & color); }
 bool GameState::theirBallPlacement() { return ballPlacement() && ! (state & color); }
 bool GameState::halfTimeLineUp(){return state & HALF_TIME;}
-bool GameState::penalty_shootout() { return gametimes & PENALTY_SHOOTOUT;}
+bool GameState::penalty_shootout() {
+    return gametimes & PENALTY_SHOOTOUT;}
 
 
 bool GameState::canMove() { return (state != HALTED); }

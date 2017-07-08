@@ -44,6 +44,7 @@ protected:
     bool indirect, direct, kickoff;
     int penaltyRand;
     Vector2D penaltyTarget;
+    bool firstKick=true;
     int penaltyCounter;
     //decision making
     QList<int> oppBlockers;
