@@ -19,6 +19,9 @@ private:
     void lineUpAllAgents();
     QList<CSkillGotoPointAvoid *> lineup;
     CSkillGotoPointAvoid * lineupAgent;
+    QList<CAgent *> agents;
+    QList<int> matchpoints;
+    QList<Vector2D> points;
 };
 
 #endif // CHALFTIMELINEUP_H
