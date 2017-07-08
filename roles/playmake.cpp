@@ -837,13 +837,15 @@ void CRolePlayMake::stopBehindBall(bool penalty)
         gotopoint->setAgent(agent);
         //		gotopoint->setPlan2(true);
         if(wm->gs->penalty_shootout())
-            gotopoint->init(wm->ball->pos + (wm->ball->pos - wm->field->oppGoal()).norm()*0.12,wm->ball->pos - agent->pos());
+            gotopoint->init(wm->ball->pos + (wm->ball->pos - wm->field->oppGoal())*0.03,wm->ball->pos - agent->pos());
+        else{
         Vector2D direction, position;
 
         direction = wm->ball->pos - agent->pos();
         direction.y*=1.2;
         position = wm->ball->pos + (wm->ball->pos - wm->field->oppGoal() + Vector2D(0,0.2)).norm()*(0.13);
         gotopoint->init(position, direction);
+        }
 
         //        gotopoint->setTargetLook( wm->ball->pos + Vector2D( wm->ball->pos - wm->field->oppGoalL()).norm()*0.15 , wm->field->oppGoalR());
 
@@ -957,7 +959,6 @@ bool CRolePlayMake::ShootPenalty(){
 
 
 int CRolePlayMake::choosePenaltyStrategy(){
-
     if(ShootPenalty()) return pshootDirect;
     else if(!goalKeeperForward) return pgoaheadShoot;
     else return pchipShoot;
@@ -965,9 +966,11 @@ int CRolePlayMake::choosePenaltyStrategy(){
 }
 
 void CRolePlayMake::executeOurPenaltyShootout(){
-    bool flag=true;
+    bool flag=false;
     debug("penalty Shootout : ",D_NADIA);
     double w;
+    if((wm->opp.active(knowledge->oppGoalieIndex)->pos-wm->field->oppGoal()).length()>2)
+        goalKeeperForward=true;
     if (knowledge->getGameMode()==CKnowledge::Stop)
     {
         debug("penalty Shootout_stop : ",D_NADIA);
@@ -995,37 +998,43 @@ void CRolePlayMake::executeOurPenaltyShootout(){
             if(flag){
                 penaltyTarget=wm->field->oppGoal();
                 kick->setTarget(penaltyTarget);
-                kick->setKickSpeed(2);
-                kick->setChip(true);
+                kick->setKickSpeed(300);
                 kick->execute();
                 if(wm->ball->vel.length()>0.1)
                     firstKick=false;
             }else{
 
                 debug("penalty Shootout_first : ",D_NADIA);
-                if((int)random()%2==0)
-                    penaltyTarget=wm->field->oppGoalL();
-                else
-                    penaltyTarget=wm->field->oppGoalR();
+//                if((int)random()%2==0)
+//                    penaltyTarget=wm->field->oppGoalL()+Vector2D(0,wm->field->oppGoalL().y);
+//                else
+                    penaltyTarget=wm->field->oppGoalR()+Vector2D(0,wm->field->oppGoalR().y);
+//                kick->setPenaltyKick(true);
+                kick->setInterceptMode(false);
+                kick->setSpin(false);
+                kick->setChip(false);
+                kick->setVeryFine(false);
+                kick->setWaitFrames(0);
+                kick->setTolerance(3);
                 kick->setTarget(penaltyTarget);
                 kick->setChip(false);
-                kick->setKickSpeed(1);
+                kick->setKickSpeed(100);
                 kick->execute();
                 if(wm->ball->vel.length()>0.1)
                     firstKick=false;
             }
         }
         else{
-            kick->setChip(false);
             if(wm->ball->vel.length()<0.1)
                 firstKick=true;
+            kick->setChip(false);
             debug("penalty Shootout_not first : ",D_NADIA);
             switch(choosePenaltyStrategy()){
 
             case pshootDirect:
                 debug("pdirect : ",D_NADIA);
                 kick->setTarget(penaltyTarget);
-                kick->setKickSpeed(7);
+                kick->setKickSpeed(1023);
                 kick->execute();
                 break;
             case pgoaheadShoot:
@@ -1039,7 +1048,7 @@ void CRolePlayMake::executeOurPenaltyShootout(){
                     }
                     else{
                         penaltyTarget = knowledge->goalVisiblity(agent->id(), w, 1.0);
-                        kick->setKickSpeed(7);
+                        kick->setKickSpeed(1023);
                         kick->execute();
                     }
                 }

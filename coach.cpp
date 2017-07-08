@@ -225,7 +225,7 @@ void CCoach::checkTransitionToForceStart(){
             cyclesWaitAfterballMoved++;
         }
     }
-    ///////////////////////////////////// f**d up by DON
+    ///////////////////////////////////// by DON
     if (knowledge->isOurNonPlayOnKick())
     {
         //transition to game on
@@ -421,6 +421,9 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         preferedGoalieAgent = -1;
         preferedDefenseCounts = 0;
     }
+
+    if (wm->gs->penalty_shootout())
+        preferedDefenseCounts = 0;
 
 }
 
