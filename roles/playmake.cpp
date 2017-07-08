@@ -830,7 +830,7 @@ void CRolePlayMake::stopBehindBall(bool penalty)
         gotopoint->setAgent(agent);
         //		gotopoint->setPlan2(true);
         //gotopoint->setTargetLook( wm->ball->pos + Vector2D( wm->ball->pos - wm->field->oppGoalL()).norm()*0.15 , wm->field->oppGoalR());
-        gotopoint->init(wm->ball->pos + (wm->ball->pos - wm->field->oppGoalL()).norm()*0.12,wm->ball->pos - agent->pos());
+        gotopoint->init(wm->ball->pos + (wm->ball->pos - wm->field->oppGoal()).norm()*0.12,wm->ball->pos - agent->pos());
         gotopoint->setSlowMode(true);
         gotopoint->setNoAvoid(false);
         gotopoint->setPenaltyKick(true);
@@ -949,7 +949,7 @@ int CRolePlayMake::choosePenaltyStrategy(){
 }
 
 void CRolePlayMake::executeOurPenaltyShootout(){
-    bool flag=false;
+    bool flag=true;
     debug("penalty Shootout : ",D_NADIA);
     double w;
     if (knowledge->getGameMode()==CKnowledge::Stop)
@@ -979,7 +979,7 @@ void CRolePlayMake::executeOurPenaltyShootout(){
             if(flag){
                 penaltyTarget=wm->field->oppGoal();
                 kick->setTarget(penaltyTarget);
-                kick->setKickSpeed(3);
+                kick->setKickSpeed(2);
                 kick->setChip(true);
                 kick->execute();
                 if(wm->ball->vel.length()>0.1)
@@ -1001,6 +1001,8 @@ void CRolePlayMake::executeOurPenaltyShootout(){
         }
         else{
             kick->setChip(false);
+            if(wm->ball->vel.length()<0.1)
+                firstKick=true;
             debug("penalty Shootout_not first : ",D_NADIA);
             switch(choosePenaltyStrategy()){
 
@@ -1023,7 +1025,6 @@ void CRolePlayMake::executeOurPenaltyShootout(){
                         penaltyTarget = knowledge->goalVisiblity(agent->id(), w, 1.0);
                         kick->setKickSpeed(7);
                         kick->execute();
-
                     }
                 }
                 else
