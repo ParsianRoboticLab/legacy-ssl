@@ -35,11 +35,11 @@ protected:
 #endif
     bool isItPossibleToClear;
     int upper_player;
-    double catch_time;
+    double catch_time;    
     CSkillGotoPoint* gps[_MAX_NUM_PLAYERS];
     CSkillGotoPointAvoid *gpa[_MAX_NUM_PLAYERS];
-    CSkillKick* kickSkill;
-    CSkillTurn turn;
+    CSkillKick* kickSkill;    
+    CSkill* AHZSkills;
     CDefPos defPos;
     Vector2D pointForKick, oneToucherDir;
     Vector2D topGoal, downGoal, midGoal, ballVel;

@@ -1843,9 +1843,46 @@ Vector2D CKnowledge::goalVisiblity(int agentId, double &regionWidth, double unde
     QList<int> relax,empty;
     relax.append(agentId);
     Vector2D target = getEmptyPosOnGoal(agents[agentId]->pos(), regionWidth, true, relax, empty, underestimateTheirGoalie);
+
     if (!target.valid())
         target = wm->field->oppGoal();
     draw(Circle2D(target, 0.05), 0, 360, "red", 1);
+    return target;
+}
+
+Vector2D CKnowledge::getEmptyPosOnGoalForPenalty(double n, bool oppGoal){
+
+    Vector2D target, goalieR, goalieL;
+    int goalieID;
+    CRobot* goalie;
+    double distanceR, distanceL;
+
+    if(oppGoal) {
+        goalieID = wm->opp.data->goalieID;
+        goalie = wm->opp[goalieID];
+        goalieR = wm->field->oppGoalR();
+        goalieL = wm->field->oppGoalL();
+
+    } else {
+        goalieID = wm->our.data->goalieID;
+        goalie = wm->our[goalieID];
+        goalieR = wm->field->ourGoalR();
+        goalieL = wm->field->ourGoalL();
+    }
+
+    distanceR = wm->opp[goalieID]->pos.dist(goalieR);
+    distanceL = wm->opp[goalieID]->pos.dist(goalieL);
+
+    if(distanceR > distanceL && fabs(distanceL - distanceR) > 0.03) {
+        target = Vector2D(goalieR.x, goalieR.y + n*distanceR);
+        draw(target, 0, QColor(Qt::black));
+//        draw(Segment2D(target, Vector2D(((goalieL+goalieR)/2).x-1, ((goalieL+goalieR)/2).y)), QColor(Qt::darkCyan));
+    } else {
+        target = Vector2D(goalieL.x, goalieL.y - n*distanceL);
+        draw(target, 0, QColor(Qt::black));
+//        draw(Segment2D(target, Vector2D(((goalieL+goalieR)/2).x-1, ((goalieL+goalieR)/2).y)), QColor(Qt::darkRed));
+    }
+
     return target;
 }
 
@@ -4265,8 +4302,8 @@ Vector2D CKnowledge::getChipDir(){
         chipperIDD=wm->opp.activeAgentID(i);
         if(!lastDirs.keys().contains(chipperIDD))
             lastDirs[chipperIDD]=QList<Vector2D>();
-//        else
-//            lastDirs.remove(chipperIDD);
+        //        else
+        //            lastDirs.remove(chipperIDD);
 
         if(Circle2D(wm->opp[chipperIDD]->pos , 0.2).contains(wm->ball->pos)){
             if((wm->ball->pos-wm->opp[chipperIDD]->pos).length()<chipperDistance && wm->ball->vel.length()<0.1){
@@ -4285,20 +4322,20 @@ Vector2D CKnowledge::getChipDir(){
             DirFound=false;
     }
     debug(QString("chipperID:%1").arg(chipperID),D_NADIA);
-if(DirFound)
-{
-    chipperDir=Vector2D(0,0);
-    for(int i=lastDirs[chipperID].count()-2; i>3; i--){
-        chipperDir+=lastDirs[chipperID].at(i-1);
+    if(DirFound)
+    {
+        chipperDir=Vector2D(0,0);
+        for(int i=lastDirs[chipperID].count()-2; i>3; i--){
+            chipperDir+=lastDirs[chipperID].at(i-1);
+        }
+        chipperDir/=5;
+        return chipperDir;
     }
-    chipperDir/=5;
-    return chipperDir;
-}
-else
-    return Vector2D(0,0);
+    else
+        return Vector2D(0,0);
 
 
-prevBallPos=wm->ball->pos;
+    prevBallPos=wm->ball->pos;
 
 }
 
@@ -4335,7 +4372,7 @@ Vector2D CKnowledge::getChipPredict(){
     }
     else
     {
-//        prev_Ball_pos.append(wm->ball->pos.y);
+        //        prev_Ball_pos.append(wm->ball->pos.y);
 
         prev_Ball_pos.append(/*( ((wm->ball->pos - startChipPoint).angleWith(dir - startChipPoint)).tan() )**/(wm->ball->pos - startChipPoint).length());
 
