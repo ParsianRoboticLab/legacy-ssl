@@ -1277,7 +1277,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
           {
               playmakeId = lastPlayMake;
               return;
-          }m
+          }
           else
               playMakeIntention.restart();
           //Vector2D ballVel = wm->ball->vel;

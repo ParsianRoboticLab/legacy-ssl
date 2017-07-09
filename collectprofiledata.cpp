@@ -10,6 +10,18 @@ bool ProfilerExecute=false;
 
 CollectProfileData::CollectProfileData()
 {
+
+    targetDir1.x=10;
+    targetDir1.y=5;
+    targetDir1.setDir(AngleDeg(90));
+    targetDir1.setLength(1);
+
+
+    targetDir2.x=10;
+    targetDir2.y=5;
+    targetDir2.setDir(AngleDeg(270));
+    targetDir2.setLength(1);
+
     for(int i=0;i<10;i++)
         activeRobots[i]=-1;
     activeRobotsCount=0;
@@ -100,12 +112,18 @@ void CollectProfileData::ChipInit(int p1){
 
 void CollectProfileData::positioning(double xpos1, double ypos1, double xpos2, double ypos2){
     prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
-    prfl1->setTarget(Vector2D(xpos1, ypos1));
     prfl1->setWaitPos(Vector2D(xpos1, ypos1));
 
+    prfl1->setTarget(Vector2D(xpos1, ypos1));
+    prfl1->setTargetDir(targetDir1);
+
+//    prfl1->gotoPointAvoidSkill->init(Vector2D(xpos1, ypos1), targetDir1);
+
     prfl2->setSelectedSkill(roleSkill::GotopointAvoid);
-    prfl2->setTarget(Vector2D(xpos2, ypos2));
     prfl2->setWaitPos(Vector2D(xpos2, ypos2));
+
+    prfl2->setTarget(Vector2D(xpos2, ypos2));
+    prfl2->setTargetDir(targetDir2);
 
     prfl1->execute();
     prfl2->execute();
@@ -115,6 +133,7 @@ void CollectProfileData::positioning(double xpos, double ypos){
     prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
     prfl1->setTarget(Vector2D(xpos, ypos));
     prfl1->setWaitPos(Vector2D(xpos, ypos));
+
 
     prfl1->execute();
 }
@@ -168,12 +187,18 @@ void CollectProfileData::LowSpeed(){
             prfl2->setTarget( Vector2D(highPosX2 , highPosY2));
             prfl2->setWaitPos(Vector2D(highPosX2 , highPosY2));
 
+            prfl2->setTargetDir(targetDir2);
+
             kickStat = ChangeStat;
         }
         else{
             prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
-            prfl1->setTarget( Vector2D(highPosX1 , highPosY1));
             prfl1->setWaitPos(Vector2D(highPosX1 , highPosY1));
+
+            prfl1->setTarget( Vector2D(highPosX1 , highPosY1));
+            prfl1->setTargetDir(targetDir1);
+
+//            prfl1->gotoPointAvoidSkill->init(Vector2D(highPosX1 , highPosY1), targetDir1);
 
             kickStat = ChangeStat;
         }
@@ -210,6 +235,7 @@ void CollectProfileData::LowSpeed(){
             prfl1->setWaitPos(Vector2D(lowPosX1 , lowPosY1));
             prfl1->setTarget( Vector2D(lowPosX1 , lowPosY1));
 
+            prfl2->setTargetDir(targetDir2);
 
             prfl1_Kicked = true;
             kickStat = ChangeStat;
@@ -247,6 +273,8 @@ void CollectProfileData::LowSpeed(){
             prfl2->setWaitPos(Vector2D(lowPosX2 , lowPosY2));
             prfl2->setTarget(Vector2D(lowPosX2 , lowPosY2));
 
+            prfl2->setTargetDir(targetDir2);
+
             prfl1_Kicked = false;
             kickStat = ChangeStat;
         }
@@ -271,6 +299,8 @@ void CollectProfileData::LowSpeed(){
                     prfl2->setWaitPos(wm->ball->pos);
                     prfl2->setTarget(wm->ball->pos);
 
+                    prfl2->setTargetDir(targetDir2);
+
                 }
                 else{
                     saveMaxBallSpeed();
@@ -285,7 +315,11 @@ void CollectProfileData::LowSpeed(){
                 if(!BallIsNear(prfl1,1)){
                     prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
                     prfl1->setWaitPos(wm->ball->pos);
+
                     prfl1->setTarget(wm->ball->pos);
+                    prfl1->setTargetDir(targetDir1);
+
+//                    prfl1->gotoPointAvoidSkill->init(wm->ball->pos, targetDir1);
 
                 }else{
                     saveMaxBallSpeed();
@@ -383,12 +417,18 @@ void CollectProfileData::HighSpeed(){
             prfl2->setTarget( Vector2D(highPosX2 , highPosY2));
             prfl2->setWaitPos(Vector2D(highPosX2 , highPosY2));
 
+            prfl2->setTargetDir(targetDir2);
+
             kickStat = ChangeStat;
         }
         else{
             prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
-            prfl1->setTarget( Vector2D(highPosX1 , highPosY1));
             prfl1->setWaitPos(Vector2D(highPosX1 , highPosY1));
+
+            prfl1->setTarget( Vector2D(highPosX1 , highPosY1));
+            prfl1->setTargetDir(targetDir1);
+
+//            prfl1->gotoPointAvoidSkill->init(Vector2D(highPosX1 , highPosY1), targetDir1);
 
             kickStat = ChangeStat;
         }
@@ -423,7 +463,11 @@ void CollectProfileData::HighSpeed(){
         else if(!Circle2D(kickerPos , 1).contains(wm->ball->pos)){    // agent1 kicked the ball and the ball is far enough
             prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
             prfl1->setWaitPos(Vector2D(highPosX1 , highPosY1));
+
             prfl1->setTarget( Vector2D(highPosX1 , highPosY1));
+            prfl1->setTargetDir(targetDir1);
+
+//            prfl1->gotoPointAvoidSkill->init(Vector2D(highPosX1 , highPosY1), targetDir1);
 
             prfl1_Kicked = true;
             kickStat = ChangeStat;
@@ -463,7 +507,7 @@ void CollectProfileData::HighSpeed(){
             prfl2->setWaitPos(Vector2D(highPosX2 , highPosY2));
             prfl2->setTarget( Vector2D(highPosX2 , highPosY2));
 
-
+            prfl2->setTargetDir(targetDir2);
 
             prfl1_Kicked = false;
             kickStat = ChangeStat;
@@ -487,6 +531,8 @@ void CollectProfileData::HighSpeed(){
                     prfl2->setWaitPos(wm->ball->pos);
                     prfl2->setTarget(wm->ball->pos);
 
+                    prfl2->setTargetDir(targetDir2);
+
                 }
                 else{
                     saveMaxBallSpeed();
@@ -497,6 +543,7 @@ void CollectProfileData::HighSpeed(){
                     prfl2->setTarget(knowledge->getAgent(prfl2->getAgentID())->pos());
                     prfl2->setWaitPos(knowledge->getAgent(prfl2->getAgentID())->pos());
 
+                    prfl2->setTargetDir(targetDir2);
 
                     kickerWait.restart();
                 }
@@ -505,7 +552,11 @@ void CollectProfileData::HighSpeed(){
                 if(!BallIsNear(prfl1,0.6)){
                     prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
                     prfl1->setWaitPos(wm->ball->pos);
+
                     prfl1->setTarget(wm->ball->pos);
+                    prfl1->setTargetDir(targetDir1);
+
+//                    prfl1->gotoPointAvoidSkill->init(wm->ball->pos, targetDir1);
 
                 }else{
                     saveMaxBallSpeed();
@@ -513,9 +564,12 @@ void CollectProfileData::HighSpeed(){
                     kickStat = prfl1_Iskicking;
 
                     prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
-                    prfl1->setTarget(knowledge->getAgent(prfl1->getAgentID())->pos());
                     prfl1->setWaitPos(knowledge->getAgent(prfl1->getAgentID())->pos());
 
+                    prfl1->setTarget(knowledge->getAgent(prfl1->getAgentID())->pos());
+                    prfl1->setTargetDir(targetDir1);
+
+//                    prfl1->gotoPointAvoidSkill->init(knowledge->getAgent(prfl1->getAgentID())->pos(), targetDir1);
 
                     kickerWait.restart();
                 }
@@ -584,6 +638,7 @@ void CollectProfileData::StartChip(){
 
         prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
         prfl1->setTarget(Vector2D(ChipGtpaX, ChipGtpaY));
+
         prfl1->execute();
         if ( Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos(), 0.4).contains(wm->ball->pos) && wm->ball->vel.length() < 0.2)
         {
@@ -620,6 +675,7 @@ void CollectProfileData::StartChip(){
     case SavingChipPos:
         prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
         prfl1->setTarget(Vector2D(ChipGtpaX, ChipGtpaY));
+
         prfl1->execute();
 
         if(BallPos.size() == posSize)
