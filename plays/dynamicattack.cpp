@@ -982,7 +982,7 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
         points[i] -= 4 - M;
         points[i] -= ballPos.dist(temp[i]) / 2;
         M = 100;
-        for(int j = 0; j < wm->our.activeAgentsCount(); i++)
+        for(int j = 0; j < wm->our.activeAgentsCount(); j++)
             M = min(M, wm->our.active(j)->pos.dist(temp[i]));
         if(M > 0.5)
             points[i] -= 4;
