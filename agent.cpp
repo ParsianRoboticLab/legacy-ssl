@@ -460,63 +460,60 @@ void CAgent::accelerationLimiter(double vf,bool diveMode)
 
     if(vf == 0)
         decCoef = 2.5;
-#if 0
-    commandV = sqrt((vforward*vforward)+(vnormal*vnormal));
-    lastV = sqrt((lastVf*lastVf)+(lastVn*lastVn));
+    ///////////////////////first Stage Acc with true angle
 
-    if(commandV > (lastV + conf()->BangBang_AccMax()* 0.0166667))
+    double accCoef =1,realAcc = 4;
+    accCoef = atan(fabs(vforward)/fabs(vnormal))/_PI*2;
+    if(diveMode)
     {
-        commandV = lastV + (conf()->BangBang_AccMax() * 0.0166667);
-    }
-    vforward = commandV * sin(atan2(tempVf,tempVn));
-    vnormal = commandV * cos(atan2(tempVf,tempVn));
-    debug(QString("command V: %1").arg(commandV),D_MHMMD);
-    debug(QString("vf: %1 , Vn :%2").arg(vforward).arg(vnormal),D_MHMMD);
-    debug(QString("Vvf: %1 , VVn :%2").arg(veltan).arg(velnorm),D_MHMMD);
-    /*if(vforward - lastVf > 1)
-    {
-        vforward = lastVf + 0.085;
-    }
-    else*/ if(vforward - lastVf < - 1)
-    {
-        vforward = lastVf - 0.085;
-    }
-
-
-    //    if(vnormal - lastVn > 1)
-    //    {
-    //        vnormal = lastVn + 0.085;
-    //    }
-    //    else if(vnormal - lastVn < - 1)
-    //    {
-    //        vnormal = lastVn - 0.085;
-    //    }
-#endif
-    debug(QString("vf: %1 , lVf :%2").arg(conf()->BangBang_AccMaxForward()).arg(conf()->BangBang_AccMaxNormal()),D_MHMMD);
-
-    if(vforward >= 0 )
-    {
-        if(vforward > (lastVf + conf()->BangBang_AccMaxForward()* 0.0166667))
-        {
-            vforward = lastVf + (conf()->BangBang_AccMaxForward()* 0.0166667)*sign(vforward);
-        }
-        if(vforward < (lastVf - decCoef*conf()->BangBang_DecMax()* 0.0166667))
-        {
-            vforward = lastVf - (decCoef*conf()->BangBang_DecMax()* 0.0166667);
-        }
+        realAcc = 10 * accCoef*conf()->BangBang_AccMaxForward() + (1-accCoef)*conf()->BangBang_AccMaxNormal();
     }
     else
     {
-        if(vforward < (lastVf - conf()->BangBang_AccMaxForward()* 0.0166667))
-        {
-            vforward = lastVf - (conf()->BangBang_AccMaxForward()* 0.0166667);
-        }
-        if(vforward > (lastVf + decCoef*conf()->BangBang_DecMax()* 0.0166667))
-        {
-            vforward = lastVf + (decCoef*conf()->BangBang_DecMax()* 0.0166667);
-        }
+        realAcc = accCoef*conf()->BangBang_AccMaxForward() + (1-accCoef)*conf()->BangBang_AccMaxNormal();
+
     }
 
+
+#if 1
+    commandV = sqrt((vforward*vforward)+(vnormal*vnormal));
+    lastV = sqrt((lastVf*lastVf)+(lastVn*lastVn));
+
+    if(commandV > (lastV + realAcc* 0.0166667))
+    {
+        commandV = lastV + (realAcc * 0.0166667);
+    }
+    vforward = commandV * sin(atan2(tempVf,tempVn));
+    vnormal = commandV * cos(atan2(tempVf,tempVn));
+
+#endif
+
+    /////////////////Second order acc limit for trajectory planning
+    if(!diveMode)
+    {
+        if(vforward >= 0 )
+        {
+            if(vforward > (lastVf + conf()->BangBang_AccMaxForward()* 0.0166667))
+            {
+                vforward = lastVf + (conf()->BangBang_AccMaxForward()* 0.0166667)*sign(vforward);
+            }
+            if(vforward < (lastVf - decCoef*conf()->BangBang_DecMax()* 0.0166667))
+            {
+                vforward = lastVf - (decCoef*conf()->BangBang_DecMax()* 0.0166667);
+            }
+        }
+        else
+        {
+            if(vforward < (lastVf - conf()->BangBang_AccMaxForward()* 0.0166667))
+            {
+                vforward = lastVf - (conf()->BangBang_AccMaxForward()* 0.0166667);
+            }
+            if(vforward > (lastVf + decCoef*conf()->BangBang_DecMax()* 0.0166667))
+            {
+                vforward = lastVf + (decCoef*conf()->BangBang_DecMax()* 0.0166667);
+            }
+        }
+    }
     debug(QString("vn: %1 , lVn :%2").arg(vnormal).arg(lastVn),D_MHMMD);
     if(vnormal >= 0)
     {
@@ -565,9 +562,9 @@ void CAgent::accelerationLimiter(double vf,bool diveMode)
 
 
     if(vforward - lastVf < - 1)
-        {
-            vforward = lastVf - 0.085;
-        }
+    {
+        vforward = lastVf - 0.085;
+    }
 
 
     lastVf = vforward;

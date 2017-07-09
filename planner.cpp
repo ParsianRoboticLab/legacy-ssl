@@ -415,7 +415,7 @@ void CPlanner::runPlanner(){
                 middleNode = Rnodes.allNodes[j];
                 nearestToGoal = nodes.allNodes[i];
                 if( obst.check(middleNode->pos , nearestToGoal->pos) && \
-                        ((result.size() && middleNode->dist + nearestToGoal->dist < mn) || (result.size() == 0 && middleNode->dist + nearestToGoal->dist + middleNode->pos.dist(nearestToGoal->pos) < mn)) ){
+                    ((result.size() && middleNode->dist + nearestToGoal->dist < mn) || (result.size() == 0 && middleNode->dist + nearestToGoal->dist + middleNode->pos.dist(nearestToGoal->pos) < mn)) ){
                     if( result.size() )
                         mn = (middleNode->dist + nearestToGoal->dist);
                     else
@@ -470,7 +470,7 @@ void CPlanner::runPlanner(){
 
     for(int i = (result.size() - 1 ); i > 0 ; i --)
     {
-       // draw(Segment2D(result[i],result[i-1]),QColor(Qt::red));
+        // draw(Segment2D(result[i],result[i-1]),QColor(Qt::red));
     }
     //////////////////////////////////////////////////path smoothing
     if( temp.size() >1)
@@ -504,21 +504,21 @@ void CPlanner::runPlanner(){
                 if(obst.check(temp[i],temp[k]) )
                 {
                     resultModified.push_back(temp[k]);
-                    draw(temp[k]);
+                    //draw(temp[k]);
                     compNodeNum = k;
                     break;
                 }
                 if((k == i -1)  )
                 {
                     resultModified.push_back(temp[k]);
-                    draw(temp[k]);
+                    //draw(temp[k]);
                     compNodeNum = k;
                 }
             }
         }
     }
 
-     fff = false;
+    fff = false;
     if( resultModified.size() == 1)
         resultModified.push_back(temp[0]);
 
@@ -733,25 +733,159 @@ void CPlannerThread::initPathPlanner( int _id , Vector2D _goal,QList<int> _ourRe
         plannerMutex.unlock();
     }
 }
+double CPlannerThread::timeEstimator(Vector2D _pos, Vector2D _vel, Vector2D _dir, Vector2D posT)
+{
+    double _x3;
+    double acc = conf()->BangBang_AccMaxForward();
+    double dec = conf()->BangBang_DecMax();
+    double xSat;
+    double veltan= (_vel.x)*cos(_dir.th().radian()) + (_vel.y)*sin(_dir.th().radian());
+    double offset = 0.15;
+    double velnorm= -1*(_vel.x)*sin(_dir.th().radian()) + (_vel.y)*cos(_dir.th().radian());
 
-void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelaxList, QList<int> &oppRelaxList, bool avoidPenaltyArea, bool avoidCenterCircle , double ballObstacleRadius)
+    double dist = 0;
+
+    if(_vel.length() < 0.2)
+    {
+        acc = (conf()->BangBang_AccMaxForward() + conf()->BangBang_AccMaxNormal())/2;
+    }
+    else
+    {
+        acc = conf()->BangBang_AccMaxForward()*(fabs(veltan)/_vel.length()) + conf()->BangBang_AccMaxNormal()*(fabs(velnorm)/_vel.length());
+    }
+
+    double vMaxReal = sqrt(((_pos.dist(posT)  + (_vel.length()*_vel.length()/2*acc))*2*acc*dec)/(acc+dec));
+    vMaxReal = min(vMaxReal,4);
+    double vMax = conf()->BangBang_VelMax();
+    vMax = min(vMax,vMaxReal);
+    xSat = ((vMax*vMax)-(_vel.length()*_vel.length()))/acc + (vMax*vMax)/dec;
+    _x3 = ( -1* _vel.length()*_vel.length()) / (-2 * fabs(conf()->BangBang_DecMax())) ;
+
+    if(_pos.dist(posT) < _x3 ) {
+        return max(0,(_vel.length()/conf()->BangBang_DecMax() - offset) );
+    }
+    else if(_vel.length() < (vMax)){
+        if(_pos.dist(posT) < xSat)
+        {
+            return max(0,(-1*offset + vMax/dec + (vMax-_vel.length())/acc + (_pos.dist(posT) - ((vMax*vMax/(2*dec)) + ((vMax+_vel.length())*(vMax-_vel.length())/acc))/2)/vMax) );
+        }
+        else
+        {
+            return max(0,(vMax/dec + (vMax-_vel.length())/acc - offset));
+        }
+    }
+    else
+    {
+        return max(0,(vMax/dec + (_pos.dist(posT) - ((vMax*vMax/(2*dec)) ))/vMax - offset) );
+
+    }
+
+}
+
+void CPlannerThread::createObstacleProb(CObstacles &obs,Vector2D _pos, Vector2D _vel, Vector2D _ang, Vector2D &_center, double &_rad,Vector2D agentPos,Vector2D agentVel, Vector2D agentGoal, Vector2D agentDir)
+{
+    Segment2D obstaclePath;
+    Vector2D intersectPoint;
+    double timeForObs = 0;
+    ///TODO: should read from vartypes
+    double maxA = 4;
+    double maxObstRad = 1.5;
+    double maxTime = 0.5;
+    if(_vel.length() < 0.2)
+    {
+        _center = _pos;
+        _rad =CRobot::robot_radius_new;
+    }
+    else
+    {
+        obstaclePath.assign(_pos,_pos+_vel.norm()*10);
+        intersectPoint =agentPath.intersection(obstaclePath);
+        if(intersectPoint.isValid())
+        {
+            ////should remove this draws
+            /// TOOD: must have better time Est
+            timeForObs= timeEstimator(agentPos,agentVel,agentDir,agentGoal);
+            timeForObs *= agentPos.dist(intersectPoint)/agentPos.dist(agentGoal);
+            timeForObs *=1;
+            timeForObs = min(maxTime,timeForObs);
+            for(double i = -0.2;i< 0.3 ; i+=0.05)
+            {
+
+                timeForObs +=i;
+                _center= _pos + _vel*timeForObs;
+                _rad = 0.7*maxA*timeForObs*timeForObs ;
+
+                _rad = min(maxObstRad,_rad);
+                _rad = min(agentPos.dist(_center) - 0.3,_rad);
+                _rad = min(_pos.dist(_center) - 0.3 ,_rad );
+                _rad +=CRobot::robot_radius_new;
+                if(timeForObs >=0)
+                {
+                    obs.add_circle(_center.x , _center.y , _rad , 0 , 0);
+//                    draw(Circle2D(_center,_rad),QColor(Qt::blue),true);
+                }
+            }
+        }
+        else
+        {
+            _center = _pos;
+            _rad =CRobot::robot_radius_new;
+        }
+    }
+
+    obs.add_circle(_center.x , _center.y , _rad , 0 , 0);
+//    draw(Circle2D(_center,_rad),QColor(Qt::blue),true);
+}
+
+void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelaxList, QList<int> &oppRelaxList, bool avoidPenaltyArea, bool avoidCenterCircle , double ballObstacleRadius, int id,Vector2D agentGoal)
 {
     obs.clear();
 
+    bool isValid = false;
+
+    Vector2D agentPos;
+
+    Vector2D agentVel;
+
+    for(int i = 0; i < mywma.our.size() ; i ++)
+    {
+        if(mywma.our[i].id == id)
+        {
+            isValid = true;
+            agentPos = mywma.our[i].pos;
+            agentVel = mywma.our[i].vel;
+            break;
+        }
+    }
+    if(!isValid)
+        return;
+
+
+
+
+    agentPath.assign(agentPos,agentGoal);
+    Vector2D _center ,dummy1,dummy2;
+    double rad = 0;
     for (int j=0;j<mywma.our.count();j++)
     {
         if( ourRelaxList.contains(mywma.our[j].id) == false )
         {
+
+            createObstacleProb(obs,mywma.our[j].pos,mywma.our[j].vel,Vector2D(0,0),_center,rad,agentPos,agentVel,agentGoal,Vector2D(1,1));
+
+
             double obstVelFactor = 0.15;
-            for(double vvv = 0; vvv <= mywma.our[j].vel.length()*2; vvv+=0.5)
+
+            //obs.add_circle(_center.x , _center.y , rad , 0 , 0);
+
+            if(1 || Circle2D(mywma.our[j].pos,CRobot::robot_radius_new+0.07).intersection(agentPath,&dummy1,&dummy2) > 1)
             {
-                double ttt = 1;
-                if (mywma.our[j].vel.length() >= 0.5 )
-                    ttt = ((mywma.our[j].vel.length()-vvv*0.5)/mywma.our[j].vel.length());
-                obs.add_circle(mywma.our[j].pos.x+mywma.our[j].vel.x*vvv*obstVelFactor , mywma.our[j].pos.y+mywma.our[j].vel.y*vvv*obstVelFactor , (CRobot::robot_radius_new+0.07)*ttt , mywma.our[j].vel.x , mywma.our[j].vel.y);
-                //obs.add_circle(mywma.our[j].pos.x , mywma.our[j].pos.y , (CRobot::robot_radius_new+0.03) , mywma.our[j].vel.x , mywma.our[j].vel.y);
-//                draw(Circle2D(Vector2D(mywma.our[j].pos.x+mywma.our[j].vel.x*vvv*obstVelFactor , mywma.our[j].pos.y+mywma.our[j].vel.y*vvv*obstVelFactor),(CRobot::robot_radius_new+0.07)*ttt),QColor(Qt::blue),true);
+                obs.add_circle(mywma.our[j].pos.x , mywma.our[j].pos.y , 0.2 , 0 , 0);
+
             }
+
+
+
         }
     }
 
@@ -760,16 +894,10 @@ void CPlannerThread::generateObstacleSpace(CObstacles &obs, QList<int> &ourRelax
         if( oppRelaxList.contains(mywma.opp[j].id) == false )
         {
 
-            double obstVelFactor = 0.12;
-            for(double vvv = 0; vvv <= mywma.opp[j].vel.length()*2; vvv+=0.5)
-            {
-                double ttt = 1;
-                if (mywma.opp[j].vel.length() >= 0.5 )
-                    ttt = 0.5*((mywma.opp[j].vel.length()*2-vvv)/mywma.opp[j].vel.length());
-                obs.add_circle(mywma.opp[j].pos.x+mywma.opp[j].vel.x*vvv*obstVelFactor , mywma.opp[j].pos.y+mywma.opp[j].vel.y*vvv*obstVelFactor , (CRobot::robot_radius_new+0.07)*ttt , mywma.opp[j].vel.x , mywma.opp[j].vel.y);
-            }
-
-            //			obs.add_circle(mywma.opp[j].pos.x , mywma.opp[j].pos.y , opp.active(j)->robotRadius()+0.03 , mywma.opp[j].vel.x , mywma.opp[j].vel.y);
+            createObstacleProb(obs,mywma.opp[j].pos,mywma.opp[j].vel,Vector2D(0,0),_center,rad,agentPos,agentVel,agentGoal,Vector2D(1,1));
+            double obstVelFactor = 0.15;
+            //obs.add_circle(_center.x , _center.y , rad , 0 , 0);
+            obs.add_circle(mywma.opp[j].pos.x , mywma.opp[j].pos.y , 0.2 , 0 , 0);
         }
     }
 
@@ -809,7 +937,7 @@ void CPlannerThread::run(){
             if( plannerMutex.tryLock(1) ){
                 if( planner[i].readyToPlan ){
 
-                    generateObstacleSpace(planner[i].obst  , planner[i].ourRelaxList , planner[i].oppRelaxList , planner[i].avoidPenaltyArea , planner[i].avoidCenterArea , planner[i].ballObstacleRadius);
+                    generateObstacleSpace(planner[i].obst  , planner[i].ourRelaxList , planner[i].oppRelaxList , planner[i].avoidPenaltyArea , planner[i].avoidCenterArea , planner[i].ballObstacleRadius,planner[i].ID,planner[i].goal);
 
                     planner[i].runPlanner();
 
