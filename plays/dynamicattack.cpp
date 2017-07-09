@@ -159,7 +159,10 @@ void CDynamicAttack::makePlan(int agentSize) {
     if (isDefenseClearing) {
         currentPlan.mode = DynamicEnums::DefenseClear;
         for (size_t i = 0; i < agentSize; i++) {
-            currentPlan.positionAgents[i].region = DynamicEnums::Near;
+//            if()
+//                currentPlan.positionAgents[i].region = DynamicEnums::CounterAttack;
+//            else
+                currentPlan.positionAgents[i].region = DynamicEnums::Near;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
         }
 
@@ -583,7 +586,7 @@ void CDynamicAttack::chooseBestPositons()
 
     if(mahiPlayMaker != NULL && ballPos.dist(mahiPlayMaker->pos()) < 0.15)
     {
-        passPos     = currentPlan.passPos;
+        passPos        = currentPlan.passPos;
         lastPassPosLoc = currentPlan.passPos;
     }
     else
@@ -970,12 +973,12 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
                 points[i] += 2;
         double M = 100;
         for(int j = 0; j < wm->opp.activeAgentsCount(); j++)
-            M = min(M, wm->opp.active(i)->pos.dist(ballPos));
+            M = min(M, wm->opp.active(j)->pos.dist(ballPos));
         if(mahiPlayMaker != NULL)
             points[i] -= (mahiPlayMaker->dir().angleOf(temp[i], mahiPlayMaker->pos(), wm->field->oppGoal()).degree()) / 10 * 2 / M;
         M = 100;
         for(int j = 0; j < wm->opp.activeAgentsCount(); j++)
-            M = min(M, wm->opp.active(i)->pos.dist(temp[i]));
+            M = min(M, wm->opp.active(j)->pos.dist(temp[i]));
         points[i] -= 4 - M;
         points[i] -= ballPos.dist(temp[i]) / 2;
         if(points[i] > points[ans])
