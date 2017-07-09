@@ -128,7 +128,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
             for(int k=0; k<81; k++)
                 ProfilerResult[i][j][k] = -1000;
 
-    refRobotID = 0;
+    refRobotID = 6;
 
     // initialize robotCoeff
     for(int i=0; i< 16; i++)
