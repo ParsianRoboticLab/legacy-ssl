@@ -37,7 +37,7 @@ CCoach::CCoach(CAgent**_agents)
     possessionIntentionInterval = 200;
     playOnTime = 2000;
     playMakeIntentionInterval = 300;
-    playMakeTh = 0.1;
+    playMakeTh = 0.3;
 
 
     /////////////////////
@@ -1265,7 +1265,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
           double maxD = -0.1;
           for(int i = 0; i < ourPlayers.size(); i++)
           {
-              double o = 1 / (knowledge->getAgent(ourPlayers[i])->pos().dist(ballPos) );
+              double o = -knowledge->getAgent(ourPlayers[i])->pos().dist(ballPos) ;
               if(ourPlayers[i] == lastPlayMake)
                   o += playMakeTh;
               if(o > maxD)
