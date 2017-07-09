@@ -346,6 +346,7 @@ void CollectProfileData::saveMaxBallSpeed(){
             if(!(ballSpeed<=(kickSpeed1/300))){
                 p1RealSpeedRec.append(ballSpeed);
                 p1KickSpeed.append(kickSpeed1);
+
 //                debug(QString("1 : max ball speed : %1, kSpeed : %2").arg(ballSpeed).arg(kickSpeed1), D_NADIA);   //collect
 
                 debug(QString("1 : measured : %1  ,   estimated : %3 , kSpeed : %2").arg(ballSpeed).arg(    //test
@@ -360,14 +361,16 @@ void CollectProfileData::saveMaxBallSpeed(){
         if(kickSpeed1==1000 && counter1==repeat)
         {
             counter1 = 0;
-            profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1 , p1RealSpeedRec);
+//            profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1 , p1RealSpeedRec);   // collect
+            profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1/125 , p1RealSpeedRec);   // test
             p1RealSpeedRec.clear();
             kickSpeed1 = MaxSpeed;
         }
         else if(counter1 == repeat && kickSpeed1<MaxSpeed+1)
         {
             counter1 = 0;
-            profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1, p1RealSpeedRec);
+//            profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1, p1RealSpeedRec);    // collect
+            profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1/125, p1RealSpeedRec);    // test
             p1RealSpeedRec.clear();
             kickSpeed1 += speedStep;
         }
@@ -379,6 +382,7 @@ void CollectProfileData::saveMaxBallSpeed(){
             if(!(ballSpeed<=(kickSpeed2/300))){
                 p2RealSpeedRec.append(ballSpeed);
                 p2KickSpeed.append(kickSpeed2);
+
 //                debug(QString("2 : max ball speed : %1, kSpeed : %2").arg(ballSpeed).arg(kickSpeed2), D_NADIA);   //collect
 
                 debug(QString("2 : measured : %1  ,   estimated : %3 , kSpeed : %2").arg(ballSpeed).arg(    //test
@@ -392,14 +396,16 @@ void CollectProfileData::saveMaxBallSpeed(){
         if(kickSpeed2==1000  && counter1==repeat)
         {
             counter2 = 0;
-            profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2 , p2RealSpeedRec);
+//            profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2 , p2RealSpeedRec);   // collect
+            profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2/125 , p2RealSpeedRec);   // test
             p2RealSpeedRec.clear();
             kickSpeed2 = MaxSpeed;
         }
         else if(counter2 == repeat && kickSpeed2<MaxSpeed+1)
         {
             counter2 = 0;
-            profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2, p2RealSpeedRec);
+//            profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2, p2RealSpeedRec);    // collect
+            profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2, p2RealSpeedRec);    // test
             p2RealSpeedRec.clear();
             kickSpeed2 += speedStep;
         }
@@ -728,7 +734,8 @@ void CollectProfileData::StartChip(){
         }
         SavedChipPos.clear();
 
-        profiler->robotsProfile[prfl1->getAgentID()].chipMap.insert(kickSpeed1-speedStep , chipRes);
+//        profiler->robotsProfile[prfl1->getAgentID()].chipMap.insert(kickSpeed1-speedStep , chipRes);    // collect
+        profiler->robotsProfile[prfl1->getAgentID()].chipMap.insert((kickSpeed1-speedStep)/300.0 , chipRes);    // test
 
 //collect
 //                debug(QString("speed : %1, dist : %2").arg(kickSpeed1-speedStep).arg(
@@ -738,6 +745,7 @@ void CollectProfileData::StartChip(){
         debug(QString("reg : speed : %1 , estimated : %2 , measured : %3").arg(
                   knowledge->getProfile(prfl1->getAgentID(), (kickSpeed1-speedStep)/300.0, false, false)).arg(
                   (kickSpeed1-speedStep)/300.0).arg(AvgWithoutOutliers(chipRes , 0.9)) , D_FATEMEH);
+
 
         lastAvg = AvgWithoutOutliers(chipRes , 0.9)-0.2;
     }
