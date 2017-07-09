@@ -162,7 +162,8 @@ private:
     void findPos(int _markAgentSize);
     void findOppAgentsToMark();   
     bool isInTheIndirectAreaShoot(Vector2D);
-    bool isInTheIndirectAreaPass(Vector2D);    
+    bool isInTheIndirectAreaPass(Vector2D);
+    bool checkOverdef();
     QList<Vector2D> ShootBlockRatio(double, Vector2D);
     QList<Vector2D> PassBlockRatio(double,Vector2D);
     QList<Vector2D> indirectAvoidShoot(Vector2D);

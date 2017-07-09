@@ -1304,12 +1304,6 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
               debug(QString("timeneeded of %1 is : %2 \n").arg(ourPlayers[i]).arg(nearest[ourPlayers[i]]), D_PARSA);
           lastPlayMake = playmakeId;
       }
-<<<<<<< HEAD
-=======
-
-      playmakeId = 11;
-
->>>>>>> origin/Defense_GK_Mark_AHZ
 }
 
 void CCoach::decideAttack()
