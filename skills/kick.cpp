@@ -1076,6 +1076,10 @@ void CSkillKick::jTurn()
         distCoef = 0.17;
     }
 
+    if(penaltyKick)
+    {
+        distCoef = 0.01;
+    }
     Vector2D idealPass = (ballPos - agentPos).norm()*distCoef;
 
     idealPass.rotate(shift);
