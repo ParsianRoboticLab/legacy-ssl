@@ -1251,10 +1251,10 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     }ourAgents.clear();
     ourAgents.append(defenseAgents);
     ///////////////// Added By AHZ for segment (before MRL game) ///////////////
-    if(stopMode){
-        ourAgents.clear();
-        ourAgents.append(defenseAgents);
-    }
+//    if(stopMode){
+//        ourAgents.clear();
+//        ourAgents.append(defenseAgents);
+//    }
     //////////////////////////////////////////////////////////////////////
     matchPoints.clear();
     for(int i = 0 ; i < _defenseNum ; i++) {
@@ -2971,6 +2971,15 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
                     else if(defenseCount == 1){
                         target = getGoaliePositionInOneDef(wm->ball->pos , 1 , 1.5);
                     }
+                    else{
+                        tempSol.append(wm->field->ourPAreaIntersect(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
+                        if(tempSol.size() == 1){
+                            target = tempSol.at(0);
+                        }
+                        else if(tempSol.size() == 2){
+                            target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
+                        }
+                    }
                 }
             }
             else{
@@ -2993,8 +3002,17 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
                 else if(defenseCount == 1){
                     target = getGoaliePositionInOneDef(wm->ball->pos , 1 , 1.5);
                 }
+                else{
+                    tempSol.append(wm->field->ourPAreaIntersect(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
+                    if(tempSol.size() == 1){
+                        target = tempSol.at(0);
+                    }
+                    else if(tempSol.size() == 2){
+                        target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
+                    }
+                }
             }
-            if(!wm->field->isInOurPenaltyArea(target) && defenseCount == 2){
+            if(!wm->field->isInOurPenaltyArea(target) && defenseCount != 1){
                 tempSol.append(wm->field->ourPAreaIntersect(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
                 if(tempSol.size() == 1){
                     target = tempSol.at(0);
