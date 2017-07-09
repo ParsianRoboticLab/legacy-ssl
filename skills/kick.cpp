@@ -1111,8 +1111,8 @@ void CSkillKick::jTurn()
     }
     else
     {
-        speedPidX->kp = 4 +2.1*agentPos.dist(ballPos) + dirReduce;
-        speedPidY->kp = 4 +2.1*agentPos.dist(ballPos) + dirReduce;
+        speedPidX->kp = 6 +2.1*agentPos.dist(ballPos) + dirReduce;
+        speedPidY->kp = 6 +2.1*agentPos.dist(ballPos) + dirReduce;
 
     }
     speedPidX->kd = 50;

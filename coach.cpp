@@ -346,12 +346,12 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
     }
 
     // handle stop
-    if (wm->ball->pos.x < 0){
-        preferedDefenseCounts = agentsCount - 1;
-    }
-    else if (wm->ball->pos.x > 1){
+//    if (wm->ball->pos.x < 0){
+//        preferedDefenseCounts = agentsCount - 1;
+//    }
+//    else if (wm->ball->pos.x > 1){
         preferedDefenseCounts = policy() -> Formation_Defense();
-    }
+//    }
 
     if(!policy()->Formation_StrictFormation() || !knowledge->isStart()){
         bool oppsAttack = false;

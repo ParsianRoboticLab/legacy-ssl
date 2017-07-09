@@ -11,7 +11,7 @@
 clock_t t;
 //#define speedTest
 
-//#define kickTest
+#define kickTest
 QList <Vector2D> agentpath;
 
 struct VectorIndex {
@@ -34,24 +34,49 @@ void CMainApplication::Experimental6()
         stopFlag = false;
     if(knowledge->joystick->getButton4())
         stopFlag = true;
-    int skillAgent = 6;
-
-
-
-
+    int skillAgent = 1;
 #ifdef kickTest
     static CSkillKick mmkick(soccer->agents[skillAgent]);
     mmkick.setTarget(wm->field->oppGoal());
     mmkick.setShotToEmptySpot(false);
     mmkick.setKickSpeed(1000);
+    mmkick.setSpin(4);
     mmkick.setGoalieMode(false);
     mmkick.setPassProfiler(false);
-    mmkick.setGoalieMode(true);
+    mmkick.setKickWithCenterOfDribbler(true);
 
     if(!stopFlag)
         mmkick.execute();
     return;
 #endif
+    static CSkillGotoPointAvoid obstg(soccer->agents[0]);
+    static CSkillGotoPointAvoid rrtTest(soccer->agents[5]);
+
+    rrtTest.execute();
+    if(soccer->agents[0]->pos().dist(Vector2D(-0.50,0))<0.5)
+    {
+        obstg.init(Vector2D(-4,0),Vector2D(0,0));
+    }
+
+    if(soccer->agents[0]->pos().dist(Vector2D(-4,0))<0.5)
+    {
+        obstg.init(Vector2D(-0.5,0),Vector2D(0,0));
+    }
+
+    if(soccer->agents[5]->pos().dist(Vector2D(-2,2))<0.5)
+    {
+        rrtTest.init(Vector2D(-2,-2),Vector2D(0,1));
+    }
+
+    if(soccer->agents[5]->pos().dist(Vector2D(-2,-2))<0.5)
+    {
+        rrtTest.init(Vector2D(-2,2),Vector2D(0,1));
+    }
+
+    obstg.setNoAvoid(true);
+    obstg.execute();
+
+    return;
 
     debug(QString("shootSen4 : %1").arg(knowledge->getAgent(4)->shootSensor()),D_MHMMD);
     debug(QString("shootSen7 : %1").arg(knowledge->getAgent(7)->shootSensor()),D_MHMMD);
@@ -61,7 +86,7 @@ void CMainApplication::Experimental6()
     debug(QString("shootSen2 : %1").arg(knowledge->getAgent(2)->shootSensor()),D_MHMMD);
 
     double maxAcc = 4;
-    double maxVel = 4;
+    double maxVel = 3;
     Polygon2D obs;
     Vector2D p0,v0;
     Vector2D acc;
@@ -69,16 +94,16 @@ void CMainApplication::Experimental6()
     v0.assign(1,1);
     double _t = 0.5;
     double ang;
-    for(int i = 0 ; i < 36 ; i ++)
+    for(_t = 0 ;_t <0.6 ; _t+=0.1  )
     {
-        ang = i*10*_DEG2RAD;
-        acc = maxAcc * Vector2D(cos(ang),sin(ang));
-        obs.addVertex(p0 + v0*_t + 0.5*_t*_t*acc);
+        for(int i = 0 ; i < 36 ; i ++)
+        {
+            ang = i*10*_DEG2RAD;
+            acc = maxAcc * Vector2D(cos(ang),sin(ang));
+            obs.addVertex(p0 + v0*_t + 0.5*_t*_t*acc);
+        }
+        draw(obs,QColor(Qt::blue),true);
     }
-
-    draw(mousePos);
-    draw(obs);
-
     return;
     static CSkillDribble mpass(soccer->agents[skillAgent]);
     Circle2D opFak(wm->opp[2]->pos + wm->opp[2]->dir.norm()*0.08,0.07);
@@ -97,7 +122,7 @@ void CMainApplication::Experimental6()
     if(!stopFlag)
     {
         if(opFak.contains(wm->ball->pos))
-        mpass.execute();
+            mpass.execute();
         else
             passKick.execute();
     }
@@ -164,23 +189,6 @@ void CMainApplication::Experimental6()
     {
         draw(knowledge->getStaticPoses(i));
     }
-    //
-    //
-    //
-    //    mgpa.init(wm->ball->pos + (soccer->agents[1]->pos() -wm->ball->pos).norm()*0.11,wm->ball->pos - soccer->agents[1]->pos());
-    //    soccer->agents[1]->setRoller(5);
-    ////    if(soccer->agents[1]->pos().dist(wm->ball->pos) >= 0.11)
-    ////    mgpa.execute();
-    ////    else
-    //        soccer->agents[1]->setRobotVel(-0.5,0.5,3);
-    //    return;
-    //        static CSkillGotoPointAvoid mgpa(soccer->agents[1]);
-    //        mgpa.init(mousePos,Vector2D(0,0));
-    //        mgpa.execute();
-    //    soccer->agents[1]->setRoller(6);
-    //    if(!stopFlag)
-    //    soccer->agents[1]->setRobotVel(-1,0,0);
-    //       return;
 
     return;
 

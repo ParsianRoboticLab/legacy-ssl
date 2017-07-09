@@ -8,9 +8,9 @@
 
 struct kalmParam
 {
-	double vx;
-	double vy;
-	double vw;
+    double vx;
+    double vy;
+    double vw;
 };
 
 
@@ -18,18 +18,18 @@ struct kalmParam
 class CRobot : public CMovingObject
 {
 private:
-	double ANGULAR_DIRECTION;
-	long double ADD_TO_ANGULAR_DIRECTION;
+    double ANGULAR_DIRECTION;
+    long double ADD_TO_ANGULAR_DIRECTION;
 
 protected:
-    double blindness, delayTime;                    
+    double blindness, delayTime;
     double lastFrameAngle, turns;
 public:
 
-	kalmParam kalman_velocs;
-	RobotTracker* tracker;
-    bool newRobot;    
-    QString role;    
+    kalmParam kalman_velocs;
+    RobotTracker* tracker;
+    bool newRobot;
+    QString role;
     static const double robot_radius_old;
     static const double robot_radius_new;
     static const double center_from_kicker_old;
@@ -43,7 +43,7 @@ public:
     double robotRadius();
     double kickerWidth();
     double centerFromKicker();
-    double wheelRadius();        
+    double wheelRadius();
     CRobot(int _id, bool isOurTeam, bool noKalman=false);
     ~CRobot();
     virtual void init();
@@ -57,9 +57,9 @@ public:
     bool kickSensor;
     QList<CRobot*> relaxed;
     bool elementNotInSight;
-    CMotionEstimator *motionEstimator;    
+    CMotionEstimator *motionEstimator;
     bool isActive();
-	Circle2D getCirle();
+    Circle2D getCirle();
     Vector2D getKickerPos(double margin = 0);
     bool isBallOwner(double verticaldist=0, double horizontaldist=-1);
     double ballComingSpeed();
@@ -76,9 +76,10 @@ public:
     Property(float, ReplDir, replDir);
 
 public:
-	bool markedByDefense;
-	bool markedByMark;
-	double danger;
+    bool markedByDefense;
+    bool markedByMark;
+    bool shootSensor;
+    double danger;
 };
 
 #endif // ROBOT_H
