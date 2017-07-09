@@ -504,14 +504,14 @@ void CPlanner::runPlanner(){
                 if(obst.check(temp[i],temp[k]) )
                 {
                     resultModified.push_back(temp[k]);
-                    draw(temp[k]);
+                    //draw(temp[k]);
                     compNodeNum = k;
                     break;
                 }
                 if((k == i -1)  )
                 {
                     resultModified.push_back(temp[k]);
-                    draw(temp[k]);
+                    //draw(temp[k]);
                     compNodeNum = k;
                 }
             }
@@ -789,8 +789,8 @@ void CPlannerThread::createObstacleProb(CObstacles &obs,Vector2D _pos, Vector2D 
     double timeForObs = 0;
     ///TODO: should read from vartypes
     double maxA = 4;
-    double maxObstRad = 3;
-    double maxTime = 1;
+    double maxObstRad = 1.5;
+    double maxTime = 0.5;
     if(_vel.length() < 0.2)
     {
         _center = _pos;
