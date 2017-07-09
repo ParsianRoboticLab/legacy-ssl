@@ -1157,7 +1157,7 @@ void CSkillKick::turnForKick()
     if(1|| knowledge->isOurNonPlayOnKick())
     {
         if(fabs((agentDir.th() - kickFinalDir).degree()) < 80)
-            angReduce = 0.6;
+            angReduce = 0.7;
         if ((agentDir.th() - kickFinalDir).degree()  <- 10 )
         {
             angPid->kp = 4*angReduce;
@@ -1898,11 +1898,12 @@ void CSkillKickOneTouch::execute()
     oneTouchMode = decideMode();
 
     Segment2D ballPath;
-    double stopParam = 0.09;
-    ballPath.assign(ballPos,ballPos + wm->ball->vel.norm()*(agentPos.dist(ballPos) - stopParam + 0.01));
+    double stopParam = 0.085;
+    ballPath.assign(ballPos,ballPos + wm->ball->vel.norm()*15);
     Segment2D ballLine;
     ballLine.assign(ballPos,ballPos + wm->ball->vel.norm()*(15));
     draw(ballPath,"red");
+    Vector2D kickerPoint = agentPos + agent->dir().norm()*stopParam;
 
 
 
@@ -1936,7 +1937,7 @@ void CSkillKickOneTouch::execute()
     else if(oneTouchArea.intersection(ballPath,&sol1,&sol2) && wm->ball->vel.length() > 0.4)
     {
         gotopointavoid->setNoAvoid(false);
-        intersectPos = ballPath.nearestPoint(agentPos);
+        intersectPos = ballPath.nearestPoint(kickerPoint);
         if(wm->field->isInOppPenaltyArea(intersectPos) || oppPenaltyAreaWP.contains(waitpos))
         {
             if(oppPenaltyArea.intersection(ballLine,&sol1,&sol2))
