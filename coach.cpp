@@ -1201,7 +1201,7 @@ void CCoach::updateAttackState()
     QList<int> ids;
     Segment2D oppNearestPath(oppNearest->pos,oppNearest->pos + oppNearest->vel);
     ids = wm->our.data->activeAgents;
-    CRobot* PMA = wm->our.active(playmakeId);
+    CRobot* PMA = wm->our[playmakeId];
 //    ourNearestAgent = knowledge->getAgent(knowledge->getNearestAgentToPoint(wm->ball->pos,&ids));
     if(PMA != NULL)
     {
@@ -1260,12 +1260,12 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
     // third version
       double ballVel = wm->ball->vel.length();
       Vector2D ballPos = wm->ball->pos;
-      if(ballVel < 0.1)
+      if(ballVel < 0.3)
       {
           double maxD = -0.1;
           for(int i = 0; i < ourPlayers.size(); i++)
           {
-              double o = 1 / (knowledge->getAgent(ourPlayers[i])->pos().dist(ballPos) + 0.03);
+              double o = -knowledge->getAgent(ourPlayers[i])->pos().dist(ballPos) ;
               if(ourPlayers[i] == lastPlayMake)
                   o += playMakeTh;
               if(o > maxD)
@@ -1476,7 +1476,8 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
         if(goodForKick)
         {
             dynamicAttack->setDirectShot(true);
-            shotToGoalthr = policy()->DynamicPlay_DirectTrsh() - 0.2;
+            if((findMostPossible(wm->our[playmakeId]->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr)))
+                shotToGoalthr = policy()->DynamicPlay_DirectTrsh() - 0.2;
         } else {
             dynamicAttack->setDirectShot(false);
             shotToGoalthr = 0;
