@@ -92,6 +92,8 @@ public:
     void executeOurPenalty();
     void executeOurPenaltyShootout();
     int choosePenaltyStrategy();
+    int getPenaltychipSpeed();
+    double lastBounce();
     bool ShootPenalty();
     void executeDefault();
     void resetOffPlays();

@@ -839,12 +839,12 @@ void CRolePlayMake::stopBehindBall(bool penalty)
         if(wm->gs->penalty_shootout())
             gotopoint->init(wm->ball->pos + (wm->ball->pos - wm->field->oppGoal())*0.03,wm->ball->pos - agent->pos());
         else{
-        Vector2D direction, position;
+            Vector2D direction, position;
 
-        direction = wm->ball->pos - agent->pos();
-        direction.y*=1.2;
-        position = wm->ball->pos + (wm->ball->pos - wm->field->oppGoal() + Vector2D(0,0.2)).norm()*(0.13);
-        gotopoint->init(position, direction);
+            direction = wm->ball->pos - agent->pos();
+            direction.y*=1.2;
+            position = wm->ball->pos + (wm->ball->pos - wm->field->oppGoal() + Vector2D(0,0.2)).norm()*(0.13);
+            gotopoint->init(position, direction);
         }
 
         //        gotopoint->setTargetLook( wm->ball->pos + Vector2D( wm->ball->pos - wm->field->oppGoalL()).norm()*0.15 , wm->field->oppGoalR());
@@ -957,12 +957,30 @@ bool CRolePlayMake::ShootPenalty(){
     else return false;
 }
 
+double CRolePlayMake::lastBounce(){
+    int sign;
+    sign= wm->field->oppGoal().x<0 ? -1 :1;
+    return (wm->field->oppGoal()+Vector2D(0,20/sign) - agent->pos()).length();
+}
+
+
+int CRolePlayMake::getPenaltychipSpeed(){
+    Vector2D oppGoaliPos=wm->opp.active(knowledge->oppGoalieIndex)->pos;
+    if(knowledge->getProfile(agent->id(),(oppGoaliPos-agent->pos()).length(),false)
+            < knowledge->getProfile(agent->id()+1,lastBounce(),false)){
+        return (knowledge->getProfile(agent->id(),(oppGoaliPos-agent->pos()).length(),false)
+                +knowledge->getProfile(agent->id()+1,lastBounce(),false))/2;
+    }
+    else return -1;
+}
+
+
 
 int CRolePlayMake::choosePenaltyStrategy(){
     if(ShootPenalty()) return pshootDirect;
     else if(!goalKeeperForward) return pgoaheadShoot;
-    else return pchipShoot;
-
+    else if(getPenaltychipSpeed()!= -1) return pchipShoot;
+    else return pgoaheadShoot;
 }
 
 void CRolePlayMake::executeOurPenaltyShootout(){
@@ -1005,11 +1023,11 @@ void CRolePlayMake::executeOurPenaltyShootout(){
             }else{
 
                 debug("penalty Shootout_first : ",D_NADIA);
-//                if((int)random()%2==0)
-//                    penaltyTarget=wm->field->oppGoalL()+Vector2D(0,wm->field->oppGoalL().y);
-//                else
-                    penaltyTarget=wm->field->oppGoalR()+Vector2D(0,wm->field->oppGoalR().y);
-//                kick->setPenaltyKick(true);
+                //                if((int)random()%2==0)
+                //                    penaltyTarget=wm->field->oppGoalL()+Vector2D(0,wm->field->oppGoalL().y);
+                //                else
+                penaltyTarget=wm->field->oppGoalR()+Vector2D(0,wm->field->oppGoalR().y);
+                //                kick->setPenaltyKick(true);
                 kick->setInterceptMode(false);
                 kick->setSpin(false);
                 kick->setChip(false);
@@ -1037,6 +1055,8 @@ void CRolePlayMake::executeOurPenaltyShootout(){
                 kick->setKickSpeed(1023);
                 kick->execute();
                 break;
+
+
             case pgoaheadShoot:
                 debug("pgoahead : ",D_NADIA);
                 if(abs(agent->pos().x)>2.5){
@@ -1061,8 +1081,13 @@ void CRolePlayMake::executeOurPenaltyShootout(){
                 gotopoint->execute();
 
                 break;
+
+
             case pchipShoot:
-                debug("pchip : ",D_NADIA);
+                kick->setTarget(penaltyTarget);
+                kick->setKickSpeed(getPenaltychipSpeed());
+                kick->setChip(true);
+                kick->execute();
                 break;
             }
         }
@@ -1147,7 +1172,7 @@ void CRolePlayMake::executeOurPenalty()
         }
     }
 
-//    draw(penaltyTarget, 0, "cyan");
+    //    draw(penaltyTarget, 0, "cyan");
 
 }
 
@@ -1295,6 +1320,7 @@ void CRolePlayMake::execute()
             || knowledge->getGameMode() == CKnowledge::OurPenaltyKick){
         debug(QString("st___:%1").arg(!wm->gs->penalty_shootout()),D_NADIA);
         executeOurPenalty();
+        return;
 
     }
 
