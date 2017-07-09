@@ -456,7 +456,7 @@ void CAgent::accelerationLimiter(double vf,bool diveMode)
     double lastV,commandV;
     double vCoef = 1;
     double tempVf = vforward , tempVn = vnormal;
-    double decCoef = 2;
+    double decCoef = 1;
 
     if(vf == 0)
         decCoef = 2.5;
