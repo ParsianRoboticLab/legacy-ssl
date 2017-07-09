@@ -941,7 +941,7 @@ bool CRolePlayMake::ShootPenalty(){
     QList<int> relax,empty;
     relax.append(agent->id());
     penaltyTarget = knowledge->getEmptyPosOnGoal(agent->pos(), w, true, relax, empty);
-    if(penaltyTarget == wm->field->oppGoal()){
+    if(penaltyTarget.dist(wm->field->oppGoal()) < 0.1){
         if(wm->opp.active(knowledge->oppGoalieIndex)->pos.y>0){
             penaltyTarget=wm->field->oppGoalL()+ Vector2D(0,0.05);
         }
@@ -951,7 +951,7 @@ bool CRolePlayMake::ShootPenalty(){
 
     }
     if(Segment2D(agent->pos(),penaltyTarget).dist(wm->opp.active(knowledge->oppGoalieIndex)->pos)
-            > abs(agent->pos().x-wm->opp.active(knowledge->oppGoalieIndex)->pos.x)/6)
+            > fabs(agent->pos().x-wm->opp.active(knowledge->oppGoalieIndex)->pos.x)/8)
         return true;
 
     else return false;
@@ -977,123 +977,108 @@ int CRolePlayMake::getPenaltychipSpeed(){
 
 
 int CRolePlayMake::choosePenaltyStrategy(){
-    if(ShootPenalty()) return pshootDirect;
-    else if(!goalKeeperForward) return pgoaheadShoot;
-    else if(getPenaltychipSpeed()!= -1) return pchipShoot;
-    else return pgoaheadShoot;
+        if(!goalKeeperForward) return pgoaheadShoot;
+        else if(ShootPenalty()) return pshootDirect;
+        else if(getPenaltychipSpeed()!= -1) return pchipShoot;
+        else return pgoaheadShoot;
 }
 
 void CRolePlayMake::executeOurPenaltyShootout(){
     bool flag=false;
     debug("penalty Shootout : ",D_NADIA);
     double w;
-    if((wm->opp.active(knowledge->oppGoalieIndex)->pos-wm->field->oppGoal()).length()>2)
+
+
+    if((wm->opp.active(knowledge->oppGoalieIndex)->pos-wm->field->oppGoal()).length()>2.5)
         goalKeeperForward=true;
+
     if (knowledge->getGameMode()==CKnowledge::Stop)
     {
-        debug("penalty Shootout_stop : ",D_NADIA);
         cyclesExecuted--;
         srand(time(NULL));
         stopBehindBall(true);
         penaltyCounter = 0;
+        setNoKick(true);
+    }
+    else {
+//        kick->setAvoidPenaltyArea(false);
+        kick->setAgent(agent);
         penaltyTarget=wm->field->oppGoal();
         kick->setTarget(penaltyTarget);
-        kick->setPenaltyKick(true);
+        kick->setPenaltyKick(false);
         kick->setInterceptMode(false);
         kick->setSpin(false);
         kick->setChip(false);
         kick->setVeryFine(false);
         kick->setWaitFrames(0);
         kick->setTolerance(3);
-        setNoKick(true);
 
-
-    }
-    else {
-        kick->setAgent(agent);
-        debug("penalty Shootout_start : ",D_NADIA);
         if(firstKick){
-            if(flag){
-                penaltyTarget=wm->field->oppGoal();
-                kick->setTarget(penaltyTarget);
-                kick->setKickSpeed(300);
-                kick->execute();
+            penaltyTarget=wm->field->oppGoalL()+2*Vector2D(0,wm->field->oppGoalL().y);;
+            kick->setTarget(penaltyTarget);
+
+            if(flag){//chip first
+                kick->setKickSpeed(3);
+                kick->setChip(true);
                 if(wm->ball->vel.length()>0.1)
                     firstKick=false;
-            }else{
+            }else{//kick first
 
-                debug("penalty Shootout_first : ",D_NADIA);
+                debug("first : ",D_NADIA);
                 //                if((int)random()%2==0)
                 //                    penaltyTarget=wm->field->oppGoalL()+Vector2D(0,wm->field->oppGoalL().y);
                 //                else
-                penaltyTarget=wm->field->oppGoalR()+Vector2D(0,wm->field->oppGoalR().y);
                 //                kick->setPenaltyKick(true);
-                kick->setInterceptMode(false);
-                kick->setSpin(false);
                 kick->setChip(false);
-                kick->setVeryFine(false);
-                kick->setWaitFrames(0);
-                kick->setTolerance(3);
-                kick->setTarget(penaltyTarget);
-                kick->setChip(false);
-                kick->setKickSpeed(100);
-                kick->execute();
+                kick->setKickSpeed(2);
                 if(wm->ball->vel.length()>0.1)
                     firstKick=false;
             }
         }
         else{
-            if(wm->ball->vel.length()<0.1)
-                firstKick=true;
+            kick->setKickSpeed(7);
             kick->setChip(false);
-            debug("penalty Shootout_not first : ",D_NADIA);
-            switch(choosePenaltyStrategy()){
 
+            switch(choosePenaltyStrategy()){
             case pshootDirect:
                 debug("pdirect : ",D_NADIA);
                 kick->setTarget(penaltyTarget);
-                kick->setKickSpeed(1023);
-                kick->execute();
                 break;
 
 
             case pgoaheadShoot:
                 debug("pgoahead : ",D_NADIA);
-                if(abs(agent->pos().x)>2.5){
-                    if(!Circle2D(wm->ball->pos,0.5).contains(agent->pos())
-                            && flag ){
-                        gotopoint->setAgent(agent);
-                        gotopoint->init(agent->pos()+agent->dir().norm(),wm->ball->pos);
-                        gotopoint->execute();
-                    }
-                    else{
-                        penaltyTarget = knowledge->goalVisiblity(agent->id(), w, 1.0);
-                        kick->setKickSpeed(1023);
-                        kick->execute();
-                    }
+                if(abs(agent->pos().x)<2){
+                    kick->setTarget(wm->field->oppGoal());
+                    kick->setKickSpeed(0);
                 }
-                else
-                    gotopoint->setAgent(agent);
-                if(flag)
-                    gotopoint->init(agent->pos()+agent->dir().norm(),wm->ball->pos);
-                else
-                    gotopoint->init(wm->ball->pos+wm->ball->getDir().norm()/10,wm->field->oppGoal());
-                gotopoint->execute();
+                else{
+//                    penaltyTarget = knowledge->goalVisiblity(agent->id(), w, 1.0);
+                    penaltyTarget=knowledge->getEmptyPosOnGoalForPenalty(1.0/8.0,true);
+                    kick->setTarget(penaltyTarget);
+                }
+                //                }
+                //                else
+                //                    gotopoint->setAgent(agent);
+                //                if(flag)
+                //                    gotopoint->init(agent->pos()+agent->dir().norm(),wm->ball->pos);
+                //                else
+                //                    gotopoint->init(wm->ball->pos,wm->field->oppGoal());
+                //                gotopoint->execute();
 
                 break;
 
 
             case pchipShoot:
-                kick->setTarget(penaltyTarget);
+                kick->setTarget(wm->field->oppGoal());
                 kick->setKickSpeed(getPenaltychipSpeed());
                 kick->setChip(true);
-                kick->execute();
                 break;
             }
         }
 
-        kick->setAgent(agent);
-        kick->setAvoidPenaltyArea(false);
+
+        kick->execute();
     }
 
 }
