@@ -585,6 +585,11 @@ void CPlayOff::firstExecute() {
     debug(QString("PB : %1, SB : %2").arg(passBlocked).arg(shotBlocked), D_MAHI);
     debug(QString("ShotSpot : %1 ").arg(shotSpot), D_MAHI);
 
+    analyze("OPP MARK SPOT", shotSpot, true);
+    analyze("OPP MARK PASS", passBlocked, true);
+    analyze("OPP MARK SHOT", shotBlocked, true);
+
+
     for (int i = 0; i < 6; i++) {
         newRoleAgent[i]->execute();
     }

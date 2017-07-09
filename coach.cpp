@@ -2478,7 +2478,7 @@ QList<SPlan*> CCoach::getMatchedPlans(int _shotSpot, const QList<SPlan*>& _plans
         Vector2D& tempBall = plan->matching.initPos.ball;
         ShotSpot tempSpot  = getShotSpot(tempBall, tempPos);
 
-        if (_shotSpot & tempSpot) {
+        if (_shotSpot & tempSpot || 1) {
             tempPlans.append(plan);
         }
 
