@@ -3044,14 +3044,14 @@ Vector2D DefensePlan::getGoaliePositionInOneDef(Vector2D _ballPos, double _limit
 
     //draw(Circle2D(wm->field->ourGoal(), tempBestRadius), "yellow");
 
-    if(wm->ball->pos.y < 0 + goalieThr){
+    if(wm->ball->pos.y + wm->ball->vel.y < 0 + goalieThr){
         goalieTarget = tempCDef->getXYByAngle(tempAngles.angle2-agentAngle/2, tempBestRadius);
-        goalieThr = 0.5;
+        goalieThr = 0.2;
         //oneDefThr = 1;
     }
     else {
         goalieTarget = tempCDef->getXYByAngle(tempAngles.angle1+agentAngle/2, tempBestRadius);
-        goalieThr = -0.5;
+        goalieThr = -0.2;
         //oneDefThr = -1;
     }
 
