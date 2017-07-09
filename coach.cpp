@@ -409,15 +409,20 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
             preferedDefenseCounts = 2;
         }
     }
-    if (knowledge->isOurNonPlayOnKick() && wm->ball->pos.x < -0.5) {
+    if(knowledge->isOurNonPlayOnKick() && wm->ball->pos.x < -0.5){
+        preferedDefenseCounts = 2;
+    }
+    if(policy()->Formation_StrictFormation()){
+        preferedDefenseCounts = policy()->Formation_Defense();
+    }
+    if(agentsCount == 2){
         preferedDefenseCounts = 2;
     }
     if(policy()->Formation_StrictFormation()){
         preferedDefenseCounts = policy()->Formation_Defense();
     }
     lastPreferredDefenseCounts = preferedDefenseCounts;
-
-    if(knowledge->getGameState()==CKnowledge::HalfTimeLineUp){
+    if(knowledge->getGameState()== CKnowledge::HalfTimeLineUp){
         preferedGoalieAgent = -1;
         preferedDefenseCounts = 0;
     }
@@ -1286,6 +1291,8 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
               debug(QString("timeneeded of %3 is : %4 \n").arg(ourPlayers[i]).arg(nearest[ourPlayers[i]]), D_PARSA);
           lastPlayMake = playmakeId;
       }
+
+      playmakeId = 11;
 
 }
 
