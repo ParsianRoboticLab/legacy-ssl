@@ -1244,17 +1244,17 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     stopMode = knowledge->isStop();
     ourAgents.clear();
     ourAgents.append(defenseAgents);
-    if(defExceptions.active){
+    if(defExceptions.active){        
         if(defExceptions.exepAgentId != -1){
+            debug(QString("id : %1 ").arg(defExceptions.exepAgentId) , D_AHZ);
             ourAgents.removeOne(knowledge->getAgent(defExceptions.exepAgentId));
         }
-    }ourAgents.clear();
-    ourAgents.append(defenseAgents);
+    }
     ///////////////// Added By AHZ for segment (before MRL game) ///////////////
-    //    if(stopMode){
-    //        ourAgents.clear();
-    //        ourAgents.append(defenseAgents);
-    //    }
+    if(stopMode){
+        ourAgents.clear();
+        ourAgents.append(defenseAgents);
+    }
     //////////////////////////////////////////////////////////////////////
     matchPoints.clear();
     for(int i = 0 ; i < _defenseNum ; i++) {
