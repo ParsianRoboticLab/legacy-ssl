@@ -120,7 +120,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     }
     else if(oneTouch)
     {
-        posPid->kp = 5;
+        posPid->kp = 7;
         posPid->kd = 20;
         posPid->ki = 0;
     }
