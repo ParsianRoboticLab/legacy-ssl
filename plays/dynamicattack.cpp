@@ -140,19 +140,6 @@ void CDynamicAttack::makePlan(int agentSize) {
         currentPlan.positionAgents[i].skill  = DynamicEnums::NoSkill;
     }
 
-    Polygon2D robotKickArea;
-    robotKickArea.addVertex(agentPos+agent->dir().norm()*0.08+agent->dir().rotate(90).norm()*0.05);
-    robotKickArea.addVertex(agentPos+agent->dir().norm()*0.15+agent->dir().rotate(90).norm()*0.05);
-    robotKickArea.addVertex(agentPos+agent->dir().norm()*0.15-agent->dir().rotate(90).norm()*0.05);
-    robotKickArea.addVertex(agentPos+agent->dir().norm()*0.08-agent->dir().rotate(90).norm()*0.05);
-
-
-    double M = 100, m = 100;
-    for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
-        M = min(M, wm->opp.active(i)->pos.dist(ballPos));
-    for(int i = 0; i < wm->our.activeAgentsCount(); i++)
-        m = min(m, wm->our.active(i)->pos.dist(ballPos));
-
     /// Start Role Assigning
 
     if (isDefenseClearing) {
