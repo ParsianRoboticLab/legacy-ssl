@@ -836,38 +836,38 @@ void CSkillKick::waitAndKick()
     oneTouchArea.assign(agentPos,onetouchRad);
     gpa->setAddVel(Vector2D(0,0));
 
-        gpa->setNoAvoid(false);
-        intersectPos = ballPath.nearestPoint(kickerPoint);
-//        if(wm->field->isInOppPenaltyArea(intersectPos) )
-//        {
-//            if(oppPenaltyArea.intersection(ballLine,&sol1,&sol2))
-//            {
-//                if(sol1.dist(agentPos) > sol2.dist(agentPos))
-//                {
-//                    sol1 = sol2;
-//                }
-//                intersectPos = sol1;
-//            }
-//        }
+    gpa->setNoAvoid(false);
+    intersectPos = ballPath.nearestPoint(kickerPoint);
+    //        if(wm->field->isInOppPenaltyArea(intersectPos) )
+    //        {
+    //            if(oppPenaltyArea.intersection(ballLine,&sol1,&sol2))
+    //            {
+    //                if(sol1.dist(agentPos) > sol2.dist(agentPos))
+    //                {
+    //                    sol1 = sol2;
+    //                }
+    //                intersectPos = sol1;
+    //            }
+    //        }
 
 
-        gpa->init(intersectPos +addVec,oneTouchDir);
+    gpa->init(intersectPos +addVec,oneTouchDir);
 
-        gpa->setOneTouchMode(true);
-        gpa->execute();
-        draw(intersectPos);
-        if(agentPos.dist(ballPos) < 1)
+    gpa->setOneTouchMode(true);
+    gpa->execute();
+    draw(intersectPos);
+    if(agentPos.dist(ballPos) < 1)
+    {
+        if(chip)
         {
-            if(chip)
-            {
-                agent->setChip(kickSpeed);
-            }
-            else
-            {
-                agent->setKick(kickSpeed);
-            }
+            agent->setChip(kickSpeed);
         }
-       // agent->setRoller(3);
+        else
+        {
+            agent->setKick(kickSpeed);
+        }
+    }
+    // agent->setRoller(3);
 
 
 }
@@ -878,12 +878,21 @@ void CSkillKick::kDontKick()
 {
 
     Vector2D finalPos;
-    gpa->setSlowMode(true);
+    gpa->setSlowMode(false);
     finalPos=ballPos-(target-ballPos).norm()*0.23;
     gpa->setBallObstacleRadius(0.4);
     if(fabs((kickFinalDir - agentDir.th()).degree()) < 10)
     {
-        finalPos=ballPos-(target-ballPos).norm()*0.12;
+        if(wm->ball->pos.x < -0.5)
+        {
+            agent->setRoller(5);
+            finalPos=ballPos-(target-ballPos).norm()*0.11;
+        }
+        else
+        {
+            agent->setRoller(1);
+            finalPos=ballPos-(target-ballPos).norm()*0.12;
+        }
         gpa->setSlowMode(false);
         gpa->setBallObstacleRadius(0);
     }
@@ -940,13 +949,13 @@ void CSkillKick::avoidOppPenalty()
     gpa->setAvoidPenaltyArea(true);
     gpa->setNoAvoid(false);
 
-//    if(!wm->field->isInOppPenaltyArea(finalPos + (wm->field->oppGoal() - finalPos).norm()*0.1))
-//    {
-//        if(penaltyStraightLine.intersection(ballPosSeg).isValid())
-//        {
-//            finalPos = penaltyStraightLine.intersection(ballPosSeg);
-//        }
-//    }
+    //    if(!wm->field->isInOppPenaltyArea(finalPos + (wm->field->oppGoal() - finalPos).norm()*0.1))
+    //    {
+    //        if(penaltyStraightLine.intersection(ballPosSeg).isValid())
+    //        {
+    //            finalPos = penaltyStraightLine.intersection(ballPosSeg);
+    //        }
+    //    }
     gpa->init(finalPos, finalDirVec);
     gpa->execute();
     agent->setKick(kickSpeed);
@@ -1043,6 +1052,7 @@ void CSkillKick::jTurn()
     Vector2D targetForJturn;
     if(movementDir < 20 && movementDir > -20)
     {
+        agent->setRoller(3);
         shift = 0;
         jTurnFromBack = false;
     }
@@ -1086,15 +1096,15 @@ void CSkillKick::jTurn()
 
     if(!jTurnFromBack)
     {
-        dirReduce = 1;
+        dirReduce += 1;
     }
     if(wm->field->isInOppPenaltyArea(ballPos + (wm->field->oppGoal() - ballPos).norm()*0.15) && agentPos.dist(ballPos)<0.25)
     {
-        dirReduce = -2;
+        dirReduce -= 2;
     }
     if(knowledge->isOurNonPlayOnKick())
     {
-        dirReduce = -1;
+        dirReduce -= 1;
     }
 
     if(penaltyKick)
@@ -1482,7 +1492,7 @@ void CSkillKick::findPosToGo()
         if(s2.dist(target) >= s1.dist(target))
             s1 = s2;
         finalPos = s1;
-        gpa->setAddVel(wm->ball->vel*0.8);
+        gpa->setAddVel(wm->ball->vel);
     }
     else
     {
@@ -1497,7 +1507,7 @@ void CSkillKick::findPosToGo()
         gpa->setBallObstacleRadius(0);
     else
         gpa->setBallObstacleRadius(0);
-    if((fabs(((ballPos - agentPos).th() - kickFinalDir).degree()) < 60) && (agentPos.dist(ballPos) < 1) && (wm->ball->vel.length() > 0.2) || (agentPos.dist(ballPos)<0.4)) {
+    if(((fabs(((ballPos - agentPos).th() - kickFinalDir).degree()) < 60) && (agentPos.dist(ballPos) < 1) && (wm->ball->vel.length() > 0.2)) || (agentPos.dist(ballPos) < 0.5)) {
         if(fabs((kickFinalDir - agentDir.th()).degree()) > 40 && dribblerArea.contains(ballPos))
         {
             turnForKick();

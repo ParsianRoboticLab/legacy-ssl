@@ -427,6 +427,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         preferedDefenseCounts = 0;
     }
 
+
 }
 
 void CCoach::calcDesiredMarkCounts()
@@ -658,10 +659,10 @@ CKnowledge::ballPossesionState CCoach::isBallOurs()
     //// NEW BALL POSSESSION ////
 
 
-    if(wm->ball->pos.x > 0.5) {
+    if(wm->ball->pos.x + wm->ball->vel.x > 0.5) {
         decidePState = CKnowledge::WEHAVETHEBALL;
 
-    } else if (wm->ball->pos.x < 0.1){
+    } else if (wm->ball->pos.x + wm->ball->vel.x < 0.1){
         decidePState = CKnowledge::WEDONTHAVETHEBALL;
     } else {
         decidePState = lastBallPossesionState;
