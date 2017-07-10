@@ -52,8 +52,7 @@ protected:
     bool noDefenseNoGoalie();
     bool isInThePenaltyArea(Vector2D _posofsth);
     void setPointToKick();
-    void checkGoalieTarget();
-    Vector2D getIntersectionWithPenaltyAreaGk(Segment2D _seg);
+    void checkGoalieTarget();    
     void setGoalKeeperState();
     void setGoalKeeperTargetPoint();
     bool ballBehindGoalie, goalieOneTouch, goalieInPenaltyAreaPrediction, goalieClearMode, goalieStrictFollow, goalieFollow, ballIsOutOfField;
@@ -89,6 +88,8 @@ protected:
     bool dangerForGoalieClearByOppAgents;
     bool dangerForInsideOfThePenaltyArea;
     bool stopMode;
+    bool playOffMode;
+    bool playOnMode;
     bool dangerModeThresholdForClear;
     bool dangerModeThresholdForDanger;
     bool changeInMarkPlanFlag;
