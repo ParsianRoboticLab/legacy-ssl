@@ -99,7 +99,10 @@ void CRoleDynamic::update() {
        shotSkill->setChip(chip);
        shotSkill->setVeryFine(false);
        shotSkill->setShotToEmptySpot(emptySpot);
-       shotSkill->setKickSpeed(1023);
+       if(wm->getIsSimulMode())
+           shotSkill->setKickSpeed(kickSpeed);
+       else
+           shotSkill->setKickSpeed(1023);
        shotSkill->execute();
        break;
    case DynamicEnums::Move:

@@ -113,7 +113,7 @@ CCoach::CCoach(CAgent**_agents)
     defenseTimeForVisionProblem[1].start();
     transientFlag = false;
     trasientTimeOut.start();
-    translationTimeOutTime = 4500;
+    translationTimeOutTime = 1500;
     exeptionPlayMake = NULL;
     exeptionPlayMakeThr = 0;
 
@@ -346,12 +346,12 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
     }
 
     // handle stop
-    if (wm->ball->pos.x < 0){
-        preferedDefenseCounts = agentsCount - 1;
-    }
-    else if (wm->ball->pos.x > 1){
+//    if (wm->ball->pos.x < 0){
+//        preferedDefenseCounts = agentsCount - 1;
+//    }
+//    else if (wm->ball->pos.x > 1){
         preferedDefenseCounts = policy() -> Formation_Defense();
-    }
+//    }
 
     if(!policy()->Formation_StrictFormation() || !knowledge->isStart()){
         bool oppsAttack = false;
@@ -381,7 +381,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
             preferedDefenseCounts = max(agentsCount - 1 - missMatchIds.count(), 0);
         } else if (transientFlag
                    &&  knowledge->getGameState() != CKnowledge::TheirKickOff) {
-            if (trasientTimeOut.elapsed() > 4500 && !wm->field->isInOurPenaltyArea(wm->ball->pos)) {
+            if (trasientTimeOut.elapsed() > 800 && !wm->field->isInOurPenaltyArea(wm->ball->pos)) {
                 preferedDefenseCounts = min(0, agentsCount - missMatchIds.count() - 1);
 
             } else {
@@ -409,15 +409,20 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
             preferedDefenseCounts = 2;
         }
     }
-    if (knowledge->isOurNonPlayOnKick() && wm->ball->pos.x < -0.5) {
+    if(knowledge->isOurNonPlayOnKick() && wm->ball->pos.x < -0.5){
+        preferedDefenseCounts = 2;
+    }
+    if(policy()->Formation_StrictFormation()){
+        preferedDefenseCounts = policy()->Formation_Defense();
+    }
+    if(agentsCount == 2){
         preferedDefenseCounts = 2;
     }
     if(policy()->Formation_StrictFormation()){
         preferedDefenseCounts = policy()->Formation_Defense();
     }
     lastPreferredDefenseCounts = preferedDefenseCounts;
-
-    if(knowledge->getGameState()==CKnowledge::HalfTimeLineUp){
+    if(knowledge->getGameState()== CKnowledge::HalfTimeLineUp){
         preferedGoalieAgent = -1;
         preferedDefenseCounts = 0;
     }
@@ -1180,10 +1185,11 @@ double CCoach::findMostPossible(Vector2D agentPos)
 void CCoach::updateAttackState()
 {
     Polygon2D robotCritArea;
-    double safeRegion = 1;
-    double critLenth = 0.75;
-    CAgent *ourNearestAgent;
-    CRobot *oppNearest;
+    double    safeRegion = 1;
+    double    critLenth = 0.75;
+    Circle2D  critCir;
+    CAgent    *ourNearestAgent;
+    CRobot    *oppNearest;
     if(wm->opp.activeAgentsCount() > 0) {
         oppNearest = wm->opp[knowledge->getNearestOppToPoint(wm->ball->pos)];
     }
@@ -1195,20 +1201,29 @@ void CCoach::updateAttackState()
     QList<int> ids;
     Segment2D oppNearestPath(oppNearest->pos,oppNearest->pos + oppNearest->vel);
     ids = wm->our.data->activeAgents;
-    ourNearestAgent = knowledge->getAgent(knowledge->getNearestAgentToPoint(wm->ball->pos,&ids));
-    robotCritArea.addVertex(ourNearestAgent->pos());
-    robotCritArea.addVertex(ourNearestAgent->pos() + ourNearestAgent->dir().norm() * critLenth + ourNearestAgent->dir().norm().rotate(90)* critLenth );
-    robotCritArea.addVertex(ourNearestAgent->pos() + ourNearestAgent->dir().norm() * critLenth + ourNearestAgent->dir().norm().rotate(-90)* critLenth);
+//    ourNearestAgent = knowledge->getAgent(knowledge->getNearestAgentToPoint(wm->ball->pos,&ids));
+    if (playmakeId != -1) {
+        CRobot* PMA = wm->our[playmakeId];
+        if(PMA != NULL)
+        {
+            critCir = Circle2D(PMA->pos, critLenth + 0.2);
+            robotCritArea.addVertex(PMA->pos);
+            robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(90) * critLenth);
+            robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(-90)* critLenth);
+        }
+    }
+
+
     draw(robotCritArea,QColor(Qt::cyan));
 
-
-    if(oppNearestPath.nearestPoint(wm->ball->pos).dist(wm->ball->pos) >= safeRegion) {
-        ourAttackState = SAFE;
-        debug(QString("Attack: safe"),D_MHMMD);
-    }
-    else if(robotCritArea.contains(oppNearest->pos)) {
+    if(robotCritArea.contains(oppNearest->pos)
+       || (ourAttackState == CRITICAL && critCir.contains(oppNearest->pos))) {
         ourAttackState = CRITICAL;
         debug(QString("Attack: critical"),D_MHMMD);
+    }
+    else if(oppNearestPath.nearestPoint(wm->ball->pos).dist(wm->ball->pos) >= safeRegion) {
+        ourAttackState = SAFE;
+        debug(QString("Attack: safe"),D_MHMMD);
     }
     else {
         ourAttackState = FAST;
@@ -1249,12 +1264,12 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
     // third version
       double ballVel = wm->ball->vel.length();
       Vector2D ballPos = wm->ball->pos;
-      if(ballVel < 0.4)
+      if(ballVel < 0.3)
       {
-          double maxD = -0.1;
+          double maxD = -1000.1;
           for(int i = 0; i < ourPlayers.size(); i++)
           {
-              double o = 1 / (knowledge->getAgent(ourPlayers[i])->pos().dist(ballPos) + 0.03);
+              double o = -knowledge->getAgent(ourPlayers[i])->pos().dist(ballPos) ;
               if(ourPlayers[i] == lastPlayMake)
                   o += playMakeTh;
               if(o > maxD)
@@ -1267,10 +1282,18 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
       }
       else
       {
+          if(playMakeIntention.elapsed() < playMakeIntentionInterval)
+          {
+              playmakeId = lastPlayMake;
+              return;
+          }
+          else
+              playMakeIntention.restart();
+          //Vector2D ballVel = wm->ball->vel;
           double nearest[10] = {};
           for(int i = 0; i < ourPlayers.size(); i++)
               nearest[ourPlayers[i]] = CSkillKick::kickTimeEstimation(knowledge->getAgent(ourPlayers[i]), wm->field->oppGoal());
-          if(lastPlayMake >= 0)
+          if(lastPlayMake >= 0 && lastPlayMake <= 9)
               nearest[lastPlayMake] -= 0.2;
           double minT = 1e8;
           for(int i = 0; i < ourPlayers.size(); i++)
@@ -1281,12 +1304,11 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
                   playmakeId = ourPlayers[i];
               }
           }
-
           for(int i = 0; i < ourPlayers.size(); i++)
-              debug(QString("timeneeded of %3 is : %4 \n").arg(ourPlayers[i]).arg(nearest[ourPlayers[i]]), D_PARSA);
+              debug(QString("timeneeded of %1 is : %2 \n").arg(ourPlayers[i]).arg(nearest[ourPlayers[i]]), D_PARSA);
           lastPlayMake = playmakeId;
       }
-
+      debug(QString("playmake is : %1").arg(playmakeId), D_PARSA);
 }
 
 void CCoach::decideAttack()
@@ -1455,11 +1477,12 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
 
     if(wm->our[playmakeId] != NULL)
     {
-        bool goodForKick = findMostPossible(wm->our[playmakeId]->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr);
+        bool goodForKick = ((wm->ball->pos.dist(wm->field->oppGoal()) < 1.5) || (findMostPossible(wm->our[playmakeId]->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr)));
         if(goodForKick)
         {
             dynamicAttack->setDirectShot(true);
-            shotToGoalthr = policy()->DynamicPlay_DirectTrsh() - 0.2;
+            if((findMostPossible(wm->our[playmakeId]->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr)))
+                shotToGoalthr = policy()->DynamicPlay_DirectTrsh() - 0.2;
         } else {
             dynamicAttack->setDirectShot(false);
             shotToGoalthr = 0;
@@ -2412,8 +2435,6 @@ void CCoach::decideTheirBallPlacement(QList<int> &_ourPlayers) {
 }
 
 void CCoach::decideHalfTimeLineUp(QList<int> &_ourPlayers) {
-    qDebug()<<"half time /line up";
-
     selectedPlay = halfTimeLineup;
 }
 
@@ -2466,7 +2487,7 @@ QList<SPlan*> CCoach::getMatchedPlans(int _shotSpot, const QList<SPlan*>& _plans
         Vector2D& tempBall = plan->matching.initPos.ball;
         ShotSpot tempSpot  = getShotSpot(tempBall, tempPos);
 
-        if (_shotSpot & tempSpot) {
+        if (_shotSpot & tempSpot || 1) {
             tempPlans.append(plan);
         }
 

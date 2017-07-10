@@ -456,15 +456,23 @@ void CAgent::accelerationLimiter(double vf,bool diveMode)
     double lastV,commandV;
     double vCoef = 1;
     double tempVf = vforward , tempVn = vnormal;
-    double decCoef = 2;
+    double decCoef = 1;
 
     if(vf == 0)
         decCoef = 2.5;
-///////////////////////first Stage Acc with true angle
+    ///////////////////////first Stage Acc with true angle
 
-     double accCoef =1,realAcc = 4;
-     accCoef = atan(fabs(vforward)/fabs(vnormal))/_PI*2;
-     realAcc = accCoef*conf()->BangBang_AccMaxForward() + (1-accCoef)*conf()->BangBang_AccMaxNormal();
+    double accCoef =1,realAcc = 4;
+    accCoef = atan(fabs(vforward)/fabs(vnormal))/_PI*2;
+    if(diveMode)
+    {
+        realAcc = 10 * accCoef*conf()->BangBang_AccMaxForward() + (1-accCoef)*conf()->BangBang_AccMaxNormal();
+    }
+    else
+    {
+        realAcc = accCoef*conf()->BangBang_AccMaxForward() + (1-accCoef)*conf()->BangBang_AccMaxNormal();
+
+    }
 
 
 #if 1
@@ -480,30 +488,32 @@ void CAgent::accelerationLimiter(double vf,bool diveMode)
 
 #endif
 
-/////////////////Second order acc limit for trajectory planning
-    if(vforward >= 0 )
+    /////////////////Second order acc limit for trajectory planning
+    if(!diveMode)
     {
-        if(vforward > (lastVf + conf()->BangBang_AccMaxForward()* 0.0166667))
+        if(vforward >= 0 )
         {
-            vforward = lastVf + (conf()->BangBang_AccMaxForward()* 0.0166667)*sign(vforward);
+            if(vforward > (lastVf + conf()->BangBang_AccMaxForward()* 0.0166667))
+            {
+                vforward = lastVf + (conf()->BangBang_AccMaxForward()* 0.0166667)*sign(vforward);
+            }
+            if(vforward < (lastVf - decCoef*conf()->BangBang_DecMax()* 0.0166667))
+            {
+                vforward = lastVf - (decCoef*conf()->BangBang_DecMax()* 0.0166667);
+            }
         }
-        if(vforward < (lastVf - decCoef*conf()->BangBang_DecMax()* 0.0166667))
+        else
         {
-            vforward = lastVf - (decCoef*conf()->BangBang_DecMax()* 0.0166667);
+            if(vforward < (lastVf - conf()->BangBang_AccMaxForward()* 0.0166667))
+            {
+                vforward = lastVf - (conf()->BangBang_AccMaxForward()* 0.0166667);
+            }
+            if(vforward > (lastVf + decCoef*conf()->BangBang_DecMax()* 0.0166667))
+            {
+                vforward = lastVf + (decCoef*conf()->BangBang_DecMax()* 0.0166667);
+            }
         }
     }
-    else
-    {
-        if(vforward < (lastVf - conf()->BangBang_AccMaxForward()* 0.0166667))
-        {
-            vforward = lastVf - (conf()->BangBang_AccMaxForward()* 0.0166667);
-        }
-        if(vforward > (lastVf + decCoef*conf()->BangBang_DecMax()* 0.0166667))
-        {
-            vforward = lastVf + (decCoef*conf()->BangBang_DecMax()* 0.0166667);
-        }
-    }
-
     debug(QString("vn: %1 , lVn :%2").arg(vnormal).arg(lastVn),D_MHMMD);
     if(vnormal >= 0)
     {
@@ -552,9 +562,9 @@ void CAgent::accelerationLimiter(double vf,bool diveMode)
 
 
     if(vforward - lastVf < - 1)
-        {
-            vforward = lastVf - 0.085;
-        }
+    {
+        vforward = lastVf - 0.085;
+    }
 
 
     lastVf = vforward;

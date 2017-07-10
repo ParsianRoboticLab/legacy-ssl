@@ -1101,8 +1101,9 @@ void CSkillGotoPointAvoid::execute()
         alpha = fabs(Vector2D::angleBetween(result[1] - result[0] , result[2] - result[1]).degree());
         debug(QString("alpha : %1").arg(alpha),D_MHMMD);
         lllll = result[1];
-        vf = -1.0259280143 * log(alpha) + 5.570475303;
+        vf = -2 * log(alpha) + 8;
         vf = max(vf , 0.5);
+        vf = min (vf,4);
     }
     else
     {
@@ -1139,7 +1140,7 @@ void CSkillGotoPointAvoid::execute()
     bangBang->setSmooth(true);// = false;
     bangBang->bangBangSpeed(agentPos,agentVel,agent->dir(),lllll,targetDir,vf,0.016,dVx,dVy,dW);
     agent->setRobotAbsVel(dVx + addVel.x,dVy + addVel.y,dW);
-    agent->accelerationLimiter(vf,diveMode||oneTouchMode);
+    agent->accelerationLimiter(vf,false);
 
 
 
@@ -1187,8 +1188,8 @@ double CSkillGotoPointAvoid::timeNeeded(CAgent *_agentT,Vector2D posT,double vMa
     Vector2D tAgentDir = _agentT->dir();
     double veltan= (tAgentVel.x)*cos(tAgentDir.th().radian()) + (tAgentVel.y)*sin(tAgentDir.th().radian());
     double offset = 0.15;
-    double velnorm= -1*(tAgentVel.x)*sin(tAgentDir.th().radian()) + (tAgentVel.y)*cos(tAgentDir.th().radian());
-    double distCoef = 1,distEffect = 1,angCoef = 0.003;
+    double velnorm= -1 * (tAgentVel.x)*sin(tAgentDir.th().radian()) + (tAgentVel.y)*cos(tAgentDir.th().radian());
+    double distCoef = 1, distEffect = 1, angCoef = 0.003;
     double dist = 0;
     double rrtAngSum = 0;
     QList <Vector2D> _result;
@@ -1202,18 +1203,18 @@ double CSkillGotoPointAvoid::timeNeeded(CAgent *_agentT,Vector2D posT,double vMa
     {
         _agentT->initPlanner(_agentT->id(),posT,_ourRelax,_oppRelax,avoidPenalty,false,ballObstacleReduce);
         _result.clear();
-        for( int i=_agentT->pathPlannerResult.size()-1 ; i>=0 ; i-- )
+        for( int i = _agentT->pathPlannerResult.size()-1 ; i>=0 ; i-- )
         {
             _result.append(_agentT->pathPlannerResult[i]);
         }
     }
 
-    if( _result.size() >= 3){
-        for(int i = 0 ; i < _result.size() - 1  ; i++)
+    if( _result.size() >= 3) {
+        for(int i = 0 ; i < _result.size() - 1; i++)
         {
             dist += _result[i].dist(_result[i+1]);
         }
-        for(int i = 1 ; i < _result.size() - 1  ; i++)
+        for(int i = 1 ; i < _result.size() - 1; i++)
         {
             rrtAngSum += fabs(Vector2D::angleBetween(_result[i] - _result[i-1] , _result[i+1] - _result[i]).degree());
         }
@@ -1221,7 +1222,6 @@ double CSkillGotoPointAvoid::timeNeeded(CAgent *_agentT,Vector2D posT,double vMa
         distEffect += rrtAngSum*angCoef;
         distEffect = max(1,distEffect);
     }
-
 
     if(tAgentVel.length() < 0.2)
     {
@@ -1232,9 +1232,9 @@ double CSkillGotoPointAvoid::timeNeeded(CAgent *_agentT,Vector2D posT,double vMa
         acc = conf()->BangBang_AccMaxForward()*(fabs(veltan)/tAgentVel.length()) + conf()->BangBang_AccMaxNormal()*(fabs(velnorm)/tAgentVel.length());
     }
 
-    double vMaxReal = sqrt(((_agentT->pos().dist(posT)  + (tAgentVel.length()*tAgentVel.length()/2*acc))*2*acc*dec)/(acc+dec));
-    vMaxReal = min(vMaxReal,4);
-    vMax = min(vMax,vMaxReal);
+    double vMaxReal = sqrt(((_agentT->pos().dist(posT) + (tAgentVel.length()*tAgentVel.length()/2*acc))*2*acc*dec)/(acc+dec));
+    vMaxReal = min(vMaxReal, 4);
+    vMax = min(vMax, vMaxReal);
     xSat = ((vMax*vMax)-(tAgentVel.length()*tAgentVel.length()))/acc + (vMax*vMax)/dec;
     _x3 = ( -1* tAgentVel.length()*tAgentVel.length()) / (-2 * fabs(conf()->BangBang_DecMax())) ;
 
@@ -1244,17 +1244,16 @@ double CSkillGotoPointAvoid::timeNeeded(CAgent *_agentT,Vector2D posT,double vMa
     else if(tAgentVel.length() < (vMax)){
         if(_agentT->pos().dist(posT) < xSat)
         {
-            return max(0,(-1*offset + vMax/dec + (vMax-tAgentVel.length())/acc + (_agentT->pos().dist(posT) - ((vMax*vMax/(2*dec)) + ((vMax+tAgentVel.length())*(vMax-tAgentVel.length())/acc))/2)/vMax) * distEffect);
+            return max(0, (-1*offset + vMax/dec + (vMax-tAgentVel.length())/acc + (_agentT->pos().dist(posT) - ((vMax*vMax/(2*dec)) + ((vMax+tAgentVel.length())*(vMax-tAgentVel.length())/acc))/2)/vMax) * distEffect);
         }
         else
         {
-            return max(0,(vMax/dec + (vMax-tAgentVel.length())/acc - offset)*distEffect);
+            return max(0, (vMax/dec + (vMax-tAgentVel.length())/acc - offset)*distEffect);
         }
     }
     else
     {
         return max(0,(vMax/dec + (_agentT->pos().dist(posT) - ((vMax*vMax/(2*dec)) ))/vMax - offset) * distEffect);
-
     }
 
 }
