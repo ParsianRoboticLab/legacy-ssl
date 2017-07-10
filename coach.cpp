@@ -367,12 +367,14 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
             } else if (agentsCount == 2) {
                 preferedDefenseCounts = 1; // one playmake and one defense
             } else {
-                if (oppsAttack) {
-                    preferedDefenseCounts = 2;
-                } else {
+                if (!oppsAttack || checkOverdef()) {
                     preferedDefenseCounts = 1;
+                } else {
+                    preferedDefenseCounts = 2;
                 }
             }
+
+
 
         } else if( knowledge->isOurNonPlayOnKick()){
             preferedDefenseCounts = 0;
@@ -393,7 +395,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         else if(!knowledge->isStop())
         {
             if(checkOverdef()){
-            preferedDefenseCounts = 1;
+                preferedDefenseCounts = 1;
             }
             else{
                 preferedDefenseCounts = 2;
@@ -401,14 +403,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
 
         }
     }
-    if(knowledge->isStart() && !knowledge->transientFlag && !policy()->Formation_StrictFormation()){
-        if(checkOverdef()){
-        preferedDefenseCounts = 1;
-        }
-        else{
-            preferedDefenseCounts = 2;
-        }
-    }
+
     if(knowledge->isOurNonPlayOnKick() && wm->ball->pos.x < -0.5){
         preferedDefenseCounts = 2;
     }
@@ -656,12 +651,12 @@ CKnowledge::ballPossesionState CCoach::isBallOurs()
     ////////////      ///////////
     ////////////      ///////////
     //// NEW BALL POSSESSION ////
+    double temp = wm->ball->pos.x + wm->ball->vel.x * 0.5;
 
-
-    if(wm->ball->pos.x > 0.5) {
+    if(temp > 0.5) {
         decidePState = CKnowledge::WEHAVETHEBALL;
 
-    } else if (wm->ball->pos.x < 0.1){
+    } else if (temp < 0.1){
         decidePState = CKnowledge::WEDONTHAVETHEBALL;
     } else {
         decidePState = lastBallPossesionState;
@@ -1504,16 +1499,14 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     if(ballPState == CKnowledge::WEHAVETHEBALL) {
         MarkNum = 0;
     } else if(ballPState == CKnowledge::WEDONTHAVETHEBALL) {
-        if(overdef == true){
-            MarkNum = 3;
-        }
-        else{
-            MarkNum = 2;
-        }
+        MarkNum = (overdef) ? 3 : 2;
+
     } else if(ballPState == CKnowledge::SOSOOUR) {
         MarkNum = 1;
+
     } else if(ballPState == CKnowledge::SOSOTHEIR) {
         MarkNum = 1;
+
     }
 
     selectedPlay->markAgents.clear();
