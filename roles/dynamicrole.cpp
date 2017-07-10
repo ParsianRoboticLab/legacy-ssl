@@ -26,6 +26,14 @@ void CRoleDynamic::update() {
    updated = false;
 
    switch(selectedSkill) {
+   case DynamicEnums::Dribble:
+       dribbleSkill->setAgent(agent);
+       dribbleSkill->setTarget(targetDir);
+       dribbleSkill->setInitialLook(target);
+       dribbleSkill->setChip(chip);
+       dribbleSkill->setDoPass(true);
+       dribbleSkill->setKickSpeed(kickSpeed);
+       break;
    case DynamicEnums::Ready:
        receiveSkill->setAgent(agent);
        receiveSkill->setTarget(target);

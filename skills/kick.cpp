@@ -1365,6 +1365,7 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
     Vector2D s1,s2;
     Segment2D ballPath(wm->ball->pos,wm->ball->pos + wm->ball->vel.norm()*10);
     Circle2D robotAreaNear (_agent->pos(),0.1);
+
     if(wm->ball->vel.length() > 0.2)
     {
         for(double i = 0 ; i < 3 ; i += 0.03)
@@ -1373,6 +1374,8 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
             finalPos = ballPosInFuture - (_target-ballPosInFuture).norm()*0.11;
             if(CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,true)<= i+0.1)
             {
+                double t = _agent->id();
+                debug(QString("pos of %1 is : %2 %3").arg(t).arg(finalPos.x).arg(finalPos.y), D_PARSA);
                 draw(finalPos);
                 return i;
             }
