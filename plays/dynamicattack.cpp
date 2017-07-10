@@ -380,6 +380,8 @@ void CDynamicAttack::playMake() {
     roleAgentPM->setAgentID(mahiAgentsID[0]);
     roleAgentPM->setAvoidPenaltyArea(true);
 
+    bool flagT = false;
+
     switch(currentPlan.playmake.skill) {
     case DynamicEnums::Pass:
         roleAgentPM -> setChip(chipOrNot(currentPlan.passPos, 0.5, 0.1));
@@ -390,6 +392,7 @@ void CDynamicAttack::playMake() {
         } else {
             roleAgentPM->setKickRealSpeed(appropriatePassSpeed());
         }
+
         roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
 
 /////////////////////////////// I HATE PARSA
@@ -405,6 +408,7 @@ void CDynamicAttack::playMake() {
             roleAgentPM->setNoKick(true);
         }*/
         break;
+
     case DynamicEnums::Chip:
         roleAgentPM->setNoKick(false);
         if (currentPlan.playmake.region == DynamicEnums::Goal) {

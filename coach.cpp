@@ -1426,7 +1426,7 @@ void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
         selectPlayOffMode(_ourplayers.size(), tempMode);
         initPlayOffMode(tempMode, _mode, _ourplayers);
         ourPlayOff->setMasterMode(tempMode);
-        if ( policy()->PlayOff_UseFirstPlay() ) {
+        if ( tempMode == NGameOff::FirstPlay ) {
             if (firstPlay && !firstIsFinished) {
                 firstTime = true;
 
@@ -1744,12 +1744,12 @@ void CCoach::selectPlayOffMode(int agentSize, NGameOff::EMode &_mode) {
     } else if (isFastPlay() && false) { // TODO : fastPlay should be completed!
         _mode = NGameOff::FastPlay;
 
-    } else if (!firstIsFinished && policy()->PlayOff_UseFirstPlay()) {
-        _mode = NGameOff::FirstPlay;
-
     } else if (knowledge->getGameState() == CKnowledge::OurKickOff
                ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
         _mode = NGameOff::StaticPlay;
+
+    } else if (!firstIsFinished && policy()->PlayOff_UseFirstPlay()) {
+        _mode = NGameOff::FirstPlay;
 
     } else if (wm->ball->pos.x > -1) {
         _mode = NGameOff::StaticPlay;
