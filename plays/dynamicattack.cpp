@@ -207,7 +207,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     else if(critical) {
 
         currentPlan.mode = DynamicEnums::Critical;
-        bool notDribble = true;
+        /*bool notDribble = true;
         if(wm->opp.activeAgentsCount() > 0 && wm->field->isInField(currentPlan.passPos))
         {
             for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
@@ -226,7 +226,7 @@ void CDynamicAttack::makePlan(int agentSize) {
                 }
             }
         }
-        if(notDribble == true)
+        if(notDribble == true)*/
             currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
 
         for(size_t i = 0;i < agentSize;i++) {
