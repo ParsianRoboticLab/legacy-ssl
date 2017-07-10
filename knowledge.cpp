@@ -1842,11 +1842,12 @@ Vector2D CKnowledge::goalVisiblity(int agentId, double &regionWidth, double unde
 
     if (!target.valid())
         target = wm->field->oppGoal();
+    draw(target,1,"yellow");
     draw(Circle2D(target, 0.05), 0, 360, "red", 1);
     return target;
 }
 
-Vector2D CKnowledge::getEmptyPosOnGoalForPenalty(double n, bool oppGoal){
+Vector2D CKnowledge::getEmptyPosOnGoalForPenalty(double n, bool oppGoal, double th){
 
     Vector2D target, goalieR, goalieL;
     int goalieID;
@@ -1869,7 +1870,7 @@ Vector2D CKnowledge::getEmptyPosOnGoalForPenalty(double n, bool oppGoal){
     distanceR = wm->opp[goalieID]->pos.dist(goalieR);
     distanceL = wm->opp[goalieID]->pos.dist(goalieL);
 
-    if(distanceR > distanceL && fabs(distanceL - distanceR) > 0.03) {
+    if(distanceR > distanceL && fabs(distanceL - distanceR) > th) {
         target = Vector2D(goalieR.x, goalieR.y + n*distanceR);
         draw(target, 0, QColor(Qt::black));
 //        draw(Segment2D(target, Vector2D(((goalieL+goalieR)/2).x-1, ((goalieL+goalieR)/2).y)), QColor(Qt::darkCyan));

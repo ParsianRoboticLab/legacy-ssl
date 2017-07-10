@@ -861,7 +861,7 @@ void CSoccer::refUpdate()
 
     lastCmdCnt = cmdCnt;
     refCommand = gsp.cmd;
-    qDebug() << "REF: " << referee.command();
+    qDebug() << "REF: " << referee.stage();
     qDebug() << "ref: " << refCommand;
     QFile file("./REF.dat");
     if (file.open(QIODevice::WriteOnly|QIODevice::Truncate)) {
@@ -1004,6 +1004,10 @@ void CSoccer::refUpdate()
             else if (wm->gs->halfTimeLineUp())
             {
                 wm->refCommand.enqueue("HalfTime LineUp");
+            }
+            else if (wm->gs->penalty_shootout())
+            {
+                wm->refCommand.enqueue("Penalty Shootout");
             }
 
             else

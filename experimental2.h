@@ -91,7 +91,7 @@ void CMainApplication::Experimental2()
     return;
 
 
-    knowledge->getEmptyPosOnGoalForPenalty(1.0/5.5, true);
+    knowledge->getEmptyPosOnGoalForPenalty(1.0/5.5, true, 0.03);
     return;
 
     static CSkillKick* k= new CSkillKick(knowledge->getAgent(0));

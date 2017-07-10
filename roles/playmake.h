@@ -23,6 +23,7 @@ public:
 class CRolePlayMake : public CRole
 {
 protected:
+    bool goalKeeperForward=false;
     Hyst ballTop;
     Hyst ballLeft;
     int qqHist;
@@ -43,6 +44,7 @@ protected:
     bool indirect, direct, kickoff;
     int penaltyRand;
     Vector2D penaltyTarget;
+    bool firstKick=true;
     int penaltyCounter;
     //decision making
     QList<int> oppBlockers;
@@ -88,12 +90,18 @@ public:
     void executeOurIndirect();
     void executeOurKickOff();
     void executeOurPenalty();
+    void executeOurPenaltyShootout();
+    int choosePenaltyStrategy();
+    int getPenaltychipSpeed();
+    double lastBounce();
+    bool ShootPenalty();
     void executeDefault();
     void resetOffPlays();
     void resetPlayMake();
     bool canScoreGoal();
     void kickPass( int kickSpeed );
     enum KickPassMode{KickPassFirst , KickPassSecond};
+    enum penaltyStrategy{pgoaheadShoot , pchipShoot , pshootDirect};
 
     KickPassMode kickPassMode;
     int kickPassCyclesWait;

@@ -225,7 +225,7 @@ void CCoach::checkTransitionToForceStart(){
             cyclesWaitAfterballMoved++;
         }
     }
-    ///////////////////////////////////// f**d up by DON
+    ///////////////////////////////////// by DON
     if (knowledge->isOurNonPlayOnKick())
     {
         //transition to game on
@@ -422,6 +422,8 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         preferedDefenseCounts = 0;
     }
 
+    if (wm->gs->penalty_shootout())
+        preferedDefenseCounts = 0;
 
 }
 
@@ -1380,6 +1382,7 @@ void CCoach::decideAttack()
             decideTheirKickOff(ourPlayers);
             break;
         case CKnowledge::OurPenaltyKick:
+
             decideOurPenalty(ourPlayers);
             break;
         case CKnowledge::TheirPenaltyKick:
@@ -1398,7 +1401,6 @@ void CCoach::decideAttack()
         break;
     case CKnowledge::HalfTimeLineUp:
         decideHalfTimeLineUp(ourPlayers);
-
         break;
     default:
         decideNull(ourPlayers);
@@ -2430,6 +2432,7 @@ void CCoach::decideTheirBallPlacement(QList<int> &_ourPlayers) {
 void CCoach::decideHalfTimeLineUp(QList<int> &_ourPlayers) {
     selectedPlay = halfTimeLineup;
 }
+
 
 void CCoach::decideNull(QList<int> &_ourPlayers) {
     selectedPlay->markAgents.clear();

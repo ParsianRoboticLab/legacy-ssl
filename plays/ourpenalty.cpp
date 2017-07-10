@@ -27,7 +27,9 @@ void COurPenalty::init(QList<int> _agents , QMap<QString , EditData*> *_editData
 
 void COurPenalty::penaltyKick(){
     executedCycles++;
-
+    if (wm->gs->penalty_shootout()) {
+        playOnFlag = false;
+    }
     choosePlayMaker();
 
     appendRemainingsAgents(positionAgents);
