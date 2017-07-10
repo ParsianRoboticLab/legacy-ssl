@@ -1172,7 +1172,6 @@ void CCoach::updateAttackState()
     robotCritArea.addVertex(ourNearestAgent->pos() + ourNearestAgent->dir().norm() * critLenth + ourNearestAgent->dir().norm().rotate(-90)* critLenth);
     draw(robotCritArea,QColor(Qt::cyan));
 
-
     if(oppNearestPath.nearestPoint(wm->ball->pos).dist(wm->ball->pos) >= safeRegion) {
         ourAttackState = SAFE;
         debug(QString("Attack: safe"),D_MHMMD);
