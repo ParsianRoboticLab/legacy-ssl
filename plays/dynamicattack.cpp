@@ -248,7 +248,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     else {
 
         currentPlan.mode = DynamicEnums::NoPlanExeption;
-        currentPlan.playmake.init(DynamicEnums::shot, DynamicEnums::Goal);
+        currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Best;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;

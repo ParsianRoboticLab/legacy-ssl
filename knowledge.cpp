@@ -128,7 +128,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
             for(int k=0; k<81; k++)
                 ProfilerResult[i][j][k] = -1000;
 
-    refRobotID = 0;
+    refRobotID = 6;
 
     // initialize robotCoeff
     for(int i=0; i< 16; i++)
@@ -158,7 +158,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
     //    RobotsCoeff[7][0] = 800;
 
 
-    profiler->load(JSON, "Chip_2_5.json");
+    profiler->load(JSON, "MRLProfiler_2_6.json");
 
     //    ProfilerResult[robotID][0:kick , 1:chip , 2:SpinKick , 3:SpinChip][10*distance(0-80)] ---> contains needed voltage for this distance
 
@@ -261,10 +261,6 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
 
     double profiledParameter=0;
     int type;
-
-    if(wm->getIsSimulMode()){
-        return (int)realParameter;
-    }
 
     if(isKick && !spinOn)
     {

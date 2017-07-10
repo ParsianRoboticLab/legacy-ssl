@@ -311,8 +311,8 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
                 }
                 markAngs.append(opponentAgentsToBeMarkPossition.at(i) - wm->field->ourGoal());
                 markRoles.append(QString("shotBlocker"));
-            }
-            for(i = 0 ; i < ourMarkAgentsSize - markPoses.size()  ; i++){
+            }            
+            for(i = 0 ; i < ourMarkAgentsSize - markPoses.size() ; i++){
                 if(i % 2){
                     markPoses.append(Vector2D(0 , i / 1.5));
                     markAngs.append(Vector2D(0,0));
@@ -324,6 +324,8 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
                     markRoles.append(QString("shotBlocker"));
                 }
             }
+            debug(QString("mark pos : %1").arg(markPoses.size()) , D_AHZ);
+            debug(QString("our mark : %1").arg(ourMarkAgentsSize) , D_AHZ);
         }
         else{
             for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
@@ -451,6 +453,20 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
                         markAngs.append(opponentAgentsCircle.at(i).center() - wm->field->ourGoal());
                         markRoles.append(QString("shotBlocker"));
                     }
+                }
+            }
+        }
+        if(ourMarkAgentsSize > markPoses.size()){
+            for(i = 0 ; i < ourMarkAgentsSize - markPoses.size() ; i++){
+                if(i % 2){
+                    markPoses.append(Vector2D(0 , (i+1) / 0.75));
+                    markAngs.append(Vector2D(0,0));
+                    markRoles.append(QString("shotBlocker"));
+                }
+                else{
+                    markPoses.append(Vector2D(0,(-i-1)  / 0.75));
+                    markAngs.append(Vector2D(0,0));
+                    markRoles.append(QString("shotBlocker"));
                 }
             }
         }
@@ -1246,6 +1262,7 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     ourAgents.append(defenseAgents);
     if(defExceptions.active){        
         if(defExceptions.exepAgentId != -1){
+            debug("darim" , D_AHZ);
             debug(QString("id : %1 ").arg(defExceptions.exepAgentId) , D_AHZ);
             ourAgents.removeOne(knowledge->getAgent(defExceptions.exepAgentId));
         }
@@ -2420,7 +2437,8 @@ int DefensePlan::decideNumOfMarks(){
 //                return defenseCount - 2;
 //            }
 //        }
-         if(playOff){
+
+        if(playOff){
             return decideNumOfMarksInPlayOff(defenseCount);
         }
         else if(knowledge->transientFlag){
