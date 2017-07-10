@@ -35,11 +35,11 @@ protected:
 #endif
     bool isItPossibleToClear;
     int upper_player;
-    double catch_time;
+    double catch_time;    
     CSkillGotoPoint* gps[_MAX_NUM_PLAYERS];
     CSkillGotoPointAvoid *gpa[_MAX_NUM_PLAYERS];
-    CSkillKick* kickSkill;
-    CSkillTurn turn;
+    CSkillKick* kickSkill;    
+    CSkill* AHZSkills;
     CDefPos defPos;
     Vector2D pointForKick, oneToucherDir;
     Vector2D topGoal, downGoal, midGoal, ballVel;
@@ -52,8 +52,7 @@ protected:
     bool noDefenseNoGoalie();
     bool isInThePenaltyArea(Vector2D _posofsth);
     void setPointToKick();
-    void checkGoalieTarget();
-    Vector2D getIntersectionWithPenaltyAreaGk(Segment2D _seg);
+    void checkGoalieTarget();    
     void setGoalKeeperState();
     void setGoalKeeperTargetPoint();
     bool ballBehindGoalie, goalieOneTouch, goalieInPenaltyAreaPrediction, goalieClearMode, goalieStrictFollow, goalieFollow, ballIsOutOfField;
@@ -89,6 +88,8 @@ protected:
     bool dangerForGoalieClearByOppAgents;
     bool dangerForInsideOfThePenaltyArea;
     bool stopMode;
+    bool playOffMode;
+    bool playOnMode;
     bool dangerModeThresholdForClear;
     bool dangerModeThresholdForDanger;
     bool changeInMarkPlanFlag;
@@ -176,7 +177,8 @@ private:
     void findPos(int _markAgentSize);
     void findOppAgentsToMark();   
     bool isInTheIndirectAreaShoot(Vector2D);
-    bool isInTheIndirectAreaPass(Vector2D);    
+    bool isInTheIndirectAreaPass(Vector2D);
+    bool checkOverdef();
     QList<Vector2D> ShootBlockRatio(double, Vector2D);
     QList<Vector2D> PassBlockRatio(double,Vector2D);
     QList<Vector2D> indirectAvoidShoot(Vector2D);

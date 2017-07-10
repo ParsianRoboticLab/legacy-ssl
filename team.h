@@ -3,6 +3,7 @@
 #include "base.h"
 #include "robot.h"
 
+
 struct CTeamData
 {
     CRobot* teamMembers[_MAX_NUM_PLAYERS];
