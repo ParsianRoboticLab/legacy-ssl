@@ -25,10 +25,18 @@ void MixTeamReader::readyRead()
 
     socket->readDatagram(buffer.data(), buffer.size(), &sender, &senderPort);
 
-    multi_team_comm::TeamPlan tp;
-    if( !tp.ParseFromArray(buffer, buffer.size())){
+//    multi_team_comm::TeamPlan tp;
+
+    if(knowledge->kPlans != NULL)
+        delete knowledge->kPlans;
+    knowledge->kPlans = new multi_team_comm::TeamPlan();
+    if( !knowledge->kPlans->ParseFromArray(buffer, buffer.size())){
         qDebug() << "ERROR";
         return;
     }
-    qDebug() << "plan size:" << tp.plans_size();
+    qDebug() << "plan size:" << knowledge->kPlans->plans_size();
+
+    knowledge->ssize = knowledge->kPlans->plans_size();
+    knowledge->ready = true;
+
 }

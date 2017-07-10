@@ -2,7 +2,8 @@
 #define MIXTEAMCHALLENGE_H
 
 #include <mainapplication.h>
-#include <mixteamhandler.h>
+#include "mixteamhandler.h"
+#include "mixteamreader.h"
 
 void CMainApplication::MixTeamChallenge()
 {
@@ -12,6 +13,8 @@ void CMainApplication::MixTeamChallenge()
 
     CMixTeamHandler *slv = new CMixTeamHandler();
     slv->slave();
+    qDebug() << "****" << knowledge->ssize;
+
 }
 
 #endif // MIXTEAMCHALLENGE_H

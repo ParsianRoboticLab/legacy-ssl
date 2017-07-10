@@ -9,7 +9,7 @@ MixTeamSender::MixTeamSender(QObject *parent) :
     flag = false;
 
     timer = new QTimer();
-    timer->start(2000);
+    timer->start(1000);
     connect(timer, SIGNAL(timeout()), this, SLOT(sendData()));
 }
 

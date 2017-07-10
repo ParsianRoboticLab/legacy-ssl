@@ -5,6 +5,9 @@
 #include <proto/multi_team_communication.pb.h>
 #include <QUdpSocket>
 #include <varswidget.h>
+#include <knowledge.h>
+
+
 
 class MixTeamReader : public QObject
 {

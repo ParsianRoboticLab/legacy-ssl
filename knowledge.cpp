@@ -20,6 +20,8 @@ CKnowledge *knowledge;
 
 CKnowledge::CKnowledge(CAgent** _agents)
 {
+    kPlans = NULL;
+    ssize = 0;
 
     //ABBAS
     refShortcuts = false;
