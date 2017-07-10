@@ -137,10 +137,10 @@ void CPlayOff::staticExecute() {
 void CPlayOff::dynamicExecute() {
 
 
-    if (dynamicSelect == CHIP || true) {
+    if (dynamicSelect == CHIP && false) {
         dynamicPlayChipToGoal();
         checkEndChipToGoal();
-    } else if (dynamicSelect == KHAFAN) {
+    } else if (dynamicSelect == KHAFAN || 1) {
         dynamicPlayKhafan();
         checkEndKhafan();
     } else if (dynamicSelect == BLOCKER) {
@@ -257,7 +257,7 @@ void CPlayOff::dynamicPlayKhafan() {
         roleAgent[0] -> setAvoidCenterCircle(false);
         roleAgent[0] -> setAvoidPenaltyArea(true);
         roleAgent[0] -> setChip(true);
-        roleAgent[0] -> setKickRealSpeed(policy()->DynamicPlay_LowSpeedChip()); // Vartypes This
+        roleAgent[0] -> setKickSpeed(700); // Vartypes This
         roleAgent[0] -> setTarget(wm->field->oppGoal());
         roleAgent[0] -> setDoPass(false);
         roleAgent[0] -> setIntercept(false);
@@ -344,7 +344,7 @@ void CPlayOff::checkEndKhafan() {
             dynamicState = 0;
         }
 
-        if (knowledge->getCurrentTime() - dynamicStartTime > 100 && dynamicStartTime != -1) {
+        if ((knowledge->getCurrentTime() - dynamicStartTime) > 300 && dynamicStartTime != -1) {
             playOnFlag = true;
             dynamicState = 0;
 
@@ -441,7 +441,7 @@ void CPlayOff::checkEndChipToGoal() {
 }
 
 Vector2D CPlayOff::getDynamicTarget(int i) {
-    Vector2D first = wm->ball->pos+(wm->field->oppGoal() - wm->ball->pos).norm()*0.7;
+    Vector2D first = wm->ball->pos+(wm->field->oppGoal() - wm->ball->pos).norm()*3;
     first.y += 0.3;
 
     switch (i) {
@@ -840,7 +840,7 @@ bool CPlayOff::isTimeOver() {
     if (!Circle2D(lastBallPos, 0.5).contains(wm->ball->pos)) {
         setTimer = false;
         debug(QString("Time That Left: %1").arg(knowledge->getCurrentTime() - tempStart), D_DEBUG);
-        if(knowledge->getCurrentTime() - tempStart > 200) { // 2 Second
+        if(knowledge->getCurrentTime() - tempStart > 250) { // 2 Second
             setTimer = true;
             return true;
         }

@@ -422,6 +422,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         preferedDefenseCounts = 0;
     }
 
+
 }
 
 void CCoach::calcDesiredMarkCounts()
