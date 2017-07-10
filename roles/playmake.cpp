@@ -942,7 +942,7 @@ bool CRolePlayMake::ShootPenalty(){
     relax.append(agent->id());
     penaltyTarget = knowledge->getEmptyPosOnGoal(agent->pos(), w, true, relax, empty);
     if(penaltyTarget.dist(wm->field->oppGoal()) < 0.1){
-        penaltyTarget=knowledge->getEmptyPosOnGoalForPenalty(1.0/10.0, true);
+        penaltyTarget=knowledge->getEmptyPosOnGoalForPenalty(1.0/10.0, true, 0.06);
 
     }
     if(Segment2D(agent->pos(),penaltyTarget).dist(wm->opp.active(knowledge->oppGoalieIndex)->pos)
@@ -973,8 +973,8 @@ int CRolePlayMake::getPenaltychipSpeed(){
 
 int CRolePlayMake::choosePenaltyStrategy(){
         if(!goalKeeperForward) return pgoaheadShoot;
-        else if(ShootPenalty()) return pshootDirect;
-        else if(getPenaltychipSpeed()!= -1) return pchipShoot;
+        else if(ShootPenalty()) return pshootDirect;/*
+        else if(getPenaltychipSpeed()!= -1) return pchipShoot;*/
         else return pgoaheadShoot;
 }
 
@@ -1012,23 +1012,29 @@ void CRolePlayMake::executeOurPenaltyShootout(){
             firstKick=false;
 
         if(firstKick){
-            penaltyTarget=wm->field->oppGoalL()+2*Vector2D(0,wm->field->oppGoalL().y);;
+            penaltyTarget=wm->field->oppGoalL()+4*Vector2D(0,wm->field->oppGoalL().y);;
             kick->setTarget(penaltyTarget);
 
             if(flag){//chip first
-                kick->setKickSpeed(3);
+                if(wm->getIsSimulMode())
+                    kick->setKickSpeed(4);
+                else
+                    kick->setKickSpeed(400);
                 kick->setChip(true);
                 if(wm->ball->vel.length()>0.1)
                     firstKick=false;
             }else{//kick first
 
-                debug("not first : ",D_NADIA);
+                debug("first : ",D_NADIA);
                 //                if((int)random()%2==0)
                 //                    penaltyTarget=wm->field->oppGoalL()+Vector2D(0,wm->field->oppGoalL().y);
                 //                else
                 //                kick->setPenaltyKick(true);
                 kick->setChip(false);
-                kick->setKickSpeed(2);
+                if(wm->getIsSimulMode())
+                    kick->setKickSpeed(2);
+                else
+                    kick->setKickSpeed(150);
                 if(wm->ball->vel.length()>0.1)
                     firstKick=false;
             }
@@ -1036,7 +1042,10 @@ void CRolePlayMake::executeOurPenaltyShootout(){
         else{
             if(wm->ball->vel.length()<0.1)
                 firstKick=true;
-            kick->setKickSpeed(7);
+            if(wm->getIsSimulMode())
+                kick->setKickSpeed(7);
+            else
+                kick->setKickSpeed(1023);
             kick->setChip(false);
 
             switch(choosePenaltyStrategy()){
@@ -1048,13 +1057,22 @@ void CRolePlayMake::executeOurPenaltyShootout(){
 
             case pgoaheadShoot:
                 debug("pgoahead : ",D_NADIA);
-                if(abs(agent->pos().x)<2){
+                if(abs(agent->pos().x)<1.5){
                     kick->setTarget(wm->field->oppGoal());
                     kick->setKickSpeed(0);
                 }
                 else{
 //                    penaltyTarget = knowledge->goalVisiblity(agent->id(), w, 1.0);
-                    penaltyTarget=knowledge->getEmptyPosOnGoalForPenalty(1.0/20,true);
+                    if(wm->opp.active(knowledge->oppGoalieIndex)->pos.y>0)
+                        penaltyTarget=wm->field->oppGoalL();
+                    else
+                        penaltyTarget=wm->field->oppGoalR();
+//                    penaltyTarget=knowledge->getEmptyPosOnGoalForPenalty(1.0/20,true, 0.06);
+                    if(wm->getIsSimulMode())
+                        kick->setKickSpeed(7);
+                    else
+                        kick->setKickSpeed(1023);
+                    kick->setDontKick(false);
                     kick->setTarget(penaltyTarget);
                 }
                 //                }
@@ -1096,13 +1114,13 @@ void CRolePlayMake::executeOurPenalty()
         cyclesExecuted--;
         srand(time(NULL));
         stopBehindBall(true);
-        penaltyTarget = knowledge->getEmptyPosOnGoalForPenalty(1.0/8.0, true);
+        penaltyTarget = knowledge->getEmptyPosOnGoalForPenalty(1.0/8.0, true, 0.03);
 
         changeDirPenaltyStrikerTime.restart();
         timerStartFlag = true;
     }
     else {
-        penaltyTarget = knowledge->getEmptyPosOnGoalForPenalty(1.0/8.0, true);   //////// tune
+        penaltyTarget = knowledge->getEmptyPosOnGoalForPenalty(1.0/8.0, true, 0.03);   //////// tune
         agent->setRoller(1);
 
         ////////////// change robot direction before kicking //////////////
