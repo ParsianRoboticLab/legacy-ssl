@@ -17,6 +17,8 @@ public:
 private:
     void reset();
     void lineUpAllAgents();
+    int locatedRobots=0;
+    bool haltRobots=false;
     QList<CSkillGotoPointAvoid *> lineup;
     CSkillGotoPointAvoid * lineupAgent;
     QList<CAgent *> agents;

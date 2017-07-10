@@ -942,12 +942,7 @@ bool CRolePlayMake::ShootPenalty(){
     relax.append(agent->id());
     penaltyTarget = knowledge->getEmptyPosOnGoal(agent->pos(), w, true, relax, empty);
     if(penaltyTarget.dist(wm->field->oppGoal()) < 0.1){
-        if(wm->opp.active(knowledge->oppGoalieIndex)->pos.y>0){
-            penaltyTarget=wm->field->oppGoalL()+ Vector2D(0,0.05);
-        }
-        else{
-            penaltyTarget=wm->field->oppGoalR() - Vector2D(0,0.05);
-        }
+        penaltyTarget=knowledge->getEmptyPosOnGoalForPenalty(1.0/10.0, true);
 
     }
     if(Segment2D(agent->pos(),penaltyTarget).dist(wm->opp.active(knowledge->oppGoalieIndex)->pos)
@@ -1013,6 +1008,9 @@ void CRolePlayMake::executeOurPenaltyShootout(){
         kick->setWaitFrames(0);
         kick->setTolerance(3);
 
+        if(ShootPenalty())
+            firstKick=false;
+
         if(firstKick){
             penaltyTarget=wm->field->oppGoalL()+2*Vector2D(0,wm->field->oppGoalL().y);;
             kick->setTarget(penaltyTarget);
@@ -1024,7 +1022,7 @@ void CRolePlayMake::executeOurPenaltyShootout(){
                     firstKick=false;
             }else{//kick first
 
-                debug("first : ",D_NADIA);
+                debug("not first : ",D_NADIA);
                 //                if((int)random()%2==0)
                 //                    penaltyTarget=wm->field->oppGoalL()+Vector2D(0,wm->field->oppGoalL().y);
                 //                else
@@ -1036,6 +1034,8 @@ void CRolePlayMake::executeOurPenaltyShootout(){
             }
         }
         else{
+            if(wm->ball->vel.length()<0.1)
+                firstKick=true;
             kick->setKickSpeed(7);
             kick->setChip(false);
 
@@ -1054,7 +1054,7 @@ void CRolePlayMake::executeOurPenaltyShootout(){
                 }
                 else{
 //                    penaltyTarget = knowledge->goalVisiblity(agent->id(), w, 1.0);
-                    penaltyTarget=knowledge->getEmptyPosOnGoalForPenalty(1.0/8.0,true);
+                    penaltyTarget=knowledge->getEmptyPosOnGoalForPenalty(1.0/20,true);
                     kick->setTarget(penaltyTarget);
                 }
                 //                }
@@ -1079,6 +1079,7 @@ void CRolePlayMake::executeOurPenaltyShootout(){
 
 
         kick->execute();
+        draw(penaltyTarget,0,"red");
     }
 
 }

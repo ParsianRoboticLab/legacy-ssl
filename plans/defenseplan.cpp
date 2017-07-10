@@ -1372,6 +1372,8 @@ void DefensePlan::execute(){
     }
     else if(knowledge->getGameState() == CKnowledge::TheirPenaltyKick){
         //TO DO: add penalty goalie for penalty shootout
+        penaltyShootOutMode();
+        return;
 
     }
     else{
@@ -1414,6 +1416,130 @@ void DefensePlan::execute(){
 
 }
 
+Vector2D DefensePlan::getGoalieShootOutTarget(bool isBallPath){
+    QList<Vector2D> target;
+    Vector2D degree;
+    Vector2D finalTarget;
+
+    Line2D ballPath(wm->ball->pos , wm->ball->pos + (wm->ball->vel.norm()*10));
+    Line2D ballLine(lastBallPos.first(), lastBallPos.last());
+    Line2D ballRay(wm->ball->pos, wm->ball->pos + wm->opp[knowledge->nearestOppToBall]->dir);
+
+    if(!isBallPath){
+        //    target = wm->field->AHZOurPAreaIntersect(ballPath);
+        //    target.append(strictFollowBall(wm->ball->pos+(wm->ball->vel.norm()*10)));
+
+
+
+        degree=(wm->field->ourGoalL()-wm->ball->pos).norm()+(wm->field->ourGoalR()-wm->ball->pos).norm();
+
+        Line2D bisectorLine(wm->ball->pos,wm->ball->pos+degree*10);
+
+        target=wm->field->AHZOurPAreaIntersect(bisectorLine);
+
+
+
+        for(int i=0;i<target.length();i++)
+            draw(target.at(i), 0, "red");
+
+        if(target.count() == 1){
+            finalTarget=(target.at(0)-wm->field->ourGoal()).norm()*1.5 + wm->field->ourGoal();
+            return finalTarget;
+        }
+        else
+            return wm->field->ourGoal();
+    }
+    else{
+        finalTarget = ballPath.perpendicular(wm->our[goalKeeperAgent->id()]->pos).intersection(ballPath);
+        return finalTarget;
+    }
+}
+
+
+
+bool DefensePlan::canReachToBall(int ourAgentId, int theirAgentId){
+    Vector2D ballPosAndVel;
+    ballPosAndVel = wm->ball->pos+wm->ball->vel;
+
+    if(wm->our[ourAgentId]->pos.dist(ballPosAndVel) < wm->opp[theirAgentId]->pos.dist(ballPosAndVel) - 0.5
+            && wm->ball->pos.dist(wm->field->ourGoal()) > 2.5){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
+int DefensePlan::decideShootOutMode(){
+
+
+    if(canReachToBall(goalKeeperAgent->id(), knowledge->nearestOppToBall)){
+        return shootOutClear;
+    }
+    else if(Circle2D(wm->ball->pos,0.12).contains(wm->opp[knowledge->nearestOppToBall]->pos)){
+        if(wm->ball->pos.dist(wm->field->ourGoal()) > 2)
+            return skyDive;
+        else
+            return shootOutClear;
+    }
+    else if(wm->ball->pos.dist(wm->field->ourGoal()) > 2){
+        return ballBisector;
+    }
+    else if(Circle2D(wm->ball->pos,0.2).contains(wm->opp[knowledge->nearestOppToBall]->pos)){
+        return shootOutClear;
+    }
+}
+
+void DefensePlan::penaltyShootOutMode(){
+
+    Vector2D targetDir(10, 5);
+    targetDir.setDir(AngleDeg(0));
+    targetDir.setLength(1);
+
+    if(lastBallPos.count() < 15){
+        lastBallPos.append(wm->ball->pos);
+    }
+    else{
+        lastBallPos.removeFirst();
+    }
+
+    penaltyShootoutMode = decideShootOutMode();
+
+    switch(penaltyShootoutMode ){
+    case shootOutClear:
+        assignSkill(goalKeeperAgent, kickSkill);
+        kickSkill->setKickSpeed(1000);
+        kickSkill->setTolerance(25);
+        kickSkill->setDontKick(false);
+        kickSkill->setSlow(false);
+        kickSkill->setSpin(false);
+        kickSkill->setAvoidPenaltyArea(false);
+        kickSkill->setGoalieMode(false);
+        kickSkill->setChip(true);
+        kickSkill->setTarget(wm->ball->pos);
+
+        break;
+
+    case ballBisector:
+
+        assignSkill(goalKeeperAgent , gpa[goalKeeperAgent->id()]);
+        gpa[goalKeeperAgent->id()]->setSlowMode(false);
+        gpa[goalKeeperAgent->id()]->setADiveMode(true);
+        gpa[goalKeeperAgent->id()]->init(getGoalieShootOutTarget(false) , targetDir);
+
+        break;
+    case skyDive:
+        assignSkill(goalKeeperAgent , gpa[goalKeeperAgent->id()]);
+        gpa[goalKeeperAgent->id()]->setSlowMode(false);
+        gpa[goalKeeperAgent->id()]->setADiveMode(true);
+        gpa[goalKeeperAgent->id()]->init(getGoalieShootOutTarget(true) , targetDir);
+
+
+        break;
+    }
+
+}
+
 void DefensePlan::penaltyMode(){
     //// By this function goalKeeper is able to move according to the direction
     //// of the opponent agents that will shot to our goal in pentalty mode.
@@ -1422,7 +1548,7 @@ void DefensePlan::penaltyMode(){
     const float goalLineExtra = 0.03;
     const double xDiff = 0.10;
     Line2D goalLine(wm->field->ourGoalL() + Vector2D(+xDiff,+goalLineExtra),
-                   wm->field->ourGoalR() + Vector2D(+xDiff,-goalLineExtra));
+                    wm->field->ourGoalR() + Vector2D(+xDiff,-goalLineExtra));
     const double epsilon = 0.12;
     Vector2D target(-2.93, 0.0);
 
@@ -1444,9 +1570,9 @@ void DefensePlan::penaltyMode(){
 
     intersectionPoint.y *= (7.0/10.0);
 
-//    if(fabs(knowledge->getAgent(goalKeeperAgent->id())->pos().y) > fabs(wm->field->ourGoalR().y))
-//        intersectionPoint.y += 1*knowledge->getAgent(goalKeeperAgent->id())->pos().dist(intersectionPoint)*knowledge->getAgent(goalKeeperAgent->id())->pos().dist(intersectionPoint)
-//                *(fabs((intersectionPoint-knowledge->getAgent(goalKeeperAgent->id())->pos()).y)/(intersectionPoint-knowledge->getAgent(goalKeeperAgent->id())->pos()).y);   // sign
+    //    if(fabs(knowledge->getAgent(goalKeeperAgent->id())->pos().y) > fabs(wm->field->ourGoalR().y))
+    //        intersectionPoint.y += 1*knowledge->getAgent(goalKeeperAgent->id())->pos().dist(intersectionPoint)*knowledge->getAgent(goalKeeperAgent->id())->pos().dist(intersectionPoint)
+    //                *(fabs((intersectionPoint-knowledge->getAgent(goalKeeperAgent->id())->pos()).y)/(intersectionPoint-knowledge->getAgent(goalKeeperAgent->id())->pos()).y);   // sign
     
     if(intersectionPoint.valid()){
         target = intersectionPoint;
@@ -1456,7 +1582,7 @@ void DefensePlan::penaltyMode(){
         target.y = 0.0;
     }
 
-//    target.y = min(max(target.y, wm->field->ourGoalR().y + epsilon), wm->field->ourGoalL().y - epsilon + 0.03);
+    //    target.y = min(max(target.y, wm->field->ourGoalR().y + epsilon), wm->field->ourGoalL().y - epsilon + 0.03);
     Vector2D targetDir(10, 5);
     targetDir.setDir(AngleDeg(0));
     targetDir.setLength(1);

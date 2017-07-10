@@ -59,6 +59,10 @@ void GameState::transition(char ref_command) {
     if (ref_command == COMM_PENALTY_SHOOTOUT){
         gametimes = PENALTY_SHOOTOUT;
     }
+    if(ref_command == COMM_TIMEOUT_YELLOW
+            || ref_command == COMM_TIMEOUT_BLUE
+            || ref_command == COMM_HALF_TIME) {
+        state=HALF_TIME; }
     if (ref_command == COMM_HALT) {
         state = HALTED; return; }
     if (ref_command == COMM_STOP) {
@@ -69,10 +73,6 @@ void GameState::transition(char ref_command) {
     if (ref_command == COMM_READY && state & NOTREADY) {
         state &= ~NOTREADY; state |= READY; return; }
 
-    if(ref_command == COMM_TIMEOUT_YELLOW
-            || ref_command == COMM_TIMEOUT_BLUE
-            || ref_command == COMM_HALF_TIME) {
-        state=HALF_TIME; return; }
 
 
 

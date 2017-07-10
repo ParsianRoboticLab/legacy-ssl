@@ -105,6 +105,7 @@ protected:
     Vector2D sumOfLastOpponentDirection;
     Vector2D tempAHZ;
     Vector2D sumOfLastOpponentPosition;
+
     int AHZCount;        
     ///////////////////////////////////////////////////
     void executeGoalKeeper();    
@@ -119,6 +120,12 @@ protected:
     bool defenseOneTouchOrNot();
     bool defenseClearOrNot();
     void runClear();
+    Vector2D getGoalieShootOutTarget(bool isBallPath);
+    bool canReachToBall(int agentId, int theirAgentId);
+    int decideShootOutMode();
+    QList <Vector2D> lastBallPos;
+    int penaltyShootoutMode;
+    void penaltyShootOutMode();
     void penaltyMode();
     bool isStopped();
     bool isTheirNonPlayKick();
@@ -128,6 +135,13 @@ protected:
         defClear = 2,
         NoneExep = 3
     };
+    enum shootOutMode{
+        shootOutClear,
+        ballBisector,
+        skyDive
+
+    };
+
     struct defenseExeptions{
         bool active;
         exepMode exeptionMode;
