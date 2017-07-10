@@ -91,7 +91,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     }
     else
     {
-        angPid->kp = 2;
+        angPid->kp = 4;
     }
     angPid->error = (dir2.th() -  agentDir.th()).radian();
 
@@ -100,7 +100,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
 
     if(oneTouch || diveMode)
     {
-        posPidDist = 0.3;
+        posPidDist = 0.5;
     }
     else
     {
@@ -120,13 +120,14 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     }
     else if(oneTouch)
     {
-        posPid->kp = 7;
+        posPid->kp = 4;
         posPid->kd = 20;
         posPid->ki = 0;
     }
     else
     {
-        posPid->kp = conf()->BangBang_posKP();
+        posPid->kp = (conf()->BangBang_posKP())*(0.2/agentPos.dist(pos2));
+        posPid->kp = min(posPid->kp,conf()->BangBang_posKP()*3);
         posPid->kd = conf()->BangBang_posKD();
         posPid->ki = conf()->BangBang_posKI();
     }
@@ -134,7 +135,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
 
     //////////////////////// dec calculations
     double vp =(posPidDist*posPid->kp);
-    double moreDec = 0.7;
+    double moreDec = 0.65;
     double decOffset = 0.5;
 
     switch(decidePlan())
