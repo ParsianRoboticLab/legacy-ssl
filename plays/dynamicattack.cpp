@@ -207,19 +207,18 @@ void CDynamicAttack::makePlan(int agentSize) {
     else if(critical) {
 
         currentPlan.mode = DynamicEnums::Critical;
-        bool notDribble = true;
-        if(wm->opp.activeAgentsCount() > 0)
+        /*bool notDribble = true;
+        if(wm->opp.activeAgentsCount() > 0 && wm->field->isInField(currentPlan.passPos))
         {
             for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
             {
-                Vector2D agentPos = wm->opp.active(i)->pos;
-                CRobot*  agent    = wm->opp.active(i);
-                Polygon2D robotKickArea;
-                robotKickArea.addVertex(agentPos+agent->dir().norm()*0.08+agent->dir().rotate(90).norm()*0.05);
-                robotKickArea.addVertex(agentPos+agent->dir().norm()*0.15+agent->dir().rotate(90).norm()*0.05);
-                robotKickArea.addVertex(agentPos+agent->dir().norm()*0.15-agent->dir().rotate(90).norm()*0.05);
-                robotKickArea.addVertex(agentPos+agent->dir().norm()*0.08-agent->dir().rotate(90).norm()*0.05);
-                if(robotKickArea.contains(ballPos))
+                CRobot*   agent         = wm->opp.active(i);
+                Vector2D  agentPos      = agent->pos, t1, t2;
+                Segment2D temp          = Segment2D(ballPos, currentPlan.passPos);
+                Circle2D  Robot         = Circle2D(agentPos, 0.1);
+                Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
+
+                if(Robot.intersection(temp, t1, t2)  && robotKickArea.intersection(temp, &t1, &t2) && ballPos.x > 0)
                 {
                     notDribble = false;
                     currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
@@ -227,7 +226,7 @@ void CDynamicAttack::makePlan(int agentSize) {
                 }
             }
         }
-        if(notDribble == true)
+        if(notDribble == true)*/
             currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
 
         for(size_t i = 0;i < agentSize;i++) {
@@ -1020,13 +1019,13 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
         M = 100;
         for(int j = 0; j < wm->opp.activeAgentsCount(); j++)
             M = min(M, wm->opp.active(j)->pos.dist(temp[i]));
-        points[i] -= 4 - M;
-        points[i] -= ballPos.dist(temp[i]) / 2;
+        points[i] += M;
+//        points[i] -= ballPos.dist(temp[i]) / 2;
         M = 100;
         for(int j = 0; j < wm->our.activeAgentsCount(); j++)
             M = min(M, wm->our.active(j)->pos.dist(temp[i]));
         if(M > 0.5)
-            points[i] -= 7;
+            points[i] -= 17;
         if(points[i] > points[ans])
             ans = i;
         debug(QString("pass pos %1 %2 point is %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
