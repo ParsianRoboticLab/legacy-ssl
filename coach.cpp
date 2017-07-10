@@ -346,12 +346,12 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
     }
 
     // handle stop
-    if (wm->ball->pos.x < 0){
-        preferedDefenseCounts = agentsCount - 1;
-    }
-    else if (wm->ball->pos.x > 1){
+//    if (wm->ball->pos.x < 0){
+//        preferedDefenseCounts = agentsCount - 1;
+//    }
+//    else if (wm->ball->pos.x > 1){
         preferedDefenseCounts = policy() -> Formation_Defense();
-    }
+//    }
 
     if(!policy()->Formation_StrictFormation() || !knowledge->isStart()){
         bool oppsAttack = false;
@@ -1201,15 +1201,19 @@ void CCoach::updateAttackState()
     QList<int> ids;
     Segment2D oppNearestPath(oppNearest->pos,oppNearest->pos + oppNearest->vel);
     ids = wm->our.data->activeAgents;
-    CRobot* PMA = wm->our[playmakeId];
 //    ourNearestAgent = knowledge->getAgent(knowledge->getNearestAgentToPoint(wm->ball->pos,&ids));
-    if(PMA != NULL)
-    {
-        critCir = Circle2D(PMA->pos, critLenth + 0.2);
-        robotCritArea.addVertex(PMA->pos);
-        robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(90) * critLenth);
-        robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(-90)* critLenth);
+    if (playmakeId != -1) {
+        CRobot* PMA = wm->our[playmakeId];
+        if(PMA != NULL)
+        {
+            critCir = Circle2D(PMA->pos, critLenth + 0.2);
+            robotCritArea.addVertex(PMA->pos);
+            robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(90) * critLenth);
+            robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(-90)* critLenth);
+        }
     }
+
+
     draw(robotCritArea,QColor(Qt::cyan));
 
     if(robotCritArea.contains(oppNearest->pos)
@@ -1262,7 +1266,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
       Vector2D ballPos = wm->ball->pos;
       if(ballVel < 0.3)
       {
-          double maxD = -0.1;
+          double maxD = -1000.1;
           for(int i = 0; i < ourPlayers.size(); i++)
           {
               double o = -knowledge->getAgent(ourPlayers[i])->pos().dist(ballPos) ;
@@ -1304,6 +1308,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
               debug(QString("timeneeded of %1 is : %2 \n").arg(ourPlayers[i]).arg(nearest[ourPlayers[i]]), D_PARSA);
           lastPlayMake = playmakeId;
       }
+      debug(QString("playmake is : %1").arg(playmakeId), D_PARSA);
 }
 
 void CCoach::decideAttack()
@@ -2430,8 +2435,6 @@ void CCoach::decideTheirBallPlacement(QList<int> &_ourPlayers) {
 }
 
 void CCoach::decideHalfTimeLineUp(QList<int> &_ourPlayers) {
-    qDebug()<<"half time /line up";
-
     selectedPlay = halfTimeLineup;
 }
 

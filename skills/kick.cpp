@@ -1110,8 +1110,8 @@ void CSkillKick::jTurn()
     }
     else
     {
-        speedPidX->kp = 4 +2.1*agentPos.dist(ballPos) + dirReduce;
-        speedPidY->kp = 4 +2.1*agentPos.dist(ballPos) + dirReduce;
+        speedPidX->kp = 6 +2.1*agentPos.dist(ballPos) + dirReduce;
+        speedPidY->kp = 6 +2.1*agentPos.dist(ballPos) + dirReduce;
 
     }
     speedPidX->kd = 50;
@@ -1897,7 +1897,7 @@ void CSkillKickOneTouch::execute()
     oneTouchMode = decideMode();
 
     Segment2D ballPath;
-    double stopParam = 0.09;
+    double stopParam = 0.085;
     ballPath.assign(ballPos,ballPos + wm->ball->vel.norm()*15);
     Segment2D ballLine;
     ballLine.assign(ballPos,ballPos + wm->ball->vel.norm()*(15));
@@ -1916,14 +1916,14 @@ void CSkillKickOneTouch::execute()
     double onetouchRad =2;
     double onetouchKickRad = 0.5;
     Circle2D oneTouchArea;
-    Circle2D oppPenaltyArea(wm->field->oppGoal() + Vector2D(0.15,0),1.35);
+    Circle2D oppPenaltyArea(wm->field->oppGoal() + Vector2D(0.15,0),1.45);
     Circle2D oppPenaltyAreaWP(wm->field->oppGoal() + Vector2D(0.15,0),1.55);
     draw(oppPenaltyAreaWP,QColor(Qt::red));
     ///temp
     draw(oppPenaltyArea,QColor(Qt::red));
 
     if(ballPos.dist(agentPos) <= onetouchRad)
-        onetouchRad = ballPos.dist(agentPos)-0.08;
+        onetouchRad = ballPos.dist(agentPos)-0.085;
     oneTouchArea.assign(agentPos,onetouchRad);
 
     if((wm->ball->vel.length() < 0.4 && agentPos.dist(ballPos) > onetouchKickRad) || (!oneTouchArea.intersection(ballPath,&sol1,&sol2) && wm->ball->vel.length() >= 0.4 && agentPos.dist(ballPos) > onetouchKickRad))
@@ -1966,7 +1966,7 @@ void CSkillKickOneTouch::execute()
                 agent->setKick(kickSpeed);
             }
         }
-        agent->setRoller(3);
+        agent->setRoller(2);
     }
     else if(ballPos.dist(agentPos) < onetouchKickRad)
     {
