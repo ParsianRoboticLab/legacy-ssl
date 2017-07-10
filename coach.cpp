@@ -651,11 +651,10 @@ CKnowledge::ballPossesionState CCoach::isBallOurs()
     ////////////      ///////////
     ////////////      ///////////
     //// NEW BALL POSSESSION ////
-    double temp = wm->ball->pos.x + wm->ball->vel.x * 0.5;
+    double temp = wm->ball->pos.x + wm->ball->vel.x * 1;
 
     if(temp > 0.5) {
         decidePState = CKnowledge::WEHAVETHEBALL;
-
     } else if (temp < 0.1){
         decidePState = CKnowledge::WEDONTHAVETHEBALL;
     } else {
