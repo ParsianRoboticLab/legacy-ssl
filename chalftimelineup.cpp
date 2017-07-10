@@ -45,6 +45,7 @@ void CHalftimeLineup::lineUpAllAgents(){
 
 
     }
+    if (agents.size() == 0) return;
     knowledge->Matching(agents,points,matchpoints);
     for(int i=0;i<agentsID.length();i++){
         lineup.at(i)->init(points[matchpoints.at(i)],Vector2D(0,1));

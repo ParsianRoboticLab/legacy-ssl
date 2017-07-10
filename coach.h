@@ -66,6 +66,7 @@ private:
     QTime intentionTimePossession;
     QTime playMakeIntention;
     QTime playOnExecTime;
+    QTime playMakeSelectTime;
     double playMakeIntentionInterval;
     double possessionIntentionInterval;
     double playMakeIntended;

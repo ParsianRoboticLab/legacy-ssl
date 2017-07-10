@@ -2437,6 +2437,7 @@ int DefensePlan::decideNumOfMarks(){
 //                return defenseCount - 2;
 //            }
 //        }
+
         if(playOff){
             return decideNumOfMarksInPlayOff(defenseCount);
         }

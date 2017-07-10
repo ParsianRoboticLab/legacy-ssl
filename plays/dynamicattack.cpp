@@ -232,7 +232,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     // it's needed to be fast
     else if(fast) {
         currentPlan.mode = DynamicEnums::Fast;
-        currentPlan.playmake.init(DynamicEnums::Pass, DynamicEnums::Best);
+        currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Best;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
@@ -248,7 +248,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     else {
 
         currentPlan.mode = DynamicEnums::NoPlanExeption;
-        currentPlan.playmake.init(DynamicEnums::Pass, DynamicEnums::Best);
+        currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Best;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
@@ -989,7 +989,7 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
         for(int j = 0; j < wm->our.activeAgentsCount(); j++)
             M = min(M, wm->our.active(j)->pos.dist(temp[i]));
         if(M > 0.5)
-            points[i] -= 4;
+            points[i] -= 7;
         if(points[i] > points[ans])
             ans = i;
         debug(QString("pass pos %1 %2 point is %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);

@@ -456,7 +456,7 @@ void CAgent::accelerationLimiter(double vf,bool diveMode)
     double lastV,commandV;
     double vCoef = 1;
     double tempVf = vforward , tempVn = vnormal;
-    double decCoef = 1;
+    double decCoef = 1.5;
 
     if(vf == 0)
         decCoef = 2.5;
@@ -466,7 +466,7 @@ void CAgent::accelerationLimiter(double vf,bool diveMode)
     accCoef = atan(fabs(vforward)/fabs(vnormal))/_PI*2;
     if(diveMode)
     {
-        realAcc = 10 * accCoef*conf()->BangBang_AccMaxForward() + (1-accCoef)*conf()->BangBang_AccMaxNormal();
+        realAcc = 1.5 * accCoef*conf()->BangBang_AccMaxForward() + (1-accCoef)*conf()->BangBang_AccMaxNormal();
     }
     else
     {
