@@ -28,7 +28,7 @@ CSkillAutoBallPlacement::~CSkillAutoBallPlacement()
 
 void CSkillAutoBallPlacement::gotoBall()
 {
-    Circle2D dribblerArea (agent->pos() + agent->dir().norm()*0.09,0.1);
+    Circle2D dribblerArea (agent->pos() + agent->dir().norm()*0.09,0.15);
     kick->setTarget(target);
     kick->setShotToEmptySpot(false);
     kick->setSlow(true);
@@ -45,16 +45,16 @@ void CSkillAutoBallPlacement::gotoBall()
     if(ballCounter < 50 && isFinished == false)
     {
         kick->setKickSpeed(0);
-        kick->setSpin(1);
+        kick->setSpin(3);
         kick->execute();
     } else if(ballCounter < 80 && isFinished == false)
          {
              kick->setKickSpeed(0);
-             kick->setSpin(4);
+             kick->setSpin(6);
              kick->execute();
          } else
               {
-                  agent->setRoller(3);
+                  agent->setRoller(5);
                   gotoTarget();
               }
 
@@ -69,7 +69,7 @@ void CSkillAutoBallPlacement::gotoTarget()
     agent->setRoller(5);////inja
     bangBang->setAngInPath(true);
     bangBang->setSlow(true);
-    bangBang->setAngKp(2);
+    bangBang->setAngKp(1);
     bangBang->setAccMax(0.3);
     bangBang->setDecMax(1);
     bangBang->setVelMax(1);

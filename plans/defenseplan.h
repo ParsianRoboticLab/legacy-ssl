@@ -52,8 +52,7 @@ protected:
     bool noDefenseNoGoalie();
     bool isInThePenaltyArea(Vector2D _posofsth);
     void setPointToKick();
-    void checkGoalieTarget();
-    Vector2D getIntersectionWithPenaltyAreaGk(Segment2D _seg);
+    void checkGoalieTarget();    
     void setGoalKeeperState();
     void setGoalKeeperTargetPoint();
     bool ballBehindGoalie, goalieOneTouch, goalieInPenaltyAreaPrediction, goalieClearMode, goalieStrictFollow, goalieFollow, ballIsOutOfField;
@@ -89,6 +88,8 @@ protected:
     bool dangerForGoalieClearByOppAgents;
     bool dangerForInsideOfThePenaltyArea;
     bool stopMode;
+    bool playOffMode;
+    bool playOnMode;
     bool dangerModeThresholdForClear;
     bool dangerModeThresholdForDanger;
     bool changeInMarkPlanFlag;
@@ -105,6 +106,7 @@ protected:
     Vector2D sumOfLastOpponentDirection;
     Vector2D tempAHZ;
     Vector2D sumOfLastOpponentPosition;
+
     int AHZCount;        
     ///////////////////////////////////////////////////
     void executeGoalKeeper();    
@@ -119,6 +121,12 @@ protected:
     bool defenseOneTouchOrNot();
     bool defenseClearOrNot();
     void runClear();
+    Vector2D getGoalieShootOutTarget(bool isBallPath);
+    bool canReachToBall(int agentId, int theirAgentId);
+    int decideShootOutMode();
+    QList <Vector2D> lastBallPos;
+    int penaltyShootoutMode;
+    void penaltyShootOutMode();
     void penaltyMode();
     bool isStopped();
     bool isTheirNonPlayKick();
@@ -128,6 +136,13 @@ protected:
         defClear = 2,
         NoneExep = 3
     };
+    enum shootOutMode{
+        shootOutClear,
+        ballBisector,
+        skyDive
+
+    };
+
     struct defenseExeptions{
         bool active;
         exepMode exeptionMode;
@@ -162,7 +177,8 @@ private:
     void findPos(int _markAgentSize);
     void findOppAgentsToMark();   
     bool isInTheIndirectAreaShoot(Vector2D);
-    bool isInTheIndirectAreaPass(Vector2D);    
+    bool isInTheIndirectAreaPass(Vector2D);
+    bool checkOverdef();
     QList<Vector2D> ShootBlockRatio(double, Vector2D);
     QList<Vector2D> PassBlockRatio(double,Vector2D);
     QList<Vector2D> indirectAvoidShoot(Vector2D);

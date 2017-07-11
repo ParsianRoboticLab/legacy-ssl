@@ -26,6 +26,14 @@ void CRoleDynamic::update() {
    updated = false;
 
    switch(selectedSkill) {
+   case DynamicEnums::Dribble:
+       dribbleSkill->setAgent(agent);
+       dribbleSkill->setTarget(targetDir);
+       dribbleSkill->setInitialLook(target);
+       dribbleSkill->setChip(chip);
+       dribbleSkill->setDoPass(true);
+       dribbleSkill->setKickSpeed(kickSpeed);
+       break;
    case DynamicEnums::Ready:
        receiveSkill->setAgent(agent);
        receiveSkill->setTarget(target);
@@ -33,6 +41,20 @@ void CRoleDynamic::update() {
        receiveSkill->setAvoidOppPenaltyArea(true);
        receiveSkill->setAvoidOurPenaltyArea(true);
        break;
+//   case DynamicEnums::Dribble:
+//       dribbleSkill->setAgent(agent);
+//       dribbleSkill->setTarget(target);
+//       dribbleSkill->setInitialLook(wm->field->oppGoal());
+//       dribbleSkill->setKickTol(tolerance);
+//       dribbleSkill->setChip(chip);
+//       if(wm->getIsSimulMode())
+//           dribbleSkill->setKickSpeed(kickSpeed);
+//       else if (chip) {
+//               dribbleSkill->setKickSpeed(max(200, kickSpeed));
+//       } else {
+//               dribbleSkill->setKickSpeed(max(300, kickSpeed));
+//       }
+//       break;
    case DynamicEnums::Shot:
        shotSkill->setAgent(agent);
        shotSkill->setTarget(target);

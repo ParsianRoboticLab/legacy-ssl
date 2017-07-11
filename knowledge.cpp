@@ -128,7 +128,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
             for(int k=0; k<81; k++)
                 ProfilerResult[i][j][k] = -1000;
 
-    refRobotID = 0;
+    refRobotID = 6;
 
     // initialize robotCoeff
     for(int i=0; i< 16; i++)
@@ -158,7 +158,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
     //    RobotsCoeff[7][0] = 800;
 
 
-    profiler->load(JSON, "Chip_2_5.json");
+    profiler->load(JSON, "MRLProfiler_2_6.json");
 
     //    ProfilerResult[robotID][0:kick , 1:chip , 2:SpinKick , 3:SpinChip][10*distance(0-80)] ---> contains needed voltage for this distance
 
@@ -261,10 +261,6 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
 
     double profiledParameter=0;
     int type;
-
-    if(wm->getIsSimulMode()){
-        return (int)realParameter;
-    }
 
     if(isKick && !spinOn)
     {
@@ -1846,11 +1842,12 @@ Vector2D CKnowledge::goalVisiblity(int agentId, double &regionWidth, double unde
 
     if (!target.valid())
         target = wm->field->oppGoal();
+    draw(target,1,"yellow");
     draw(Circle2D(target, 0.05), 0, 360, "red", 1);
     return target;
 }
 
-Vector2D CKnowledge::getEmptyPosOnGoalForPenalty(double n, bool oppGoal){
+Vector2D CKnowledge::getEmptyPosOnGoalForPenalty(double n, bool oppGoal, double th){
 
     Vector2D target, goalieR, goalieL;
     int goalieID;
@@ -1873,7 +1870,7 @@ Vector2D CKnowledge::getEmptyPosOnGoalForPenalty(double n, bool oppGoal){
     distanceR = wm->opp[goalieID]->pos.dist(goalieR);
     distanceL = wm->opp[goalieID]->pos.dist(goalieL);
 
-    if(distanceR > distanceL && fabs(distanceL - distanceR) > 0.03) {
+    if(distanceR > distanceL && fabs(distanceL - distanceR) > th) {
         target = Vector2D(goalieR.x, goalieR.y + n*distanceR);
         draw(target, 0, QColor(Qt::black));
 //        draw(Segment2D(target, Vector2D(((goalieL+goalieR)/2).x-1, ((goalieL+goalieR)/2).y)), QColor(Qt::darkCyan));
