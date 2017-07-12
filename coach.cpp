@@ -424,6 +424,8 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
 
     if (wm->gs->penalty_shootout())
         preferedDefenseCounts = 0;
+//    if (knowledge->getGameState() == CKnowledge::OurIndirectKick)
+//        preferedGoalieAgent = -1;
 
 }
 
