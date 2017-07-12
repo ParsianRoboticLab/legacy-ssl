@@ -55,7 +55,7 @@ protected:
     void checkGoalieTarget();    
     void setGoalKeeperState();
     void setGoalKeeperTargetPoint();
-    bool ballBehindGoalie, goalieOneTouch, goalieInPenaltyAreaPrediction, goalieClearMode, goalieStrictFollow, goalieFollow, ballIsOutOfField;
+    bool ballBehindGoalie, goalieOneTouch,goalieClearMode,ballIsOutOfField;
     double strictfollowThr;
     double behindBallThr;    
     bool besidePoleFlag;
@@ -110,8 +110,7 @@ protected:
     int AHZCount;        
     ///////////////////////////////////////////////////
     void executeGoalKeeper();    
-    Vector2D strictFollowBall(Vector2D _ballPos);
-    Vector2D followBall(Vector2D _ballPos);
+    Vector2D strictFollowBall(Vector2D _ballPos);    
     Vector2D checkDefensePoint(CAgent* agent, const Vector2D& point);
     rcsc::Vector2D avoidKicker(int i, int kicker);
     void announceClearing(bool state);
