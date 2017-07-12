@@ -314,11 +314,19 @@ public:
     void analyseShoot();
     void analysePass();
 
+
     void setMasterMode(EMode _mode);
     EMode getMasterMode();
     void reset();
     void setInitial(bool _init);
 private:
+
+
+    // Critical Play
+    bool criticalPlay();
+    CSkillKick* criticalKick;
+    bool criticalInit;
+
     bool initial;
 
     SPlan* masterPlan;
