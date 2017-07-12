@@ -10,6 +10,7 @@ CRolePlayOff::CRolePlayOff() {
     receivePassSkill = new CSkillReceivePass(NULL);
     updated = true;
     roleUpdate = false;
+    noAvoid = false;
     timer.start();
     agentID = -1;
     lookForward = true;
@@ -42,6 +43,7 @@ void CRolePlayOff::reset()
     agentID = -1;
     lookForward = true;
     ballIsNear = false;
+    noAvoid = false;
 }
 
 void CRolePlayOff::update() {
@@ -54,6 +56,7 @@ void CRolePlayOff::update() {
         gotoPointAvoidSkill->setAvoidPenaltyArea(avoidPenaltyArea);
         gotoPointAvoidSkill->setMaxVelocity(maxVelocity);
         gotoPointAvoidSkill->setAvoidBall(avoidBall);
+        gotoPointAvoidSkill->setNoAvoid(noAvoid);
         gotoPointAvoidSkill->setBallObstacleRadius(1);
         gotoPointAvoidSkill->setAgent(agent);
 
