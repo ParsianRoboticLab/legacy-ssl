@@ -128,8 +128,10 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     }
     else
     {
-        posPid->kp = (conf()->BangBang_posKP())*(0.4/agentPos.dist(pos2));
+        posPid->kp = (conf()->BangBang_posKP())*(0.02/(agentPos.dist(pos2)*agentPos.dist(pos2)));
+        debug(QString("kp: %1").arg(posPid->kp),D_MHMMD);
         posPid->kp = min(posPid->kp,conf()->BangBang_posKP()*2);
+        posPid->kp = max(posPid->kp,conf()->BangBang_posKP());
         posPid->kd = conf()->BangBang_posKD();
         posPid->ki = conf()->BangBang_posKI();
     }
@@ -138,7 +140,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     //////////////////////// dec calculations
     double vp =(posPidDist*posPid->kp);
     double moreDec = 0.7;
-    double decOffset = 0.45;
+    double decOffset = 0.6;
 
     switch(decidePlan())
     {
