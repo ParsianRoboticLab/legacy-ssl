@@ -5,13 +5,9 @@
 
 using namespace std;
 
-
-#define CHIP_POWER 1023
 #define LONG_CHIP_POWER 1023
-#define KICK_POWER 1000
 
 ///////////////// AHZ is writing, have you my voice? ... ;) //////////////////
-/////////////////////////// Added for RC 2017 ///////////////////////////////
 bool DefensePlan::isAgentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> stuckIndexs){
     //// If defense agents stuck together , this function
     QList<Circle2D> agentsCircle;
@@ -51,7 +47,6 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
         }
     }
 }
-/////////////////////////////////////////////////////////////////////////////
 float getDegree(Vector2D pos1, Vector2D origin, Vector2D pos3){
     //// get the angle of between two vector that
     //// is made up by this 3 points.
@@ -65,7 +60,7 @@ bool DefensePlan::isIndirectArea(Vector2D aPoint){
     //// check that a point is in the circle around the ball
     //// with 50cm radius or not.
 
-    bool localFlag = Circle2D(wm->ball->pos , ballCircleR).contains(aPoint) ?   1 : 0;
+    bool localFlag = Circle2D(wm->ball->pos , 0.7).contains(aPoint) ?   1 : 0;
     return localFlag;
 }
 
@@ -94,7 +89,7 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
 
     ////////////////////////// Variables of this function //////////////////////
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
-    bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)/*|| (knowledge->getGameState() == CKnowledge::TheirKickOff)*/|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
+    bool playOff = knowledge->getGameState() == CKnowledge::TheirDirectKick || knowledge->getGameState() == CKnowledge::TheirKickOff || knowledge->getGameState() == CKnowledge::TheirIndirectKick;
     int i;
     int j;
     Vector2D ourCenterOfGoalPossition = wm->field->ourGoal();
@@ -105,7 +100,6 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
     QList <Vector2D> sol;
     QList <Vector2D> tempSol;
     double opponentAgentsCircleR = 0.2;
-    QList<int> omittedOpp;
     QList<Circle2D> opponentAgentsCircle;
     QList<Circle2D> opponentAgentsToBeMarkCircle;
     QList<Circle2D> tempOpponentAgentsToBeMarkedCircle;
@@ -215,15 +209,6 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
     ////////////////////////////////////////////////////////////////////////////
     debug(QString("Mark Agents Count : %1").arg(ourMarkAgentsSize) , D_SEPEHR , QColor(Qt::red));
     debug(QString("Opponent Agents to be mark count : %1").arg(opponentAgentsToBeMarkPossition.size()) , D_SEPEHR , QColor(Qt::red));
-    ///// Ommit opponent Agent(s) that is(are) ball owner //////////////////////
-    for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
-        if(isIndirectArea(opponentAgentsToBeMarkPossition.at(i))){
-            omittedOpp.append(i);
-        }
-    }
-    for(i = 0 ; i < omittedOpp.size() ; i++){
-        opponentAgentsToBeMarkPossition.removeAt(omittedOpp.at(i));
-    }
     ///////// Make Cirlcles around opponent agents /////////////////////////////
     for(i = 0 ; i < opponentAgentsToBeMarkPossition.size(); i++){
         opponentAgentsToBeMarkCircle.append(Circle2D(opponentAgentsToBeMarkPossition.at(i) , opponentAgentsCircleR));
@@ -517,7 +502,6 @@ void DefensePlan::manToManMarkBlockShotInPlayOff(int _markAgentSize){
 
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
     bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick) || (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
-    bool intelligentMarkType = policy()->Mark_IntelligentMarkType();
     int count;
     QList <Vector2D> sol;
     QList <Vector2D> tempSol;
@@ -1737,7 +1721,6 @@ void DefensePlan::executeGoalKeeper(){
     playOnMode = knowledge->isStart();
     stopMode = knowledge->isStop();
     if(goalKeeperAgent != NULL){
-        /******** Must*********************/
         if(savedClearPos.valid() && clearCnt > 30){
             savedClearPos.invalidate();
             clearCnt = 0;
@@ -1836,13 +1819,13 @@ void DefensePlan::executeGoalKeeper(){
                 kickSkill->setAvoidPenaltyArea(false);
                 kickSkill->setGoalieMode(true);
                 if(wm->ball->pos.y >= 0){
-                    kickSkill->setTarget(Vector2D(-4.5 , -6) - wm->field->ourGoal());
+                    kickSkill->setTarget(Vector2D(-3.5 , -2.5) - wm->field->ourGoal());
                 }
                 else{
-                    kickSkill->setTarget(Vector2D(-4.5 , 6) - wm->field->ourGoal());
+                    kickSkill->setTarget(Vector2D(-3.5 , 2.5) - wm->field->ourGoal());
                 }
                 kickSkill->setChip(true);
-                kickSkill->setKickSpeed(1023);
+                kickSkill->setKickSpeed(512);
             }
         }
         else{
@@ -1858,7 +1841,6 @@ void DefensePlan::executeGoalKeeper(){
                 gpa[goalKeeperAgent->id()]->execute();
             }
             else if(dangerForGoalieClear){
-                //////////////////// Added for RC 2017 //////////////////////
                 if(dangerForInsideOfThePenaltyArea){
                     debug("Danger Mode" , D_AHZ);
                     AHZSkills = kickSkill;
@@ -1876,6 +1858,7 @@ void DefensePlan::executeGoalKeeper(){
                         kickSkill->setTarget(Vector2D(-4.5 , 6) - wm->field->ourGoal());
                     }
                     kickSkill->setChip(true);
+                    kickSkill->setKickSpeed(512);
                 }
                 else{
                     AHZSkills = gpa[knowledge->goalie->id()];
@@ -1890,7 +1873,6 @@ void DefensePlan::executeGoalKeeper(){
                     gpa[goalKeeperAgent->id()]->setAvoidPenaltyArea(false);
                     gpa[goalKeeperAgent->id()]->execute();
                 }
-                /////////////////////////////////////////////////////////////
             }
             else{
                 //// strict follow
@@ -2551,15 +2533,15 @@ int DefensePlan::decideNumOfMarks(){
     playOnMode = knowledge->isStart();
     playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick|| knowledge->getGameState() == CKnowledge::TheirIndirectKick;
     if(defenseCount > 0){
-        //        if(knowledge->isStop() && defenseCount >=2){
-        //            if(checkOverdef()){
-        //            return defenseCount - 1;
-        //            }
-        //            else{
-        //                return defenseCount - 2;
-        //            }
-        //        }
-        if(playOffMode){
+        if(knowledge->isStop() && defenseCount >= 2){
+            if(checkOverdef()){
+                return defenseCount - 1;
+            }
+            else{
+                return defenseCount - 2;
+            }
+        }
+        else if(playOffMode){
             return decideNumOfMarksInPlayOff(defenseCount);
         }
         else if(knowledge->transientFlag){
@@ -2652,7 +2634,13 @@ Vector2D DefensePlan::ballPrediction(bool _isGoalie){
 
 void DefensePlan::findOppAgentsToMark(){
     oppAgentsToMark.clear();
-    oppAgentsToMark.append(knowledge->toBeMopps);
+    debug(QString("opp goalie id : %1").arg(knowledge->findOppGoalie()), D_AHZ);
+    for(int i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
+        if(wm->opp.activeAgentID(i) != knowledge->findOppGoalie() && !isIndirectArea(wm->opp.active(i)->pos)){
+            oppAgentsToMark.append(wm->opp.active(i));
+        }
+    }
+    debug(QString("Mopps count : %1").arg(oppAgentsToMark.size()), D_AHZ);
     oppAgentsToMarkPos.clear();
     if(knowledge->getGameState() == CKnowledge::TheirKickOff){
         for(int i = 0; i < oppAgentsToMark.count(); i++){
