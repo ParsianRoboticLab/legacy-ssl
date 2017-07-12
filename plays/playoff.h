@@ -397,7 +397,7 @@ private:
     void mahiCircle(int limit);
     void mahiVector(int limit);
 
-    bool doPass;
+    bool doPass, doAfterlife;
 
     //////////////End  Plan
     bool isTimeOver();

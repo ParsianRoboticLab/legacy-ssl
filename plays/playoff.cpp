@@ -16,6 +16,7 @@ CPlayOff::CPlayOff()
     isBallIn = false;
     tempAgent = new CRolePlayOff();
     doPass = false;
+    doAfterlife = false;
     setTimer = true;
     ////////////
 
@@ -322,7 +323,7 @@ void CPlayOff::checkEndKhafan() {
 
     if (dynamicState == 2) {
         if (roleAgent[1] -> getAgent() -> pos().dist(roleAgent[1] -> getTarget())
-                < roleAgent[1] -> getEventDist()) {
+            < roleAgent[1] -> getEventDist()) {
             dynamicState = 4;
             pass = true;
         }
@@ -876,7 +877,7 @@ bool CPlayOff::isFinalShotDone() {
     if (tLastState == -1 || tLastAgent == -1) return false;
 
     CAgent* tAgent = knowledge ->
-            getAgent(masterPlan -> common.matchedID[tLastAgent]);
+                     getAgent(masterPlan -> common.matchedID[tLastAgent]);
 
     Circle2D cir (tAgent->pos() + tAgent->dir().norm()*0.08, 0.16);
     Circle2D cir2(tAgent->pos() + tAgent->dir().norm()*0.20, 0.40);
@@ -943,14 +944,15 @@ void CPlayOff::passManager() {
 
     CAgent* c    = knowledge->getAgent(i);
     if (positionAgent[r.id].stateNumber == r.state
-            ||  positionAgent[r.id].stateNumber == r.state + 1) {
+        ||  positionAgent[r.id].stateNumber == r.state + 1) {
         debug(QString("RC : %1, %2").arg(r.id).arg(r.state), D_MAHI);
         if (positionAgent[r.id].getAbsArgs(r.state).staticPos.dist(c -> pos()) >
-                masterPlan->common.lastDist) {
+            masterPlan->common.lastDist) {
             doPass = false;
-
+            doAfterlife = false;
         } else {
             doPass = true;
+            doAfterlife = true;
         }
         roleAgent[p.id]->setDoPass(doPass);
 
@@ -978,7 +980,7 @@ bool CPlayOff::isTaskDone(CRolePlayOff* _roleAgent){
     case roleSkill::ReceivePass:
         return isReceiveDone(_roleAgent);
         break;
-        // After Life
+        //  Life
     case roleSkill::Mark:
     case roleSkill::Support:
     case roleSkill::Defense:
@@ -1009,7 +1011,18 @@ void CPlayOff::checkEndState() {
             roleAgent[i]->resetTime();
 
             if(positionAgent[i].stateNumber + 1  < positionAgent[i].positionArg.size()) {
-                positionAgent[i].stateNumber++;
+                if (positionAgent[i].getArgs(1).staticSkill == Defense
+                ||  positionAgent[i].getArgs(1).staticSkill == Support
+                ||  positionAgent[i].getArgs(1).staticSkill == Position
+                ||  positionAgent[i].getArgs(1).staticSkill == Goalie
+                ||  positionAgent[i].getArgs(1).staticSkill == Mark) {
+
+                    if (doAfterlife) {
+                        positionAgent[i].stateNumber++;
+                    }
+                    continue;
+                }
+                    positionAgent[i].stateNumber++;
 
             } else {
                 positionAgent[i].zombie = true;
@@ -1030,11 +1043,13 @@ void CPlayOff::fillRoleProperties() {
 
                 roleAgent[i]->setFirstMove((positionAgent[i].stateNumber == 0));
                 roleAgent[i]->setAgent(knowledge->getAgent(masterPlan->common.matchedID.value(i)));
+                // handle onetouch faster
                 if (positionAgent[i].stateNumber + 1 < positionAgent[i].positionArg.size()) {
                     if (positionAgent[i].getArgs().staticSkill == MoveSkill && positionAgent[i].getArgs(1).staticSkill == OneTouchSkill) {
                         positionAgent[i].stateNumber++;
                     }
                 }
+
                 assignTask(roleAgent[i], positionAgent[i]);
                 roleAgent[i]->setRoleUpdate(true);
                 roleAgent[i]->resetTime();
@@ -1075,6 +1090,7 @@ void CPlayOff::assignTask(CRolePlayOff* _roleAgent, const SPositioningAgent& _po
     case MoveSkill:
         assignMove(_roleAgent, _positionAgent);
         break;
+        // After Life
     case Defense:
         assignDefense(_roleAgent, _positionAgent);
         break;
@@ -1469,6 +1485,7 @@ void CPlayOff::reset(){
     }
     isBallIn = false;
     tempAgent = new CRolePlayOff();
+    doAfterlife = false;
     doPass = false;
     setTimer = true;
     ////////////
@@ -1746,12 +1763,12 @@ void CPlayOff::findThePasserandReciver(const NGameOff::SExecution & _plan,
 
 
             _pair.second.id    = _plan.AgentPlan[_pair.first.id]
-                    [_pair.first.state].
-                    skill[si].targetAgent;
+                                 [_pair.first.state].
+                                 skill[si].targetAgent;
 
             _pair.second.state = _plan.AgentPlan[_pair.first.id]
-                    [_pair.first.state].
-                    skill[si].targetIndex;
+                                 [_pair.first.state].
+                                 skill[si].targetIndex;
 
         }
     }
