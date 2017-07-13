@@ -964,7 +964,7 @@ double CRolePlayMake::lastBounce(){
 void CRolePlayMake::loadLastBounceSpeed(){
     lastBounceDataFile.open(QIODevice::ReadOnly);
 
-    QMap<double, double> data;
+    QMap<double, int> data;
     QPair<int, QMap<double, int> > p;
 
     QStringList l;
@@ -1006,7 +1006,7 @@ int CRolePlayMake::getLastBounceSpeed(int id, double lastBounceDistance){
         if(lastBounceProfileData.at(i).first != id)
             continue;
         else{
-            return lastBounceProfileData.at(i).second.keys(lastBounceDistance);
+            return lastBounceProfileData.at(i).second.keys().value(lastBounceDistance);
         }
     }
 }
