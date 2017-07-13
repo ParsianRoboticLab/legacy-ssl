@@ -138,6 +138,7 @@ CCoach::CCoach(CAgent**_agents)
     playoffPlanSelectionDataFile.setFileName("PlayoffPlanRepeat.txt");
     out.setDevice(&playoffPlanSelectionDataFile);
 
+    for (int i = 0; i < 12 ; i++) faultDetectionCounter[i] = 0;
 }
 
 CCoach::~CCoach()
@@ -2517,4 +2518,37 @@ bool CCoach::checkOverdef(){
         overDefThr = 0;
         return false;
     }
+}
+
+void CCoach::checkSensorShootFault() {
+    QList<int> ourPlayers = wm->our.data->activeAgents;
+    for (size_t i = 0; i < 12; i++) {
+        if (ourPlayers.contains(i)) {
+            CAgent* tempAgent = knowledge->getAgent(i);
+            if (tempAgent->shootSensor()
+                &&  wm->ball->pos.dist(tempAgent->pos() + tempAgent->dir().norm()*0.08) > 0.2) {
+                faultDetectionCounter[i]++;
+
+            } else {
+                faultDetectionCounter[i] = 0;
+            }
+        } else {
+            faultDetectionCounter[i] = 0;
+        }
+    }
+
+    for (size_t i = 0; i < 12; i++) {
+        if ( faultDetectionCounter[i] > 300 || knowledge->getAgent(i)->changeIsNeeded) {
+            knowledge->getAgent(i)->changeIsNeeded = true;
+        }
+    }
+
+    for (size_t i = 0; i < ourPlayers.size(); i++) {
+        if (knowledge->getAgent(i)->changeIsNeeded) {
+            debug(QString("[ROBOT FAULT] %1"), D_ERROR);
+
+        }
+
+    }
+
 }
