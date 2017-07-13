@@ -132,12 +132,12 @@ void CRoleStop::execute()
 	gotopoint->setAgent(agent);
 	gotopoint->setMaxVelocity(2.0);
 	gotopoint->setMaxVelocityNormal(1.0);
-	gotopoint->setAvoidPenaltyArea(true);
 	if (wm->ball->inSight<=0 || !wm->ball->pos.valid() || !wm->field->isInField(wm->ball->pos)) {agent->waitHere();return;}
 	info()->findPositions();
 	gotopoint->setTargetLook(target, wm->ball->pos);
 	gotopoint->setAvoidPenaltyArea(true);
-  gotopoint->setBallObstacleRadius(4*CBall::radius);
+    gotopoint->setBallObstacleRadius(0.50);
+    gotopoint->setAvoidBall(true);
 	gotopoint->execute();
 	draw(Circle2D(target , 0.03) , "magenta" , true);
     draw(QString("%1").arg(kkk) , target);
