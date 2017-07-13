@@ -1446,7 +1446,6 @@ void CCoach::decidePlayOff(QList<int>& _ourplayers, POMODE _mode) {
 
         }
 
-        qDebug() << "[Coach] first time config done";
     } else {
         setPlayOff( ourPlayOff->getMasterMode() );
     }
