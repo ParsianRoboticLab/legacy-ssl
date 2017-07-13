@@ -32,23 +32,30 @@ void CStopPlay::stopPosition() {
     executedCycles++;
     setFormation("Stop7");
 
-    Vector2D temp;
-
     for (int i = 0;i < 6 ; i++) {
-        if ((*editData)["Stop7"] != NULL
-        && (*editData)["Stop7"]->formation()->getRoleName(i+1) == "Position") {
-            temp = (*editData)["Stop7"]->formation().get()->getPosition(i+1, wm->ball->pos);
-            rolePosition[i] = temp;
+        if(conf()->LocalSettings_LineUpPosition() == "OurCornerL") {
+            rolePosition[i] = Vector2D(0.25*i-0.5, _FIELD_HEIGHT/2);
+
+        } else if(conf()->LocalSettings_LineUpPosition() == "OurCornerR") {
+            rolePosition[i] = Vector2D(0.25*i-0.5, -_FIELD_HEIGHT/2);
+
+        } else if(conf()->LocalSettings_LineUpPosition() == "parsian") {
+            if (conf()->LocalSettings_OurTeamSide() == "Left") {
+                rolePosition[i] = Vector2D(0.25*i-1, -_FIELD_HEIGHT/2);
+
+            } else {
+                rolePosition[i] = Vector2D((-0.25*i+1), -_FIELD_HEIGHT/2);
+
+            }
         }
+
     }
 
     for(int i = 0; i < agentsID.size(); i++) {
-        gpa[i]->init(rolePosition[5-i],wm->field->oppGoal());
+        gpa[i]->init(rolePosition[i],wm->field->oppGoal());
         gpa[i]->setAgent(knowledge->getAgent(agentsID.at(i)));
         gpa[i]->execute();
     }
-
-
 
 }
 

@@ -20,3 +20,5 @@ potts
 motion/*
 launcher/*
 *.conf.*
+PlayoffPlanRepeat.txt
+plan.db3

@@ -173,6 +173,9 @@ CAgent::CAgent(short int _ID)
     _ACC = 0;
     _DEC = 0;
     agentStopTime.start();
+
+    changeIsNeeded = false;
+
 }
 
 void CAgent::loadProfiles()

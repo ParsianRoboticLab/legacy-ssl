@@ -237,6 +237,10 @@ private:
     ///HMD
     bool checkOverdef();
     double overDefThr;
+
+    // inter change
+    void checkSensorShootFault();
+    int  faultDetectionCounter[12];
 };
 
 

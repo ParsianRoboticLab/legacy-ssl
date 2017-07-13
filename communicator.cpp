@@ -186,8 +186,10 @@ void CBaseCommunicator::readData()
     }
 
     debug(QString("id : %1").arg((int)robotPacket[4][1]), D_MHMMD);
-    for (int i = 0; i < _MAX_NUM_PLAYERS; i++)
-        knowledge->getAgent(i)->setShootSensor(robotPacket[i][1]);
+    for (int i = 0; i < _MAX_NUM_PLAYERS; i++) {
+        knowledge->getAgent(i)->setShootSensor(robotPacket[i][1] & 0x01);
+        knowledge->getAgent(i)->changeIsNeeded = robotPacket[i][4] & 0b11000000;
+    }
 }
 
 CBaseCommunicator::~CBaseCommunicator()
