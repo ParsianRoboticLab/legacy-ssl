@@ -56,6 +56,8 @@ void CMixTeamHandler::master()
     }
     else if(knowledge->getGameState() == CKnowledge::TheirIndirectKick){
         debug("task2 : theirIndirect", D_ATOUSA);
+        task2positioning();
+        task2MakePacket();
     }
     else if(knowledge->getGameState() == CKnowledge::OurIndirectKick){
         debug("task3 : ourIndirect", D_ATOUSA);
@@ -124,16 +126,23 @@ void CMixTeamHandler::initialSlaveMakePacket()
         }
     }
 
-    //for goalie
-    plans[robotsInField-1] = packet->add_plans();
-    plans[robotsInField-1]->set_robot_id(knowledge->mixGoaleID);
-    plans[robotsInField-1]->set_role(multi_team_comm::RobotPlan::Goalie);
-    poses[robotsInField-1] = plans[robotsInField-1]->mutable_nav_target();
-//        planLoc[i] = plans[i]->mutable_shot_target();
-//        planLoc[i] = allPositions[i];
-    posLoc[robotsInField-1] = poses[robotsInField-1]->mutable_loc();
-    posLoc[robotsInField-1]->set_x((wm->field->ourGoal().x + 0.12)*100);
-    posLoc[robotsInField-1]->set_y(wm->field->ourGoal().y * 100);
+    int k;
+    for(k = 0 ; i < robotsInField ; k++){
+        if(knowledge->activesInField.at(k)->id() == knowledge->mixGoaleID)
+            break;
+    }
+    if( k != robotsInField ){
+        //for goalie
+        plans[robotsInField-1] = packet->add_plans();
+        plans[robotsInField-1]->set_robot_id(knowledge->mixGoaleID);
+        plans[robotsInField-1]->set_role(multi_team_comm::RobotPlan::Goalie);
+        poses[robotsInField-1] = plans[robotsInField-1]->mutable_nav_target();
+    //        planLoc[i] = plans[i]->mutable_shot_target();
+    //        planLoc[i] = allPositions[i];
+        posLoc[robotsInField-1] = poses[robotsInField-1]->mutable_loc();
+        posLoc[robotsInField-1]->set_x((wm->field->ourGoal().x + 0.12)*100);
+        posLoc[robotsInField-1]->set_y(wm->field->ourGoal().y * 100);
+    }
 
     static MixTeamSender *sender = new MixTeamSender();
     sender->packet = packet;
@@ -229,16 +238,23 @@ void CMixTeamHandler::task1MakePacket()
         }
     }
 
-    //for goalie
-    plans[robotsInField-1] = packet->add_plans();
-    plans[robotsInField-1]->set_robot_id(knowledge->mixGoaleID);
-    plans[robotsInField-1]->set_role(multi_team_comm::RobotPlan::Goalie);
-    poses[robotsInField-1] = plans[robotsInField-1]->mutable_nav_target();
-//        planLoc[i] = plans[i]->mutable_shot_target();
-//        planLoc[i] = allPositions[i];
-    posLoc[robotsInField-1] = poses[robotsInField-1]->mutable_loc();
-    posLoc[robotsInField-1]->set_x((wm->field->ourGoal().x + 0.12)*100);
-    posLoc[robotsInField-1]->set_y(wm->field->ourGoal().y * 100);
+    int k;
+    for(k = 0 ; i < robotsInField ; k++){
+        if(knowledge->activesInField.at(k)->id() == knowledge->mixGoaleID)
+            break;
+    }
+    if( k != robotsInField ){
+        //for goalie
+        plans[robotsInField-1] = packet->add_plans();
+        plans[robotsInField-1]->set_robot_id(knowledge->mixGoaleID);
+        plans[robotsInField-1]->set_role(multi_team_comm::RobotPlan::Goalie);
+        poses[robotsInField-1] = plans[robotsInField-1]->mutable_nav_target();
+    //        planLoc[i] = plans[i]->mutable_shot_target();
+    //        planLoc[i] = allPositions[i];
+        posLoc[robotsInField-1] = poses[robotsInField-1]->mutable_loc();
+        posLoc[robotsInField-1]->set_x((wm->field->ourGoal().x + 0.12)*100);
+        posLoc[robotsInField-1]->set_y(wm->field->ourGoal().y * 100);
+    }
 
     static MixTeamSender *sender = new MixTeamSender();
     sender->packet = packet;
@@ -247,12 +263,77 @@ void CMixTeamHandler::task1MakePacket()
 
 void CMixTeamHandler::task2positioning()
 {
+    int num = 11;
+    //defense
+    allPositions[0] = Vector2D(wm->field->ourGoal().x + 1.15, 0);
+    allPositions[1] = Vector2D(wm->field->ourGoal().x + 1.14, 0.3);
+    allPositions[2] = Vector2D(wm->field->ourGoal().x + 1.14, -0.3);
+    allPositions[3] = Vector2D(wm->field->ourGoal().x + 1.1, 0.6);
+    allPositions[4] = Vector2D(wm->field->ourGoal().x + 1.1, -0.6);
+    allPositions[5] = Vector2D(wm->field->ourGoal().x + 0.95, 0.9);
+    allPositions[6] = Vector2D(wm->field->ourGoal().x + 0.95, -0.9);
+    allPositions[7] = Vector2D(wm->field->ourGoal().x + 0.72, 1.15);
+    allPositions[8] = Vector2D(wm->field->ourGoal().x + 0.72, -1.15);
 
+    //others
+    allPositions[9] = Vector2D(wm->field->ourGoal().x + 4.1, 2.5);
+    allPositions[10] = Vector2D(wm->field->ourGoal().x + 4.4, 2.5);
+
+    for( int i = 0 ; i < num ; i++ ){
+        draw(Circle2D(allPositions[i],0.1), "red");
+    }
 }
 
 void CMixTeamHandler::task2MakePacket()
 {
+    int robotsInField = knowledge->activesInField.size();
+    multi_team_comm::TeamPlan *packet = new multi_team_comm::TeamPlan();
+    multi_team_comm::RobotPlan *plans[robotsInField];
+    multi_team_comm::Pose *poses[robotsInField];
+    multi_team_comm::Location *posLoc[robotsInField];
+    multi_team_comm::Location *planLoc[robotsInField];
+    int i = 0;
+    for( int j = 0 ; j < robotsInField ; j++ ){
+        if( knowledge->activesInField.at(j)->id() != knowledge->mixGoaleID ){
+            plans[i] = packet->add_plans();
+            plans[i]->set_robot_id(knowledge->activesInField.at(j)->id());
+            if(i < 9)
+                plans[i]->set_role(multi_team_comm::RobotPlan::Defense);
+            else
+                plans[i]->set_role(multi_team_comm::RobotPlan::Default);
+            poses[i] = plans[i]->mutable_nav_target();
+    //        planLoc[i] = plans[i]->mutable_shot_target();
+    //        planLoc[i] = allPositions[i];
+            posLoc[i] = poses[i]->mutable_loc();
+            posLoc[i]->set_x(allPositions[i].x * 100);
+            posLoc[i]->set_y(allPositions[i].y * 100);
+            i++;
+        }
+    }
 
+    int k;
+    for(k = 0 ; i < robotsInField ; k++){
+        if(knowledge->activesInField.at(k)->id() == knowledge->mixGoaleID)
+            break;
+    }
+    if( k != robotsInField ){
+        //for goalie
+         plans[robotsInField-1] = packet->add_plans();
+         plans[robotsInField-1]->set_robot_id(knowledge->mixGoaleID);
+         plans[robotsInField-1]->set_role(multi_team_comm::RobotPlan::Goalie);
+         poses[robotsInField-1] = plans[robotsInField-1]->mutable_nav_target();
+     //        planLoc[i] = plans[i]->mutable_shot_target();
+     //        planLoc[i] = allPositions[i];
+         posLoc[robotsInField-1] = poses[robotsInField-1]->mutable_loc();
+         posLoc[robotsInField-1]->set_x((wm->field->ourGoal().x + 0.12)*100);
+         posLoc[robotsInField-1]->set_y(wm->field->ourGoal().y * 100);
+    }
+
+    static MixTeamSender *sender = new MixTeamSender();
+    sender->packet = packet;
+
+    qDebug() << " sssss: " << packet->plans().size();
+    sender->flag = true;
 }
 
 ///////////////////slave/////////////////////
@@ -268,7 +349,7 @@ void CMixTeamHandler::slave()
     }
     else if(knowledge->getGameState() == CKnowledge::TheirIndirectKick){
         debug("task2 : theirIndirect", D_ATOUSA);
-
+        initialReadPacket();
     }
     else if(knowledge->getGameState() == CKnowledge::OurIndirectKick){
         debug("task3 : ourIndirect", D_ATOUSA);
