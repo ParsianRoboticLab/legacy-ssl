@@ -972,7 +972,7 @@ int CRolePlayMake::getPenaltychipSpeed(){
 
 
 int CRolePlayMake::choosePenaltyStrategy(){
-        if(!goalKeeperForward) return pgoaheadShoot;
+        if(true) return pgoaheadShoot;
         else if(ShootPenalty()) return pshootDirect;/*
         else if(getPenaltychipSpeed()!= -1) return pchipShoot;*/
         else return pgoaheadShoot;
@@ -1021,7 +1021,7 @@ void CRolePlayMake::executeOurPenaltyShootout(){
                 else
                     kick->setKickSpeed(400);
                 kick->setChip(true);
-                if(wm->ball->vel.length()>0.1)
+                if(wm->ball->vel.length()>0.4)
                     firstKick=false;
             }else{//kick first
 
