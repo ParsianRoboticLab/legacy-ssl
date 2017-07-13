@@ -207,7 +207,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     else if(critical) {
 
         currentPlan.mode = DynamicEnums::Critical;
-        /*bool notDribble = true;
+        bool notDribble = true;
         if(wm->opp.activeAgentsCount() > 0 && wm->field->isInField(currentPlan.passPos))
         {
             for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
@@ -218,16 +218,25 @@ void CDynamicAttack::makePlan(int agentSize) {
                 Circle2D  Robot         = Circle2D(agentPos, 0.1);
                 Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
 
-                if(Robot.intersection(temp, t1, t2)  && robotKickArea.intersection(temp, &t1, &t2) && ballPos.x > 0)
+                if((Robot.intersection(temp, &t1, &t2)  && robotKickArea.intersection(temp, &t1, &t2) && ballPos.x > 0)
+                    || (lastplaymakeInit == 1 && Robot.intersection(temp, &t1, &t2)))
                 {
+                    debug(QString("WOW we are dribbling"), D_PARSA);
                     notDribble = false;
                     currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
+                    lastplaymakeInit = 1;
                     break;
                 }
             }
         }
-        if(notDribble == true)*/
+        /*if(notDribble == true)
+        {
+            debug(QString("NOOOOOO we are not Dribbling"), D_PARSA);
             currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
+            lastplaymakeInit = 0;
+        }*/
+
+
 
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Best;
@@ -251,7 +260,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     // it's needed to be fast
     else if(fast) {
         currentPlan.mode = DynamicEnums::Fast;
-        currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
+        currentPlan.playmake.init(DynamicEnums::Pass, DynamicEnums::Best);
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Best;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
@@ -267,7 +276,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     else {
 
         currentPlan.mode = DynamicEnums::NoPlanExeption;
-        currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
+        currentPlan.playmake.init(DynamicEnums::Pass, DynamicEnums::Best);
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Best;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
@@ -413,6 +422,7 @@ void CDynamicAttack::playMake() {
         roleAgentPM -> setChip(chipOrNot(currentPlan.passPos, 0.5, 0.1));
         roleAgentPM -> setTarget(currentPlan.passPos);
         roleAgentPM -> setEmptySpot(false);
+        roleAgentPM -> setNoKick(false);
         if(roleAgentPM->getChip()) {
             roleAgentPM->setKickRealSpeed(appropriateChipSpeed());
         } else {
@@ -1028,11 +1038,15 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
             points[i] -= 17;
         if(points[i] > points[ans])
             ans = i;
-        debug(QString("pass pos %1 %2 point is %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
+        //debug(QString("pass pos %1 %2 point is %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
     }
     currentPlan.passPos = temp[ans];
     lastPassPosLoc = currentPlan.passPos;
     debug(QString("pass Pos %1 %2").arg(currentPlan.passPos.x).arg(currentPlan.passPos.y), D_PARSA);
+
+
+
+
 
     //the old one:
 //    QList <Vector2D> temp;
