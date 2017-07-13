@@ -29,6 +29,8 @@ public:
         bool hasGyro;
     } abilities;
 
+    bool changeIsNeeded;
+
     SoccerIntention *intention;
     IntentionDefense defIntent;
     IntentionMark markIntent;
@@ -36,7 +38,7 @@ public:
     IntentionBlock blockIntent;
     IntentionPosition positionIntent;
     Vector2D homePos;
- void accelerationLimiter(double vf,bool diveMode = false);
+    void accelerationLimiter(double vf,bool diveMode = false);
     double goalVisibility;
     QTime agentStopTime;
     bool timerReset;
