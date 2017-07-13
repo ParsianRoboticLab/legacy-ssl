@@ -6,6 +6,7 @@ const int GameState::GAME_ON =  (1 << 0);
 const int GameState::GAME_OFF = (1 << 1);
 const int GameState::HALTED =   (1 << 2);
 
+
 const int GameState::KICKOFF =  (1 << 3);
 const int GameState::PENALTY =  (1 << 4);
 const int GameState::DIRECT =   (1 << 5);
@@ -56,31 +57,24 @@ void GameState::transition(char ref_command) {
     if (ref_command == COMM_SUBGOAL_BLUE) bluescore--;
     if (ref_command == COMM_GOAL_YELLOW) yellowscore++;
     if (ref_command == COMM_SUBGOAL_YELLOW) yellowscore--;
-    if (ref_command == COMM_PENALTY_SHOOTOUT){
-        gametimes = PENALTY_SHOOTOUT;
-    }
-    if(ref_command == COMM_TIMEOUT_YELLOW
-            || ref_command == COMM_TIMEOUT_BLUE
-            || ref_command == COMM_HALF_TIME) {
-        state=HALF_TIME; }
     if (ref_command == COMM_HALT) {
         state = HALTED; return; }
+
     if (ref_command == COMM_STOP) {
         state = GAME_OFF; return; }
+
     if (ref_command == COMM_START) {
         state = GAME_ON; return; }
 
     if (ref_command == COMM_READY && state & NOTREADY) {
         state &= ~NOTREADY; state |= READY; return; }
 
-
-
-
-
-
-
     if (state & READY) {
         state = GAME_ON; return; }
+    if (ref_command == COMM_PENALTY_SHOOTOUT){
+        gametimes = PENALTY_SHOOTOUT;
+    }
+
 
     if (state == GAME_OFF) {
         switch (ref_command) {
@@ -109,13 +103,13 @@ void GameState::transition(char ref_command) {
             state = BALLPLACEMENT | BLUE | READY; return;
         case COMM_BALLPLACEMENT_YELLOW:
             state = BALLPLACEMENT | YELLOW | READY; return;
+        case COMM_HALF_TIME:
+            state=HALF_TIME;return;
 
 
         default: break;
         }
     }
-    if(ref_command == COMM_PENALTY_SHOOTOUT){
-        state |= PENALTY_SHOOTOUT; return; }
 }
 
 bool GameState::gameOn() { return (state == GAME_ON); }

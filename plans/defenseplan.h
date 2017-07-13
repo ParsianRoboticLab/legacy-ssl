@@ -5,6 +5,7 @@
 #include <cmath>
 
 //#define OLD_FASTEST 1
+
 #define LOOP_TIME_BYKK 0.016
 #define AGENT_SPEED_BYKK 1.5
 //struct velAndAccByKK {
@@ -125,8 +126,9 @@ protected:
     bool canReachToBall(int agentId, int theirAgentId);
     int decideShootOutMode();
     QList <Vector2D> lastBallPos;
-    int penaltyShootoutMode;
+    int penaltyShootoutMode=beforeTouch;
     void penaltyShootOutMode();
+    CSkillGotoPointAvoid* striker_Robot;
     void penaltyMode();
     bool isStopped();
     bool isTheirNonPlayKick();
@@ -137,6 +139,7 @@ protected:
         NoneExep = 3
     };
     enum shootOutMode{
+        beforeTouch,
         shootOutClear,
         ballBisector,
         skyDive
