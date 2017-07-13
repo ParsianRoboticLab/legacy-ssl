@@ -70,6 +70,9 @@ CRolePlayMake::CRolePlayMake(CAgent *_agent) : CRole(_agent)
     //    spinPass = new CBehaviourSpinPass;
     initialPoint.invalidate();
     forceRedecide = false;
+
+    lastBounceDataFile.setFileName("lastBounce");
+    out.setDevice(&lastBounceDataFile);
 }
 
 CRolePlayMake::~CRolePlayMake()
@@ -958,6 +961,55 @@ double CRolePlayMake::lastBounce(){
     return (wm->field->oppGoal()+Vector2D(0,20/sign) - agent->pos()).length();
 }
 
+void CRolePlayMake::loadLastBounceSpeed(){
+    lastBounceDataFile.open(QIODevice::ReadOnly);
+
+    QMap<double, double> data;
+    QPair<int, QMap<double, int> > p;
+
+    QStringList l;
+    QString text = out.readAll();
+    l = text.split("\n");
+
+    debug(QString("size: %1").arg(l.size()), D_FATEMEH);
+    if(text.size() > 0){
+        p.first = l.at(0).toInt();
+        for(int i=1; i<l.size(); i++){
+            if(l.at(i) == "*"){
+                p.second.clear();
+                p.second = data;
+                lastBounceProfileData.append(p);
+                data.clear();
+                if(i+1 == l.size())
+                    break;
+                p.first = l.at(i+1).toInt();
+                i++;
+            }
+            else{
+                data.insert(l.at(i).toDouble(), l.at(i+1).toInt());
+                i++;
+            }
+        }
+    }
+
+//    for(int i=0; i< lastBounceProfileData.size(); i++){
+//        debug(QString("id: %1").arg(lastBounceProfileData.at(i).first), D_FATEMEH);
+//        for(int j=0; j< lastBounceProfileData.at(i).second.keys().size(); j++)
+//            debug(QString("%1:: %2").arg(lastBounceProfileData.at(i).second.keys().at(j)).arg(
+//                      lastBounceProfileData.at(i).second.values().at(j)), D_FATEMEH);
+//    }
+
+}
+
+int CRolePlayMake::getLastBounceSpeed(int id, double lastBounceDistance){
+    for(int i=0; i< lastBounceProfileData.size(); i++){
+        if(lastBounceProfileData.at(i).first != id)
+            continue;
+        else{
+            return lastBounceProfileData.at(i).second.keys(lastBounceDistance);
+        }
+    }
+}
 
 int CRolePlayMake::getPenaltychipSpeed(){
     Vector2D oppGoaliPos=wm->opp.active(knowledge->oppGoalieIndex)->pos;
@@ -979,6 +1031,7 @@ int CRolePlayMake::choosePenaltyStrategy(){
 }
 
 void CRolePlayMake::executeOurPenaltyShootout(){
+    loadLastBounceSpeed();
     bool flag=false;
     debug("penalty Shootout : ",D_NADIA);
     double w;
