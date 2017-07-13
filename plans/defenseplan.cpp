@@ -8,21 +8,12 @@ using namespace std;
 #define LONG_CHIP_POWER 1023
 
 ///////////////// AHZ is writing, have you my voice? ... ;) //////////////////
-bool DefensePlan::isAgentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> stuckIndexs){
+bool DefensePlan::isAgentsStuckTogether(QList<Vector2D> agentsPosition){
     //// If defense agents stuck together , this function
-    QList<Circle2D> agentsCircle;
-    Vector2D sol[2];
-    for(int i = 0 ; i < agentsPosition.size() ; i++){
-        agentsCircle.append(Circle2D(agentsPosition.at(i) , CRobot::robot_radius_new));
-    }
     for(int i = 0 ; i < agentsPosition.size() ; i++){
         for(int j = 0 ; j < agentsPosition.size() ; j++){
             if(i != j){
-                if(agentsCircle.at(i).intersection(agentsCircle.at(j) , &sol[0] , &sol[1])){
-                    stuckPositions.append(agentsPosition.at(i));
-                    stuckPositions.append(agentsPosition.at(j));
-                    stuckIndexs.append(i);
-                    stuckIndexs.append(j);
+                if(agentsPosition.at(i).dist(agentsPosition.at(j)) <= 2 * CRobot::robot_radius_new){                    
                     return true;
                 }
             }
@@ -31,7 +22,22 @@ bool DefensePlan::isAgentsStuckTogether(QList<Vector2D> agentsPosition , QList<V
     return false;
 }
 
-void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> stuckPositions){
+void DefensePlan::agentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs){
+    //// If defense agents stuck together , this function
+    for(int i = 0 ; i < agentsPosition.size() ; i++){
+        for(int j = 0 ; j < i ; j++){
+            if(i != j){
+                if(agentsPosition.at(i).dist(agentsPosition.at(j)) <= 2 * CRobot::robot_radius_new){
+                    stuckPositions.append(agentsPosition.at(i));
+                    stuckPositions.append(agentsPosition.at(j));
+                    stuckIndexs.append(i);
+                }
+            }
+        }
+    }
+}
+
+void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> &stuckPositions){
     QList<Circle2D> stuckAgentsCircle;
     Segment2D centerToCenter;
     for(int i = 0 ; i < stuckPositions.size() ; i++){
@@ -47,6 +53,7 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
         }
     }
 }
+
 float getDegree(Vector2D pos1, Vector2D origin, Vector2D pos3){
     //// get the angle of between two vector that
     //// is made up by this 3 points.
@@ -765,7 +772,7 @@ void DefensePlan::setGoalKeeperState(){
                 return;
             }
             else if(playOnMode){
-                if((wm->ball->vel.length() > 1.3 || goalieOneTouch) && (goalLine.intersection(ballLine).valid() || oneTouchCnt < 5)){
+                if((wm->ball->vel.length() > 1.3) && (goalLine.intersection(ballLine).valid() || oneTouchCnt < 5)){
                     ballBehindGoalie = false;
                     goalieOneTouch = true;
                     goalieClearMode = false;
@@ -785,6 +792,10 @@ void DefensePlan::setGoalKeeperState(){
                     ballIsOutOfField = false;
                     behindBallThr = 0;
                     return;
+                }
+                else{
+                    goalieClearMode = false;
+                    goalieOneTouch = false;
                 }
                 ballBehindGoalie = false;
                 behindBallThr = 0.08;
@@ -1233,6 +1244,15 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     matchPoints.append(markPoses);
     draw(QString(" %1 %2").arg(matchPoints.count()).arg(_defenseNum),Vector2D(-2,2),"red");
     draw(QString("  %1").arg(ourAgents.count()),Vector2D(2,2),"red");
+    /////////////// Stucking agents ///////////////////////////////////////////
+    if(isAgentsStuckTogether(matchPoints)){
+        agentsStuckTogether(matchPoints , stuckPositions , stuckIndexs);
+        debug("Agents Stuck together" , D_AHZ);
+        debug(QString("stuck : %1").arg(stuckPositions.size()),  D_AHZ);
+        debug(QString("stuck : %1").arg(stuckIndexs.size()),  D_AHZ);
+        correctingTheAgentsAreStuckTogether(matchPoints , stuckPositions);
+    }
+    ////////////////////////////////////////////////////////////////////////////
     knowledge->Matching(ourAgents,matchPoints,matchResult);
     debug(QString("defenseAHZ : %1 ").arg(defenseAgents.size()) , D_AHZ);
     Vector2D tempMatchPoints[matchPoints.size()];
@@ -1265,12 +1285,6 @@ void DefensePlan::matchingDefPos(int _defenseNum){
         for(int i = 0; i < defenseCount ; i++){
             defensePoints[i] = matchPoints[i];
         }
-        /////////////////////// Added for RC 2017 //////////////////////////////
-        if(isAgentsStuckTogether(matchPoints , stuckPositions , stuckIndexs)){
-            debug("Agents Stuck together" , D_AHZ);
-            correctingTheAgentsAreStuckTogether(matchPoints , stuckPositions);
-        }
-        ////////////////////////////////////////////////////////////////////////
         for(int i = 0 ; i < matchPoints.count() && i < matchResult.count() ; i++){
             gpa[ourAgents[i]->id()]->noRelax();
             for(int j = 0; j < ourAgents.size(); j++){
@@ -1720,6 +1734,7 @@ void DefensePlan::executeGoalKeeper(){
     playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick|| knowledge->getGameState() == CKnowledge::TheirIndirectKick;
     playOnMode = knowledge->isStart();
     stopMode = knowledge->isStop();
+    QList<Vector2D> tempSol;
     if(goalKeeperAgent != NULL){
         if(savedClearPos.valid() && clearCnt > 30){
             savedClearPos.invalidate();
@@ -1730,6 +1745,15 @@ void DefensePlan::executeGoalKeeper(){
         }
         else{
             clearCnt = 0;
+        }
+        if(!wm->field->isInOurPenaltyArea(goalKeeperTarget)){
+            tempSol.append(wm->field->ourPAreaIntersect(Segment2D(knowledge->goalie->pos() , goalKeeperTarget)));
+            if(tempSol.size() == 1){
+                goalKeeperTarget = tempSol.at(0);
+            }
+            else if(tempSol.size() == 2){
+                goalKeeperTarget = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
+            }
         }
         if(playOffMode){
             AHZSkills = gpa[knowledge->goalie->id()];
@@ -2538,7 +2562,7 @@ int DefensePlan::decideNumOfMarks(){
                 return defenseCount - 1;
             }
             else{
-                return defenseCount - 2;
+                return defenseCount;
             }
         }
         else if(playOffMode){
@@ -2552,7 +2576,7 @@ int DefensePlan::decideNumOfMarks(){
                 ||Vector2D::angleOf(BallPos,ourGoal,rightCorner).abs() < 20 + overDefThr)
                     && defenseCount > 1 && !Circle2D((wm->field->ourGoal() - Vector2D(0.2,0)),1.60).contains(wm->ball->pos)) {
                 overDefThr = 5;
-                return 1;
+                return 0;
             }
             else{
                 overDefThr = 0;
@@ -2634,7 +2658,7 @@ Vector2D DefensePlan::ballPrediction(bool _isGoalie){
 
 void DefensePlan::findOppAgentsToMark(){
     oppAgentsToMark.clear();
-    debug(QString("opp goalie id : %1").arg(knowledge->findOppGoalie()), D_AHZ);
+    debug(QString("opp goalie ID : %1").arg(knowledge->findOppGoalie()), D_AHZ);
     for(int i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
         if(wm->opp.activeAgentID(i) != knowledge->findOppGoalie() && !isIndirectArea(wm->opp.active(i)->pos)){
             oppAgentsToMark.append(wm->opp.active(i));
@@ -2733,7 +2757,6 @@ void DefensePlan::findPos(int _markAgentSize){
         segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
     }
     //////////////// Determine the plan of mark from GUI ////////////////////
-
     if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass){
         if(playOff || stopMode){
             stateForMark = QString("BlockPass");
