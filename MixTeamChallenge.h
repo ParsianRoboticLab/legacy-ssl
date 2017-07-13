@@ -8,13 +8,21 @@
 void CMainApplication::MixTeamChallenge()
 {
     knowledge->updateGameState();
-    CMixTeamHandler *mstr = new CMixTeamHandler();
+    static CMixTeamHandler *mstr = new CMixTeamHandler();
     mstr->master();
 
-    CMixTeamHandler *slv = new CMixTeamHandler();
+    static CMixTeamHandler *slv = new CMixTeamHandler();
     slv->slave();
-    qDebug() << "****" << knowledge->ssize;
 
+
+//    slv->execute();
+
+
+    qDebug() << "****" << knowledge->ssize;
+//    qDebug() << "^^^^" << knowledge->activesInField.size();
+    qDebug() << "&&&&" << knowledge->getActiveAgents().size();
+    qDebug() << "^^^^" << knowledge->activesInField.size();
+    debug(QString("GID: %1").arg(knowledge->mixGoaleID), D_ATOUSA);
 }
 
 #endif // MIXTEAMCHALLENGE_H

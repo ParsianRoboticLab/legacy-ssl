@@ -38,5 +38,7 @@ void MixTeamReader::readyRead()
 
     knowledge->ssize = knowledge->kPlans->plans_size();
     knowledge->ready = true;
-
+//    knowledge->activesInField.clear();//??bashe?
+    knowledge->activesInField = knowledge->getActiveAgents();
+    knowledge->mixGoaleID = wm->our.data->goalieID;
 }

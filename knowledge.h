@@ -159,8 +159,8 @@ public:
     multi_team_comm::TeamPlan *kPlans;
     int ssize;
     bool ready = false;
-
-
+    QList<CAgent*> activesInField;
+    int mixGoaleID;
 
 
 

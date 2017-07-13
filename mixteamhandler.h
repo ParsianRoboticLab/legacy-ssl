@@ -6,12 +6,8 @@
 #include "mixteamsender.h"
 #include "mixteamreader.h"
 
-#define MAX_OUR_ROBOTS_IN_FIELD 5//dont change
-#define MAX_ROBOTS_IN_FIELD 10//dont change
-
-//number of robots except goalie
-#define ROBOTS_IN_FIELD 8//ino baadan t GUI bayad bezarm
-#define OUR_ROBOTS_IN_FIELD 4//ino baadan t GUI bayad bezarm
+#define MAX_OUR_ROBOTS_IN_FIELD 6//dont change
+#define MAX_ROBOTS_IN_FIELD 11//dont change
 
 
 class CMixTeamHandler
@@ -20,19 +16,18 @@ public:
     CMixTeamHandler();
 
     int goalieID;
-    int allAgentIDs[MAX_ROBOTS_IN_FIELD];
-    int ourAgentIDs[MAX_OUR_ROBOTS_IN_FIELD];
+    QList<int> ourAgentIDs;
+    int numOfAllOurRobots;
 
     Vector2D goaliePos;
-//    Vector2D ourPos[5];
-//    Vector2D slavePos[5];
     Vector2D allPositions[MAX_ROBOTS_IN_FIELD];
 
     MixTeamReader *reader;
 
-//    CRolePlayOff *ourRols[MAX_OUR_ROBOTS_IN_FIELD];
     CSkillGotoPoint *ourRols[MAX_OUR_ROBOTS_IN_FIELD];
-    CRolePlayOff *goalieRole;
+
+    ////////Constructor/////
+    void setOurRobotIDs();
 
     ////////master part/////
 
@@ -43,13 +38,15 @@ public:
     void task1MakePacket();
     void task2positioning();
     void task2MakePacket();
+
     Vector2D getXYByAngleOurGoal(double _angle, double _radius);
 
-    ////////slave pasrt/////
+
+    ////////slave part/////
     void slave();
     void initialReadPacket();
-    bool isOurAgent(int id);
-
+//    void execute();
+//    CAgent **agents;
 };
 
 #endif // MIXTEAMHANDLER_H

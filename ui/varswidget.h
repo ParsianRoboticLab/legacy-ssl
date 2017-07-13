@@ -60,6 +60,7 @@ public:
     DEF_VALUE(LocalSettings,bool, Bool, ParsianWorkShop)
     DEF_VALUE(LocalSettings,std::string,String,MixTeamIP)
     DEF_VALUE(LocalSettings,int,Int,MixTeamPort)
+    DEF_VALUE(LocalSettings,std::string,String,MixTeamIDs)
 
 
     DEF_TREE(Common)
