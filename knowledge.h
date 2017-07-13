@@ -276,7 +276,7 @@ public:
     bool isPointClear(Vector2D point, Vector2D from, double radBig, double radSmall, bool considerRelaxedIDs, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, QList<int> ourSmallIDs, QList<int> oppSmallIDs);
     bool isPointClear(Vector2D point, Vector2D from, double rad, bool considerRelaxedIDs=false, QList<int> ourRelaxedIDs=QList<int>(), QList<int> oppRelaxedIDs=QList<int>());
     Vector2D onetouchablity(int agentId, double &goalWidth, double &angle, double &coming,int senderId=-1, double underestimateTheirGoalie=1.0);
-    Vector2D getEmptyPosOnGoalForPenalty(double n, bool oppGoal, double th);
+    Vector2D getEmptyPosOnGoalForPenalty(double n, bool oppGoal, double th, CAgent* ourAgent=NULL);
     Vector2D goalVisiblity(int agentId, double &regionWidth, double underestimateTheirGoalie);
     Vector2D getEmptyPosOnGoal(Vector2D from, double &regionWidth, bool oppGoal, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, double wOpenness = 1.0, bool _draw = false);
     Vector2D getEmptyPosOnPoints(Vector2D from, double &regionWidth, QList<Vector2D> points, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs);

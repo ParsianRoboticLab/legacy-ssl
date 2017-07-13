@@ -1554,7 +1554,7 @@ int DefensePlan::decideShootOutMode(){
 void DefensePlan::penaltyShootOutMode(){
     int sID;
 
-    for(int i=0;i<knowledge->getActiveAgents().count();i++){
+    /*for(int i=0;i<knowledge->getActiveAgents().count();i++){
         if(knowledge->getActiveAgents().at(i)->id()!=goalKeeperAgent->id()){
             sID=i;
         }
@@ -1564,7 +1564,7 @@ void DefensePlan::penaltyShootOutMode(){
     striker_Robot->setSlowMode(false);
     striker_Robot->setADiveMode(true);
     striker_Robot->init(wm->field->oppCornerL() , wm->field->ourGoal());
-    striker_Robot->execute();
+    striker_Robot->execute();*/
 
     Vector2D targetDir(10, 5);
     targetDir=wm->opp[knowledge->nearestOppToBall]->pos;
