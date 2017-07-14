@@ -890,6 +890,16 @@ CAgent::Abilities::Abilities()
     hasGyro = canChip = canKick = canSpin = highBattery = true;
 }
 
+CAgent::Status::Status() {
+    spin = shotSensor = fault = faild = halt = shotBoard = false;
+    kickFault = chipFault = false;
+    encoderFault[0] = encoderFault[1] = encoderFault[2] = encoderFault[3] = false;
+    motorFault[0] = motorFault[1] = motorFault[2] = motorFault[3] = motorFault[4] = false;
+    beep = false;
+    shotSensorFault = false;
+
+}
+
 double CAgent::kickValueSpeed(double value,bool spinner)//for onetouch
 {
     if (wm->getIsSimulMode())
