@@ -161,7 +161,8 @@ SOURCES += main.cpp \
     plays/stopplay.cpp \
     defpos.cpp \
     chipkick.cpp \
-    chalftimelineup.cpp
+    chalftimelineup.cpp \
+    proto/robot_status.pb.cc
 
 HEADERS += base.h \
     worldmodel.h \
@@ -335,7 +336,8 @@ HEADERS += base.h \
     plays/stopplay.h \
     defpos.h \
     chipkick.h \
-    chalftimelineup.h
+    chalftimelineup.h \
+    proto/robot_status.pb.h
 
 unix:INCLUDEPATH += "/usr/local/include"
 unix:LIBS += -L/usr/local/include/qjson -lqjson

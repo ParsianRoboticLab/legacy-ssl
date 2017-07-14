@@ -1052,7 +1052,6 @@ void DefensePlan::initDefense(const QList <CAgent*> &_defenseAgents){
 
     defenseAgents.clear();
     defenseAgents.append(_defenseAgents);
-    debug(QString(" sag to toohet: %1").arg(defenseAgents.size()) , D_AHZ);
     agents.append(_defenseAgents);
 }
 
@@ -1136,6 +1135,9 @@ DefensePlan::DefensePlan()
         stateForMark = QString("BlockShot");
     }
     ////////////////////////////////
+
+    striker_Robot=new CSkillGotoPointAvoid(NULL);
+
     for (int i = 0; i < _MAX_NUM_PLAYERS; i++){
         lastMarker[i] = -1;
 
@@ -1407,6 +1409,11 @@ Vector2D DefensePlan::getGoalieShootOutTarget(bool isBallPath){
     QList<Vector2D> target;
     Vector2D degree;
     Vector2D finalTarget;
+    double alpha;
+    if(wm->ball->pos.dist(wm->opp[knowledge->nearestOppToBall]->pos)<1)
+        alpha=1;
+    else
+        alpha=0;
 
     Line2D ballPath(wm->ball->pos , wm->ball->pos + (wm->ball->vel.norm()*10));
     Line2D ballLine(lastBallPos.first(), lastBallPos.last());
@@ -1438,6 +1445,8 @@ Vector2D DefensePlan::getGoalieShootOutTarget(bool isBallPath){
     }
     else{
         finalTarget = ballPath.perpendicular(wm->our[goalKeeperAgent->id()]->pos).intersection(ballPath);
+        finalTarget =finalTarget * alpha + wm->opp[knowledge->nearestOppToBall]->pos* (1-alpha);
+
         return finalTarget;
     }
 }
@@ -1460,10 +1469,14 @@ bool DefensePlan::canReachToBall(int ourAgentId, int theirAgentId){
 int DefensePlan::decideShootOutMode(){
 
 
-    if(canReachToBall(goalKeeperAgent->id(), knowledge->nearestOppToBall)){
+    if((wm->ball->pos.dist(wm->opp[knowledge->nearestOppToBall]->pos) <0.5
+        && wm->ball->pos.dist(wm->field->ourGoal())>5) || wm->ball->pos.dist(wm->field->ourGoal())>5.5)
+        return beforeTouch;
+
+    else if(canReachToBall(goalKeeperAgent->id(), knowledge->nearestOppToBall)){
         return shootOutClear;
     }
-    else if(Circle2D(wm->ball->pos,0.12).contains(wm->opp[knowledge->nearestOppToBall]->pos)){
+    else if(Circle2D(wm->ball->pos,0.15).contains(wm->opp[knowledge->nearestOppToBall]->pos)){
         if(wm->ball->pos.dist(wm->field->ourGoal()) > 2)
             return skyDive;
         else
@@ -1475,13 +1488,28 @@ int DefensePlan::decideShootOutMode(){
     else if(Circle2D(wm->ball->pos,0.2).contains(wm->opp[knowledge->nearestOppToBall]->pos)){
         return shootOutClear;
     }
+    else return skyDive;
 }
 
 void DefensePlan::penaltyShootOutMode(){
+    int sID;
+
+    for(int i=0;i<knowledge->getActiveAgents().count();i++){
+        if(knowledge->getActiveAgents().at(i)->id()!=goalKeeperAgent->id()){
+            sID=i;
+        }
+    }
+    assignSkill(knowledge->getActiveAgents().at(sID) , striker_Robot);
+    debug(QString("shp:%1").arg(knowledge->getActiveAgents().at(sID)->id()),D_NADIA);
+    striker_Robot->setSlowMode(false);
+    striker_Robot->setADiveMode(true);
+    striker_Robot->init(wm->field->oppCornerL() , wm->field->ourGoal());
+    striker_Robot->execute();
 
     Vector2D targetDir(10, 5);
-    targetDir.setDir(AngleDeg(0));
-    targetDir.setLength(1);
+    targetDir=wm->opp[knowledge->nearestOppToBall]->pos;
+    //    targetDir.setLength(1);
+
 
     if(lastBallPos.count() < 15){
         lastBallPos.append(wm->ball->pos);
@@ -1491,8 +1519,17 @@ void DefensePlan::penaltyShootOutMode(){
     }
 
     penaltyShootoutMode = decideShootOutMode();
+    debug(QString("Mode:%1").arg(penaltyShootoutMode),D_NADIA);
 
     switch(penaltyShootoutMode ){
+    case beforeTouch:
+        assignSkill(goalKeeperAgent , gpa[goalKeeperAgent->id()]);
+        gpa[goalKeeperAgent->id()]->setSlowMode(false);
+        gpa[goalKeeperAgent->id()]->setADiveMode(true);
+        gpa[goalKeeperAgent->id()]->init(wm->field->ourGoal() , targetDir);
+        break;
+
+
     case shootOutClear:
         assignSkill(goalKeeperAgent, kickSkill);
         kickSkill->setKickSpeed(1000);
@@ -1515,6 +1552,7 @@ void DefensePlan::penaltyShootOutMode(){
         gpa[goalKeeperAgent->id()]->init(getGoalieShootOutTarget(false) , targetDir);
 
         break;
+
     case skyDive:
         assignSkill(goalKeeperAgent , gpa[goalKeeperAgent->id()]);
         gpa[goalKeeperAgent->id()]->setSlowMode(false);
@@ -2914,6 +2952,20 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
     tempSeg.assign(wm->ball->pos, wm->ball->pos + (opp - wm->ball->pos) * 10);
     Vector2D pos = wm->ball->pos + (opp - wm->ball->pos) * ratio;
     CDefPos test;
+    double distance = (wm->ball->pos - opp).length();
+    debug(QString("Dist %1").arg(distance), D_MAHI);
+    if(distance > 0.6){
+        if(ratio * distance > 0.1){
+        debug(QString("First"),D_HAMED);
+        }else{
+            debug(QString("second"),D_HAMED);
+            pos = wm->ball->pos + (opp - wm->ball->pos) * 0.15 / distance;
+        }
+    }
+    else{
+        debug(QString("Third"),D_HAMED);
+        pos = wm->ball->pos + (opp - wm->ball->pos) * (1 + 0.15 / distance);
+    }
     if((wm->field->ourGoal() - pos).length() < markRadiusStrict){
         tempQlist.append(test.getIntersectionWithPenaltyAreaDef(2, tempSeg));
         tempQlist.append( wm->ball->pos - opp);

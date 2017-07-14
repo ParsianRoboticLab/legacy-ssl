@@ -14,6 +14,11 @@ using namespace std;
 
 #define MAX_KICK_SPEED 1023
 #define new_com_test_robot_id -1
+
+struct Fault {
+
+};
+
 class CSkill;
 class CAgent : public QObject
 {
@@ -29,6 +34,29 @@ public:
         bool hasGyro;
     } abilities;
 
+    class Status {
+    public:
+        Status();
+        double battery;
+        double capCharge; // the charge of shot capacities
+        double dataLost;
+        bool spin;
+        bool shotSensor;
+        bool fault;
+        bool faild;
+        bool halt;
+        bool shotBoard;
+        bool kickFault;
+        bool chipFault;
+        bool encoderFault[4];
+        bool motorFault[5];
+        bool beep;
+        bool shotSensorFault;
+
+    } status;
+
+    bool changeIsNeeded;
+
     SoccerIntention *intention;
     IntentionDefense defIntent;
     IntentionMark markIntent;
@@ -36,7 +64,7 @@ public:
     IntentionBlock blockIntent;
     IntentionPosition positionIntent;
     Vector2D homePos;
- void accelerationLimiter(double vf,bool diveMode = false);
+    void accelerationLimiter(double vf,bool diveMode = false);
     double goalVisibility;
     QTime agentStopTime;
     bool timerReset;
@@ -62,17 +90,18 @@ public:
     void setOnOffState(bool state);
     void setCommandID  (int ID);
 
+    bool shootSensor();
+    void setShootSensor(bool b);
+    bool canOneTouch();
+
     //position and velocity
     Vector2D pos();
     Vector2D dir();
-    bool shootSensor();
-    void setShootSensor(bool b);
     double dirDegree();
     Vector2D vel();
     double angularVel();
     CRobot* self();
     Vector2D distToBall();
-    bool canOneTouch();
 
     //Low Level Commands
     void setRobotVel(double _vtan, double _vnorm, double _w); //vtan, vnorm in m/s and w in rad/s
