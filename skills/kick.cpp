@@ -1381,15 +1381,14 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
 
     if(wm->ball->vel.length() > 0.2)
     {
-        for(double i = 0 ; i < 3 ; i += 0.03)
+        for(double i = 0 ; i < 10 ; i += 0.03)
         {
             ballPosInFuture = wm->ball->getPosInFuture(i);
             finalPos = ballPosInFuture - (_target-ballPosInFuture).norm()*0.11;
             if(CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,true)<= i+0.1)
             {
                 double t = _agent->id();
-                debug(QString("pos of %1 is : %2 %3").arg(t).arg(finalPos.x).arg(finalPos.y), D_PARSA);
-                draw(finalPos);
+                draw(finalPos,1,QColor(Qt::blue));
                 return i;
             }
         }
