@@ -150,9 +150,9 @@ void CBaseCommunicator::readData()
                 if(i >= 12)
                 {
 
-                    for(int j = i-1 ; j >= i - 12 ; j--)
+                    for(int j = 0 ; j <= 12 ; j++)
                     {
-                        robotPacket[recDataFlow[i-12]][j] = recDataFlow[j];
+                        robotPacket[recDataFlow[i-12]][j] = recDataFlow[j+i-12];
                         onlineRobotsTimer[recDataFlow[i-12]].restart();
                     }
                     if (!recDataFlow.isEmpty())
@@ -188,6 +188,8 @@ void CBaseCommunicator::readData()
     debug(QString("id : %1").arg((int)robotPacket[4][1]), D_MHMMD);
     for (int i = 0; i < _MAX_NUM_PLAYERS; i++)
         knowledge->getAgent(i)->setShootSensor(robotPacket[i][1]);
+
+    debug(QString("sh : %1").arg(robotPacket[5][1]),D_MAHI);
 }
 
 CBaseCommunicator::~CBaseCommunicator()

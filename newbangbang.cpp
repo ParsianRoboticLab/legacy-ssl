@@ -104,7 +104,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     }
     else
     {
-        posPidDist = 0.3;
+        posPidDist = 0.15;
     }
     if(slow)
     {
@@ -120,8 +120,10 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     }
     else if(oneTouch)
     {
-        posPid->kp = 4*(0.4/agentPos.dist(pos2));
-        posPid->kp = min(posPid->kp,conf()->BangBang_posKP()*2);
+        posPid->kp = (conf()->BangBang_posKP())*(0.04/(agentPos.dist(pos2)*agentPos.dist(pos2)));
+        debug(QString("kp: %1").arg(posPid->kp),D_MHMMD);
+        posPid->kp = min(posPid->kp,conf()->BangBang_posKP()*3);
+        posPid->kp = max(posPid->kp,conf()->BangBang_posKP());
 
         posPid->kd = 20;
         posPid->ki = 0;
