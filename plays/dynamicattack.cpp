@@ -162,7 +162,7 @@ void CDynamicAttack::makePlan(int agentSize) {
 //            if()
 //                currentPlan.positionAgents[i].region = DynamicEnums::CounterAttack;
 //            else
-                currentPlan.positionAgents[i].region = DynamicEnums::Near;
+            currentPlan.positionAgents[i].region = DynamicEnums::Near;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
         }
 
@@ -171,8 +171,8 @@ void CDynamicAttack::makePlan(int agentSize) {
     // we Don't have the ball
     else if (wm->ball->pos.x < 0) {
         currentPlan.mode = DynamicEnums::NotWeHaveBall;
-
         currentPlan.playmake.init(DynamicEnums::Chip, DynamicEnums::Goal);
+
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Near;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
@@ -218,9 +218,10 @@ void CDynamicAttack::makePlan(int agentSize) {
                 Circle2D  Robot         = Circle2D(agentPos, 0.1);
                 Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
 
-                if((Robot.intersection(temp, &t1, &t2)  && robotKickArea.intersection(temp, &t1, &t2) && ballPos.x > 0)
+                if((/*Robot.intersection(temp, &t1, &t2)  && */robotKickArea.intersection(temp, &t1, &t2) && ballPos.x > 0)
                     || (lastplaymakeInit == 1 && Robot.intersection(temp, &t1, &t2)))
                 {
+                    oppRob = wm->opp.active(i)->pos;
                     debug(QString("WOW we are dribbling"), D_PARSA);
                     notDribble = false;
                     currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
@@ -229,14 +230,12 @@ void CDynamicAttack::makePlan(int agentSize) {
                 }
             }
         }
-        /*if(notDribble == true)
+        if(notDribble == true)
         {
             debug(QString("NOOOOOO we are not Dribbling"), D_PARSA);
-            currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
+            currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
             lastplaymakeInit = 0;
-        }*/
-
-
+        }
 
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Best;
@@ -274,15 +273,13 @@ void CDynamicAttack::makePlan(int agentSize) {
     // there's no need to be fast and
     // there is no plan for this situation
     else {
-
         currentPlan.mode = DynamicEnums::NoPlanExeption;
         currentPlan.playmake.init(DynamicEnums::Pass, DynamicEnums::Best);
-        for(size_t i = 0;i < agentSize;i++) {
+        for(size_t i = 0; i < agentSize; i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Best;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
         }
     }
-
 }
 
 CAgent* CDynamicAttack::getMahiPlayMaker() {
@@ -410,10 +407,12 @@ void CDynamicAttack::playMake() {
 
     bool flagT = false;
 
+    Vector2D og = wm->ball->pos - wm->field->ourGoal();
+
     switch(currentPlan.playmake.skill) {
     case DynamicEnums::Dribble:
         roleAgentPM -> setTargetDir(currentPlan.passPos);
-        roleAgentPM -> setTarget(wm->field->oppGoal());
+        roleAgentPM -> setTarget(og);
         roleAgentPM -> setChip(false);
         roleAgentPM -> setNoKick(true);
         roleAgentPM -> setSelectedSkill(DynamicEnums::Dribble); // skill Dribble
