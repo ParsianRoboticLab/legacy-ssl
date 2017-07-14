@@ -1110,7 +1110,6 @@ void DefensePlan::initDefense(const QList <CAgent*> &_defenseAgents){
 
     defenseAgents.clear();
     defenseAgents.append(_defenseAgents);
-    debug(QString(" sag to toohet: %1").arg(defenseAgents.size()) , D_AHZ);
     agents.append(_defenseAgents);
 }
 
@@ -1306,6 +1305,12 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     matchPoints.append(markPoses);
     draw(QString(" %1 %2").arg(matchPoints.count()).arg(_defenseNum),Vector2D(-2,2),"red");
     draw(QString("  %1").arg(ourAgents.count()),Vector2D(2,2),"red");
+    /////////////////////// Added for RC 2017 //////////////////////////////
+    if(isAgentsStuckTogether(matchPoints , stuckPositions , stuckIndexs)){
+        debug("Agents Stuck together" , D_AHZ);
+        correctingTheAgentsAreStuckTogether(matchPoints , stuckPositions);
+    }
+    ////////////////////////////////////////////////////////////////////////
     knowledge->Matching(ourAgents,matchPoints,matchResult);
     debug(QString("defenseAHZ : %1 ").arg(defenseAgents.size()) , D_AHZ);
     Vector2D tempMatchPoints[matchPoints.size()];
@@ -1338,12 +1343,6 @@ void DefensePlan::matchingDefPos(int _defenseNum){
         for(int i = 0; i < defenseCount ; i++){
             defensePoints[i] = matchPoints[i];
         }
-        /////////////////////// Added for RC 2017 //////////////////////////////
-        if(isAgentsStuckTogether(matchPoints , stuckPositions , stuckIndexs)){
-            debug("Agents Stuck together" , D_AHZ);
-            correctingTheAgentsAreStuckTogether(matchPoints , stuckPositions);
-        }
-        ////////////////////////////////////////////////////////////////////////
         for(int i = 0 ; i < matchPoints.count() && i < matchResult.count() ; i++){
             gpa[ourAgents[i]->id()]->noRelax();
             for(int j = 0; j < ourAgents.size(); j++){
@@ -2988,6 +2987,20 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
     tempSeg.assign(wm->ball->pos, wm->ball->pos + (opp - wm->ball->pos) * 10);
     Vector2D pos = wm->ball->pos + (opp - wm->ball->pos) * ratio;
     CDefPos test;
+    double distance = (wm->ball->pos - opp).length();
+    debug(QString("Dist %1").arg(distance), D_MAHI);
+    if(distance > 0.6){
+        if(ratio * distance > 0.1){
+        debug(QString("First"),D_HAMED);
+        }else{
+            debug(QString("second"),D_HAMED);
+            pos = wm->ball->pos + (opp - wm->ball->pos) * 0.15 / distance;
+        }
+    }
+    else{
+        debug(QString("Third"),D_HAMED);
+        pos = wm->ball->pos + (opp - wm->ball->pos) * (1 + 0.15 / distance);
+    }
     if((wm->field->ourGoal() - pos).length() < markRadiusStrict){
         tempQlist.append(test.getIntersectionWithPenaltyAreaDef(2, tempSeg));
         tempQlist.append( wm->ball->pos - opp);
