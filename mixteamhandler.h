@@ -38,6 +38,8 @@ public:
     void task1MakePacket();
     void task2positioning();
     void task2MakePacket();
+    void task3positioning();
+    void task3MakePacket();
 
     Vector2D getXYByAngleOurGoal(double _angle, double _radius);
 

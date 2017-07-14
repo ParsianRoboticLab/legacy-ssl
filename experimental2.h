@@ -25,7 +25,34 @@ Vector2D lastBallPos = Vector2D(0,0);
 bool start = true;
 void CMainApplication::Experimental2()
 {
+    static CSkillKick *kicker = new CSkillKick(knowledge->getActiveAgents().at(1));
+    kicker->setDontKick(true);
+    kicker->setChip(false);
+    kicker->setTarget(Vector2D(2,0));
+    kicker->setKickSpeed(5);
 
+    if(Circle2D(Vector2D(2,0), 0.3).contains(knowledge->getActiveAgents().at(0)->pos())){
+        kicker->setDontKick(false);
+        kicker->execute();
+    }
+    debug(QString("vel : %1").arg(wm->ball->vel.length()), D_ATOUSA);
+    if(wm->ball->vel.length() > 0.5){
+        kicker->setDontKick(true);
+    }
+    else{
+        kicker->setDontKick(false);
+    }
+
+
+    static CSkillKickOneTouch *oneToucher = new CSkillKickOneTouch(knowledge->getActiveAgents().at(0));
+    oneToucher->setTarget(wm->field->oppGoal());
+    oneToucher->setWaitPos(Vector2D(2,0));
+    oneToucher->setKickSpeed(10);
+    oneToucher->execute();
+
+
+
+    return;
     //technicalChalenge Penalty
 
     int id = 2;

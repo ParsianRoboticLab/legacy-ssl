@@ -336,6 +336,34 @@ void CMixTeamHandler::task2MakePacket()
     sender->flag = true;
 }
 
+void CMixTeamHandler::task3positioning()
+{
+    int robotsInField = knowledge->activesInField.size();
+    /*
+    int i;
+    for(i = 0 ; i < robotsInField ; i++){
+        if(knowledge->activesInField.at(i)->id() == knowledge->mixGoaleID)
+            break;
+    }
+    if( i != robotsInField )
+        robotsInField--;
+    */
+
+    int selectedOpp = -1;
+    for(int i = 0 ; i < robotsInField ; i++){
+        int tid = knowledge->activesInField.at(i)->id();
+        if(!(ourAgentIDs.contains(tid)) && (tid != knowledge->mixGoaleID)){
+            selectedOpp = tid;
+        }
+    }
+
+}
+
+void CMixTeamHandler::task3MakePacket()
+{
+
+}
+
 ///////////////////slave/////////////////////
 void CMixTeamHandler::slave()
 {
