@@ -1218,8 +1218,8 @@ void CCoach::updateAttackState()
 
     draw(robotCritArea,QColor(Qt::cyan));
 
-    if(robotCritArea.contains(oppNearest->pos)
-       || (ourAttackState == CRITICAL && critCir.contains(oppNearest->pos))) {
+    if(robotCritArea.contains(oppNearest->pos)){
+       //|| (ourAttackState == CRITICAL && critCir.contains(oppNearest->pos))) {
         ourAttackState = CRITICAL;
         debug(QString("Attack: critical"),D_MHMMD);
     }
@@ -1306,11 +1306,11 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
                 playmakeId = ourPlayers[i];
             }
         }
-        for(int i = 0; i < ourPlayers.size(); i++)
-            debug(QString("timeneeded of %1 is : %2 \n").arg(ourPlayers[i]).arg(nearest[ourPlayers[i]]), D_PARSA);
+       /* for(int i = 0; i < ourPlayers.size(); i++)
+            debug(QString("timeneeded of %1 is : %2 \n").arg(ourPlayers[i]).arg(nearest[ourPlayers[i]]), D_PARSA);*/
         lastPlayMake = playmakeId;
     }
-    debug(QString("playmake is : %1").arg(playmakeId), D_PARSA);
+//    debug(QString("playmake is : %1").arg(playmakeId), D_PARSA);
 }
 
 void CCoach::decideAttack()
@@ -1479,6 +1479,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     if(wm->our[playmakeId] != NULL)
     {
         bool goodForKick = ((wm->ball->pos.dist(wm->field->oppGoal()) < 1.5) || (findMostPossible(wm->our[playmakeId]->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr)));
+//        debug(QString(" %1 shotprob ").arg(findMostPossible(wm->our[playmakeId]->pos)), D_PARSA);
         if(goodForKick)
         {
             dynamicAttack->setDirectShot(true);
