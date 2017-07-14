@@ -10,6 +10,7 @@
 #include <QVector2D>
 
 #include "defpos.h"
+#include "proto/multi_team_communication.pb.h"
 
 //#include "simulation/simulator.h"
 //#include <widgets.h>
@@ -154,6 +155,14 @@ public:
     //added
     Vector2D getBPPosition();
     void setBPPosition(float x, float y);
+
+    //added for mixteam TC
+    multi_team_comm::TeamPlan *kPlans;
+    int ssize;
+    bool ready = false;
+    QList<CAgent*> activesInField;
+    int mixGoaleID;
+
 
 
     class PlaymakerSelector

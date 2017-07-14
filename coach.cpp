@@ -347,12 +347,12 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
     }
 
     // handle stop
-    //    if (wm->ball->pos.x < 0){
-    //        preferedDefenseCounts = agentsCount - 1;
-    //    }
-    //    else if (wm->ball->pos.x > 1){
-    preferedDefenseCounts = policy() -> Formation_Defense();
-    //    }
+//    if (wm->ball->pos.x < 0){
+//        preferedDefenseCounts = agentsCount - 1;
+//    }
+//    else if (wm->ball->pos.x > 1){
+        preferedDefenseCounts = policy() -> Formation_Defense();
+//    }
 
     if(!policy()->Formation_StrictFormation() || !knowledge->isStart()){
         bool oppsAttack = false;
@@ -2205,9 +2205,9 @@ void CCoach::execute()
     playmakeId = -1;
     if((critArea.contains(wm->ball->pos) && wm->field->isInField(wm->ball->pos))) {
         decideDefense();
-        choosePlaymakeAndSupporter(true);
+//        choosePlaymakeAndSupporter(true);
     } else {
-        choosePlaymakeAndSupporter(false);
+//        choosePlaymakeAndSupporter(false);
         decideDefense();
     }
 
@@ -2506,6 +2506,7 @@ QList<SPlan*> CCoach::getMatchedPlans(int _shotSpot, const QList<SPlan*>& _plans
     else                                                return tempPlans;
 
 }
+
 ///HMD
 bool CCoach::checkOverdef(){
     if((Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourCornerL()).abs() < 20 + overDefThr
@@ -2552,3 +2553,4 @@ void CCoach::checkSensorShootFault() {
     }
 
 }
+
