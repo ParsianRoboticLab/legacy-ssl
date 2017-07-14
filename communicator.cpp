@@ -150,9 +150,9 @@ void CBaseCommunicator::readData()
                 if(i >= 12)
                 {
 
-                    for(int j = i-1 ; j >= i - 12 ; j--)
+                    for(int j = 0 ; j <= 12 ; j++)
                     {
-                        robotPacket[recDataFlow[i-12]][j] = recDataFlow[j];
+                        robotPacket[recDataFlow[i-12]][j] = recDataFlow[j+i-12];
                         onlineRobotsTimer[recDataFlow[i-12]].restart();
                     }
                     if (!recDataFlow.isEmpty())
