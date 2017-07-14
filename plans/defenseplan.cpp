@@ -2595,15 +2595,15 @@ int DefensePlan::decideNumOfMarks(){
     playOnMode = knowledge->isStart();
     playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick|| knowledge->getGameState() == CKnowledge::TheirIndirectKick;
     if(defenseCount > 0){
-        if(knowledge->isStop() && defenseCount >= 2){
-            if(checkOverdef()){
-                return defenseCount - 1;
-            }
-            else{
-                return defenseCount;
-            }
-        }
-        else if(playOffMode){
+                if(knowledge->isStop() && defenseCount >=2){
+                    if(checkOverdef()){
+                    return defenseCount - 1;
+                    }
+                    else{
+                        return defenseCount - 2;
+                    }
+                }
+        if(playOffMode){
             return decideNumOfMarksInPlayOff(defenseCount);
         }
         else if(knowledge->transientFlag){

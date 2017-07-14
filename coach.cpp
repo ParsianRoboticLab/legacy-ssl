@@ -346,13 +346,13 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         preferedGoalieAgent = wm->our.data->goalieID;
     }
 
-    // handle stop
-//    if (wm->ball->pos.x < 0){
-//        preferedDefenseCounts = agentsCount - 1;
-//    }
-//    else if (wm->ball->pos.x > 1){
-        preferedDefenseCounts = policy() -> Formation_Defense();
-//    }
+//     handle stop
+        if (wm->ball->pos.x < 0){
+            preferedDefenseCounts = agentsCount - 1;
+        }
+        else if (wm->ball->pos.x > 1){
+    preferedDefenseCounts = policy() -> Formation_Defense();
+        }
 
     if(!policy()->Formation_StrictFormation() || !knowledge->isStart()){
         bool oppsAttack = false;
@@ -385,14 +385,12 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         } else if (transientFlag
                    &&  knowledge->getGameState() != CKnowledge::TheirKickOff) {
             if (trasientTimeOut.elapsed() > 1000 && !wm->field->isInOurPenaltyArea(wm->ball->pos)) {
-                preferedDefenseCounts = min(0, agentsCount - missMatchIds.count() - 1);
-
+                preferedDefenseCounts = max(0, agentsCount - missMatchIds.count() - 1);
             } else {
                 preferedDefenseCounts = agentsCount - missMatchIds.count();
 
             }
-            debug("[coach] harchi robot mobat darim rikhtim tu defa", D_MAHI);
-        }
+                   }
         else if(!knowledge->isStop())
         {
             if(checkOverdef()){
@@ -427,7 +425,6 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         preferedDefenseCounts = 0;
     //    if (knowledge->getGameState() == CKnowledge::OurIndirectKick)
     //        preferedGoalieAgent = -1;
-
 }
 
 void CCoach::calcDesiredMarkCounts()
