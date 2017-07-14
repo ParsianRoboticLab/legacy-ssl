@@ -8,6 +8,11 @@
 #include <defensepositioning.h>
 #include <time.h>
 #include <autoballplacement.h>
+#include <proto/multi_team_communication.pb.h>
+#include <mixteamthread.h>
+#include <mixteamsender.h>
+#include <mixteamreader.h>
+
 clock_t t;
 //#define speedTest
 
@@ -19,9 +24,39 @@ struct VectorIndex {
     int index;
 };
 
+
 int id = 2;
+bool firstTime = true;
 void CMainApplication::Experimental6()
 {
+
+    static MixTeamSender *sender = new MixTeamSender();
+    static MixTeamReader *reader = new MixTeamReader();
+//    static MixTeamThread *mthr = new MixTeamThread();
+
+    multi_team_comm::TeamPlan* example = new multi_team_comm::TeamPlan();
+    multi_team_comm::RobotPlan *rp1 = example->add_plans();
+    multi_team_comm::Pose *pose1 = rp1->mutable_nav_target();
+    multi_team_comm::Location *loc1 = pose1->mutable_loc();
+
+    loc1->set_x(1);loc1->set_y(1);
+    pose1->set_heading(1.2);
+    rp1->set_robot_id(1);
+
+
+    multi_team_comm::RobotPlan *rp2 = example->add_plans();
+    multi_team_comm::Pose *pose2 = rp2->mutable_nav_target();
+    multi_team_comm::Location *loc2 = pose2->mutable_loc();
+
+    loc2->set_x(2);loc2->set_y(2);
+    pose2->set_heading(2.2);
+    rp2->set_robot_id(2);
+
+    sender->packet = example;
+    sender->flag = true;
+
+    return;
+
 #ifdef speedTest
     int agentNum = 7;
     soccer->agents[agentNum]->setRobotAbsVel(1,0,0);
