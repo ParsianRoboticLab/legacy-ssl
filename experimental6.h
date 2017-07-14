@@ -8,6 +8,11 @@
 #include <defensepositioning.h>
 #include <time.h>
 #include <autoballplacement.h>
+#include <proto/multi_team_communication.pb.h>
+#include <mixteamthread.h>
+#include <mixteamsender.h>
+#include <mixteamreader.h>
+
 clock_t t;
 //#define speedTest
 
@@ -18,6 +23,7 @@ struct VectorIndex {
     Vector2D vec;
     int index;
 };
+
 
 int id = 2;
 long int a=0;
@@ -37,7 +43,7 @@ void CMainApplication::Experimental6()
         stopFlag = false;
     if(knowledge->joystick->getButton4())
         stopFlag = true;
-    int skillAgent = 2;
+    int skillAgent = 7;
 #ifdef kickTest
     static CSkillKick mmkick(soccer->agents[skillAgent]);
     mmkick.setTarget(wm->field->oppGoal());

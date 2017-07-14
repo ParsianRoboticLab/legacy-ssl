@@ -346,13 +346,13 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         preferedGoalieAgent = wm->our.data->goalieID;
     }
 
-    // handle stop
-    //    if (wm->ball->pos.x < 0){
-    //        preferedDefenseCounts = agentsCount - 1;
-    //    }
-    //    else if (wm->ball->pos.x > 1){
+//     handle stop
+        if (wm->ball->pos.x < 0){
+            preferedDefenseCounts = agentsCount - 1;
+        }
+        else if (wm->ball->pos.x > 1){
     preferedDefenseCounts = policy() -> Formation_Defense();
-    //    }
+        }
 
     if(!policy()->Formation_StrictFormation() || !knowledge->isStart()){
         bool oppsAttack = false;
@@ -385,14 +385,12 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         } else if (transientFlag
                    &&  knowledge->getGameState() != CKnowledge::TheirKickOff) {
             if (trasientTimeOut.elapsed() > 1000 && !wm->field->isInOurPenaltyArea(wm->ball->pos)) {
-                preferedDefenseCounts = min(0, agentsCount - missMatchIds.count() - 1);
-
+                preferedDefenseCounts = max(0, agentsCount - missMatchIds.count() - 1);
             } else {
                 preferedDefenseCounts = agentsCount - missMatchIds.count();
 
             }
-            debug("[coach] harchi robot mobat darim rikhtim tu defa", D_MAHI);
-        }
+                   }
         else if(!knowledge->isStop())
         {
             if(checkOverdef()){
@@ -427,7 +425,6 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         preferedDefenseCounts = 0;
     //    if (knowledge->getGameState() == CKnowledge::OurIndirectKick)
     //        preferedGoalieAgent = -1;
-
 }
 
 void CCoach::calcDesiredMarkCounts()
@@ -1218,8 +1215,8 @@ void CCoach::updateAttackState()
 
     draw(robotCritArea,QColor(Qt::cyan));
 
-    if(robotCritArea.contains(oppNearest->pos)
-       || (ourAttackState == CRITICAL && critCir.contains(oppNearest->pos))) {
+    if(robotCritArea.contains(oppNearest->pos)){
+       //|| (ourAttackState == CRITICAL && critCir.contains(oppNearest->pos))) {
         ourAttackState = CRITICAL;
         debug(QString("Attack: critical"),D_MHMMD);
     }
@@ -1252,15 +1249,17 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
         if (ourPlayers.size() - preferedDefenseCounts <= 0) {
             playmakeId = -1;
             lastPlayMake = -1;
+
             return;
         }
     }
 
     if (ourPlayers.size() == 0) {
-        playmakeId = -1;
+        playmakeId = -1;        
         lastPlayMake = -1;
         return;
     }
+
 
     ////////////////////first we choose our playmake
     // third version
@@ -1287,6 +1286,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
         if(playMakeIntention.elapsed() < playMakeIntentionInterval)
         {
             playmakeId = lastPlayMake;
+            debug(QString("playmake is : %1").arg(playmakeId), D_PARSA);
             return;
         }
         else
@@ -1479,6 +1479,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     if(wm->our[playmakeId] != NULL)
     {
         bool goodForKick = ((wm->ball->pos.dist(wm->field->oppGoal()) < 1.5) || (findMostPossible(wm->our[playmakeId]->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr)));
+//        debug(QString(" %1 shotprob ").arg(findMostPossible(wm->our[playmakeId]->pos)), D_PARSA);
         if(goodForKick)
         {
             dynamicAttack->setDirectShot(true);
@@ -2214,7 +2215,7 @@ void CCoach::execute()
     ////////////////////////////////////////////
 
     decideAttack();
-
+    checkSensorShootFault();
     // checks whether the goalie is under the net or not if it is moves out
     checkGoalieInsight();
     // Old Role Base Execution -- used for block, old_playmaker
@@ -2506,6 +2507,7 @@ QList<SPlan*> CCoach::getMatchedPlans(int _shotSpot, const QList<SPlan*>& _plans
     else                                                return tempPlans;
 
 }
+
 ///HMD
 bool CCoach::checkOverdef(){
     if((Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourCornerL()).abs() < 20 + overDefThr
@@ -2552,3 +2554,4 @@ void CCoach::checkSensorShootFault() {
     }
 
 }
+

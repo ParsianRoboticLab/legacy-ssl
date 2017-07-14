@@ -60,6 +60,11 @@ public:
     DEF_ENUM(LocalSettings,std::string,LineUpPosition)
 
     DEF_VALUE(LocalSettings,bool, Bool, ParsianWorkShop)
+    DEF_VALUE(LocalSettings,std::string,String,MixTeamIP)
+    DEF_VALUE(LocalSettings,int,Int,MixTeamPort)
+    DEF_VALUE(LocalSettings,std::string,String,MixTeamIDs)
+
+
     DEF_TREE(Common)
     DEF_VALUE(Common,int,Int,Viewport_Width)
     DEF_VALUE(Common,int,Int,Command_Interval)
