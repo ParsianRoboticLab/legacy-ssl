@@ -1305,12 +1305,13 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     matchPoints.append(markPoses);
     draw(QString(" %1 %2").arg(matchPoints.count()).arg(_defenseNum),Vector2D(-2,2),"red");
     draw(QString("  %1").arg(ourAgents.count()),Vector2D(2,2),"red");
-    /////////////////////// Added for RC 2017 //////////////////////////////
+    /*/////////////////////// Added for RC 2017 //////////////////////////////
     if(isAgentsStuckTogether(matchPoints , stuckPositions , stuckIndexs)){
         debug("Agents Stuck together" , D_AHZ);
         correctingTheAgentsAreStuckTogether(matchPoints , stuckPositions);
     }
     ////////////////////////////////////////////////////////////////////////
+    */
     knowledge->Matching(ourAgents,matchPoints,matchResult);
     debug(QString("defenseAHZ : %1 ").arg(defenseAgents.size()) , D_AHZ);
     Vector2D tempMatchPoints[matchPoints.size()];
@@ -2635,14 +2636,14 @@ int DefensePlan::decideNumOfMarks(){
     playOnMode = knowledge->isStart();
     playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick|| knowledge->getGameState() == CKnowledge::TheirIndirectKick;
     if(defenseCount > 0){
-        //        if(knowledge->isStop() && defenseCount >=2){
-        //            if(checkOverdef()){
-        //            return defenseCount - 1;
-        //            }
-        //            else{
-        //                return defenseCount - 2;
-        //            }
-        //        }
+                if(knowledge->isStop() && defenseCount >=2){
+                    if(checkOverdef()){
+                    return defenseCount - 1;
+                    }
+                    else{
+                        return defenseCount - 2;
+                    }
+                }
         if(playOffMode){
             return decideNumOfMarksInPlayOff(defenseCount);
         }
