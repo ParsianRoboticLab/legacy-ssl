@@ -1883,7 +1883,7 @@ Vector2D CKnowledge::getEmptyPosOnGoalForPenalty(double n, bool oppGoal, double 
 
         debug(QString("%1, %2").arg(rightDeg.abs()).arg(leftDeg.abs()), D_FATEMEH);
 
-        if(rightDeg.abs() > leftDeg.abs() && fabs(rightDeg.abs() - leftDeg.abs()) > th){
+        if(rightDeg.abs() > leftDeg.abs() && fabs(rightDeg.abs() - leftDeg.abs()) > th*15){
             target = Vector2D(goalieR.x, goalieR.y + n);
             draw(target, 10, QColor(Qt::cyan));
         } else {
@@ -4132,6 +4132,34 @@ void CKnowledge::sortByY(QList <CAgent *> &_agents ){
     }
 }
 
+double CKnowledge::chipGoalPropability(bool isOurChip){
+    double GoalDistanceToBall;
+    double GoalieDistanseToBall;
+    double GoalDistanceToGoalie;
+    Vector2D goal,goaliePos;
+    if(isOurChip){
+        goal=wm->field->oppGoal();
+        goaliePos=wm->opp.active(knowledge->oppGoalieIndex)->pos;
+
+    }
+    else{
+        goal= wm->field->ourGoal();
+        goaliePos=goalie->pos();
+    }
+
+    GoalDistanceToBall=wm->ball->pos.dist(goal)/1.9;
+    GoalieDistanseToBall=wm->ball->pos.dist(goaliePos);
+    GoalDistanceToGoalie=goaliePos.dist(goal);
+    if(goaliePos.dist(wm->ball->pos)<0.35
+            || wm->ball->pos.dist(goal)<1)
+        return 0;
+    else if(((GoalDistanceToBall-GoalieDistanseToBall)/GoalDistanceToGoalie)*2 >0)
+        return ((GoalDistanceToBall-GoalieDistanseToBall)/GoalDistanceToGoalie)*2;
+    else return 0;
+
+
+}
+
 int CKnowledge::nonPlayOnFastestSelector(QList <CAgent *> _agents){
     double minDist = 1000;
     for( int i=0 ; i<_agents.size() ; i++ ){
@@ -4312,7 +4340,6 @@ void CKnowledge::setNecessaryDefKick(bool tempNcssryDefKick) {
 bool CKnowledge::getNecessaryDefKick() {
     return necessaryDefKick;
 }
-
 
 Vector2D CKnowledge::getChipDir(){
 

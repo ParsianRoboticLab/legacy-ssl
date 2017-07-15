@@ -179,10 +179,12 @@ public:
         void setPassRecvTarget(int id);
     } playmakerSelector;
     bool transientFlag;
+
     int newFastestSelector(QList <CAgent*> _agents);
     int nonPlayOnFastestSelector(QList <CAgent*> _agents);
     void sortByX(QList <CAgent *> &_agents );
     void sortByY(QList <CAgent *> &_agents );
+    double chipGoalPropability(bool isOurChip);
     int Matching(const QList <CAgent*> robots, const QList <Vector2D> pointsToMatch, QList <int> &matchPoints);
     void fastMatching(const QList <CAgent*> robots, const QList <Vector2D> pointsToMatch, QList <int> &matchPoints);
     int factorial(int a);
