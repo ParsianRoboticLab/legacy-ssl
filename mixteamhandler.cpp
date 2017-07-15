@@ -67,10 +67,10 @@ void CMixTeamHandler::master()
 
 void CMixTeamHandler::initialPositioning()
 {
-    int robotsInField = knowledge->activesInField.size();
+    int robotsInField = knowledge->getActiveAgents().size();
     int i;
     for(i = 0 ; i < robotsInField ; i++){
-        if(knowledge->activesInField.at(i)->id() == knowledge->mixGoaleID)
+        if(knowledge->getActiveAgents().at(i)->id() == knowledge->mixGoaleID)
             break;
     }
     if( i != robotsInField )
@@ -102,7 +102,8 @@ void CMixTeamHandler::initialPositioning()
 
 void CMixTeamHandler::initialMakePacket()
 {
-    int robotsInField = knowledge->activesInField.size();
+    int robotsInField = knowledge->getActiveAgents().size();
+    qDebug() << "----" << knowledge->getActiveAgents().size();
     multi_team_comm::TeamPlan *packet = new multi_team_comm::TeamPlan();
     multi_team_comm::RobotPlan *plans[robotsInField];
     multi_team_comm::Pose *poses[robotsInField];
@@ -110,9 +111,9 @@ void CMixTeamHandler::initialMakePacket()
     multi_team_comm::Location *planLoc[robotsInField];
     int i = 0;
     for( int j = 0 ; j < robotsInField ; j++ ){
-        if( knowledge->activesInField.at(j)->id() != knowledge->mixGoaleID ){
+        if( knowledge->getActiveAgents().at(j)->id() != knowledge->mixGoaleID ){
             plans[i] = packet->add_plans();
-            plans[i]->set_robot_id(knowledge->activesInField.at(j)->id());
+            plans[i]->set_robot_id(knowledge->getActiveAgents().at(j)->id());
     //        plans[i]->set_role(multi_team_comm::RobotPlan::Defense);//not important here
             poses[i] = plans[i]->mutable_nav_target();
     //        planLoc[i] = plans[i]->mutable_shot_target();
@@ -126,7 +127,7 @@ void CMixTeamHandler::initialMakePacket()
 
     int k;
     for(k = 0 ; i < robotsInField ; k++){
-        if(knowledge->activesInField.at(k)->id() == knowledge->mixGoaleID)
+        if(knowledge->getActiveAgents().at(k)->id() == knowledge->mixGoaleID)
             break;
     }
     if( k != robotsInField ){
@@ -150,10 +151,10 @@ void CMixTeamHandler::initialMakePacket()
 
 void CMixTeamHandler::task1positioning()
 {
-    int robotsInField = knowledge->activesInField.size();
+    int robotsInField = knowledge->getActiveAgents().size();
     int i;
     for(i = 0 ; i < robotsInField ; i++){
-        if(knowledge->activesInField.at(i)->id() == knowledge->mixGoaleID)
+        if(knowledge->getActiveAgents().at(i)->id() == knowledge->mixGoaleID)
             break;
     }
     if( i != robotsInField )
@@ -202,7 +203,7 @@ Vector2D CMixTeamHandler::getXYByAngleOurGoal(double _angle, double _radius)
 
 void CMixTeamHandler::task1MakePacket()
 {
-    int robotsInField = knowledge->activesInField.size();
+    int robotsInField = knowledge->getActiveAgents().size();
     multi_team_comm::TeamPlan *packet = new multi_team_comm::TeamPlan();
     multi_team_comm::RobotPlan *plans[robotsInField];
     multi_team_comm::Pose *poses[robotsInField];
@@ -210,9 +211,9 @@ void CMixTeamHandler::task1MakePacket()
     multi_team_comm::Location *planLoc[robotsInField];
     int i = 0;
     for( int j = 0 ; j < robotsInField/2 ; j++ ){
-        if( knowledge->activesInField.at(j)->id() != knowledge->mixGoaleID ){
+        if( knowledge->getActiveAgents().at(j)->id() != knowledge->mixGoaleID ){
             plans[i] = packet->add_plans();
-            plans[i]->set_robot_id(knowledge->activesInField.at(j)->id());
+            plans[i]->set_robot_id(knowledge->getActiveAgents().at(j)->id());
             plans[i]->set_role(multi_team_comm::RobotPlan::Defense);//not important here
             poses[i] = plans[i]->mutable_nav_target();
     //        planLoc[i] = plans[i]->mutable_shot_target();
@@ -225,9 +226,9 @@ void CMixTeamHandler::task1MakePacket()
     }
 
     for( int j = robotsInField/2 ; j < robotsInField ; j++ ){
-        if( knowledge->activesInField.at(j)->id() != knowledge->mixGoaleID ){
+        if( knowledge->getActiveAgents().at(j)->id() != knowledge->mixGoaleID ){
             plans[i] = packet->add_plans();
-            plans[i]->set_robot_id(knowledge->activesInField.at(j)->id());
+            plans[i]->set_robot_id(knowledge->getActiveAgents().at(j)->id());
             plans[i]->set_role(multi_team_comm::RobotPlan::Offense);//not important here
             poses[i] = plans[i]->mutable_nav_target();
     //        planLoc[i] = plans[i]->mutable_shot_target();
@@ -241,7 +242,7 @@ void CMixTeamHandler::task1MakePacket()
 
     int k;
     for(k = 0 ; i < robotsInField ; k++){
-        if(knowledge->activesInField.at(k)->id() == knowledge->mixGoaleID)
+        if(knowledge->getActiveAgents().at(k)->id() == knowledge->mixGoaleID)
             break;
     }
     if( k != robotsInField ){
@@ -287,7 +288,7 @@ void CMixTeamHandler::task2positioning()
 
 void CMixTeamHandler::task2MakePacket()
 {
-    int robotsInField = knowledge->activesInField.size();
+    int robotsInField = knowledge->getActiveAgents().size();
     multi_team_comm::TeamPlan *packet = new multi_team_comm::TeamPlan();
     multi_team_comm::RobotPlan *plans[robotsInField];
     multi_team_comm::Pose *poses[robotsInField];
@@ -295,9 +296,9 @@ void CMixTeamHandler::task2MakePacket()
     multi_team_comm::Location *planLoc[robotsInField];
     int i = 0;
     for( int j = 0 ; j < robotsInField ; j++ ){
-        if( knowledge->activesInField.at(j)->id() != knowledge->mixGoaleID ){
+        if( knowledge->getActiveAgents().at(j)->id() != knowledge->mixGoaleID ){
             plans[i] = packet->add_plans();
-            plans[i]->set_robot_id(knowledge->activesInField.at(j)->id());
+            plans[i]->set_robot_id(knowledge->getActiveAgents().at(j)->id());
             if(i < 9)
                 plans[i]->set_role(multi_team_comm::RobotPlan::Defense);
             else
@@ -314,7 +315,7 @@ void CMixTeamHandler::task2MakePacket()
 
     int k;
     for(k = 0 ; i < robotsInField ; k++){
-        if(knowledge->activesInField.at(k)->id() == knowledge->mixGoaleID)
+        if(knowledge->getActiveAgents().at(k)->id() == knowledge->mixGoaleID)
             break;
     }
     if( k != robotsInField ){
@@ -337,7 +338,7 @@ void CMixTeamHandler::task2MakePacket()
 
 void CMixTeamHandler::task3positioning()
 {
-    int robotsInField = knowledge->activesInField.size();
+    int robotsInField = knowledge->getActiveAgents().size();
 
     selectedIDM = chooseMasterID(robotsInField);
     selectedIDS = chooseSlaveID(robotsInField);
@@ -363,7 +364,7 @@ void CMixTeamHandler::task3positioning()
 int CMixTeamHandler::chooseMasterID(int robotsInField)
 {
     for(int i = 0 ; i < robotsInField ; i++){
-        int tid = knowledge->activesInField.at(i)->id();
+        int tid = knowledge->getActiveAgents().at(i)->id();
         if((ourAgentIDs.contains(tid)) && (tid != knowledge->mixGoaleID)){
             return tid;
         }
@@ -374,7 +375,7 @@ int CMixTeamHandler::chooseMasterID(int robotsInField)
 int CMixTeamHandler::chooseSlaveID(int robotsInField)
 {
     for(int i = 0 ; i < robotsInField ; i++){
-        int tid = knowledge->activesInField.at(i)->id();
+        int tid = knowledge->getActiveAgents().at(i)->id();
         if(!(ourAgentIDs.contains(tid)) && (tid != knowledge->mixGoaleID)){
             return tid;
         }
@@ -384,7 +385,7 @@ int CMixTeamHandler::chooseSlaveID(int robotsInField)
 
 void CMixTeamHandler::task3MakePacket()
 {
-    int robotsInField = knowledge->activesInField.size();
+    int robotsInField = knowledge->getActiveAgents().size();
     multi_team_comm::TeamPlan *packet = new multi_team_comm::TeamPlan();
     multi_team_comm::RobotPlan *plans[robotsInField];
     multi_team_comm::Pose *poses[robotsInField];
@@ -419,9 +420,9 @@ void CMixTeamHandler::task3MakePacket()
 
     int i = 2;
     for( int j = 0 ; j < robotsInField ; j++ ){
-        if( (knowledge->activesInField.at(j)->id() != selectedIDS) && (knowledge->activesInField.at(j)->id() != selectedIDM)){
+        if( (knowledge->getActiveAgents().at(j)->id() != selectedIDS) && (knowledge->getActiveAgents().at(j)->id() != selectedIDM)){
             plans[i] = packet->add_plans();
-            plans[i]->set_robot_id(knowledge->activesInField.at(j)->id());
+            plans[i]->set_robot_id(knowledge->getActiveAgents().at(j)->id());
             plans[i]->set_role(multi_team_comm::RobotPlan::Default);
             poses[i] = plans[i]->mutable_nav_target();
     //        planLoc[i] = plans[i]->mutable_shot_target();
@@ -498,9 +499,11 @@ void CMixTeamHandler::task3ReadPacket()
             if(ourAgentIDs.contains(ptemp.robot_id())){
                 if(ptemp.role() == multi_team_comm::RobotPlan::Offense){
                     if(isMaster){
+                        debug(QString("kicker = %1").arg(ptemp.robot_id()), D_ATOUSA);
                         executeMasterOffense(ptemp.robot_id(), Vector2D((double)ptemp.nav_target().loc().x()/100, (double)ptemp.nav_target().loc().y()/100), Vector2D((double)ptemp.shot_target().x()/100, (double)ptemp.shot_target().y()/100), slaveID);
                     }
                     else{
+                        debug(QString("onetoucher = %1").arg(ptemp.robot_id()), D_ATOUSA);
                         executeSlaveOffense(ptemp.robot_id(), Vector2D((double)ptemp.nav_target().loc().x()/100, (double)ptemp.nav_target().loc().y()/100), Vector2D((double)ptemp.shot_target().x()/100, (double)ptemp.shot_target().y()/100));
                     }
                 }
@@ -520,7 +523,7 @@ void CMixTeamHandler::task3ReadPacket()
 
 void CMixTeamHandler::executeMasterOffense(int robotId, Vector2D point1, Vector2D point2, int slaveID)
 {
-    debug(QString("kicker = %1").arg(robotId), D_ATOUSA);
+    debug(QString("*kicker = %1").arg(robotId), D_ATOUSA);
     kicker->setAgent(knowledge->getAgent(robotId));
     kicker->setDontKick(true);
     kicker->setChip(false);
@@ -547,7 +550,7 @@ void CMixTeamHandler::executeMasterOffense(int robotId, Vector2D point1, Vector2
 
 void CMixTeamHandler::executeSlaveOffense(int robotId, Vector2D point1, Vector2D point2)
 {
-    debug(QString("ownToucher = %1").arg(robotId), D_ATOUSA);
+    debug(QString("*ownToucher = %1").arg(robotId), D_ATOUSA);
     oneToucher->setAgent(knowledge->getAgent(robotId));
     oneToucher->setTarget(point2);
     oneToucher->setWaitPos(point1);
