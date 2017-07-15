@@ -608,8 +608,8 @@ CSkillKick::CSkillKick(CAgent *_agent) : CSkill(_agent)
     angPid= new _PID(2,0,0,0,0);
     speedPidX = new _PID(1,0,0,0,0);
     speedPidY = new _PID(1,0,0,0,0);
-    speedPidX->kp = 3;
-    speedPidY->kp = 3;
+    posPidX = new _PID(1,0,0,0,0);
+    posPidY = new _PID(1,0,0,0,0);
     veryFine = false;
     interceptMode = false;
     kkShotEmpySpot = false;
@@ -692,7 +692,7 @@ kckMode CSkillKick::decideMode()
     robotKickArea.addVertex(agentPos+agent->dir().norm()*0.08-agent->dir().rotate(90).norm()*distCoef);
 
 
-    if((passProfiler || kickWithCenterOfDribbler)) {
+    if(!knowledge->isOurNonPlayOnKick()&&(passProfiler || kickWithCenterOfDribbler)) {
         if(dribblerArea.contains(ballPos) && robotKickArea.contains(ballPos))
         {
             kickerOn = true;
@@ -878,7 +878,7 @@ void CSkillKick::kDontKick()
 {
 
     Vector2D finalPos;
-    gpa->setSlowMode(false);
+    gpa->setSlowMode(true);
     finalPos=ballPos-(target-ballPos).norm()*0.23;
     gpa->setBallObstacleRadius(0.4);
     if(fabs((kickFinalDir - agentDir.th()).degree()) < 10)
@@ -891,7 +891,7 @@ void CSkillKick::kDontKick()
         else
         {
             agent->setRoller(0);
-            finalPos=ballPos-(target-ballPos).norm()*0.12;
+            finalPos=ballPos-(target-ballPos).norm()*0.125;
         }
         gpa->setSlowMode(false);
         gpa->setBallObstacleRadius(0);
@@ -1039,67 +1039,138 @@ void CSkillKick::jTurn()
 {
     if(kkShotEmpySpot)
         target = findMostPossible();
-    angPid->kp = 5;
-    Polygon2D robotKickArea;
+    //    //// vars
     bool isFinalController = false;
+    double posPidKp = 1;
+    double speedPidKp = 1;
+    Vector2D targetForJturnSpeed,targetForJturnPos;
+    Vector2D idealPass ;
+
+    //    if(movementDir <= 50 && movementDir >= -50)
+    //    {
+    //        targetForJturnPos = ballPos + (ballPos - target).norm()*0.05;
+    //        isFinalController = true;
+    //        if(movementDir > 20)
+    //        {
+    //            shift = 12 + (1-agentPos.dist(ballPos))*35;
+    //        }
+    //        else if(movementDir < -20)
+    //        {
+    //             shift = -12 - (1-agentPos.dist(ballPos))*35;
+    //        }
+    //        else
+    //        {
+    //            shift = 0;
+    //        }
+
+    //        idealPass.rotate(shift);
+    //        targetForJturnSpeed = agentPos + idealPass;
+
+    //    }
+    //    else
+    //    {
+    //        isFinalController = false;
+    //        if(movementDir > 0)
+    //        {
+    //            shift = 15 + (1-agentPos.dist(ballPos))*61;
+    //        }
+    //        else if(movementDir < 0)
+    //        {
+    //            shift = -15 - (1-agentPos.dist(ballPos))*61;
+    //        }
+    //        idealPass.rotate(shift);
+    //        targetForJturnSpeed = agentPos + idealPass;
+    //    }
+
+    //*/
+
+
+
+    //    draw(targetForJturnSpeed);
+
+
+
 
 
     double movementDir = ((ballPos - agentPos).th() - kickFinalDir).degree();
-
-    //    double robotDir = (ballPos - agentPos).th().radian() - agentDir.th().radian();
     double shift = 0;
     double distCoef = 0.15;
-    Vector2D targetForJturn;
-    if(movementDir <= 30 && movementDir >= -30)
+
+    idealPass = (ballPos - agentPos).norm()*distCoef;
+
+    if(abs(movementDir) < 50 && ballPos.dist(agentPos) < 0.35)
     {
-        targetForJturn = ballPos + (ballPos - target).norm()*0.05;
-        isFinalController = true;
+        isFinalController =true;
     }
     else
     {
         isFinalController = false;
+    }
+    if(movementDir <= 50 && movementDir >= -50)
+    {
+        targetForJturnPos = ballPos + (ballPos - target).norm()*0.11;
+        if(movementDir > 20)
+        {
+            shift = 10 + (1-agentPos.dist(ballPos))*25;
+        }
+        else if(movementDir < -20)
+        {
+            shift = -10 - (1-agentPos.dist(ballPos))*25;
+        }
+        else
+        {
+
+            shift = 0;
+        }
+
+        idealPass.rotate(shift);
+        targetForJturnSpeed = agentPos + idealPass;
+
+    }
+    else
+    {
         if(movementDir > 0)
         {
             shift = 15 + (1-agentPos.dist(ballPos))*61;
-            jTurnFromBack = true;
         }
         else if(movementDir < 0)
         {
             shift = -15 - (1-agentPos.dist(ballPos))*61;
-            jTurnFromBack = true;
         }
-
-        Vector2D idealPass = (ballPos - agentPos).norm()*distCoef;
         idealPass.rotate(shift);
-        targetForJturn = agentPos + idealPass;
-
-    }
-
-    //    else if(movementDir > 0) {
-    //        if(wm->ball->vel.length() < 0.1)
-    //            shift = 12 + (1-agentPos.dist(ballPos))*35;
-    //        else
-    //            shift =12 + (1-agentPos.dist(ballPos))*45;
-    //        distCoef = 0.17;
-    //    }
-    //    else if(movementDir < 0){
-    //        if(wm->ball->vel.length() < 0.1)
-    //            shift = -12 - (1-agentPos.dist(ballPos))*35;
-    //        else
-    //            shift = -12 - (1-agentPos.dist(ballPos))*45;
-
-    //        distCoef = 0.17;
-    //    }
-
-    if(penaltyKick)
-    {
-        distCoef = 0.01;
+        targetForJturnSpeed = agentPos + idealPass;
     }
 
 
-    speedPidX->error  = targetForJturn.x - agentPos.x;
-    speedPidY->error = targetForJturn.y - agentPos.y;
+
+
     double dirReduce = (fabs(movementDir)/70)*(fabs(movementDir)/70);
+
+    speedPidX->error  = targetForJturnSpeed.x - agentPos.x;
+    speedPidY->error = targetForJturnSpeed.y - agentPos.y;
+    posPidX->error = targetForJturnPos.x - agentPos.x;
+    posPidY->error = targetForJturnPos.y - agentPos.y;
+
+    ////////////set Active adaptive PIDs
+
+
+    if(isFinalController && wm->ball->vel.length() < 0.2)
+    {
+
+        posPidKp = 4+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
+        speedPidKp = 2;// +2.1*agentPos.dist(ballPos) + dirReduce;
+    }
+    else
+    {
+        posPidKp = 0;
+        speedPidKp = 8 +2.1*agentPos.dist(ballPos) + dirReduce;
+    }
+    posPidX->kp = posPidKp;
+    posPidY->kp = posPidKp;
+    posPidX->kd = 10;
+    posPidY->kd = 10;
+
+
 
     if(!jTurnFromBack)
     {
@@ -1114,64 +1185,36 @@ void CSkillKick::jTurn()
         dirReduce -= 1;
     }
 
-    if(isFinalController )
-    {
-        speedPidX->kp = 6+(0.01/(agentPos.dist(targetForJturn)*agentPos.dist(targetForJturn)));
-        speedPidY->kp = 6+(0.01/(agentPos.dist(targetForJturn)*agentPos.dist(targetForJturn)));
-
-    }
-    else
-    {
-        speedPidX->kp = 4 +2.1*agentPos.dist(ballPos) + dirReduce;
-        speedPidY->kp = 4 +2.1*agentPos.dist(ballPos) + dirReduce;
-
-    }
-
-//    if(penaltyKick || (knowledge->isOurNonPlayOnKick() && wm->ball->pos.x > 0))
-//    {
-//        angPid->kp = 7;
-//        speedPidX->kp = 4;
-//        speedPidY->kp = 4;
-//    }
-//    else if(wm->ball->vel.length() > 0.2)
-//    {
-//        speedPidX->kp = 4 +2.1*agentPos.dist(ballPos) + dirReduce;
-//        speedPidY->kp = 4 +2.1*agentPos.dist(ballPos) + dirReduce;
-//    }
-//    else
-//    {
-//        speedPidX->kp = 4 +2.1*agentPos.dist(ballPos) + dirReduce;
-//        speedPidY->kp = 4 +2.1*agentPos.dist(ballPos) + dirReduce;
-
-//    }
-    speedPidX->kd = 50;
-    speedPidY->kd = 50;
-
-
-
-    double ballx= (wm->ball->vel.x)*cos(agentDir.th().radian()) + (wm->ball->vel.y)*sin(agentDir.th().radian());
-    double bally= -1*(wm->ball->vel.x)*sin(agentDir.th().radian()) + (wm->ball->vel.y)*cos(agentDir.th().radian());
-    angPid->error = (kickFinalDir - agentDir.th()).radian();
 
     if(penaltyKick)
     {
-        ballx = 0;
-        bally = 0;
+        angPid->kp = 7;
+        speedPidX->kp = 4;
+        speedPidY->kp = 4;
+    }
+    else if(wm->ball->vel.length() > 0.2)
+    {
+        speedPidX->kp = speedPidKp;
+        speedPidY->kp = speedPidKp;
     }
     else
     {
-        ballx = wm->ball->vel.x;
-        bally = wm->ball->vel.y;
+        speedPidY->kp = speedPidKp;
+        speedPidX->kp = speedPidKp;
     }
-
-
-
-    agent->setRobotAbsVel(1 * ballx + speedPidX->PID_OUT()
-                          ,1 * bally + speedPidY->PID_OUT()
+    angPid->kp = 5;
+    angPid->error = (kickFinalDir - agentDir.th()).radian();
+    agent->setRobotAbsVel(wm->ball->vel.x + speedPidX->PID_OUT() + posPidX->PID_OUT()
+                          ,wm->ball->vel.y+ speedPidY->PID_OUT() + posPidY->PID_OUT()
                           ,angPid->PID_OUT());
     speedPidX->pError = speedPidX->error;
     speedPidY->pError = speedPidY->error;
+
+    posPidX->pError = posPidX->error;
+    posPidY->pError = posPidY->error;
+
     agent->accelerationLimiter(0,false);
+
 }
 
 void CSkillKick::turnForKick()
@@ -1185,13 +1228,13 @@ void CSkillKick::turnForKick()
     if(knowledge->isOurNonPlayOnKick())
     {
         if(fabs((agentDir.th() - kickFinalDir).degree()) < 80)
-            angReduce = 0.6;
+            angReduce = 0.5;
         if ((agentDir.th() - kickFinalDir).degree()  <- 10 )
         {
             angPid->kp = 4*angReduce;
 
             angPid->error = ((ballPos - agentPos).th() - agent->dir().th()).radian();
-            agent->setRobotVel( -0.11 + agentPos.dist(ballPos) ,-1*angReduce,angPid->PID_OUT() +4*angReduce);
+            agent->setRobotVel( -0.11 + agentPos.dist(ballPos) ,-1.2*angReduce,angPid->PID_OUT() +4*angReduce);
 
 
         }
@@ -1200,7 +1243,7 @@ void CSkillKick::turnForKick()
             angPid->kp = 4*angReduce;
 
             angPid->error = ((ballPos - agentPos).th() - agent->dir().th()).radian();
-            agent->setRobotVel( -0.11 + agentPos.dist(ballPos),1*angReduce,angPid->PID_OUT() - 4*angReduce) ;
+            agent->setRobotVel( -0.11 + agentPos.dist(ballPos),1.2*angReduce,angPid->PID_OUT() - 4*angReduce) ;
         }
 
 
@@ -1381,15 +1424,14 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
 
     if(wm->ball->vel.length() > 0.2)
     {
-        for(double i = 0 ; i < 3 ; i += 0.03)
+        for(double i = 0 ; i < 10 ; i += 0.03)
         {
             ballPosInFuture = wm->ball->getPosInFuture(i);
             finalPos = ballPosInFuture - (_target-ballPosInFuture).norm()*0.11;
             if(CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,true)<= i+0.1)
             {
                 double t = _agent->id();
-//                debug(QString("pos of %1 is : %2 %3").arg(t).arg(finalPos.x).arg(finalPos.y), D_PARSA);
-                draw(finalPos);
+                draw(finalPos,1,QColor(Qt::blue));
                 return i;
             }
         }

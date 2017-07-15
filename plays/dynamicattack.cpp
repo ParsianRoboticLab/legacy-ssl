@@ -208,34 +208,34 @@ void CDynamicAttack::makePlan(int agentSize) {
 
         currentPlan.mode = DynamicEnums::Critical;
         bool notDribble = true;
-        if(wm->opp.activeAgentsCount() > 0 && wm->field->isInField(currentPlan.passPos))
-        {
-            for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
-            {
-                CRobot*   agent         = wm->opp.active(i);
-                Vector2D  agentPos      = agent->pos, t1, t2;
-                Segment2D temp          = Segment2D(ballPos, currentPlan.passPos);
-                Circle2D  Robot         = Circle2D(agentPos, 0.1);
-                Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
+//        if(wm->opp.activeAgentsCount() > 0 && wm->field->isInField(currentPlan.passPos))
+//        {
+//            for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
+//            {
+//                CRobot*   agent         = wm->opp.active(i);
+//                Vector2D  agentPos      = agent->pos, t1, t2;
+//                Segment2D temp          = Segment2D(ballPos, currentPlan.passPos);
+//                Circle2D  Robot         = Circle2D(agentPos, 0.1);
+//                Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
 
-                if((/*Robot.intersection(temp, &t1, &t2)  && */robotKickArea.intersection(temp, &t1, &t2) && ballPos.x > 0)
-                    || (lastplaymakeInit == 1 && Robot.intersection(temp, &t1, &t2)))
-                {
-                    oppRob = wm->opp.active(i)->pos;
-                    debug(QString("WOW we are dribbling"), D_PARSA);
-                    notDribble = false;
-                    currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
-                    lastplaymakeInit = 1;
-                    break;
-                }
-            }
-        }
-        if(notDribble == true)
-        {
+//                if((robotKickArea.contains(ballPos) && /*Robot.intersection(temp, &t1, &t2)  && */robotKickArea.intersection(temp, &t1, &t2) && ballPos.x > 0)
+//                    || (lastplaymakeInit == 1 && Robot.intersection(temp, &t1, &t2)))
+//                {
+//                    oppRob = wm->opp.active(i)->pos;
+//                    debug(QString("WOW we are dribbling"), D_PARSA);
+//                    notDribble = false;
+//                    currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
+//                    lastplaymakeInit = 1;
+//                    break;
+//                }
+//            }
+//        }
+//        if(notDribble == true)
+//        {
             debug(QString("NOOOOOO we are not Dribbling"), D_PARSA);
-            currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
+            currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
             lastplaymakeInit = 0;
-        }
+//        }
 
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Best;
@@ -412,7 +412,7 @@ void CDynamicAttack::playMake() {
     switch(currentPlan.playmake.skill) {
     case DynamicEnums::Dribble:
         roleAgentPM -> setTargetDir(currentPlan.passPos);
-        roleAgentPM -> setTarget(og);
+        roleAgentPM -> setTarget(oppRob);
         roleAgentPM -> setChip(false);
         roleAgentPM -> setNoKick(true);
         roleAgentPM -> setSelectedSkill(DynamicEnums::Dribble); // skill Dribble

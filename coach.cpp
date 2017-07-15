@@ -1249,15 +1249,17 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
         if (ourPlayers.size() - preferedDefenseCounts <= 0) {
             playmakeId = -1;
             lastPlayMake = -1;
+
             return;
         }
     }
 
     if (ourPlayers.size() == 0) {
-        playmakeId = -1;
+        playmakeId = -1;        
         lastPlayMake = -1;
         return;
     }
+
 
     ////////////////////first we choose our playmake
     // third version
@@ -1284,6 +1286,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
         if(playMakeIntention.elapsed() < playMakeIntentionInterval)
         {
             playmakeId = lastPlayMake;
+            debug(QString("playmake is : %1").arg(playmakeId), D_PARSA);
             return;
         }
         else
@@ -1303,11 +1306,11 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
                 playmakeId = ourPlayers[i];
             }
         }
-       /* for(int i = 0; i < ourPlayers.size(); i++)
-            debug(QString("timeneeded of %1 is : %2 \n").arg(ourPlayers[i]).arg(nearest[ourPlayers[i]]), D_PARSA);*/
+        for(int i = 0; i < ourPlayers.size(); i++)
+            debug(QString("timeneeded of %1 is : %2 \n").arg(ourPlayers[i]).arg(nearest[ourPlayers[i]]), D_PARSA);
         lastPlayMake = playmakeId;
     }
-//    debug(QString("playmake is : %1").arg(playmakeId), D_PARSA);
+    debug(QString("playmake is : %1").arg(playmakeId), D_PARSA);
 }
 
 void CCoach::decideAttack()
@@ -2203,16 +2206,16 @@ void CCoach::execute()
     playmakeId = -1;
     if((critArea.contains(wm->ball->pos) && wm->field->isInField(wm->ball->pos))) {
         decideDefense();
-//        choosePlaymakeAndSupporter(true);
+        choosePlaymakeAndSupporter(true);
     } else {
-//        choosePlaymakeAndSupporter(false);
+        choosePlaymakeAndSupporter(false);
         decideDefense();
     }
 
     ////////////////////////////////////////////
 
     decideAttack();
-
+    checkSensorShootFault();
     // checks whether the goalie is under the net or not if it is moves out
     checkGoalieInsight();
     // Old Role Base Execution -- used for block, old_playmaker

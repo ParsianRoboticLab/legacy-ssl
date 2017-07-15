@@ -960,7 +960,7 @@ void CPlayOff::passManager() {
         }
 
         if (positionAgent[r.id].getAbsArgs(r.state).staticPos.dist(c -> pos()) >
-            masterPlan->common.lastDist*2) {
+            masterPlan->common.lastDist) {
             doAfterlife = false;
         } else {
             doAfterlife = true;

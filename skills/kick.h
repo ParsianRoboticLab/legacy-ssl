@@ -171,6 +171,10 @@ private:
     _PID *angPid;
     _PID *speedPidX;
     _PID *speedPidY;
+    _PID *posPidX;
+    _PID *posPidY;
+
+
     Vector2D agentPos;
     Vector2D agentDir;
     QQueue <Vector2D> dirQueue;
