@@ -2785,15 +2785,35 @@ Vector2D DefensePlan::ballPrediction(bool _isGoalie){
 }
 
 void DefensePlan::findOppAgentsToMark(){
+
     oppAgentsToMark.clear();
+    oppAgentsToMarkPos.clear();
     debug(QString("opp goalie ID : %1").arg(knowledge->findOppGoalie()), D_AHZ);
     for(int i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
-        if(wm->opp.activeAgentID(i) != knowledge->findOppGoalie() && !isIndirectArea(wm->opp.active(i)->pos)){
+        if(wm->opp.activeAgentID(i) != knowledge->findOppGoalie() ){
             oppAgentsToMark.append(wm->opp.active(i));
         }
     }
-    debug(QString("Mopps count : %1").arg(oppAgentsToMark.size()), D_AHZ);
-    oppAgentsToMarkPos.clear();
+
+    if(knowledge->isTheirNonPlayOnKick()){
+        //Ommiting nearest to ball
+        int nearestToBall = -1;
+        double nearestToBallDist = 100000;
+
+        for(int i = 0 ; i < oppAgentsToMark.count() ; i++)
+        {
+            if((oppAgentsToMark[i]->pos).dist(wm->ball->pos) < nearestToBallDist)
+            {
+                nearestToBall = i;
+                nearestToBallDist = oppAgentsToMark[i]->pos.dist(wm->ball->pos);
+                debug(QString("the nearest id is:%1").arg(oppAgentsToMark[i]->id),D_HAMED);
+                draw(oppAgentsToMark[i]->pos + oppAgentsToMark[i]->vel);
+            }
+        }
+        if(nearestToBall != -1)
+            oppAgentsToMark.removeOne(oppAgentsToMark[nearestToBall]);
+        ///////////////////////
+    }
     if(knowledge->getGameState() == CKnowledge::TheirKickOff){
         for(int i = 0; i < oppAgentsToMark.count(); i++){
             if(oppAgentsToMark[i]->pos.x > policy()->Mark_OppOmitLimitKickOff()){
@@ -2805,7 +2825,7 @@ void DefensePlan::findOppAgentsToMark(){
             }
         }
     }
-    else{
+    else if(knowledge->getGameState() == CKnowledge::TheirIndirectKick || knowledge->getGameState() == CKnowledge::TheirDirectKick){
         for(int i = 0; i < oppAgentsToMark.count(); i++){
             if(oppAgentsToMark[i]->pos.x > policy()->Mark_OppOmitLimitPlayoff()){
                 oppAgentsToMark.removeOne(oppAgentsToMark[i]);
