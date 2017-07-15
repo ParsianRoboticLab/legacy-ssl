@@ -571,12 +571,7 @@ int CKnowledge::factorial(int a)
 
 double CKnowledge::getRealBallVel()
 {
-    ballVelLowPass = 0.9 * ballVelLowPass + 0.1 *(((ballPosHis[0].dist(ballPosHis[1])/mainLoopTime) + (wm->ball->pos.dist(ballPosHis[0])/mainLoopTime) + (wm->ball->pos.dist(ballPosHis[1])/(mainLoopTime*2)))/3);
-
-    ballPosHis[1] = ballPosHis[0];
-    ballPosHis[0] = wm->ball->pos;
-    draw(QString("New Ball Vel : %1").arg(ballVelLowPass,0, 'f', 2),Vector2D(-3,-3.5));
-    return ballVelLowPass;
+    return wm->ball->vel.length();
 }
 
 int CKnowledge::Matching(const QList <CAgent*> robots, const QList <Vector2D> pointsToMatch, QList <int> &matchPoints){
