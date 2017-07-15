@@ -377,6 +377,35 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
 
 }
 
+
+double CKnowledge::chipGoalPropability(bool isOurChip){
+    double GoalDistanceToBall;
+    double GoalieDistanseToBall;
+    double GoalDistanceToGoalie;
+    Vector2D goal,goaliePos;
+    if(isOurChip){
+        goal=wm->field->oppGoal();
+        goaliePos=wm->opp.active(knowledge->oppGoalieIndex)->pos;
+
+    }
+    else{
+        goal= wm->field->ourGoal();
+        goaliePos=goalie->pos();
+    }
+
+    GoalDistanceToBall=wm->ball->pos.dist(goal)/1.9;
+    GoalieDistanseToBall=wm->ball->pos.dist(goaliePos);
+    GoalDistanceToGoalie=goaliePos.dist(goal);
+    if(goaliePos.dist(wm->ball->pos)<0.35
+            || wm->ball->pos.dist(goal)<1)
+        return 0;
+    else if(((GoalDistanceToBall-GoalieDistanseToBall)/GoalDistanceToGoalie)*2 >0)
+        return ((GoalDistanceToBall-GoalieDistanseToBall)/GoalDistanceToGoalie)*2;
+    else return 0;
+
+
+}
+
 void CKnowledge::calculateCommandFrameRate()
 {
     double now = CProfiler::getTime();

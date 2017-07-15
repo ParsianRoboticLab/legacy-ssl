@@ -137,7 +137,7 @@ void CRoleStop::execute()
 	info()->findPositions();
 	gotopoint->setTargetLook(target, wm->ball->pos);
 	gotopoint->setAvoidPenaltyArea(true);
-  gotopoint->setBallObstacleRadius(4*CBall::radius);
+        gotopoint->setBallObstacleRadius(0.5);
 	gotopoint->execute();
 	draw(Circle2D(target , 0.03) , "magenta" , true);
     draw(QString("%1").arg(kkk) , target);
