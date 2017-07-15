@@ -10,6 +10,7 @@
 #include <QVector2D>
 
 #include "defpos.h"
+#include "proto/multi_team_communication.pb.h"
 
 //#include "simulation/simulator.h"
 //#include <widgets.h>
@@ -155,6 +156,14 @@ public:
     Vector2D getBPPosition();
     void setBPPosition(float x, float y);
 
+    //added for mixteam TC
+    multi_team_comm::TeamPlan *kPlans;
+    int ssize;
+    bool ready = false;
+    QList<CAgent*> activesInField;
+    int mixGoaleID;
+
+
 
     class PlaymakerSelector
     {
@@ -184,7 +193,6 @@ public:
     int nonPlayOnFastestSelector(QList <CAgent*> _agents);
     void sortByX(QList <CAgent *> &_agents );
     void sortByY(QList <CAgent *> &_agents );
-    double chipGoalPropability(bool isOurChip);
     int Matching(const QList <CAgent*> robots, const QList <Vector2D> pointsToMatch, QList <int> &matchPoints);
     void fastMatching(const QList <CAgent*> robots, const QList <Vector2D> pointsToMatch, QList <int> &matchPoints);
     int factorial(int a);
