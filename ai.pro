@@ -167,7 +167,8 @@ SOURCES += main.cpp \
     proto/multi_team_communication.pb.cc \
     mixteamsender.cpp \
     mixteamreader.cpp \
-    mixteamhandler.cpp
+    mixteamhandler.cpp \
+    robotstatussender.cpp
 
 
 HEADERS += base.h \
@@ -349,7 +350,8 @@ HEADERS += base.h \
     mixteamsender.h \
     mixteamreader.h \
     MixTeamChallenge.h \
-    mixteamhandler.h
+    mixteamhandler.h \
+    robotstatussender.h
 
 unix:INCLUDEPATH += "/usr/local/include"
 unix:LIBS += -L/usr/local/include/qjson -lqjson

@@ -241,6 +241,8 @@ CMainApplication::CMainApplication(QWidget *parent)
 
     //	knowledgeVarsWidget = new CKnowledgeVarsWidget();
 
+    statusSender = new CRobotStatusSender(16, this);
+
 #ifdef DISTURBANCE_MATRIX
     learnEWidget = new CLearnEWidget(soccer->agents);
     learnEWidget->setWindowTitle("Learn E");
