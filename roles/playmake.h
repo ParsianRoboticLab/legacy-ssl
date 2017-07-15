@@ -92,8 +92,6 @@ public:
     void executeOurPenalty();
     void executeOurPenaltyShootout();
     int choosePenaltyStrategy();
-    void loadLastBounceSpeed();
-    int getLastBounceSpeed(int id, double lastBounceDistance);
     int getPenaltychipSpeed();
     double lastBounce();
     bool ShootPenalty();

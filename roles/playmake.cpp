@@ -964,55 +964,7 @@ double CRolePlayMake::lastBounce(){
     return (wm->field->oppGoal().dist(agent->pos()))-0.23;
 }
 
-void CRolePlayMake::loadLastBounceSpeed(){
-    lastBounceDataFile.open(QIODevice::ReadOnly);
 
-    QMap<double, int> data;
-    QPair<int, QMap<double, int> > p;
-
-    QStringList l;
-    QString text = out.readAll();
-    l = text.split("\n");
-
-    debug(QString("size: %1").arg(l.size()), D_FATEMEH);
-    if(text.size() > 0){
-        p.first = l.at(0).toInt();
-        for(int i=1; i<l.size(); i++){
-            if(l.at(i) == "*"){
-                p.second.clear();
-                p.second = data;
-                lastBounceProfileData.append(p);
-                data.clear();
-                if(i+1 == l.size())
-                    break;
-                p.first = l.at(i+1).toInt();
-                i++;
-            }
-            else{
-                data.insert(l.at(i).toDouble(), l.at(i+1).toInt());
-                i++;
-            }
-        }
-    }
-
-    //    for(int i=0; i< lastBounceProfileData.size(); i++){
-    //        debug(QString("id: %1").arg(lastBounceProfileData.at(i).first), D_FATEMEH);
-    //        for(int j=0; j< lastBounceProfileData.at(i).second.keys().size(); j++)
-    //            debug(QString("%1:: %2").arg(lastBounceProfileData.at(i).second.keys().at(j)).arg(
-    //                      lastBounceProfileData.at(i).second.values().at(j)), D_FATEMEH);
-    //    }
-
-}
-
-int CRolePlayMake::getLastBounceSpeed(int id, double lastBounceDistance){
-    for(int i=0; i< lastBounceProfileData.size(); i++){
-        if(lastBounceProfileData.at(i).first != id)
-            continue;
-        else{
-            return lastBounceProfileData.at(i).second.keys().value(lastBounceDistance);
-        }
-    }
-}
 
 int CRolePlayMake::getPenaltychipSpeed(){
     Vector2D oppGoaliPos=wm->opp[wm->opp.data->goalieID]->pos;
@@ -1035,12 +987,15 @@ int CRolePlayMake::choosePenaltyStrategy(){
 }
 
 void CRolePlayMake::executeOurPenaltyShootout(){
-    loadLastBounceSpeed();
     bool flag=false;
     debug("penalty Shootout : ",D_NADIA);
     double w;
-    if (abs(wm->ball->pos.x) > 4)
+    if (abs(wm->ball->pos.x) > 4.4)
         firstKick=true;
+
+
+
+
 
     // debug(QString("gI %1").arg(knowledge->oppGoalieIndex),D_MHMMD);
     if(wm->opp[wm->opp.data->goalieID]!= NULL )
@@ -1086,10 +1041,6 @@ void CRolePlayMake::executeOurPenaltyShootout(){
             }else{//kick first
 
                 debug("first : ",D_NADIA);
-                //                if((int)random()%2==0)
-                //                    penaltyTarget=wm->field->oppGoalL()+Vector2D(0,wm->field->oppGoalL().y);
-                //                else
-                //                kick->setPenaltyKick(true);
                 kick->setChip(false);
                 if(wm->getIsSimulMode())
                     kick->setKickSpeed(1);
