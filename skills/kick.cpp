@@ -620,6 +620,7 @@ CSkillKick::CSkillKick(CAgent *_agent) : CSkill(_agent)
     kickWithCenterOfDribbler = false;
     goalieMode = false;
     jTurnFromBack = false;
+    playMakeMode = false;
 }
 
 CSkillKick::~CSkillKick()
@@ -716,12 +717,12 @@ kckMode CSkillKick::decideMode()
     draw(QString("theta : %1").arg(fabs(((target-agentPos).th().degree() - (ballPos-agentPos).th().degree() ))) , Vector2D(-1,-1));
 
 
-    if(penaltyKick)
-    {
-        return KPENALTY;
-    }
 
-    else if(wm->field->isInOppPenaltyArea(ballPos) && !passProfiler && avoidOppPenaltyArea && !((robotArea.intersection(ballpath,&tempVec1,&tempVec2) ==2 && ballRealVel > 1 )))
+    if(playMakeMode && wm->field->isInOurPenaltyArea(ballPos))
+    {
+        return KAVOIDOPPENALTY;
+    }
+    else if((!penaltyKick) && wm->field->isInOppPenaltyArea(ballPos) && !passProfiler && avoidOppPenaltyArea && !((robotArea.intersection(ballpath,&tempVec1,&tempVec2) ==2 && ballRealVel > 1 )))
     {
         return KAVOIDOPPENALTY;
     }
@@ -908,6 +909,38 @@ void CSkillKick::direct()
     //findPosToGoAlt();
 }
 
+
+void CSkillKick::avoidOurPenalty()
+{
+    gpa->setSlowMode(slow);
+    Vector2D finalPos ,dummyPos1,dummyPos;
+    Vector2D tempVector;
+    tempVector = ballPos - wm->field->ourGoal();
+    Circle2D penaltyCircle;
+    Segment2D ballSeg;
+    Segment2D ballPosSeg;
+    ballPosSeg.assign( wm->field->ourGoal(),wm->field->ourGoal() + tempVector.norm()*2);
+    ballSeg.assign(ballPos,ballPos+wm->ball->vel.norm()*10);
+    penaltyCircle.assign(wm->field->ourGoal() + Vector2D(0.15,0),1.4);
+
+
+    penaltyCircle.intersection(ballPosSeg,&dummyPos1,&dummyPos);
+
+    if(wm->field->isInField(dummyPos1))
+    {
+        finalPos = dummyPos1;
+    }
+    draw(finalPos);
+    if(ballPos.dist(agentPos) > 0.2)
+        finalDirVec = target - agentPos;
+    gpa->setADiveMode(false);
+    gpa->setAvoidPenaltyArea(true);
+    gpa->setNoAvoid(false);
+
+    gpa->init(finalPos, finalDirVec);
+    gpa->execute();
+    agent->setKick(kickSpeed);
+}
 
 void CSkillKick::avoidOppPenalty()
 {
@@ -1445,7 +1478,6 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
 
 void CSkillKick::findPosToGo()
 {
-
     Circle2D  agentNearArea(agentPos,0.15);
     Vector2D sol1,sol2;
     QList<int> ourRelax,oppRelax;
@@ -1509,7 +1541,7 @@ void CSkillKick::findPosToGo()
                 }
             }
         }
-        if(canOneTouch || kickerSeg.intersection(ballPath).isValid())
+        if((canOneTouch || kickerSeg.intersection(ballPath).isValid()) && !sagMode )
         {
             debug("oneTOUCH",D_MHMMD);
             if( ( fabs(((target-agentPos).th().degree() - (ballPos-agentPos).th().degree() )) < 60 ))
@@ -1803,7 +1835,14 @@ void CSkillKick::execute()
         debug("PENALTY",D_KK);
         break;
     case KAVOIDOPPENALTY:
-        avoidOppPenalty();
+        if(wm->ball->pos.x  >0)
+        {
+            avoidOppPenalty();
+        }
+        else
+        {
+            avoidOurPenalty();
+        }
         break;
     case KWAITANDKICK:
         waitAndKick();

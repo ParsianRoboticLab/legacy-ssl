@@ -203,6 +203,7 @@ private:
     void kkIntercept();
     void kkPenalty();
     void avoidOppPenalty();
+    void avoidOurPenalty();
     void waitAndKick();
     void kDontKick();
     void kWaitForTurn();
@@ -268,6 +269,7 @@ public:
     SkillProperty(CSkillKick, bool, AlternateMode, alternateMode);
     SkillProperty(CSkillKick, double,KickAngTol, kickAngTol);
     SkillProperty(CSkillKick, bool,KickWithCenterOfDribbler, kickWithCenterOfDribbler);
+    SkillProperty(CSkillKick, bool,PlayMakeMode, playMakeMode);
 
 };
 
