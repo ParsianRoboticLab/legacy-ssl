@@ -62,6 +62,8 @@ public:
     CAgent* getMahiPlayMaker();
 
 private:
+    Vector2D oppRob;
+    int lastplaymakeInit;
     Vector2D lastPassPosLoc;
     int lastGuards[6];
     int guardSize;

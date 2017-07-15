@@ -245,6 +245,9 @@ public:
     void Experimental4();
     void Experimental5();
     void Experimental6();
+
+    void MixTeamChallenge();
+
     void JsHandy();
     void kickProfiler();
     bool MergeCamerasExperiment();

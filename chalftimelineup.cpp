@@ -17,9 +17,6 @@ void CHalftimeLineup::init(QList<int> _agents, QMap<QString, EditData *> *_editD
     initMaster();
 
 
-
-
-
     if( knowledge->getLastPlayExecuted() != HalfTimeLineUp ){
         reset();
     }
@@ -27,7 +24,9 @@ void CHalftimeLineup::init(QList<int> _agents, QMap<QString, EditData *> *_editD
 }
 
 void CHalftimeLineup::lineUpAllAgents(){
-
+    agentsID.clear();
+    agentsID.append(wm->our.data->activeAgents);
+//    qDebug()<<"agentsID Nadia:"<<agentsID.size();
     agents.clear();
     points.clear();
     for(int i=0;i<agentsID.count();i++){
@@ -45,19 +44,22 @@ void CHalftimeLineup::lineUpAllAgents(){
             points.append(wm->field->center()+Vector2D(i*-0.25,-3.3));
 
     }
+//    qDebug()<<"points Nadia:"<<points.size();
+//    qDebug()<<"matchpoints Nadia:"<<matchpoints.size();
 
     if(!haltRobots){
-        debug("residan",D_NADIA);
         knowledge->Matching(agents,points,matchpoints);
 
         for(int i=0;i<agentsID.length();i++){
             lineup.at(i)->init(points[matchpoints.at(i)],Vector2D(0,1));
+            lineup.at(i)->setADiveMode(false);
             lineup.at(i)->setAvoidPenaltyArea(false);
             lineup.at(i)->execute();
         }
 
         for(int i=0;i<agentsID.length();i++){
-            if(Circle2D(knowledge->getAgent(agentsID.at(i))->pos(),0.1).contains(points[matchpoints.at(i)]))
+            if(Circle2D(knowledge->getAgent(agentsID.at(i))->pos(),0.05).contains(points[matchpoints.at(i)])
+                    && knowledge->getAgent(agentsID.at(i))->vel().length()<0.2)
                 locatedRobots++;
         }
 

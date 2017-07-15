@@ -5,6 +5,7 @@
 #include <cmath>
 
 //#define OLD_FASTEST 1
+
 #define LOOP_TIME_BYKK 0.016
 #define AGENT_SPEED_BYKK 1.5
 //struct velAndAccByKK {
@@ -55,7 +56,7 @@ protected:
     void checkGoalieTarget();    
     void setGoalKeeperState();
     void setGoalKeeperTargetPoint();
-    bool ballBehindGoalie, goalieOneTouch, goalieInPenaltyAreaPrediction, goalieClearMode, goalieStrictFollow, goalieFollow, ballIsOutOfField;
+    bool ballBehindGoalie, goalieOneTouch,goalieClearMode,ballIsOutOfField;
     double strictfollowThr;
     double behindBallThr;    
     bool besidePoleFlag;
@@ -66,19 +67,20 @@ protected:
     Segment2D getBisectorSegment(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
     void manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkBlockShotInPlayOff(int _markAgentSize);
-    bool isAgentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> stuckIndexs);
-    void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> stuckPositions);
+    void agentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs);
+    bool isAgentsStuckTogether(QList<Vector2D> agentsPosition);
+    void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> &stuckPositions);
     void getIntersectionWithPenaltyAreaAHZ(Segment2D , Vector2D sol1 , Vector2D sol2);
     bool isIndirectArea(Vector2D);    
-
     //atousa
     Vector2D getGoaliePositionInOneDef(Vector2D _ballPos, double _limit1, double _limit2);
     double goalieThr;
-
+    ////////
     int angleDegreeThrNotStop = 0;
     double threshOld = 0.0;
     double ballCircleR = 0.5;
     double xLimitForblockingPass;
+    bool stuckFlag;
     bool isCrowdedInFrontOfPenaltyAreaByOurAgents;
     bool isCrowdedInFrontOfPenaltyAreaByOppAgents;
     bool ballISInpenaltyAreaAndDangerCircle;
@@ -110,8 +112,7 @@ protected:
     int AHZCount;        
     ///////////////////////////////////////////////////
     void executeGoalKeeper();    
-    Vector2D strictFollowBall(Vector2D _ballPos);
-    Vector2D followBall(Vector2D _ballPos);
+    Vector2D strictFollowBall(Vector2D _ballPos);    
     Vector2D checkDefensePoint(CAgent* agent, const Vector2D& point);
     rcsc::Vector2D avoidKicker(int i, int kicker);
     void announceClearing(bool state);
@@ -125,8 +126,9 @@ protected:
     bool canReachToBall(int agentId, int theirAgentId);
     int decideShootOutMode();
     QList <Vector2D> lastBallPos;
-    int penaltyShootoutMode;
+    int penaltyShootoutMode=beforeTouch;
     void penaltyShootOutMode();
+    CSkillGotoPointAvoid* striker_Robot;
     void penaltyMode();
     bool isStopped();
     bool isTheirNonPlayKick();
@@ -137,6 +139,7 @@ protected:
         NoneExep = 3
     };
     enum shootOutMode{
+        beforeTouch,
         shootOutClear,
         ballBisector,
         skyDive

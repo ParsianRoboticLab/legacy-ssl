@@ -161,7 +161,14 @@ SOURCES += main.cpp \
     plays/stopplay.cpp \
     defpos.cpp \
     chipkick.cpp \
-    chalftimelineup.cpp
+    chalftimelineup.cpp \
+    proto/robot_status.pb.cc \
+    mixteamthread.cpp \
+    proto/multi_team_communication.pb.cc \
+    mixteamsender.cpp \
+    mixteamreader.cpp \
+    mixteamhandler.cpp
+
 
 HEADERS += base.h \
     worldmodel.h \
@@ -335,7 +342,14 @@ HEADERS += base.h \
     plays/stopplay.h \
     defpos.h \
     chipkick.h \
-    chalftimelineup.h
+    chalftimelineup.h \
+    proto/robot_status.pb.h \
+    mixteamthread.h \
+    proto/multi_team_communication.pb.h \
+    mixteamsender.h \
+    mixteamreader.h \
+    MixTeamChallenge.h \
+    mixteamhandler.h
 
 unix:INCLUDEPATH += "/usr/local/include"
 unix:LIBS += -L/usr/local/include/qjson -lqjson
@@ -415,13 +429,3 @@ INCLUDEPATH += $$PWD/intentions/
 
 RESOURCES +=
 CONFIG += c++11
-
-
-
-
-
-
-
-
-
-

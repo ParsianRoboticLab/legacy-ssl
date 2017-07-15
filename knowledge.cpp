@@ -20,6 +20,9 @@ CKnowledge *knowledge;
 
 CKnowledge::CKnowledge(CAgent** _agents)
 {
+    kPlans = NULL;
+    ssize = 0;
+    mixGoaleID = 0;
 
     //ABBAS
     refShortcuts = false;

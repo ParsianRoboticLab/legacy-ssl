@@ -186,10 +186,35 @@ void CBaseCommunicator::readData()
     }
 
     debug(QString("id : %1").arg((int)robotPacket[4][1]), D_MHMMD);
-    for (int i = 0; i < _MAX_NUM_PLAYERS; i++)
-        knowledge->getAgent(i)->setShootSensor(robotPacket[i][1]);
+    for (int i = 0; i < _MAX_NUM_PLAYERS; i++) {
+        CAgent* tempAgent = knowledge->getAgent(i);
+        tempAgent->setShootSensor(robotPacket[i][1] & 0x01);
 
-    debug(QString("sh : %1").arg(robotPacket[5][1]),D_MAHI);
+        tempAgent->changeIsNeeded         = robotPacket[i][4] & 0b11000000;
+
+        tempAgent->status.battery         = robotPacket[i][1] & 0b11111100;
+        tempAgent->status.capCharge       = robotPacket[i][2] & 0b00111111;
+        tempAgent->status.dataLost        = robotPacket[i][4] & 0b00001111;
+        tempAgent->status.spin            = robotPacket[i][1] & 0b00000010;
+        tempAgent->status.shotSensor      = robotPacket[i][1] & 0b00000001;
+        tempAgent->status.fault           = robotPacket[i][4] & 0b10000000;
+        tempAgent->status.faild           = robotPacket[i][4] & 0b01000000;
+        tempAgent->status.halt            = robotPacket[i][4] & 0b00100000;
+        tempAgent->status.shotBoard       = robotPacket[i][5] & 0b01000000;
+        tempAgent->status.kickFault       = robotPacket[i][5] & 0b00100000;
+        tempAgent->status.chipFault       = robotPacket[i][5] & 0b00010000;
+        tempAgent->status.encoderFault[0] = robotPacket[i][5] & 0b00001000;
+        tempAgent->status.encoderFault[1] = robotPacket[i][5] & 0b00000100;
+        tempAgent->status.encoderFault[2] = robotPacket[i][5] & 0b00000010;
+        tempAgent->status.encoderFault[3] = robotPacket[i][5] & 0b00000001;
+        tempAgent->status.motorFault[0]   = robotPacket[i][6] & 0b00000001;
+        tempAgent->status.motorFault[1]   = robotPacket[i][6] & 0b00000010;
+        tempAgent->status.motorFault[2]   = robotPacket[i][6] & 0b00000100;
+        tempAgent->status.motorFault[3]   = robotPacket[i][6] & 0b00001000;
+        tempAgent->status.motorFault[4]   = robotPacket[i][6] & 0b00010000;
+        tempAgent->status.beep            = robotPacket[i][6] & 0b00100000;
+        tempAgent->status.shotSensorFault = robotPacket[i][6] & 0b01000000;
+    }
 }
 
 CBaseCommunicator::~CBaseCommunicator()

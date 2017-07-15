@@ -1388,7 +1388,7 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
             if(CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,true)<= i+0.1)
             {
                 double t = _agent->id();
-                debug(QString("pos of %1 is : %2 %3").arg(t).arg(finalPos.x).arg(finalPos.y), D_PARSA);
+//                debug(QString("pos of %1 is : %2 %3").arg(t).arg(finalPos.x).arg(finalPos.y), D_PARSA);
                 draw(finalPos);
                 return i;
             }
