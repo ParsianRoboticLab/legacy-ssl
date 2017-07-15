@@ -311,10 +311,6 @@ CSkillReceivePass::CSkillReceivePass(CAgent *_agent)
 
 }
 
-/*void CSkillReceivePass::setAgent(CAgent *_agent)
-{
- agent = _agent;
-}*/
 double CSkillReceivePass::progress()
 {
     return 0.0;
@@ -330,13 +326,8 @@ kkRPMode CSkillReceivePass::decideMode()
     Circle2D tempCircle(target, 0.2 + cirThresh);
     Circle2D tempCircle2(target, receiveR);
     draw(tempCircle, QColor(Qt::cyan));
-    if(kkBallPos.dist(kkAgentPos) < receiveR && ballRealVel < 0.2 )
-    {
-        kickCirThresh = 0.5;
-        velThresh = 0.2;
-        return RPRECEIVE;
-    }
-    else if(tempCircle.contains(kkAgentPos) && ballRealVel > 0.2 )
+
+    if(tempCircle.contains(kkAgentPos) && ballRealVel > 0.2 )
     {
         cirThresh = 1.0;
         Circle2D tempKickCircle(kkAgentPos, 0.3 + kickCirThresh);
@@ -414,8 +405,6 @@ void CSkillReceivePass::execute()
         else
             gotopointavoid->init(agent->pos(), oneTouchDir);
         gotopointavoid->setSlowMode(false);
-        //gotopointavoid->setFinalDir(kkBallPos - kkAgentPos);
-
         gotopointavoid->execute();
         debug("RPWAITPOS",D_KK);
         break;
@@ -429,111 +418,25 @@ void CSkillReceivePass::execute()
         gotopointavoid->init(tempDampTarget,oneTouchDir);
         gotopointavoid->execute();
         debug("RPdamp-Back",D_KK);
-
-        //        else
-        //        {
-        //            tempVecDamp = kkBallPos + (kkAgentPos - kkBallPos).norm()*0.095;
-        //            gotopointavoid->init(tempVecDamp,oneTouchDir);
-        //            gotopointavoid->execute();
-        //            debug("RPdamp",D_KK);
-        //        }
-
         break;
     case RPINTERSECT:
+        agent->setRoller(2);
         intersectPos = agentPerLine.intersection(tempBallPath);
-        //ntersectPos -= Vector2D(0.115*cos(target.th().radian()), 0.115*sin(target.th().radian()));
         gotopointavoid->init(intersectPos,oneTouchDir);
         gotopointavoid->setSlowMode(false);
+        gotopointavoid->setOneTouchMode(true);
         gotopointavoid->execute();
         debug("Intercept", D_KK);
 
         break;
     case RPNONE:
         gotopointavoid->init(target,oneTouchDir);
+        gotopointavoid->setOneTouchMode(true);
         gotopointavoid->setSlowMode(false);
         gotopointavoid->execute();
         debug("RP",D_KK);
         break;
-        /*case RPRECEIVE:
-  tempVecDamp = kkBallPos + (kkAgentPos - kkBallPos).norm()*0.095;
-  gotopointavoid->init(tempVecDamp,oneTouchDir);
-  gotopointavoid->execute();
-  debug("RPreceive",D_KK);
-  break;*/
-
     }
-
-    return;
-    Vector2D Dir(0,0);
-
-    Dir = wm->ball->pos - agent->pos();
-    bool isInTarget=false;
-    Circle2D receiveMargin;
-    receiveMargin.assign(target,receiveR);
-    ballPath.assign(wm->ball->pos,wm->ball->pos+(((target.dist(wm->ball->pos))+1)*wm->ball->vel.norm()));
-    Vector2D *pos1 = new Vector2D;
-    Vector2D *pos2 = new Vector2D;
-    static Vector2D newTarget(0,0);
-
-    if (!target.valid()) target = wm->field->oppGoal();
-    /*if(agent->pos().dist(newTarget) < 0.5)
-  isInTarget = true;
-
- if(isInTarget)
- {
-  if(wm->ball->vel.length()>0.1 )
-  {
-   newTarget = ballPath.nearestPoint(agent->pos()) - Vector2D(0.09*cos(Dir.th().radian()), 0.09*sin(Dir.th().radian()));
-
-  }
-  else
-   newTarget = agent->pos();
- }
- else
- {
-  newTarget =target;
- }
-
- */
-
-    if(agent->pos().dist(wm->ball->pos) < 0.5)
-        agent->setRoller(7);
-    else
-        agent->setRoller(0);
-    if(agent->pos().dist(wm->ball->pos) < 0.15 && fabs((agent->dir().th()-Dir.th()).degree()) < 20)
-        received = true;
-    else
-        received =false;
-
-    if(agent->pos().dist(target) < 1)
-    {
-        if(receiveMargin.contains(wm->ball->pos) && wm->ball->vel.length() <= 0.01)
-            newTarget.assign(wm->ball->pos.x - 0.12*cos(Dir.th().radian()) + 0.1*wm->ball->vel.x, wm->ball->pos.y - 0.12*sin(Dir.th().radian())+ 0.1*wm->ball->vel.y);
-        else
-        {
-            if(wm->ball->vel.length()>0.01 && receiveMargin.intersection(ballPath,pos1,pos2))
-            {
-                newTarget = ballPath.nearestPoint(agent->pos());// - Vector2D(0.09*cos(Dir.th().radian()), 0.09*sin(Dir.th().radian()));
-
-            }
-            else
-                newTarget = target;
-        }
-
-    }
-    else
-        newTarget = target;
-
-
-    //debug(QString("dist : %1").arg(agent->pos().dist(newTarget)),D_HOSSEIN);
-    draw(newTarget,D_HOSSEIN,"red");
-    gotopointavoid->init(newTarget,Dir);
-
-    if(slow)
-        gotopointavoid->setMaxVelocity(2);
-    else
-        gotopointavoid->setMaxVelocity(4);
-    gotopointavoid->execute();
 
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
