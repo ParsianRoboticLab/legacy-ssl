@@ -1520,8 +1520,6 @@ bool DefensePlan::agentEffectOnBallProbability(Vector2D ballPos, Vector2D ballVe
 
 
 Vector2D DefensePlan::getGoalieShootOutTarget(bool isSkyDive){
-    QList<Vector2D> target;
-    double diam;
     Vector2D degree;
     Vector2D finalTarget;
 
@@ -1549,10 +1547,21 @@ Vector2D DefensePlan::getGoalieShootOutTarget(bool isSkyDive){
 //            }
 //        }
 
-        diam = 1.5 - knowledge->chipGoalPropability(false);
 
-        debug(QString("ballBisector, diam:%1").arg(diam), D_FATEMEH);
-        Circle2D c = Circle2D(wm->field->ourGoal(),diam);
+//        if(knowledge->chipGoalPropability(false) < 0.2)
+//            shootOutDiam = 2.2;
+//        else if(knowledge->chipGoalPropability(false) < 0.4)
+//            shootOutDiam = 2;
+//        else if(knowledge->chipGoalPropability(false) < 0.7)
+//            shootOutDiam = 1.7;
+//        else
+//            shootOutDiam = 1.5;
+
+        if(knowledge->chipGoalPropability(false) > 0.1 || knowledge->chipGoalPropability(false) < 0.05)
+            shootOutDiam = min(2*wm->ball->pos.dist(wm->field->ourGoal())/5.0, 2);
+
+        debug(QString("ballBisector, diam:%1").arg(shootOutDiam), D_FATEMEH);
+        Circle2D c = Circle2D(wm->field->ourGoal(),shootOutDiam);
 
         if (c.intersection(bisectorLine, &a, &b)) {
             finalTarget= (a.x > b.x) ? a : b;
@@ -1602,23 +1611,21 @@ int DefensePlan::decideShootOutMode(){
         debug("beforeTouch", D_FATEMEH);
         result = beforeTouch;
     }
-        else
-            result = ballBisector;
-//    else if(canReachToBall(goalKeeperAgent->id(), knowledge->nearestOppToBall)
-//            || (!Circle2D(wm->ball->pos,0.20).contains(wm->opp[knowledge->nearestOppToBall]->pos)
-//                && wm->ball->pos.dist(wm->field->ourGoal()) < 1.7)
-//            ){
-//        debug("shootOutClear", D_FATEMEH);
-//        result = shootOutClear;
-//    }
-//    else if(!agentEffectOnBallProbability(wm->ball->pos, wm->ball->vel, wm->opp[knowledge->nearestOppToBall]->pos, wm->opp[knowledge->nearestOppToBall]->vel, true)){
-//        debug("ballBisector", D_FATEMEH);
-//        result = ballBisector;
-//    }
-//    else{
-//        debug("skydive", D_FATEMEH);
-//        result = skyDive;
-//    }
+    else if(canReachToBall(goalKeeperAgent->id(), knowledge->nearestOppToBall)
+            || (!Circle2D(wm->ball->pos,0.20).contains(wm->opp[knowledge->nearestOppToBall]->pos)
+                && wm->ball->pos.dist(wm->field->ourGoal()) < 1.7)
+            ){
+        debug("shootOutClear", D_FATEMEH);
+        result = shootOutClear;
+    }
+    else if(!agentEffectOnBallProbability(wm->ball->pos, wm->ball->vel, wm->opp[knowledge->nearestOppToBall]->pos, wm->opp[knowledge->nearestOppToBall]->vel, true)){
+        debug("ballBisector", D_FATEMEH);
+        result = ballBisector;
+    }
+    else{
+        debug("skydive", D_FATEMEH);
+        result = skyDive;
+    }
 
     return result;
 }
@@ -1675,7 +1682,8 @@ void DefensePlan::penaltyShootOutMode(){
     case ballBisector:
         assignSkill(goalKeeperAgent , gpa[goalKeeperAgent->id()]);
         gpa[goalKeeperAgent->id()]->setSlowMode(false);
-        gpa[goalKeeperAgent->id()]->setADiveMode(true);
+        gpa[goalKeeperAgent->id()]->setADiveMode(false);
+        gpa[goalKeeperAgent->id()]->setLookAt(wm->ball->pos);
         agentTarget = getGoalieShootOutTarget(false);
         gpa[goalKeeperAgent->id()]->init(agentTarget , targetDir /*wm->ball->pos-goalKeeperAgent->pos()*/);
         draw(agentTarget, 0, QColor(Qt::darkRed));
@@ -1685,6 +1693,7 @@ void DefensePlan::penaltyShootOutMode(){
         assignSkill(goalKeeperAgent , gpa[goalKeeperAgent->id()]);
         gpa[goalKeeperAgent->id()]->setSlowMode(false);
         gpa[goalKeeperAgent->id()]->setADiveMode(true);
+        gpa[goalKeeperAgent->id()]->setLookAt(wm->ball->pos);
         agentTarget = getGoalieShootOutTarget(true) ;
         gpa[goalKeeperAgent->id()]->init(agentTarget, targetDir);
         draw(agentTarget, 0, QColor(Qt::darkBlue));

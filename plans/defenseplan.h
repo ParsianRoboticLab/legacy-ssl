@@ -148,6 +148,7 @@ protected:
     };
 
     bool agentEffectOnBallProbabilityRes;
+    double shootOutDiam = 2.5;
 
     struct defenseExeptions{
         bool active;
