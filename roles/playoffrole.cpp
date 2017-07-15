@@ -109,7 +109,6 @@ void CRolePlayOff::update() {
             receivePassSkill->setIATargetDir(targetDir);
             receivePassSkill->setIgnoreAngle(false);
         }
-        receivePassSkill->setAgent(agent);
         updated = false;
         break;
     default:
