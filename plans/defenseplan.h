@@ -122,7 +122,8 @@ protected:
     bool defenseOneTouchOrNot();
     bool defenseClearOrNot();
     void runClear();
-    Vector2D getGoalieShootOutTarget(bool isBallPath);
+    bool agentEffectOnBallProbability(Vector2D ballPos, Vector2D ballVel, Vector2D agentPos, Vector2D agentVel, bool isTowardOurgoal);
+    Vector2D getGoalieShootOutTarget(bool isSkyDive);
     bool canReachToBall(int agentId, int theirAgentId);
     int decideShootOutMode();
     QList <Vector2D> lastBallPos;
@@ -146,6 +147,10 @@ protected:
 
     };
 
+    bool shootOutClearModeSelected = false;
+    bool agentEffectOnBallProbabilityRes;
+    double shootOutDiam = 2.5;
+
     struct defenseExeptions{
         bool active;
         exepMode exeptionMode;
@@ -153,6 +158,7 @@ protected:
     };
     Vector2D ballPrediction(bool _isGoalie);
 
+    Vector2D lastBallPosition;
 public:
     DefensePlan();
     void execute();

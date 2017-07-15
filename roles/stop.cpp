@@ -136,6 +136,7 @@ void CRoleStop::execute()
 	info()->findPositions();
 	gotopoint->setTargetLook(target, wm->ball->pos);
 	gotopoint->setAvoidPenaltyArea(true);
+
     gotopoint->setBallObstacleRadius(0.50);
     gotopoint->setAvoidBall(true);
 	gotopoint->execute();
