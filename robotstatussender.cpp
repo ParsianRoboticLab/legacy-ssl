@@ -15,6 +15,8 @@ CRobotStatusSender::~CRobotStatusSender() {
 }
 
 void CRobotStatusSender::sendData() {
+    if (!conf()->LocalSettings_sendRobotStatus()) return;
+
     QByteArray datagram;
     packet = new robot_status::Status;
     fillPacket(packet);
