@@ -606,10 +606,8 @@ CSkillKick::CSkillKick(CAgent *_agent) : CSkill(_agent)
     gpa = new CSkillGotoPointAvoid(_agent);
     gpa->setSlowMode(false);
     angPid= new _PID(2,0,0,0,0);
-    speedPidX = new _PID(1,0,0,0,0);
-    speedPidY = new _PID(1,0,0,0,0);
-    posPidX = new _PID(1,0,0,0,0);
-    posPidY = new _PID(1,0,0,0,0);
+    speedPid = new _PID(1,0,0,0,0);
+    posPid = new _PID(1,0,0,0,0);
     veryFine = false;
     interceptMode = false;
     kkShotEmpySpot = false;
@@ -628,8 +626,8 @@ CSkillKick::~CSkillKick()
 
     delete gpa;
     delete angPid;
-    delete speedPidX;
-    delete speedPidY;
+    delete speedPid;
+    delete posPid;
 }
 
 void CSkillKick::resetI()
@@ -892,7 +890,7 @@ void CSkillKick::kDontKick()
         else
         {
             agent->setRoller(0);
-            finalPos=ballPos-(target-ballPos).norm()*0.125;
+            finalPos=ballPos-(target-ballPos).norm()*0.13;
         }
         gpa->setSlowMode(false);
         gpa->setBallObstacleRadius(0);
@@ -1078,60 +1076,14 @@ void CSkillKick::jTurn()
     double speedPidKp = 1;
     Vector2D targetForJturnSpeed,targetForJturnPos;
     Vector2D idealPass ;
-
-    //    if(movementDir <= 50 && movementDir >= -50)
-    //    {
-    //        targetForJturnPos = ballPos + (ballPos - target).norm()*0.05;
-    //        isFinalController = true;
-    //        if(movementDir > 20)
-    //        {
-    //            shift = 12 + (1-agentPos.dist(ballPos))*35;
-    //        }
-    //        else if(movementDir < -20)
-    //        {
-    //             shift = -12 - (1-agentPos.dist(ballPos))*35;
-    //        }
-    //        else
-    //        {
-    //            shift = 0;
-    //        }
-
-    //        idealPass.rotate(shift);
-    //        targetForJturnSpeed = agentPos + idealPass;
-
-    //    }
-    //    else
-    //    {
-    //        isFinalController = false;
-    //        if(movementDir > 0)
-    //        {
-    //            shift = 15 + (1-agentPos.dist(ballPos))*61;
-    //        }
-    //        else if(movementDir < 0)
-    //        {
-    //            shift = -15 - (1-agentPos.dist(ballPos))*61;
-    //        }
-    //        idealPass.rotate(shift);
-    //        targetForJturnSpeed = agentPos + idealPass;
-    //    }
-
-    //*/
-
-
-
-    //    draw(targetForJturnSpeed);
-
-
-
-
-
+    Vector2D movementThSpeed,movementThPos;
     double movementDir = ((ballPos - agentPos).th() - kickFinalDir).degree();
     double shift = 0;
     double distCoef = 0.15;
 
     idealPass = (ballPos - agentPos).norm()*distCoef;
 
-    if(abs(movementDir) < 50 && ballPos.dist(agentPos) < 0.35)
+    if(abs(movementDir) < 50/* && ballPos.dist(agentPos) < 0.35*/)
     {
         isFinalController =true;
     }
@@ -1141,18 +1093,24 @@ void CSkillKick::jTurn()
     }
     if(movementDir <= 50 && movementDir >= -50)
     {
-        targetForJturnPos = ballPos + (ballPos - target).norm()*0.11;
+        targetForJturnPos = ballPos + (ballPos - target).norm()*0.08;
         if(movementDir > 20)
         {
-            shift = 10 + (1-agentPos.dist(ballPos))*25;
+            if(wm->ball->vel.length() > 0.3)
+                shift = 8 + (1-agentPos.dist(ballPos))*20;
+            else
+                shift = 10 + (1-agentPos.dist(ballPos))*25;
         }
         else if(movementDir < -20)
         {
-            shift = -10 - (1-agentPos.dist(ballPos))*25;
+            if(wm->ball->vel.length() > 0.3)
+                shift = -8 - (1-agentPos.dist(ballPos))*20;
+            else
+                shift = -10 - (1-agentPos.dist(ballPos))*25;
         }
         else
         {
-
+            agent->setRoller(spin);
             shift = 0;
         }
 
@@ -1175,33 +1133,34 @@ void CSkillKick::jTurn()
     }
 
 
-
-
+    movementThSpeed = (targetForJturnSpeed - agentPos).norm();
+    movementThPos = (targetForJturnPos - agentPos).norm();
     double dirReduce = (fabs(movementDir)/70)*(fabs(movementDir)/70);
 
-    speedPidX->error  = targetForJturnSpeed.x - agentPos.x;
-    speedPidY->error = targetForJturnSpeed.y - agentPos.y;
-    posPidX->error = targetForJturnPos.x - agentPos.x;
-    posPidY->error = targetForJturnPos.y - agentPos.y;
+    speedPid->error  = targetForJturnSpeed.dist(agentPos);
+    posPid->error = targetForJturnPos.dist(agentPos);
 
     ////////////set Active adaptive PIDs
 
 
-    if(isFinalController && wm->ball->vel.length() < 0.2)
+    if(isFinalController )
     {
-
-        posPidKp = 4+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
-        speedPidKp = 2;// +2.1*agentPos.dist(ballPos) + dirReduce;
+        if(wm->ball->vel.length() > 0.2)
+        {
+            posPid->kp = 1+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
+            speedPid->kp = 4;// +2.1*agentPos.dist(ballPos) + dirReduce;
+        }
+        else
+        {
+            posPid->kp = 4+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
+            speedPid->kp = 2;// +2.1*agentPos.dist(ballPos) + dirReduce;
+        }
     }
     else
     {
-        posPidKp = 0;
-        speedPidKp = 8 +2.1*agentPos.dist(ballPos) + dirReduce;
+        posPid->kp = 0;
+        speedPid->kp = 6 +2.1*agentPos.dist(ballPos) + dirReduce;
     }
-    posPidX->kp = posPidKp;
-    posPidY->kp = posPidKp;
-    posPidX->kd = 10;
-    posPidY->kd = 10;
 
 
 
@@ -1222,29 +1181,20 @@ void CSkillKick::jTurn()
     if(penaltyKick)
     {
         angPid->kp = 7;
-        speedPidX->kp = 4;
-        speedPidY->kp = 4;
+        speedPid->kp = 4;
     }
-    else if(wm->ball->vel.length() > 0.2)
-    {
-        speedPidX->kp = speedPidKp;
-        speedPidY->kp = speedPidKp;
-    }
-    else
-    {
-        speedPidY->kp = speedPidKp;
-        speedPidX->kp = speedPidKp;
-    }
-    angPid->kp = 5;
-    angPid->error = (kickFinalDir - agentDir.th()).radian();
-    agent->setRobotAbsVel(wm->ball->vel.x + speedPidX->PID_OUT() + posPidX->PID_OUT()
-                          ,wm->ball->vel.y+ speedPidY->PID_OUT() + posPidY->PID_OUT()
-                          ,angPid->PID_OUT());
-    speedPidX->pError = speedPidX->error;
-    speedPidY->pError = speedPidY->error;
 
-    posPidX->pError = posPidX->error;
-    posPidY->pError = posPidY->error;
+    angPid->kp = 5;
+
+    double vx= movementThSpeed.x * speedPid->PID_OUT() + movementThPos.x * posPid->PID_OUT();
+    double vy = movementThSpeed.y * speedPid->PID_OUT()+ movementThPos.y * posPid->PID_OUT();
+    angPid->error = (kickFinalDir - agentDir.th()).radian();
+    agent->setRobotAbsVel(wm->ball->vel.x + vx
+                          ,wm->ball->vel.y+ vy
+                          ,angPid->PID_OUT());
+    speedPid->pError = speedPid->error;
+
+    posPid->pError = posPid->error;
 
     agent->accelerationLimiter(0,false);
 
@@ -1267,7 +1217,7 @@ void CSkillKick::turnForKick()
             angPid->kp = 4*angReduce;
 
             angPid->error = ((ballPos - agentPos).th() - agent->dir().th()).radian();
-            agent->setRobotVel( -0.11 + agentPos.dist(ballPos) ,-1.2*angReduce,angPid->PID_OUT() +4*angReduce);
+            agent->setRobotVel( (-0.12 + agentPos.dist(ballPos))*4 ,-1*angReduce,angPid->PID_OUT() +4*angReduce);
 
 
         }
@@ -1276,7 +1226,7 @@ void CSkillKick::turnForKick()
             angPid->kp = 4*angReduce;
 
             angPid->error = ((ballPos - agentPos).th() - agent->dir().th()).radian();
-            agent->setRobotVel( -0.11 + agentPos.dist(ballPos),1.2*angReduce,angPid->PID_OUT() - 4*angReduce) ;
+            agent->setRobotVel( (-0.12 + agentPos.dist(ballPos))*4,1*angReduce,angPid->PID_OUT() - 4*angReduce) ;
         }
 
 
