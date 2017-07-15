@@ -1439,7 +1439,7 @@ bool DefensePlan::agentEffectOnBallProbability(Vector2D ballPos, Vector2D ballVe
 //    }
 
 
-    if(ballVel.length() > 4 || ballPos.dist(goal) < 2.8){
+    if(ballVel.length() > 4 || ballPos.dist(goal) < 3){
         agentEffectOnBallProbabilityRes = true;     // skyDive
     }
     else if(ballVel.length() < 2 || ballPos.dist(agentPos) > 1){
@@ -1513,7 +1513,7 @@ Vector2D DefensePlan::getGoalieShootOutTarget(bool isSkyDive){
         if(wm->ball->vel.length() > 4
                 || (wm->ball->pos.dist(wm->field->ourGoal()) < 2.7
                     && wm->ball->pos.dist(wm->opp[knowledge->nearestOppToBall]->pos) > 0.15)
-                || wm->ball->pos.dist(wm->field->ourGoal()) < 1.2){
+                || wm->ball->pos.dist(wm->field->ourGoal()) < 1.4){
             debug("skydive, ballpath", D_FATEMEH);
             finalTarget = ballPath.perpendicular(wm->our[goalKeeperAgent->id()]->pos).intersection(ballPath);
         }else{
@@ -1532,6 +1532,9 @@ Vector2D DefensePlan::getGoalieShootOutTarget(bool isSkyDive){
 }
 
 bool DefensePlan::canReachToBall(int ourAgentId, int theirAgentId){
+    if(wm->our[ourAgentId] == NULL
+            || wm->opp[theirAgentId]==NULL)
+        return false;
     Vector2D ballPosAndVel;
     ballPosAndVel = wm->ball->pos+wm->ball->vel;
 
@@ -1545,17 +1548,22 @@ bool DefensePlan::canReachToBall(int ourAgentId, int theirAgentId){
 }
 
 int DefensePlan::decideShootOutMode(){
+    if(goalKeeperAgent==NULL)
+        return 0;
     int result;
 
-    if(lastBallPosition.dist(wm->ball->pos) < 0.06){
+    if(lastBallPosition.dist(wm->ball->pos) < 0.04){
         debug("beforeTouch", D_FATEMEH);
+        shootOutClearModeSelected = false;
         result = beforeTouch;
     }
     else if(canReachToBall(goalKeeperAgent->id(), knowledge->nearestOppToBall)
-            || (!Circle2D(wm->ball->pos,0.20).contains(wm->opp[knowledge->nearestOppToBall]->pos)
-                && wm->ball->pos.dist(wm->field->ourGoal()) < 1.7)
+            || (!Circle2D(wm->ball->pos,0.10).contains(wm->opp[knowledge->nearestOppToBall]->pos)
+                && wm->ball->pos.dist(wm->field->ourGoal()) < 1.7 )
+                || shootOutClearModeSelected
             ){
         debug("shootOutClear", D_FATEMEH);
+        shootOutClearModeSelected = true;
         result = shootOutClear;
     }
     else if(!agentEffectOnBallProbability(wm->ball->pos, wm->ball->vel, wm->opp[knowledge->nearestOppToBall]->pos, wm->opp[knowledge->nearestOppToBall]->vel, true)){
@@ -1571,6 +1579,8 @@ int DefensePlan::decideShootOutMode(){
 }
 
 void DefensePlan::penaltyShootOutMode(){
+    if(goalKeeperAgent== NULL)
+        return;
     penaltyShootoutMode = decideShootOutMode();
 
     Vector2D targetDir(10, 5), agentTarget;
@@ -1607,8 +1617,8 @@ void DefensePlan::penaltyShootOutMode(){
 
     case shootOutClear:
         assignSkill(goalKeeperAgent, kickSkill);
-        kickSkill->setKickSpeed(1000);
-        kickSkill->setTolerance(25);
+        kickSkill->setKickSpeed(1023);
+        kickSkill->setTolerance(50);
         kickSkill->setDontKick(false);
         kickSkill->setSlow(false);
         kickSkill->setSpin(false);
@@ -1616,6 +1626,7 @@ void DefensePlan::penaltyShootOutMode(){
         kickSkill->setGoalieMode(false);
         kickSkill->setChip(true);
         kickSkill->setTarget(wm->field->oppGoal());
+        kickSkill->setSagMode(true);
 
         break;
 
