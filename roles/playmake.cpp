@@ -84,10 +84,10 @@ bool CRolePlayMake::spinBack()
     return false;
     bool pushIt = false;
     if ((stopped)
-            || (kickoff)
-            || (!agent->abilities.canSpin)
-            || wm->ball->pos.dist(wm->field->oppCornerL() )< 0.9
-            || wm->ball->pos.dist(wm->field->oppCornerR() )< 0.9)
+        || (kickoff)
+        || (!agent->abilities.canSpin)
+        || wm->ball->pos.dist(wm->field->oppCornerL() )< 0.9
+        || wm->ball->pos.dist(wm->field->oppCornerR() )< 0.9)
         return false;
     if (knowledge->frameCount - lastFrameCrowded > 9)
     {
@@ -531,22 +531,22 @@ void CRolePlayMake::passShootNew()
     }
 
     if ((knowledge->getTechnicalMode().isEmpty()) &&
-            (
-                (knowledge->getGameMode()==CKnowledge::Start
-                 &&
-                 (wm->field->isInOurPenaltyArea( (wm->ball->pos-wm->field->ourGoal())*0.7 + wm->field->ourGoal() )
-                  || wm->field->isInOurPenaltyArea( (wm->ball->predict(0.15)-wm->field->ourGoal())*0.7 + wm->field->ourGoal() )
-                  || wm->field->isInOurPenaltyArea( (wm->ball->predict(0.3)-wm->field->ourGoal())*0.7 + wm->field->ourGoal() )
-                  || wm->field->isInOurPenaltyArea( (wm->ball->predict(0.45)-wm->field->ourGoal())*0.7 + wm->field->ourGoal() )
-                  || wm->field->isInOurPenaltyArea( (agent->pos()))
-                  || wm->field->isInOurPenaltyArea( (agent->pos()+agent->vel()*0.15))
-                  || wm->field->isInOurPenaltyArea( (agent->pos()+agent->vel()*0.3))
-                  || wm->field->isInOurPenaltyArea( (agent->pos()+agent->vel()*0.45))
-                  || wm->field->isInOurPenaltyArea( Vector2D(agent->pos()-wm->field->ourGoal())*0.7+wm->field->ourGoal())
-                  || (knowledge->frameCount - knowledge->defenseClearingFrame < 9))
+        (
+            (knowledge->getGameMode()==CKnowledge::Start
+             &&
+             (wm->field->isInOurPenaltyArea( (wm->ball->pos-wm->field->ourGoal())*0.7 + wm->field->ourGoal() )
+              || wm->field->isInOurPenaltyArea( (wm->ball->predict(0.15)-wm->field->ourGoal())*0.7 + wm->field->ourGoal() )
+              || wm->field->isInOurPenaltyArea( (wm->ball->predict(0.3)-wm->field->ourGoal())*0.7 + wm->field->ourGoal() )
+              || wm->field->isInOurPenaltyArea( (wm->ball->predict(0.45)-wm->field->ourGoal())*0.7 + wm->field->ourGoal() )
+              || wm->field->isInOurPenaltyArea( (agent->pos()))
+              || wm->field->isInOurPenaltyArea( (agent->pos()+agent->vel()*0.15))
+              || wm->field->isInOurPenaltyArea( (agent->pos()+agent->vel()*0.3))
+              || wm->field->isInOurPenaltyArea( (agent->pos()+agent->vel()*0.45))
+              || wm->field->isInOurPenaltyArea( Vector2D(agent->pos()-wm->field->ourGoal())*0.7+wm->field->ourGoal())
+              || (knowledge->frameCount - knowledge->defenseClearingFrame < 9))
 
-                 ))
-            )
+             ))
+        )
     {
         gotopoint->setAgent(agent);
         Vector2D qq = wm->ball->pos - wm->field->ourGoal();
@@ -949,11 +949,15 @@ bool CRolePlayMake::ShootPenalty(){
         penaltyTarget=knowledge->getEmptyPosOnGoalForPenalty(1.0/10.0, true, 0.06,agent);
 
     }
-    if(Segment2D(agent->pos(),penaltyTarget).dist(wm->opp.active(knowledge->oppGoalieIndex)->pos)
-            > fabs(agent->pos().x-wm->opp.active(knowledge->oppGoalieIndex)->pos.x)/6)
+    debug(QString("goalie index :%1").arg(wm->opp.data->goalieID),D_NADIA);
+    if(wm->opp[wm->opp.data->goalieID] == NULL)
+        return false;
+    if(Segment2D(agent->pos(),penaltyTarget).dist(wm->opp[wm->opp.data->goalieID]->pos)
+       > fabs(agent->pos().x-wm->opp[wm->opp.data->goalieID]->pos.x)/4)
         return true;
 
     else return false;
+    return false;
 }
 
 double CRolePlayMake::lastBounce(){
@@ -991,12 +995,12 @@ void CRolePlayMake::loadLastBounceSpeed(){
         }
     }
 
-//    for(int i=0; i< lastBounceProfileData.size(); i++){
-//        debug(QString("id: %1").arg(lastBounceProfileData.at(i).first), D_FATEMEH);
-//        for(int j=0; j< lastBounceProfileData.at(i).second.keys().size(); j++)
-//            debug(QString("%1:: %2").arg(lastBounceProfileData.at(i).second.keys().at(j)).arg(
-//                      lastBounceProfileData.at(i).second.values().at(j)), D_FATEMEH);
-//    }
+    //    for(int i=0; i< lastBounceProfileData.size(); i++){
+    //        debug(QString("id: %1").arg(lastBounceProfileData.at(i).first), D_FATEMEH);
+    //        for(int j=0; j< lastBounceProfileData.at(i).second.keys().size(); j++)
+    //            debug(QString("%1:: %2").arg(lastBounceProfileData.at(i).second.keys().at(j)).arg(
+    //                      lastBounceProfileData.at(i).second.values().at(j)), D_FATEMEH);
+    //    }
 
 }
 
@@ -1011,16 +1015,12 @@ int CRolePlayMake::getLastBounceSpeed(int id, double lastBounceDistance){
 }
 
 int CRolePlayMake::getPenaltychipSpeed(){
-    Vector2D oppGoaliPos=wm->opp.active(knowledge->oppGoalieIndex)->pos;
+    Vector2D oppGoaliPos=wm->opp[wm->opp.data->goalieID]->pos;
     debug(QString("chipsepeed:%1").arg(knowledge->chipGoalPropability(true)),D_NADIA);
     if(knowledge->chipGoalPropability(true)>0.1){
-//        if(knowledge->getProfile(agent->id(),(oppGoaliPos-agent->pos()).length(),false)
-//                < knowledge->getProfile(agent->id()+1,lastBounce(),false)){
-//            return (knowledge->getProfile(agent->id(),(oppGoaliPos-agent->pos()).length(),false)
-//                    +knowledge->getProfile(agent->id()+1,lastBounce(),false))/2;
-//        }
-//        else return -1;
-        return 200;
+
+         return (knowledge->getProfile(agent->id(),(oppGoaliPos-agent->pos()).length(),false)
+                                          +knowledge->getProfile(agent->id()+1,lastBounce(),false))/2;
     }
     else return -1;
 }
@@ -1042,10 +1042,12 @@ void CRolePlayMake::executeOurPenaltyShootout(){
     if (abs(wm->ball->pos.x) > 4)
         firstKick=true;
 
-
-    if((wm->opp.active(knowledge->oppGoalieIndex)->pos-wm->field->oppGoal()).length()>2.5)
-        goalKeeperForward=true;
-
+    // debug(QString("gI %1").arg(knowledge->oppGoalieIndex),D_MHMMD);
+    if(wm->opp[wm->opp.data->goalieID]!= NULL )
+    {
+        if((wm->opp[wm->opp.data->goalieID]->pos-wm->field->oppGoal()).length()>2.5)
+            goalKeeperForward=true;
+    }
     if (knowledge->getGameMode()==CKnowledge::Stop)
     {
         cyclesExecuted--;
@@ -1061,12 +1063,11 @@ void CRolePlayMake::executeOurPenaltyShootout(){
         kick->setTarget(penaltyTarget);
         kick->setPenaltyKick(false);
         kick->setInterceptMode(false);
-        kick->setSpin(false);
+        kick->setSpin(3);
         kick->setChip(false);
         kick->setVeryFine(false);
         kick->setWaitFrames(0);
         kick->setTolerance(1);
-
         if(ShootPenalty())
             firstKick=false;
 
@@ -1122,7 +1123,7 @@ void CRolePlayMake::executeOurPenaltyShootout(){
 
             case pgoaheadShoot:
                 debug("pgoahead : ",D_NADIA);
-                if(abs(agent->pos().x)<1.25){
+                if(agent->pos().x < 1){
                     penaltyTarget=wm->field->oppGoalL()+0*Vector2D(0,wm->field->oppGoalL().y);;
                     kick->setTarget(penaltyTarget);
 
@@ -1155,17 +1156,17 @@ void CRolePlayMake::executeOurPenaltyShootout(){
                     else
                         kick->setKickSpeed(1023);
                     kick->setDontKick(false);
-                    if(Line2D(penaltyTarget,agent->pos()).dist(wm->opp.active(knowledge->oppGoalieIndex)->pos) <0.2){
-                        //                        if(agent->pos().dist(wm->opp.active(knowledge->oppGoalieIndex)->pos-agent->pos())>0.45
-                        //                                && (wm->opp.active(knowledge->oppGoalieIndex)->pos-agent->pos()).dist(penaltyTarget)){
-                        penaltyTarget=knowledge->getEmptyPosOnGoalForPenalty(0.1,true, 0.03);
-                        kick->setChip(true);
-                        kick->setKickSpeed(200);
-                        debug("chiiip",D_NADIA);
-                        //                        }
+                    //                    if(Line2D(penaltyTarget,agent->pos()).dist(wm->opp.active(knowledge->oppGoalieIndex)->pos) <0.2){
+                    //                        //                        if(agent->pos().dist(wm->opp.active(knowledge->oppGoalieIndex)->pos-agent->pos())>0.45
+                    //                        //                                && (wm->opp.active(knowledge->oppGoalieIndex)->pos-agent->pos()).dist(penaltyTarget)){
+                    //                        penaltyTarget=knowledge->getEmptyPosOnGoalForPenalty(0.1,true, 0.03);
+                    //                        kick->setChip(true);
+                    //                        kick->setKickSpeed(200);
+                    //                        debug("chiiip",D_NADIA);
+                    //                        //                        }
 
 
-                    }
+                    //                    }
                     kick->setTarget(penaltyTarget);
 
 
@@ -1183,7 +1184,8 @@ void CRolePlayMake::executeOurPenaltyShootout(){
             }
         }
 
-
+        kick->setShotToEmptySpot(true);
+        kick->setAvoidOppPenaltyArea(false);
         kick->execute();
         draw(penaltyTarget,0,"red");
     }
@@ -1272,9 +1274,9 @@ void CRolePlayMake::executeOurPenalty()
 
 bool CRolePlayMake::canScoreGoal(){
     if( (knowledge->getGameState() == CKnowledge::OurPenaltyKick || knowledge->getGameMode() == CKnowledge::OurPenaltyKick)
-            || knowledge->getGameState() == CKnowledge::OurIndirectKick
-            || (knowledge->getGameState() == CKnowledge::OurKickOff && knowledge->getGameMode() == CKnowledge::Stop)
-            ){
+        || knowledge->getGameState() == CKnowledge::OurIndirectKick
+        || (knowledge->getGameState() == CKnowledge::OurKickOff && knowledge->getGameMode() == CKnowledge::Stop)
+        ){
         return false;
     }
 
@@ -1284,8 +1286,8 @@ bool CRolePlayMake::canScoreGoal(){
     if(info()->oneToucher.isEmpty())
         info()->oneToucherDist2Ball = 100;
     if(agent->pos().dist(wm->ballCatchTarget(agent->self())) < info()->oneToucherDist2Ball
-            &&  (agent->canOneTouch() && coming > 0.3 && ang<policy()->PlayMaker_OneTouchAngleThreshold() )
-            )
+       &&  (agent->canOneTouch() && coming > 0.3 && ang<policy()->PlayMaker_OneTouchAngleThreshold() )
+       )
     {
         Segment2D ballSeg(wm->ball->pos , wm->ball->pos+wm->ball->vel.norm());
         draw(QString("PlayMake OneTouch"),Vector2D(-2,1),"magenta",18);
@@ -1372,8 +1374,8 @@ void CRolePlayMake::execute()
 {
     cyclesExecuted++;
     if( wm->ball->inSight <= 0
-            ||	wm->ball->pos.valid() == false
-            ||	wm->field->marginedField().contains(wm->ball->pos) == false ){
+        ||	wm->ball->pos.valid() == false
+        ||	wm->field->marginedField().contains(wm->ball->pos) == false ){
         agent->waitHere();
         return;
     }
@@ -1574,7 +1576,7 @@ CAgent* CRolePlayMakeInfo::passReceiver(CAgent* self, int p, QList<int> passable
         {
             int k = i%knowledge->agentCount();
             if ((knowledge->getAgent(k)->isVisible()) && (knowledge->getAgent(k)->id() != self->id())
-                    )
+                )
             {
                 return knowledge->getAgent(k);
             }
@@ -1583,8 +1585,8 @@ CAgent* CRolePlayMakeInfo::passReceiver(CAgent* self, int p, QList<int> passable
     for (int i=0;i<knowledge->agentCount();i++)
     {
         if ((knowledge->getAgent(i)->isVisible()) && (knowledge->getAgent(i)->id() != self->id())
-                && passables.contains(i)
-                )
+            && passables.contains(i)
+            )
         {
             DistAgent a;
             a.agent = knowledge->getAgent(i);
@@ -1608,8 +1610,8 @@ CAgent* CRolePlayMakeInfo::bestPassReceiver(bool indirect)
     for (int i=0;i<knowledge->agentCount();i++)
     {
         if ((knowledge->getAgent(i)->isVisible()) && (knowledge->getAgent(i)->skillName != CRolePlayMake::Name)
-                //&& ((knowledge->getAgent(i)->canRecvPass || indirect))
-                && (knowledge->getAgent(i)->skillName=="position"))
+            //&& ((knowledge->getAgent(i)->canRecvPass || indirect))
+            && (knowledge->getAgent(i)->skillName=="position"))
         {
             double ang = 0, coming = 0;
             knowledge->onetouchablity(knowledge->getAgent(i)->id(), w, ang, coming);
@@ -1703,8 +1705,8 @@ void CRolePlayMake::executeOurDirect()
     else slow = true;
     double w;
     if (policy()->OurDirect_ChipToGoal() ||
-            (policy()->OurDirect_ChipToGoalInOurField()
-             && CGameConditions::check("ballinside",QStringList() << "field1stquarter")))
+        (policy()->OurDirect_ChipToGoalInOurField()
+         && CGameConditions::check("ballinside",QStringList() << "field1stquarter")))
     {
         draw("Chip it: direct", Vector2D(-1,-1), "black");
         kick->setAgent(agent);
@@ -1793,9 +1795,9 @@ void CRolePlayMake::executeOurIndirect()
         kick->setSpin(true);
         bool chipIt=false;
         if ((policy()->OurIndirect_ChipToGoalInOurField() && knowledge->getGameMode()==CKnowledge::OurIndirectKick)
-                ||
-                (policy()->OurDirect_ChipToGoalInOurField() && knowledge->getGameMode()==CKnowledge::OurDirectKick)
-                )
+            ||
+            (policy()->OurDirect_ChipToGoalInOurField() && knowledge->getGameMode()==CKnowledge::OurDirectKick)
+            )
         {
             if (CGameConditions::check("ballinside",QStringList() << "field1stquarter"))
             {

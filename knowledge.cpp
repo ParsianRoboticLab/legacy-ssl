@@ -388,7 +388,7 @@ double CKnowledge::chipGoalPropability(bool isOurChip){
     Vector2D goal,goaliePos;
     if(isOurChip){
         goal=wm->field->oppGoal();
-        goaliePos=wm->opp.active(knowledge->oppGoalieIndex)->pos;
+        goaliePos=wm->opp[wm->opp.data->goalieID]->pos;
 
     }
     else{

@@ -1141,18 +1141,25 @@ void CSkillKick::jTurn()
     }
     if(movementDir <= 50 && movementDir >= -50)
     {
-        targetForJturnPos = ballPos + (ballPos - target).norm()*0.11;
+        targetForJturnPos = ballPos + (ballPos - target).norm()*0.08;
         if(movementDir > 20)
         {
-            shift = 10 + (1-agentPos.dist(ballPos))*25;
+            if(wm->ball->vel.length() > 0.2)
+                shift = 7 + (1-agentPos.dist(ballPos))*15;
+            else
+                shift = 10 + (1-agentPos.dist(ballPos))*25;
+
         }
         else if(movementDir < -20)
         {
-            shift = -10 - (1-agentPos.dist(ballPos))*25;
+            if(wm->ball->vel.length() > 0.2)
+                shift = -7 - (1-agentPos.dist(ballPos))*15;
+            else
+                shift = -10 - (1-agentPos.dist(ballPos))*25;
         }
         else
         {
-
+            agent->setRoller(spin);
             shift = 0;
         }
 
@@ -1187,16 +1194,22 @@ void CSkillKick::jTurn()
     ////////////set Active adaptive PIDs
 
 
-    if(isFinalController && wm->ball->vel.length() < 0.2)
+    if(isFinalController&& wm->ball->vel.length() < 0.5)
     {
-
-        posPidKp = 4+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
-        speedPidKp = 2;// +2.1*agentPos.dist(ballPos) + dirReduce;
+        posPidKp = 5+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
+        speedPidKp = 2 +2.1*agentPos.dist(ballPos) + dirReduce;
     }
     else
     {
         posPidKp = 0;
-        speedPidKp = 8 +2.1*agentPos.dist(ballPos) + dirReduce;
+        if(wm->ball->vel.length() > 0.5)
+        {
+            speedPidKp = 5 +2.1*agentPos.dist(ballPos) + dirReduce;
+        }
+        else
+        {
+            speedPidKp = 6 +2.1*agentPos.dist(ballPos) + dirReduce;
+        }
     }
     posPidX->kp = posPidKp;
     posPidY->kp = posPidKp;

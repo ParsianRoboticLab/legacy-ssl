@@ -1547,6 +1547,8 @@ bool DefensePlan::canReachToBall(int ourAgentId, int theirAgentId){
 int DefensePlan::decideShootOutMode(){
     int result;
 
+    if(goalKeeperAgent == NULL)
+        return 0;
     if(lastBallPosition.dist(wm->ball->pos) < 0.06){
         debug("beforeTouch", D_FATEMEH);
         result = beforeTouch;
@@ -1571,6 +1573,10 @@ int DefensePlan::decideShootOutMode(){
 }
 
 void DefensePlan::penaltyShootOutMode(){
+    if(goalKeeperAgent == NULL)
+    {
+        return;
+    }
     penaltyShootoutMode = decideShootOutMode();
 
     Vector2D targetDir(10, 5), agentTarget;
