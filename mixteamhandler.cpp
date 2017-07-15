@@ -5,12 +5,11 @@ CMixTeamHandler::CMixTeamHandler()
     reader = new MixTeamReader();
     setOurRobotIDs();
 
-//    for(int i = 0 ; i < ourAgentIDs.size() ; i++){//set our robot IDs
-//        qDebug() << "^"<<ourAgentIDs.at(i);
-//    }
-
     for(int i = 0 ; i < MAX_OUR_ROBOTS_IN_FIELD; i++ )
         ourRols[i] = new CSkillGotoPoint(NULL);
+    kicker = new CSkillKick(NULL);
+    oneToucher = new CSkillKickOneTouch(NULL);
+    gpa = new CSkillGotoPointAvoid(NULL);
 }
 
 void CMixTeamHandler::setOurRobotIDs()
@@ -47,7 +46,7 @@ void CMixTeamHandler::master()
     if(knowledge->getGameState() == CKnowledge::Stop){
         debug("initial : stop", D_ATOUSA);
         initialPositioning();
-        initialSlaveMakePacket();
+        initialMakePacket();
     }
     else if(knowledge->getGameState() == CKnowledge::Start){ //force start
         debug("task1 : forceStart", D_ATOUSA);
@@ -61,6 +60,8 @@ void CMixTeamHandler::master()
     }
     else if(knowledge->getGameState() == CKnowledge::OurIndirectKick){
         debug("task3 : ourIndirect", D_ATOUSA);
+        task3positioning();
+        task3MakePacket();
     }
 }
 
@@ -89,12 +90,9 @@ void CMixTeamHandler::initialPositioning()
         i = 0;
     }
 
-//    qDebug() << "alaki " << robotsInField;
-
     for(  ; i < robotsInField/2 ; i++ ){
         allPositions[i] = Vector2D(px, py);
         allPositions[robotsInField-i-1] = Vector2D(allPositions[i].x, -allPositions[i].y);
-        qDebug() << "i : " << i << ",   j : " << robotsInField-i-1 ;
         draw(Circle2D(allPositions[i],0.1), "red");
         draw(Circle2D(allPositions[robotsInField-i-1],0.1), "red");
         py += offset;
@@ -102,7 +100,7 @@ void CMixTeamHandler::initialPositioning()
 
 }
 
-void CMixTeamHandler::initialSlaveMakePacket()
+void CMixTeamHandler::initialMakePacket()
 {
     int robotsInField = knowledge->activesInField.size();
     multi_team_comm::TeamPlan *packet = new multi_team_comm::TeamPlan();
@@ -144,7 +142,7 @@ void CMixTeamHandler::initialSlaveMakePacket()
         posLoc[robotsInField-1]->set_y(wm->field->ourGoal().y * 100);
     }
 
-    static MixTeamSender *sender = new MixTeamSender();
+    static MixTeamSender *sender = new MixTeamSender(16);
     sender->packet = packet;
     sender->flag = true;
 }
@@ -160,6 +158,7 @@ void CMixTeamHandler::task1positioning()
     }
     if( i != robotsInField )
         robotsInField--;
+
     draw(Circle2D(wm->field->ourGoal(),1.5), "cyan");
     double radius = 1.5;
     Vector2D vec;
@@ -177,8 +176,12 @@ void CMixTeamHandler::task1positioning()
             angle += 1.57;
         else if( (robotsInField+1)/2 == 0 )
             angle += 0;
+//        debug (QString("a : %1, r : %2").arg(angle).arg(robotsInField), D_MAHI);
         allPositions[i] = getXYByAngleOurGoal(angle, radius);
+        draw(Circle2D(Vector2D(allPositions[i]),0.1), "black");
         allPositions[robotsInField-i-1] = Vector2D(-allPositions[i].x, allPositions[i].y);
+        draw(Circle2D(Vector2D(allPositions[robotsInField-i-1]),0.1), "blue");
+
     }
 }
 
@@ -217,7 +220,6 @@ void CMixTeamHandler::task1MakePacket()
             posLoc[i] = poses[i]->mutable_loc();
             posLoc[i]->set_x(allPositions[i].x * 100);
             posLoc[i]->set_y(allPositions[i].y * 100);
-            draw(Circle2D(Vector2D(allPositions[i]),0.1), "blue");
             i++;
         }
     }
@@ -233,7 +235,6 @@ void CMixTeamHandler::task1MakePacket()
             posLoc[i] = poses[i]->mutable_loc();
             posLoc[i]->set_x(allPositions[i].x * 100);
             posLoc[i]->set_y(allPositions[i].y * 100);
-            draw(Circle2D(allPositions[i],0.1), "blue");
             i++;
         }
     }
@@ -256,7 +257,7 @@ void CMixTeamHandler::task1MakePacket()
         posLoc[robotsInField-1]->set_y(wm->field->ourGoal().y * 100);
     }
 
-    static MixTeamSender *sender = new MixTeamSender();
+    static MixTeamSender *sender = new MixTeamSender(16);
     sender->packet = packet;
     sender->flag = true;
 }
@@ -329,44 +330,118 @@ void CMixTeamHandler::task2MakePacket()
          posLoc[robotsInField-1]->set_y(wm->field->ourGoal().y * 100);
     }
 
-    static MixTeamSender *sender = new MixTeamSender();
+    static MixTeamSender *sender = new MixTeamSender(16);
     sender->packet = packet;
-
-    qDebug() << " sssss: " << packet->plans().size();
     sender->flag = true;
 }
 
 void CMixTeamHandler::task3positioning()
 {
     int robotsInField = knowledge->activesInField.size();
-    /*
-    int i;
-    for(i = 0 ; i < robotsInField ; i++){
-        if(knowledge->activesInField.at(i)->id() == knowledge->mixGoaleID)
-            break;
-    }
-    if( i != robotsInField )
-        robotsInField--;
-    */
 
-    int selectedOpp = -1;
+    selectedIDM = chooseMasterID(robotsInField);
+    selectedIDS = chooseSlaveID(robotsInField);
+    debug(QString("M : %1, S : %2").arg(selectedIDM).arg(selectedIDS), D_ATOUSA);
+
+    if(selectedIDS == -1 || selectedIDM == -1){
+        debug(QString("selected is -1"), D_ATOUSA);
+    }
+
+    selectedPosM = Vector2D(wm->field->oppGoal().x - 0.5, -2.5);
+    selectedPosS = Vector2D(wm->field->oppGoal().x - 1, 2);
+    draw(Circle2D(selectedPosS,0.1), "red");
+    draw(Circle2D(selectedPosM,0.1), "red");
+
+    double offset = 0.9;
+    for(int i = 0 ; i < robotsInField ; i++ ){
+        allPositions[i] = Vector2D(wm->field->ourGoal().x + offset, -2.5);
+        offset += 0.3;
+        draw(Circle2D(allPositions[i],0.1), "red");
+    }
+}
+
+int CMixTeamHandler::chooseMasterID(int robotsInField)
+{
+    for(int i = 0 ; i < robotsInField ; i++){
+        int tid = knowledge->activesInField.at(i)->id();
+        if((ourAgentIDs.contains(tid)) && (tid != knowledge->mixGoaleID)){
+            return tid;
+        }
+    }
+    return -1;
+}
+
+int CMixTeamHandler::chooseSlaveID(int robotsInField)
+{
     for(int i = 0 ; i < robotsInField ; i++){
         int tid = knowledge->activesInField.at(i)->id();
         if(!(ourAgentIDs.contains(tid)) && (tid != knowledge->mixGoaleID)){
-            selectedOpp = tid;
+            return tid;
         }
     }
-
+    return -1;
 }
 
 void CMixTeamHandler::task3MakePacket()
 {
+    int robotsInField = knowledge->activesInField.size();
+    multi_team_comm::TeamPlan *packet = new multi_team_comm::TeamPlan();
+    multi_team_comm::RobotPlan *plans[robotsInField];
+    multi_team_comm::Pose *poses[robotsInField];
+    multi_team_comm::Location *posLoc[robotsInField];
+    multi_team_comm::Location *planLoc[robotsInField];
 
+
+    //master robot plan
+    plans[0] = packet->add_plans();
+    plans[0]->set_robot_id(selectedIDM);//for master to pass
+    plans[0]->set_role(multi_team_comm::RobotPlan::Offense);
+    poses[0] = plans[0]->mutable_nav_target();
+    planLoc[0] = plans[0]->mutable_shot_target();
+    planLoc[0]->set_x(selectedPosS.x * 100);//shot target
+    planLoc[0]->set_y(selectedPosS.y * 100);//shot target
+    posLoc[0] = poses[0]->mutable_loc();
+    posLoc[0]->set_x(selectedPosM.x * 100);//nav traget
+    posLoc[0]->set_y(selectedPosM.y * 100);//nav target
+
+    //slave robot plan
+    plans[1] = packet->add_plans();
+    plans[1]->set_robot_id(selectedIDS);//for master to pass
+    plans[1]->set_role(multi_team_comm::RobotPlan::Offense);
+    poses[1] = plans[1]->mutable_nav_target();
+    planLoc[1] = plans[1]->mutable_shot_target();
+    planLoc[1]->set_x(wm->field->oppGoal().x * 100);//shot target
+    planLoc[1]->set_y(wm->field->oppGoal().y * 100);//shot target
+    posLoc[1] = poses[1]->mutable_loc();
+    posLoc[1]->set_x(selectedPosS.x * 100);//nav traget
+    posLoc[1]->set_y(selectedPosS.y * 100);//nav target
+
+
+    int i = 2;
+    for( int j = 0 ; j < robotsInField ; j++ ){
+        if( (knowledge->activesInField.at(j)->id() != selectedIDS) && (knowledge->activesInField.at(j)->id() != selectedIDM)){
+            plans[i] = packet->add_plans();
+            plans[i]->set_robot_id(knowledge->activesInField.at(j)->id());
+            plans[i]->set_role(multi_team_comm::RobotPlan::Default);
+            poses[i] = plans[i]->mutable_nav_target();
+    //        planLoc[i] = plans[i]->mutable_shot_target();
+    //        planLoc[i] = allPositions[i];
+            posLoc[i] = poses[i]->mutable_loc();
+            posLoc[i]->set_x(allPositions[i].x * 100);
+            posLoc[i]->set_y(allPositions[i].y * 100);
+            i++;
+        }
+    }
+
+    static MixTeamSender *sender = new MixTeamSender(16);
+    sender->packet = packet;
+    sender->flag = true;
 }
 
 ///////////////////slave/////////////////////
-void CMixTeamHandler::slave()
+void CMixTeamHandler::slave(bool isM)
 {
+    isMaster = isM;
     if(knowledge->getGameState() == CKnowledge::Stop){
         debug("initial : stop", D_ATOUSA);
         initialReadPacket();
@@ -381,7 +456,7 @@ void CMixTeamHandler::slave()
     }
     else if(knowledge->getGameState() == CKnowledge::OurIndirectKick){
         debug("task3 : ourIndirect", D_ATOUSA);
-
+        task3ReadPacket();
     }
 }
 
@@ -391,9 +466,7 @@ void CMixTeamHandler::initialReadPacket()
         int counter = 0;
         for(int  i = 0 ;  i < knowledge->kPlans->plans_size() ; i++){
             multi_team_comm::RobotPlan ptemp = knowledge->kPlans->plans(i);
-//            debug(QString("planID: %1 ").arg(ptemp.robot_id()), D_ATOUSA);
             if(ourAgentIDs.contains(ptemp.robot_id())){
-//                debug(QString("i : %1").arg(ptemp.robot_id()), D_ATOUSA);
                 ourRols[counter]->setAgent(knowledge->getAgent(ptemp.robot_id()));
                 ourRols[counter]->init(Vector2D((double)ptemp.nav_target().loc().x()/100,(double)ptemp.nav_target().loc().y()/100),Vector2D(0,0));
 //                draw(Circle2D(Vector2D((double)ptemp.nav_target().loc().x()/100,(double)ptemp.nav_target().loc().y()/100),0.1), "red");
@@ -401,8 +474,85 @@ void CMixTeamHandler::initialReadPacket()
                 counter++;
             }
         }
-        debug(QString("counter = %1").arg(counter), D_ATOUSA);
+//        debug(QString("counter = %1").arg(counter), D_ATOUSA);
         for(int i = 0 ; i < counter ; i++)
             ourRols[i]->execute();
     }
+}
+
+void CMixTeamHandler::task3ReadPacket()
+{
+    if( knowledge->ready ){
+        int counter = 0;
+        //find slave offense for kick
+        int slaveID = -1;
+        for(int i = 0 ; i < knowledge->kPlans->plans_size() ; i++){
+            multi_team_comm::RobotPlan p = knowledge->kPlans->plans(i);
+            if( p.role() == multi_team_comm::RobotPlan::Offense && !(ourAgentIDs.contains(p.robot_id()))){
+                slaveID = p.robot_id();
+                break;
+            }
+        }
+        for(int  i = 0 ;  i < knowledge->kPlans->plans_size() ; i++){
+            multi_team_comm::RobotPlan ptemp = knowledge->kPlans->plans(i);
+            if(ourAgentIDs.contains(ptemp.robot_id())){
+                if(ptemp.role() == multi_team_comm::RobotPlan::Offense){
+                    if(isMaster){
+                        executeMasterOffense(ptemp.robot_id(), Vector2D((double)ptemp.nav_target().loc().x()/100, (double)ptemp.nav_target().loc().y()/100), Vector2D((double)ptemp.shot_target().x()/100, (double)ptemp.shot_target().y()/100), slaveID);
+                    }
+                    else{
+                        executeSlaveOffense(ptemp.robot_id(), Vector2D((double)ptemp.nav_target().loc().x()/100, (double)ptemp.nav_target().loc().y()/100), Vector2D((double)ptemp.shot_target().x()/100, (double)ptemp.shot_target().y()/100));
+                    }
+                }
+                else{
+                    ourRols[counter]->setAgent(knowledge->getAgent(ptemp.robot_id()));
+                    ourRols[counter]->init(Vector2D((double)ptemp.nav_target().loc().x()/100,(double)ptemp.nav_target().loc().y()/100),Vector2D(0,0));
+    //                draw(Circle2D(Vector2D((double)ptemp.nav_target().loc().x()/100,(double)ptemp.nav_target().loc().y()/100),0.1), "red");
+                    counter++;
+                }
+            }
+        }
+//        debug(QString("counter = %1").arg(counter), D_ATOUSA);
+        for(int i = 0 ; i < counter ; i++)
+            ourRols[i]->execute();
+    }
+}
+
+void CMixTeamHandler::executeMasterOffense(int robotId, Vector2D point1, Vector2D point2, int slaveID)
+{
+    debug(QString("kicker = %1").arg(robotId), D_ATOUSA);
+    kicker->setAgent(knowledge->getAgent(robotId));
+    kicker->setDontKick(true);
+    kicker->setChip(false);
+    kicker->setTarget(point2);
+    kicker->setKickSpeed(4);
+
+    gpa->setAgent(knowledge->getAgent(robotId));
+    gpa->init(point1, Vector2D(0,1));
+
+    CAgent *c = knowledge->getAgent(robotId);
+
+//    debug(QString("vel : %1").arg(wm->ball->vel.length()), D_ATOUSA);
+    if(wm->ball->vel.length() > 0.5){
+        gpa->execute();
+    }
+    else{
+        if(Circle2D(point2, 0.3).contains(knowledge->getAgent(slaveID)->pos())){//receive ID ro chi kar konam?
+//            debug(QString("*role id defalut %1").arg(c->id()), D_ATOUSA);
+            kicker->setDontKick(false);
+            kicker->execute();
+        }
+    }
+}
+
+void CMixTeamHandler::executeSlaveOffense(int robotId, Vector2D point1, Vector2D point2)
+{
+    debug(QString("ownToucher = %1").arg(robotId), D_ATOUSA);
+    oneToucher->setAgent(knowledge->getAgent(robotId));
+    oneToucher->setTarget(point2);
+    oneToucher->setWaitPos(point1);
+    oneToucher->setKickSpeed(5);
+
+    if(wm->ball->vel.length() > 0.3)
+        oneToucher->execute();
 }

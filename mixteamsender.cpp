@@ -1,7 +1,7 @@
 #include "mixteamsender.h"
 #include <QDebug>
 
-MixTeamSender::MixTeamSender(QObject *parent) :
+MixTeamSender::MixTeamSender(int miliSeconds,QObject *parent) :
     QObject(parent)
 {
     socket = new QUdpSocket(this);
@@ -9,7 +9,7 @@ MixTeamSender::MixTeamSender(QObject *parent) :
     flag = false;
 
     timer = new QTimer();
-    timer->start(16);
+    timer->start(miliSeconds);
     connect(timer, SIGNAL(timeout()), this, SLOT(sendData()));
 }
 
@@ -20,7 +20,7 @@ MixTeamSender::~MixTeamSender()
 
 void MixTeamSender::sendData()
 {
-    qDebug() << "S";
+//    qDebug() << "S";
     QByteArray datagram;
     if(packet != NULL && flag)
     {
@@ -31,7 +31,7 @@ void MixTeamSender::sendData()
         }
         mutex.lock();
         quint64 bytes_sent = socket->writeDatagram(datagram, QHostAddress(QString::fromStdString(conf()->LocalSettings_MixTeamIP())), conf()->LocalSettings_MixTeamPort());
-        qDebug() << "sent = " << bytes_sent << ",   real = " << datagram.size();
+//        qDebug() << "sent = " << bytes_sent << ",   real = " << datagram.size();
         mutex.unlock();
         if (bytes_sent != datagram.size()) {
             qDebug() << QString("Sending UDP datagram failed (maybe too large?). Size was: %1 byte(s).").arg(datagram.size());

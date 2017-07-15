@@ -15,10 +15,10 @@ MixTeamReader::~MixTeamReader()
 
 void MixTeamReader::readyRead()
 {
-    qDebug() << "read";
+//    qDebug() << "read";
     QByteArray buffer;
     buffer.resize(socket->pendingDatagramSize());
-    qDebug() << "size : " << socket->pendingDatagramSize();
+//    qDebug() << "size : " << socket->pendingDatagramSize();
 
     QHostAddress sender;
     quint16 senderPort;
@@ -34,11 +34,15 @@ void MixTeamReader::readyRead()
         qDebug() << "ERROR";
         return;
     }
-    qDebug() << "plan size:" << knowledge->kPlans->plans_size();
+//    qDebug() << "plan size:" << knowledge->kPlans->plans_size();
 
     knowledge->ssize = knowledge->kPlans->plans_size();
     knowledge->ready = true;
 //    knowledge->activesInField.clear();//??bashe?
     knowledge->activesInField = knowledge->getActiveAgents();
-    knowledge->mixGoaleID = wm->our.data->goalieID;
+    if (policy()->Formation_GoalieFromGUI()) {
+        knowledge->mixGoaleID = policy()->Formation_Goalie();
+    } else {
+        knowledge->mixGoaleID = wm->our.data->goalieID;
+    }
 }

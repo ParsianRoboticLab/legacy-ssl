@@ -12,7 +12,7 @@ class MixTeamSender : public QObject
 {
     Q_OBJECT
 public:
-    explicit MixTeamSender(QObject *parent = 0);
+    explicit MixTeamSender(int miliSeconds, QObject *parent = 0);
     virtual ~MixTeamSender();
 
     QMutex mutex;

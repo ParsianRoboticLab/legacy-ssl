@@ -30,7 +30,7 @@ bool firstTime = true;
 void CMainApplication::Experimental6()
 {
 
-    static MixTeamSender *sender = new MixTeamSender();
+    static MixTeamSender *sender = new MixTeamSender(true);
     static MixTeamReader *reader = new MixTeamReader();
 //    static MixTeamThread *mthr = new MixTeamThread();
 

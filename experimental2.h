@@ -26,6 +26,46 @@ bool start = true;
 void CMainApplication::Experimental2()
 {
 
+    double xp = 0.5;
+
+    Vector2D point1(4,-2.5);
+    Vector2D point2(point1.x-xp, 2);
+
+    static CSkillKick *kicker = new CSkillKick(NULL);
+    kicker->setAgent(knowledge->getActiveAgents().at(1));
+    kicker->setDontKick(true);
+    kicker->setChip(false);
+    kicker->setTarget(point2);
+    kicker->setKickSpeed(4);
+
+    static CSkillGotoPointAvoid *gpa = new CSkillGotoPointAvoid(NULL);
+    gpa->setAgent(knowledge->getActiveAgents().at(1));
+    gpa->init(point1, Vector2D(0,1));
+
+
+    debug(QString("vel : %1").arg(wm->ball->vel.length()), D_ATOUSA);
+    if(wm->ball->vel.length() > 0.5){
+        gpa->execute();
+    }
+    else{
+        if(Circle2D(point2, 0.3).contains(knowledge->getActiveAgents().at(0)->pos())){
+            kicker->setDontKick(false);
+            kicker->execute();
+        }
+    }
+
+
+    static CSkillKickOneTouch *oneToucher = new CSkillKickOneTouch(NULL);
+    oneToucher->setAgent(knowledge->getActiveAgents().at(0));
+    oneToucher->setTarget(wm->field->oppGoal());
+    oneToucher->setWaitPos(point2);
+    oneToucher->setKickSpeed(5);
+
+    oneToucher->execute();
+
+    return;
+
+
     static CAgent* myAgent = knowledge->getAgent(wm->our.activeAgentID(0));
     static CSkillGotoPointAvoid *robot1 = new CSkillGotoPointAvoid(myAgent);
 
@@ -121,37 +161,6 @@ void CMainApplication::Experimental2()
     draw(Segment2D(best, Vector2D(0,0)), QColor(Qt::red));
     return;
 
-
-    static CSkillKick *kicker = new CSkillKick(knowledge->getActiveAgents().at(1));
-    kicker->setDontKick(true);
-    kicker->setChip(false);
-    kicker->setTarget(Vector2D(2,0));
-    kicker->setKickSpeed(5);
-
-    if(Circle2D(Vector2D(2,0), 0.3).contains(knowledge->getActiveAgents().at(0)->pos())){
-        kicker->setDontKick(false);
-        kicker->execute();
-    }
-    debug(QString("vel : %1").arg(wm->ball->vel.length()), D_ATOUSA);
-    if(wm->ball->vel.length() > 0.5){
-        kicker->setDontKick(true);
-    }
-    else{
-        kicker->setDontKick(false);
-    }
-
-    return;
-
-
-    static CSkillKickOneTouch *oneToucher = new CSkillKickOneTouch(knowledge->getActiveAgents().at(0));
-    oneToucher->setTarget(wm->field->oppGoal());
-    oneToucher->setWaitPos(Vector2D(2,0));
-    oneToucher->setKickSpeed(10);
-    oneToucher->execute();
-
-
-
-    return;
     //technicalChalenge Penalty
 
     int id = 2;
