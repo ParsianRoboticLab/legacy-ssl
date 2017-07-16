@@ -499,11 +499,11 @@ void CMixTeamHandler::task3ReadPacket()
             if(ourAgentIDs.contains(ptemp.robot_id())){
                 if(ptemp.role() == multi_team_comm::RobotPlan::Offense){
                     if(isMaster){
-                        debug(QString("kicker = %1").arg(ptemp.robot_id()), D_ATOUSA);
+//                        debug(QString("kicker = %1").arg(ptemp.robot_id()), D_ATOUSA);
                         executeMasterOffense(ptemp.robot_id(), Vector2D((double)ptemp.nav_target().loc().x()/100, (double)ptemp.nav_target().loc().y()/100), Vector2D((double)ptemp.shot_target().x()/100, (double)ptemp.shot_target().y()/100), slaveID);
                     }
                     else{
-                        debug(QString("onetoucher = %1").arg(ptemp.robot_id()), D_ATOUSA);
+//                        debug(QString("onetoucher = %1").arg(ptemp.robot_id()), D_ATOUSA);
                         executeSlaveOffense(ptemp.robot_id(), Vector2D((double)ptemp.nav_target().loc().x()/100, (double)ptemp.nav_target().loc().y()/100), Vector2D((double)ptemp.shot_target().x()/100, (double)ptemp.shot_target().y()/100));
                     }
                 }
@@ -523,7 +523,6 @@ void CMixTeamHandler::task3ReadPacket()
 
 void CMixTeamHandler::executeMasterOffense(int robotId, Vector2D point1, Vector2D point2, int slaveID)
 {
-    debug(QString("*kicker = %1").arg(robotId), D_ATOUSA);
     kicker->setAgent(knowledge->getAgent(robotId));
     kicker->setDontKick(true);
     kicker->setChip(false);
@@ -541,21 +540,22 @@ void CMixTeamHandler::executeMasterOffense(int robotId, Vector2D point1, Vector2
     }
     else{
         if(Circle2D(point2, 0.3).contains(knowledge->getAgent(slaveID)->pos())){//receive ID ro chi kar konam?
-//            debug(QString("*role id defalut %1").arg(c->id()), D_ATOUSA);
-            kicker->setDontKick(false);
-            kicker->execute();
+                debug(QString("kicker id is %1").arg(c->id()), D_ATOUSA);
+                kicker->setDontKick(false);
+                kicker->execute();
+        }
+        else{
+            gpa->execute();//?
         }
     }
 }
 
 void CMixTeamHandler::executeSlaveOffense(int robotId, Vector2D point1, Vector2D point2)
 {
-    debug(QString("*ownToucher = %1").arg(robotId), D_ATOUSA);
+    debug(QString("ownToucher = %1").arg(robotId), D_ATOUSA);
     oneToucher->setAgent(knowledge->getAgent(robotId));
     oneToucher->setTarget(point2);
     oneToucher->setWaitPos(point1);
     oneToucher->setKickSpeed(5);
-
-    if(wm->ball->vel.length() > 0.3)
-        oneToucher->execute();
+    oneToucher->execute();
 }
