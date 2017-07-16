@@ -26,6 +26,8 @@
 #include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
 
+namespace robot_status {
+
 // Internal implementation detail -- do not call these.
 void  protobuf_AddDesc_robot_5fstatus_2eproto();
 void protobuf_AssignDesc_robot_5fstatus_2eproto();
@@ -34,6 +36,7 @@ void protobuf_ShutdownFile_robot_5fstatus_2eproto();
 class Fault;
 class Fail;
 class Robot_Packet;
+class Status;
 
 // ===================================================================
 
@@ -154,7 +157,7 @@ class Fault : public ::google::protobuf::Message {
   inline bool beep() const;
   inline void set_beep(bool value);
 
-  // @@protoc_insertion_point(class_scope:Fault)
+  // @@protoc_insertion_point(class_scope:robot_status.Fault)
  private:
   inline void set_has_shootboard();
   inline void clear_has_shootboard();
@@ -288,7 +291,7 @@ class Fail : public ::google::protobuf::Message {
   inline bool motor5() const;
   inline void set_motor5(bool value);
 
-  // @@protoc_insertion_point(class_scope:Fail)
+  // @@protoc_insertion_point(class_scope:robot_status.Fail)
  private:
   inline void set_has_motor1();
   inline void clear_has_motor1();
@@ -445,25 +448,25 @@ class Robot_Packet : public ::google::protobuf::Message {
   inline float datalost() const;
   inline void set_datalost(float value);
 
-  // optional .Fault faultMessage = 11;
+  // optional .robot_status.Fault faultMessage = 11;
   inline bool has_faultmessage() const;
   inline void clear_faultmessage();
   static const int kFaultMessageFieldNumber = 11;
-  inline const ::Fault& faultmessage() const;
-  inline ::Fault* mutable_faultmessage();
-  inline ::Fault* release_faultmessage();
-  inline void set_allocated_faultmessage(::Fault* faultmessage);
+  inline const ::robot_status::Fault& faultmessage() const;
+  inline ::robot_status::Fault* mutable_faultmessage();
+  inline ::robot_status::Fault* release_faultmessage();
+  inline void set_allocated_faultmessage(::robot_status::Fault* faultmessage);
 
-  // optional .Fail failedMessage = 12;
+  // optional .robot_status.Fail failedMessage = 12;
   inline bool has_failedmessage() const;
   inline void clear_failedmessage();
   static const int kFailedMessageFieldNumber = 12;
-  inline const ::Fail& failedmessage() const;
-  inline ::Fail* mutable_failedmessage();
-  inline ::Fail* release_failedmessage();
-  inline void set_allocated_failedmessage(::Fail* failedmessage);
+  inline const ::robot_status::Fail& failedmessage() const;
+  inline ::robot_status::Fail* mutable_failedmessage();
+  inline ::robot_status::Fail* release_failedmessage();
+  inline void set_allocated_failedmessage(::robot_status::Fail* failedmessage);
 
-  // @@protoc_insertion_point(class_scope:Robot_Packet)
+  // @@protoc_insertion_point(class_scope:robot_status.Robot_Packet)
  private:
   inline void set_has_id();
   inline void clear_has_id();
@@ -501,8 +504,8 @@ class Robot_Packet : public ::google::protobuf::Message {
   bool failed_;
   ::google::protobuf::int32 boardid_;
   bool halt_;
-  ::Fault* faultmessage_;
-  ::Fail* failedmessage_;
+  ::robot_status::Fault* faultmessage_;
+  ::robot_status::Fail* failedmessage_;
   float datalost_;
 
   mutable int _cached_size_;
@@ -514,6 +517,91 @@ class Robot_Packet : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static Robot_Packet* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class Status : public ::google::protobuf::Message {
+ public:
+  Status();
+  virtual ~Status();
+
+  Status(const Status& from);
+
+  inline Status& operator=(const Status& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Status& default_instance();
+
+  void Swap(Status* other);
+
+  // implements Message ----------------------------------------------
+
+  Status* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Status& from);
+  void MergeFrom(const Status& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .robot_status.Robot_Packet robots = 1;
+  inline int robots_size() const;
+  inline void clear_robots();
+  static const int kRobotsFieldNumber = 1;
+  inline const ::robot_status::Robot_Packet& robots(int index) const;
+  inline ::robot_status::Robot_Packet* mutable_robots(int index);
+  inline ::robot_status::Robot_Packet* add_robots();
+  inline const ::google::protobuf::RepeatedPtrField< ::robot_status::Robot_Packet >&
+      robots() const;
+  inline ::google::protobuf::RepeatedPtrField< ::robot_status::Robot_Packet >*
+      mutable_robots();
+
+  // @@protoc_insertion_point(class_scope:robot_status.Status)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::robot_status::Robot_Packet > robots_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_robot_5fstatus_2eproto();
+  friend void protobuf_AssignDesc_robot_5fstatus_2eproto();
+  friend void protobuf_ShutdownFile_robot_5fstatus_2eproto();
+
+  void InitAsDefaultInstance();
+  static Status* default_instance_;
 };
 // ===================================================================
 
@@ -1058,7 +1146,7 @@ inline void Robot_Packet::set_datalost(float value) {
   datalost_ = value;
 }
 
-// optional .Fault faultMessage = 11;
+// optional .robot_status.Fault faultMessage = 11;
 inline bool Robot_Packet::has_faultmessage() const {
   return (_has_bits_[0] & 0x00000400u) != 0;
 }
@@ -1069,24 +1157,24 @@ inline void Robot_Packet::clear_has_faultmessage() {
   _has_bits_[0] &= ~0x00000400u;
 }
 inline void Robot_Packet::clear_faultmessage() {
-  if (faultmessage_ != NULL) faultmessage_->::Fault::Clear();
+  if (faultmessage_ != NULL) faultmessage_->::robot_status::Fault::Clear();
   clear_has_faultmessage();
 }
-inline const ::Fault& Robot_Packet::faultmessage() const {
+inline const ::robot_status::Fault& Robot_Packet::faultmessage() const {
   return faultmessage_ != NULL ? *faultmessage_ : *default_instance_->faultmessage_;
 }
-inline ::Fault* Robot_Packet::mutable_faultmessage() {
+inline ::robot_status::Fault* Robot_Packet::mutable_faultmessage() {
   set_has_faultmessage();
-  if (faultmessage_ == NULL) faultmessage_ = new ::Fault;
+  if (faultmessage_ == NULL) faultmessage_ = new ::robot_status::Fault;
   return faultmessage_;
 }
-inline ::Fault* Robot_Packet::release_faultmessage() {
+inline ::robot_status::Fault* Robot_Packet::release_faultmessage() {
   clear_has_faultmessage();
-  ::Fault* temp = faultmessage_;
+  ::robot_status::Fault* temp = faultmessage_;
   faultmessage_ = NULL;
   return temp;
 }
-inline void Robot_Packet::set_allocated_faultmessage(::Fault* faultmessage) {
+inline void Robot_Packet::set_allocated_faultmessage(::robot_status::Fault* faultmessage) {
   delete faultmessage_;
   faultmessage_ = faultmessage;
   if (faultmessage) {
@@ -1096,7 +1184,7 @@ inline void Robot_Packet::set_allocated_faultmessage(::Fault* faultmessage) {
   }
 }
 
-// optional .Fail failedMessage = 12;
+// optional .robot_status.Fail failedMessage = 12;
 inline bool Robot_Packet::has_failedmessage() const {
   return (_has_bits_[0] & 0x00000800u) != 0;
 }
@@ -1107,24 +1195,24 @@ inline void Robot_Packet::clear_has_failedmessage() {
   _has_bits_[0] &= ~0x00000800u;
 }
 inline void Robot_Packet::clear_failedmessage() {
-  if (failedmessage_ != NULL) failedmessage_->::Fail::Clear();
+  if (failedmessage_ != NULL) failedmessage_->::robot_status::Fail::Clear();
   clear_has_failedmessage();
 }
-inline const ::Fail& Robot_Packet::failedmessage() const {
+inline const ::robot_status::Fail& Robot_Packet::failedmessage() const {
   return failedmessage_ != NULL ? *failedmessage_ : *default_instance_->failedmessage_;
 }
-inline ::Fail* Robot_Packet::mutable_failedmessage() {
+inline ::robot_status::Fail* Robot_Packet::mutable_failedmessage() {
   set_has_failedmessage();
-  if (failedmessage_ == NULL) failedmessage_ = new ::Fail;
+  if (failedmessage_ == NULL) failedmessage_ = new ::robot_status::Fail;
   return failedmessage_;
 }
-inline ::Fail* Robot_Packet::release_failedmessage() {
+inline ::robot_status::Fail* Robot_Packet::release_failedmessage() {
   clear_has_failedmessage();
-  ::Fail* temp = failedmessage_;
+  ::robot_status::Fail* temp = failedmessage_;
   failedmessage_ = NULL;
   return temp;
 }
-inline void Robot_Packet::set_allocated_failedmessage(::Fail* failedmessage) {
+inline void Robot_Packet::set_allocated_failedmessage(::robot_status::Fail* failedmessage) {
   delete failedmessage_;
   failedmessage_ = failedmessage;
   if (failedmessage) {
@@ -1134,8 +1222,39 @@ inline void Robot_Packet::set_allocated_failedmessage(::Fail* failedmessage) {
   }
 }
 
+// -------------------------------------------------------------------
+
+// Status
+
+// repeated .robot_status.Robot_Packet robots = 1;
+inline int Status::robots_size() const {
+  return robots_.size();
+}
+inline void Status::clear_robots() {
+  robots_.Clear();
+}
+inline const ::robot_status::Robot_Packet& Status::robots(int index) const {
+  return robots_.Get(index);
+}
+inline ::robot_status::Robot_Packet* Status::mutable_robots(int index) {
+  return robots_.Mutable(index);
+}
+inline ::robot_status::Robot_Packet* Status::add_robots() {
+  return robots_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::robot_status::Robot_Packet >&
+Status::robots() const {
+  return robots_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::robot_status::Robot_Packet >*
+Status::mutable_robots() {
+  return &robots_;
+}
+
 
 // @@protoc_insertion_point(namespace_scope)
+
+}  // namespace robot_status
 
 #ifndef SWIG
 namespace google {

@@ -12,16 +12,13 @@ void CMainApplication::MixTeamChallenge()
     mstr->master();
 
     static CMixTeamHandler *slv = new CMixTeamHandler();
-    slv->slave();
+
+    //if we are master, attribute is true and if we are slave, attribute is true
+    slv->slave(true);
 
 
 //    slv->execute();
 
-
-    qDebug() << "****" << knowledge->ssize;
-//    qDebug() << "^^^^" << knowledge->activesInField.size();
-    qDebug() << "&&&&" << knowledge->getActiveAgents().size();
-    qDebug() << "^^^^" << knowledge->activesInField.size();
     debug(QString("GID: %1").arg(knowledge->mixGoaleID), D_ATOUSA);
 }
 

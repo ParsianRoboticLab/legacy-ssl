@@ -16,6 +16,8 @@
 #include <google/protobuf/wire_format.h>
 // @@protoc_insertion_point(includes)
 
+namespace robot_status {
+
 namespace {
 
 const ::google::protobuf::Descriptor* Fault_descriptor_ = NULL;
@@ -27,6 +29,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* Robot_Packet_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Robot_Packet_reflection_ = NULL;
+const ::google::protobuf::Descriptor* Status_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  Status_reflection_ = NULL;
 
 }  // namespace
 
@@ -105,6 +110,21 @@ void protobuf_AssignDesc_robot_5fstatus_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Robot_Packet));
+  Status_descriptor_ = file->message_type(3);
+  static const int Status_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Status, robots_),
+  };
+  Status_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      Status_descriptor_,
+      Status::default_instance_,
+      Status_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Status, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Status, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(Status));
 }
 
 namespace {
@@ -123,6 +143,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
     Fail_descriptor_, &Fail::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Robot_Packet_descriptor_, &Robot_Packet::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    Status_descriptor_, &Status::default_instance());
 }
 
 }  // namespace
@@ -134,6 +156,8 @@ void protobuf_ShutdownFile_robot_5fstatus_2eproto() {
   delete Fail_reflection_;
   delete Robot_Packet::default_instance_;
   delete Robot_Packet_reflection_;
+  delete Status::default_instance_;
+  delete Status_reflection_;
 }
 
 void protobuf_AddDesc_robot_5fstatus_2eproto() {
@@ -143,28 +167,32 @@ void protobuf_AddDesc_robot_5fstatus_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\022robot_status.proto\"\300\001\n\005Fault\022\022\n\nshootB"
-    "oard\030\001 \002(\010\022\021\n\tkickFault\030\002 \002(\010\022\021\n\tchipFau"
-    "lt\030\003 \002(\010\022\025\n\rencoderMotor1\030\004 \002(\010\022\025\n\rencod"
-    "erMotor2\030\005 \002(\010\022\025\n\rencoderMotor3\030\006 \002(\010\022\025\n"
-    "\rencoderMotor4\030\007 \002(\010\022\023\n\013shootSensor\030\010 \002("
-    "\010\022\014\n\004beep\030\t \002(\010\"V\n\004Fail\022\016\n\006Motor1\030\001 \002(\010\022"
-    "\016\n\006Motor2\030\002 \002(\010\022\016\n\006Motor3\030\003 \002(\010\022\016\n\006Motor"
-    "4\030\004 \002(\010\022\016\n\006Motor5\030\005 \002(\010\"\360\001\n\014Robot_Packet"
-    "\022\n\n\002id\030\001 \002(\005\022\017\n\007battery\030\002 \002(\002\022\014\n\004spin\030\003 "
-    "\002(\010\022\023\n\013shootsensor\030\004 \002(\010\022\024\n\014shootVoltage"
-    "\030\005 \002(\002\022\017\n\007boardID\030\006 \002(\005\022\r\n\005fault\030\007 \002(\010\022\016"
-    "\n\006failed\030\010 \002(\010\022\014\n\004halt\030\t \002(\010\022\020\n\010dataLost"
-    "\030\n \002(\002\022\034\n\014faultMessage\030\013 \001(\0132\006.Fault\022\034\n\r"
-    "failedMessage\030\014 \001(\0132\005.Fail", 546);
+    "\n\022robot_status.proto\022\014robot_status\"\300\001\n\005F"
+    "ault\022\022\n\nshootBoard\030\001 \002(\010\022\021\n\tkickFault\030\002 "
+    "\002(\010\022\021\n\tchipFault\030\003 \002(\010\022\025\n\rencoderMotor1\030"
+    "\004 \002(\010\022\025\n\rencoderMotor2\030\005 \002(\010\022\025\n\rencoderM"
+    "otor3\030\006 \002(\010\022\025\n\rencoderMotor4\030\007 \002(\010\022\023\n\013sh"
+    "ootSensor\030\010 \002(\010\022\014\n\004beep\030\t \002(\010\"V\n\004Fail\022\016\n"
+    "\006Motor1\030\001 \002(\010\022\016\n\006Motor2\030\002 \002(\010\022\016\n\006Motor3\030"
+    "\003 \002(\010\022\016\n\006Motor4\030\004 \002(\010\022\016\n\006Motor5\030\005 \002(\010\"\212\002"
+    "\n\014Robot_Packet\022\n\n\002id\030\001 \002(\005\022\017\n\007battery\030\002 "
+    "\002(\002\022\014\n\004spin\030\003 \002(\010\022\023\n\013shootsensor\030\004 \002(\010\022\024"
+    "\n\014shootVoltage\030\005 \002(\002\022\017\n\007boardID\030\006 \002(\005\022\r\n"
+    "\005fault\030\007 \002(\010\022\016\n\006failed\030\010 \002(\010\022\014\n\004halt\030\t \002"
+    "(\010\022\020\n\010dataLost\030\n \002(\002\022)\n\014faultMessage\030\013 \001"
+    "(\0132\023.robot_status.Fault\022)\n\rfailedMessage"
+    "\030\014 \001(\0132\022.robot_status.Fail\"4\n\006Status\022*\n\006"
+    "robots\030\001 \003(\0132\032.robot_status.Robot_Packet", 640);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "robot_status.proto", &protobuf_RegisterTypes);
   Fault::default_instance_ = new Fault();
   Fail::default_instance_ = new Fail();
   Robot_Packet::default_instance_ = new Robot_Packet();
+  Status::default_instance_ = new Status();
   Fault::default_instance_->InitAsDefaultInstance();
   Fail::default_instance_->InitAsDefaultInstance();
   Robot_Packet::default_instance_->InitAsDefaultInstance();
+  Status::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_robot_5fstatus_2eproto);
 }
 
@@ -1074,8 +1102,8 @@ Robot_Packet::Robot_Packet()
 }
 
 void Robot_Packet::InitAsDefaultInstance() {
-  faultmessage_ = const_cast< ::Fault*>(&::Fault::default_instance());
-  failedmessage_ = const_cast< ::Fail*>(&::Fail::default_instance());
+  faultmessage_ = const_cast< ::robot_status::Fault*>(&::robot_status::Fault::default_instance());
+  failedmessage_ = const_cast< ::robot_status::Fail*>(&::robot_status::Fail::default_instance());
 }
 
 Robot_Packet::Robot_Packet(const Robot_Packet& from)
@@ -1148,10 +1176,10 @@ void Robot_Packet::Clear() {
     halt_ = false;
     datalost_ = 0;
     if (has_faultmessage()) {
-      if (faultmessage_ != NULL) faultmessage_->::Fault::Clear();
+      if (faultmessage_ != NULL) faultmessage_->::robot_status::Fault::Clear();
     }
     if (has_failedmessage()) {
-      if (failedmessage_ != NULL) failedmessage_->::Fail::Clear();
+      if (failedmessage_ != NULL) failedmessage_->::robot_status::Fail::Clear();
     }
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -1323,7 +1351,7 @@ bool Robot_Packet::MergePartialFromCodedStream(
         break;
       }
 
-      // optional .Fault faultMessage = 11;
+      // optional .robot_status.Fault faultMessage = 11;
       case 11: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -1337,7 +1365,7 @@ bool Robot_Packet::MergePartialFromCodedStream(
         break;
       }
 
-      // optional .Fail failedMessage = 12;
+      // optional .robot_status.Fail failedMessage = 12;
       case 12: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
@@ -1419,13 +1447,13 @@ void Robot_Packet::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteFloat(10, this->datalost(), output);
   }
 
-  // optional .Fault faultMessage = 11;
+  // optional .robot_status.Fault faultMessage = 11;
   if (has_faultmessage()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       11, this->faultmessage(), output);
   }
 
-  // optional .Fail failedMessage = 12;
+  // optional .robot_status.Fail failedMessage = 12;
   if (has_failedmessage()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
       12, this->failedmessage(), output);
@@ -1489,14 +1517,14 @@ void Robot_Packet::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(10, this->datalost(), target);
   }
 
-  // optional .Fault faultMessage = 11;
+  // optional .robot_status.Fault faultMessage = 11;
   if (has_faultmessage()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         11, this->faultmessage(), target);
   }
 
-  // optional .Fail failedMessage = 12;
+  // optional .robot_status.Fail failedMessage = 12;
   if (has_failedmessage()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
@@ -1570,14 +1598,14 @@ int Robot_Packet::ByteSize() const {
       total_size += 1 + 4;
     }
 
-    // optional .Fault faultMessage = 11;
+    // optional .robot_status.Fault faultMessage = 11;
     if (has_faultmessage()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->faultmessage());
     }
 
-    // optional .Fail failedMessage = 12;
+    // optional .robot_status.Fail failedMessage = 12;
     if (has_failedmessage()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
@@ -1644,10 +1672,10 @@ void Robot_Packet::MergeFrom(const Robot_Packet& from) {
       set_datalost(from.datalost());
     }
     if (from.has_faultmessage()) {
-      mutable_faultmessage()->::Fault::MergeFrom(from.faultmessage());
+      mutable_faultmessage()->::robot_status::Fault::MergeFrom(from.faultmessage());
     }
     if (from.has_failedmessage()) {
-      mutable_failedmessage()->::Fail::MergeFrom(from.failedmessage());
+      mutable_failedmessage()->::robot_status::Fail::MergeFrom(from.failedmessage());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -1706,6 +1734,214 @@ void Robot_Packet::Swap(Robot_Packet* other) {
 }
 
 
+// ===================================================================
+
+#ifndef _MSC_VER
+const int Status::kRobotsFieldNumber;
+#endif  // !_MSC_VER
+
+Status::Status()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void Status::InitAsDefaultInstance() {
+}
+
+Status::Status(const Status& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void Status::SharedCtor() {
+  _cached_size_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+Status::~Status() {
+  SharedDtor();
+}
+
+void Status::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void Status::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* Status::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return Status_descriptor_;
+}
+
+const Status& Status::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_robot_5fstatus_2eproto();
+  return *default_instance_;
+}
+
+Status* Status::default_instance_ = NULL;
+
+Status* Status::New() const {
+  return new Status;
+}
+
+void Status::Clear() {
+  robots_.Clear();
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool Status::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // repeated .robot_status.Robot_Packet robots = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_robots:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_robots()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(10)) goto parse_robots;
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void Status::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // repeated .robot_status.Robot_Packet robots = 1;
+  for (int i = 0; i < this->robots_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, this->robots(i), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* Status::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // repeated .robot_status.Robot_Packet robots = 1;
+  for (int i = 0; i < this->robots_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        1, this->robots(i), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int Status::ByteSize() const {
+  int total_size = 0;
+
+  // repeated .robot_status.Robot_Packet robots = 1;
+  total_size += 1 * this->robots_size();
+  for (int i = 0; i < this->robots_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->robots(i));
+  }
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void Status::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const Status* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const Status*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void Status::MergeFrom(const Status& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  robots_.MergeFrom(from.robots_);
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void Status::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void Status::CopyFrom(const Status& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool Status::IsInitialized() const {
+
+  for (int i = 0; i < robots_size(); i++) {
+    if (!this->robots(i).IsInitialized()) return false;
+  }
+  return true;
+}
+
+void Status::Swap(Status* other) {
+  if (other != this) {
+    robots_.Swap(&other->robots_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata Status::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = Status_descriptor_;
+  metadata.reflection = Status_reflection_;
+  return metadata;
+}
+
+
 // @@protoc_insertion_point(namespace_scope)
+
+}  // namespace robot_status
 
 // @@protoc_insertion_point(global_scope)

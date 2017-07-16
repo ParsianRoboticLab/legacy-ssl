@@ -23,6 +23,7 @@ public slots:
 
 private:
     QUdpSocket *socket;
+    Net::UDP* sharedRadioMC;
 
 };
 

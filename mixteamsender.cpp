@@ -1,7 +1,7 @@
 #include "mixteamsender.h"
 #include <QDebug>
 
-MixTeamSender::MixTeamSender(QObject *parent) :
+MixTeamSender::MixTeamSender(int miliSeconds,QObject *parent) :
     QObject(parent)
 {
     socket = new QUdpSocket(this);
@@ -9,7 +9,7 @@ MixTeamSender::MixTeamSender(QObject *parent) :
     flag = false;
 
     timer = new QTimer();
-    timer->start(16);
+    timer->start(miliSeconds);
     connect(timer, SIGNAL(timeout()), this, SLOT(sendData()));
 }
 
@@ -20,10 +20,10 @@ MixTeamSender::~MixTeamSender()
 
 void MixTeamSender::sendData()
 {
-    qDebug() << "S";
     QByteArray datagram;
     if(packet != NULL && flag)
     {
+        qDebug() << "S";
         datagram.resize(packet->ByteSize());
         bool success = packet->SerializeToArray(datagram.data(), datagram.size());
         if(!success) {

@@ -897,6 +897,7 @@ CAgent::Status::Status() {
     motorFault[0] = motorFault[1] = motorFault[2] = motorFault[3] = motorFault[4] = false;
     beep = false;
     shotSensorFault = false;
+    boardID = -1;
 
 }
 

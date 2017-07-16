@@ -78,6 +78,10 @@ CVarsWidget::CVarsWidget()
             ADD_VALUE(LocalSettings,Int,MixTeamPort,1234,"MixTeam Send/Read Port")
             ADD_VALUE(LocalSettings,String,MixTeamIDs,"01234","MixTeam Our Robot IDs(hex)")
 
+            ADD_VALUE(LocalSettings,Bool,sendRobotStatus,false,"Send Robot Status")
+            ADD_VALUE(LocalSettings,String, robotStatusIP,"127.0.0.1","Robots' Status IP")
+            ADD_VALUE(LocalSettings,Int, robotStatusPort,10010, "Robots' Status Port")
+
             ADD_TREE(Common,"Common",true)
             ADD_VALUE(Common,Int,Viewport_Width,800,"Viewport Width")
             ADD_VALUE(Common,Int,Command_Interval,10,"Command Sending Interval(ms)")
@@ -407,6 +411,12 @@ IMPL_VALUE(CVarsWidget,LocalSettings,bool,Bool,ParsianWorkShop)
 IMPL_VALUE(CVarsWidget,LocalSettings,std::string,String,MixTeamIP)
 IMPL_VALUE(CVarsWidget,LocalSettings,int,Int,MixTeamPort)
 IMPL_VALUE(CVarsWidget,LocalSettings,std::string,String,MixTeamIDs)
+
+IMPL_VALUE(CVarsWidget,LocalSettings,bool,Bool,sendRobotStatus)
+IMPL_VALUE(CVarsWidget,LocalSettings,std::string,String,robotStatusIP)
+IMPL_VALUE(CVarsWidget,LocalSettings,int,Int,robotStatusPort)
+
+
 IMPL_VALUE(CVarsWidget,Common,int,Int,Viewport_Width)
 IMPL_VALUE(CVarsWidget,Common,int,Int,Command_Interval)
 IMPL_VALUE(CVarsWidget,Common,int,Int,Monitor_Interval)
