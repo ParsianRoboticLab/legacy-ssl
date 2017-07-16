@@ -1046,6 +1046,7 @@ void CSkillKick::jTurn()
     ////////////set Active adaptive PIDs
 
 
+
     if(isFinalController )
     {
         if(wm->ball->vel.length() > 0.2)
@@ -1065,6 +1066,11 @@ void CSkillKick::jTurn()
         speedPid->kp = 6 +2.1*agentPos.dist(ballPos) + dirReduce;
     }
 
+    if(slow)
+    {
+        posPid->kp = 0;
+        speedPid->kp = 2;// +2.1*agentPos.dist(ballPos) + dirReduce;
+    }
 
 
     if(!jTurnFromBack)
