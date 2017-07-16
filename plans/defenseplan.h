@@ -153,6 +153,7 @@ protected:
     };
     Vector2D ballPrediction(bool _isGoalie);
 
+    Vector2D lastBallPosition;
 public:
     DefensePlan();
     void execute();
