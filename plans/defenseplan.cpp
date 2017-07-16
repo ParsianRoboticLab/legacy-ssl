@@ -2747,7 +2747,7 @@ void DefensePlan::findOppAgentsToMark(){
         }
     }
 
-    if(knowledge->isTheirNonPlayOnKick()){
+    if(knowledge->isTheirNonPlayOnKick() || knowledge->getGameState() == CKnowledge::Stop){
         //Ommiting nearest to ball
         int nearestToBall = -1;
         double nearestToBallDist = 100000;
@@ -3017,7 +3017,7 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
     double distance = (wm->ball->pos - opp).length();
     debug(QString("Dist %1").arg(distance), D_MAHI);
     if(distance > 0.6){
-        if(ratio * distance > 0.1){
+        if(ratio * distance > 0.2){
         debug(QString("First"),D_HAMED);
         }else{
             debug(QString("second"),D_HAMED);
