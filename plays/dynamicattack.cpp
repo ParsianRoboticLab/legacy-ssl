@@ -1,6 +1,7 @@
 #include "dynamicattack.h"
 
 CDynamicAttack::CDynamicAttack() {
+    lastPMInitWasDribble = false;
     //isShotInPass = false;
     lastPassPosLoc = Vector2D(5000, 5000);
     guardSize = 3;
@@ -155,6 +156,10 @@ void CDynamicAttack::makePlan(int agentSize) {
 //            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
 //        }
 //    }
+
+    if(critical == false)
+        lastPMInitWasDribble = false;
+
     //if defense is clearing
     if (isDefenseClearing) {
         currentPlan.mode = DynamicEnums::DefenseClear;
@@ -178,17 +183,6 @@ void CDynamicAttack::makePlan(int agentSize) {
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
         }
     }
-    //    // if Defense isn't clearing and
-    //    // we have the ball
-    //    // ball is in our field
-    //    else if (ballPos.x < 0) {
-    //        currentPlan.mode = DynamicEnums::BallInOurField;
-    //        currentPlan.playmake.init(DynamicEnums::Chip, DynamicEnums::Forward);
-    //        for(size_t i = 0;i < agentSize;i++) {
-    //            currentPlan.positionAgents[i].region = DynamicEnums::Near;
-    //            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
-    //        }
-    //    }
     // if Defense isn't clearing and
     // we have ball and
     // shot prob is more than 50%
@@ -208,34 +202,37 @@ void CDynamicAttack::makePlan(int agentSize) {
 
         currentPlan.mode = DynamicEnums::Critical;
         bool notDribble = true;
-//        if(wm->opp.activeAgentsCount() > 0 && wm->field->isInField(currentPlan.passPos))
-//        {
-//            for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
-//            {
-//                CRobot*   agent         = wm->opp.active(i);
-//                Vector2D  agentPos      = agent->pos, t1, t2;
-//                Segment2D temp          = Segment2D(ballPos, currentPlan.passPos);
-//                Circle2D  Robot         = Circle2D(agentPos, 0.1);
-//                Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
+        if(wm->opp.activeAgentsCount() > 0 && wm->field->isInField(currentPlan.passPos))
+        {
+            for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
+            {
+                CRobot*   agent         = wm->opp.active(i);
+                Vector2D  agentPos      = agent->pos, t1, t2;
+                Segment2D temp          = Segment2D(ballPos, currentPlan.passPos);
+                Circle2D  oppRobotArea  = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
+                Circle2D  ourRobotArea  = Circle2D(mahiPlayMaker->pos()
+                                                  + mahiPlayMaker->dir().norm() * 0.08, 0.08);
+                Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
 
-//                if((robotKickArea.contains(ballPos) && /*Robot.intersection(temp, &t1, &t2)  && */robotKickArea.intersection(temp, &t1, &t2) && ballPos.x > 0)
-//                    || (lastplaymakeInit == 1 && Robot.intersection(temp, &t1, &t2)))
-//                {
-//                    oppRob = wm->opp.active(i)->pos;
+
+                if((robotKickArea.intersection(temp, &t1, &t2) && ballPos.x > 0) &&
+         (lastPMInitWasDribble || (oppRobotArea.contains(ballPos) && ourRobotArea.contains(ballPos))))
+                {
+                    lastPMInitWasDribble = true;
+                    oppRob = wm->opp.active(i)->pos;
 //                    debug(QString("WOW we are dribbling"), D_PARSA);
-//                    notDribble = false;
-//                    currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
-//                    lastplaymakeInit = 1;
-//                    break;
-//                }
-//            }
-//        }
-//        if(notDribble == true)
-//        {
-            debug(QString("NOOOOOO we are not Dribbling"), D_PARSA);
+                    notDribble = false;
+                    currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
+                    break;
+                }
+            }
+        }
+        if(notDribble == true)
+        {
+            lastPMInitWasDribble = true;
+//            debug(QString("NOOOOOO we are not Dribbling"), D_PARSA);
             currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
-            lastplaymakeInit = 0;
-//        }
+        }
 
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Best;
@@ -412,7 +409,7 @@ void CDynamicAttack::playMake() {
     switch(currentPlan.playmake.skill) {
     case DynamicEnums::Dribble:
         roleAgentPM -> setTargetDir(currentPlan.passPos);
-        roleAgentPM -> setTarget(oppRob);
+        roleAgentPM -> setTarget(wm->ball->pos);
         roleAgentPM -> setChip(false);
         roleAgentPM -> setNoKick(true);
         roleAgentPM -> setSelectedSkill(DynamicEnums::Dribble); // skill Dribble
@@ -1033,8 +1030,8 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
         M = 100;
         for(int j = 0; j < wm->our.activeAgentsCount(); j++)
             M = min(M, wm->our.active(j)->pos.dist(temp[i]));
-        if(M > 0.5)
-            points[i] -= 17;
+        if(M > 1)
+            points[i] -= 5;
         if(points[i] > points[ans])
             ans = i;
         //debug(QString("pass pos %1 %2 point is %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
@@ -1211,12 +1208,14 @@ void CDynamicAttack::managePasser() {
 
 int CDynamicAttack::farGuardFromPoint(const int &_guardIndex,
                                       const Vector2D &_point) {
-    int tempDist, tempIndex, tempMax = 0;
+    double tempDist, tempIndex, tempMax = 0;
     tempIndex = -1;
     for(size_t i = 0;i < 3;i++) {
         tempDist = guardLocations[currentPlan.agentSize]
                 [guardIndexList.at(_guardIndex)]
                 [i].dist(_point);
+        if(i == lastGuards[_guardIndex])
+            tempDist += 0.3;
         if(tempDist  > tempMax) {
             tempMax = tempDist;
             tempIndex = i;
