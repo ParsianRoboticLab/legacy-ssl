@@ -2758,7 +2758,7 @@ void DefensePlan::findOppAgentsToMark(){
             {
                 nearestToBall = i;
                 nearestToBallDist = oppAgentsToMark[i]->pos.dist(wm->ball->pos);
-                debug(QString("the nearest id is:%1").arg(oppAgentsToMark[i]->id),D_HAMED);
+               // debug(QString("the nearest id is:%1").arg(oppAgentsToMark[i]->id),D_HAMED);
                 draw(oppAgentsToMark[i]->pos + oppAgentsToMark[i]->vel);
             }
         }
@@ -2814,15 +2814,15 @@ Vector2D DefensePlan::posvel(CRobot* opp, double VelReliabiity){
     Vector2D penaltyvec;
     penaltyvec.assign(test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).x,test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).y);
     if(wm->field->isInField(penaltyvec) && penaltyvec.isValid() && tempseg.length() != 0){
-        debug(QString("Intersection with penalty area by penaltyvec: %1,%2").arg(penaltyvec.x).arg(penaltyvec.y),D_HAMED);
+        //debug(QString("Intersection with penalty area by penaltyvec: %1,%2").arg(penaltyvec.x).arg(penaltyvec.y),D_HAMED);
         return penaltyvec;
     }
     else if(temppos.x < -4.4){
-        debug(QString("Opp is out"),D_HAMED);
+        //debug(QString("Opp is out"),D_HAMED);
         return Vector2D(-4.4,(opp->pos + VelReliabiity * opp->vel).y) ;
     }
     else{
-        debug(QString("normal mode"),D_HAMED);
+        //debug(QString("normal mode"),D_HAMED);
         return opp->pos + VelReliabiity * opp->vel;
     }
 }
@@ -3015,6 +3015,12 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
     Vector2D pos = wm->ball->pos + (opp - wm->ball->pos) * ratio;
     CDefPos test;
     double distance = (wm->ball->pos - opp).length();
+    Vector2D sol;
+    Segment2D isInPenaltyArea;
+    isInPenaltyArea.assign(opp, wm->ball->pos);
+    QList<Vector2D> tempVec;
+    tempVec.clear();
+
     debug(QString("Dist %1").arg(distance), D_MAHI);
     if(distance > 0.6){
         if(ratio * distance > 0.2){
@@ -3028,8 +3034,26 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
         debug(QString("Third"),D_HAMED);
         pos = wm->ball->pos + (opp - wm->ball->pos) * (1 + 0.15 / distance);
     }
-    if((wm->field->ourGoal() - pos).length() < markRadiusStrict){
-        tempQlist.append(test.getIntersectionWithPenaltyAreaDef(2, tempSeg));
+
+    if(!wm->field->AHZOurPAreaIntersect(isInPenaltyArea).isEmpty()){
+        tempVec.append(wm->field->AHZOurPAreaIntersect(tempSeg));
+            if(tempVec.size() == 1)
+            {
+                tempQlist.append(tempVec.first());
+            }
+            else if(tempVec.size() == 2)
+            {
+                if((tempVec.first() - wm->ball->pos).length() > (tempVec.last() - wm->ball->pos).length())
+                {
+                    sol = tempVec.first();
+                }
+                else if ((tempVec.last() - wm->ball->pos).length() > (tempVec.first() - wm->ball->pos).length())
+                {
+                    sol = tempVec.last();
+                }
+                tempQlist.append(sol);
+            }
+
         tempQlist.append( wm->ball->pos - opp);
         draw(tempSeg, "red");
         debug(QString("this is in the penalty area, Block pass Mode"), D_HAMED);
