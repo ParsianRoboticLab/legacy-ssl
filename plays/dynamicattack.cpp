@@ -211,7 +211,7 @@ void CDynamicAttack::makePlan(int agentSize) {
                 Segment2D temp          = Segment2D(ballPos, currentPlan.passPos);
                 Circle2D  oppRobotArea  = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.1);
                 Circle2D  ourRobotArea  = Circle2D(mahiPlayMaker->pos()
-                                                           + agent->dir().norm() * 0.08, 0.1);
+                                                  + mahiPlayMaker->dir().norm() * 0.08, 0.1);
                 Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
 
 
@@ -1214,6 +1214,8 @@ int CDynamicAttack::farGuardFromPoint(const int &_guardIndex,
         tempDist = guardLocations[currentPlan.agentSize]
                 [guardIndexList.at(_guardIndex)]
                 [i].dist(_point);
+        if(i == lastGuards[_guardIndex])
+            tempDist += 0.3;
         if(tempDist  > tempMax) {
             tempMax = tempDist;
             tempIndex = i;
