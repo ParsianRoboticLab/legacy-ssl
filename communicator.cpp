@@ -214,6 +214,8 @@ void CBaseCommunicator::readData()
         tempAgent->status.motorFault[4]   = robotPacket[i][6] & 0b00010000;
         tempAgent->status.beep            = robotPacket[i][6] & 0b00100000;
         tempAgent->status.shotSensorFault = robotPacket[i][6] & 0b01000000;
+
+        tempAgent->status.boardID         = robotPacket[i][3] & 0b00011111;
     }
 }
 
