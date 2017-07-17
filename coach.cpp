@@ -1186,7 +1186,7 @@ void CCoach::updateAttackState()
     Polygon2D robotCritArea;
     double    safeRegion= 1   ;
     double    critLenth = 0.4 ;
-    double    critThrsh = 0.35;
+    double    critThrsh = 0.45;
     double    critAng   = 20  ;
     CRobot    *oppNearest;
     if(wm->opp.activeAgentsCount() > 0) {
