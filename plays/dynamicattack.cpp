@@ -209,9 +209,9 @@ void CDynamicAttack::makePlan(int agentSize) {
                 CRobot*   agent         = wm->opp.active(i);
                 Vector2D  agentPos      = agent->pos, t1, t2;
                 Segment2D temp          = Segment2D(ballPos, currentPlan.passPos);
-                Circle2D  oppRobotArea  = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.1);
+                Circle2D  oppRobotArea  = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
                 Circle2D  ourRobotArea  = Circle2D(mahiPlayMaker->pos()
-                                                  + mahiPlayMaker->dir().norm() * 0.08, 0.1);
+                                                  + mahiPlayMaker->dir().norm() * 0.08, 0.08);
                 Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
 
 
@@ -222,7 +222,7 @@ void CDynamicAttack::makePlan(int agentSize) {
                     oppRob = wm->opp.active(i)->pos;
 //                    debug(QString("WOW we are dribbling"), D_PARSA);
                     notDribble = false;
-                    currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
+                    currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
                     break;
                 }
             }
@@ -409,7 +409,7 @@ void CDynamicAttack::playMake() {
     switch(currentPlan.playmake.skill) {
     case DynamicEnums::Dribble:
         roleAgentPM -> setTargetDir(currentPlan.passPos);
-        roleAgentPM -> setTarget(oppRob);
+        roleAgentPM -> setTarget(wm->ball->pos);
         roleAgentPM -> setChip(false);
         roleAgentPM -> setNoKick(true);
         roleAgentPM -> setSelectedSkill(DynamicEnums::Dribble); // skill Dribble
