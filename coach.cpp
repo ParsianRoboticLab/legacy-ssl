@@ -2546,8 +2546,8 @@ void CCoach::checkSensorShootFault() {
     }
 
     for (size_t i = 0; i < ourPlayers.size(); i++) {
-        if (knowledge->getAgent(i)->changeIsNeeded) {
-            debug(QString("[ROBOT FAULT] %1"), D_ERROR);
+        if (knowledge->getAgent(ourPlayers.at(i))->changeIsNeeded) {
+            debug(QString("[ROBOT FAULT] %1").arg(ourPlayers.at(i)), D_ERROR);
 
         }
 
