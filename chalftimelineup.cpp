@@ -53,6 +53,7 @@ void CHalftimeLineup::lineUpAllAgents(){
         for(int i=0;i<agentsID.length();i++){
             lineup.at(i)->init(points[matchpoints.at(i)],Vector2D(0,1));
             lineup.at(i)->setADiveMode(false);
+            lineup.at(i)->setSlowMode(true);
             lineup.at(i)->setAvoidPenaltyArea(false);
             lineup.at(i)->execute();
         }
