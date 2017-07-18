@@ -50,8 +50,8 @@ kk2Angles CDefPos::getIntersections(Vector2D _ballPos, double _radius)
     Segment2D tempSeg1(wm->field->ourGoalL(), _ballPos);
     Segment2D tempSeg2(wm->field->ourGoalR(), _ballPos);
     if(isNearPenaltyArea) {
-        inter1 = getIntersectionWithPenaltyAreaDef(_radius , tempSeg1);
-        inter2 = getIntersectionWithPenaltyAreaDef(_radius , tempSeg2);
+        inter1 = getIntersectionWithPenaltyAreaDef(_radius , tempSeg1, false);
+        inter2 = getIntersectionWithPenaltyAreaDef(_radius , tempSeg2, false);
         nearRadius[0] = (wm->field->ourGoal() - Vector2D(penaltyAreaOffset,0)).dist(inter1);
         nearRadius[1] = (wm->field->ourGoal()- Vector2D(penaltyAreaOffset,0)).dist(inter2);
     }
@@ -179,17 +179,23 @@ bool CDefPos::isInPenaltyAreaDef(double _tempBestRadius , Vector2D vec){
     Segment2D tempSeg;
     tempSeg.assign(vec, wm->field->ourGoal());
     CDefPos test;
-    return !(test.getIntersectionWithPenaltyAreaDef(_tempBestRadius, tempSeg).isValid() || wm->field->isInField(test.getIntersectionWithPenaltyAreaDef(_tempBestRadius, tempSeg)) );
+    return !(test.getIntersectionWithPenaltyAreaDef(_tempBestRadius, tempSeg, false).isValid() || wm->field->isInField(test.getIntersectionWithPenaltyAreaDef(_tempBestRadius, tempSeg, false)) );
 }
 
-Vector2D CDefPos::getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Segment2D _seg)
+Vector2D CDefPos::getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Segment2D _seg, bool isMixTeam)
 {
+    double FIELD_WIDTH;
+    if(!isMixTeam){
+        FIELD_WIDTH = _FIELD_WIDTH;
+    } else {
+        FIELD_WIDTH = _MIXTEAM_FIELD_WIDTH;
+    }
     ////////////////////////////////////////////////
     Vector2D ins1[2];
     Vector2D ins2[2];
     Vector2D ins3[2];
     Vector2D finter;
-    Vector2D fOurGoal(- _FIELD_WIDTH/2.0 , 0.0);
+    Vector2D fOurGoal(- FIELD_WIDTH/2.0 , 0.0);
     double PAreaOffset = _tempBestRadius - 1.37;
     if(PAreaOffset < 0.12) {
         PAreaOffset = 0.15;
@@ -202,7 +208,8 @@ Vector2D CDefPos::getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Seg
     draw(r,QColor(Qt::black));
     ////////////////////////////////////////////////
     r.intersection(_seg,&ins1[0],&ins1[1]);
-    if((wm->field->isInField(ins1[0])) && (ins3[0].x >=-3.42) && ins1[0].valid() || ins1[1].valid() && (wm->field->isInField(ins1[1])) && (ins3[1].x >=-3.42)) {
+    if((wm->field->isInField(ins1[0])) && (ins3[0].x >=-3.42) && ins1[0].valid()
+            || ins1[1].valid() && (wm->field->isInField(ins1[1])) && (ins3[1].x >=-3.42)) {
         debug(QString("Debug Rect intersection ins1 is %1 %2, ins2 is %3,%4").arg(ins1[0].x).arg(ins1[0].y).arg(ins1[1].x).arg(ins1[1].y),D_HAMED);
         if(ins1[0].x > -3.42 && wm->field->isInField(ins1[0])){
             finter =  ins1[0];
