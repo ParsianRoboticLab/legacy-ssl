@@ -968,7 +968,7 @@ int CRolePlayMake::getPenaltychipSpeed(){
 //                    +knowledge->getProfile(agent->id()+1,lastBounce(),false))/2;
 //        }
 //        else return -1;
-        return 3;
+        return 200;
     }
     else return -1;
 }
@@ -1018,14 +1018,14 @@ void CRolePlayMake::executeOurPenaltyShootout(){
             firstKick=false;
 
         if(firstKick){
-            penaltyTarget=wm->field->oppGoal()+0*Vector2D(0,wm->field->oppGoalL().y);;
+            penaltyTarget=wm->field->oppGoalL()+0*Vector2D(0,wm->field->oppGoalL().y);;
             kick->setTarget(penaltyTarget);
 
             if(flag){//chip first
                 if(wm->getIsSimulMode())
                     kick->setKickSpeed(1);
                 else
-                    kick->setKickSpeed(150);
+                    kick->setKickSpeed(170);
                 kick->setChip(true);
                 if(wm->ball->vel.length()>0.4)
                     firstKick=false;
@@ -1058,7 +1058,11 @@ void CRolePlayMake::executeOurPenaltyShootout(){
             switch(choosePenaltyStrategy()){
             case pshootDirect:
                 debug("pdirect : ",D_NADIA);
+                penaltyTarget=knowledge->getEmptyPosOnGoalForPenalty(0.13,true, 10,agent);
                 kick->setTarget(penaltyTarget);
+                kick->setChip(false);
+                kick->setKickSpeed(1000);
+                kick->setAvoidOppPenaltyArea(true);
                 break;
 
 
@@ -1066,14 +1070,14 @@ void CRolePlayMake::executeOurPenaltyShootout(){
             case pgoaheadShoot:
                 debug("pgoahead : ",D_NADIA);
                 if(abs(agent->pos().x)<1.25){
-                    penaltyTarget=wm->field->oppGoal()+0*Vector2D(0,wm->field->oppGoalL().y);;
+                    penaltyTarget=wm->field->oppGoalL()+0*Vector2D(0,wm->field->oppGoalL().y);;
                     kick->setTarget(penaltyTarget);
 
                     if(flag){//chip first
                         if(wm->getIsSimulMode())
-                            kick->setKickSpeed(1);
+                            kick->setKickSpeed(100);
                         else
-                            kick->setKickSpeed(150);
+                            kick->setKickSpeed(170);
                         kick->setChip(true);
                     }else{//kick first
 
@@ -1092,7 +1096,7 @@ void CRolePlayMake::executeOurPenaltyShootout(){
                     }
                 }
                 else{
-                    penaltyTarget=knowledge->getEmptyPosOnGoalForPenalty(0.13,true, 0.06);
+                    penaltyTarget=knowledge->getEmptyPosOnGoalForPenalty(0.13,true, 10,agent);
                     if(wm->getIsSimulMode())
                         kick->setKickSpeed(7);
                     else
