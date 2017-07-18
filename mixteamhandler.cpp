@@ -80,7 +80,7 @@ void CMixTeamHandler::initialMakePacket()
     multi_team_comm::RobotPlan *plans[robotsInField];
     multi_team_comm::Pose *poses[robotsInField];
     multi_team_comm::Location *posLoc[robotsInField];
-    multi_team_comm::Location *planLoc[robotsInField];
+    multi_team_comm::Location *shotTraget[robotsInField];
     int i = 0;
     for( int j = 0 ; j < robotsInField ; j++ ){
         if( knowledge->getActiveAgents().at(j)->id() != knowledge->mixGoaleID ){
@@ -180,7 +180,7 @@ void CMixTeamHandler::task1MakePacket()
     multi_team_comm::RobotPlan *plans[robotsInField];
     multi_team_comm::Pose *poses[robotsInField];
     multi_team_comm::Location *posLoc[robotsInField];
-    multi_team_comm::Location *planLoc[robotsInField];
+    multi_team_comm::Location *shotTarget[robotsInField];
     int i = 0;
     for( int j = 0 ; j < robotsInField/2 ; j++ ){
         if( knowledge->getActiveAgents().at(j)->id() != knowledge->mixGoaleID ){
@@ -362,7 +362,7 @@ void CMixTeamHandler::task3MakePacket()
     multi_team_comm::RobotPlan *plans[robotsInField];
     multi_team_comm::Pose *poses[robotsInField];
     multi_team_comm::Location *posLoc[robotsInField];
-    multi_team_comm::Location *planLoc[robotsInField];
+    multi_team_comm::Location *shotTarget[robotsInField];
 
 
     //master robot plan
@@ -370,9 +370,9 @@ void CMixTeamHandler::task3MakePacket()
     plans[0]->set_robot_id(selectedIDM);//for master to pass
     plans[0]->set_role(multi_team_comm::RobotPlan::Offense);
     poses[0] = plans[0]->mutable_nav_target();
-    planLoc[0] = plans[0]->mutable_shot_target();
-    planLoc[0]->set_x(selectedPosS.x * 100);//shot target
-    planLoc[0]->set_y(selectedPosS.y * 100);//shot target
+    shotTarget[0] = plans[0]->mutable_shot_target();
+    shotTarget[0]->set_x(selectedPosS.x * 100);//shot target
+    shotTarget[0]->set_y(selectedPosS.y * 100);//shot target
     posLoc[0] = poses[0]->mutable_loc();
     posLoc[0]->set_x(selectedPosM.x * 100);//nav traget
     posLoc[0]->set_y(selectedPosM.y * 100);//nav target
@@ -382,9 +382,9 @@ void CMixTeamHandler::task3MakePacket()
     plans[1]->set_robot_id(selectedIDS);//for master to pass
     plans[1]->set_role(multi_team_comm::RobotPlan::Offense);
     poses[1] = plans[1]->mutable_nav_target();
-    planLoc[1] = plans[1]->mutable_shot_target();
-    planLoc[1]->set_x(wm->field->oppGoal().x * 100);//shot target
-    planLoc[1]->set_y(wm->field->oppGoal().y * 100);//shot target
+    shotTarget[1] = plans[1]->mutable_shot_target();
+    shotTarget[1]->set_x(wm->field->oppGoal().x * 100);//shot target
+    shotTarget[1]->set_y(wm->field->oppGoal().y * 100);//shot target
     posLoc[1] = poses[1]->mutable_loc();
     posLoc[1]->set_x(selectedPosS.x * 100);//nav traget
     posLoc[1]->set_y(selectedPosS.y * 100);//nav target
@@ -533,7 +533,6 @@ void CMixTeamHandler::executeSlaveOffense(int robotId, Vector2D point1, Vector2D
 
 }
 
-
 CMixTeamCoach::CMixTeamCoach(){
     markRadiusStrict = 1.43;
     ShootRatioBlock  = policy()->Mark_ShootRatioBlock() / 100.0;
@@ -647,24 +646,124 @@ void CMixTeamCoach::decideMarkAndDefenseCount(){
     }
 }
 
-void CMixTeamCoach::setPositions(){
-    tempDefPos = defPos.getDefPositions(wm->ball->pos, defenseCount, 1.5, 3);
+void CMixTeamCoach::setDefPositions(){
+
+    // defense
+    defensePos = defPos.getDefPositions(wm->ball->pos, defenseCount, 1.5, 3);
 
     oppPos.clear();
     for(int i=0; i<wm->opp.activeAgentsCount(); i++){
         oppPos.append(wm->opp.active(i)->pos);
     }
 
+    // mark
     sortedDangerousOpp = sortdangerpassplayoff(oppPos);
-
     markPos.clear();
-    for(int i=0; i < markCount; i++){
-//                markPos.append(ShootBlockRatio(ShootRatioBlock, sortedDangerousOpp.at(i).Pos));
-//                markPos.append(PassBlockRatio(PassRatioBlock, sortedDangerousOpp.at(i).Pos));
+    for(int i=0; i < min(markCount, sortedDangerousOpp.size()); i++){
+        if(policy()->Mark_PlayOffManToMan()) {
+            markPos.append(PassBlockRatio(PassRatioBlock, sortedDangerousOpp.at(i).Pos));
+        } else {
+            markPos.append(ShootBlockRatio(ShootRatioBlock, sortedDangerousOpp.at(i).Pos));
+        }
     }
 }
 
-void CMixTeamCoach::makePlanPacket(){
+void CMixTeamCoach::DefDynamicAssigning(){
+
+    CMixTeamCoach::SRobotPlan plan;
+
+    QQueue<int> ids = wm->our.data->activeAgents;
+    double leastDist, dist;
+    int selectedId;
+
+    if(ids.contains(knowledge->mixGoaleID))
+        ids.removeOne(knowledge->mixGoaleID);
+
+    for(int i = 0; i < defenseCount; i++){  // defense assigning
+        leastDist = 100000;
+        selectedId = _INVALID_ID;
+        for(int j = 0; j < ids.count(); j++){
+            dist = wm->our[ids[j]]->pos.dist(defensePos.pos[i]);
+            if(dist < leastDist){
+                leastDist = dist;
+                selectedId = ids[j];
+            }
+        }
+        ids.removeOne(selectedId);
+
+        plan.role = multi_team_comm::RobotPlan::Defense;
+        plan.id = selectedId;
+        plan.location = defensePos.pos[i];
+        plan.heading = Vector2D::dirTo_deg(defensePos.pos[i], wm->ball->pos)*(3.14/180.0);
+        plan.shotTarget.invalidate();
+
+        robotsPlan.append(plan);
+    }
+
+    for(int i = 0; i < markPos.count(); i++){  // mark assigning
+        leastDist = 100000;
+        selectedId = _INVALID_ID;
+        for(int j = 0; j < ids.count(); j++){
+            dist = wm->our[ids[j]]->pos.dist(markPos.at(i).position);
+            if(dist < leastDist){
+                leastDist = dist;
+                selectedId = ids[j];
+            }
+        }
+        ids.removeOne(selectedId);
+
+        plan.role = multi_team_comm::RobotPlan::Defense;
+        plan.id = selectedId;
+        plan.location = markPos.at(i).position;
+        plan.heading = markPos.at(i).heading;
+        plan.shotTarget.invalidate();
+
+        robotsPlan.append(plan);
+    }
+}
+
+void CMixTeamCoach::makeMasterPlanPacket(){
+
+    int planCount = robotsPlan.size();
+    multi_team_comm::TeamPlan *packet = new multi_team_comm::TeamPlan();
+    multi_team_comm::RobotPlan *plans[planCount];
+    multi_team_comm::Pose *poses[planCount];
+    multi_team_comm::Location *posLoc[planCount];
+    multi_team_comm::Location *shotTraget[planCount];
+
+    for( int i = 0 ; i < robotsPlan.size() ; i++ ){
+        plans[i] = packet->add_plans();
+
+        plans[i]->set_robot_id(robotsPlan.at(i).id);                // id
+
+        plans[i]->set_role(robotsPlan.at(i).role);                  // role
+
+        poses[i] = plans[i]->mutable_nav_target();
+
+        if(robotsPlan.at(i).heading != _INVALID_HEADING){           // heading
+            poses[i]->set_heading(robotsPlan.at(i).heading);
+        }
+
+        if(robotsPlan.at(i).location.isValid()){                    // position
+            posLoc[i] = poses[i]->mutable_loc();
+            posLoc[i]->set_x(robotsPlan.at(i).location.x);
+            posLoc[i]->set_y(robotsPlan.at(i).location.y);
+        }
+
+        if(robotsPlan.at(i).shotTarget.isValid()){                  // shot target
+            shotTraget[i] = plans[i]->mutable_shot_target();
+            shotTraget[i]->set_x(robotsPlan.at(i).shotTarget.x);
+            shotTraget[i]->set_y(robotsPlan.at(i).shotTarget.y);
+        }
+    }
+
+    static MixTeamSender *sender = new MixTeamSender(16);
+    sender->packet = packet;
+    sender->flag = true;
+
+}
+
+void CMixTeamCoach::testDefense(){
 
 }
 
@@ -675,18 +774,18 @@ CMixTeamCoach::SPosAndHeading CMixTeamCoach::ShootBlockRatio(double ratio, Vecto
     //// shot path.
     CMixTeamCoach::SPosAndHeading temp;
     CDefPos test;
-    temp.heading = Vector2D(0,0);
+    temp.heading = _INVALID_HEADING;
     temp.position = Vector2D(0,0);
     Segment2D tempSeg;
     tempSeg.assign(opp + (wm->field->ourGoal() - opp) * (-10), wm->field->ourGoal());
     Vector2D pos = opp + (wm->field->ourGoal() - opp) * ratio;
     if((wm->field->ourGoal() - pos).length() < markRadiusStrict){
         temp.position = test.getIntersectionWithPenaltyAreaDef(1.39,tempSeg, true);
-        temp.heading = opp - wm->field->ourGoal();
+        temp.heading =  Vector2D::dirTo_deg(wm->field->ourGoal(), opp)*(3.14/180);
     }
     else{
         temp.position = pos;
-        temp.heading = opp - wm->field->ourGoal();
+        temp.heading =  Vector2D::dirTo_deg(wm->field->ourGoal(), opp)*(3.14/180);
     }
     draw(tempSeg, "blue");
     return temp;
@@ -700,7 +799,7 @@ CMixTeamCoach::SPosAndHeading CMixTeamCoach::PassBlockRatio(double ratio, Vector
     Segment2D tempSeg;
     Vector2D pos = wm->ball->pos + (opp - wm->ball->pos) * ratio;
     temp.position = Vector2D(0,0);
-    temp.heading = Vector2D(0,0);
+    temp.heading = _INVALID_HEADING;
     tempSeg.assign(wm->ball->pos, wm->ball->pos + (opp - wm->ball->pos) * 10);
     double distance = (wm->ball->pos - opp).length();
 
@@ -719,13 +818,13 @@ CMixTeamCoach::SPosAndHeading CMixTeamCoach::PassBlockRatio(double ratio, Vector
     }
     if((wm->field->ourGoal() - pos).length() < markRadiusStrict){
         temp.position = test.getIntersectionWithPenaltyAreaDef(2, tempSeg, true);
-        temp.heading = wm->ball->pos - opp;
+        temp.heading =  Vector2D::dirTo_deg(opp, wm->ball->pos)*(3.14/180);
         draw(tempSeg, "red");
         debug(QString("this is in the penalty area, Block pass Mode"), D_HAMED);
     }
     else{
         temp.position = pos;
-        temp.heading = wm->ball->pos - opp;
+        temp.heading =  Vector2D::dirTo_deg(opp, wm->ball->pos)*(3.14/180);
         draw(tempSeg, "red");
     }
     return temp;
@@ -734,8 +833,7 @@ CMixTeamCoach::SPosAndHeading CMixTeamCoach::PassBlockRatio(double ratio, Vector
 QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayoff(QList<Vector2D> oppposdanger){
     double danger;
     /////////////// Polygon
-    double radius = .1;
-    double treshold = 1;
+    double radius = .1, treshold = 1;
 
     Vector2D sol1,sol2,sol3;
     Vector2D _pos1 = wm->ball->pos;
@@ -745,7 +843,6 @@ QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayoff(QList<
     Polygon2D _poly;
     Circle2D(_pos2,radius + treshold).
             intersection(_path.perpendicular(_pos2),&sol1,&sol2);
-
 
     _poly.addVertex(sol1);
     sol3 = sol1;
@@ -759,25 +856,18 @@ QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayoff(QList<
 
     draw(_poly,"cyan");
 
-
-
     double KAP = 1; //Angle parameter
     double KDBP = 1; //distancetoball
     double KDIP = 2; //distancetointersect
 
-    double AngleP;
-    double distanceToBallProjectionP;
-    double distanceToIntersectP;
-
+    double AngleP, distanceToBallProjectionP, distanceToIntersectP;
 
     double RangeofAngleP = 90;
     double RangeofdistanceToBallProjectionP = Segment2D(Vector2D(-1.0 * _MIXTEAM_FIELD_WIDTH / 2, -1.0 * _MIXTEAM_FIELD_HEIGHT/2 ), Vector2D(_MIXTEAM_FIELD_WIDTH / 2 , _MIXTEAM_FIELD_HEIGHT / 2)).length();
     double RangeofdistanceToIntersectP =  radius;
     double danger2;
 
-
     /////////////////////
-
 
     double KA=1; //Angle Coefficient
     double KDB=0;  //Distance To Ball
@@ -790,7 +880,6 @@ QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayoff(QList<
                                                   Vector2D(-1.0 * _MIXTEAM_FIELD_WIDTH/2,-1.0 * _MIXTEAM_FIELD_HEIGHT /2)).length());
     double RangeofDistancetoGoal = fabs(Segment2D(Vector2D(_MIXTEAM_FIELD_WIDTH/2,_MIXTEAM_FIELD_HEIGHT /2),
                                                   wm->field->ourGoal()).length());
-
     //double RangeofTempDis = 2;
     double angle, distancetoball, distancetogoal,danger1;
 
@@ -798,16 +887,12 @@ QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayoff(QList<
     CMixTeamCoach::SDangerousOpp dv;
     double Polycontain;
     for(int i = 0; i<oppposdanger.count(); i++) {
-        if(Polycontain == _poly.contains(oppposdanger[i]))
-        {
+        if(Polycontain == _poly.contains(oppposdanger[i])) {
             Polycontain = 1;
-        }
-        else
-        {
+        } else {
             Polycontain = 0;
         }
         dv.Pos = oppposdanger[i];
-
 
         angle = Vector2D::angleOf(wm->field->ourGoalR(), oppposdanger[i], wm->field->ourGoalL() ).degree();
         distancetoball =  (oppposdanger[i] - wm->ball->pos).length();
@@ -836,10 +921,8 @@ QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayoff(QList<
         //        draw(QString("mindistance%1").arg(mintempdis), oppposdanger[i] + Vector2D(0,0.5), QColor(Qt::blue));
     }
     ///sorting the Qlist
-    for(int i = 0; i< output.count(); i++)
-    {
-        for(int j = 0; j< output.count() - 1; j++ )
-        {
+    for(int i = 0; i< output.count(); i++) {
+        for(int j = 0; j< output.count() - 1; j++ ) {
             if(output.at(j).danger < output.at(j+1).danger)
                 output.swap(j, j+1);
         }

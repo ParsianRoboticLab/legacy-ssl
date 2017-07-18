@@ -15,7 +15,6 @@ class CMixTeamHandler
 public:
     CMixTeamHandler();
 
-    int goalieID;
     int numOfAllOurRobots;
     bool isMaster;
 
@@ -63,6 +62,10 @@ public:
 
 
 class CMixTeamCoach{
+
+#define _INVALID_HEADING 100000
+#define _INVALID_ID      -1
+
 public:
     CKnowledge::ballPossesionState lastBallPossess;
     int defenseCount, markCount;
@@ -72,7 +75,7 @@ public:
 
     struct SPosAndHeading{
         Vector2D position;
-        Vector2D heading;
+        float heading;
     };
 
     struct SDangerousOpp{
@@ -80,10 +83,25 @@ public:
         double danger;
     };
 
+    enum Role{
+        DefaultRole = 0,
+        GoalieRole  = 1,
+        DefenseRole = 2,
+        OffenseRole = 3
+    };
+
+    struct SRobotPlan{
+        multi_team_comm::RobotPlan::RobotRole role;
+        int id;
+        Vector2D location;
+        float heading;
+        Vector2D shotTarget;
+    };
+
     CDefPos defPos;
-    kkDefPos tempDefPos;
-    QList<Vector2D> DefensePos;
-    QList<SPosAndHeading> markPos;
+    kkDefPos defensePos;
+    QList<SPosAndHeading > markPos;
+
     QList<SDangerousOpp> sortedDangerousOpp;
     QList<Vector2D> oppPos;
 
@@ -94,12 +112,18 @@ public:
     CKnowledge::ballPossesionState ballPossess();
     void decideMarkAndDefenseCount();
     void setPositions();
-    void makePlanPacket();
+    void DefDynamicAssigning();
+    void makeMasterPlanPacket();
+
+    void testDefense();
 
     CMixTeamCoach::SPosAndHeading ShootBlockRatio(double ratio, Vector2D opp);
     CMixTeamCoach::SPosAndHeading PassBlockRatio(double ratio, Vector2D opp);
 
     QList<CMixTeamCoach::SDangerousOpp > sortdangerpassplayoff(QList<Vector2D> oppposdanger);
+
+
+    QList<SRobotPlan> robotsPlan;
 
 };
 
