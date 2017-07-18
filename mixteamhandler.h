@@ -88,6 +88,7 @@ public:
     QList<Vector2D> oppPos;
 
     double markRadiusStrict;
+    double ShootRatioBlock, PassRatioBlock;
 
     CMixTeamCoach();
     CKnowledge::ballPossesionState ballPossess();
@@ -98,9 +99,7 @@ public:
     CMixTeamCoach::SPosAndHeading ShootBlockRatio(double ratio, Vector2D opp);
     CMixTeamCoach::SPosAndHeading PassBlockRatio(double ratio, Vector2D opp);
 
-    QList<CMixTeamCoach::SDangerousOpp > sortdangerpassplayon(QList<Vector2D> oppposdanger);
     QList<CMixTeamCoach::SDangerousOpp > sortdangerpassplayoff(QList<Vector2D> oppposdanger);
-
 
 };
 

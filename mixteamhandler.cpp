@@ -535,7 +535,9 @@ void CMixTeamHandler::executeSlaveOffense(int robotId, Vector2D point1, Vector2D
 
 
 CMixTeamCoach::CMixTeamCoach(){
-    markRadiusStrict = 1.39;
+    markRadiusStrict = 1.43;
+    ShootRatioBlock  = policy()->Mark_ShootRatioBlock() / 100.0;
+    PassRatioBlock   = (100  - policy()->Mark_PassRatioBlock()) / 100.0;
 }
 
 CKnowledge::ballPossesionState CMixTeamCoach::ballPossess(){
@@ -653,11 +655,12 @@ void CMixTeamCoach::setPositions(){
         oppPos.append(wm->opp.active(i)->pos);
     }
 
-    sortedDangerousOpp = sortdangerpassplayon(oppPos);
+    sortedDangerousOpp = sortdangerpassplayoff(oppPos);
 
+    markPos.clear();
     for(int i=0; i < markCount; i++){
-//        markPos.append(ShootBlockRatio(0.5, sortedDangerousOpp.at(i).Pos));
-//        markPos.append(PassBlockRatio(0.5, sortedDangerousOpp.at(i).Pos));
+//                markPos.append(ShootBlockRatio(ShootRatioBlock, sortedDangerousOpp.at(i).Pos));
+//                markPos.append(PassBlockRatio(PassRatioBlock, sortedDangerousOpp.at(i).Pos));
     }
 }
 
@@ -678,35 +681,33 @@ CMixTeamCoach::SPosAndHeading CMixTeamCoach::ShootBlockRatio(double ratio, Vecto
     tempSeg.assign(opp + (wm->field->ourGoal() - opp) * (-10), wm->field->ourGoal());
     Vector2D pos = opp + (wm->field->ourGoal() - opp) * ratio;
     if((wm->field->ourGoal() - pos).length() < markRadiusStrict){
-        temp.position = test.getIntersectionWithPenaltyAreaDef(1.39,tempSeg);
+        temp.position = test.getIntersectionWithPenaltyAreaDef(1.39,tempSeg, true);
         temp.heading = opp - wm->field->ourGoal();
-        draw(tempSeg, "blue");
     }
     else{
         temp.position = pos;
         temp.heading = opp - wm->field->ourGoal();
-        draw(tempSeg, "blue");
     }
+    draw(tempSeg, "blue");
     return temp;
 }
 
 CMixTeamCoach::SPosAndHeading CMixTeamCoach::PassBlockRatio(double ratio, Vector2D opp){
     //// This function produces a point that block the pass path.Also if the
-    //// resulted point is in the penalty area, this function geneates a suitable
-    //// point.
-
+    //// resulted point is in the penalty area, this function geneates a suitable point.
     CMixTeamCoach::SPosAndHeading temp;
+    CDefPos test;
     Segment2D tempSeg;
+    Vector2D pos = wm->ball->pos + (opp - wm->ball->pos) * ratio;
     temp.position = Vector2D(0,0);
     temp.heading = Vector2D(0,0);
     tempSeg.assign(wm->ball->pos, wm->ball->pos + (opp - wm->ball->pos) * 10);
-    Vector2D pos = wm->ball->pos + (opp - wm->ball->pos) * ratio;
-    CDefPos test;
     double distance = (wm->ball->pos - opp).length();
+
     debug(QString("Dist %1").arg(distance), D_MAHI);
     if(distance > 0.6){
         if(ratio * distance > 0.1){
-        debug(QString("First"),D_HAMED);
+            debug(QString("First"),D_HAMED);
         }else{
             debug(QString("second"),D_HAMED);
             pos = wm->ball->pos + (opp - wm->ball->pos) * 0.15 / distance;
@@ -717,7 +718,7 @@ CMixTeamCoach::SPosAndHeading CMixTeamCoach::PassBlockRatio(double ratio, Vector
         pos = wm->ball->pos + (opp - wm->ball->pos) * (1 + 0.15 / distance);
     }
     if((wm->field->ourGoal() - pos).length() < markRadiusStrict){
-        temp.position = test.getIntersectionWithPenaltyAreaDef(2, tempSeg);
+        temp.position = test.getIntersectionWithPenaltyAreaDef(2, tempSeg, true);
         temp.heading = wm->ball->pos - opp;
         draw(tempSeg, "red");
         debug(QString("this is in the penalty area, Block pass Mode"), D_HAMED);
@@ -729,74 +730,6 @@ CMixTeamCoach::SPosAndHeading CMixTeamCoach::PassBlockRatio(double ratio, Vector
     }
     return temp;
 }
-
-QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayon(QList<Vector2D> oppposdanger) {
-
-    double KA=1; //Angle Coefficient
-    double KDB=1;  //Distance To Ball
-    double KDG=1;  //Distnce To Goal
-    double RangeofAngle = Vector2D::angleOf(wm->field->ourGoalR(),Vector2D(-1.0 * (_FIELD_WIDTH / 2 - _GOAL_RAD), 0), wm->field->ourGoalL()).degree();
-    //draw(Vector2D(-1.0 * (_FIELD_WIDTH - _GOAL_WIDTH), 0), QColor(Qt::red));
-    // double RangeofAngle2 = Vector2D::angleOf(wm->field->ou,Vector2D(0, -1.0 * (_FIELD_WIDTH - _GOAL_WIDTH)), wm->field->ourGoalL()).degree();
-
-    double RangeofDistancetoBall = fabs(Segment2D(Vector2D(_FIELD_WIDTH/2,_FIELD_HEIGHT /2), Vector2D(-1.0 * _FIELD_WIDTH/2,-1.0 * _FIELD_HEIGHT /2)).length());
-
-    double RangeofDistancetoGoal = fabs(Segment2D(Vector2D(_FIELD_WIDTH/2,_FIELD_HEIGHT /2), wm->field->ourGoal()).length());
-
-    double angle, distancetoball, distancetogoal,danger;
-
-    QList<CMixTeamCoach::SDangerousOpp> output;
-    CMixTeamCoach::SDangerousOpp dv;
-    for(int i = 0; i<oppposdanger.count(); i++) {
-        dv.Pos = oppposdanger[i];
-
-        angle = Vector2D::angleOf(wm->field->ourGoalR(), oppposdanger[i], wm->field->ourGoalL() ).degree();
-        distancetoball =  (oppposdanger[i] - wm->ball->pos).length();
-        distancetogoal =  (oppposdanger[i] - wm->field->ourGoal()).length();
-        danger = (KA * fabs(angle) / RangeofAngle) + ( KDB * 1 - (distancetoball / RangeofDistancetoBall) ) + (KDG * 1 -(distancetogoal / RangeofDistancetoGoal));
-
-        dv.danger = danger;
-        output.append(dv);
-        //draw(QString("HMD danger=%1").arg(danger), oppposdanger[i] + Vector2D(0,0.3), QColor(Qt::red));
-
-        // finding nearest to intersect
-        Segment2D tempsegment;
-        tempsegment.assign(oppposdanger[i],wm->field->ourGoal());
-
-        double mintempdis = 0.0;
-        if(wm->our.activeAgentsCount() != 0)
-            mintempdis = tempsegment.dist(wm->our.active(0)->pos);
-
-        for(int j=0; j<wm->our.activeAgentsCount(); j++)
-        {
-            if(tempsegment.dist(wm->our.active(j)->pos) < mintempdis)
-            {
-                mintempdis = tempsegment.dist(wm->our.active(j)->pos);
-            }
-
-        }
-
-        //        draw(QString("mindistance%1").arg(mintempdis), oppposdanger[i] + Vector2D(0,0.5), QColor(Qt::blue));
-    }
-
-    ///sorting the Qlist
-    for(int i = 0; i< output.count(); i++)
-    {
-        for(int j = 0; j< output.count() - 1; j++ )
-        {
-            if(output.at(j).danger < output.at(j).danger)
-                output.swap(j, j+1);
-        }
-    }
-
-    for(int i=0; i<output.count(); i++)
-    {
-        //draw(QString("HMD Danger New%1" ).arg(output[i].second),output[i].first + Vector2D(0,.2),QColor(Qt::red));
-    }
-
-    return output;
-}
-
 
 QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayoff(QList<Vector2D> oppposdanger){
     double danger;
@@ -838,7 +771,7 @@ QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayoff(QList<
 
 
     double RangeofAngleP = 90;
-    double RangeofdistanceToBallProjectionP = Segment2D(Vector2D(-1.0 * _FIELD_WIDTH / 2, -1.0 * _FIELD_HEIGHT /2 ), Vector2D(_FIELD_WIDTH / 2 , _FIELD_HEIGHT / 2)).length();
+    double RangeofdistanceToBallProjectionP = Segment2D(Vector2D(-1.0 * _MIXTEAM_FIELD_WIDTH / 2, -1.0 * _MIXTEAM_FIELD_HEIGHT/2 ), Vector2D(_MIXTEAM_FIELD_WIDTH / 2 , _MIXTEAM_FIELD_HEIGHT / 2)).length();
     double RangeofdistanceToIntersectP =  radius;
     double danger2;
 
@@ -849,13 +782,14 @@ QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayoff(QList<
     double KA=1; //Angle Coefficient
     double KDB=0;  //Distance To Ball
     double KDG=1;  //Distnce To Goal
-    double RangeofAngle = Vector2D::angleOf(wm->field->ourGoalR(),Vector2D(-1.0 * (_FIELD_WIDTH / 2 - _GOAL_RAD), 0), wm->field->ourGoalL()).degree();
-    //draw(Vector2D(-1.0 * (_FIELD_WIDTH - _GOAL_WIDTH), 0), QColor(Qt::red));
-    // double RangeofAngle2 = Vector2D::angleOf(wm->field->ou,Vector2D(0, -1.0 * (_FIELD_WIDTH - _GOAL_WIDTH)), wm->field->ourGoalL()).degree();
+    double RangeofAngle = Vector2D::angleOf(wm->field->ourGoalR(),Vector2D(-1.0 * (_MIXTEAM_FIELD_WIDTH / 2 - _GOAL_RAD), 0), wm->field->ourGoalL()).degree();
+    //draw(Vector2D(-1.0 * (_MIXTEAM_FIELD_WIDTH - _GOAL_WIDTH), 0), QColor(Qt::red));
+    // double RangeofAngle2 = Vector2D::angleOf(wm->field->ou,Vector2D(0, -1.0 * (_MIXTEAM_FIELD_WIDTH - _GOAL_WIDTH)), wm->field->ourGoalL()).degree();
 
-    double RangeofDistancetoBall = fabs(Segment2D(Vector2D(_FIELD_WIDTH/2,_FIELD_HEIGHT /2), Vector2D(-1.0 * _FIELD_WIDTH/2,-1.0 * _FIELD_HEIGHT /2)).length());
-
-    double RangeofDistancetoGoal = fabs(Segment2D(Vector2D(_FIELD_WIDTH/2,_FIELD_HEIGHT /2), wm->field->ourGoal()).length());
+    double RangeofDistancetoBall = fabs(Segment2D(Vector2D(_MIXTEAM_FIELD_WIDTH/2,_MIXTEAM_FIELD_HEIGHT /2),
+                                                  Vector2D(-1.0 * _MIXTEAM_FIELD_WIDTH/2,-1.0 * _MIXTEAM_FIELD_HEIGHT /2)).length());
+    double RangeofDistancetoGoal = fabs(Segment2D(Vector2D(_MIXTEAM_FIELD_WIDTH/2,_MIXTEAM_FIELD_HEIGHT /2),
+                                                  wm->field->ourGoal()).length());
 
     //double RangeofTempDis = 2;
     double angle, distancetoball, distancetogoal,danger1;
@@ -898,8 +832,6 @@ QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayoff(QList<
         output.append(dv);
         draw(QString("HMD danger=%1").arg(danger), oppposdanger[i] + Vector2D(0,0.3), QColor(Qt::red));
         //draw(_poly, QColor(Qt::blue));
-
-
 
         //        draw(QString("mindistance%1").arg(mintempdis), oppposdanger[i] + Vector2D(0,0.5), QColor(Qt::blue));
     }
