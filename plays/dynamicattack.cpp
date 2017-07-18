@@ -222,7 +222,7 @@ void CDynamicAttack::makePlan(int agentSize) {
                     oppRob = wm->opp.active(i)->pos;
 //                    debug(QString("WOW we are dribbling"), D_PARSA);
                     notDribble = false;
-                    currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
+                    currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
                     break;
                 }
             }
@@ -641,6 +641,8 @@ void CDynamicAttack::chooseBestPositons()
     //this choose the points with maximum x that has a good one touch angle
     for(int i = 0; i < agentSize; i++)
     {
+        semiDynamicPosition.append(Vector2D(ballPos.x, -ballPos.y));
+        continue;
         //        debug(QString("region %1").arg(i), D_PARSA);
         int best = -1;
         Vector2D  points  [guardSize];
@@ -1020,12 +1022,15 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
         double M = 100;
         for(int j = 0; j < wm->opp.activeAgentsCount(); j++)
             M = min(M, wm->opp.active(j)->pos.dist(ballPos));
-        if(mahiPlayMaker != NULL)
+        if(mahiPlayMaker != NULL && M < 2)
             points[i] -= (mahiPlayMaker->dir().angleOf(temp[i], mahiPlayMaker->pos(), wm->field->oppGoal()).degree()) / 10 * 2 / M;
+        debug(QString("pass pos %1 %2 point is %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
         M = 100;
         for(int j = 0; j < wm->opp.activeAgentsCount(); j++)
             M = min(M, wm->opp.active(j)->pos.dist(temp[i]));
-        points[i] += M;
+        if(M < 2)
+            points[i] += M;
+        debug(QString("pass pos %1 %2 point is %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
 //        points[i] -= ballPos.dist(temp[i]) / 2;
         M = 100;
         for(int j = 0; j < wm->our.activeAgentsCount(); j++)
@@ -1034,7 +1039,7 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
             points[i] -= 5;
         if(points[i] > points[ans])
             ans = i;
-        //debug(QString("pass pos %1 %2 point is %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
+        debug(QString("pass pos %1 %2 point is %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
     }
     currentPlan.passPos = temp[ans];
     lastPassPosLoc = currentPlan.passPos;
