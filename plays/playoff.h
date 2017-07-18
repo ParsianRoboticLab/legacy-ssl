@@ -264,6 +264,7 @@ struct SExecution {
     int symmetry     =  1;
     int theLastAgent = -1;
     int theLastState = -1;
+    int passCount;
     AgentPoint passer;
     AgentPoint reciver;
 };

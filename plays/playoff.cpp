@@ -839,6 +839,7 @@ bool CPlayOff::isAllTasksDone() {
 }
 
 bool CPlayOff::isTimeOver() {
+
     if (setTimer) {
         tempStart = knowledge->getCurrentTime();
     }
@@ -846,7 +847,7 @@ bool CPlayOff::isTimeOver() {
     if (!Circle2D(lastBallPos, 0.5).contains(wm->ball->pos)) {
         setTimer = false;
         debug(QString("Time That Left: %1").arg(knowledge->getCurrentTime() - tempStart), D_DEBUG);
-        if(knowledge->getCurrentTime() - tempStart > 250) { // 2 Second
+        if(knowledge->getCurrentTime() - tempStart > 200*masterPlan->execution.passCount) { // 2 Second
             setTimer = true;
             return true;
         }
@@ -855,6 +856,9 @@ bool CPlayOff::isTimeOver() {
 }
 
 bool CPlayOff::isBallDirChanged() {
+
+    if (masterPlan->execution.passCount != 1) return false;
+
     // USE PASSER FORM INITIAL LEVEL
     const int& passer = masterPlan->execution.passer.id;
     const int& recive = masterPlan->execution.reciver.id;
@@ -1634,7 +1638,7 @@ bool CPlayOff::isKickDone(CRolePlayOff * _roleAgent) {
 
 bool CPlayOff::isReceiveDone(const CRolePlayOff * _roleAgent) {
     if(Circle2D(_roleAgent->getAgent()->pos(), 0.3).contains(wm->ball->pos)) {
-        if (wm->ball->vel.length() < 0.3)
+        if (wm->ball->vel.length() < 0.5)
             return true;
     }
     return false;
@@ -1749,6 +1753,7 @@ void CPlayOff::analysePass() {
         QList<AgentPair> tPass;
         findThePasserandReciver(masterPlan->execution, tPass);
         havePassInPlan = tPass.size();
+        masterPlan->execution.passCount = tPass.size();
         if (havePassInPlan) {
             masterPlan->execution.passer .id     = tPass.at(0).first.id;
             masterPlan->execution.passer .state  = tPass.at(0).first.state;
