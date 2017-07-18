@@ -533,36 +533,28 @@ void CMixTeamHandler::executeSlaveOffense(int robotId, Vector2D point1, Vector2D
 
 }
 
+
+// CMixTeamCoach Class
+
 CMixTeamCoach::CMixTeamCoach(){
     markRadiusStrict = 1.43;
+
     ShootRatioBlock  = policy()->Mark_ShootRatioBlock() / 100.0;
     PassRatioBlock   = (100  - policy()->Mark_PassRatioBlock()) / 100.0;
+
+    playMakeIntentionTimer.start();
 }
 
-CKnowledge::ballPossesionState CMixTeamCoach::ballPossess(){
-    CKnowledge::ballPossesionState ballPoss;
-    double temp = wm->ball->pos.x + wm->ball->vel.x * 1;
+void CMixTeamCoach::goaliePacket(){
 
-    if(temp > 1.7) {
-        ballPoss = CKnowledge::WEHAVETHEBALL;
-    } else if (temp < 0.5){
-        ballPoss = CKnowledge::WEDONTHAVETHEBALL;
-    } else {
-        ballPoss = lastBallPossess;
-    }
+    CMixTeamCoach::SRobotPlan plan;
+    plan.role = multi_team_comm::RobotPlan::Goalie;
+    plan.id = knowledge->mixGoaleID;
+    plan.location.invalidate();
+    plan.heading = _INVALID_HEADING;
+    plan.shotTarget.invalidate();
 
-    if (wm->field->isInOurPenaltyArea(wm->ball->pos)
-            &&  wm->ball->vel.length() < 0.2) {
-        ballPoss = CKnowledge::SOSOTHEIR;
-    }
-    if (wm->field->isInOppPenaltyArea(wm->ball->pos)
-            && wm->ball->vel.length() < 0.2) {
-        ballPoss = CKnowledge::SOSOOUR;
-    }
-
-    lastBallPossess = ballPoss;
-
-    return ballPoss;
+    robotsPlan.append(plan);
 }
 
 void CMixTeamCoach::decideMarkAndDefenseCount(){
@@ -668,18 +660,17 @@ void CMixTeamCoach::setDefPositions(){
     }
 }
 
-void CMixTeamCoach::DefDynamicAssigning(){
+void CMixTeamCoach::defDynamicAssigning(){
 
     CMixTeamCoach::SRobotPlan plan;
 
-    QQueue<int> ids = wm->our.data->activeAgents;
     double leastDist, dist;
     int selectedId;
 
     if(ids.contains(knowledge->mixGoaleID))
         ids.removeOne(knowledge->mixGoaleID);
 
-    for(int i = 0; i < defenseCount; i++){  // defense assigning
+    for(int i = 0; i < defenseCount; i++){     // defense assigning
         leastDist = 100000;
         selectedId = _INVALID_ID;
         for(int j = 0; j < ids.count(); j++){
@@ -690,6 +681,7 @@ void CMixTeamCoach::DefDynamicAssigning(){
             }
         }
         ids.removeOne(selectedId);
+        defIds.append(selectedId);
 
         plan.role = multi_team_comm::RobotPlan::Defense;
         plan.id = selectedId;
@@ -711,11 +703,57 @@ void CMixTeamCoach::DefDynamicAssigning(){
             }
         }
         ids.removeOne(selectedId);
+        defIds.append(selectedId);
 
         plan.role = multi_team_comm::RobotPlan::Defense;
         plan.id = selectedId;
         plan.location = markPos.at(i).position;
         plan.heading = markPos.at(i).heading;
+        plan.shotTarget.invalidate();
+
+        robotsPlan.append(plan);
+    }
+}
+
+void CMixTeamCoach::choosePlayMake(){
+
+    CMixTeamCoach::SRobotPlan plan;
+    int selectedId;
+    double leastDist;
+
+    leastDist = 100000;
+    selectedId = _INVALID_ID;
+    for(int j = 0; j < ids.count(); j++){
+        dist = wm->our[ids[j]]->pos.dist(wm->ball->pos+wm->ball->vel);
+        if(dist < leastDist){
+            leastDist = dist;
+            selectedId = ids[j];
+        }
+    }
+
+    if(playMakeIntentionTimer.elapsed() > 1000 || wm->ball->vel.length() > 1 || leastDist < 0.13){
+        playMakeID = selectedId;
+        playMakeIntentionTimer.restart();
+    }
+
+    plan.role = multi_team_comm::RobotPlan::Default;
+    plan.id = playMakeID;
+    plan.location = wm->ball->pos+wm->ball->vel;
+    plan.heading = Vector2D::dirTo_deg(defensePos.pos[i], wm->ball->pos)*(3.14/180.0);
+    plan.shotTarget.invalidate();
+
+    robotsPlan.append(plan);
+}
+
+void CMixTeamCoach::nonsenseOffense(){
+
+    CMixTeamCoach::SRobotPlan plan;
+
+    for(int i=0; i < ids.count(); i++){
+        plan.role = multi_team_comm::RobotPlan::Offense;
+        plan.id = ids.at(i);
+        plan.location = wm->field->ourGoal()+Vector2D(0.15*(i+1), 0.6);
+        plan.heading = 0;
         plan.shotTarget.invalidate();
 
         robotsPlan.append(plan);
@@ -765,6 +803,51 @@ void CMixTeamCoach::makeMasterPlanPacket(){
 
 void CMixTeamCoach::testDefense(){
 
+    defIds.clear();
+    robotsPlan.clear();
+
+    goalieID = knowledge->mixGoaleID;
+
+    ids = wm->our.data->activeAgents;
+
+    // goalie
+    goaliePacket();
+
+    // defense
+    decideMarkAndDefenseCount();
+    setDefPositions();
+    defDynamicAssigning();
+
+    // offense
+    nonsenseOffense();
+
+    makeMasterPlanPacket();
+}
+
+CKnowledge::ballPossesionState CMixTeamCoach::ballPossess(){
+    CKnowledge::ballPossesionState ballPoss;
+    double temp = wm->ball->pos.x + wm->ball->vel.x * 1;
+
+    if(temp > 1.7) {
+        ballPoss = CKnowledge::WEHAVETHEBALL;
+    } else if (temp < 0.5){
+        ballPoss = CKnowledge::WEDONTHAVETHEBALL;
+    } else {
+        ballPoss = lastBallPossess;
+    }
+
+    if (wm->field->isInOurPenaltyArea(wm->ball->pos)
+            &&  wm->ball->vel.length() < 0.2) {
+        ballPoss = CKnowledge::SOSOTHEIR;
+    }
+    if (wm->field->isInOppPenaltyArea(wm->ball->pos)
+            && wm->ball->vel.length() < 0.2) {
+        ballPoss = CKnowledge::SOSOOUR;
+    }
+
+    lastBallPossess = ballPoss;
+
+    return ballPoss;
 }
 
 CMixTeamCoach::SPosAndHeading CMixTeamCoach::ShootBlockRatio(double ratio, Vector2D opp){

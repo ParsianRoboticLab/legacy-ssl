@@ -67,11 +67,6 @@ class CMixTeamCoach{
 #define _INVALID_ID      -1
 
 public:
-    CKnowledge::ballPossesionState lastBallPossess;
-    int defenseCount, markCount;
-    int goalieID;
-
-    QList<int> ourAgents;
 
     struct SPosAndHeading{
         Vector2D position;
@@ -98,8 +93,16 @@ public:
         Vector2D shotTarget;
     };
 
+    CKnowledge::ballPossesionState lastBallPossess;
+    int defenseCount, markCount;
+    int goalieID, playMakeID;
+
+    QTime playMakeIntentionTimer;
+    QList<int> ourAgents;
+
     CDefPos defPos;
     kkDefPos defensePos;
+
     QList<SPosAndHeading > markPos;
 
     QList<SDangerousOpp> sortedDangerousOpp;
@@ -108,20 +111,27 @@ public:
     double markRadiusStrict;
     double ShootRatioBlock, PassRatioBlock;
 
+    QQueue<int> ids;
+    QList<int> defIds;
+
     CMixTeamCoach();
-    CKnowledge::ballPossesionState ballPossess();
+    void goaliePacket();
     void decideMarkAndDefenseCount();
-    void setPositions();
-    void DefDynamicAssigning();
+    void setDefPositions();
+    void defDynamicAssigning();
+    void choosePlayMake();
+
+    void nonsenseOffense();
+
     void makeMasterPlanPacket();
 
     void testDefense();
 
+    CKnowledge::ballPossesionState ballPossess();
     CMixTeamCoach::SPosAndHeading ShootBlockRatio(double ratio, Vector2D opp);
     CMixTeamCoach::SPosAndHeading PassBlockRatio(double ratio, Vector2D opp);
 
     QList<CMixTeamCoach::SDangerousOpp > sortdangerpassplayoff(QList<Vector2D> oppposdanger);
-
 
     QList<SRobotPlan> robotsPlan;
 
