@@ -62,8 +62,10 @@ public:
     CAgent* getMahiPlayMaker();
 
 private:
+    double thrsh = 0;
     bool lastPMInitWasDribble;
     Vector2D oppRob;
+    double lastYDrib = 0;
     Vector2D lastPassPosLoc;
     int lastGuards[6];
     int guardSize;
