@@ -73,8 +73,6 @@ for (int i=0;i<packet.detection().robots_##__COLOR__##_size();i++) \
 
 void CVisionClient::parse(SSL_WrapperPacket& packet)
 {
-
-    debug(QString("camID : %1").arg(packet.detection().camera_id()), D_ATOUSA);
     //lastCamera = -1;
     float ourTeamSide=(ourSide==_SIDE_RIGHT)? -1.0f : 1.0f;
     if (packet.has_detection())
