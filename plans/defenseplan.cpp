@@ -2864,7 +2864,7 @@ void DefensePlan::findOppAgentsToMark(){
     }
     for(int i = 0; i < oppAgentsToMark.count(); i++){
         draw(oppAgentsToMark[i]->pos);
-        oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i], 0.5));
+        oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i], policy()->Mark_VelReliability()));
     }
     debug(QString("OppAgenttoMark count %1").arg(oppAgentsToMarkPos.count()), D_HAMED);
 }
