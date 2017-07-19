@@ -15,8 +15,6 @@ class CMixTeamHandler
 public:
     CMixTeamHandler();
 
-    int goalieID;
-    QList<int> ourAgentIDs;
     int numOfAllOurRobots;
     bool isMaster;
 
@@ -34,9 +32,6 @@ public:
     int selectedIDM;//master ID for task3
     Vector2D selectedPosS;//slave pos for task3
     Vector2D selectedPosM;//master pos for task3
-
-    ////////Constructor/////
-    void setOurRobotIDs();
 
     ////////master part/////
 
@@ -61,8 +56,88 @@ public:
     void task3ReadPacket();
     void executeMasterOffense(int, Vector2D, Vector2D, int);
     void executeSlaveOffense(int, Vector2D, Vector2D);
-//    void execute();
-//    CAgent **agents;
+    //    void execute();
+    //    CAgent **agents;
+};
+
+
+class CMixTeamCoach{
+
+#define _INVALID_HEADING 100000
+#define _INVALID_ID      -1
+
+public:
+
+    struct SPosAndHeading{
+        Vector2D position;
+        float heading;
+    };
+
+    struct SDangerousOpp{
+        Vector2D Pos;
+        double danger;
+    };
+
+    enum Role{
+        DefaultRole = 0,
+        GoalieRole  = 1,
+        DefenseRole = 2,
+        OffenseRole = 3
+    };
+
+    struct SRobotPlan{
+        multi_team_comm::RobotPlan::RobotRole role;
+        int id;
+        Vector2D location;
+        float heading;
+        Vector2D shotTarget;
+    };
+
+    CKnowledge::ballPossesionState lastBallPossess;
+    int defenseCount, markCount;
+    int goalieID, playMakeID;
+
+    QTime playMakeIntentionTimer;
+    QList<int> ourAgents;
+
+    CDefPos defPos;
+    kkDefPos defensePos;
+
+    QList<SPosAndHeading > markPos;
+
+    QList<Vector2D> positioningPos;
+
+    QList<SDangerousOpp> sortedDangerousOpp;
+    QList<Vector2D> oppPos;
+
+    double markRadiusStrict;
+    double ShootRatioBlock, PassRatioBlock;
+
+    QQueue<int> ids;
+    QList<int> defIds;
+
+    CMixTeamCoach();
+    void goaliePacket();
+    void decideMarkAndDefenseCount();
+    void setDefPositions();
+    void defDynamicAssigning();
+    void choosePlayMake();
+    void positioning();
+
+    void nonsenseOffense();
+
+    void makeMasterPlanPacket();
+
+    void testDefense();
+
+    CKnowledge::ballPossesionState ballPossess();
+    CMixTeamCoach::SPosAndHeading ShootBlockRatio(double ratio, Vector2D opp);
+    CMixTeamCoach::SPosAndHeading PassBlockRatio(double ratio, Vector2D opp);
+
+    QList<CMixTeamCoach::SDangerousOpp > sortdangerpassplayoff(QList<Vector2D> oppposdanger);
+
+    QList<SRobotPlan> robotsPlan;
+
 };
 
 #endif // MIXTEAMHANDLER_H

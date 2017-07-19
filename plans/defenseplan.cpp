@@ -2812,7 +2812,7 @@ Vector2D DefensePlan::posvel(CRobot* opp, double VelReliabiity){
     tempseg.assign(opp->pos, opp->pos + VelReliabiity * opp->vel);
     draw(tempseg,QColor(Qt::yellow));
     Vector2D penaltyvec;
-    penaltyvec.assign(test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).x,test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).y);
+    penaltyvec.assign(test.getIntersectionWithPenaltyAreaDef(1.37,tempseg, false).x,test.getIntersectionWithPenaltyAreaDef(1.37,tempseg, false).y);
     if(wm->field->isInField(penaltyvec) && penaltyvec.isValid() && tempseg.length() != 0){
         debug(QString("Intersection with penalty area by penaltyvec: %1,%2").arg(penaltyvec.x).arg(penaltyvec.y),D_HAMED);
         return penaltyvec;
@@ -2904,7 +2904,7 @@ QList<Vector2D> DefensePlan::ShootBlockRatio(double ratio, Vector2D opp){
     tempSeg.assign(opp + (wm->field->ourGoal() - opp) * (-10), wm->field->ourGoal());
     Vector2D pos = opp + (wm->field->ourGoal() - opp) * ratio;
     if((wm->field->ourGoal() - pos).length() < markRadiusStrict){
-        tempQlist.append(test.getIntersectionWithPenaltyAreaDef(1.39,tempSeg));
+        tempQlist.append(test.getIntersectionWithPenaltyAreaDef(1.39,tempSeg, false));
         tempQlist.append(opp - wm->field->ourGoal());
         draw(tempSeg, "blue");
     }
@@ -3029,7 +3029,7 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
         pos = wm->ball->pos + (opp - wm->ball->pos) * (1 + 0.15 / distance);
     }
     if((wm->field->ourGoal() - pos).length() < markRadiusStrict){
-        tempQlist.append(test.getIntersectionWithPenaltyAreaDef(2, tempSeg));
+        tempQlist.append(test.getIntersectionWithPenaltyAreaDef(2, tempSeg, false));
         tempQlist.append( wm->ball->pos - opp);
         draw(tempSeg, "red");
         debug(QString("this is in the penalty area, Block pass Mode"), D_HAMED);
