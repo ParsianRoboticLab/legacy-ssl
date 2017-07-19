@@ -861,8 +861,8 @@ void CSoccer::refUpdate()
 
     lastCmdCnt = cmdCnt;
     refCommand = gsp.cmd;
-    qDebug() << "REF: " << referee.stage();
-    qDebug() << "ref: " << refCommand;
+//    qDebug() << "REF: " << referee.stage();
+//    qDebug() << "ref: " << refCommand;
     QFile file("./REF.dat");
     if (file.open(QIODevice::WriteOnly|QIODevice::Truncate)) {
         QTextStream stream( &file );
@@ -1455,6 +1455,7 @@ void CVisionThread::run()
         double pt = -1;
         if (vision->receive(packet))
         {
+            debug(QString("cid : %1").arg(packet.detection().camera_id()), D_ATOUSA);
             pt = CProfiler::getTime();
             frame ++;
             vc->parse(packet);
