@@ -448,15 +448,15 @@ void CSoccer::sendPacketToSimulator(){
         double w3 = agents[i]->v3*gain;
         double w4 = agents[i]->v4*gain;
 
-        command->set_wheelsspeed(false);
-        command->set_wheel1(0);
-        command->set_wheel2(0);
-        command->set_wheel3(0);
-        command->set_wheel4(0);
+        command->set_wheelsspeed(true);
+        command->set_wheel1(w1);
+        command->set_wheel2(w2);
+        command->set_wheel3(w3);
+        command->set_wheel4(w4);
 
         command->set_velangular(agents[i]->vangular*_DEG2RAD);
-        command->set_velnormal(agents[i]->vnormal);
-        command->set_veltangent(agents[i]->vforward);
+        command->set_velnormal(0);
+        command->set_veltangent(0);
         command->set_kickspeedx(agents[i]->kickSpeed);
         if (agents[i]->chip){
             command->set_kickspeedz(agents[i]->kickSpeed);
