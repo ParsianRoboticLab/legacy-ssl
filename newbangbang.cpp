@@ -169,12 +169,16 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     }
     trajectoryPlanner();
     lastPath = agentVel.th();
+
     /////////////////////th pid
 //    debug(QString("vdes : %1").arg(vDes),D_MHMMD);
     _Vx =  desiredVx;//(vDes)*cos(appliedTh);
     _Vy =  desiredVy;//(vDes)*sin(appliedTh);
     _W = angPid->PID_OUT();
+    debug(QString("v1: %1 ").arg(_W),D_MHMMD);
+
     lastVx = _Vx;
     lastVy = _Vy;
+    angPid->pError = angPid->error;
     posPid->pError = posPid->error;
 }
