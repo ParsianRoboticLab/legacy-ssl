@@ -36,8 +36,6 @@ class CollectProfileData : public QObject
 {
     Q_OBJECT
 public:
-    CRolePlayOff *rcvr;
-    CRolePlayOff *pss;
 
     CRolePlayOff * prfl1;
     CRolePlayOff * prfl2;
@@ -70,7 +68,7 @@ public:
     double highPosX1, highPosY1, highPosX2, highPosY2;
     double ChipGtpaX, ChipGtpaY, ChipTrgtX, ChipTrgtY;
 
-    bool isChip;
+    bool isChip, isTest;
 
     QList<double> p1RealSpeedRec , p2RealSpeedRec;
     QList<int> p1KickSpeed , p2KickSpeed;
