@@ -91,6 +91,7 @@ public:
     void executeOurKickOff();
     void executeOurPenalty();
     void executeOurPenaltyShootout();
+    void theirPenaltyPositioning();
     int choosePenaltyStrategy();
     int getPenaltychipSpeed();
     double lastBounce();

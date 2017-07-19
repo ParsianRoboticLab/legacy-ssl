@@ -1911,7 +1911,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     }
 
     /** new plan selector **/
-    //        thePlan = chooseMostSuccecfull(validPlans);
+//            thePlan = chooseMostSuccecfull(validPlans);
     /** new plan selector **/
 
 
@@ -2420,6 +2420,11 @@ void CCoach::decideTheirPenalty(QList<int> &_ourPlayers) {
 }
 
 void CCoach::decideStart(QList<int> &_ourPlayers) {
+    if(wm->gs->penalty_shootout()){
+        selectedPlay=theirPenalty;
+        return;
+    }
+
     selectedPlay = dynamicAttack;
     decidePlayOn(_ourPlayers, lastPlayers);
 }

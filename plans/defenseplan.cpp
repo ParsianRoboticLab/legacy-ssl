@@ -1589,18 +1589,6 @@ void DefensePlan::penaltyShootOutMode(){
         lastBallPos.removeFirst();
     }
 
-    //    int sID;
-    //    for(int i=0;i<knowledge->getActiveAgents().count();i++){
-    //        if(knowledge->getActiveAgents().at(i)->id()!=goalKeeperAgent->id()){
-    //            sID=i;
-    //        }
-    //    }
-    //    assignSkill(knowledge->getActiveAgents().at(sID) , striker_Robot);
-    //    debug(QString("shp:%1").arg(knowledge->getActiveAgents().at(sID)->id()),D_NADIA);
-    //    striker_Robot->setSlowMode(false);
-    //    striker_Robot->setADiveMode(true);
-    //    striker_Robot->init(wm->field->oppCornerL() , wm->field->ourGoal());
-    //    striker_Robot->execute();
 
     switch(penaltyShootoutMode){
     case beforeTouch:
@@ -1645,6 +1633,7 @@ void DefensePlan::penaltyShootOutMode(){
         draw(agentTarget, 0, QColor(Qt::darkBlue));
         break;
     }
+
 
 
 
