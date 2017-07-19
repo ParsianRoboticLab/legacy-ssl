@@ -16,6 +16,8 @@ void CMainApplication::MixTeamChallenge()
     //if we are master, attribute is true and if we are slave, attribute is true
     slv->slave(true);
 
+    static CMixTeamCoach* mixCoach = new CMixTeamCoach();
+    mixCoach->testDefense();
 
 //    slv->execute();
 

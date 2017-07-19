@@ -1073,6 +1073,7 @@ void CMixTeamCoach::makeMasterPlanPacket(){
             posLoc[i] = poses[i]->mutable_loc();
             posLoc[i]->set_x(robotsPlan.at(i).location.x*100);
             posLoc[i]->set_y(robotsPlan.at(i).location.y*100);
+            draw(Circle2D(robotsPlan.at(i).location, 0.2), QColor(Qt::magenta));
         }
 
         if(robotsPlan.at(i).shotTarget.isValid()){                  // shot target
