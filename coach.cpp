@@ -1470,18 +1470,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
         debug(QString("playmake : %1").arg(playmakeId),D_MHMMD);
     }
 
-    Circle2D ourDefenseArea(wm->field->ourGoal(), 1.6);
-
-    if (knowledge->variables["clearing"] == "true"
-        || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length() < 1)) {
-        if(playmakeId != -1) {
-            ourPlayers.append(playmakeId);
-            dynamicAttack->setPlayMake(-1);
-        }
-        dynamicAttack->setDefenseClear(true);
-    } else {
-        dynamicAttack->setDefenseClear(false);
-    }
+    dynamicAttack->setDefenseClear(false);
 
     if(wm->our[playmakeId] != NULL)
     {

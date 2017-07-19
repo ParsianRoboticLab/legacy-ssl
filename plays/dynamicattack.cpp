@@ -161,21 +161,8 @@ void CDynamicAttack::makePlan(int agentSize) {
     if(critical == false)
         lastPMInitWasDribble = false;
 
-    //if defense is clearing
-    if (isDefenseClearing) {
-        currentPlan.mode = DynamicEnums::DefenseClear;
-        for (size_t i = 0; i < agentSize; i++) {
-//            if()
-//                currentPlan.positionAgents[i].region = DynamicEnums::CounterAttack;
-//            else
-            currentPlan.positionAgents[i].region = DynamicEnums::Near;
-            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
-        }
-
-    }
-    // if Defense isn't clearing and
-    // we Don't have the ball
-    else if (wm->ball->pos.x < 0) {
+    // we Don't have the ball -- counter-attack, blocking, move forward
+    if (wm->ball->pos.x < 0) {
         currentPlan.mode = DynamicEnums::NotWeHaveBall;
         currentPlan.playmake.init(DynamicEnums::Chip, DynamicEnums::Goal);
 
@@ -184,7 +171,6 @@ void CDynamicAttack::makePlan(int agentSize) {
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
         }
     }
-    // if Defense isn't clearing and
     // we have ball and
     // shot prob is more than 50%
     else if (directShot) {
@@ -195,7 +181,6 @@ void CDynamicAttack::makePlan(int agentSize) {
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
         }
     }
-    // if Defense isn't clearing and
     // we have ball and
     // shot prob isn't more than 50% and
     // there is a critical situation
@@ -257,7 +242,6 @@ void CDynamicAttack::makePlan(int agentSize) {
         currentPlan.mode = DynamicEnums::NoPositionAgent;
         currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
     }
-    // if Defense isn't clearing and
     // we have ball and
     // shot prob isn't more than 50% and
     // there isn't a critical situation and
