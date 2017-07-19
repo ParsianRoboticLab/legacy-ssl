@@ -1455,7 +1455,6 @@ void CVisionThread::run()
         double pt = -1;
         if (vision->receive(packet))
         {
-            debug(QString("cid : %1").arg(packet.detection().camera_id()), D_ATOUSA);
             pt = CProfiler::getTime();
             frame ++;
             vc->parse(packet);

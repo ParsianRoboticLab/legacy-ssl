@@ -2,12 +2,14 @@
 #define MIXTEAMHANDLER_H
 
 #include <mainapplication.h>
+#include <base.h>
 #include "proto/multi_team_communication.pb.h"
 #include "mixteamsender.h"
 #include "mixteamreader.h"
 
 #define MAX_OUR_ROBOTS_IN_FIELD 6//dont change
 #define MAX_ROBOTS_IN_FIELD 11//dont change
+#define PI 3.141592
 
 
 class CMixTeamHandler
@@ -56,8 +58,28 @@ public:
     void task3ReadPacket();
     void executeMasterOffense(int, Vector2D, Vector2D, int);
     void executeSlaveOffense(int, Vector2D, Vector2D);
-    //    void execute();
-    //    CAgent **agents;
+//    void execute();
+//    CAgent **agents;
+
+    ///////mixed team game//////
+
+    CRolePlayOff *robots[6];
+//    CSkillGotoPointAvoid *robots[6];
+
+    void initialSkills();
+    void mixReadPacket();
+
+    void executePlan(multi_team_comm::RobotPlan plan, int validation);
+    int isPlanValid(multi_team_comm::RobotPlan plan);
+    bool isPosValid(multi_team_comm::RobotPlan plan);
+    bool isPosLocValid(multi_team_comm::Location loc);
+    bool isShotTargetValid(multi_team_comm::RobotPlan plan);
+    bool isRoleValid(multi_team_comm::RobotPlan plan);
+
+    float refineHeading(float heading);
+    void gotopointExecute(multi_team_comm::RobotPlan plan);
+    void kickExecute(multi_team_comm::RobotPlan plan);
+    void receiveExecute(multi_team_comm::RobotPlan plan);
 };
 
 
