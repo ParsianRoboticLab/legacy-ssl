@@ -393,6 +393,16 @@ private:
     CRolePlayOff *roleAgent[6];
     CRolePlayOff *tempAgent;
     CRolePlayOff *newRoleAgent[6];
+    enum BlockerDeterminer{
+        penaltyAreaBlock=1,
+        centralRegionBlock=2,
+        RoundRegionBlock=4
+    };
+
+    BlockerDeterminer blockerState;
+    QList<int> blockersPenaltyArea;
+    QList<int> blockersCentralRegion;
+    QList<int> blockersRoundRegion;
 
     Vector2D kickOffPos[6];
 
