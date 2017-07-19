@@ -585,36 +585,79 @@ bool CDynamicAttack::isPlayMakeChanged() {
 
 int CDynamicAttack::appropriatePassSpeed() {
 
-    double tempDistance;
-
+    double tempDistance = 0;
+    double speed = 0;
     if(mahiPlayMaker != NULL) {
         tempDistance = mahiPlayMaker->pos().dist(currentPlan.passPos);
-        if(tempDistance < 2) {
-            return policy()->DynamicPlay_LowSpeedPass();
+
+        if (true) {// dynamic pass Speed
+            if (tempDistance < 2) {
+                speed = knowledge->getProfile(mahiPlayMaker->id(), tempDistance) + policy()->DynamicPlay_LowSpeedPass();
+
+            } else if(tempDistance > 4) {
+                speed = knowledge->getProfile(mahiPlayMaker->id(), tempDistance) + policy()->DynamicPlay_HighSpeedPass();
+
+            } else {
+                speed = knowledge->getProfile(mahiPlayMaker->id(), tempDistance) + policy()->DynamicPlay_MediumSpeedPass();
+
+            }
+
+        } else {
+            if (tempDistance < 2) {
+                speed = policy()->DynamicPlay_LowSpeedPass();
+
+            } else if(tempDistance > 4) {
+                speed = policy()->DynamicPlay_HighSpeedPass();
+
+            } else {
+                speed = policy()->DynamicPlay_MediumSpeedPass();
+
+            }
+
         }
-        else if(tempDistance > 4) {
-            return policy()->DynamicPlay_HighSpeedPass();
-        }
+    } else {
+        speed = policy()->DynamicPlay_MediumSpeedPass();
     }
-    return policy()->DynamicPlay_MediumSpeedPass();
-    policy()->KKPlayOn_KKChipSpeed();
+    return speed;
 }
 
 
 int CDynamicAttack::appropriateChipSpeed() {
 
-    double tempDistance;
-
+    double tempDistance = 0;
+    double speed = 0;
     if(mahiPlayMaker != NULL) {
         tempDistance = mahiPlayMaker->pos().dist(currentPlan.passPos);
-        if(tempDistance < 2) {
-            return policy()->DynamicPlay_LowSpeedChip();
+
+        if (true) {// dynamic chip Speed
+            if (tempDistance < 2) {
+                speed = knowledge->getProfile(mahiPlayMaker->id(), tempDistance, false) + policy()->DynamicPlay_LowSpeedChip();
+
+            } else if(tempDistance > 4) {
+                speed = knowledge->getProfile(mahiPlayMaker->id(), tempDistance, false) + policy()->DynamicPlay_HighSpeedChip();
+
+            } else {
+                speed = knowledge->getProfile(mahiPlayMaker->id(), tempDistance, false) + policy()->DynamicPlay_MediumSpeedChip();
+
+            }
+
+        } else {
+            if (tempDistance < 2) {
+                speed = policy()->DynamicPlay_LowSpeedChip();
+
+            } else if(tempDistance > 4) {
+                speed = policy()->DynamicPlay_HighSpeedChip();
+
+            } else {
+                speed = policy()->DynamicPlay_MediumSpeedChip();
+
+            }
+
         }
-        else if(tempDistance > 4) {
-            return policy()->DynamicPlay_HighSpeedChip();
-        }
+    } else {
+        speed = policy()->DynamicPlay_MediumSpeedPass();
     }
-    return policy()->DynamicPlay_MediumSpeedChip();
+    return speed;
 }
 
 void CDynamicAttack::chooseBestPositons()

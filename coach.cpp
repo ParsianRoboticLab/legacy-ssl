@@ -2551,14 +2551,17 @@ void CCoach::checkSensorShootFault() {
             knowledge->getAgent(i)->changeIsNeeded = true;
         }
     }
-
+    QString s;
     for (size_t i = 0; i < ourPlayers.size(); i++) {
+        s += QString(" %1 ").arg(ourPlayers.at(i));
         if (knowledge->getAgent(ourPlayers.at(i))->changeIsNeeded) {
             debug(QString("[ROBOT FAULT] %1").arg(ourPlayers.at(i)), D_ERROR);
 
         }
 
     }
+//    debug(s, D_MAHI);
+
 
 }
 

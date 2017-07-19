@@ -14,6 +14,7 @@ CRolePlayOff::CRolePlayOff() {
     timer.start();
     agentID = -1;
     lookForward = true;
+    spin=0;
 }
 
 CRolePlayOff::~CRolePlayOff() {
@@ -44,6 +45,7 @@ void CRolePlayOff::reset()
     lookForward = true;
     ballIsNear = false;
     noAvoid = false;
+    spin=0;
 }
 
 void CRolePlayOff::update() {
@@ -78,6 +80,7 @@ void CRolePlayOff::update() {
         kickSkill->setTolerance(0.5);
         kickSkill->setPassProfiler(false);
         kickSkill->setKickWithCenterOfDribbler(false);
+        kickSkill->setSpin(spin);
 
         if(!doPass && !chip && lookForward) {
             kickSkill->setTarget(Vector2D(1000, 0));
