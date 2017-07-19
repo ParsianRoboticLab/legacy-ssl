@@ -138,6 +138,8 @@ public:
     QQueue<int> ids;
     QList<int> defIds;
 
+    QList<SRobotPlan> robotsPlan;
+
     CMixTeamCoach();
     void goaliePacket();
     void decideMarkAndDefenseCount();
@@ -158,7 +160,10 @@ public:
 
     QList<CMixTeamCoach::SDangerousOpp > sortdangerpassplayoff(QList<Vector2D> oppposdanger);
 
-    QList<SRobotPlan> robotsPlan;
+    bool isInTheIndirectAreaShoot(Vector2D opp);
+    bool isInTheIndirectAreaPass(Vector2D opp);
+
+    CMixTeamCoach::SPosAndHeading indirectAvoidPassAndShoot(Vector2D opp, bool isShoot);
 
 };
 

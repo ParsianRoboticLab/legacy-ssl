@@ -13,7 +13,7 @@ CMixTeamHandler::CMixTeamHandler()
 
     for(int i = 0 ; i < 6 ; i++ ){
         robots[i] = new CRolePlayOff();
-//        robots[i] = new CSkillGotoPointAvoid(NULL);
+        //        robots[i] = new CSkillGotoPointAvoid(NULL);
     }
 }
 
@@ -91,12 +91,12 @@ void CMixTeamHandler::initialMakePacket()
         if( knowledge->getActiveAgents().at(j)->id() != knowledge->mixGoaleID ){
             plans[i] = packet->add_plans();
             plans[i]->set_robot_id(knowledge->getActiveAgents().at(j)->id());
-//            plans[i]->set_role(multi_team_comm::RobotPlan::Defense);//not important here
+            //            plans[i]->set_role(multi_team_comm::RobotPlan::Defense);//not important here
             poses[i] = plans[i]->mutable_nav_target();
             poses[i]->set_heading(1.57);
-//            planLoc[i] = plans[i]->mutable_shot_target();
-//            planLoc[i]->set_x(allPositions[i].x * 100);
-//            planLoc[i]->set_y(allPositions[i].y * 100);
+            //            planLoc[i] = plans[i]->mutable_shot_target();
+            //            planLoc[i]->set_x(allPositions[i].x * 100);
+            //            planLoc[i]->set_y(allPositions[i].y * 100);
 
             posLoc[i] = poses[i]->mutable_loc();
             posLoc[i]->set_x(allPositions[i].x * 100);
@@ -105,8 +105,8 @@ void CMixTeamHandler::initialMakePacket()
         }
     }
 
-//    debug(QString("yes: plan[0].x : %1").arg(plans[0]->has_nav_target()), D_ATOUSA);
-//    debug(QString("no: plan[0].x : %1, plan[0].y : %2").arg(plans[0]->shot_target().x()).arg(plans[0]->shot_target().y()), D_ATOUSA);
+    //    debug(QString("yes: plan[0].x : %1").arg(plans[0]->has_nav_target()), D_ATOUSA);
+    //    debug(QString("no: plan[0].x : %1, plan[0].y : %2").arg(plans[0]->shot_target().x()).arg(plans[0]->shot_target().y()), D_ATOUSA);
 
     int k;
     for(k = 0 ; i < robotsInField ; k++){
@@ -119,9 +119,9 @@ void CMixTeamHandler::initialMakePacket()
         plans[robotsInField-1]->set_robot_id(knowledge->mixGoaleID);
         plans[robotsInField-1]->set_role(multi_team_comm::RobotPlan::Offense);
         poses[robotsInField-1] = plans[robotsInField-1]->mutable_nav_target();
-//        planLoc[i] = plans[i]->mutable_shot_target();
-//        planLoc[i]->set_x(wm->field->oppGoal().x*100);
-//        planLoc[i]->set_y(wm->field->oppGoal().y*100);
+        //        planLoc[i] = plans[i]->mutable_shot_target();
+        //        planLoc[i]->set_x(wm->field->oppGoal().x*100);
+        //        planLoc[i]->set_y(wm->field->oppGoal().y*100);
         posLoc[robotsInField-1] = poses[robotsInField-1]->mutable_loc();
         posLoc[robotsInField-1]->set_x((wm->field->ourGoal().x + 0.12)*100);
         posLoc[robotsInField-1]->set_y(wm->field->ourGoal().y * 100);
@@ -460,7 +460,7 @@ void CMixTeamHandler::initialReadPacket()
             multi_team_comm::RobotPlan ptemp = knowledge->kPlans->plans(i);
             if(knowledge->ourAgentIDsMixTeam.contains(ptemp.robot_id())){
                 ourRols[counter]->setAgent(knowledge->getAgent(ptemp.robot_id()));
-//                draw(Circle2D(Vector2D((double)ptemp.nav_target().loc().x()/100,(double)ptemp.nav_target().loc().y()/100),0.1), "red");
+                //                draw(Circle2D(Vector2D((double)ptemp.nav_target().loc().x()/100,(double)ptemp.nav_target().loc().y()/100),0.1), "red");
                 Vector2D targetDir;
                 if(ptemp.has_nav_target() && ptemp.nav_target().has_heading() && ptemp.nav_target().heading() < 500 && ptemp.nav_target().heading() > -500){
                     float rHeading = refineHeading(ptemp.nav_target().heading());
@@ -498,11 +498,11 @@ void CMixTeamHandler::task3ReadPacket()
             if(knowledge->ourAgentIDsMixTeam.contains(ptemp.robot_id())){
                 if(ptemp.role() == multi_team_comm::RobotPlan::Offense){
                     if(isMaster){
-//                        debug(QString("kicker = %1").arg(ptemp.robot_id()), D_ATOUSA);
+                        //                        debug(QString("kicker = %1").arg(ptemp.robot_id()), D_ATOUSA);
                         executeMasterOffense(ptemp.robot_id(), Vector2D((double)ptemp.nav_target().loc().x()/100, (double)ptemp.nav_target().loc().y()/100), Vector2D((double)ptemp.shot_target().x()/100, (double)ptemp.shot_target().y()/100), slaveID);
                     }
                     else{
-//                        debug(QString("onetoucher = %1").arg(ptemp.robot_id()), D_ATOUSA);
+                        //                        debug(QString("onetoucher = %1").arg(ptemp.robot_id()), D_ATOUSA);
                         executeSlaveOffense(ptemp.robot_id(), Vector2D((double)ptemp.nav_target().loc().x()/100, (double)ptemp.nav_target().loc().y()/100), Vector2D((double)ptemp.shot_target().x()/100, (double)ptemp.shot_target().y()/100));
                     }
                 }
@@ -518,7 +518,7 @@ void CMixTeamHandler::task3ReadPacket()
                     Vector2D target = Vector2D((double)ptemp.nav_target().loc().x()/100,(double)ptemp.nav_target().loc().y()/100);
                     draw(Circle2D(targetDir + target , 0.05), "black");
                     ourRols[counter]->init(target , target + targetDir);
-    //                draw(Circle2D(Vector2D((double)ptemp.nav_target().loc().x()/100,(double)ptemp.nav_target().loc().y()/100),0.1), "red");
+                    //                draw(Circle2D(Vector2D((double)ptemp.nav_target().loc().x()/100,(double)ptemp.nav_target().loc().y()/100),0.1), "red");
                     counter++;
                 }
             }
@@ -548,9 +548,9 @@ void CMixTeamHandler::executeMasterOffense(int robotId, Vector2D point1, Vector2
     }
     else{
         if(Circle2D(point2, 0.3).contains(knowledge->getAgent(slaveID)->pos())){//receive ID ro chi kar konam?
-                debug(QString("kicker id is %1").arg(c->id()), D_ATOUSA);
-                kicker->setDontKick(false);
-                kicker->execute();
+            debug(QString("kicker id is %1").arg(c->id()), D_ATOUSA);
+            kicker->setDontKick(false);
+            kicker->execute();
         }
         else{
             gpa->execute();//?
@@ -650,7 +650,7 @@ void CMixTeamHandler::gotopointExecute(multi_team_comm::RobotPlan plan)
 
     robots[index]->setTargetDir(targetDir + target);
     draw(Circle2D(targetDir + target , 0.05), "black");
-        qDebug() << "res   x : " << (targetDir + target).x << "   y : " << (targetDir + target).y;
+    qDebug() << "res   x : " << (targetDir + target).x << "   y : " << (targetDir + target).y;
     robots[index]->setTarget(target);
 
     robots[index]->execute();
@@ -676,7 +676,7 @@ void CMixTeamHandler::receiveExecute(multi_team_comm::RobotPlan plan)
     robots[index]->setAgent(knowledge->getAgent(plan.robot_id()));
     robots[index]->setSelectedSkill(roleSkill::ReceivePass);
     robots[index]->setTarget(wm->ball->pos + wm->ball->vel);
-//    draw(Circle2D(wm->ball->pos + wm->ball->vel, 0.1), "cyan");
+    //    draw(Circle2D(wm->ball->pos + wm->ball->vel, 0.1), "cyan");
     robots[index]->setAvoidPenaltyArea(true);
     robots[index]->setReceiveRadius(0.4);
     robots[index]->execute();
@@ -860,13 +860,82 @@ void CMixTeamCoach::setDefPositions(){
     // mark
     sortedDangerousOpp = sortdangerpassplayoff(oppPos);
     markPos.clear();
-    for(int i=0; i < min(markCount, sortedDangerousOpp.size()); i++){
-        if(policy()->Mark_PlayOffManToMan()) {
-            markPos.append(PassBlockRatio(PassRatioBlock, sortedDangerousOpp.at(i).Pos));
-        } else {
-            markPos.append(ShootBlockRatio(ShootRatioBlock, sortedDangerousOpp.at(i).Pos));
+
+    if(markCount <= sortedDangerousOpp.size())
+    {
+
+        for(int i=0; i < markCount; i++){
+            if(policy()->Mark_PlayOffManToMan()) {
+                if(!isInTheIndirectAreaPass(sortedDangerousOpp.at(i).Pos)){
+                markPos.append(PassBlockRatio(PassRatioBlock, sortedDangerousOpp.at(i).Pos));
+                } else {
+                    markPos.append(indirectAvoidPassAndShoot(sortedDangerousOpp.at(i+markCount).Pos, false));
+                }
+            }
+            else
+            {
+                if(!isInTheIndirectAreaShoot(sortedDangerousOpp.at(i).Pos)){
+                    markPos.append(ShootBlockRatio(ShootRatioBlock, sortedDangerousOpp.at(i).Pos));
+                }
+                else{
+                    markPos.append(indirectAvoidPassAndShoot(sortedDangerousOpp.at(i+markCount).Pos, true));
+                }
+            }
         }
+
     }
+    else
+    {
+
+        for(int i=0; i < sortedDangerousOpp.size(); i++){
+            if(policy()->Mark_PlayOffManToMan()){
+                if(!isInTheIndirectAreaShoot(sortedDangerousOpp.at(i).Pos)){
+                    markPos.append(ShootBlockRatio(ShootRatioBlock, sortedDangerousOpp.at(i).Pos));
+                } else {
+                    markPos.append(indirectAvoidPassAndShoot(sortedDangerousOpp.at(i).Pos, true));
+                }
+            }
+            else
+            {
+                if(!isInTheIndirectAreaPass(sortedDangerousOpp.at(i).Pos)){
+                    markPos.append(PassBlockRatio(PassRatioBlock, sortedDangerousOpp.at(i).Pos));
+                } else {
+                    markPos.append(indirectAvoidPassAndShoot(sortedDangerousOpp.at(i).Pos, false));
+                }
+            }
+        }
+
+        for(int i=0; i < min(sortedDangerousOpp.size(), markCount - sortedDangerousOpp.size()); i++){
+            if(!policy()->Mark_PlayOffManToMan()){
+                if(!isInTheIndirectAreaShoot(sortedDangerousOpp.at(i).Pos)){
+                    markPos.append(ShootBlockRatio(ShootRatioBlock, sortedDangerousOpp.at(i).Pos));
+                } else {
+                    markPos.append(indirectAvoidPassAndShoot(sortedDangerousOpp.at(i).Pos, true));
+                }
+            }
+            else
+            {
+                if(!isInTheIndirectAreaPass(sortedDangerousOpp.at(i).Pos)){
+                    markPos.append(PassBlockRatio(PassRatioBlock, sortedDangerousOpp.at(i).Pos));
+                } else {
+                    markPos.append(indirectAvoidPassAndShoot(sortedDangerousOpp.at(i).Pos, false));
+                }
+            }
+        }
+
+        if(markCount > markPos.count()){
+            CMixTeamCoach::SPosAndHeading temp;
+            temp.heading = 0;
+            for(int i=markPos.count(); i<markCount; i++){
+                temp.position = Vector2D(0,  (i - markPos.count()) *  4.5/ 6  * pow(-1, (i - markPos.count())) );
+                if(markPos.count() < markCount){
+                    markPos.append(temp);
+                }
+            }
+        }
+
+    }
+
 }
 
 void CMixTeamCoach::defDynamicAssigning(){
@@ -1231,4 +1300,72 @@ QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayoff(QList<
 
     return output;
 
+}
+
+bool CMixTeamCoach::isInTheIndirectAreaShoot(Vector2D opp){
+    //// This function checks the point that is resulted from block shot plan,
+    //// is in the ball circle or not.
+
+    Circle2D indirectAvoidCircle(wm->ball->pos, 0.6);
+    if(indirectAvoidCircle.contains(ShootBlockRatio(ShootRatioBlock, opp).position)){
+        return true;
+    } else{
+        return false;
+    }
+}
+
+
+bool CMixTeamCoach::isInTheIndirectAreaPass(Vector2D opp){
+    //// This function checks the point that is resulted from block pass plan,
+    //// is in the ball circle or not.
+
+    double indirectAvoidRadius = 0.5 + 0.1;
+    Circle2D indirectAvoidCircle(wm->ball->pos, indirectAvoidRadius);
+    if (indirectAvoidCircle.contains(PassBlockRatio(PassRatioBlock, opp).position)){
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+CMixTeamCoach::SPosAndHeading CMixTeamCoach::indirectAvoidPassAndShoot(Vector2D opp, bool isShoot){
+    //// If a point(that is resulted from block pass plan) is in the ball circle
+    //// , this function produces a suitable point instead of it.The point is
+    //// intersection of ball circle && pass path.
+
+    Segment2D tempseg;
+    double indirectAvoidRadius = 0.5 + .1;
+    Circle2D indirectAvoidCircle(wm->ball->pos,indirectAvoidRadius);
+
+    Vector2D sol1, sol2, sol;
+
+    if(isShoot){
+        tempseg.assign(wm->ball->pos, opp + 10 * (opp - wm->ball->pos));
+    } else {
+        tempseg.assign(opp, wm->field->ourGoal());
+    }
+
+    indirectAvoidCircle.intersection(tempseg, &sol1, &sol2);
+
+    if(isShoot){
+        if(sol1.valid()){
+            sol = sol1;
+        }
+        else if(sol2.valid()){
+            sol = sol2;
+        }
+    } else {
+        if((wm->field->ourGoal() - sol1).length() > (wm->field->ourGoal() - sol2).length()){
+            sol = sol2;
+        } else {
+            sol = sol1;
+        }
+    }
+
+    CMixTeamCoach::SPosAndHeading res;
+    res.position = sol;
+    res.heading  = Vector2D::dirTo_deg(opp, wm->ball->pos)*(3.14/180);;
+
+    return res;
 }
