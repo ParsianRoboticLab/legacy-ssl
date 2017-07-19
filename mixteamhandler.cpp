@@ -10,6 +10,11 @@ CMixTeamHandler::CMixTeamHandler()
     kicker = new CSkillKick(NULL);
     oneToucher = new CSkillKickOneTouch(NULL);
     gpa = new CSkillGotoPointAvoid(NULL);
+
+    for(int i = 0 ; i < 6 ; i++ ){
+        robots[i] = new CRolePlayOff();
+//        robots[i] = new CSkillGotoPointAvoid(NULL);
+    }
 }
 
 void CMixTeamHandler::setOurRobotIDs()
@@ -114,16 +119,21 @@ void CMixTeamHandler::initialMakePacket()
         if( knowledge->getActiveAgents().at(j)->id() != knowledge->mixGoaleID ){
             plans[i] = packet->add_plans();
             plans[i]->set_robot_id(knowledge->getActiveAgents().at(j)->id());
-    //        plans[i]->set_role(multi_team_comm::RobotPlan::Defense);//not important here
+//            plans[i]->set_role(multi_team_comm::RobotPlan::Defense);//not important here
             poses[i] = plans[i]->mutable_nav_target();
-    //        planLoc[i] = plans[i]->mutable_shot_target();
-    //        planLoc[i] = allPositions[i];
+            poses[i]->set_heading(1.57);
+//            planLoc[i] = plans[i]->mutable_shot_target();
+//            planLoc[i]->set_x(allPositions[i].x * 100);
+//            planLoc[i]->set_y(allPositions[i].y * 100);
             posLoc[i] = poses[i]->mutable_loc();
             posLoc[i]->set_x(allPositions[i].x * 100);
             posLoc[i]->set_y(allPositions[i].y * 100);
             i++;
         }
     }
+
+//    debug(QString("yes: plan[0].x : %1").arg(plans[0]->has_nav_target()), D_ATOUSA);
+//    debug(QString("no: plan[0].x : %1, plan[0].y : %2").arg(plans[0]->shot_target().x()).arg(plans[0]->shot_target().y()), D_ATOUSA);
 
     int k;
     for(k = 0 ; i < robotsInField ; k++){
@@ -134,10 +144,11 @@ void CMixTeamHandler::initialMakePacket()
         //for goalie
         plans[robotsInField-1] = packet->add_plans();
         plans[robotsInField-1]->set_robot_id(knowledge->mixGoaleID);
-        plans[robotsInField-1]->set_role(multi_team_comm::RobotPlan::Goalie);
+        plans[robotsInField-1]->set_role(multi_team_comm::RobotPlan::Offense);
         poses[robotsInField-1] = plans[robotsInField-1]->mutable_nav_target();
-    //        planLoc[i] = plans[i]->mutable_shot_target();
-    //        planLoc[i] = allPositions[i];
+//        planLoc[i] = plans[i]->mutable_shot_target();
+//        planLoc[i]->set_x(wm->field->oppGoal().x*100);
+//        planLoc[i]->set_y(wm->field->oppGoal().y*100);
         posLoc[robotsInField-1] = poses[robotsInField-1]->mutable_loc();
         posLoc[robotsInField-1]->set_x((wm->field->ourGoal().x + 0.12)*100);
         posLoc[robotsInField-1]->set_y(wm->field->ourGoal().y * 100);
@@ -442,24 +453,31 @@ void CMixTeamHandler::task3MakePacket()
 ///////////////////slave/////////////////////
 void CMixTeamHandler::slave(bool isM)
 {
-    isMaster = isM;
-    if(knowledge->getGameState() == CKnowledge::Stop){
-        debug("initial : stop", D_ATOUSA);
-        initialReadPacket();
+    if(false){//initial
+        isMaster = isM;
+        if(knowledge->getGameState() == CKnowledge::Stop){
+            debug("initial : stop", D_ATOUSA);
+            initialReadPacket();
+        }
+        else if(knowledge->getGameState() == CKnowledge::Start){ //force start
+            debug("task1 : forceStart", D_ATOUSA);
+            initialReadPacket();
+        }
+        else if(knowledge->getGameState() == CKnowledge::TheirIndirectKick){
+            debug("task2 : theirIndirect", D_ATOUSA);
+            initialReadPacket();
+        }
+        else if(knowledge->getGameState() == CKnowledge::OurIndirectKick){
+            debug("task3 : ourIndirect", D_ATOUSA);
+            task3ReadPacket();
+        }
     }
-    else if(knowledge->getGameState() == CKnowledge::Start){ //force start
-        debug("task1 : forceStart", D_ATOUSA);
-        initialReadPacket();
+    else {
+        mixReadPacket();
     }
-    else if(knowledge->getGameState() == CKnowledge::TheirIndirectKick){
-        debug("task2 : theirIndirect", D_ATOUSA);
-        initialReadPacket();
-    }
-    else if(knowledge->getGameState() == CKnowledge::OurIndirectKick){
-        debug("task3 : ourIndirect", D_ATOUSA);
-        task3ReadPacket();
-    }
+
 }
+
 
 void CMixTeamHandler::initialReadPacket()
 {
@@ -469,9 +487,17 @@ void CMixTeamHandler::initialReadPacket()
             multi_team_comm::RobotPlan ptemp = knowledge->kPlans->plans(i);
             if(ourAgentIDs.contains(ptemp.robot_id())){
                 ourRols[counter]->setAgent(knowledge->getAgent(ptemp.robot_id()));
-                ourRols[counter]->init(Vector2D((double)ptemp.nav_target().loc().x()/100,(double)ptemp.nav_target().loc().y()/100),Vector2D(0,0));
 //                draw(Circle2D(Vector2D((double)ptemp.nav_target().loc().x()/100,(double)ptemp.nav_target().loc().y()/100),0.1), "red");
-
+                Vector2D targetDir;
+                if(ptemp.has_nav_target() && ptemp.nav_target().has_heading() && ptemp.nav_target().heading() < 500 && ptemp.nav_target().heading() > -500){
+                    float rHeading = refineHeading(ptemp.nav_target().heading());
+                    targetDir = targetDir.setPolar(1, AngleDeg(rHeading*_RAD2DEG));
+                }
+                else
+                    targetDir = Vector2D(1,0);
+                Vector2D target = Vector2D((double)ptemp.nav_target().loc().x()/100,(double)ptemp.nav_target().loc().y()/100);
+                draw(Circle2D(targetDir + target , 0.05), "black");
+                ourRols[counter]->init(target, target+targetDir);
                 counter++;
             }
         }
@@ -509,7 +535,16 @@ void CMixTeamHandler::task3ReadPacket()
                 }
                 else{
                     ourRols[counter]->setAgent(knowledge->getAgent(ptemp.robot_id()));
-                    ourRols[counter]->init(Vector2D((double)ptemp.nav_target().loc().x()/100,(double)ptemp.nav_target().loc().y()/100),Vector2D(0,0));
+                    Vector2D targetDir;
+                    if(ptemp.has_nav_target() && ptemp.nav_target().has_heading() && ptemp.nav_target().heading() < 500 && ptemp.nav_target().heading() > -500){
+                        float rHeading = refineHeading(ptemp.nav_target().heading());
+                        targetDir = targetDir.setPolar(1, AngleDeg(rHeading*_RAD2DEG));
+                    }
+                    else
+                        targetDir = Vector2D(1,0);
+                    Vector2D target = Vector2D((double)ptemp.nav_target().loc().x()/100,(double)ptemp.nav_target().loc().y()/100);
+                    draw(Circle2D(targetDir + target , 0.05), "black");
+                    ourRols[counter]->init(target , target + targetDir);
     //                draw(Circle2D(Vector2D((double)ptemp.nav_target().loc().x()/100,(double)ptemp.nav_target().loc().y()/100),0.1), "red");
                     counter++;
                 }
@@ -530,7 +565,7 @@ void CMixTeamHandler::executeMasterOffense(int robotId, Vector2D point1, Vector2
     kicker->setKickSpeed(4);
 
     gpa->setAgent(knowledge->getAgent(robotId));
-    gpa->init(point1, Vector2D(0,1));
+    gpa->init(point1, Vector2D(1,0));
 
     CAgent *c = knowledge->getAgent(robotId);
 
@@ -558,4 +593,179 @@ void CMixTeamHandler::executeSlaveOffense(int robotId, Vector2D point1, Vector2D
     oneToucher->setWaitPos(point1);
     oneToucher->setKickSpeed(5);
     oneToucher->execute();
+}
+
+
+/////////mixed team game/////////
+void CMixTeamHandler::mixReadPacket()
+{
+    if(knowledge->ready){
+        for(int i = 0; i < knowledge->kPlans->plans_size(); i++){
+            multi_team_comm::RobotPlan ptemp = knowledge->kPlans->plans(i);
+            if(ourAgentIDs.contains(ptemp.robot_id())){
+                int validation = isPlanValid(ptemp);
+                bool v = isPosLocValid(ptemp.nav_target().loc());
+                debug(QString("validation : %1, id : %2").arg(v).arg(ptemp.robot_id()), D_ATOUSA);
+
+                if(validation != -1)
+                    executePlan(ptemp, validation);
+            }
+        }
+    }
+}
+
+int CMixTeamHandler::isPlanValid(multi_team_comm::RobotPlan plan)
+{
+    if(isPosValid(plan)){
+        return 1;
+    }
+    else if(isShotTargetValid(plan)){
+        return 2;
+    }
+    else if(isRoleValid(plan)){
+        return 3;
+    }
+    else
+        return -1;//invalid
+}
+
+void CMixTeamHandler::executePlan(multi_team_comm::RobotPlan plan, int validation)
+{
+    if(validation == 1){//valid pos
+        if(!isShotTargetValid(plan)){
+            if(!plan.has_role()){//gotopoint
+                gotopointExecute(plan);
+            }
+            else if(plan.role() == multi_team_comm::RobotPlan::Offense){//rcv
+                receiveExecute(plan);
+            }
+            else{//gtp
+                gotopointExecute(plan);
+            }
+        }
+        else{//kick
+            kickExecute(plan);
+        }
+    }
+    else if(validation == 2){//invalid pos & valid shotTarget
+        //kick
+        kickExecute(plan);
+    }
+    else if(validation == 3){//invalid pos & invald shotTarget & valid role(defense of goalie)
+        //goalie or defense execution
+    }
+    else
+        debug("plan validation error", D_ATOUSA);
+}
+
+void CMixTeamHandler::gotopointExecute(multi_team_comm::RobotPlan plan)
+{
+    int index = ourAgentIDs.indexOf(plan.robot_id());
+
+    robots[index]->setAgent(knowledge->getAgent(plan.robot_id()));
+    robots[index]->setSelectedSkill(roleSkill::GotopointAvoid);
+    Vector2D target = Vector2D(plan.nav_target().loc().x()*0.01,plan.nav_target().loc().y()*0.01);
+    Vector2D targetDir;
+    if(plan.has_nav_target() && plan.nav_target().has_heading() && plan.nav_target().heading() < 500 && plan.nav_target().heading() > -500){
+        float rHeading = refineHeading(plan.nav_target().heading());
+        targetDir = targetDir.setPolar(1, AngleDeg(rHeading*_RAD2DEG));
+    }
+    else
+        targetDir = Vector2D(1,0);
+    draw(Circle2D(targetDir + target , 0.05), "black");
+
+    robots[index]->setTargetDir(targetDir + target);
+    draw(Circle2D(targetDir + target , 0.05), "black");
+        qDebug() << "res   x : " << (targetDir + target).x << "   y : " << (targetDir + target).y;
+    robots[index]->setTarget(target);
+
+    robots[index]->execute();
+}
+
+void CMixTeamHandler::kickExecute(multi_team_comm::RobotPlan plan)
+{
+    int index = ourAgentIDs.indexOf(plan.robot_id());
+    robots[index]->setAgent(knowledge->getAgent(plan.robot_id()));
+    robots[index]->setSelectedSkill(roleSkill::Kick);
+    Vector2D target = Vector2D(plan.shot_target().x()*0.01 , plan.shot_target().y()*0.01);
+    robots[index]->setTarget(target);
+    robots[index]->setDoPass(true);
+    robots[index]->setKickSpeed(10);//?
+    //setKickSpeed should be based on profiles!?
+    robots[index]->execute();
+}
+
+void CMixTeamHandler::receiveExecute(multi_team_comm::RobotPlan plan)
+{
+    debug("rcv", D_ATOUSA);
+    int index = ourAgentIDs.indexOf(plan.robot_id());
+    robots[index]->setAgent(knowledge->getAgent(plan.robot_id()));
+    robots[index]->setSelectedSkill(roleSkill::ReceivePass);
+    robots[index]->setTarget(wm->ball->pos + wm->ball->vel);
+//    draw(Circle2D(wm->ball->pos + wm->ball->vel, 0.1), "cyan");
+    robots[index]->setAvoidPenaltyArea(true);
+    robots[index]->setReceiveRadius(0.4);
+    robots[index]->execute();
+}
+
+bool CMixTeamHandler::isPosValid(multi_team_comm::RobotPlan plan)
+{
+    if(!plan.has_nav_target())
+        return false;
+    else if(!plan.nav_target().has_loc())
+        return false;
+    else
+        return isPosLocValid(plan.nav_target().loc());
+}
+
+bool CMixTeamHandler::isPosLocValid(multi_team_comm::Location loc)
+{
+    if( !(loc.has_x() && loc.has_y()) )
+        return false;
+    //heigth = 10.4, width = 14.8
+    else if( ((double)loc.x()/100 > -_STADIUM_WIDTH/2)
+             && ((double)loc.x()/100 < _STADIUM_WIDTH/2)
+             && ((double)loc.y()/100 > -_STADIUM_HEIGHT/2)
+             && ((double)loc.y()/100 < _STADIUM_HEIGHT/2)){
+        return true;
+    }
+    else
+        return false;
+    //heading ham bayad check beshe
+}
+
+bool CMixTeamHandler::isShotTargetValid(multi_team_comm::RobotPlan plan)
+{
+    //it is not important for shot_target to be in field
+    if(!plan.has_shot_target())
+        return false;
+    else if(!plan.shot_target().has_x() || !plan.shot_target().has_y())
+        return false;
+    else
+        return true;
+}
+
+bool CMixTeamHandler::isRoleValid(multi_team_comm::RobotPlan plan)
+{
+    if(!plan.has_role())
+        return false;
+    else if(plan.role() == multi_team_comm::RobotPlan::Offense || plan.role() == multi_team_comm::RobotPlan::Default)
+        return false;
+    else
+        return true;
+}
+
+float CMixTeamHandler::refineHeading(float heading)
+{
+    if( heading > PI ){
+        while(heading > PI){
+            heading -= PI*2;
+        }
+    }
+    if( heading < -PI ){
+        while(heading < -PI){
+            heading += PI*2;
+        }
+    }
+    return heading;
 }
