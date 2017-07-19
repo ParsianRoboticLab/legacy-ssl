@@ -105,6 +105,8 @@ public:
 
     QList<SPosAndHeading > markPos;
 
+    QList<Vector2D> positioningPos;
+
     QList<SDangerousOpp> sortedDangerousOpp;
     QList<Vector2D> oppPos;
 
@@ -120,6 +122,7 @@ public:
     void setDefPositions();
     void defDynamicAssigning();
     void choosePlayMake();
+    void positioning();
 
     void nonsenseOffense();
 

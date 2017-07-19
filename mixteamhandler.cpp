@@ -745,6 +745,15 @@ void CMixTeamCoach::choosePlayMake(){
     robotsPlan.append(plan);
 }
 
+void CMixTeamCoach::positioning(){
+
+    for(int i = 0; i < ids.count(); i++){
+        if(ids[i] != playMakeID){
+
+        }
+    }
+}
+
 void CMixTeamCoach::nonsenseOffense(){
 
     CMixTeamCoach::SRobotPlan plan;
@@ -784,14 +793,14 @@ void CMixTeamCoach::makeMasterPlanPacket(){
 
         if(robotsPlan.at(i).location.isValid()){                    // position
             posLoc[i] = poses[i]->mutable_loc();
-            posLoc[i]->set_x(robotsPlan.at(i).location.x);
-            posLoc[i]->set_y(robotsPlan.at(i).location.y);
+            posLoc[i]->set_x(robotsPlan.at(i).location.x*100);
+            posLoc[i]->set_y(robotsPlan.at(i).location.y*100);
         }
 
         if(robotsPlan.at(i).shotTarget.isValid()){                  // shot target
             shotTraget[i] = plans[i]->mutable_shot_target();
-            shotTraget[i]->set_x(robotsPlan.at(i).shotTarget.x);
-            shotTraget[i]->set_y(robotsPlan.at(i).shotTarget.y);
+            shotTraget[i]->set_x(robotsPlan.at(i).shotTarget.x*100);
+            shotTraget[i]->set_y(robotsPlan.at(i).shotTarget.y*100);
         }
     }
 
