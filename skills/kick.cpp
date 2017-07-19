@@ -1051,12 +1051,12 @@ void CSkillKick::jTurn()
     {
         if(wm->ball->vel.length() > 0.2)
         {
-            posPid->kp = 1+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
-            speedPid->kp = 4;// +2.1*agentPos.dist(ballPos) + dirReduce;
+            posPid->kp = 2+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
+            speedPid->kp = 3;// +2.1*agentPos.dist(ballPos) + dirReduce;
         }
         else
         {
-            posPid->kp = 4+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
+            posPid->kp = 3+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
             speedPid->kp = 2;// +2.1*agentPos.dist(ballPos) + dirReduce;
         }
     }
