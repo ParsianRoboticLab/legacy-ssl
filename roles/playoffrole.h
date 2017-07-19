@@ -47,6 +47,8 @@ public:
     ClassProperty(CRolePlayOff, bool, LookForward, lookForward, updated);
     ClassProperty(CRolePlayOff, bool, NoAvoid, noAvoid, updated);
 
+    ClassProperty(CRolePlayOff, bool, Spin, spin, updated);
+
 
     ////////Not Executive Property
     ClassProperty(CRolePlayOff, long long, Time, time, dont);
