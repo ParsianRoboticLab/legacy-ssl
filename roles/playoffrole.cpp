@@ -99,10 +99,19 @@ void CRolePlayOff::update() {
             oneTouchSkill->setKickSpeed(8);
         else
             oneTouchSkill->setKickSpeed(1023);
-        oneTouchSkill->setAgent(agent);
         updated = false;
         break;
     case roleSkill::ReceivePass:
+//        oneTouchSkill->setTarget(targetDir);
+//        oneTouchSkill->setWaitPos(target);
+//        oneTouchSkill->setAgent(agent);
+//        oneTouchSkill->setChip(false);
+//        oneTouchSkill->setShotToEmptySpot(false);
+//        if (wm->getIsSimulMode())
+//            oneTouchSkill->setKickSpeed(8);
+//        else
+//            oneTouchSkill->setKickSpeed(1023);
+//        updated = false;
         receivePassSkill->setTarget(target);
         receivePassSkill->setAvoidOppPenaltyArea(avoidPenaltyArea);
         receivePassSkill->setReceiveRadius(receiveRadius);
@@ -112,7 +121,6 @@ void CRolePlayOff::update() {
             receivePassSkill->setIATargetDir(targetDir);
             receivePassSkill->setIgnoreAngle(false);
         }
-        receivePassSkill->setAgent(agent);
         updated = false;
         break;
     default:
@@ -142,6 +150,7 @@ void CRolePlayOff::execute() {
         oneTouchSkill->execute();
         break;
     case roleSkill::ReceivePass:
+//        oneTouchSkill->execute();
         receivePassSkill->execute();
         break;
     default:

@@ -3269,7 +3269,7 @@ CLoggerWidget::CLoggerWidget(){
     chbxDebug[19] = new QCheckBox("Erfan" , this);
 
     tcolor.insert(D_ERROR,QColor(Qt::red));
-    tcolor.insert(D_MAHI,QColor(Qt::green));
+//    tcolor.insert(D_MAHI,QColor(Qt::green));
     // TODO:insert color for other Types
     txtFPS = new QLineEdit("60" , this);
     lblFPS = new QLabel("FPS" , this);
