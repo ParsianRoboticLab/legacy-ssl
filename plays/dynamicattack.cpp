@@ -1,6 +1,7 @@
 #include "dynamicattack.h"
 
 CDynamicAttack::CDynamicAttack() {
+    dribbleIntention.restart();
     lastPMInitWasDribble = false;
     //isShotInPass = false;
     lastPassPosLoc = Vector2D(5000, 5000);
@@ -216,11 +217,12 @@ void CDynamicAttack::makePlan(int agentSize) {
 
 
                 if((robotKickArea.intersection(temp, &t1, &t2) && ballPos.x > 0) &&
-         (lastPMInitWasDribble || (oppRobotArea.contains(ballPos) && ourRobotArea.contains(ballPos))))
+         (lastPMInitWasDribble || (oppRobotArea.contains(ballPos) /*&& ourRobotArea.contains(ballPos)*/)))
                 {
+                    dribbleIntention.restart();
                     lastPMInitWasDribble = true;
                     oppRob = wm->opp.active(i)->pos;
-//                    debug(QString("WOW we are dribbling"), D_PARSA);
+                    debug(QString("WOW we are dribbling"), D_PARSA);
                     notDribble = false;
                     currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
                     for(size_t i = 0;i < agentSize;i++) {
@@ -416,7 +418,7 @@ void CDynamicAttack::playMake() {
     switch(currentPlan.playmake.skill) {
     case DynamicEnums::Dribble:
         roleAgentPM -> setTargetDir(currentPlan.passPos);
-        roleAgentPM -> setTarget(wm->ball->pos);
+        roleAgentPM -> setTarget(oppRob);
         roleAgentPM -> setChip(false);
         roleAgentPM -> setNoKick(true);
         roleAgentPM -> setSelectedSkill(DynamicEnums::Dribble); // skill Dribble
@@ -649,7 +651,8 @@ void CDynamicAttack::chooseBestPositons()
     for(int i = 0; i < agentSize; i++)
     {
         //if it wants to get a dribble position:
-        if(currentPlan.positionAgents[i].region == DynamicEnums::Supporter)
+        if(currentPlan.positionAgents[i].region == DynamicEnums::Supporter ||
+           dribbleIntention.msec() < 6000)
         {
             cntD++;
             double x, y;
@@ -1063,6 +1066,14 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
     double points[10] = {};
     for (int i = 0; i < _points.size(); i++)
         temp.append(_points.at(i));
+    //if we are dribbling
+         debug(QString("DIntention %3").arg(dribbleIntention.msec()), D_PARSA);
+    if(dribbleIntention.msec() < 6000)
+    {
+        currentPlan.passPos = temp[0];
+        return;
+    }
+    //else
     for(int i = 0; i < temp.size(); i++)
     {
         if(lastPassPosLoc == temp[i])
@@ -1072,15 +1083,19 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
         if(mahiPlayMaker != NULL)
         {
             for(int j = 0; j < wm->opp.activeAgentsCount(); j++)
+            {
                 M = min(M, wm->opp.active(j)->pos.dist(mahiPlayMaker->pos()));
+                M = min(M, (wm->opp.active(j)->pos +
+                            wm->opp.active(j)->vel * 0.5).dist(mahiPlayMaker->pos()));
+            }
             //if(M < 2)
             {
                 double e = mahiPlayMaker->dir().angleOf(temp[i], mahiPlayMaker->pos(),
                            mahiPlayMaker->dir().norm() * 1 + mahiPlayMaker->pos()).degree();
-                double p = (6 - e / 30)  / M;
+                double p = (e / 30) / (M + 0.001);
                 points[i] -= p;
                 debug(QString("angle is %1").arg(mahiPlayMaker->dir().angleOf(temp[i], mahiPlayMaker->pos(),
-                                                                              mahiPlayMaker->dir().norm() * 1 + mahiPlayMaker->pos()).degree()), D_PARSA);
+                                 mahiPlayMaker->dir().norm() * 1 + mahiPlayMaker->pos()).degree()), D_PARSA);
             }
         }
         debug(QString("%1 %2 near opp %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
@@ -1091,7 +1106,7 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
             points[i] += M;
         else
             points[i] += 4;
-        debug(QString("%1 %2 point is %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
+        debug(QString("%1 %2 opptotemp %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
 //        points[i] -= ballPos.dist(temp[i]) / 2;
         M = 100;
         for(int j = 0; j < wm->our.activeAgentsCount(); j++)
@@ -1100,7 +1115,7 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
             points[i] -= 5;
         if(points[i] > points[ans])
             ans = i;
-        debug(QString("%1 %2 point is %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
+        debug(QString("%1 %2 ourtopoint %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
         debug(QString("end"), D_PARSA);
     }
     currentPlan.passPos = temp[ans];

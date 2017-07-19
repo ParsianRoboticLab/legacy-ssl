@@ -70,6 +70,7 @@ private:
     int lastGuards[6];
     int guardSize;
     QTime positioningIntention;
+    QTime dribbleIntention;
     double positioningIntentionInterval;
     bool shotInPass;
 
