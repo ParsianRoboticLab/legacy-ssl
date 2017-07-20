@@ -1055,11 +1055,11 @@ void CSkillKick::jTurn()
         if(wm->ball->vel.length() > 0.2)
         {
             posPid->kp = 1+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
-            speedPid->kp = 4;// +2.1*agentPos.dist(ballPos) + dirReduce;
+            speedPid->kp = 3;// +2.1*agentPos.dist(ballPos) + dirReduce;
         }
         else
         {
-            posPid->kp = 4+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
+            posPid->kp = 3+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
             speedPid->kp = 2;// +2.1*agentPos.dist(ballPos) + dirReduce;
         }
     }
@@ -1315,19 +1315,26 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
     Vector2D ballPosInFuture;
     Vector2D s1,s2;
     Segment2D ballPath(wm->ball->pos,wm->ball->pos + wm->ball->vel.norm()*10);
-    Circle2D robotAreaNear (_agent->pos(),0.1);
+    Circle2D robotAreaNear (_agent->pos(),0.4);
 
     if(wm->ball->vel.length() > 0.2)
     {
-        for(double i = 0 ; i < 10 ; i += 0.03)
+        if(robotAreaNear.intersection(ballPath,&s1,&s2) && wm->ball->whenBallReachToPoint(wm->ball->pos.dist(_agent->pos())) >= 0)
         {
-            ballPosInFuture = wm->ball->getPosInFuture(i);
-            finalPos = ballPosInFuture - (_target-ballPosInFuture).norm()*0.11;
-            if(CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,true)<= i+0.1)
+            return wm->ball->whenBallReachToPoint(wm->ball->pos.dist(_agent->pos()));
+        }
+        else
+        {
+            for(double i = 0 ; i < 3 ; i += 0.03)
             {
-                double t = _agent->id();
-                draw(finalPos,1,QColor(Qt::blue));
-                return i;
+                ballPosInFuture = wm->ball->getPosInFuture(i);
+                finalPos = ballPosInFuture - (_target-ballPosInFuture).norm()*0.11;
+                if(CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,true)<= i+0.1)
+                {
+
+                    draw(finalPos,1,QColor(Qt::blue));
+                    return i;
+                }
             }
         }
     }

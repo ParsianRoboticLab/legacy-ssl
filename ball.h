@@ -28,6 +28,7 @@ public:
     Vector2D whereBallSpeedIs(double speed);
     Vector2D ballSpeedAt(double dist);
     double getBallAcc();
+    double whenBallReachToPoint(double dist);
     Vector2D getPosInFuture(double _t);
     int ballInsistanceCounter;    
 
