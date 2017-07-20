@@ -195,7 +195,7 @@ void CDynamicAttack::makePlan(int agentSize) {
             Segment2D temp          = Segment2D(ballPos, currentPlan.passPos);
             Circle2D  oppRobotArea  = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
             Circle2D  ourRobotArea  = Circle2D(mahiPlayMaker->pos()
-                                              + mahiPlayMaker->dir().norm() * 0.08, 0.08);
+                                             + mahiPlayMaker->dir().norm()  * 0.08, 0.08);
             Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
             Circle2D  bc = Circle2D(ballPos, 0.5);
 
@@ -226,6 +226,7 @@ void CDynamicAttack::makePlan(int agentSize) {
             }
         }
     }
+    lastPMInitWasDribble = (currentPlan.playmake.skill == DynamicEnums::Dribble);
     if(notDribble == true)
     {
         if(critical) {
