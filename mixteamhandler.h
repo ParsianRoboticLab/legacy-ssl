@@ -130,6 +130,8 @@ public:
     int defenseCount, markCount;
     int goalieID, playMakeID;
 
+    CAgent *goalKeeper;
+
     QTime playMakeIntentionTimer;
     QList<int> ourAgents;
 
