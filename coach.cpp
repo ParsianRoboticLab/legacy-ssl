@@ -1205,21 +1205,26 @@ void CCoach::updateAttackState()
         CRobot* PMA = wm->our[playmakeId];
         if(PMA != NULL)
         {
-            robotCritArea.addVertex(PMA->pos);
             double critL = critLenth;
             double critA = 90;
-            if(lastASWasCritical)
+//            if(lastASWasCritical == false)
+            if(lastASWasCritical == false)
             {
                 critA += critAng;
                 critL += critThrsh;
-                robotCritArea.addVertex(PMA->pos + Vector2D(0, 1));
+                robotCritArea.addVertex(PMA->pos);
+                robotCritArea.addVertex(PMA->pos + Vector2D(0, 0.7));
                 robotCritArea.addVertex(PMA->pos + Vector2D(1, 0));
-                robotCritArea.addVertex(PMA->pos - Vector2D(0, 1));
+                robotCritArea.addVertex(PMA->pos - Vector2D(0, 0.7));
             }
-            else
+            if(lastASWasCritical == true)
             {
-                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(critA )* critL);
-                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(-critA)* critL);
+                robotCritArea.addVertex(PMA->pos + Vector2D(0, 0.8));
+                robotCritArea.addVertex(PMA->pos + Vector2D(1.1, 0));
+                robotCritArea.addVertex(PMA->pos - Vector2D(0, 0.8));
+                robotCritArea.addVertex(PMA->pos - Vector2D(0.5, 0));
+//                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(critA )* critL);
+//                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(-critA)* critL);
             }
         }
     }
