@@ -2993,7 +2993,7 @@ bool DefensePlan::isInTheIndirectAreaShoot(Vector2D opp){
     //// This function checks the point that is resulted from block shot plan,
     //// is in the ball circle or not.
 
-    Circle2D indirectAvoidCircle(wm->ball->pos, 0.6);
+    Circle2D indirectAvoidCircle(wm->ball->pos, 0.5 + 0.2);
     if(indirectAvoidCircle.contains(ShootBlockRatio(segmentpershoot, opp).first()) && !knowledge->transientFlag){
         return 1;
     }
@@ -3030,7 +3030,7 @@ bool DefensePlan::isInTheIndirectAreaPass(Vector2D opp){
     //// This function checks the point that is resulted from block pass plan,
     //// is in the ball circle or noShootBlockRatiot.
     debug(QString("IndirectAreaPass"),D_HAMED);
-    double indirectAvoidRadius = 0.5 + 0.1;
+    double indirectAvoidRadius = 0.5 + 0.2;
     Circle2D indirectAvoidCircle(wm->ball->pos, indirectAvoidRadius);
     if (indirectAvoidCircle.contains(PassBlockRatio(segmentperpass, opp).first()) && !knowledge->transientFlag)
         return 1;
@@ -3046,7 +3046,7 @@ QList<Vector2D> DefensePlan::indirectAvoidPass(Vector2D opp){
 
     Segment2D tempseg;
     tempseg.assign(wm->ball->pos, opp + 10 * (opp - wm->ball->pos));
-    double indirectAvoidRadius = 0.5 + .1;
+    double indirectAvoidRadius = 0.5 + .2;
     Circle2D indirectAvoidCircle(wm->ball->pos,indirectAvoidRadius);
     Vector2D sol1, sol2, sol;
     indirectAvoidCircle.intersection(tempseg, &sol1, &sol2);
