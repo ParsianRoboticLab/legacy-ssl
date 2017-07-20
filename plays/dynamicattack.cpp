@@ -160,13 +160,13 @@ void CDynamicAttack::makePlan(int agentSize) {
 
 //    if(critical == false)
 //        lastPMInitWasDribble = false;
-    bool notDribble = true;
+    bool notInFirst = true;
 
     // we Don't have the ball -- counter-attack, blocking, move forward
     if (wm->ball->pos.x < 0) {
+        notInFirst = false;
         currentPlan.mode = DynamicEnums::NotWeHaveBall;
         currentPlan.playmake.init(DynamicEnums::Chip, DynamicEnums::Goal);
-
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Near;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
@@ -175,6 +175,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     // we have ball and
     // shot prob is more than 50%
     else if (directShot) {
+        notInFirst = false;
         currentPlan.mode = DynamicEnums::HighProb;
         currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
         for(size_t i = 0;i < agentSize;i++) {
@@ -211,9 +212,8 @@ void CDynamicAttack::makePlan(int agentSize) {
                     oppRob = wm->opp.active(i)->pos;
                 }
                 dribbleIntention.restart();
-                lastPMInitWasDribble = true;
+                notInFirst = false;
                 debug(QString("WOW we are dribbling"), D_PARSA);
-                notDribble = false;
                 currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
                 for(size_t i = 0;i < agentSize;i++) {
                     if(i < 1)
@@ -227,8 +227,10 @@ void CDynamicAttack::makePlan(int agentSize) {
         }
     }
     lastPMInitWasDribble = (currentPlan.playmake.skill == DynamicEnums::Dribble);
-    if(notDribble == true)
+    debug(QString(" %1 ").arg(notInFirst), D_PARSA);
+    if(notInFirst == true)
     {
+        debug(QString(" %1 ").arg(notInFirst), D_PARSA);
         if(critical) {
             currentPlan.mode = DynamicEnums::Critical;
             {
@@ -695,6 +697,14 @@ void CDynamicAttack::chooseBestPositons()
             double x, y;
             if(cntD == 1)
             {
+                if(lastYDrib == 10)
+                {
+                    if(ballPos.y > 0)
+                        y = ballPos.y - 1.5;
+                    else
+                        y = ballPos.y + 1.5;
+                }
+                else
                 if(ballPos.y > 0.2)
                 {
                     y = ballPos.y - 1.5;
@@ -731,6 +741,7 @@ void CDynamicAttack::chooseBestPositons()
         //if it wants to get the BEST position
         else
         {
+            lastYDrib = 10;
             int best = -1;
             Vector2D  points  [guardSize];
             double tempAngle  [guardSize];
