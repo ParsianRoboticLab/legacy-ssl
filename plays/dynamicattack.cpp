@@ -198,9 +198,10 @@ void CDynamicAttack::makePlan(int agentSize) {
             Circle2D  ourRobotArea  = Circle2D(mahiPlayMaker->pos()
                                              + mahiPlayMaker->dir().norm()  * 0.08, 0.08);
             Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
-            Circle2D  bc = Circle2D(ballPos, 0.3);
+            Circle2D  bc = Circle2D(ballPos, 0.25);
 
-            if(ballPos.x > 0 && ((robotKickArea.intersection(temp, &t1, &t2) && oppRobotArea.contains(ballPos))
+            if(/*mahiPlayMaker->shootSensor() && */ballPos.x > 1 &&
+                    ((robotKickArea.intersection(temp, &t1, &t2) && oppRobotArea.contains(ballPos))
                        || (lastPMInitWasDribble && bc.contains(mahiPlayMaker->pos()) && bc.contains(oppRob))))
             {
                 if(lastPMInitWasDribble && bc.contains(mahiPlayMaker->pos()) && bc.contains(oppRob))
@@ -227,10 +228,10 @@ void CDynamicAttack::makePlan(int agentSize) {
         }
     }
     lastPMInitWasDribble = (currentPlan.playmake.skill == DynamicEnums::Dribble);
-    debug(QString(" %1 ").arg(notInFirst), D_PARSA);
+//    debug(QString(" %1 ").arg(notInFirst), D_PARSA);
     if(notInFirst == true)
     {
-        debug(QString(" %1 ").arg(notInFirst), D_PARSA);
+//        debug(QString(" %1 ").arg(notInFirst), D_PARSA);
         if(critical) {
             currentPlan.mode = DynamicEnums::Critical;
             {
@@ -259,8 +260,9 @@ void CDynamicAttack::makePlan(int agentSize) {
         // we have positioning agents
         // it's needed to be fast
         else if(fast) {
+            oppRob = wm->field->oppGoal();
             currentPlan.mode = DynamicEnums::Fast;
-            currentPlan.playmake.init(DynamicEnums::Pass, DynamicEnums::Best);
+            currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
             for(size_t i = 0;i < agentSize;i++) {
                 currentPlan.positionAgents[i].region = DynamicEnums::Best;
                 currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
@@ -691,7 +693,7 @@ void CDynamicAttack::chooseBestPositons()
     {
         //if it wants to get a dribble position:
         if(currentPlan.positionAgents[i].region == DynamicEnums::Supporter ||
-           (i == 0 && dribbleIntention.elapsed() < 3000))
+           (i <= 1 && dribbleIntention.elapsed() < 3000))
         {
             cntD++;
             double x, y;
@@ -726,6 +728,21 @@ void CDynamicAttack::chooseBestPositons()
             semiDynamicPosition.append(Vector2D(x, y));
         }
         //if it wants to get the BEST position
+        else if(agentSize == 1)
+        {
+            if(ballPos.y > 0.3)
+            {
+                semiDynamicPosition.append(guardLocations[agentSize][0][2]);
+                lastGuards[0] = 2;
+            }
+            else if(ballPos.y < -0.3)
+            {
+                semiDynamicPosition.append(guardLocations[agentSize][0][0]);
+                lastGuards[0] = 0;
+            }
+            else
+                semiDynamicPosition.append(guardLocations[agentSize][0][lastGuards[0]]);
+        }
         else
         {
             lastYDrib = 10;
@@ -1553,21 +1570,21 @@ void CDynamicAttack::assignLocations_0() {
 
 void CDynamicAttack::assignLocations_1() {
     //Opp Feild
-    guardLocations[1][0][0].assign(_FIELD_WIDTH/2 - 0.5, _FIELD_HEIGHT/4 + 0.5);
+    guardLocations[1][0][0].assign(_FIELD_WIDTH/2 - 1,  _FIELD_HEIGHT/4 + 0.5);
     guardLocations[1][0][1].assign(_FIELD_WIDTH/4, 0);
-    guardLocations[1][0][2].assign(_FIELD_WIDTH/2 - 0.5, -_FIELD_HEIGHT/4 - 0.5);
+    guardLocations[1][0][2].assign(_FIELD_WIDTH/2 - 1, -_FIELD_HEIGHT/4 - 0.5);
 }
 
 void CDynamicAttack::assignLocations_2() {
     //Top Opp Half
     guardLocations[2][0][0].assign(1.15, 1.15);
     guardLocations[2][0][1].assign(2.1 , 1.65);
-    guardLocations[2][0][2].assign(3.65, 2);
+    guardLocations[2][0][2].assign(2.95, 2);
 
     //Bottom Opp Half
     guardLocations[2][1][0].assign(1.15, -1.15);
     guardLocations[2][1][1].assign(2.1 , -1.65);
-    guardLocations[2][1][2].assign(3.65, -2  );
+    guardLocations[2][1][2].assign(2.95, -2  );
 //    guardLocations[2][1][0].assign(0, 0.3);
 //    guardLocations[2][1][1].assign(0, 0);
 //    guardLocations[2][1][2].assign(0, -0.3);
@@ -1577,7 +1594,7 @@ void CDynamicAttack::assignLocations_3() {
     //Top Opp Tertium
     guardLocations[3][0][0].assign(1   , 1.5);
     guardLocations[3][0][1].assign(2.25, 2);
-    guardLocations[3][0][2].assign(3.65, 1.85);
+    guardLocations[3][0][2].assign(2.65, 1.85);
     //Middle Opp Tertium
     guardLocations[3][1][0].assign(0.5 , 0);
     guardLocations[3][1][1].assign(1.75, 0);
@@ -1585,14 +1602,14 @@ void CDynamicAttack::assignLocations_3() {
     //Bottom Opp Tertium
     guardLocations[3][2][0].assign(1   , -1.5);
     guardLocations[3][2][1].assign(2.25, -2);
-    guardLocations[3][2][2].assign(3.65, -1.85);
+    guardLocations[3][2][2].assign(2.65, -1.85);
 }
 
 void CDynamicAttack::assignLocations_4() {
     // Top Opp 1/4
     guardLocations[4][0][0].assign(1.35, 2.05);
     guardLocations[4][0][1].assign(2.5 , 2.25);
-    guardLocations[4][0][2].assign(3.85, 2.00);
+    guardLocations[4][0][2].assign(2.95, 2.00);
     // Mid-Top Opp 1/4
 
     guardLocations[4][1][0].assign(0.65, 0.9);
@@ -1607,7 +1624,7 @@ void CDynamicAttack::assignLocations_4() {
     // Bottom Opp 1/4
     guardLocations[4][3][0].assign(1.35, -2.05);
     guardLocations[4][3][1].assign(2.5 , -2.25);
-    guardLocations[4][3][2].assign(3.85, -2.00);
+    guardLocations[4][3][2].assign(2.95, -2.00);
 }
 
 void CDynamicAttack::assignLocations_5() {
