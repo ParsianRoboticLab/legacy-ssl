@@ -7,7 +7,6 @@
 chipKick *chipKickRobot;
 chipKick::chipKick()
 {
-    qDebug()<<"oomaaaad";
     robotId=2;
 //    refrenceRobotId=0;
     prevVel=0;

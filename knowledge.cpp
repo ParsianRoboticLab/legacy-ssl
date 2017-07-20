@@ -388,7 +388,7 @@ double CKnowledge::chipGoalPropability(bool isOurChip){
     Vector2D goal,goaliePos;
     if(isOurChip){
         goal=wm->field->oppGoal();
-        goaliePos=wm->opp.active(knowledge->oppGoalieIndex)->pos;
+        goaliePos=wm->opp[wm->opp.data->goalieID]->pos;
 
     }
     else{
@@ -4431,16 +4431,23 @@ Vector2D CKnowledge::getChipPredict(){
 
         predictedPosition=Vector2D(0,0);
 
-        for(int i=0;i<predictedBallPoses.size();i+=1){
+
+        for(int i=1;i<predictedBallPoses.size();i+=1){
+            debug(QString("pos%1:%2").arg(i).arg(predictedBallPoses.at(i).x),D_NADIA);
+        }
+        for(int i=1;i<predictedBallPoses.size();i+=1){
             if(i>14)
                 break;
             predictedPosition+=predictedBallPoses.at(i);
             draw(predictedBallPoses.at(i));
         }
-        if(predictedBallPoses.size()<15)
-            predictedPosition/=predictedBallPoses.size();
+
+        if(predictedBallPoses.size()<15){
+            predictedPosition/=predictedBallPoses.size()-1;
+
+        }
         else
-            predictedPosition/=15;
+            predictedPosition/=14;
 
         debug(QString("counter: %1").arg(chipPredictCounter),D_NADIA);
 
