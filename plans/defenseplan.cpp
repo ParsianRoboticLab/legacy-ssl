@@ -74,8 +74,8 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
         solvedPosition.append(stuckPositions.at(i) + (1.4*CRobot::robot_radius_new - centerToCenter.at(i).length()/2)*((centerToCenter.at(i).a() - centerToCenter.at(i).b()).norm()));
     }
 
-    for(int i = 0 ; i < stuckIndexs.size() ; i++){
-        for(int j = 0 ; j < stuckIndexs.size() ; j++){
+    for(int i = 0 ; i < min(stuckIndexs.size(), stuckPositions.size()) ; i++){
+        for(int j = 0 ; j < min(stuckIndexs.size(), stuckPositions.size()) ; j++){
             if(stuckIndexs.at(i) == stuckIndexs.at(j) && i != j){
                 isRepeated = true;
                 tempIndexs.append(j);
@@ -641,7 +641,7 @@ void DefensePlan::manToManMarkBlockShotInPlayOff(int _markAgentSize){
             for(int i = markPoses.count() ; i < _markAgentSize; i++){
                 if(markPoses.count() < _markAgentSize){
                     markRoles.append(QString("shotBlocker"));
-                    markPoses.append(Vector2D(0,  count *  4.5/ 6  * pow(-1, count) ));
+                    markPoses.append(Vector2D(-2,  count *  4.5/ 6  * pow(-1, count) ));
                     markAngs.append(Vector2D(1,0));
                 }
                 count++;
@@ -3541,12 +3541,12 @@ QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2
     double danger;
     /////////////// Polygon
     double radius = .1;
-    double treshold = 1;
+    double treshold = 0.5;
 
     Vector2D sol1,sol2,sol3;
     Vector2D _pos1 = wm->ball->pos;
 
-    Vector2D _pos2 = wm->ball->pos + (10.0  * wm->ball->vel.norm() * knowledge->getRealBallVel());
+    Vector2D _pos2 = wm->ball->pos + (3  * wm->ball->vel.norm() * knowledge->getRealBallVel());
     Line2D _path(_pos1,_pos2);
     Polygon2D _poly;
     Circle2D(_pos2,radius + treshold).
@@ -3632,7 +3632,7 @@ QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2
         if( knowledge->getRealBallVel() < .1)
             danger = danger1;
         else
-            danger = 10* Polycontain * danger2 + danger1;
+            danger = 8* Polycontain * danger2 + danger1;
 
         temp.second = danger;
         output.append(temp);
