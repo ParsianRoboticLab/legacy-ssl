@@ -7,6 +7,7 @@
 
 void CMainApplication::MixTeamChallenge()
 {
+    //ambiguity
     knowledge->updateGameState();
     static CMixTeamHandler *mstr = new CMixTeamHandler();
     mstr->master();
