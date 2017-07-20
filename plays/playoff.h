@@ -242,8 +242,19 @@ struct SMatching {
 };
 
 struct AgentPoint {
-    int id    = -1;
-    int state = -1;
+
+    AgentPoint() {
+        id    = -1;
+        state = -1;
+    }
+
+    AgentPoint(int id, int state) {
+        this->id    = id;
+        this->state = state;
+    }
+
+    int id;
+    int state;
 };
 
 struct SExecution {
@@ -253,6 +264,7 @@ struct SExecution {
     int symmetry     =  1;
     int theLastAgent = -1;
     int theLastState = -1;
+    int passCount;
     AgentPoint passer;
     AgentPoint reciver;
 };
@@ -291,7 +303,7 @@ typedef QPair<NGameOff::AgentPoint, NGameOff::AgentPoint> AgentPair;
 
 using namespace NGameOff;
 
-enum FirstStep {Stay, Move, Done};
+enum FirstStep {Stay, Move1, Move2, Done};
 
 class CPlayOff : public CMasterPlay {
 
@@ -333,6 +345,9 @@ private:
     EMode masterMode;
 
     void globalExecute();
+    bool isBlockDisturbing();
+
+    int BlockerStopperID;
 
     bool isPathClear(Vector2D _pos1, Vector2D _pos2, double _radius, double treshold);
 
@@ -352,6 +367,19 @@ private:
     void firstExecute();
     void kickOffStopModePlay(int tagentSize);
     void firstPlayForOppCorner(int _agentSize);
+
+
+    ////////////////////////////Blocker//////////////////////////////////
+    bool BlockerExecute(int agentID);
+    CAgent* BlockerAgent;
+    CSkillGotoPointAvoid* blockergpa;
+    enum BlockerStop{
+        Diversion,
+        BlockStop,
+        TurnAndKick
+    };
+    BlockerStop blockerStopStates;
+
 
     POMODE getPlayOffMode();
     void getCostRec(double costArr[][6], int arrSize, QList<kkValue> &valueList, kkValue value, int size, int aId = 0);
@@ -393,7 +421,17 @@ private:
     CRolePlayOff *roleAgent[6];
     CRolePlayOff *tempAgent;
     CRolePlayOff *newRoleAgent[6];
+    enum BlockerDetector{
+        penaltyAreaBlock   = 0b001,
+        centralRegionBlock = 0b010,
+        RoundRegionBlock   = 0b100
+    };
 
+    int blockerState;
+    int blockerID;
+    QList<int> blockersPenaltyArea;
+    QList<int> blockersCentralRegion;
+    QList<int> blockersRoundRegion;
     Vector2D kickOffPos[6];
 
     bool isBallIn;
@@ -440,7 +478,7 @@ private:
     void assignKick     (CRolePlayOff*, const SPositioningAgent&, bool _chip);
     void assignReceive  (CRolePlayOff*, const SPositioningAgent&, bool _ignoreAngle);
     QPair<int, int> findTheLastShoot(const SExecution& _plan);
-    void findThePasserandReciver(const SExecution&, AgentPair&);
+    void findThePasserandReciver(const SExecution&, QList<AgentPair> &_pairList);
     int findReciver(int _passer, int _state);
     QList<SBallOwner> ownerList;
     bool havePassInPlan;
@@ -474,7 +512,8 @@ private:
     FirstStep firstStepEnums;
     int shotSpot;
     void stayPoistioning();
-    void movePositioning();
+    void move1Positioning();
+    void move2Positioning();
     void donePositioning();
 
 

@@ -953,12 +953,16 @@ void CPlayOffWidget::updateModel() {
             model->appendRow(pkg);
             qDebug() << "FILE";
             file = new QStandardItem(guiPlan.planFile);
+            QString temp = guiPlan.package;
+            file->setToolTip("<html><img src="+temp.replace(".","/") + "/" + guiPlan.planFile + ".png" +"/></html>");
             pkg->appendRow(file);
         }
         else if (lastGui->planFile != guiPlan.planFile) {
             fileCounter++;
             qDebug() << "PLAN";
             file = new QStandardItem(guiPlan.planFile);
+            QString temp = guiPlan.package;
+            file->setToolTip("<html><img src="+temp.replace(".","/") + "/" + guiPlan.planFile + ".png" +"/></html>");
             pkg->appendRow(file);
         }
         planCounter++;
@@ -969,7 +973,6 @@ void CPlayOffWidget::updateModel() {
         plan->setEditable(false);
         pkg->setEditable(false);
         lastGui = &m_plans.at(i)->gui;
-        qDebug() << guiPlan.package;
 
     }
 }
@@ -3269,7 +3272,7 @@ CLoggerWidget::CLoggerWidget(){
     chbxDebug[19] = new QCheckBox("Erfan" , this);
 
     tcolor.insert(D_ERROR,QColor(Qt::red));
-    tcolor.insert(D_MAHI,QColor(Qt::green));
+//    tcolor.insert(D_MAHI,QColor(Qt::green));
     // TODO:insert color for other Types
     txtFPS = new QLineEdit("60" , this);
     lblFPS = new QLabel("FPS" , this);
@@ -3811,6 +3814,7 @@ CNewProfilerWidget::CNewProfilerWidget(QWidget* parent):QDialog(parent){
     startProf=new QPushButton("start Profiling",this);
     profilerRobotsList->setLayout(ProfilerLayout);
     chbxChip=new QCheckBox("Is Chip?",this);
+    chbxTest=new QCheckBox("Is Test?",this);
     chbxProf[0]=new QCheckBox("0",this);
     chbxProf[1]=new QCheckBox("1",this);
     chbxProf[2]=new QCheckBox("2",this);
@@ -3835,6 +3839,7 @@ CNewProfilerWidget::CNewProfilerWidget(QWidget* parent):QDialog(parent){
     l->addWidget(filenamelable,4,1);
     l->addWidget(fileName,4,2);
     l->addWidget(chbxChip,5,1);
+    l->addWidget(chbxTest,5,2);
     l->addWidget(startProf,6,1);
     this->setLayout(l);
 
@@ -3855,6 +3860,8 @@ void CNewProfilerWidget::startProfFunc(){
     }
     collectKickProfile->repeat=repeatNum->text().toInt();
     collectKickProfile->isChip=chbxChip->isChecked();
+    collectKickProfile->isTest=chbxTest->isChecked();
+
     if(chbxChip->isChecked())
         isChip = QString("chip");
     else

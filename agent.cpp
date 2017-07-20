@@ -771,9 +771,9 @@ void CAgent::addRobotVel(double _vtan, double _vnorm, double _w)
     double vx , vy , w;
     jacobianInverse(v1 , v2 , v3 , v4 , vx , vy , w);
 
-    vforward = vx;
-    vnormal  = vy;
-    vangular = w*_RAD2DEG;
+    vforward += _vtan;
+    vnormal  += _vnorm;
+    vangular += w*_RAD2DEG;
 }
 
 void CAgent::waitHere()

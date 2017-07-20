@@ -1184,10 +1184,10 @@ double CCoach::findMostPossible(Vector2D agentPos)
 void CCoach::updateAttackState()
 {
     Polygon2D robotCritArea;
-    double    safeRegion = 1;
-    double    critLenth = 0.75;
-    Circle2D  critCir;
-    CAgent    *ourNearestAgent;
+    double    safeRegion= 1   ;
+    double    critLenth = 0.4 ;
+    double    critThrsh = 0.95;
+    double    critAng   = 30  ;
     CRobot    *oppNearest;
     if(wm->opp.activeAgentsCount() > 0) {
         oppNearest = wm->opp[knowledge->getNearestOppToPoint(wm->ball->pos)];
@@ -1205,10 +1205,27 @@ void CCoach::updateAttackState()
         CRobot* PMA = wm->our[playmakeId];
         if(PMA != NULL)
         {
-            critCir = Circle2D(PMA->pos, critLenth + 0.2);
-            robotCritArea.addVertex(PMA->pos);
-            robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(90) * critLenth);
-            robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(-90)* critLenth);
+            double critL = critLenth;
+            double critA = 90;
+//            if(lastASWasCritical == false)
+            if(lastASWasCritical == false)
+            {
+                critA += critAng;
+                critL += critThrsh;
+                robotCritArea.addVertex(PMA->pos);
+                robotCritArea.addVertex(PMA->pos + Vector2D(0, 0.7));
+                robotCritArea.addVertex(PMA->pos + Vector2D(1, 0));
+                robotCritArea.addVertex(PMA->pos - Vector2D(0, 0.7));
+            }
+            if(lastASWasCritical == true)
+            {
+                robotCritArea.addVertex(PMA->pos + Vector2D(0, 0.8));
+                robotCritArea.addVertex(PMA->pos + Vector2D(1.1, 0));
+                robotCritArea.addVertex(PMA->pos - Vector2D(0, 0.8));
+                robotCritArea.addVertex(PMA->pos - Vector2D(0.5, 0));
+//                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(critA )* critL);
+//                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(-critA)* critL);
+            }
         }
     }
 
@@ -1216,7 +1233,6 @@ void CCoach::updateAttackState()
     draw(robotCritArea,QColor(Qt::cyan));
 
     if(robotCritArea.contains(oppNearest->pos)){
-       //|| (ourAttackState == CRITICAL && critCir.contains(oppNearest->pos))) {
         ourAttackState = CRITICAL;
         debug(QString("Attack: critical"),D_MHMMD);
     }
@@ -1228,6 +1244,8 @@ void CCoach::updateAttackState()
         ourAttackState = FAST;
         debug(QString("Attack: fast"),D_MHMMD);
     }
+
+    lastASWasCritical = (ourAttackState == CRITICAL);
 
 }
 void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
@@ -1463,18 +1481,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
         debug(QString("playmake : %1").arg(playmakeId),D_MHMMD);
     }
 
-    Circle2D ourDefenseArea(wm->field->ourGoal(), 1.6);
-
-    if (knowledge->variables["clearing"] == "true"
-        || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length() < 1)) {
-        if(playmakeId != -1) {
-            ourPlayers.append(playmakeId);
-            dynamicAttack->setPlayMake(-1);
-        }
-        dynamicAttack->setDefenseClear(true);
-    } else {
-        dynamicAttack->setDefenseClear(false);
-    }
+    dynamicAttack->setDefenseClear(false);
 
     if(wm->our[playmakeId] != NULL)
     {
@@ -1911,7 +1918,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     }
 
     /** new plan selector **/
-    //        thePlan = chooseMostSuccecfull(validPlans);
+//            thePlan = chooseMostSuccecfull(validPlans);
     /** new plan selector **/
 
 
@@ -2420,6 +2427,11 @@ void CCoach::decideTheirPenalty(QList<int> &_ourPlayers) {
 }
 
 void CCoach::decideStart(QList<int> &_ourPlayers) {
+    if(wm->gs->penalty_shootout()){
+        selectedPlay=theirPenalty;
+        return;
+    }
+
     selectedPlay = dynamicAttack;
     decidePlayOn(_ourPlayers, lastPlayers);
 }
@@ -2544,14 +2556,17 @@ void CCoach::checkSensorShootFault() {
             knowledge->getAgent(i)->changeIsNeeded = true;
         }
     }
-
+    QString s;
     for (size_t i = 0; i < ourPlayers.size(); i++) {
-        if (knowledge->getAgent(i)->changeIsNeeded) {
-            debug(QString("[ROBOT FAULT] %1"), D_ERROR);
+        s += QString(" %1 ").arg(ourPlayers.at(i));
+        if (knowledge->getAgent(ourPlayers.at(i))->changeIsNeeded) {
+            debug(QString("[ROBOT FAULT] %1").arg(ourPlayers.at(i)), D_ERROR);
 
         }
 
     }
+//    debug(s, D_MAHI);
+
 
 }
 

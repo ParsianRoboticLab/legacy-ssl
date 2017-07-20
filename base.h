@@ -56,7 +56,6 @@ enum DynamicMode {
     BallInOurField,
     NoPositionAgent,
     BallInOppJaw
-
 };
 
 enum DynamicSkill {

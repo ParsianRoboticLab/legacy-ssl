@@ -966,6 +966,8 @@ CSkillGotoPointAvoid* CSkillGotoPointAvoid::oppRelax(int element)
 
 void CSkillGotoPointAvoid::execute()
 {
+    if(agent == NULL)
+        return;
     agentPos = agent->pos();
     agentVel = agent->vel();
     double dVx,dVy,dW;

@@ -321,6 +321,22 @@ vel /=2;
 #endif
 }
 
+double CBall::whenBallReachToPoint(double dist)
+{
+    double v2 = vel.length()*vel.length();
+    double a = getBallAcc();
+    double _time = 0;
+    if((v2 - 2*a*dist) < 0)
+    {
+        return -1;
+    }
+    else
+    {
+        _time = (vel.length() - sqrt(v2 - 2*a*dist))/a;
+        return _time;
+    }
+}
+
 Vector2D CBall::whereBallSpeedIs(double speed)
 {
     if (vel.length() < speed) return pos;
@@ -337,7 +353,7 @@ Vector2D CBall::ballSpeedAt(double dist)
 
 double CBall::getBallAcc(){
   // return Gravity*BallFriction();
-    return 0.3;
+    return 0.17;
         return this->acc.length();
 }
 
