@@ -33,6 +33,7 @@ void CRoleDynamic::update() {
        dribbleSkill->setInitialLook(target);
        dribbleSkill->setChip(chip);
        dribbleSkill->setDoPass(true);
+       dribbleSkill->setKickTol(10);
        dribbleSkill->setKickSpeed(kickSpeed);
        break;
    case DynamicEnums::Ready:
