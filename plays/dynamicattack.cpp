@@ -198,7 +198,7 @@ void CDynamicAttack::makePlan(int agentSize) {
             Circle2D  ourRobotArea  = Circle2D(mahiPlayMaker->pos()
                                              + mahiPlayMaker->dir().norm()  * 0.08, 0.08);
             Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
-            Circle2D  bc = Circle2D(ballPos, 0.5);
+            Circle2D  bc = Circle2D(ballPos, 0.3);
 
             if(ballPos.x > 0 && ((robotKickArea.intersection(temp, &t1, &t2) && oppRobotArea.contains(ballPos))
                        || (lastPMInitWasDribble && bc.contains(mahiPlayMaker->pos()) && bc.contains(oppRob))))
@@ -216,7 +216,7 @@ void CDynamicAttack::makePlan(int agentSize) {
                 debug(QString("WOW we are dribbling"), D_PARSA);
                 currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
                 for(size_t i = 0;i < agentSize;i++) {
-                    if(i < 1)
+                    if(i < 2)
                         currentPlan.positionAgents[i].region = DynamicEnums::Supporter;
                     else
                         currentPlan.positionAgents[i].region = DynamicEnums::Best;
@@ -716,26 +716,13 @@ void CDynamicAttack::chooseBestPositons()
                 else
                     y = lastYDrib;
                 x = min(ballPos.x - 0.1, 3.3);
+                lastYDrib = y;
             }
-            if(ballPos.x > 3.3 - thrsh)
+            if(cntD == 2)
             {
-                thrsh = 0.3;
-                if(cntD == 1);
-                else
-                {
-
-                }
+                x = ballPos.x - 1;
+                y = ballPos.y;
             }
-            else
-            {
-                thrsh = 0;
-                if(cntD == 1);
-                else
-                {
-
-                }
-            }
-            lastYDrib = y;
             semiDynamicPosition.append(Vector2D(x, y));
         }
         //if it wants to get the BEST position
