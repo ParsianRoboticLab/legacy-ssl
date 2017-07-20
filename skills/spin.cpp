@@ -35,7 +35,7 @@ void CSkillDribble::spinDribble()
     kick->setPassProfiler(false);
     draw(agentPos + (agentDir).norm()*2);
     agent->addRobotVel(0,0,0);
-    kickSpeed = 200;
+
     if(catchedBall == false)
     {
         kick->execute();
@@ -59,8 +59,6 @@ void CSkillDribble::spinDribble()
         kick->execute();
         kick->setSpin(3);
     }
-
-    tol = 10;
     if(fabs((agentDir.th() - (target- agentPos).th()).degree()) < tol )
         readyForPass = true;
     else
