@@ -442,11 +442,12 @@ void CSoccer::sendPacketToSimulator(){
         const double gain = 1.013; //to match simulator with code [use parsianNew.ini in simulator 0.845 if you use parsian.ini (old robots)]
         //			const double gain = 2*1.068; //to match simulator with code [use parsianNew.ini in simulator 0.845 if you use parsian.ini (old robots)]
 
-
         double w1 = agents[i]->v1*gain;
         double w2 = agents[i]->v2*gain;
         double w3 = agents[i]->v3*gain;
         double w4 = agents[i]->v4*gain;
+
+        agents[i]->jacobian(agents[i]->vforward,agents[i]->vnormal,agents[i]->vangular*_DEG2RAD,w1,w2,w3,w4);
 
         command->set_wheelsspeed(true);
         command->set_wheel1(w1);
@@ -454,7 +455,7 @@ void CSoccer::sendPacketToSimulator(){
         command->set_wheel3(w3);
         command->set_wheel4(w4);
 
-        command->set_velangular(agents[i]->vangular*_DEG2RAD);
+        command->set_velangular(0);
         command->set_velnormal(0);
         command->set_veltangent(0);
         command->set_kickspeedx(agents[i]->kickSpeed);

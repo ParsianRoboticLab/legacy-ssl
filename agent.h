@@ -159,8 +159,8 @@ public:
     void initPlanner( const int &_id , const Vector2D &_target , const QList<int> &_ourRelaxList , const QList<int> &_oppRelaxList , const bool &_avoidPenaltyArea , const bool &_avoidCenterCircle , const double &_ballObstacleRadius);
     Vector2D agentAngelForGyro;
     int calibrated;
-private:
     void jacobian(double _vx, double _vy, double _w, double &v1, double &v2, double &v3, double &v4);
+private:
     void jacobianInverse(double _v1, double _v2, double _v3, double _v4,double &_vx, double &_vy, double &_w);
     bool calibrateGyro;
     unsigned int packetNum;
