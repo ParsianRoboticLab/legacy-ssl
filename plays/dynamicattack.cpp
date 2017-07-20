@@ -1,7 +1,7 @@
 #include "dynamicattack.h"
 
 CDynamicAttack::CDynamicAttack() {
-    dribbleIntention.restart();
+    dribbleIntention.start();
     lastPMInitWasDribble = false;
     //isShotInPass = false;
     lastPassPosLoc = Vector2D(5000, 5000);
@@ -158,8 +158,9 @@ void CDynamicAttack::makePlan(int agentSize) {
 //        }
 //    }
 
-    if(critical == false)
-        lastPMInitWasDribble = false;
+//    if(critical == false)
+//        lastPMInitWasDribble = false;
+    bool notDribble = true;
 
     // we Don't have the ball -- counter-attack, blocking, move forward
     if (wm->ball->pos.x < 0) {
@@ -184,90 +185,98 @@ void CDynamicAttack::makePlan(int agentSize) {
     // we have ball and
     // shot prob isn't more than 50% and
     // there is a critical situation
-    else if(critical) {
-
-        currentPlan.mode = DynamicEnums::Critical;
-        bool notDribble = true;
-        if(wm->opp.activeAgentsCount() > 0 && wm->field->isInField(currentPlan.passPos))
+    else
+    if(wm->opp.activeAgentsCount() > 0 && wm->field->isInField(currentPlan.passPos))
+    {
+        for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
         {
-            for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
+            CRobot*   agent         = wm->opp.active(i);
+            Vector2D  agentPos      = agent->pos, t1, t2;
+            Segment2D temp          = Segment2D(ballPos, currentPlan.passPos);
+            Circle2D  oppRobotArea  = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
+            Circle2D  ourRobotArea  = Circle2D(mahiPlayMaker->pos()
+                                              + mahiPlayMaker->dir().norm() * 0.08, 0.08);
+            Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
+            Circle2D  bc = Circle2D(ballPos, 0.5);
+
+            if(ballPos.x > 0 && ((robotKickArea.intersection(temp, &t1, &t2) && oppRobotArea.contains(ballPos))
+                       || (lastPMInitWasDribble && bc.contains(mahiPlayMaker->pos()) && bc.contains(oppRob))))
             {
-                CRobot*   agent         = wm->opp.active(i);
-                Vector2D  agentPos      = agent->pos, t1, t2;
-                Segment2D temp          = Segment2D(ballPos, currentPlan.passPos);
-                Circle2D  oppRobotArea  = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
-                Circle2D  ourRobotArea  = Circle2D(mahiPlayMaker->pos()
-                                                  + mahiPlayMaker->dir().norm() * 0.08, 0.08);
-                Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
-
-
-                if((robotKickArea.intersection(temp, &t1, &t2) && ballPos.x > 0) &&
-         (lastPMInitWasDribble || (oppRobotArea.contains(ballPos) /*&& ourRobotArea.contains(ballPos)*/)))
+                if(lastPMInitWasDribble && bc.contains(mahiPlayMaker->pos()) && bc.contains(oppRob))
                 {
-                    dribbleIntention.restart();
-                    lastPMInitWasDribble = true;
-                    oppRob = wm->opp.active(i)->pos;
-                    debug(QString("WOW we are dribbling"), D_PARSA);
-                    notDribble = false;
-                    currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
-                    for(size_t i = 0;i < agentSize;i++) {
-                        if(i < 1)
-                            currentPlan.positionAgents[i].region = DynamicEnums::Supporter;
-                        else
-                            currentPlan.positionAgents[i].region = DynamicEnums::Best;
-                        currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
-                    }
-                    break;
+
                 }
+                else if(robotKickArea.intersection(temp, &t1, &t2) && oppRobotArea.contains(ballPos) /*&& ourRobotArea.contains(ballPos)*/)
+                {
+                    oppRob = wm->opp.active(i)->pos;
+                }
+                dribbleIntention.restart();
+                lastPMInitWasDribble = true;
+                debug(QString("WOW we are dribbling"), D_PARSA);
+                notDribble = false;
+                currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
+                for(size_t i = 0;i < agentSize;i++) {
+                    if(i < 1)
+                        currentPlan.positionAgents[i].region = DynamicEnums::Supporter;
+                    else
+                        currentPlan.positionAgents[i].region = DynamicEnums::Best;
+                    currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+                }
+                break;
             }
         }
-        if(notDribble == true)
-        {
-            lastPMInitWasDribble = true;
-//            debug(QString("NOOOOOO we are not Dribbling"), D_PARSA);
+    }
+    if(notDribble == true)
+    {
+        if(critical) {
+            currentPlan.mode = DynamicEnums::Critical;
+            {
+                lastPMInitWasDribble = true;
+                //            debug(QString("NOOOOOO we are not Dribbling"), D_PARSA);
+                currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
+                for(size_t i = 0;i < agentSize;i++) {
+                    currentPlan.positionAgents[i].region = DynamicEnums::Best;
+                    currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+                }
+            }
+
+        }
+        // if Defense isn't clearing and
+        // we have ball and
+        // shot prob isn't more than 50% and
+        // there isn't a critical situation and
+        // we don't have positioning agent
+        else if (agentSize == 0) {
+            currentPlan.mode = DynamicEnums::NoPositionAgent;
             currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
+        }
+        // we have ball and
+        // shot prob isn't more than 50% and
+        // there isn't a critical situation and
+        // we have positioning agents
+        // it's needed to be fast
+        else if(fast) {
+            currentPlan.mode = DynamicEnums::Fast;
+            currentPlan.playmake.init(DynamicEnums::Pass, DynamicEnums::Best);
             for(size_t i = 0;i < agentSize;i++) {
                 currentPlan.positionAgents[i].region = DynamicEnums::Best;
                 currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
             }
         }
-
-    }
-    // if Defense isn't clearing and
-    // we have ball and
-    // shot prob isn't more than 50% and
-    // there isn't a critical situation and
-    // we don't have positioning agent
-    else if (agentSize == 0) {
-        currentPlan.mode = DynamicEnums::NoPositionAgent;
-        currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
-    }
-    // we have ball and
-    // shot prob isn't more than 50% and
-    // there isn't a critical situation and
-    // we have positioning agents
-    // it's needed to be fast
-    else if(fast) {
-        currentPlan.mode = DynamicEnums::Fast;
-        currentPlan.playmake.init(DynamicEnums::Pass, DynamicEnums::Best);
-        for(size_t i = 0;i < agentSize;i++) {
-            currentPlan.positionAgents[i].region = DynamicEnums::Best;
-            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
-        }
-    }
-    // if Defense isn't clearing and
-    // we have ball and
-    // shot prob isn't more than 50% and
-    // there isn't a critical situation and
-    // we have positioning agents
-    // there's no need to be fast and
-    // there is no plan for this situation
-    else {
-        currentPlan.mode = DynamicEnums::NoPlanExeption;
-        currentPlan.playmake.init(DynamicEnums::Pass, DynamicEnums::Best);
-        for(size_t i = 0; i < agentSize; i++) {
-            currentPlan.positionAgents[i].region = DynamicEnums::Best;
-            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+        // if Defense isn't clearing and
+        // we have ball and
+        // shot prob isn't more than 50% and
+        // there isn't a critical situation and
+        // we have positioning agents
+        // there's no need to be fast and
+        // there is no plan for this situation
+        else {
+            currentPlan.mode = DynamicEnums::NoPlanExeption;
+            currentPlan.playmake.init(DynamicEnums::Pass, DynamicEnums::Best);
+            for(size_t i = 0; i < agentSize; i++) {
+                currentPlan.positionAgents[i].region = DynamicEnums::Best;
+                currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+            }
         }
     }
 }
@@ -679,7 +688,7 @@ void CDynamicAttack::chooseBestPositons()
     {
         //if it wants to get a dribble position:
         if(currentPlan.positionAgents[i].region == DynamicEnums::Supporter ||
-           dribbleIntention.msec() < 6000)
+           (i == 0 && dribbleIntention.elapsed() < 3000))
         {
             cntD++;
             double x, y;
@@ -1093,9 +1102,9 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
     double points[10] = {};
     for (int i = 0; i < _points.size(); i++)
         temp.append(_points.at(i));
+//    debug(QString("DIntention %3").arg(dribbleIntention.elapsed()), D_PARSA);
     //if we are dribbling
-         debug(QString("DIntention %3").arg(dribbleIntention.msec()), D_PARSA);
-    if(dribbleIntention.msec() < 6000)
+    if(dribbleIntention.elapsed() < 3000)
     {
         currentPlan.passPos = temp[0];
         return;
