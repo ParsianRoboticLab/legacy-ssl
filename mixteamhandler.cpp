@@ -650,7 +650,7 @@ void CMixTeamHandler::gotopointExecute(multi_team_comm::RobotPlan plan)
 
     robots[index]->setTargetDir(targetDir + target);
     draw(Circle2D(targetDir + target , 0.05), "black");
-    qDebug() << "res   x : " << (targetDir + target).x << "   y : " << (targetDir + target).y;
+//    qDebug() << "res   x : " << (targetDir + target).x << "   y : " << (targetDir + target).y;
     robots[index]->setTarget(target);
 
     robots[index]->execute();
@@ -842,6 +842,9 @@ CMixTeamCoach::CMixTeamCoach(){
     ShootRatioBlock  = policy()->Mark_ShootRatioBlock() / 100.0;
     PassRatioBlock   = (100  - policy()->Mark_PassRatioBlock()) / 100.0;
 
+    goalKeeper = NULL;
+//    goalKeeper = knowledge->getAgent(knowledge->mixGoaleID);
+
     playMakeIntentionTimer.start();
 }
 
@@ -851,11 +854,14 @@ void CMixTeamCoach::goaliePacket(){
 
     CmixTeamGoalie * copyGoalieDef = new CmixTeamGoalie();
 
+
     copyGoalieDef->setGoalKeeperStateMixTeam();
+
+    copyGoalieDef->initGoalKeeper(goalKeeper);//added
+
     copyGoalieDef->setGoalKeeperTargetPointMixTeam();
 
     copyGoalieDef->updateGoalKeeperTarget();
-
 
     plan.role = multi_team_comm::RobotPlan::Goalie;
     plan.id = knowledge->goalie->id();
@@ -1203,6 +1209,7 @@ void CMixTeamCoach::testDefense(){
     ids = wm->our.data->activeAgents;
 
     // goalie
+    //here  knowledge->goalie has data
     goaliePacket();
 
     // defense
@@ -1214,6 +1221,8 @@ void CMixTeamCoach::testDefense(){
     nonsenseOffense();
 
     makeMasterPlanPacket();
+    qDebug() << "atousa";
+
 }
 
 CKnowledge::ballPossesionState CMixTeamCoach::ballPossess(){
