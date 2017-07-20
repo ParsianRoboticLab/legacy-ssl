@@ -719,7 +719,7 @@ void CDynamicAttack::chooseBestPositons()
                 }
                 else
                 {
-                    thrshDribble = 0.3;
+                    thrshDribble = 0.2;
                     if(lastYDrib == 10)
                     {
                         if(ballPos.y > 0)
