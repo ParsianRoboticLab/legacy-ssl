@@ -999,15 +999,17 @@ void CSkillKick::jTurn()
         targetForJturnPos = ballPos + (ballPos - target).norm()*0.08;
         if(movementDir > 20)
         {
-            if(wm->ball->vel.length() > 0.3)
-                shift = 8 + (1-agentPos.dist(ballPos))*20;
+            if(wm->ball->vel.length() > 0.2)
+                shift = 7 + (1-agentPos.dist(ballPos))*15;
             else
                 shift = 10 + (1-agentPos.dist(ballPos))*25;
+
         }
         else if(movementDir < -20)
         {
-            if(wm->ball->vel.length() > 0.3)
-                shift = -8 - (1-agentPos.dist(ballPos))*20;
+            if(wm->ball->vel.length() > 0.2)
+                shift = -7 - (1-agentPos.dist(ballPos))*15;
+
             else
                 shift = -10 - (1-agentPos.dist(ballPos))*25;
         }
@@ -1044,6 +1046,7 @@ void CSkillKick::jTurn()
     posPid->error = targetForJturnPos.dist(agentPos);
 
     ////////////set Active adaptive PIDs
+
 
 
 

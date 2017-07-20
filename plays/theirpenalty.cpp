@@ -31,8 +31,10 @@ void CTheirPenalty::execute_0(){
 
 void CTheirPenalty::execute_1(){
 	executedCycles++;
-
-	appendRemainingsAgents(positionAgents);
+        if (wm->gs->penalty_shootout()) {
+            choosePlayMaker();
+        }
+            appendRemainingsAgents(positionAgents);
 
     setFormation("TheirP");
 }
