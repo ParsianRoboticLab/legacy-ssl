@@ -28,7 +28,9 @@ void CMixTeamHandler::master()
     if(knowledge->getGameState() == CKnowledge::Stop){
         debug("initial : stop", D_ATOUSA);
         initialPositioning();
+
         initialMakePacket(); // this is for initial task
+
         //        testALL(); // this is just for testing slave
 
     }
@@ -585,7 +587,7 @@ void CMixTeamHandler::mixReadPacket()
             if(knowledge->ourAgentIDsMixTeam.contains(ptemp.robot_id())){
                 int validation = isPlanValid(ptemp);
                 bool v = isPosLocValid(ptemp.nav_target().loc());
-                debug(QString("validation : %1, id : %2").arg(v).arg(ptemp.robot_id()), D_ATOUSA);
+                //                debug(QString("validation : %1, id : %2").arg(v).arg(ptemp.robot_id()), D_ATOUSA);
 
                 if(validation != -1)
                     executePlan(ptemp, validation);
@@ -605,21 +607,26 @@ int CMixTeamHandler::isPlanValid(multi_team_comm::RobotPlan plan)
 void CMixTeamHandler::executePlan(multi_team_comm::RobotPlan plan, int validation)
 {
     if(validation == 1){//valid pos
+
         if(!isShotTargetValid(plan)){
             if(plan.has_role() && plan.role() == multi_team_comm::RobotPlan::Offense){//rcv
+                debug(QString("id : %1 rcv").arg(plan.robot_id()), D_ATOUSA);
                 receiveExecute(plan);;
             }
             else{//gotopoint
+                debug(QString("id : %1 gpa").arg(plan.robot_id()), D_ATOUSA);
                 gotopointExecute(plan);
             }
         }
-        else{//kick --> in beshe one touch
-            //            kickExecute(plan);
+        else{//one touch
+            debug(QString("id : %1 oneTouch").arg(plan.robot_id()), D_ATOUSA);
+
             oneTouchExecute(plan);
         }
     }
     else if(validation == 2){//invalid pos & valid shotTarget
         //kick --> property avaz mishe (vase goalie avoid penalty area nadarim)
+        debug(QString("id : %1 kick").arg(plan.robot_id()), D_ATOUSA);
         kickExecute(plan);
     }
     else if(validation == 3){//invalid pos & invald shotTarget & valid role(goalie)
@@ -643,7 +650,7 @@ void CMixTeamHandler::gotopointExecute(multi_team_comm::RobotPlan plan)
     }
     else
         targetDir = Vector2D(1,0);
-    draw(Circle2D(targetDir + target , 0.05), "black");
+    draw(Circle2D(target , 0.3), "black");
 
     robots[index]->setTargetDir(targetDir + target);
     draw(Circle2D(targetDir + target , 0.05), "black");
@@ -675,8 +682,9 @@ void CMixTeamHandler::kickExecute(multi_team_comm::RobotPlan plan)
     else
         robots[index]->setAvoidPenaltyArea(true);
 
-    //    if(wm->ball->vel.length() < 0.1)
-    robots[index]->execute();
+    if(wm->ball->vel.length() < 0.1)    // control kick skill
+        robots[index]->execute();
+
 }
 
 bool CMixTeamHandler::isPathClear(Vector2D _pos1, Vector2D _pos2, double _radius, double treshold) {
@@ -824,8 +832,10 @@ void CMixTeamHandler::testALL()
         selectedIDM = 1;
         selectedPosM = Vector2D(wm->field->oppGoal().x - 0.5, -2.5);
         selectedPosS = Vector2D(wm->field->oppGoal().x - 1, 2);
-        packet1();
-        //        packet2();
+
+//        packet1();    // test gtp, kick & 1touch
+        packet2();      // test gtp, kick, 1touch & rcv
+
         testSlaveFlag = true;
     }
     else{
@@ -1033,74 +1043,102 @@ void CmixTeamGoalie::setGoalKeeperTargetPointMixTeam(){
 
 void CmixTeamGoalie::updateGoalKeeperTarget(){
 
-    if(playOffMode){
-        goalieTarget = goalKeeperTarget;
-        goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos )*(3.14/180.0);
-    }
-    else if(stopMode){
-        goalieTarget = goalKeeperTarget;
-        goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos )*(3.14/180.0);
-    }
-    else if(ballIsOutOfField){
-        goalieTarget = goalKeeperTarget;
-        goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos )*(3.14/180.0);
-    }
-    else if(ballBehindGoalie){  // kick
-        goalieTarget.invalidate();
-        goalieShottarget = wm->field->oppGoal();
-        goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos )*(3.14/180.0);
-    }
-    else if(besidePoleFlag){    // kick
-        Rect2D fieldRect(Vector2D(- _FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0) + Vector2D(-0.005,-0.005),Vector2D(_FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0)+Vector2D(+0.005,+0.005));
-        Line2D ballPrGoalLine(wm->ball->pos, Vector2D(wm->ball->pos.x,(wm->ball->pos.y + 0.01)));
-        Vector2D solut[2];
-        debug("Ball is beside the our goal" , D_AHZ , "red");
-        fieldRect.intersection(ballPrGoalLine, &solut[0], &solut[1]);
-        Vector2D noKickTarget = (solut[0].dist(wm->ball->pos) < solut[1].dist(wm->ball->pos)) ? solut[0] : solut[0];
+    QList<Vector2D> tempSol;
 
-        goalieTarget.invalidate();
-        goalieShottarget = noKickTarget;
-    }
-    else if(goalieClearMode && !dangerForGoalieClear){
-        if(wm->ball->vel.length() > 0.4 && wm->ball->vel.length() < 1.3){
-            goalieTarget = Segment2D(wm->ball->pos , wm->ball->pos + wm->ball->vel.norm()*100).nearestPoint(knowledge->goalie->pos());
-            goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos )*(3.14/180.0);
-        }
-        else{  // kick
-            goalieTarget.invalidate();
-            if(wm->ball->pos.y >= 0){
-                goalieShottarget = Vector2D(-3.5 , -2.5) - wm->field->ourGoal();
+    if(knowledge->goalie != NULL){
+        if(!wm->field->isInOurPenaltyArea(goalKeeperTarget)){
+            tempSol.append(wm->field->ourPAreaIntersect(Segment2D(knowledge->goalie->pos() , goalKeeperTarget)));
+            if(tempSol.size() == 1){
+                goalKeeperTarget = tempSol.at(0);
+
             }
-            else{
-                goalieShottarget = Vector2D(-3.5 , 2.5) - wm->field->ourGoal();
+            else if(tempSol.size() == 2){
+                goalKeeperTarget = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
             }
         }
-    }
-    else{
-        if(goalieOneTouch){
+        if(playOffMode){
+            debug("goalie gtp", D_FATEMEH);
             goalieTarget = goalKeeperTarget;
-            goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), knowledge->goalie->pos())*(3.14/180.0);
+            goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos );
+            goalieShottarget.invalidate();
         }
-        else if(dangerForGoalieClear){  // kick
-            if(dangerForInsideOfThePenaltyArea){
+        else if(stopMode){
+            debug("goalie gtp", D_FATEMEH);
+            goalieTarget = goalKeeperTarget;
+            goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos );
+            goalieShottarget.invalidate();
+        }
+        else if(ballIsOutOfField){
+            debug("goalie gtp", D_FATEMEH);
+            goalieTarget = goalKeeperTarget;
+            goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos );
+            goalieShottarget.invalidate();
+        }
+        else if(ballBehindGoalie){  // kick
+            debug("goalie kick", D_FATEMEH);
+            goalieTarget.invalidate();
+            goalieShottarget = wm->field->oppGoal();
+            goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos );
+        }
+        else if(besidePoleFlag){    // kick
+            debug("goalie kick", D_FATEMEH);
+            Rect2D fieldRect(Vector2D(- _FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0) + Vector2D(-0.005,-0.005),Vector2D(_FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0)+Vector2D(+0.005,+0.005));
+            Line2D ballPrGoalLine(wm->ball->pos, Vector2D(wm->ball->pos.x,(wm->ball->pos.y + 0.01)));
+            Vector2D solut[2];
+            debug("Ball is beside the our goal" , D_AHZ , "red");
+            fieldRect.intersection(ballPrGoalLine, &solut[0], &solut[1]);
+            Vector2D noKickTarget = (solut[0].dist(wm->ball->pos) < solut[1].dist(wm->ball->pos)) ? solut[0] : solut[0];
+
+            goalieTarget.invalidate();
+            goalieShottarget = noKickTarget;
+        }
+        else if(goalieClearMode && !dangerForGoalieClear){
+            if(wm->ball->vel.length() > 0.4 && wm->ball->vel.length() < 1.3){
+                debug("goalie gtp", D_FATEMEH);
+                goalieTarget = Segment2D(wm->ball->pos , wm->ball->pos + wm->ball->vel.norm()*100).nearestPoint(knowledge->goalie->pos());
+                goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos );
+                goalieShottarget.invalidate();
+            }
+            else{  // kick
+                debug("goalie kick", D_FATEMEH);
                 goalieTarget.invalidate();
                 if(wm->ball->pos.y >= 0){
-                    goalieShottarget = Vector2D(-4.5 , -6) - wm->field->ourGoal();
+                    goalieShottarget = Vector2D(-3.5 , -2.5) - wm->field->ourGoal();
                 }
                 else{
-                    goalieShottarget= Vector2D(-4.5 , 6) - wm->field->ourGoal();
+                    goalieShottarget = Vector2D(-3.5 , 2.5) - wm->field->ourGoal();
                 }
-
-            }
-            else{
-                goalieTarget = wm->field->oppGoal();
-                goalieHeading = Vector2D::dirTo_deg(knowledge->goalie->pos(), wm->ball->pos )*(3.14/180.0);
             }
         }
         else{
+            if(goalieOneTouch){
+                goalieTarget = goalKeeperTarget;
+                goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), knowledge->goalie->pos());
+                goalieShottarget.invalidate();//?
+            }
+            else if(dangerForGoalieClear){  // kick
+                if(dangerForInsideOfThePenaltyArea){
+                    goalieTarget.invalidate();
+                    if(wm->ball->pos.y >= 0){
+                        goalieShottarget = Vector2D(-4.5 , -6) - wm->field->ourGoal();
+                    }
+                    else{
+                        goalieShottarget= Vector2D(-4.5 , 6) - wm->field->ourGoal();
+                    }
 
-            goalieTarget = wm->field->oppGoal();
-            goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos )*(3.14/180.0);
+                }
+                else{
+                    goalieTarget = wm->field->oppGoal();
+                    goalieHeading = Vector2D::dirTo_deg(knowledge->goalie->pos(), wm->ball->pos );
+                    goalieShottarget.invalidate();
+                }
+            }
+            else{
+
+                goalieTarget = wm->field->oppGoal();
+                goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos );
+                goalieShottarget.invalidate();
+            }
         }
     }
 
@@ -1127,10 +1165,8 @@ void CMixTeamCoach::goaliePacket(){
     CmixTeamGoalie * copyGoalieDef = new CmixTeamGoalie();
 
 
-    copyGoalieDef->setGoalKeeperStateMixTeam();
-
     copyGoalieDef->initGoalKeeper(goalKeeper);//added
-
+    copyGoalieDef->setGoalKeeperStateMixTeam();
     copyGoalieDef->setGoalKeeperTargetPointMixTeam();
 
     copyGoalieDef->updateGoalKeeperTarget();
