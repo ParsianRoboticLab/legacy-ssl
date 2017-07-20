@@ -15,15 +15,22 @@ CMixTeamHandler::CMixTeamHandler()
         robots[i] = new CRolePlayOff();
         //        robots[i] = new CSkillGotoPointAvoid(NULL);
     }
+
+    testSlaveFlag = false;
+
+//    goaliM = new DefensePlan();
 }
 
 ///////////////////master/////////////////////
 void CMixTeamHandler::master()
 {
+    //goaliID bayad update beshe
     if(knowledge->getGameState() == CKnowledge::Stop){
         debug("initial : stop", D_ATOUSA);
         initialPositioning();
-        initialMakePacket();
+        initialMakePacket(); // this is for initial task
+//        testALL(); // this is just for testing slave
+
     }
     else if(knowledge->getGameState() == CKnowledge::Start){ //force start
         debug("task1 : forceStart", D_ATOUSA);
@@ -93,10 +100,10 @@ void CMixTeamHandler::initialMakePacket()
             plans[i]->set_robot_id(knowledge->getActiveAgents().at(j)->id());
             //            plans[i]->set_role(multi_team_comm::RobotPlan::Defense);//not important here
             poses[i] = plans[i]->mutable_nav_target();
-            poses[i]->set_heading(1.57);
-            //            planLoc[i] = plans[i]->mutable_shot_target();
-            //            planLoc[i]->set_x(allPositions[i].x * 100);
-            //            planLoc[i]->set_y(allPositions[i].y * 100);
+            poses[i]->set_heading(0);
+//            planLoc[i] = plans[i]->mutable_shot_target();
+//            planLoc[i]->set_x(allPositions[i].x * 100);
+//            planLoc[i]->set_y(allPositions[i].y * 100);
 
             posLoc[i] = poses[i]->mutable_loc();
             posLoc[i]->set_x(allPositions[i].x * 100);
@@ -117,7 +124,7 @@ void CMixTeamHandler::initialMakePacket()
         //for goalie
         plans[robotsInField-1] = packet->add_plans();
         plans[robotsInField-1]->set_robot_id(knowledge->mixGoaleID);
-        plans[robotsInField-1]->set_role(multi_team_comm::RobotPlan::Offense);
+        plans[robotsInField-1]->set_role(multi_team_comm::RobotPlan::Goalie);
         poses[robotsInField-1] = plans[robotsInField-1]->mutable_nav_target();
         //        planLoc[i] = plans[i]->mutable_shot_target();
         //        planLoc[i]->set_x(wm->field->oppGoal().x*100);
@@ -376,7 +383,6 @@ void CMixTeamHandler::task3MakePacket()
     multi_team_comm::Location *posLoc[robotsInField];
     multi_team_comm::Location *shotTarget[robotsInField];
 
-
     //master robot plan
     plans[0] = packet->add_plans();
     plans[0]->set_robot_id(selectedIDM);//for master to pass
@@ -498,12 +504,12 @@ void CMixTeamHandler::task3ReadPacket()
             if(knowledge->ourAgentIDsMixTeam.contains(ptemp.robot_id())){
                 if(ptemp.role() == multi_team_comm::RobotPlan::Offense){
                     if(isMaster){
-                        //                        debug(QString("kicker = %1").arg(ptemp.robot_id()), D_ATOUSA);
-                        executeMasterOffense(ptemp.robot_id(), Vector2D((double)ptemp.nav_target().loc().x()/100, (double)ptemp.nav_target().loc().y()/100), Vector2D((double)ptemp.shot_target().x()/100, (double)ptemp.shot_target().y()/100), slaveID);
+//                        debug(QString("kicker = %1").arg(ptemp.robot_id()), D_ATOUSA);
+                        executeTask3MasterOffense(ptemp.robot_id(), Vector2D((double)ptemp.nav_target().loc().x()/100, (double)ptemp.nav_target().loc().y()/100), Vector2D((double)ptemp.shot_target().x()/100, (double)ptemp.shot_target().y()/100), slaveID);
                     }
                     else{
-                        //                        debug(QString("onetoucher = %1").arg(ptemp.robot_id()), D_ATOUSA);
-                        executeSlaveOffense(ptemp.robot_id(), Vector2D((double)ptemp.nav_target().loc().x()/100, (double)ptemp.nav_target().loc().y()/100), Vector2D((double)ptemp.shot_target().x()/100, (double)ptemp.shot_target().y()/100));
+//                        debug(QString("onetoucher = %1").arg(ptemp.robot_id()), D_ATOUSA);
+                        executeTask3SlaveOffense(ptemp.robot_id(), Vector2D((double)ptemp.nav_target().loc().x()/100, (double)ptemp.nav_target().loc().y()/100), Vector2D((double)ptemp.shot_target().x()/100, (double)ptemp.shot_target().y()/100));
                     }
                 }
                 else{
@@ -529,7 +535,7 @@ void CMixTeamHandler::task3ReadPacket()
     }
 }
 
-void CMixTeamHandler::executeMasterOffense(int robotId, Vector2D point1, Vector2D point2, int slaveID)
+void CMixTeamHandler::executeTask3MasterOffense(int robotId, Vector2D point1, Vector2D point2, int slaveID)
 {
     kicker->setAgent(knowledge->getAgent(robotId));
     kicker->setDontKick(true);
@@ -558,7 +564,7 @@ void CMixTeamHandler::executeMasterOffense(int robotId, Vector2D point1, Vector2
     }
 }
 
-void CMixTeamHandler::executeSlaveOffense(int robotId, Vector2D point1, Vector2D point2)
+void CMixTeamHandler::executeTask3SlaveOffense(int robotId, Vector2D point1, Vector2D point2)
 {
     debug(QString("ownToucher = %1").arg(robotId), D_ATOUSA);
     oneToucher->setAgent(knowledge->getAgent(robotId));
@@ -570,7 +576,7 @@ void CMixTeamHandler::executeSlaveOffense(int robotId, Vector2D point1, Vector2D
 
 
 
-/////////mixed team game/////////
+/////////mixed team game(slave)/////////
 void CMixTeamHandler::mixReadPacket()
 {
     if(knowledge->ready){
@@ -581,7 +587,7 @@ void CMixTeamHandler::mixReadPacket()
                 bool v = isPosLocValid(ptemp.nav_target().loc());
                 debug(QString("validation : %1, id : %2").arg(v).arg(ptemp.robot_id()), D_ATOUSA);
 
-                if(validation != -1)
+                if(validation == 3)
                     executePlan(ptemp, validation);
             }
         }
@@ -590,43 +596,34 @@ void CMixTeamHandler::mixReadPacket()
 
 int CMixTeamHandler::isPlanValid(multi_team_comm::RobotPlan plan)
 {
-    if(isPosValid(plan)){
-        return 1;
-    }
-    else if(isShotTargetValid(plan)){
-        return 2;
-    }
-    else if(isRoleValid(plan)){
-        return 3;
-    }
-    else
-        return -1;//invalid
+    if      (isPosValid(plan))         return  1;
+    else if (isShotTargetValid(plan))  return  2;
+    else if (isRoleValid(plan))        return  3;
+    else                               return -1;//invalid
 }
 
 void CMixTeamHandler::executePlan(multi_team_comm::RobotPlan plan, int validation)
 {
     if(validation == 1){//valid pos
         if(!isShotTargetValid(plan)){
-            if(!plan.has_role()){//gotopoint
-                gotopointExecute(plan);
+            if(plan.has_role() && plan.role() == multi_team_comm::RobotPlan::Offense){//rcv
+                receiveExecute(plan);;
             }
-            else if(plan.role() == multi_team_comm::RobotPlan::Offense){//rcv
-                receiveExecute(plan);
-            }
-            else{//gtp
+            else{//gotopoint
                 gotopointExecute(plan);
             }
         }
-        else{//kick
-            kickExecute(plan);
+        else{//kick --> in beshe one touch
+//            kickExecute(plan);
+            oneTouchExecute(plan);
         }
     }
     else if(validation == 2){//invalid pos & valid shotTarget
-        //kick
+        //kick --> property avaz mishe (vase goalie avoid penalty area nadarim)
         kickExecute(plan);
     }
-    else if(validation == 3){//invalid pos & invald shotTarget & valid role(defense of goalie)
-        //goalie or defense execution
+    else if(validation == 3){//invalid pos & invald shotTarget & valid role(goalie)
+//        executeSlaveGoalie(plan);
     }
     else
         debug("plan validation error", D_ATOUSA);
@@ -656,17 +653,55 @@ void CMixTeamHandler::gotopointExecute(multi_team_comm::RobotPlan plan)
     robots[index]->execute();
 }
 
+
 void CMixTeamHandler::kickExecute(multi_team_comm::RobotPlan plan)
 {
+    //kick has no targetDir --> heading is not needed
     int index = knowledge->ourAgentIDsMixTeam.indexOf(plan.robot_id());
+    Vector2D target = Vector2D(plan.shot_target().x()*0.01 , plan.shot_target().y()*0.01);
+    bool isKick = isPathClear(wm->ball->pos, target, 0.5, 0.1);
+    int kickSpeed = knowledge->getProfile(plan.robot_id(), target.dist(wm->ball->pos), isKick);
+
     robots[index]->setAgent(knowledge->getAgent(plan.robot_id()));
     robots[index]->setSelectedSkill(roleSkill::Kick);
-    Vector2D target = Vector2D(plan.shot_target().x()*0.01 , plan.shot_target().y()*0.01);
     robots[index]->setTarget(target);
     robots[index]->setDoPass(true);
-    robots[index]->setKickSpeed(10);//?
-    //setKickSpeed should be based on profiles!?
-    robots[index]->execute();
+    //if path is clear --> isKick = true --> chip is false
+    robots[index]->setChip(!isKick);
+    robots[index]->setKickSpeed(kickSpeed);
+
+    if(plan.has_role() == multi_team_comm::RobotPlan::Goalie)
+        robots[index]->setAvoidPenaltyArea(false);
+    else
+        robots[index]->setAvoidPenaltyArea(true);
+
+//    if(wm->ball->vel.length() < 0.1)
+        robots[index]->execute();
+}
+
+bool CMixTeamHandler::isPathClear(Vector2D _pos1, Vector2D _pos2, double _radius, double treshold) {
+    Vector2D sol1,sol2,sol3;
+    Line2D _path(_pos1,_pos2);
+    Polygon2D _poly;
+    Circle2D(_pos2,_radius + treshold).
+            intersection(_path.perpendicular(_pos2),&sol1,&sol2);
+
+    _poly.addVertex(sol1);
+    sol3 = sol1;
+    _poly.addVertex(sol2);
+    Circle2D(_pos1,CRobot::robot_radius_new + treshold).
+            intersection(_path.perpendicular(_pos1),&sol1,&sol2);
+
+    _poly.addVertex(sol2);
+    _poly.addVertex(sol1);
+    _poly.addVertex(sol3);
+
+    draw(_poly,"red");
+
+    for(int i = 0;i < wm->opp.activeAgentsCount();i++) {
+        if(_poly.contains(wm->opp.active(i)->pos)) return false;
+    }
+    return true;
 }
 
 void CMixTeamHandler::receiveExecute(multi_team_comm::RobotPlan plan)
@@ -675,10 +710,34 @@ void CMixTeamHandler::receiveExecute(multi_team_comm::RobotPlan plan)
     int index = knowledge->ourAgentIDsMixTeam.indexOf(plan.robot_id());
     robots[index]->setAgent(knowledge->getAgent(plan.robot_id()));
     robots[index]->setSelectedSkill(roleSkill::ReceivePass);
-    robots[index]->setTarget(wm->ball->pos + wm->ball->vel);
-    //    draw(Circle2D(wm->ball->pos + wm->ball->vel, 0.1), "cyan");
+    Vector2D target = Vector2D(plan.nav_target().loc().x()*0.01, plan.nav_target().loc().y()*0.01);
+    robots[index]->setTarget(target);
+//    draw(Circle2D(wm->ball->pos + wm->ball->vel, 0.1), "cyan");
     robots[index]->setAvoidPenaltyArea(true);
-    robots[index]->setReceiveRadius(0.4);
+    robots[index]->setReceiveRadius(1);
+    //receivePass has no targetDir --> heading is not needed
+    robots[index]->execute();
+}
+
+void CMixTeamHandler::oneTouchExecute(multi_team_comm::RobotPlan plan)
+{
+    //oneTouch has no targetDir --> heading is not needed
+    int index = knowledge->ourAgentIDsMixTeam.indexOf(plan.robot_id());
+    Vector2D target = Vector2D(plan.shot_target().x()*0.01, plan.shot_target().y()*0.01);
+    bool isKick = isPathClear(wm->ball->pos, target, 0.5, 0.1);
+    int kickSpeed = knowledge->getProfile(plan.robot_id(), target.dist(wm->ball->pos), isKick);
+    Vector2D waitPos = Vector2D(plan.nav_target().loc().x()*0.01 , plan.nav_target().loc().y()*0.01);
+
+    robots[index]->setAgent(knowledge->getAgent(plan.robot_id()));
+    robots[index]->setSelectedSkill(roleSkill::OneTouch);
+
+    draw(Circle2D(target, 0.2), "blue");
+    robots[index]->setTarget(target);
+    draw(Circle2D(waitPos, 0.2), "blue");
+    robots[index]->setWaitPos(waitPos);
+
+    robots[index]->setChip(!isKick);
+    robots[index]->setKickSpeed(kickSpeed);
     robots[index]->execute();
 }
 
@@ -723,10 +782,10 @@ bool CMixTeamHandler::isRoleValid(multi_team_comm::RobotPlan plan)
 {
     if(!plan.has_role())
         return false;
-    else if(plan.role() == multi_team_comm::RobotPlan::Offense || plan.role() == multi_team_comm::RobotPlan::Default)
-        return false;
-    else
+    else if(plan.role() == multi_team_comm::RobotPlan::Goalie)
         return true;
+    else
+        return false;
 }
 
 float CMixTeamHandler::refineHeading(float heading)
@@ -744,6 +803,219 @@ float CMixTeamHandler::refineHeading(float heading)
     return heading;
 }
 
+void CMixTeamHandler::executeSlaveGoalie(multi_team_comm::RobotPlan plan)
+{
+    QList <CAgent*> deflist;
+    deflist.clear();
+
+//    knowledge->mixGoaleID = plan.robot_id();
+    qDebug() << "@ : " << plan.robot_id();
+    goaliM->initGoalKeeper(knowledge->getAgent(plan.robot_id()));
+    goaliM->initDefense(deflist);
+    goaliM->execute();
+}
+
+////////////test slave//////////////
+void CMixTeamHandler::testALL()
+{
+    draw(Circle2D(Vector2D(5.5, -3), 0.3), "blue");
+    if(testSlaveFlag || Circle2D(Vector2D(5.5, -3), 0.3).contains(wm->ball->pos)){
+        selectedIDS = 0;
+        selectedIDM = 1;
+        selectedPosM = Vector2D(wm->field->oppGoal().x - 0.5, -2.5);
+        selectedPosS = Vector2D(wm->field->oppGoal().x - 1, 2);
+        packet1();
+//        packet2();
+        testSlaveFlag = true;
+    }
+    else{
+        testGPA();
+    }
+}
+
+void CMixTeamHandler::testGPA()
+{
+    int robotsInField = knowledge->getActiveAgents().size();
+    qDebug() << "----" << knowledge->getActiveAgents().size();
+    multi_team_comm::TeamPlan *packet = new multi_team_comm::TeamPlan();
+    multi_team_comm::RobotPlan *plans[robotsInField];
+    multi_team_comm::Pose *poses[robotsInField];
+    multi_team_comm::Location *posLoc[robotsInField];
+    multi_team_comm::Location *shotTraget[robotsInField];
+
+    int i = 0;
+    for( int j = 0 ; j < robotsInField ; j++ ){
+        if( knowledge->getActiveAgents().at(j)->id() != knowledge->mixGoaleID ){
+            plans[i] = packet->add_plans();
+            plans[i]->set_robot_id(knowledge->getActiveAgents().at(j)->id());
+//            plans[i]->set_role(multi_team_comm::RobotPlan::Defense);//not important here
+            poses[i] = plans[i]->mutable_nav_target();
+            poses[i]->set_heading(1.57);
+//            planLoc[i] = plans[i]->mutable_shot_target();
+//            planLoc[i]->set_x(allPositions[i].x * 100);
+//            planLoc[i]->set_y(allPositions[i].y * 100);
+
+            posLoc[i] = poses[i]->mutable_loc();
+            posLoc[i]->set_x((wm->ball->pos.x-3) * 100);
+            posLoc[i]->set_y(allPositions[i].y * 100);
+            i++;
+        }
+    }
+
+//    debug(QString("yes: plan[0].x : %1").arg(plans[0]->has_nav_target()), D_ATOUSA);
+//    debug(QString("no: plan[0].x : %1, plan[0].y : %2").arg(plans[0]->shot_target().x()).arg(plans[0]->shot_target().y()), D_ATOUSA);
+
+    int k;
+    for(k = 0 ; i < robotsInField ; k++){
+        if(knowledge->getActiveAgents().at(k)->id() == knowledge->mixGoaleID)
+            break;
+    }
+    if( k != robotsInField ){
+        //for goalie
+        plans[robotsInField-1] = packet->add_plans();
+        plans[robotsInField-1]->set_robot_id(knowledge->mixGoaleID);
+        plans[robotsInField-1]->set_role(multi_team_comm::RobotPlan::Goalie);
+        poses[robotsInField-1] = plans[robotsInField-1]->mutable_nav_target();
+//        planLoc[i] = plans[i]->mutable_shot_target();
+//        planLoc[i]->set_x(wm->field->oppGoal().x*100);
+//        planLoc[i]->set_y(wm->field->oppGoal().y*100);
+        posLoc[robotsInField-1] = poses[robotsInField-1]->mutable_loc();
+        posLoc[robotsInField-1]->set_x((wm->field->ourGoal().x + 0.12)*100);
+        posLoc[robotsInField-1]->set_y(wm->field->ourGoal().y * 100);
+    }
+
+    static MixTeamSender *sender = new MixTeamSender(16);
+    sender->packet = packet;
+    sender->flag = true;
+}
+
+void CMixTeamHandler::packet1()
+{
+    int robotsInField = knowledge->getActiveAgents().size();
+    multi_team_comm::TeamPlan *packet = new multi_team_comm::TeamPlan();
+    multi_team_comm::RobotPlan *plans[robotsInField];
+    multi_team_comm::Pose *poses[robotsInField];
+    multi_team_comm::Location *posLoc[robotsInField];
+    multi_team_comm::Location *shotTarget[robotsInField];
+
+    //master robot plan
+    //kick
+    plans[0] = packet->add_plans();
+    plans[0]->set_robot_id(selectedIDM);//1
+//    plans[0]->set_role(multi_team_comm::RobotPlan::Offense);
+//    poses[0] = plans[0]->mutable_nav_target();
+    shotTarget[0] = plans[0]->mutable_shot_target();
+    shotTarget[0]->set_x(selectedPosS.x * 100);//shot target
+    shotTarget[0]->set_y(selectedPosS.y * 100);//shot target
+//    posLoc[0] = poses[0]->mutable_loc();
+//    posLoc[0]->set_x(selectedPosM.x * 100);//nav traget
+//    posLoc[0]->set_y(selectedPosM.y * 100);//nav target
+
+    //slave robot plan
+    //onetouch
+    plans[1] = packet->add_plans();
+    plans[1]->set_robot_id(selectedIDS);//for master to pass
+//    plans[1]->set_role(multi_team_comm::RobotPlan::Offense);
+    poses[1] = plans[1]->mutable_nav_target();
+    shotTarget[1] = plans[1]->mutable_shot_target();
+    shotTarget[1]->set_x(wm->field->oppGoal().x * 100);//shot target
+    shotTarget[1]->set_y(wm->field->oppGoal().y * 100);//shot target
+    posLoc[1] = poses[1]->mutable_loc();
+    posLoc[1]->set_x(selectedPosS.x * 100);//nav traget
+    posLoc[1]->set_y(selectedPosS.y * 100);//nav target
+
+
+    int i = 2;
+    for( int j = 0 ; j < robotsInField ; j++ ){
+        if( (knowledge->getActiveAgents().at(j)->id() != selectedIDS) && (knowledge->getActiveAgents().at(j)->id() != selectedIDM)){
+            plans[i] = packet->add_plans();
+            plans[i]->set_robot_id(knowledge->getActiveAgents().at(j)->id());
+            plans[i]->set_role(multi_team_comm::RobotPlan::Default);
+            poses[i] = plans[i]->mutable_nav_target();
+            //        planLoc[i] = plans[i]->mutable_shot_target();
+            //        planLoc[i] = allPositions[i];
+            posLoc[i] = poses[i]->mutable_loc();
+            posLoc[i]->set_x(allPositions[i].x * 100);
+            posLoc[i]->set_y(allPositions[i].y * 100);
+            i++;
+        }
+    }
+
+    static MixTeamSender *sender = new MixTeamSender(16);
+    sender->packet = packet;
+    sender->flag = true;
+}
+
+void CMixTeamHandler::packet2()
+{
+    int robotsInField = knowledge->getActiveAgents().size();
+    multi_team_comm::TeamPlan *packet = new multi_team_comm::TeamPlan();
+    multi_team_comm::RobotPlan *plans[robotsInField];
+    multi_team_comm::Pose *poses[robotsInField];
+    multi_team_comm::Location *posLoc[robotsInField];
+    multi_team_comm::Location *shotTarget[robotsInField];
+
+    //master robot plan
+    //kick
+    plans[0] = packet->add_plans();
+    plans[0]->set_robot_id(selectedIDM);//1
+//    plans[0]->set_role(multi_team_comm::RobotPlan::Offense);
+//    poses[0] = plans[0]->mutable_nav_target();
+    shotTarget[0] = plans[0]->mutable_shot_target();
+    shotTarget[0]->set_x(selectedPosS.x * 100);//shot target
+    shotTarget[0]->set_y(selectedPosS.y * 100);//shot target
+//    posLoc[0] = poses[0]->mutable_loc();
+//    posLoc[0]->set_x(selectedPosM.x * 100);//nav traget
+//    posLoc[0]->set_y(selectedPosM.y * 100);//nav target
+
+    //slave robot plan
+    //onetouch
+    plans[1] = packet->add_plans();
+    plans[1]->set_robot_id(selectedIDS);//for master to pass
+//    plans[1]->set_role(multi_team_comm::RobotPlan::Offense);
+    poses[1] = plans[1]->mutable_nav_target();
+    shotTarget[1] = plans[1]->mutable_shot_target();
+    shotTarget[1]->set_x(0 * 100);//shot target
+    shotTarget[1]->set_y(-2 * 100);//shot target
+    posLoc[1] = poses[1]->mutable_loc();
+    posLoc[1]->set_x(selectedPosS.x * 100);//nav traget
+    posLoc[1]->set_y(selectedPosS.y * 100);//nav target
+
+
+    //receiver
+    plans[2] = packet->add_plans();
+    plans[2]->set_robot_id(5);
+    plans[2]->set_role(multi_team_comm::RobotPlan::Offense);
+    poses[2] = plans[2]->mutable_nav_target();
+//    shotTarget[1] = plans[1]->mutable_shot_target();
+//    shotTarget[1]->set_x(wm->field->oppGoal().x * 100);//shot target
+//    shotTarget[1]->set_y(wm->field->oppGoal().y * 100);//shot target
+    posLoc[2] = poses[2]->mutable_loc();
+    posLoc[2]->set_x(0 * 100);//nav traget
+    posLoc[2]->set_y(-2 * 100);//nav target
+
+    int i = 3;
+    for( int j = 0 ; j < robotsInField ; j++ ){
+        if( (knowledge->getActiveAgents().at(j)->id() != selectedIDS) && (knowledge->getActiveAgents().at(j)->id() != selectedIDM)){
+            plans[i] = packet->add_plans();
+            plans[i]->set_robot_id(knowledge->getActiveAgents().at(j)->id());
+            plans[i]->set_role(multi_team_comm::RobotPlan::Default);
+            poses[i] = plans[i]->mutable_nav_target();
+            //        planLoc[i] = plans[i]->mutable_shot_target();
+            //        planLoc[i] = allPositions[i];
+            posLoc[i] = poses[i]->mutable_loc();
+            posLoc[i]->set_x(allPositions[i].x * 100);
+            posLoc[i]->set_y(allPositions[i].y * 100);
+            i++;
+        }
+    }
+
+    static MixTeamSender *sender = new MixTeamSender(16);
+    sender->packet = packet;
+    sender->flag = true;
+}
+
+// CMixTeamCoach Class
 
 
 
@@ -963,14 +1235,14 @@ void CMixTeamCoach::setDefPositions(){
 
     // defense
     defensePos = defPos.getDefPositions(wm->ball->pos, defenseCount, 1.5, 3);
-
-    oppPos.clear();
+//    oppPos.clear();
     for(int i=0; i<wm->opp.activeAgentsCount(); i++){
-        oppPos.append(wm->opp.active(i)->pos);
+//        oppPos.append(wm->opp.active(i)->pos);
+        oppPos[i] = wm->opp.active(i)->pos;
     }
 
     // mark
-    sortedDangerousOpp = sortdangerpassplayoff(oppPos);
+    sortedDangerousOpp = sortdangerpassplayoff();
     markPos.clear();
 
     if(markCount <= sortedDangerousOpp.size())
@@ -1185,7 +1457,8 @@ void CMixTeamCoach::makeMasterPlanPacket(){
             posLoc[i] = poses[i]->mutable_loc();
             posLoc[i]->set_x(robotsPlan.at(i).location.x*100);
             posLoc[i]->set_y(robotsPlan.at(i).location.y*100);
-            draw(Circle2D(robotsPlan.at(i).location, 0.2), QColor(Qt::cyan));
+
+            draw(Circle2D(robotsPlan.at(i).location, 0.2), "blue");
         }
 
         if(robotsPlan.at(i).shotTarget.isValid()){                  // shot target
@@ -1214,16 +1487,20 @@ void CMixTeamCoach::testDefense(){
     //here  knowledge->goalie has data
     goaliePacket();
 
+
     // defense
     decideMarkAndDefenseCount();
+
+
     setDefPositions();
+
     defDynamicAssigning();
+
 
     // offense
     nonsenseOffense();
 
     makeMasterPlanPacket();
-    qDebug() << "atousa";
 
 }
 
@@ -1316,7 +1593,7 @@ CMixTeamCoach::SPosAndHeading CMixTeamCoach::PassBlockRatio(double ratio, Vector
     return temp;
 }
 
-QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayoff(QList<Vector2D> oppposdanger){
+QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayoff(){
     double danger;
     /////////////// Polygon
     double radius = .1, treshold = 1;
@@ -1372,23 +1649,23 @@ QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayoff(QList<
     QList<CMixTeamCoach::SDangerousOpp> output;
     CMixTeamCoach::SDangerousOpp dv;
     double Polycontain;
-    for(int i = 0; i<oppposdanger.count(); i++) {
-        if(Polycontain == _poly.contains(oppposdanger[i])) {
+    for(int i = 0; i<wm->opp.activeAgentsCount(); i++) {
+        if(Polycontain == _poly.contains(oppPos[i])) {
             Polycontain = 1;
         } else {
             Polycontain = 0;
         }
-        dv.Pos = oppposdanger[i];
+        dv.Pos = oppPos[i];
 
-        angle = Vector2D::angleOf(wm->field->ourGoalR(), oppposdanger[i], wm->field->ourGoalL() ).degree();
-        distancetoball =  (oppposdanger[i] - wm->ball->pos).length();
-        distancetogoal =  (oppposdanger[i] - wm->field->ourGoal()).length();
+        angle = Vector2D::angleOf(wm->field->ourGoalR(), oppPos[i], wm->field->ourGoalL() ).degree();
+        distancetoball =  (oppPos[i] - wm->ball->pos).length();
+        distancetogoal =  (oppPos[i] - wm->field->ourGoal()).length();
 
         ////poly
 
-        AngleP = Vector2D::angleOf( oppposdanger[i], wm->ball->pos, _path.projection(oppposdanger[i]) ).degree();
-        distanceToIntersectP = _path.dist(oppposdanger[i]); //distanse of opponent to the path
-        distanceToBallProjectionP = _path.projection(oppposdanger[i]).length(); //distance of the ball to the projection of opponent to the path
+        AngleP = Vector2D::angleOf( oppPos[i], wm->ball->pos, _path.projection(oppPos[i]) ).degree();
+        distanceToIntersectP = _path.dist(oppPos[i]); //distanse of opponent to the path
+        distanceToBallProjectionP = _path.projection(oppPos[i]).length(); //distance of the ball to the projection of opponent to the path
 
         danger1 = (KA * fabs(angle) / RangeofAngle) + ( KDB *( 1 - (distancetoball / RangeofDistancetoBall)) ) + (KDG * (1 -(distancetogoal / RangeofDistancetoGoal)));
         danger2 = KAP * ( 1 - AngleP/RangeofAngleP) + KDBP * (1 - distanceToBallProjectionP/RangeofdistanceToBallProjectionP ) + KDIP * (1 - distanceToIntersectP / RangeofdistanceToIntersectP);
@@ -1401,10 +1678,10 @@ QList<CMixTeamCoach::SDangerousOpp > CMixTeamCoach::sortdangerpassplayoff(QList<
 
         dv.danger = danger;
         output.append(dv);
-        draw(QString("HMD danger=%1").arg(danger), oppposdanger[i] + Vector2D(0,0.3), QColor(Qt::red));
+        draw(QString("HMD danger=%1").arg(danger), oppPos[i] + Vector2D(0,0.3), QColor(Qt::red));
         //draw(_poly, QColor(Qt::blue));
 
-        //        draw(QString("mindistance%1").arg(mintempdis), oppposdanger[i] + Vector2D(0,0.5), QColor(Qt::blue));
+        //        draw(QString("mindistance%1").arg(mintempdis), oppPos[i] + Vector2D(0,0.5), QColor(Qt::blue));
     }
     ///sorting the Qlist
     for(int i = 0; i< output.count(); i++) {

@@ -3099,10 +3099,6 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
         debug(QString("Third"),D_HAMED);
         pos = wm->ball->pos + (opp - wm->ball->pos) * (1 + 0.15 / distance);
     }
-//<<<<<<< HEAD
-//    if((wm->field->ourGoal() - pos).length() < markRadiusStrict){
-//        tempQlist.append(test.getIntersectionWithPenaltyAreaDef(2, tempSeg, false));
-//=======
 
     if(!wm->field->AHZOurPAreaIntersect(isInPenaltyArea).isEmpty()){
         tempVec.append(wm->field->AHZOurPAreaIntersect(tempSeg));
@@ -3123,7 +3119,6 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
                 tempQlist.append(sol);
             }
 
-//>>>>>>> develop
         tempQlist.append( wm->ball->pos - opp);
         draw(tempSeg, "red");
         debug(QString("this is in the penalty area, Block pass Mode"), D_HAMED);

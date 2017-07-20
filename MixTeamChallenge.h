@@ -7,6 +7,7 @@
 
 void CMainApplication::MixTeamChallenge()
 {
+    //ambiguity
     knowledge->updateGameState();
     knowledge->updatePlotterData();
 

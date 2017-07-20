@@ -3,6 +3,7 @@
 
 #include <mainapplication.h>
 #include <base.h>
+#include "plans/defenseplan.h"
 #include "proto/multi_team_communication.pb.h"
 #include "mixteamsender.h"
 #include "mixteamreader.h"
@@ -35,8 +36,8 @@ public:
     Vector2D selectedPosS;//slave pos for task3
     Vector2D selectedPosM;//master pos for task3
 
-    ////////master part/////
 
+    ////////master part/////
     void master();
     void initialPositioning();
     void initialMakePacket();
@@ -52,19 +53,17 @@ public:
     Vector2D getXYByAngleOurGoal(double _angle, double _radius);
 
 
-    ////////slave part/////
+    ////////slave part/////////
     void slave(bool isM);
     void initialReadPacket();
     void task3ReadPacket();
-    void executeMasterOffense(int, Vector2D, Vector2D, int);
-    void executeSlaveOffense(int, Vector2D, Vector2D);
-//    void execute();
-//    CAgent **agents;
+    void executeTask3MasterOffense(int, Vector2D, Vector2D, int);
+    void executeTask3SlaveOffense(int, Vector2D, Vector2D);
 
     ///////mixed team game//////
 
     CRolePlayOff *robots[6];
-//    CSkillGotoPointAvoid *robots[6];
+    DefensePlan *goaliM;
 
     void initialSkills();
     void mixReadPacket();
@@ -80,6 +79,16 @@ public:
     void gotopointExecute(multi_team_comm::RobotPlan plan);
     void kickExecute(multi_team_comm::RobotPlan plan);
     void receiveExecute(multi_team_comm::RobotPlan plan);
+    void oneTouchExecute(multi_team_comm::RobotPlan plan);
+    bool isPathClear(Vector2D _pos1, Vector2D _pos2, double _radius, double treshold);
+    void executeSlaveGoalie(multi_team_comm::RobotPlan plan);
+
+    ////////////////test slave///////////
+    bool testSlaveFlag;
+    void testALL();
+    void testGPA();
+    void packet1();
+    void packet2();
 };
 
 
@@ -143,7 +152,8 @@ public:
     QList<Vector2D> positioningPos;
 
     QList<SDangerousOpp> sortedDangerousOpp;
-    QList<Vector2D> oppPos;
+//    QList<Vector2D> oppPos;
+    Vector2D oppPos[11];
 
     double markRadiusStrict;
     double ShootRatioBlock, PassRatioBlock;
@@ -171,7 +181,7 @@ public:
     CMixTeamCoach::SPosAndHeading ShootBlockRatio(double ratio, Vector2D opp);
     CMixTeamCoach::SPosAndHeading PassBlockRatio(double ratio, Vector2D opp);
 
-    QList<CMixTeamCoach::SDangerousOpp > sortdangerpassplayoff(QList<Vector2D> oppposdanger);
+    QList<CMixTeamCoach::SDangerousOpp > sortdangerpassplayoff();
 
     bool isInTheIndirectAreaShoot(Vector2D opp);
     bool isInTheIndirectAreaPass(Vector2D opp);
