@@ -8,3 +8,4 @@ echo "$l : "
 echo `../ssl-visual-planner/Visual_Planner update $l`
 fi
 done
+rm \(copy\).* temppo.db 
