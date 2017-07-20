@@ -1778,16 +1778,8 @@ void DefensePlan::executeGoalKeeper(){
     playOnMode = knowledge->isStart();
     stopMode = knowledge->isStop();
     QList<Vector2D> tempSol;
+    tempSol.clear();
     if(goalKeeperAgent != NULL){
-        if(!wm->field->isInOurPenaltyArea(goalKeeperTarget)){
-            tempSol.append(wm->field->ourPAreaIntersect(Segment2D(knowledge->goalie->pos() , goalKeeperTarget)));
-            if(tempSol.size() == 1){
-                goalKeeperTarget = tempSol.at(0);
-            }
-            else if(tempSol.size() == 2){
-                goalKeeperTarget = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
-            }
-        }
         if(playOffMode){
             AHZSkills = gpa[knowledge->goalie->id()];
             debug("Their Indirect" , D_AHZ);
@@ -1911,7 +1903,7 @@ void DefensePlan::executeGoalKeeper(){
                     AHZSkills = kickSkill;
                     kickSkill->setTolerance(10);
                     kickSkill->setDontKick(false);
-                    kickSkill->setSlow(true);
+                    kickSkill->setSlow(false);
                     kickSkill->setSpin(false);
                     kickSkill->setChip(false);
                     kickSkill->setAvoidPenaltyArea(false);
@@ -1953,6 +1945,25 @@ void DefensePlan::executeGoalKeeper(){
             }
             draw(Circle2D(goalKeeperTarget , 0.05) , 0 , 360 , "black" , true);
         }
+        if(!wm->field->isInOurPenaltyArea(goalKeeperTarget) && !goalieOneTouch){
+            tempSol.append(wm->field->ourPAreaIntersect(Segment2D(wm->field->ourGoal() , goalKeeperTarget)));
+            if(tempSol.size() == 1){
+                goalKeeperTarget = tempSol.at(0);
+            }
+            else if(tempSol.size() == 2){
+                goalKeeperTarget = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
+            }
+        }
+        if(!wm->field->isInOurPenaltyArea(knowledge->goalie->pos()) && !goalieOneTouch){
+            tempSol.append(wm->field->ourPAreaIntersect(Segment2D(wm->field->ourGoal() , knowledge->goalie->pos())));
+            if(tempSol.size() == 1){
+                goalKeeperTarget = tempSol.at(0);
+            }
+            else if(tempSol.size() == 2){
+                goalKeeperTarget = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
+            }
+        }
+
     }
 }
 
