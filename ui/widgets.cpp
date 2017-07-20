@@ -962,7 +962,7 @@ void CPlayOffWidget::updateModel() {
             qDebug() << "PLAN";
             file = new QStandardItem(guiPlan.planFile);
             QString temp = guiPlan.package;
-            file->setToolTip("<html><img width=\"700\" src="+temp.replace(".","/") + "/" + guiPlan.planFile + ".png" +"/></html>");
+            file->setToolTip("<html><img src="+temp.replace(".","/") + "/" + guiPlan.planFile + ".png" +"/></html>");
             pkg->appendRow(file);
         }
         planCounter++;
