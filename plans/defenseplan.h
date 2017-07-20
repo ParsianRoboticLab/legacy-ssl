@@ -65,12 +65,13 @@ protected:
     ////////////////////////////// AHZ ///////////////////    
     Line2D getBisectorLine(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
     Segment2D getBisectorSegment(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
+    Segment2D getOppNearestToBallDirInTheirIndirectMode(int lastDirectionSize);
     void manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkBlockShotInPlayOff(int _markAgentSize);
     void agentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs);
     bool isAgentsStuckTogether(QList<Vector2D> agentsPosition);
-    void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs);
-    void getIntersectionWithPenaltyAreaAHZ(Segment2D , Vector2D sol1 , Vector2D sol2);
+    bool isStateGoingFromIndirectToTransient();
+    void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs);    
     bool isIndirectArea(Vector2D);    
     //atousa
     Vector2D getGoaliePositionInOneDef(Vector2D _ballPos, double _limit1, double _limit2);
@@ -97,17 +98,19 @@ protected:
     bool changeInMarkPlanFlag;
     bool manToManMarkBlockPassFlag;
     bool ballBool;
+    bool goalKeeperPredictionModeInPlayOff;
     QString lastStateForMark;
     QString stateForMark;
     int lastOpponentAgentsToBeMarkSize;
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;
-    QList <Vector2D> tenLastOpponentDirection;    
+    QList <Vector2D> lastOppNearestToBallDirections;
     Vector2D opponentPasserDirection;
-    Vector2D opponentPasserPossition;
-    Vector2D sumOfLastOpponentDirection;
+    Vector2D oppNearestToBallPossition;
+    Vector2D sumOfLastOpponentDirections;
     Vector2D tempAHZ;
     Vector2D sumOfLastOpponentPosition;
+    Vector2D finalOppNearestToBallDirection;
 
     int AHZCount;        
     ///////////////////////////////////////////////////
