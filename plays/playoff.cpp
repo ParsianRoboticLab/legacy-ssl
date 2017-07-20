@@ -229,7 +229,7 @@ void CPlayOff::staticExecute() {
             fillRoleProperties();
             posExecute();
             checkEndState();
-
+            debug(QString("ID : %1, ST : %2").arg(1).arg(positionAgent[1].stateNumber), D_MAHI);
             if(masterPlan->common.currentSize > 1 && havePassInPlan) {
                 passManager();
             }
@@ -1108,6 +1108,7 @@ bool CPlayOff::isAllTasksDone() {
 }
 
 bool CPlayOff::isTimeOver() {
+
     if (setTimer) {
         tempStart = knowledge->getCurrentTime();
     }
@@ -1115,7 +1116,7 @@ bool CPlayOff::isTimeOver() {
     if (!Circle2D(lastBallPos, 0.5).contains(wm->ball->pos)) {
         setTimer = false;
         debug(QString("Time That Left: %1").arg(knowledge->getCurrentTime() - tempStart), D_DEBUG);
-        if(knowledge->getCurrentTime() - tempStart > 250) { // 2 Second
+        if(knowledge->getCurrentTime() - tempStart > 200*masterPlan->execution.passCount) { // 2 Second
             setTimer = true;
             return true;
         }
@@ -1124,6 +1125,9 @@ bool CPlayOff::isTimeOver() {
 }
 
 bool CPlayOff::isBallDirChanged() {
+
+    if (masterPlan->execution.passCount != 1) return false;
+
     // USE PASSER FORM INITIAL LEVEL
     const int& passer = masterPlan->execution.passer.id;
     const int& recive = masterPlan->execution.reciver.id;
@@ -1303,8 +1307,8 @@ void CPlayOff::checkEndState() {
                     }
                     continue;
                 }
-                positionAgent[i].stateNumber++;
-
+                    positionAgent[i].stateNumber++;
+                    debug(QString("ID : %1, ST : %2").arg(i).arg(positionAgent[i].stateNumber), D_MAHI);
             } else {
                 //                positionAgent[i].zombie = true;
                 ///Temp
@@ -1425,7 +1429,7 @@ void CPlayOff::assignReceive(CRolePlayOff* _roleAgent, const SPositioningAgent& 
     _roleAgent->setIgnoreAngle(_ignoreAngle);
     _roleAgent->setTarget(_posAgent.getArgs().staticPos);
     _roleAgent->setTargetDir(_posAgent.getArgs().staticAng); /** Just Matter when we use Ignore mode **/
-    _roleAgent->setReceiveRadius(_posAgent.getArgs().staticEscapeRadius);
+    _roleAgent->setReceiveRadius((double)_posAgent.getArgs().leftData/100);
     _roleAgent->setSelectedSkill(roleSkill::ReceivePass);
 }
 
@@ -1701,7 +1705,7 @@ void CPlayOff::assignTasks() {
                 tempPosArg.PassToId           = skill.targetAgent;
                 tempPosArg.PassToState        = skill.targetIndex;
 
-                if (skill.name == PassSkill) {
+                if (skill.name == PassSkill && positionAgent[i].positionArg.back().staticSkill == MoveSkill) {
                     positionAgent[i].positionArg.back().staticPos = POBALLPOS;
                 } else if (skill.name == ShotToGoalSkill
                            || skill.name == ChipToGoalSkill
@@ -1907,7 +1911,7 @@ bool CPlayOff::isKickDone(CRolePlayOff * _roleAgent) {
 
 bool CPlayOff::isReceiveDone(const CRolePlayOff * _roleAgent) {
     if(Circle2D(_roleAgent->getAgent()->pos(), 0.3).contains(wm->ball->pos)) {
-        if (wm->ball->vel.length() < 0.3)
+        if (wm->ball->vel.length() < 0.5)
             return true;
     }
     return false;
@@ -2019,13 +2023,16 @@ void CPlayOff::analysePass() {
     // TODO : need edit for mulitiple pass
     if (masterPlan != NULL) {
         // first : passer second : reciver
-        QPair<AgentPoint, AgentPoint> tPass;
+        QList<AgentPair> tPass;
         findThePasserandReciver(masterPlan->execution, tPass);
-        masterPlan->execution.passer .id     = tPass.first.id;
-        masterPlan->execution.passer .state  = tPass.first.state;
-        masterPlan->execution.reciver.id     = tPass.second.id;
-        masterPlan->execution.reciver.state  = tPass.second.state;
-
+        havePassInPlan = tPass.size();
+        masterPlan->execution.passCount = tPass.size();
+        if (havePassInPlan) {
+            masterPlan->execution.passer .id     = tPass.at(0).first.id;
+            masterPlan->execution.passer .state  = tPass.at(0).first.state;
+            masterPlan->execution.reciver.id     = tPass.at(0).second.id;
+            masterPlan->execution.reciver.state  = tPass.at(0).second.state;
+        }
     }
 
     qDebug() << "PI : " << masterPlan->execution.passer .id;
@@ -2054,54 +2061,41 @@ bool CPlayOff::criticalPlay() {
 }
 
 void CPlayOff::findThePasserandReciver(const NGameOff::SExecution & _plan,
-                                       AgentPair& _pair) {
+                                       QList<AgentPair>& _pairList) {
 
-    int counter = 0;
-    Q_FOREACH(QList<playOffRobot> agent, _plan.AgentPlan) {
-        int counter2 = 0;
-        Q_FOREACH(playOffRobot node, agent) {
-            Q_FOREACH(playOffSkill skill, node.skill) {
-                if (skill.name == PassSkill) {
-                    _pair.first.id    = counter;
-                    _pair.first.state = counter2;
-                    break;
+    QList<AgentPoint> passer;
+
+    for (int i = 0; i < _plan.AgentPlan.size(); i++) {
+        const QList<playOffRobot> & agent = _plan.AgentPlan.at(i);
+        for (int j = 0; j < agent.size(); j++) {
+            const playOffRobot& node = agent.at(j);
+            for (int k = 0; k < node.skill.size(); k++) {
+                const POffSkills& skill = node.skill.at(k).name;
+                if (skill == PassSkill) {
+                    passer.append(AgentPoint(i,j));
                 }
             }
-
-            if (_pair.first.id != -1) {
-                break;
-            }
-
-            counter2++;
-        }
-
-        if (_pair.first.id != -1) {
-            break;
-        }
-
-        counter++;
-    }
-
-    int &id = _pair.first.id;
-    int &st = _pair.first.state;
-
-    if (id >= 0 && id < _plan.AgentPlan.size()) {
-        if (st >= 0 && st < _plan.AgentPlan.at(id).size()) {
-
-            int si = (_plan.AgentPlan[id][st].skill[1].name) ? 1 : 2;
-
-
-            _pair.second.id    = _plan.AgentPlan[_pair.first.id]
-                    [_pair.first.state].
-                    skill[si].targetAgent;
-
-            _pair.second.state = _plan.AgentPlan[_pair.first.id]
-                    [_pair.first.state].
-                    skill[si].targetIndex;
-
         }
     }
 
+    for (int i = 0; i < passer.size(); i++) {
+        const int &id = passer.at(i).id;
+        const int &st = passer.at(i).state;
+
+        int si = (_plan.AgentPlan[id][st].skill[1].name == PassSkill) ? 1 : 2;
+        int rid = _plan.AgentPlan[id][st].skill[si].targetAgent;
+        int rs  = _plan.AgentPlan[id][st].skill[si].targetIndex;
+        debug(QString("PASS : %1, %2, %3, %4").arg(id).arg(st).arg(rid).arg(rs), D_MAHI);
+        AgentPoint tempReciver;
+        tempReciver.id    = rid;
+        tempReciver.state = rs;
+
+        AgentPair ap;
+        ap.first  = passer[i];
+        ap.second = tempReciver;
+        _pairList.append(ap);
+
+    }
 
 }
 

@@ -352,13 +352,14 @@ CPolicyWidget::CPolicyWidget()
     ADD_VALUE(Mark, Double , OppOmitLimitPlayon  , 2.0, "Opponent Ommit Limit Playon");
     ADD_VALUE(Mark, Double , OppOmitLimitPlayoff  , 2.0, "Opponent Ommit Limit Playoff");
     ADD_VALUE(Mark, Double , OppOmitLimitKickOff  , 2.0, "Opponent Ommit Limit KickOff");
-    ADD_VALUE(Mark, Double, ShootRatioBlock, 0.33, "Shoot Ratio Block");
-    ADD_VALUE(Mark, Double, PassRatioBlock, 0.33, "Pass Ratio Block");
+    ADD_VALUE(Mark, Double, ShootRatioBlock, 33.0 , "Shoot Ratio Block");
+    ADD_VALUE(Mark, Double, PassRatioBlock, 33.0, "Pass Ratio Block");
 
     ADD_VALUE(Mark, Bool, OmmitNearestToBallPlayon, false, "Ommit Nearest To ball Playon");
 
     ADD_VALUE(Mark, Bool , IntelligentMarkType, false, "Intelligent Mark Type");
     ADD_VALUE(Mark, Bool , IntelligentMarkPrediction, true, "Intelligent Mark Prediction");
+    ADD_VALUE(Mark, Double , VelReliability, 0.5 , "VelReliability");
 
     globalWorld=VarXML::read(globalWorld,"policy.xml");
 
@@ -610,7 +611,7 @@ IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , OmmitNearestToBallPlayon)
 
 IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , IntelligentMarkType)
 IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , IntelligentMarkPrediction)
-
+IMPL_VALUE(CPolicyWidget, Mark, double, Double, VelReliability)
 
 
 IMPL_VALUE(CPolicyWidget,OurDirect, bool, Bool, CornerChip)

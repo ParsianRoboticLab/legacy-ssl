@@ -13,7 +13,7 @@ bool DefensePlan::isAgentsStuckTogether(QList<Vector2D> agentsPosition){
     for(int i = 0 ; i < agentsPosition.size() ; i++){
         for(int j = 0 ; j < agentsPosition.size() ; j++){
             if(i != j){
-                if(agentsPosition.at(i).dist(agentsPosition.at(j)) <= 2 * CRobot::robot_radius_new){                    
+                if(agentsPosition.at(i).dist(agentsPosition.at(j)) <= 2 * CRobot::robot_radius_new){
                     return true;
                 }
             }
@@ -24,34 +24,107 @@ bool DefensePlan::isAgentsStuckTogether(QList<Vector2D> agentsPosition){
 
 void DefensePlan::agentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs){
     //// If defense agents stuck together , this function
+    stuckPositions.clear();
+    stuckIndexs.clear();
     for(int i = 0 ; i < agentsPosition.size() ; i++){
         for(int j = 0 ; j < i ; j++){
             if(i != j){
                 if(agentsPosition.at(i).dist(agentsPosition.at(j)) <= 2 * CRobot::robot_radius_new){
                     stuckPositions.append(agentsPosition.at(i));
                     stuckPositions.append(agentsPosition.at(j));
-                    stuckIndexs.append(i);
                 }
+            }
+        }
+    }
+    for(int i = 0 ; i < stuckPositions.size() ; i++){
+        for(int j = 0 ; j < agentsPosition.size() ; j++){
+            if(stuckPositions.at(i) == agentsPosition.at(j)){
+                stuckIndexs.append(j);
             }
         }
     }
 }
 
-void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> &stuckPositions){
-    QList<Circle2D> stuckAgentsCircle;
-    Segment2D centerToCenter;
+void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs){
+    QList<Segment2D> centerToCenter;
+    QList<Vector2D> solvedPosition;
+    QList<Vector2D> temp;
+    QList<int> tempIndexs;
+    QList<Vector2D> tempAgentsPosition;
+    QList<Vector2D> finalSolvedPosition;
+    Vector2D tempPoint = Vector2D(0,0);
+    bool isRepeated = false;
+    QList<Vector2D> tempVectors;
+    solvedPosition.clear();
+    tempAgentsPosition.clear();
     for(int i = 0 ; i < stuckPositions.size() ; i++){
-        stuckAgentsCircle.append(Circle2D(stuckPositions.at(i) , CRobot::robot_radius_new));
+        if(i % 2 == 0){
+            centerToCenter.append(Segment2D(stuckPositions.at(i) , stuckPositions.at(i+1)));
+        }
+        else{
+            centerToCenter.append(Segment2D(stuckPositions.at(i) , stuckPositions.at(i-1)));
+        }
     }
-    centerToCenter = Segment2D(stuckAgentsCircle.at(0).center() , stuckAgentsCircle.at(1).center());
+    debug(QString("center : %1").arg(centerToCenter.size()) , D_AHZ);
     for(int i = 0 ; i < stuckPositions.size() ; i++){
-        for(int j = 0 ; j < agentsPosition.size() ; j++){
-            if(stuckPositions.at(i) == agentsPosition.at(j)){
-                agentsPosition.removeAt(j);
-                agentsPosition.append(stuckPositions.at(i) + (pow(-1,i)*(((2 + 0.2)*CRobot::robot_radius_new - centerToCenter.length()) / 2))*((stuckPositions.at(0) - stuckPositions.at(1)).norm()));
+        solvedPosition.append(stuckPositions.at(i) + (1*CRobot::robot_radius_new - centerToCenter.at(i).length()/2)*((centerToCenter.at(i).a() - centerToCenter.at(i).b()).norm()));
+    }
+
+    for(int i = 0 ; i < stuckIndexs.size() ; i++){
+        for(int j = 0 ; j < stuckIndexs.size() ; j++){
+            if(stuckIndexs.at(i) == stuckIndexs.at(j) && i != j){
+                isRepeated = true;
+                tempIndexs.append(j);
+                debug(QString("temp Index : %1").arg(j) , D_AHZ);
+            }
+        }
+        if(isRepeated){
+            tempIndexs.append(i);
+            tempPoint = stuckPositions.at(i);
+            for(int k = 0 ; k < solvedPosition.size() ; k++){
+                for(int m = 0 ; m < tempIndexs.size() ; m++){
+                    if(tempIndexs.at(m) == k){
+                        temp.append(solvedPosition.at(k));
+                    }
+                }
+            }
+            for(int n = 0 ; n < temp.size() ; n++){
+                tempVectors.append(temp.at(n) - tempPoint);
+            }
+            for(int n = 0 ; n < tempVectors.size() ; n++){
+                tempPoint += tempVectors.at(n);
+            }
+            finalSolvedPosition.append(tempPoint);
+            isRepeated = false;
+        }
+        else{
+            tempIndexs.append(i);
+            finalSolvedPosition.append(solvedPosition.at(i));
+        }
+        isRepeated = false;
+        tempIndexs.clear();
+        tempVectors.clear();
+        temp.clear();
+    }
+    for(int i = 0 ; i < finalSolvedPosition.size() ; i++){
+        for(int j = 0 ; j < finalSolvedPosition.size() ; j++){
+            if(i != j && finalSolvedPosition.at(i) == finalSolvedPosition.at(j)){
+                finalSolvedPosition.removeAt(j);
             }
         }
     }
+    for(int i = 0 ; i < stuckPositions.size() ; i++){
+        for(int j = 0 ; j < agentsPosition.size() ; j++){
+            if(agentsPosition.at(j) == stuckPositions.at(i)){
+                agentsPosition.removeAt(j);
+            }
+        }
+    }
+    for(int i = 0 ; i < finalSolvedPosition.size() ; i++){
+        agentsPosition.append(finalSolvedPosition.at(i));
+    }
+    debug(QString("solved : %1").arg(finalSolvedPosition.size()), D_AHZ);
+    debug(QString("match : %1").arg(agentsPosition.size()), D_AHZ);
 }
 
 float getDegree(Vector2D pos1, Vector2D origin, Vector2D pos3){
@@ -1248,12 +1321,12 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     draw(QString("  %1").arg(ourAgents.count()),Vector2D(2,2),"red");
     /////////////// Stucking agents ///////////////////////////////////////////
     if(isAgentsStuckTogether(matchPoints)){
-        agentsStuckTogether(matchPoints , stuckPositions , stuckIndexs);
-        debug("Agents Stuck together" , D_AHZ);
-        debug(QString("stuck : %1").arg(stuckPositions.size()),  D_AHZ);
-        debug(QString("stuck : %1").arg(stuckIndexs.size()),  D_AHZ);
-        correctingTheAgentsAreStuckTogether(matchPoints , stuckPositions);
-    }
+          agentsStuckTogether(matchPoints , stuckPositions , stuckIndexs);
+          debug("Agents Stuck together" , D_AHZ);
+          debug(QString("stuck : %1").arg(stuckPositions.size()),  D_AHZ);
+          debug(QString("stuck : %1").arg(stuckIndexs.size()),  D_AHZ);
+          correctingTheAgentsAreStuckTogether(matchPoints , stuckPositions , stuckIndexs);
+      }
     ////////////////////////////////////////////////////////////////////////
     knowledge->Matching(ourAgents,matchPoints,matchResult);
     debug(QString("defenseAHZ : %1 ").arg(defenseAgents.size()) , D_AHZ);
@@ -2769,7 +2842,7 @@ void DefensePlan::findOppAgentsToMark(){
             }
         }
     }
-    else if(knowledge->getGameState() == CKnowledge::TheirIndirectKick || knowledge->getGameState() == CKnowledge::TheirDirectKick || knowledge->getGameState() == CKnowledge::Stop){
+    else if(knowledge->getGameState() == CKnowledge::TheirIndirectKick || knowledge->getGameState() == CKnowledge::TheirDirectKick || knowledge->getGameState() == CKnowledge::Stop || knowledge->transientFlag){
         for(int i = 0; i < oppAgentsToMark.count(); i++){
             if(oppAgentsToMark[i]->pos.x > policy()->Mark_OppOmitLimitPlayoff()){
                 oppAgentsToMark.removeOne(oppAgentsToMark[i]);
@@ -2783,7 +2856,7 @@ void DefensePlan::findOppAgentsToMark(){
     }
     for(int i = 0; i < oppAgentsToMark.count(); i++){
         draw(oppAgentsToMark[i]->pos);
-        oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i], 0.5));
+        oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i], policy()->Mark_VelReliability()));
     }
     debug(QString("OppAgenttoMark count %1").arg(oppAgentsToMarkPos.count()), D_HAMED);
 }

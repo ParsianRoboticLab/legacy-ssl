@@ -242,8 +242,19 @@ struct SMatching {
 };
 
 struct AgentPoint {
-    int id    = -1;
-    int state = -1;
+
+    AgentPoint() {
+        id    = -1;
+        state = -1;
+    }
+
+    AgentPoint(int id, int state) {
+        this->id    = id;
+        this->state = state;
+    }
+
+    int id;
+    int state;
 };
 
 struct SExecution {
@@ -253,6 +264,7 @@ struct SExecution {
     int symmetry     =  1;
     int theLastAgent = -1;
     int theLastState = -1;
+    int passCount;
     AgentPoint passer;
     AgentPoint reciver;
 };
@@ -466,7 +478,7 @@ private:
     void assignKick     (CRolePlayOff*, const SPositioningAgent&, bool _chip);
     void assignReceive  (CRolePlayOff*, const SPositioningAgent&, bool _ignoreAngle);
     QPair<int, int> findTheLastShoot(const SExecution& _plan);
-    void findThePasserandReciver(const SExecution&, AgentPair&);
+    void findThePasserandReciver(const SExecution&, QList<AgentPair> &_pairList);
     int findReciver(int _passer, int _state);
     QList<SBallOwner> ownerList;
     bool havePassInPlan;

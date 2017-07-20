@@ -306,6 +306,7 @@ public:
     DEF_VALUE(Mark, bool, Bool, OmmitNearestToBallPlayon)
     DEF_VALUE(Mark, bool, Bool, IntelligentMarkType)
     DEF_VALUE(Mark, bool, Bool, IntelligentMarkPrediction)
+    DEF_VALUE(Mark, double, Double, VelReliability)
 
 
 

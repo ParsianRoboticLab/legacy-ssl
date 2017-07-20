@@ -69,7 +69,7 @@ protected:
     void manToManMarkBlockShotInPlayOff(int _markAgentSize);
     void agentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs);
     bool isAgentsStuckTogether(QList<Vector2D> agentsPosition);
-    void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> &stuckPositions);
+    void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs);
     void getIntersectionWithPenaltyAreaAHZ(Segment2D , Vector2D sol1 , Vector2D sol2);
     bool isIndirectArea(Vector2D);    
     //atousa
