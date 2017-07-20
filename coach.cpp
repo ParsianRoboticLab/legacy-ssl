@@ -1186,8 +1186,8 @@ void CCoach::updateAttackState()
     Polygon2D robotCritArea;
     double    safeRegion= 1   ;
     double    critLenth = 0.4 ;
-    double    critThrsh = 0.45;
-    double    critAng   = 20  ;
+    double    critThrsh = 0.95;
+    double    critAng   = 30  ;
     CRobot    *oppNearest;
     if(wm->opp.activeAgentsCount() > 0) {
         oppNearest = wm->opp[knowledge->getNearestOppToPoint(wm->ball->pos)];
@@ -1207,14 +1207,25 @@ void CCoach::updateAttackState()
         {
             double critL = critLenth;
             double critA = 90;
-            if(lastASWasCritical)
+//            if(lastASWasCritical == false)
+            if(lastASWasCritical == false)
             {
                 critA += critAng;
                 critL += critThrsh;
+                robotCritArea.addVertex(PMA->pos);
+                robotCritArea.addVertex(PMA->pos + Vector2D(0, 0.7));
+                robotCritArea.addVertex(PMA->pos + Vector2D(1, 0));
+                robotCritArea.addVertex(PMA->pos - Vector2D(0, 0.7));
             }
-            robotCritArea.addVertex(PMA->pos);
-            robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(critA )* critLenth);
-            robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(-critA)* critLenth);
+            if(lastASWasCritical == true)
+            {
+                robotCritArea.addVertex(PMA->pos + Vector2D(0, 0.8));
+                robotCritArea.addVertex(PMA->pos + Vector2D(1.1, 0));
+                robotCritArea.addVertex(PMA->pos - Vector2D(0, 0.8));
+                robotCritArea.addVertex(PMA->pos - Vector2D(0.5, 0));
+//                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(critA )* critL);
+//                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(-critA)* critL);
+            }
         }
     }
 
@@ -1470,18 +1481,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
         debug(QString("playmake : %1").arg(playmakeId),D_MHMMD);
     }
 
-    Circle2D ourDefenseArea(wm->field->ourGoal(), 1.6);
-
-    if (knowledge->variables["clearing"] == "true"
-        || (ourDefenseArea.contains(wm->ball->pos) && wm->ball->vel.length() < 1)) {
-        if(playmakeId != -1) {
-            ourPlayers.append(playmakeId);
-            dynamicAttack->setPlayMake(-1);
-        }
-        dynamicAttack->setDefenseClear(true);
-    } else {
-        dynamicAttack->setDefenseClear(false);
-    }
+    dynamicAttack->setDefenseClear(false);
 
     if(wm->our[playmakeId] != NULL)
     {
