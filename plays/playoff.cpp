@@ -3,6 +3,8 @@
 
 CPlayOff::CPlayOff()
 {
+    blockerState=0;
+    blockerID=-1;
     qDebug() << "Bring yourself back online playoff";
 
     decidePlan = true;
@@ -479,8 +481,9 @@ int CPlayOff::getShotSpot() {
 }
 
 void CPlayOff::stayPoistioning() {
-    newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(-0.3,0));
-    newRoleAgent[0]->setTargetDir(wm->field->oppGoal());
+
+    newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(0,-0.3));
+    newRoleAgent[0]->setTargetDir(wm->field->oppGoal()-wm->ball->pos);
     newRoleAgent[1]->setTarget(Vector2D(1, .5));
     newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
     newRoleAgent[2]->setTarget(Vector2D(1, -1.5));
@@ -493,19 +496,25 @@ void CPlayOff::stayPoistioning() {
     newRoleAgent[5]->setTargetDir(wm->field->oppGoal());
 
     for(int i=0;i<wm->opp.data->activeAgents.size();i++){
-        if(Triangle2D(newRoleAgent[0]->agent->pos()
+        if(Triangle2D(newRoleAgent[0]->getAgent()->pos()
                       ,wm->field->oppGoal()
                       ,wm->field->oppGoal()/2).contains(wm->opp.active(i)->pos)
-                && Line2D(newRoleAgent[0]->agent->pos(),wm->field->oppGoal()).dist(wm->opp.active(i)->pos)<0.4)
+                && Line2D(newRoleAgent[0]->getAgent()->pos(),wm->field->oppGoal()).dist(wm->opp.active(i)->pos)<0.2)
         {
-            blockersPenaltyArea.append(i);
+            if(!blockersPenaltyArea.contains(i)){
+                debug(QString("penaltyAreaID:%1").arg(i),D_NADIA);
+                blockersPenaltyArea.append(i);
+            }
         }
     }
+
+
 }
 
-void CPlayOff::movePositioning() {
-    newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(-0.3,0));
-    newRoleAgent[0]->setTargetDir(Vector2D(0,0));
+void CPlayOff::move1Positioning() {
+
+    newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(0.3,-0.3));
+    newRoleAgent[0]->setTargetDir(Vector2D(0,0)-wm->ball->pos);
     newRoleAgent[1]->setTarget(Vector2D(1, -1.5));
     newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
     newRoleAgent[2]->setTarget(Vector2D(1, .5));
@@ -518,26 +527,28 @@ void CPlayOff::movePositioning() {
     newRoleAgent[5]->setTargetDir(wm->field->oppGoal());
 
 
+    blockersCentralRegion.clear();
+
     for(int i=0;i<wm->opp.data->activeAgents.size();i++){
-        if(Triangle2D(newRoleAgent[0]->agent->pos()
+        if(Triangle2D(newRoleAgent[0]->getAgent()->pos()
                       ,wm->field->oppGoal()/2
-                      ,Vector2D(newRoleAgent[0]->getAgent()->pos().y/2,0)).contains(wm->opp.active(i)->pos)
-                && Line2D(newRoleAgent[0]->agent->pos(),Vector2D(0,0)).dist(wm->opp.active(i)->pos)<0.4)
+                      ,Vector2D(0,newRoleAgent[0]->getAgent()->pos().y/2)).contains(wm->opp.active(i)->pos)
+                && Line2D(newRoleAgent[0]->getAgent()->pos(),Vector2D(0,0)).dist(wm->opp.active(i)->pos)<0.2)
         {
-            blockersCentralRegion.append(i);
-        }
-        else{
-        if(blockersPenaltyArea.contains(i))
-            blockersPenaltyArea.removeOne(i);
+            if(!blockersCentralRegion.contains(i)){
+                debug(QString("centralID:%1").arg(i),D_NADIA);
+                blockersCentralRegion.append(i);
+            }
         }
     }
 
 
 }
 
-void CPlayOff::donePositioning() {
-    newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(-0.3,0));
-    newRoleAgent[0]->setTargetDir(Vector2D(0,newRoleAgent[0]->getAgent()->pos().y));
+
+void CPlayOff::move2Positioning(){
+    newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(0.3,0));
+    newRoleAgent[0]->setTargetDir(Vector2D(0,newRoleAgent[0]->getAgent()->pos().y)-wm->ball->pos);
     newRoleAgent[1]->setTarget(Vector2D(2, -.5));
     newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
     newRoleAgent[2]->setTarget(Vector2D(3.5, -1.5));
@@ -550,19 +561,68 @@ void CPlayOff::donePositioning() {
     newRoleAgent[5]->setTargetDir(wm->field->oppGoal());
 
 
+
+    blockersRoundRegion.clear();
+
     for(int i=0;i<wm->opp.data->activeAgents.size();i++){
-        if(Triangle2D(newRoleAgent[0]->agent->pos()
+        if(Triangle2D(newRoleAgent[0]->getAgent()->pos()
                       ,Vector2D(0,0)
                       ,Vector2D(newRoleAgent[0]->getAgent()->pos().y,0)).contains(wm->opp.active(i)->pos)
-                && Line2D(newRoleAgent[0]->agent->pos(),Vector2D(newRoleAgent[0]->getAgent()->pos().y,0)).dist(wm->opp.active(i)->pos)<0.4)
+                && Line2D(newRoleAgent[0]->getAgent()->pos(),Vector2D(0,newRoleAgent[0]->getAgent()->pos().y)).dist(wm->opp.active(i)->pos)<0.2)
         {
-            blockersRoundRegion.append(i);
-        }
-        else{
-        if(blockersRoundRegion.contains(i))
-            blockersCentralRegion.removeOne(i);
+            if(!blockersRoundRegion.contains(i)){
+                debug(QString("RoundId:%1").arg(i),D_NADIA);
+                blockersRoundRegion.append(i);
+            }
         }
     }
+
+
+
+
+    blockerState=0;
+
+    debug(QString("blocker state1:%1").arg(blockerState),D_NADIA);
+    for(int i=0;i<blockersPenaltyArea.size();i++){
+        debug(QString("penaltyArea:%1").arg(blockersPenaltyArea.at(i)),D_NADIA);
+        if(blockersCentralRegion.contains(blockersPenaltyArea.at(i))){
+            blockerState += penaltyAreaBlock;
+            blockerID=i;
+        }
+    }
+
+    for(int i=0;i<blockersCentralRegion.size();i++){
+        debug(QString("central:%1").arg(blockersCentralRegion.at(i)),D_NADIA);
+        if(blockersRoundRegion.contains(blockersCentralRegion.at(i)) && i==blockerID)
+            blockerState += centralRegionBlock;
+    }
+
+
+    for(int i=0;i<blockersRoundRegion.size();i++){
+        debug(QString("Rounds:%1").arg(blockersRoundRegion.at(i)),D_NADIA);
+        if(blockersCentralRegion.contains(blockersRoundRegion.at(i)) && i==blockerID)
+            blockerState += RoundRegionBlock;
+    }
+
+
+    debug(QString("blocker state2:%1").arg(blockerState),D_NADIA);
+
+
+}
+
+void CPlayOff::donePositioning() {
+    newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(0,-0.3));
+    newRoleAgent[0]->setTargetDir(wm->field->oppGoal()-wm->ball->pos);
+    newRoleAgent[1]->setTarget(Vector2D(2, -.5));
+    newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[2]->setTarget(Vector2D(3.5, -1.5));
+    newRoleAgent[2]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[3]->setTarget(Vector2D(0, 1.5));
+    newRoleAgent[3]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[4]->setTarget(Vector2D(2, -2.5));
+    newRoleAgent[4]->setTargetDir(wm->field->oppGoal());
+    newRoleAgent[5]->setTarget(Vector2D(2, 2.5));
+    newRoleAgent[5]->setTargetDir(wm->field->oppGoal());
 
 }
 
@@ -690,6 +750,7 @@ void CPlayOff::kickOffStopModePlay(int tAgentsize) {
 
 void CPlayOff::firstPlayForOppCorner(int _agentSize) {
 
+
     for (int i = 0; i < _agentSize; i++) {
         if (newRoleAgent[i]->getRoleUpdate() == false) {
             newRoleAgent[i]->setUpdated(true);
@@ -706,8 +767,11 @@ void CPlayOff::firstPlayForOppCorner(int _agentSize) {
     case Stay:
         stayPoistioning();
         break;
-    case Move:
-        movePositioning();
+    case Move1:
+        move1Positioning();
+        break;
+    case Move2:
+        move2Positioning();
         break;
     case Done:
         donePositioning();
@@ -723,8 +787,9 @@ void CPlayOff::firstPlayForOppCorner(int _agentSize) {
         }
     }
     if (finisher == _agentSize) {
-        if (firstStepEnums == Stay) firstStepEnums = Done;
-        else if (firstStepEnums == Move) firstStepEnums = Done;
+        if (firstStepEnums == Stay) firstStepEnums = Move1;
+        else if (firstStepEnums == Move1) firstStepEnums = Move2;
+        else if (firstStepEnums == Move2) firstStepEnums = Done;
         else firstStepEnums = Done;
     }
 
@@ -1549,6 +1614,8 @@ void CPlayOff::reset(){
 
     qDebug() << "Bring yourself back online playoff";
 
+    blockerState=0;
+    blockerID=-1;
     decidePlan = true;
     agentSize = 1;
     for(int i = 0;i < 6;i++) {

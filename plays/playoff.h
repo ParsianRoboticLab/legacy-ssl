@@ -291,7 +291,7 @@ typedef QPair<NGameOff::AgentPoint, NGameOff::AgentPoint> AgentPair;
 
 using namespace NGameOff;
 
-enum FirstStep {Stay, Move, Done};
+enum FirstStep {Stay, Move1, Move2, Done};
 
 class CPlayOff : public CMasterPlay {
 
@@ -399,11 +399,11 @@ private:
         RoundRegionBlock=4
     };
 
-    BlockerDeterminer blockerState;
+    int blockerState;
+    int blockerID;
     QList<int> blockersPenaltyArea;
     QList<int> blockersCentralRegion;
     QList<int> blockersRoundRegion;
-
     Vector2D kickOffPos[6];
 
     bool isBallIn;
@@ -484,7 +484,8 @@ private:
     FirstStep firstStepEnums;
     int shotSpot;
     void stayPoistioning();
-    void movePositioning();
+    void move1Positioning();
+    void move2Positioning();
     void donePositioning();
 
 
