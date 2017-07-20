@@ -979,30 +979,16 @@ void DefensePlan::setGoalKeeperTargetPoint(){
             }
             //////////////// End of Danger Mode ////////////////////////////////
             else{
-                Segment2D ballLine = Segment2D(wm->ball->pos , wm->ball->pos + wm->ball->vel*10);
-                Segment2D ourWidthField = Segment2D(wm->field->ourCornerL() , wm->field->ourCornerR());
-                if(!ballLine.intersection(ourWidthField).isValid() && wm->ball->vel.length() > 0.1){
-                    tempSol.append(wm->field->ourPAreaIntersect(getBisectorSegment(wm->field->ourGoalL() , ballPrediction(true) , wm->field->ourGoalR())));
-                    if(tempSol.size() == 2){
-                        goalKeeperTarget = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
-                    }
-                    else if(tempSol.size() == 1){
-                        debug("aya injas" , D_AHZ);
-                        goalKeeperTarget = tempSol.at(0);
+                debug(QString("strict follow"), D_AHZ);
+                predictedBall = ballPrediction(true);
+                if(predictedBall.x - 0.02 < knowledge->goalie->pos().x){
+                    Segment2D ball2PredictedBall(ballPos,predictedBall);
+                    Line2D robotPrGoalLine(knowledge->goalie->pos(), Vector2D(knowledge->goalie->pos().x,(knowledge->goalie->pos().y + 0.01)));
+                    if(ball2PredictedBall.intersection(robotPrGoalLine).valid()){
+                        predictedBall = ball2PredictedBall.intersection(robotPrGoalLine);
                     }
                 }
-                else{
-                    debug(QString("strict follow"), D_AHZ);
-                    predictedBall = ballPrediction(true);
-                    if(predictedBall.x - 0.02 < knowledge->goalie->pos().x){
-                        Segment2D ball2PredictedBall(ballPos,predictedBall);
-                        Line2D robotPrGoalLine(knowledge->goalie->pos(), Vector2D(knowledge->goalie->pos().x,(knowledge->goalie->pos().y + 0.01)));
-                        if(ball2PredictedBall.intersection(robotPrGoalLine).valid()){
-                            predictedBall = ball2PredictedBall.intersection(robotPrGoalLine);
-                        }
-                    }
-                    goalKeeperTarget = strictFollowBall(predictedBall);
-                }
+                goalKeeperTarget = strictFollowBall(predictedBall);
             }
         }
     }
@@ -3175,7 +3161,10 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
         Line2D aimLessLine(Vector2D(0,0),Vector2D(-1,-1));
         draw(AZBisecOpenSeg,"red");
         goal2Ball.assign(wm->field->ourGoal(),wm->ball->pos);
-        if(knowledge->goalie->pos().dist(AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos())) > 0.3 + thr){
+        Segment2D ballLine = Segment2D(wm->ball->pos , wm->ball->pos + wm->ball->vel*10);
+        Segment2D ourWidthField = Segment2D(wm->field->ourCornerL() , wm->field->ourCornerR());
+        if((!ballLine.intersection(ourWidthField).isValid() && wm->ball->vel.length() > 3.5)
+                || knowledge->goalie->pos().dist(AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos())) > 0.3 + thr){
             target = AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos());
             thr = 0;
             if(!wm->field->isInField(target)){
