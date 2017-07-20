@@ -1052,11 +1052,11 @@ void CSkillKick::jTurn()
         if(wm->ball->vel.length() > 0.2)
         {
             posPid->kp = 1+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
-            speedPid->kp = 4;// +2.1*agentPos.dist(ballPos) + dirReduce;
+            speedPid->kp = 3;// +2.1*agentPos.dist(ballPos) + dirReduce;
         }
         else
         {
-            posPid->kp = 4+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
+            posPid->kp = 3+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
             speedPid->kp = 2;// +2.1*agentPos.dist(ballPos) + dirReduce;
         }
     }
@@ -1312,7 +1312,7 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
     Vector2D ballPosInFuture;
     Vector2D s1,s2;
     Segment2D ballPath(wm->ball->pos,wm->ball->pos + wm->ball->vel.norm()*10);
-    Circle2D robotAreaNear (_agent->pos(),0.2);
+    Circle2D robotAreaNear (_agent->pos(),0.4);
 
     if(wm->ball->vel.length() > 0.2)
     {
@@ -1322,7 +1322,7 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
         }
         else
         {
-            for(double i = 0 ; i < 10 ; i += 0.03)
+            for(double i = 0 ; i < 3 ; i += 0.03)
             {
                 ballPosInFuture = wm->ball->getPosInFuture(i);
                 finalPos = ballPosInFuture - (_target-ballPosInFuture).norm()*0.11;
