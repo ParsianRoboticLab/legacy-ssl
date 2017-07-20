@@ -953,12 +953,16 @@ void CPlayOffWidget::updateModel() {
             model->appendRow(pkg);
             qDebug() << "FILE";
             file = new QStandardItem(guiPlan.planFile);
+            QString temp = guiPlan.package;
+            file->setToolTip("<html><img src="+temp.replace(".","/") + "/" + guiPlan.planFile + ".png" +"/></html>");
             pkg->appendRow(file);
         }
         else if (lastGui->planFile != guiPlan.planFile) {
             fileCounter++;
             qDebug() << "PLAN";
             file = new QStandardItem(guiPlan.planFile);
+            QString temp = guiPlan.package;
+            file->setToolTip("<html><img width=\"700\" src="+temp.replace(".","/") + "/" + guiPlan.planFile + ".png" +"/></html>");
             pkg->appendRow(file);
         }
         planCounter++;
@@ -969,7 +973,6 @@ void CPlayOffWidget::updateModel() {
         plan->setEditable(false);
         pkg->setEditable(false);
         lastGui = &m_plans.at(i)->gui;
-        qDebug() << guiPlan.package;
 
     }
 }
