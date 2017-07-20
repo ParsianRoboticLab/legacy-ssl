@@ -266,8 +266,7 @@ private:
     double pushBallHist;
     int failureAtempCnt;
     int clearCnt;
-    double savedClearDist;
-    Vector2D savedClearPos;
+    double savedClearDist;    
     int goaliePassBlockCnt;
     Vector2D gBassBlockTargetSave;
     double predictThresh;    

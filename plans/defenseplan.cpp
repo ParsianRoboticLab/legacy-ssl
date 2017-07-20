@@ -768,7 +768,7 @@ void DefensePlan::setGoalKeeperTargetPoint(){
     dangerForGoalieClearByOppAgents = false;
     isCrowdedInFrontOfPenaltyAreaByOppAgents = false;
     isCrowdedInFrontOfPenaltyAreaByOurAgents = false;
-    playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick|| knowledge->getGameState() == CKnowledge::TheirIndirectKick;
+    playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick || knowledge->getGameState() == CKnowledge::TheirIndirectKick;
     playOnMode = knowledge->isStart();
     stopMode = knowledge->isStop();
     tempSol.clear();
@@ -781,7 +781,6 @@ void DefensePlan::setGoalKeeperTargetPoint(){
         predictedBall = ballPos + ballVel;
         Circle2D penaltyArea(wm->field->ourGoal() - Vector2D(0.3,0),1.28);
         besidePoleFlag = false;
-        savedClearPos = findBestPointForChipTarget(savedClearDist,1);
         penaltyArea.intersection(Line2D(wm->ball->pos , wm->field->ourGoal()),&Solutions[0] , &Solutions[1]);
         Circle2D dangerCircle = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.40);
         Circle2D dangerCircle1 = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.40);
@@ -823,7 +822,7 @@ void DefensePlan::setGoalKeeperTargetPoint(){
                 if(wm->field->isInOurPenaltyArea(wm->ball->pos)){
                     tempGoalKeeperTarget = tempSol.at(0);
                     if(CSkillGotoPointAvoid::timeNeeded(knowledge->goalie , tempGoalKeeperTarget , conf()->BangBang_VelMax(),ourRelax , oppRelax,0,0.2,1)  <
-                       wm->ball->vel.length() / wm->ball->pos.dist(tempGoalKeeperTarget)){
+                            wm->ball->vel.length() / wm->ball->pos.dist(tempGoalKeeperTarget)){
                         goalKeeperPredictionModeInPlayOff = true;
                         goalKeeperTarget = tempGoalKeeperTarget;
                     }
@@ -832,7 +831,7 @@ void DefensePlan::setGoalKeeperTargetPoint(){
                     if(tempSol.size() == 2){
                         tempGoalKeeperTarget = tempSol.at(0).dist(oppPasser) > tempSol.at(1).dist(oppPasser) ? tempSol.at(0) : tempSol.at(1);
                         if(CSkillGotoPointAvoid::timeNeeded(knowledge->goalie , tempGoalKeeperTarget , conf()->BangBang_VelMax(),ourRelax , oppRelax,0,0.2,1) <
-                           wm->ball->vel.length() / wm->ball->pos.dist(tempGoalKeeperTarget)){
+                                wm->ball->vel.length() / wm->ball->pos.dist(tempGoalKeeperTarget)){
                             goalKeeperPredictionModeInPlayOff = true;
                             goalKeeperTarget = tempGoalKeeperTarget;
                         }
@@ -873,17 +872,12 @@ void DefensePlan::setGoalKeeperTargetPoint(){
         }
         else if(goalieOneTouch){
             Segment2D ballLine(ballPos, ballPos + ballVel.norm()*10);
-            Segment2D goalLine(wm->field->ourGoal()+Vector2D(0,1) , wm->field->ourGoal()+Vector2D(0,-1));
-            QList <int> alaki;
-            //debug(QString("goali time: %1 , %2").arg(CSkillGotoPointAvoid::timeNeeded(goalKeeperAgent,ballLine.nearestPoint(knowledge->goalie->pos()),4,alaki,alaki,false,0,true)).arg(CSkillGotoPointAvoid::timeNeeded(goalKeeperAgent,ballLine.intersection(goalLine),4,alaki,alaki,false,0,true)),D_MHMMD);
             goalKeeperTarget = ballLine.nearestPoint(knowledge->goalie->pos());
-            //goalKeeperTarget = ballLine.intersection(goalLine);
             debug(QString("OneTouch To Side Point"), D_AHZ);
             return;
         }
         else if(goalieClearMode){
             ////////////// Danger Mode for inside of the penalty area///////////
-            savedClearPos = findBestPointForChipTarget(savedClearDist,1);
             if(wm->our.activeAgentsCount() > 0 || wm->opp.activeAgentsCount() > 0){
                 for(int i = 0; i < wm->our.activeAgentsCount() ; i++){
                     if(wm->our.active(i)->id != knowledge->goalie->id()){
@@ -985,16 +979,30 @@ void DefensePlan::setGoalKeeperTargetPoint(){
             }
             //////////////// End of Danger Mode ////////////////////////////////
             else{
-                debug(QString("strict follow"), D_AHZ);
-                predictedBall = ballPrediction(true);
-                if(predictedBall.x - 0.02 < knowledge->goalie->pos().x){
-                    Segment2D ball2PredictedBall(ballPos,predictedBall);
-                    Line2D robotPrGoalLine(knowledge->goalie->pos(), Vector2D(knowledge->goalie->pos().x,(knowledge->goalie->pos().y + 0.01)));
-                    if(ball2PredictedBall.intersection(robotPrGoalLine).valid()){
-                        predictedBall = ball2PredictedBall.intersection(robotPrGoalLine);
+                Segment2D ballLine = Segment2D(wm->ball->pos , wm->ball->pos + wm->ball->vel*10);
+                Segment2D ourWidthField = Segment2D(wm->field->ourCornerL() , wm->field->ourCornerR());
+                if(!ballLine.intersection(ourWidthField).isValid() && wm->ball->vel.length() > 0.1){
+                    tempSol.append(wm->field->ourPAreaIntersect(getBisectorSegment(wm->field->ourGoalL() , ballPrediction(true) , wm->field->ourGoalR())));
+                    if(tempSol.size() == 2){
+                        goalKeeperTarget = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
+                    }
+                    else if(tempSol.size() == 1){
+                        debug("aya injas" , D_AHZ);
+                        goalKeeperTarget = tempSol.at(0);
                     }
                 }
-                goalKeeperTarget = strictFollowBall(predictedBall);
+                else{
+                    debug(QString("strict follow"), D_AHZ);
+                    predictedBall = ballPrediction(true);
+                    if(predictedBall.x - 0.02 < knowledge->goalie->pos().x){
+                        Segment2D ball2PredictedBall(ballPos,predictedBall);
+                        Line2D robotPrGoalLine(knowledge->goalie->pos(), Vector2D(knowledge->goalie->pos().x,(knowledge->goalie->pos().y + 0.01)));
+                        if(ball2PredictedBall.intersection(robotPrGoalLine).valid()){
+                            predictedBall = ball2PredictedBall.intersection(robotPrGoalLine);
+                        }
+                    }
+                    goalKeeperTarget = strictFollowBall(predictedBall);
+                }
             }
         }
     }
@@ -1046,7 +1054,6 @@ DefensePlan::DefensePlan()
     noDefThr = 0;
     chipGKCounter = 0;
 
-    savedClearPos.invalidate();
     clearCnt = 0;
 
     defenseCount = defenseAgents.size();
@@ -1780,21 +1787,12 @@ void DefensePlan::executeGoalKeeper(){
     //// target point that have been produced in the "setGoalKeeperTargetPoint"
     //// function. In this function also like the other functions for goalkeeper,
     //// we have some mode for handling the goalkeeper behavior.
+
     playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick  || knowledge->getGameState() == CKnowledge::TheirIndirectKick;
     playOnMode = knowledge->isStart();
     stopMode = knowledge->isStop();
     QList<Vector2D> tempSol;
     if(goalKeeperAgent != NULL){
-        if(savedClearPos.valid() && clearCnt > 30){
-            savedClearPos.invalidate();
-            clearCnt = 0;
-        }
-        else if(savedClearPos.valid() && clearCnt <= 30){
-            clearCnt++;
-        }
-        else{
-            clearCnt = 0;
-        }
         if(!wm->field->isInOurPenaltyArea(goalKeeperTarget)){
             tempSol.append(wm->field->ourPAreaIntersect(Segment2D(knowledge->goalie->pos() , goalKeeperTarget)));
             if(tempSol.size() == 1){
