@@ -699,25 +699,42 @@ void CDynamicAttack::chooseBestPositons()
             double x, y;
             if(cntD == 1)
             {
-                if(lastYDrib == 10)
+                if(ballPox.x > 3.3 - thrshDribble)
                 {
-                    if(ballPos.y > 0)
+                    thrshDribble = 0.3;
+                    if(lastYDrib == 10)
+                    {
+                        if(ballPos.y > 0)
+                            y = ballPos.y - 1.5;
+                        else
+                            y = ballPos.y + 1.5;
+                    }
+                    else if(ballPos.y > 0.2)
                         y = ballPos.y - 1.5;
-                    else
+                    else if(ballPos.y < -0.2)
                         y = ballPos.y + 1.5;
+                    else
+                        y = lastYDrib;
+                    x = min(ballPos.x - 0.1, 3.3);
                 }
                 else
-                if(ballPos.y > 0.2)
                 {
-                    y = ballPos.y - 1.5;
+                    thrshDribble = 0;
+                    if(lastYDrib == 10)
+                    {
+                        if(ballPos.y > 0)
+                            y = -1.5;
+                        else
+                            y = 1.5;
+                    }
+                    else if(ballPos.y > 0.2)
+                        y = -1.5;
+                    else if(ballPos.y < -0.2)
+                        y = 1.5;
+                    else
+                        y = lastYDrib;
+                    x = 3.5;
                 }
-                else if(ballPos.y < -0.2)
-                {
-                    y = ballPos.y + 1.5;
-                }
-                else
-                    y = lastYDrib;
-                x = min(ballPos.x - 0.1, 3.3);
                 lastYDrib = y;
             }
             if(cntD == 2)
