@@ -743,8 +743,99 @@ float CMixTeamHandler::refineHeading(float heading)
     }
     return heading;
 }
-// CMixTeamCoach Class
 
+
+
+
+CmixTeamGoalie::CmixTeamGoalie(){
+
+}
+
+void CmixTeamGoalie::setGoalKeeperStateMixTeam(){
+    setGoalKeeperState();
+}
+
+void CmixTeamGoalie::setGoalKeeperTargetPointMixTeam(){
+    setGoalKeeperTargetPoint();
+}
+
+void CmixTeamGoalie::updateGoalKeeperTarget(){
+
+    if(playOffMode){
+        goalieTarget = goalKeeperTarget;
+        goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos );
+    }
+    else if(stopMode){
+        goalieTarget = goalKeeperTarget;
+        goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos );
+    }
+    else if(ballIsOutOfField){
+        goalieTarget = goalKeeperTarget;
+        goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos );
+    }
+    else if(ballBehindGoalie){  // kick
+        goalieTarget.invalidate();
+        goalieShottarget = wm->field->oppGoal();
+        goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos );
+    }
+    else if(besidePoleFlag){    // kick
+        Rect2D fieldRect(Vector2D(- _FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0) + Vector2D(-0.005,-0.005),Vector2D(_FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0)+Vector2D(+0.005,+0.005));
+        Line2D ballPrGoalLine(wm->ball->pos, Vector2D(wm->ball->pos.x,(wm->ball->pos.y + 0.01)));
+        Vector2D solut[2];
+        debug("Ball is beside the our goal" , D_AHZ , "red");
+        fieldRect.intersection(ballPrGoalLine, &solut[0], &solut[1]);
+        Vector2D noKickTarget = (solut[0].dist(wm->ball->pos) < solut[1].dist(wm->ball->pos)) ? solut[0] : solut[0];
+
+        goalieTarget.invalidate();
+        goalieShottarget = noKickTarget;
+    }
+    else if(goalieClearMode && !dangerForGoalieClear){
+        if(wm->ball->vel.length() > 0.4 && wm->ball->vel.length() < 1.3){
+            goalieTarget = Segment2D(wm->ball->pos , wm->ball->pos + wm->ball->vel.norm()*100).nearestPoint(knowledge->goalie->pos());
+            goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos );
+        }
+        else{  // kick
+            goalieTarget.invalidate();
+            if(wm->ball->pos.y >= 0){
+                goalieShottarget = Vector2D(-3.5 , -2.5) - wm->field->ourGoal();
+            }
+            else{
+                goalieShottarget = Vector2D(-3.5 , 2.5) - wm->field->ourGoal();
+            }
+        }
+    }
+    else{
+        if(goalieOneTouch){
+            goalieTarget = goalKeeperTarget;
+            goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), knowledge->goalie->pos());
+        }
+        else if(dangerForGoalieClear){  // kick
+            if(dangerForInsideOfThePenaltyArea){
+                goalieTarget.invalidate();
+                if(wm->ball->pos.y >= 0){
+                    goalieShottarget = Vector2D(-4.5 , -6) - wm->field->ourGoal();
+                }
+                else{
+                    goalieShottarget= Vector2D(-4.5 , 6) - wm->field->ourGoal();
+                }
+
+            }
+            else{
+                goalieTarget = wm->field->oppGoal();
+                goalieHeading = Vector2D::dirTo_deg(knowledge->goalie->pos(), wm->ball->pos );
+            }
+        }
+        else{
+
+            goalieTarget = wm->field->oppGoal();
+            goalieHeading = Vector2D::dirTo_deg(wm->field->ourGoal(), wm->ball->pos );
+        }
+    }
+
+}
+
+
+////// CMixTeamCoach Class //////
 CMixTeamCoach::CMixTeamCoach(){
     markRadiusStrict = 1.43;
 
@@ -757,11 +848,21 @@ CMixTeamCoach::CMixTeamCoach(){
 void CMixTeamCoach::goaliePacket(){
 
     CMixTeamCoach::SRobotPlan plan;
+
+    CmixTeamGoalie * copyGoalieDef = new CmixTeamGoalie();
+
+    copyGoalieDef->setGoalKeeperStateMixTeam();
+    copyGoalieDef->setGoalKeeperTargetPointMixTeam();
+
+    copyGoalieDef->updateGoalKeeperTarget();
+
+
     plan.role = multi_team_comm::RobotPlan::Goalie;
-    plan.id = knowledge->mixGoaleID;
-    plan.location.invalidate();
-    plan.heading = _INVALID_HEADING;
-    plan.shotTarget.invalidate();
+    plan.id = knowledge->goalie->id();
+    plan.location   = copyGoalieDef->goalieTarget;
+    plan.heading    = copyGoalieDef->goalieHeading;
+    plan.shotTarget = copyGoalieDef->goalieShottarget;
+
 
     robotsPlan.append(plan);
 }
@@ -837,6 +938,9 @@ void CMixTeamCoach::decideMarkAndDefenseCount(){
 
     }
 
+    // test
+    defenseCount = 0;
+    markCount = 0;
 
     if (wm->gs->penalty_shootout()) {
         defenseCount = 0;
@@ -1073,7 +1177,7 @@ void CMixTeamCoach::makeMasterPlanPacket(){
             posLoc[i] = poses[i]->mutable_loc();
             posLoc[i]->set_x(robotsPlan.at(i).location.x*100);
             posLoc[i]->set_y(robotsPlan.at(i).location.y*100);
-            draw(Circle2D(robotsPlan.at(i).location, 0.2), QColor(Qt::magenta));
+            draw(Circle2D(robotsPlan.at(i).location, 0.2), QColor(Qt::cyan));
         }
 
         if(robotsPlan.at(i).shotTarget.isValid()){                  // shot target
@@ -1315,7 +1419,6 @@ bool CMixTeamCoach::isInTheIndirectAreaShoot(Vector2D opp){
     }
 }
 
-
 bool CMixTeamCoach::isInTheIndirectAreaPass(Vector2D opp){
     //// This function checks the point that is resulted from block pass plan,
     //// is in the ball circle or not.
@@ -1328,7 +1431,6 @@ bool CMixTeamCoach::isInTheIndirectAreaPass(Vector2D opp){
         return false;
     }
 }
-
 
 CMixTeamCoach::SPosAndHeading CMixTeamCoach::indirectAvoidPassAndShoot(Vector2D opp, bool isShoot){
     //// If a point(that is resulted from block pass plan) is in the ball circle

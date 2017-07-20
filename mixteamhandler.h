@@ -83,6 +83,24 @@ public:
 };
 
 
+
+class CmixTeamGoalie : public DefensePlan{
+
+public:
+    CmixTeamGoalie();
+    void setGoalKeeperStateMixTeam();
+    void setGoalKeeperTargetPointMixTeam();
+    void execGoalKeeper();
+    void updateGoalKeeperTarget();
+
+    float goalieHeading;
+
+    Vector2D goalieTarget, goalieShottarget;
+
+
+};
+
+
 class CMixTeamCoach{
 
 #define _INVALID_HEADING 100000
@@ -98,13 +116,6 @@ public:
     struct SDangerousOpp{
         Vector2D Pos;
         double danger;
-    };
-
-    enum Role{
-        DefaultRole = 0,
-        GoalieRole  = 1,
-        DefenseRole = 2,
-        OffenseRole = 3
     };
 
     struct SRobotPlan{
