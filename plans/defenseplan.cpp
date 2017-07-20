@@ -46,17 +46,21 @@ void DefensePlan::agentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vec
 }
 
 void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs){
+
     QList<Segment2D> centerToCenter;
     QList<Vector2D> solvedPosition;
     QList<Vector2D> temp;
     QList<int> tempIndexs;
     QList<Vector2D> tempAgentsPosition;
     QList<Vector2D> finalSolvedPosition;
+    QList<Vector2D> nonRepetitiveFinalSolvedPosition;
     Vector2D tempPoint = Vector2D(0,0);
     bool isRepeated = false;
     QList<Vector2D> tempVectors;
+    ///////////////////// Update the state /////////////////////////////////////
     solvedPosition.clear();
     tempAgentsPosition.clear();
+    nonRepetitiveFinalSolvedPosition.clear();
     for(int i = 0 ; i < stuckPositions.size() ; i++){
         if(i % 2 == 0){
             centerToCenter.append(Segment2D(stuckPositions.at(i) , stuckPositions.at(i+1)));
@@ -67,7 +71,7 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
     }
     debug(QString("center : %1").arg(centerToCenter.size()) , D_AHZ);
     for(int i = 0 ; i < stuckPositions.size() ; i++){
-        solvedPosition.append(stuckPositions.at(i) + (1*CRobot::robot_radius_new - centerToCenter.at(i).length()/2)*((centerToCenter.at(i).a() - centerToCenter.at(i).b()).norm()));
+        solvedPosition.append(stuckPositions.at(i) + (1.4*CRobot::robot_radius_new - centerToCenter.at(i).length()/2)*((centerToCenter.at(i).a() - centerToCenter.at(i).b()).norm()));
     }
 
     for(int i = 0 ; i < stuckIndexs.size() ; i++){
@@ -106,13 +110,13 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
         tempVectors.clear();
         temp.clear();
     }
+    //// Tnx for Mahi && Parsa && Mhmmd :) ////// //////////////////////////////
     for(int i = 0 ; i < finalSolvedPosition.size() ; i++){
-        for(int j = 0 ; j < finalSolvedPosition.size() ; j++){
-            if(i != j && finalSolvedPosition.at(i) == finalSolvedPosition.at(j)){
-                finalSolvedPosition.removeAt(j);
-            }
+        if(!nonRepetitiveFinalSolvedPosition.contains(finalSolvedPosition.at(i))){
+            nonRepetitiveFinalSolvedPosition.append(finalSolvedPosition.at(i));
         }
     }
+    ///////////////////////////////////////////////////////////////////////////
     for(int i = 0 ; i < stuckPositions.size() ; i++){
         for(int j = 0 ; j < agentsPosition.size() ; j++){
             if(agentsPosition.at(j) == stuckPositions.at(i)){
@@ -120,8 +124,9 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
             }
         }
     }
-    for(int i = 0 ; i < finalSolvedPosition.size() ; i++){
-        agentsPosition.append(finalSolvedPosition.at(i));
+
+    for(int i = 0 ; i < nonRepetitiveFinalSolvedPosition.size() ; i++){
+        agentsPosition.append(nonRepetitiveFinalSolvedPosition.at(i));
     }
     debug(QString("solved : %1").arg(finalSolvedPosition.size()), D_AHZ);
     debug(QString("match : %1").arg(agentsPosition.size()), D_AHZ);
@@ -194,97 +199,7 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
     markPoses.clear();
     markAngs.clear();
     markRoles.clear();
-    /////////////////// Intelligent mark plan ///////////////////////////////
-    if((playOn && !knowledge->transientFlag) || knowledge->isStop()){
-        sol.clear();
-        tenLastOpponentDirection.clear();
-        sumOfLastOpponentDirection = Vector2D(0,0);
-        ballBool = false;
-        AHZCount = 0;
-    }
-    debug(QString("ten last : %1").arg(tenLastOpponentDirection.size()) , D_AHZ);
-    debug(QString("ahz count : %1").arg(AHZCount) , D_AHZ);
-    if(policy()->Mark_IntelligentMarkPrediction()){
-        if(playOff){
-            tenLastOpponentDirection.append(wm->opp[knowledge->nearestOppToBall]->dir);
-            if(AHZCount >= 10){
-                tenLastOpponentDirection.removeFirst();
-            }
-            AHZCount++;
-        }
-        if(LastTS != knowledge->transientFlag && LastTS == 0){
-            if(AHZCount < 10){
-                for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - (AHZCount - 1) ; i--){
-                    sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
-                }
-            }
-            else{
-                for(int i = tenLastOpponentDirection.size() - 1 ; i >= tenLastOpponentDirection.size() - 10 ; i--){
-                    sumOfLastOpponentDirection += tenLastOpponentDirection.at(i);
-                }
-            }
-            if(AHZCount < 10){
-                opponentPasserDirection = sumOfLastOpponentDirection / AHZCount;
-            }
-            else{
-                opponentPasserDirection = sumOfLastOpponentDirection / 10;
-            }
-            opponentPasserPossition = wm->opp[knowledge->nearestOppToBall]->pos;
-        }
-        if(knowledge->transientFlag){
-            if(wm->field->isInOurPenaltyArea(wm->ball->pos)){
-                ballBool = true;
-                Segment2D ballPath(wm->ball->pos , wm->ball->pos + (wm->ball->vel.norm()*10));
-                tempSol.append(wm->field->AHZOurPAreaIntersect(ballPath));
-                if(tempSol.size() == 1){
-                    draw(Segment2D(wm->ball->pos , wm->ball->pos + (wm->ball->vel.norm()*10)) , "black");
-                    markPoses.append(tempSol.at(0));
-                    markRoles.append(QString("predictBlocker"));
-                    markAngs.append(wm->field->center() - wm->field->ourGoal());
-                    ourMarkAgentsSize--;
-                }
-            }
-            if(ballBool){
-                if(!wm->field->isInOurPenaltyArea(wm->ball->pos)){
-                    Line2D ballPath(wm->ball->pos , wm->ball->pos + wm->ball->vel);
-                    tempSol.append(wm->field->AHZOurPAreaIntersect(ballPath));
-                    draw(Segment2D(wm->ball->pos , wm->ball->pos - (wm->ball->vel.norm()*10)) , "black");
-                    if(tempSol.size() == 2){
-                        tempAHZ = tempSol.at(0).isValid() && tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
-                        markPoses.append(tempAHZ);
-                        markRoles.append(QString("predictBlocker"));
-                        markAngs.append(wm->field->center() - wm->field->ourGoal());
-                        ourMarkAgentsSize--;
-                    }
-                    else if(tempSol.size() == 1){
-                        tempAHZ = tempSol.at(0);
-                        markPoses.append(tempAHZ);
-                        markRoles.append(QString("predictBlocker"));
-                        markAngs.append(wm->field->center() - wm->field->ourGoal());
-                        ourMarkAgentsSize--;
-                    }
-                    else{
-                        markPoses.append(wm->ball->pos);
-                        markRoles.append(QString("predictBlocker"));
-                        markAngs.append(wm->field->center() - wm->field->ourGoal());
-                        ourMarkAgentsSize--;
-                    }
-
-                }
-            }
-            else{
-                sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
-                if(sol.size()){
-                    sol.append(wm->field->AHZOurPAreaIntersect(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection))));
-                    draw(Segment2D(opponentPasserPossition , opponentPasserPossition + (10 * opponentPasserDirection)) , "black");
-                    markPoses.append(Segment2D(sol.first() , opponentPasserPossition).length() > Segment2D(sol.last() , opponentPasserPossition).length() ? sol.first() : sol.last());
-                    markRoles.append(QString("predictBlocker"));
-                    markAngs.append(wm->field->center() - wm->field->ourGoal());
-                    ourMarkAgentsSize--;
-                }
-            }
-        }
-    }
+    /////////////////// Intelligent mark plan ///////////////////////////////    
     LastTS = knowledge->transientFlag;
     ////////////////////////////////////////////////////////////////////////////
     debug(QString("Mark Agents Count : %1").arg(ourMarkAgentsSize) , D_SEPEHR , QColor(Qt::red));
@@ -836,15 +751,7 @@ void DefensePlan::setGoalKeeperState(){
                 dangerForGoalieClear = true;
             }
             ///////////////////////////////////////////////////////////////////////
-            if(knowledge->goalie->pos().x  + behindBallThr > wm->ball->pos.x && !wm->field->isInOurPenaltyArea(wm->ball->pos) && !dangerForGoalieClear){
-                ballBehindGoalie = true;
-                goalieOneTouch = false;
-                goalieClearMode = false;
-                ballIsOutOfField = false;
-                behindBallThr = 0;
-                return;
-            }
-            else if(playOnMode){
+            if(playOnMode && !dangerForGoalieClear){
                 if((wm->ball->vel.length() > 1.3) && (goalLine.intersection(ballLine).valid() || oneTouchCnt < 5)){
                     ballBehindGoalie = false;
                     goalieOneTouch = true;
@@ -872,6 +779,14 @@ void DefensePlan::setGoalKeeperState(){
                 }
                 ballBehindGoalie = false;
                 behindBallThr = 0.08;
+            }
+            else if(knowledge->goalie->pos().x  + behindBallThr > wm->ball->pos.x && !wm->field->isInOurPenaltyArea(wm->ball->pos)){
+                ballBehindGoalie = true;
+                goalieOneTouch = false;
+                goalieClearMode = false;
+                ballIsOutOfField = false;
+                behindBallThr = 0;
+                return;
             }
         }
         else{
@@ -1323,10 +1238,10 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     if(isAgentsStuckTogether(matchPoints)){
           agentsStuckTogether(matchPoints , stuckPositions , stuckIndexs);
           debug("Agents Stuck together" , D_AHZ);
-          debug(QString("stuck : %1").arg(stuckPositions.size()),  D_AHZ);
-          debug(QString("stuck : %1").arg(stuckIndexs.size()),  D_AHZ);
+          debug(QString("stuck position: %1").arg(stuckPositions.size()),  D_AHZ);
+          debug(QString("stuck index: %1").arg(stuckIndexs.size()),  D_AHZ);
           correctingTheAgentsAreStuckTogether(matchPoints , stuckPositions , stuckIndexs);
-      }
+     }
     ////////////////////////////////////////////////////////////////////////
     knowledge->Matching(ourAgents,matchPoints,matchResult);
     debug(QString("defenseAHZ : %1 ").arg(defenseAgents.size()) , D_AHZ);
