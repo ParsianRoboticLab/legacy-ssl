@@ -176,7 +176,7 @@ float getDegree(Vector2D pos1, Vector2D origin, Vector2D pos3){
     return (v1.th() - v2.th()).degree();
 }
 
-bool DefensePlan::isIndirectArea(Vector2D aPoint){
+bool DefensePlan::isInIndirectArea(Vector2D aPoint){
     //// check that a point is in the circle around the ball
     //// with 50cm radius or not.
 
@@ -208,8 +208,6 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
 
 
     ////////////////////////// Variables of this function //////////////////////
-    bool playOn = knowledge->getGameMode() == CKnowledge::Start;
-    bool playOff = knowledge->getGameState() == CKnowledge::TheirDirectKick || knowledge->getGameState() == CKnowledge::TheirKickOff || knowledge->getGameState() == CKnowledge::TheirIndirectKick;
     int i;
     int j;
     Vector2D ourCenterOfGoalPossition = wm->field->ourGoal();
@@ -217,13 +215,12 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
     Vector2D sol3 , sol4;
     Vector2D sol5 , sol6;
     Vector2D sol7 , sol8;
-    QList <Vector2D> sol;
-    QList <Vector2D> tempSol;
     double opponentAgentsCircleR = 0.2;
     QList<Circle2D> opponentAgentsCircle;
     QList<Circle2D> opponentAgentsToBeMarkCircle;
     QList<Circle2D> tempOpponentAgentsToBeMarkedCircle;
     QList<Vector2D> ourMarkAgentsPossition;
+    QList<Vector2D> tempOpponentAgentsToBeMarkedPosition;
     QList<QPair<Vector2D,double> > sortDangerAgentsToBeMarkBlockPassPlayOff;
     QList<QPair<Vector2D,double> > tempSortDangerAgentsToBeBlockPassPlayOff;
     Circle2D goalCircle(ourCenterOfGoalPossition , 1.43);
@@ -231,6 +228,7 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
     //////////////////// Clear QLists for update the states ////////////////////
     stopMode = knowledge->isStop();
     ourMarkAgentsPossition.clear();
+    tempOpponentAgentsToBeMarkedPosition.clear();
     markPoses.clear();
     markAngs.clear();
     markRoles.clear();
@@ -238,12 +236,20 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
     LastTS = knowledge->transientFlag;
     ////////////////////////////////////////////////////////////////////////////
     debug(QString("Mark Agents Count : %1").arg(ourMarkAgentsSize) , D_SEPEHR , QColor(Qt::red));
-    debug(QString("Opponent Agents to be mark count : %1").arg(opponentAgentsToBeMarkPossition.size()) , D_SEPEHR , QColor(Qt::red));
     ///////// Make Cirlcles around opponent agents /////////////////////////////
+    debug(QString("Opponent Agents to be mark count : %1").arg(opponentAgentsToBeMarkPossition.size()) , D_SEPEHR , QColor(Qt::green));
+    for(int i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
+        if(!isInIndirectArea(opponentAgentsToBeMarkPossition.at(i))){
+            tempOpponentAgentsToBeMarkedPosition.append(opponentAgentsToBeMarkPossition.at(i));
+        }
+    }
+    opponentAgentsToBeMarkPossition.clear();
+    opponentAgentsToBeMarkPossition = tempOpponentAgentsToBeMarkedPosition;
     for(i = 0 ; i < opponentAgentsToBeMarkPossition.size(); i++){
         opponentAgentsToBeMarkCircle.append(Circle2D(opponentAgentsToBeMarkPossition.at(i) , opponentAgentsCircleR));
         draw(opponentAgentsToBeMarkCircle.at(i) , "Cyan");
     }
+    debug(QString("Opponent Agents to be mark count : %1").arg(opponentAgentsToBeMarkPossition.size()) , D_SEPEHR , QColor(Qt::red));
     ///////////////// Block Pass Plan ////////////////////////////////////
     if(opponentAgentsToBeMarkPossition.size() == ourMarkAgentsSize){
         for(i = 0 ; i < ourMarkAgentsSize ; i++){
@@ -278,12 +284,12 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
         if(opponentAgentsToBeMarkPossition.size() == 0){
             for(i = 0 ; i < ourMarkAgentsSize ; i++){
                 if(i % 2){
-                    markPoses.append(Vector2D(0 , i / 1.5));
+                    markPoses.append(Vector2D(-3 , i / 1.5));
                     markAngs.append(Vector2D(0,0));
                     markRoles.append(QString("shotBlocker"));
                 }
                 else{
-                    markPoses.append(Vector2D(0,-i  / 1.5));
+                    markPoses.append(Vector2D(-3,-i  / 1.5));
                     markAngs.append(Vector2D(0,0));
                     markRoles.append(QString("shotBlocker"));
                 }
@@ -329,12 +335,12 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
             }
             for(i = 0 ; i < ourMarkAgentsSize - markPoses.size() ; i++){
                 if(i % 2){
-                    markPoses.append(Vector2D(0 , i / 1.5));
+                    markPoses.append(Vector2D(-3 , i / 1.5));
                     markAngs.append(Vector2D(0,0));
                     markRoles.append(QString("shotBlocker"));
                 }
                 else{
-                    markPoses.append(Vector2D(0,-i  / 1.5));
+                    markPoses.append(Vector2D(-3,-i  / 1.5));
                     markAngs.append(Vector2D(0,0));
                     markRoles.append(QString("shotBlocker"));
                 }
@@ -474,12 +480,12 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
         if(ourMarkAgentsSize > markPoses.size()){
             for(i = 0 ; i < ourMarkAgentsSize - markPoses.size() ; i++){
                 if(i % 2){
-                    markPoses.append(Vector2D(0 , (i+1) / 0.75));
+                    markPoses.append(Vector2D(-3 , (i+1) / 0.75));
                     markAngs.append(Vector2D(0,0));
                     markRoles.append(QString("shotBlocker"));
                 }
                 else{
-                    markPoses.append(Vector2D(0,(-i-1)  / 0.75));
+                    markPoses.append(Vector2D(-3,(-i-1)  / 0.75));
                     markAngs.append(Vector2D(0,0));
                     markRoles.append(QString("shotBlocker"));
                 }
@@ -516,10 +522,10 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
             draw(Circle2D(wm->ball->pos , ballCircleR),QColor(Qt::black));
             debug(QString("Man To Man Mark In PlayOn Mode / BlockPass / opp > our") , D_SEPEHR);
         }
-
     }
     //////////////// Draw Possition of Mark Agents //////////////////////////
     for(i = 0 ; i < markPoses.size() ; i++){
+        debug(QString("x : %1").arg(markPoses.at(i).x) , D_AHZ);
         draw(markPoses.at(i) ,1, "white");
         draw(markRoles.at(i) , markPoses.at(i) - Vector2D(0,0.4) , "white");
     }
@@ -3176,7 +3182,6 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
             knowledge->getEmptyAngle(ballPrediction(true), wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true);
             AZBisecOpenSeg = Segment2D(ballPrediction(true) , ballPrediction(true) + Vector2D(cos(_PI*(AZBisecOpenAngle)/180),sin(_PI*(AZBisecOpenAngle)/180)).norm()*12);
             target = AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos());
-            debug("aya injas ? ",D_AHZ);
         }
         else{
             if(knowledge->goalie->pos().dist(AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos())) > 0.3 + thr){
