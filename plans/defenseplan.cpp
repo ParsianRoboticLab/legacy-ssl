@@ -1596,12 +1596,7 @@ void DefensePlan::penaltyShootOutMode(){
         break;
     }
 
-<<<<<<< HEAD
 
-
-
-=======
->>>>>>> develop
 }
 
 void DefensePlan::penaltyMode(){
