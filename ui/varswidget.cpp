@@ -73,6 +73,15 @@ CVarsWidget::CVarsWidget()
             ADD_TO_ENUM(LocalSettings,LineUpPosition,"parsian")
             END_ENUM(LocalSettings,LineUpPosition)
             ADD_VALUE(LocalSettings,Bool,ParsianWorkShop,false,"Parsian Workshop")
+
+            ADD_VALUE(LocalSettings,String,MixTeamIP,"127.0.0.1","MixTeam Send/Read IP")
+            ADD_VALUE(LocalSettings,Int,MixTeamPort,1234,"MixTeam Send/Read Port")
+            ADD_VALUE(LocalSettings,String,MixTeamIDs,"01234","MixTeam Our Robot IDs(hex)")
+
+            ADD_VALUE(LocalSettings,Bool,sendRobotStatus,false,"Send Robot Status")
+            ADD_VALUE(LocalSettings,String, robotStatusIP,"127.0.0.1","Robots' Status IP")
+            ADD_VALUE(LocalSettings,Int, robotStatusPort,10010, "Robots' Status Port")
+
             ADD_TREE(Common,"Common",true)
             ADD_VALUE(Common,Int,Viewport_Width,800,"Viewport Width")
             ADD_VALUE(Common,Int,Command_Interval,10,"Command Sending Interval(ms)")
@@ -320,6 +329,7 @@ CPolicyWidget::CPolicyWidget()
     ADD_VALUE(PlayOff, Int, OneToucherID, 0, "One Toucher ID ");
     ADD_VALUE(PlayOff, Bool, UseFastPlay, false, "Use Fast Play");
     ADD_VALUE(PlayOff, Bool, UseFirstPlay, false, "Use First Play");
+    ADD_VALUE(PlayOff, Bool, UseBlockBlocker, false, "Use Blocker Block");
 
     ADD_TREE(DynamicPlay, "DynamicPlay", false);
     ADD_VALUE(DynamicPlay, Double , LowSpeedPass   , 0, "Low Speed Pass");
@@ -342,13 +352,14 @@ CPolicyWidget::CPolicyWidget()
     ADD_VALUE(Mark, Double , OppOmitLimitPlayon  , 2.0, "Opponent Ommit Limit Playon");
     ADD_VALUE(Mark, Double , OppOmitLimitPlayoff  , 2.0, "Opponent Ommit Limit Playoff");
     ADD_VALUE(Mark, Double , OppOmitLimitKickOff  , 2.0, "Opponent Ommit Limit KickOff");
-    ADD_VALUE(Mark, Double, ShootRatioBlock, 0.33, "Shoot Ratio Block");
-    ADD_VALUE(Mark, Double, PassRatioBlock, 0.33, "Pass Ratio Block");
+    ADD_VALUE(Mark, Double, ShootRatioBlock, 33.0 , "Shoot Ratio Block");
+    ADD_VALUE(Mark, Double, PassRatioBlock, 33.0, "Pass Ratio Block");
 
     ADD_VALUE(Mark, Bool, OmmitNearestToBallPlayon, false, "Ommit Nearest To ball Playon");
 
     ADD_VALUE(Mark, Bool , IntelligentMarkType, false, "Intelligent Mark Type");
     ADD_VALUE(Mark, Bool , IntelligentMarkPrediction, true, "Intelligent Mark Prediction");
+    ADD_VALUE(Mark, Double , VelReliability, 0.5 , "VelReliability");
 
     globalWorld=VarXML::read(globalWorld,"policy.xml");
 
@@ -399,6 +410,15 @@ IMPL_ENUM(CVarsWidget,LocalSettings,std::string,OurTeamColor)
 IMPL_ENUM(CVarsWidget,LocalSettings,std::string,OurTeamSide)
 IMPL_ENUM(CVarsWidget,LocalSettings,std::string,LineUpPosition)
 IMPL_VALUE(CVarsWidget,LocalSettings,bool,Bool,ParsianWorkShop)
+IMPL_VALUE(CVarsWidget,LocalSettings,std::string,String,MixTeamIP)
+IMPL_VALUE(CVarsWidget,LocalSettings,int,Int,MixTeamPort)
+IMPL_VALUE(CVarsWidget,LocalSettings,std::string,String,MixTeamIDs)
+
+IMPL_VALUE(CVarsWidget,LocalSettings,bool,Bool,sendRobotStatus)
+IMPL_VALUE(CVarsWidget,LocalSettings,std::string,String,robotStatusIP)
+IMPL_VALUE(CVarsWidget,LocalSettings,int,Int,robotStatusPort)
+
+
 IMPL_VALUE(CVarsWidget,Common,int,Int,Viewport_Width)
 IMPL_VALUE(CVarsWidget,Common,int,Int,Command_Interval)
 IMPL_VALUE(CVarsWidget,Common,int,Int,Monitor_Interval)
@@ -564,6 +584,7 @@ IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, IDBaseOneToucher)
 IMPL_VALUE(CPolicyWidget,PlayOff, int, Int, OneToucherID)
 IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, UseFastPlay)
 IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, UseFirstPlay)
+IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, UseBlockBlocker)
 
 IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , LowSpeedPass)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , MediumSpeedPass)
@@ -590,7 +611,7 @@ IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , OmmitNearestToBallPlayon)
 
 IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , IntelligentMarkType)
 IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , IntelligentMarkPrediction)
-
+IMPL_VALUE(CPolicyWidget, Mark, double, Double, VelReliability)
 
 
 IMPL_VALUE(CPolicyWidget,OurDirect, bool, Bool, CornerChip)

@@ -20,6 +20,9 @@ CKnowledge *knowledge;
 
 CKnowledge::CKnowledge(CAgent** _agents)
 {
+    kPlans = NULL;
+    ssize = 0;
+    mixGoaleID = 0;
 
     //ABBAS
     refShortcuts = false;
@@ -377,6 +380,35 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
 
 }
 
+
+double CKnowledge::chipGoalPropability(bool isOurChip){
+    double GoalDistanceToBall;
+    double GoalieDistanseToBall;
+    double GoalDistanceToGoalie;
+    Vector2D goal,goaliePos;
+    if(isOurChip){
+        goal=wm->field->oppGoal();
+        goaliePos=wm->opp[wm->opp.data->goalieID]->pos;
+
+    }
+    else{
+        goal= wm->field->ourGoal();
+        goaliePos=goalie->pos();
+    }
+
+    GoalDistanceToBall=wm->ball->pos.dist(goal)/1.9;
+    GoalieDistanseToBall=wm->ball->pos.dist(goaliePos);
+    GoalDistanceToGoalie=goaliePos.dist(goal);
+    if(goaliePos.dist(wm->ball->pos)<0.35
+            || wm->ball->pos.dist(goal)<1)
+        return 0;
+    else if(((GoalDistanceToBall-GoalieDistanseToBall)/GoalDistanceToGoalie)*2 >0)
+        return ((GoalDistanceToBall-GoalieDistanseToBall)/GoalDistanceToGoalie)*2;
+    else return 0;
+
+
+}
+
 void CKnowledge::calculateCommandFrameRate()
 {
     double now = CProfiler::getTime();
@@ -568,12 +600,7 @@ int CKnowledge::factorial(int a)
 
 double CKnowledge::getRealBallVel()
 {
-    ballVelLowPass = 0.9 * ballVelLowPass + 0.1 *(((ballPosHis[0].dist(ballPosHis[1])/mainLoopTime) + (wm->ball->pos.dist(ballPosHis[0])/mainLoopTime) + (wm->ball->pos.dist(ballPosHis[1])/(mainLoopTime*2)))/3);
-
-    ballPosHis[1] = ballPosHis[0];
-    ballPosHis[0] = wm->ball->pos;
-    draw(QString("New Ball Vel : %1").arg(ballVelLowPass,0, 'f', 2),Vector2D(-3,-3.5));
-    return ballVelLowPass;
+    return wm->ball->vel.length();
 }
 
 int CKnowledge::Matching(const QList <CAgent*> robots, const QList <Vector2D> pointsToMatch, QList <int> &matchPoints){
@@ -1847,20 +1874,26 @@ Vector2D CKnowledge::goalVisiblity(int agentId, double &regionWidth, double unde
     return target;
 }
 
-Vector2D CKnowledge::getEmptyPosOnGoalForPenalty(double n, bool oppGoal, double th){
+Vector2D CKnowledge::getEmptyPosOnGoalForPenalty(double n, bool oppGoal, double th, CAgent* ourAgent){
 
     Vector2D target, goalieR, goalieL;
     int goalieID;
     CRobot* goalie;
     double distanceR, distanceL;
 
+//    Line2D goalLine;
+
+    AngleDeg rightDeg, leftDeg;
+
     if(oppGoal) {
+//        goalLine.assign(wm->field->oppGoalL(), wm->field->oppGoalR());
         goalieID = wm->opp.data->goalieID;
         goalie = wm->opp[goalieID];
         goalieR = wm->field->oppGoalR();
         goalieL = wm->field->oppGoalL();
 
     } else {
+//        goalLine.assign(wm->field->ourGoalL(), wm->field->ourGoalR());
         goalieID = wm->our.data->goalieID;
         goalie = wm->our[goalieID];
         goalieR = wm->field->ourGoalR();
@@ -1870,15 +1903,33 @@ Vector2D CKnowledge::getEmptyPosOnGoalForPenalty(double n, bool oppGoal, double 
     distanceR = wm->opp[goalieID]->pos.dist(goalieR);
     distanceL = wm->opp[goalieID]->pos.dist(goalieL);
 
-    if(distanceR > distanceL && fabs(distanceL - distanceR) > th) {
-        target = Vector2D(goalieR.x, goalieR.y + n*distanceR);
-        draw(target, 0, QColor(Qt::black));
-//        draw(Segment2D(target, Vector2D(((goalieL+goalieR)/2).x-1, ((goalieL+goalieR)/2).y)), QColor(Qt::darkCyan));
-    } else {
-        target = Vector2D(goalieL.x, goalieL.y - n*distanceL);
-        draw(target, 0, QColor(Qt::black));
-//        draw(Segment2D(target, Vector2D(((goalieL+goalieR)/2).x-1, ((goalieL+goalieR)/2).y)), QColor(Qt::darkRed));
+    if(ourAgent != NULL){
+
+        rightDeg = Vector2D::angleOf(wm->field->ourGoalR(), ourAgent->pos(), goalie->pos);
+        leftDeg = Vector2D::angleOf(wm->field->ourGoalL(), ourAgent->pos(), goalie->pos);
+
+        debug(QString("%1, %2").arg(rightDeg.abs()).arg(leftDeg.abs()), D_FATEMEH);
+
+        if(rightDeg.abs() > leftDeg.abs() && fabs(rightDeg.abs() - leftDeg.abs()) > th*15){
+            target = Vector2D(goalieR.x, goalieR.y + n);
+            draw(target, 10, QColor(Qt::cyan));
+        } else {
+            target = Vector2D(goalieL.x, goalieL.y - n);
+            draw(target, 10, QColor(Qt::cyan));
+        }
     }
+    else{
+        if(distanceR > distanceL && fabs(distanceL - distanceR) > th) {
+            target = Vector2D(goalieR.x, goalieR.y + n*distanceR);
+            draw(target, 0, QColor(Qt::black));
+            //        draw(Segment2D(target, Vector2D(((goalieL+goalieR)/2).x-1, ((goalieL+goalieR)/2).y)), QColor(Qt::darkCyan));
+        } else {
+            target = Vector2D(goalieL.x, goalieL.y - n*distanceL);
+            draw(target, 0, QColor(Qt::black));
+            //        draw(Segment2D(target, Vector2D(((goalieL+goalieR)/2).x-1, ((goalieL+goalieR)/2).y)), QColor(Qt::darkRed));
+        }
+    }
+
 
     return target;
 }
@@ -4289,7 +4340,6 @@ bool CKnowledge::getNecessaryDefKick() {
     return necessaryDefKick;
 }
 
-
 Vector2D CKnowledge::getChipDir(){
 
 
@@ -4381,16 +4431,23 @@ Vector2D CKnowledge::getChipPredict(){
 
         predictedPosition=Vector2D(0,0);
 
-        for(int i=0;i<predictedBallPoses.size();i+=1){
+
+        for(int i=1;i<predictedBallPoses.size();i+=1){
+            debug(QString("pos%1:%2").arg(i).arg(predictedBallPoses.at(i).x),D_NADIA);
+        }
+        for(int i=1;i<predictedBallPoses.size();i+=1){
             if(i>14)
                 break;
             predictedPosition+=predictedBallPoses.at(i);
             draw(predictedBallPoses.at(i));
         }
-        if(predictedBallPoses.size()<15)
-            predictedPosition/=predictedBallPoses.size();
+
+        if(predictedBallPoses.size()<15){
+            predictedPosition/=predictedBallPoses.size()-1;
+
+        }
         else
-            predictedPosition/=15;
+            predictedPosition/=14;
 
         debug(QString("counter: %1").arg(chipPredictCounter),D_NADIA);
 

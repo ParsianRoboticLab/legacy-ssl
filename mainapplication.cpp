@@ -32,6 +32,7 @@
 #include "kickprofiler.h"
 #include "autoballplacement.h"
 #include "chipkick.h"
+#include "MixTeamChallenge.h"
 
 
 QString startUpMode;
@@ -240,6 +241,8 @@ CMainApplication::CMainApplication(QWidget *parent)
 
     //	knowledgeVarsWidget = new CKnowledgeVarsWidget();
 
+    statusSender = new CRobotStatusSender(16, this);
+
 #ifdef DISTURBANCE_MATRIX
     learnEWidget = new CLearnEWidget(soccer->agents);
     learnEWidget->setWindowTitle("Learn E");
@@ -289,7 +292,7 @@ CMainApplication::CMainApplication(QWidget *parent)
 
     setMixedAct = new QAction(tr("Mixed Team Mode"), this);
     setMixedAct->setCheckable(true);
-    setMixedAct->setChecked(false);//(wm->mixedMode == true));
+    setMixedAct->setChecked((experimental==14));
 
     setExp1Act = new QAction("Experimental1", this);
     setExp1Act->setCheckable(true);
@@ -688,6 +691,7 @@ void CMainApplication::customControl(bool &custom)
         {
             chipKickRobot->stateController();
         }
+        if(experimental==14) MixTeamChallenge();
 
     }
     else {
@@ -836,6 +840,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
         setTC_chipKick->setChecked(false);
+        setMixedAct->setChecked(false);
     }
     else if (action->text() == setExp2Act->text())
     {
@@ -850,6 +855,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
         setTC_chipKick->setChecked(false);
+        setMixedAct->setChecked(false);
     }
     else if (action->text() == setExp3Act->text())
     {
@@ -864,6 +870,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
         setTC_chipKick->setChecked(false);
+        setMixedAct->setChecked(false);
     }
     else if (action->text() == setExp4Act->text())
     {
@@ -878,6 +885,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
         setTC_chipKick->setChecked(false);
+        setMixedAct->setChecked(false);
     }
     else if (action->text() == setExp5Act->text())
     {
@@ -892,6 +900,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
         setTC_chipKick->setChecked(false);
+        setMixedAct->setChecked(false);
     }
     else if (action->text() == setExp6Act->text())
     {
@@ -906,6 +915,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
         setTC_chipKick->setChecked(false);
+        setMixedAct->setChecked(false);
     }
     else if (action->text() == setTechnicalChallengeAct->text())
     {
@@ -922,6 +932,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
         setTC_chipKick->setChecked(false);
+        setMixedAct->setChecked(false);
     }
     else if (action->text() == setMergeCamerasExperimentAct->text())
     {
@@ -943,6 +954,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setTechnicalChallengeAct->setChecked(false);
         setFProfiler->setChecked(false);
         setTC_chipKick->setChecked(false);
+        setMixedAct->setChecked(false);
     }
     else if (action->text() == setJsHandy->text())
     {
@@ -958,6 +970,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
         setTC_chipKick->setChecked(false);
+        setMixedAct->setChecked(false);
     }
     else if (action->text() == setKProfiler->text())
     {
@@ -975,6 +988,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setMergeCamerasExperimentAct->setChecked(false);
         setFProfiler->setChecked(false);
         setTC_chipKick->setChecked(false);
+        setMixedAct->setChecked(false);
     }
     else if (action->text() == setFProfiler->text())
     {
@@ -992,6 +1006,7 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setKProfiler->setChecked(false);
         setJsHandy->setChecked(false);
         setTC_chipKick->setChecked(false);
+        setMixedAct->setChecked(false);
         CNewProfilerWidget *profilerWidget;
         profilerWidget=new CNewProfilerWidget(this);
         profilerWidget->show();
@@ -1012,12 +1027,35 @@ void CMainApplication::setQuiescentMode(QAction *action)
         setKProfiler->setChecked(false);
         setJsHandy->setChecked(false);
         setTC_chipKick->setChecked(false);
+        setMixedAct->setChecked(false);
     }
     else if (action->text() == setTC_chipKick->text())
     {
         experimental = 13;
         if (setTC_chipKick->isChecked()) setTC_chipKick->setChecked(true);
         else {setTC_chipKick->setChecked(false);experimental=0;}
+        setExp1Act->setChecked(false);
+        setExp2Act->setChecked(false);
+        setExp3Act->setChecked(false);
+        setExp4Act->setChecked(false);
+        setExp5Act->setChecked(false);
+        setExp6Act->setChecked(false);
+        setJsHandy->setChecked(false);
+        setMergeCamerasExperimentAct->setChecked(false);
+        setKProfiler->setChecked(false);
+        setJsHandy->setChecked(false);
+        setFProfiler->setChecked(false);
+        setKProfiler->setChecked(false);
+        setMixedAct->setChecked(false);
+    }
+    else if(action->text() == setMixedAct->text())
+    {
+        experimental = 14;
+        if(setMixedAct->isChecked()) setMixedAct->setChecked(true);
+        else{
+            setMixedAct->setChecked(false);
+            experimental = 0;
+        }
         setExp1Act->setChecked(false);
         setExp2Act->setChecked(false);
         setExp3Act->setChecked(false);

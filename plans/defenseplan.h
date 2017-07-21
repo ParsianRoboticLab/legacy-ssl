@@ -5,6 +5,7 @@
 #include <cmath>
 
 //#define OLD_FASTEST 1
+
 #define LOOP_TIME_BYKK 0.016
 #define AGENT_SPEED_BYKK 1.5
 //struct velAndAccByKK {
@@ -55,7 +56,7 @@ protected:
     void checkGoalieTarget();    
     void setGoalKeeperState();
     void setGoalKeeperTargetPoint();
-    bool ballBehindGoalie, goalieOneTouch, goalieInPenaltyAreaPrediction, goalieClearMode, goalieStrictFollow, goalieFollow, ballIsOutOfField;
+    bool ballBehindGoalie, goalieOneTouch,goalieClearMode,ballIsOutOfField;
     double strictfollowThr;
     double behindBallThr;    
     bool besidePoleFlag;
@@ -64,21 +65,23 @@ protected:
     ////////////////////////////// AHZ ///////////////////    
     Line2D getBisectorLine(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
     Segment2D getBisectorSegment(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
+    Segment2D getOppNearestToBallDirInTheirIndirectMode(int lastDirectionSize);
     void manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkBlockShotInPlayOff(int _markAgentSize);
-    bool isAgentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> stuckIndexs);
-    void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> stuckPositions);
-    void getIntersectionWithPenaltyAreaAHZ(Segment2D , Vector2D sol1 , Vector2D sol2);
+    void agentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs);
+    bool isAgentsStuckTogether(QList<Vector2D> agentsPosition);
+    bool isStateGoingFromIndirectToTransient();
+    void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs);    
     bool isIndirectArea(Vector2D);    
-
     //atousa
     Vector2D getGoaliePositionInOneDef(Vector2D _ballPos, double _limit1, double _limit2);
     double goalieThr;
-
+    ////////
     int angleDegreeThrNotStop = 0;
     double threshOld = 0.0;
     double ballCircleR = 0.5;
     double xLimitForblockingPass;
+    bool stuckFlag;
     bool isCrowdedInFrontOfPenaltyAreaByOurAgents;
     bool isCrowdedInFrontOfPenaltyAreaByOppAgents;
     bool ballISInpenaltyAreaAndDangerCircle;
@@ -95,23 +98,24 @@ protected:
     bool changeInMarkPlanFlag;
     bool manToManMarkBlockPassFlag;
     bool ballBool;
+    bool goalKeeperPredictionModeInPlayOff;
     QString lastStateForMark;
     QString stateForMark;
     int lastOpponentAgentsToBeMarkSize;
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;
-    QList <Vector2D> tenLastOpponentDirection;    
+    QList <Vector2D> lastOppNearestToBallDirections;
     Vector2D opponentPasserDirection;
-    Vector2D opponentPasserPossition;
-    Vector2D sumOfLastOpponentDirection;
+    Vector2D oppNearestToBallPossition;
+    Vector2D sumOfLastOpponentDirections;
     Vector2D tempAHZ;
     Vector2D sumOfLastOpponentPosition;
+    Vector2D finalOppNearestToBallDirection;
 
     int AHZCount;        
     ///////////////////////////////////////////////////
     void executeGoalKeeper();    
-    Vector2D strictFollowBall(Vector2D _ballPos);
-    Vector2D followBall(Vector2D _ballPos);
+    Vector2D strictFollowBall(Vector2D _ballPos);    
     Vector2D checkDefensePoint(CAgent* agent, const Vector2D& point);
     rcsc::Vector2D avoidKicker(int i, int kicker);
     void announceClearing(bool state);
@@ -121,12 +125,14 @@ protected:
     bool defenseOneTouchOrNot();
     bool defenseClearOrNot();
     void runClear();
-    Vector2D getGoalieShootOutTarget(bool isBallPath);
+    bool agentEffectOnBallProbability(Vector2D ballPos, Vector2D ballVel, Vector2D agentPos, Vector2D agentVel, bool isTowardOurgoal);
+    Vector2D getGoalieShootOutTarget(bool isSkyDive);
     bool canReachToBall(int agentId, int theirAgentId);
     int decideShootOutMode();
     QList <Vector2D> lastBallPos;
-    int penaltyShootoutMode;
+    int penaltyShootoutMode=beforeTouch;
     void penaltyShootOutMode();
+    CSkillGotoPointAvoid* striker_Robot;
     void penaltyMode();
     bool isStopped();
     bool isTheirNonPlayKick();
@@ -137,11 +143,16 @@ protected:
         NoneExep = 3
     };
     enum shootOutMode{
+        beforeTouch,
         shootOutClear,
         ballBisector,
         skyDive
 
     };
+
+    bool shootOutClearModeSelected = false;
+    bool agentEffectOnBallProbabilityRes;
+    double shootOutDiam = 2.5;
 
     struct defenseExeptions{
         bool active;
@@ -150,6 +161,7 @@ protected:
     };
     Vector2D ballPrediction(bool _isGoalie);
 
+    Vector2D lastBallPosition;
 public:
     DefensePlan();
     void execute();
@@ -254,8 +266,7 @@ private:
     double pushBallHist;
     int failureAtempCnt;
     int clearCnt;
-    double savedClearDist;
-    Vector2D savedClearPos;
+    double savedClearDist;    
     int goaliePassBlockCnt;
     Vector2D gBassBlockTargetSave;
     double predictThresh;    

@@ -91,7 +91,11 @@ public:
     void executeOurKickOff();
     void executeOurPenalty();
     void executeOurPenaltyShootout();
+    void theirPenaltyPositioning();
     int choosePenaltyStrategy();
+    void ShootoutSwitching(bool isChip);
+    void firstKickInShootout(bool isChip);
+    void kickInitialShootout();
     int getPenaltychipSpeed();
     double lastBounce();
     bool ShootPenalty();
@@ -106,6 +110,10 @@ public:
     KickPassMode kickPassMode;
     int kickPassCyclesWait;
     Vector2D finalTarget;
+
+    QList<QPair<int, QMap<double, int> > > lastBounceProfileData;
+    QTextStream out;
+    QFile lastBounceDataFile;
 
     virtual void generateFromConfig(CAgent *a);
     virtual CSkillConfigWidget* generateConfigWidget(QWidget *parent);

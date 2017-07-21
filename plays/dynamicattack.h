@@ -62,10 +62,15 @@ public:
     CAgent* getMahiPlayMaker();
 
 private:
+    double thrshDribble = 0;
+    bool lastPMInitWasDribble;
+    Vector2D oppRob;
+    double lastYDrib = 0;
     Vector2D lastPassPosLoc;
     int lastGuards[6];
     int guardSize;
     QTime positioningIntention;
+    QTime dribbleIntention;
     double positioningIntentionInterval;
     bool shotInPass;
 

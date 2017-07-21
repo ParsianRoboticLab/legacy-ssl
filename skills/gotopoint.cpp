@@ -966,6 +966,8 @@ CSkillGotoPointAvoid* CSkillGotoPointAvoid::oppRelax(int element)
 
 void CSkillGotoPointAvoid::execute()
 {
+    if(agent == NULL)
+        return;
     agentPos = agent->pos();
     agentVel = agent->vel();
     double dVx,dVy,dW;
@@ -1050,7 +1052,7 @@ void CSkillGotoPointAvoid::execute()
     }
     else
     {
-        agent->initPlanner(agent->id() , targetPos , ourRelaxList , oppRelaxList , avoidPenaltyArea , avoidCenterCircle ,0);//avoidBall* ballObstacleRadius);
+        agent->initPlanner(agent->id() , targetPos , ourRelaxList , oppRelaxList , avoidPenaltyArea , avoidCenterCircle ,ballObstacleRadius);
         result.clear();
         for( int i=agent->pathPlannerResult.size()-1 ; i>=0 ; i-- )
         {

@@ -169,8 +169,10 @@ private:
     kckMode decideMode();
     kckMode kickMode;
     _PID *angPid;
-    _PID *speedPidX;
-    _PID *speedPidY;
+    _PID *speedPid;
+    _PID *posPid;
+
+
     Vector2D agentPos;
     Vector2D agentDir;
     QQueue <Vector2D> dirQueue;
@@ -199,6 +201,7 @@ private:
     void kkIntercept();
     void kkPenalty();
     void avoidOppPenalty();
+    void avoidOurPenalty();
     void waitAndKick();
     void kDontKick();
     void kWaitForTurn();
@@ -264,6 +267,7 @@ public:
     SkillProperty(CSkillKick, bool, AlternateMode, alternateMode);
     SkillProperty(CSkillKick, double,KickAngTol, kickAngTol);
     SkillProperty(CSkillKick, bool,KickWithCenterOfDribbler, kickWithCenterOfDribbler);
+    SkillProperty(CSkillKick, bool,PlayMakeMode, playMakeMode);
 
 };
 

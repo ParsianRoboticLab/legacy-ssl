@@ -48,6 +48,7 @@ public:
     ClassProperty(CCoach, Vector2D, LastBallPos, lastBallPos, updated);*/
 
 private:
+    bool lastASWasCritical;
     Vector2D passPos;
     bool passPlayMake;
     Vector2D lastBallVelPM;
@@ -237,6 +238,10 @@ private:
     ///HMD
     bool checkOverdef();
     double overDefThr;
+
+    // inter change
+    void checkSensorShootFault();
+    int  faultDetectionCounter[12];
 };
 
 

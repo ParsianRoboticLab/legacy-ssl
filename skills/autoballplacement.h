@@ -12,9 +12,10 @@ private:
 //    CSkillGotoPointAvoid *GPA;
     CSkillKick *kick;
     CNewBangBang *bangBang;
-
+    bool isVisionOkArea;
     void gotoBall();
     void gotoTarget();
+    int state;
     Vector2D ballPos;
     Vector2D agentPos;
     int ballCounter = 0;

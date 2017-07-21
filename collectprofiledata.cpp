@@ -140,8 +140,6 @@ void CollectProfileData::positioning(double xpos, double ypos){
 
 bool CollectProfileData::BallIsNear(CRolePlayOff * agent, double rad){
     if(Circle2D(knowledge->getAgent(agent->getAgentID())->pos(), rad).contains(wm->ball->pos)){
-        rcvr = prfl2;
-        pss = prfl1;
         kickStat = prfl1_Iskicking;
         return true;
     }
@@ -347,11 +345,13 @@ void CollectProfileData::saveMaxBallSpeed(){
                 p1RealSpeedRec.append(ballSpeed);
                 p1KickSpeed.append(kickSpeed1);
 
-//                debug(QString("1 : max ball speed : %1, kSpeed : %2").arg(ballSpeed).arg(kickSpeed1), D_NADIA);   //collect
-
-                debug(QString("1 : measured : %1  ,   estimated : %3 , kSpeed : %2").arg(ballSpeed).arg(    //test
-                                      knowledge->getProfile(prfl1->getAgentID(), kickSpeed1/125, true, false )).arg(
-                                      kickSpeed1/125), D_NADIA);
+                if(isTest){
+                    debug(QString("1 : measured : %1  ,   estimated : %3 , kSpeed : %2").arg(ballSpeed).arg(    //test
+                              knowledge->getProfile(prfl1->getAgentID(), kickSpeed1/125, true, false )).arg(
+                              kickSpeed1/125), D_NADIA);
+                }else{
+                    debug(QString("1 : max ball speed : %1, kSpeed : %2").arg(ballSpeed).arg(kickSpeed1), D_NADIA);   //collect
+                }
             }
             else
                 counter1--;
@@ -361,16 +361,24 @@ void CollectProfileData::saveMaxBallSpeed(){
         if(kickSpeed1==1000 && counter1==repeat)
         {
             counter1 = 0;
-//            profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1 , p1RealSpeedRec);   // collect
-            profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1/125 , p1RealSpeedRec);   // test
+
+            if(isTest){
+                profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1/125 , p1RealSpeedRec);   // test
+            } else {
+                profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1 , p1RealSpeedRec);   // collect
+            }
             p1RealSpeedRec.clear();
             kickSpeed1 = MaxSpeed;
         }
         else if(counter1 == repeat && kickSpeed1<MaxSpeed+1)
         {
             counter1 = 0;
-//            profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1, p1RealSpeedRec);    // collect
-            profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1/125, p1RealSpeedRec);    // test
+
+            if(isTest){
+                profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1/125, p1RealSpeedRec);    // test
+            } else {
+                profiler->robotsProfile[prfl1->getAgentID()].kickMap.insert(kickSpeed1, p1RealSpeedRec);    // collect
+            }
             p1RealSpeedRec.clear();
             kickSpeed1 += speedStep;
         }
@@ -383,11 +391,13 @@ void CollectProfileData::saveMaxBallSpeed(){
                 p2RealSpeedRec.append(ballSpeed);
                 p2KickSpeed.append(kickSpeed2);
 
-//                debug(QString("2 : max ball speed : %1, kSpeed : %2").arg(ballSpeed).arg(kickSpeed2), D_NADIA);   //collect
-
-                debug(QString("2 : measured : %1  ,   estimated : %3 , kSpeed : %2").arg(ballSpeed).arg(    //test
-                                      knowledge->getProfile(prfl2->getAgentID(), kickSpeed2/125, true, false )).arg(
-                                      kickSpeed2/125), D_NADIA);
+                if(isTest){
+                    debug(QString("2 : measured : %1  ,   estimated : %3 , kSpeed : %2").arg(ballSpeed).arg(    //test
+                              knowledge->getProfile(prfl2->getAgentID(), kickSpeed2/125, true, false )).arg(
+                              kickSpeed2/125), D_NADIA);
+                } else {
+                    debug(QString("2 : max ball speed : %1, kSpeed : %2").arg(ballSpeed).arg(kickSpeed2), D_NADIA);   //collect
+                }
             }
             else counter2--;
         }
@@ -396,16 +406,26 @@ void CollectProfileData::saveMaxBallSpeed(){
         if(kickSpeed2==1000  && counter1==repeat)
         {
             counter2 = 0;
-//            profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2 , p2RealSpeedRec);   // collect
-            profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2/125 , p2RealSpeedRec);   // test
+
+            if(isTest){
+                profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2/125 , p2RealSpeedRec);   // test
+            } else {
+                profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2 , p2RealSpeedRec);   // collect
+            }
+
             p2RealSpeedRec.clear();
             kickSpeed2 = MaxSpeed;
         }
         else if(counter2 == repeat && kickSpeed2<MaxSpeed+1)
         {
             counter2 = 0;
-//            profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2, p2RealSpeedRec);    // collect
-            profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2, p2RealSpeedRec);    // test
+
+            if(isTest){
+                profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2, p2RealSpeedRec);    // test
+            } else {
+                profiler->robotsProfile[prfl2->getAgentID()].kickMap.insert(kickSpeed2, p2RealSpeedRec);    // collect
+            }
+
             p2RealSpeedRec.clear();
             kickSpeed2 += speedStep;
         }
@@ -456,8 +476,11 @@ void CollectProfileData::HighSpeed(){
                 prfl2->setTarget( Vector2D(highPosX2 , highPosY2));
                 prfl2->setWaitPos(Vector2D(highPosX2 , highPosY2));
 
-//                prfl1->setKickSpeed(kickSpeed1);  //collect
-                prfl1->setKickSpeed(knowledge->getProfile(prfl1->getAgentID(), kickSpeed1/125, true, false ));  //test
+                if(isTest){
+                    prfl1->setKickSpeed(knowledge->getProfile(prfl1->getAgentID(), kickSpeed1/125, true, false ));  //test
+                } else {
+                    prfl1->setKickSpeed(kickSpeed1);  //collect
+                }
 
             }
 
@@ -496,9 +519,11 @@ void CollectProfileData::HighSpeed(){
                 prfl2->setWaitPos(Vector2D(highPosX1 , highPosY1));
                 prfl1->setWaitPos(Vector2D(highPosX1 , highPosY1));
 
-//                prfl2->setKickSpeed(kickSpeed2);  //collect
-
-                prfl2->setKickSpeed(knowledge->getProfile(prfl2->getAgentID(), kickSpeed2/125, true, false ));  //test
+                if(isTest){
+                    prfl2->setKickSpeed(knowledge->getProfile(prfl2->getAgentID(), kickSpeed2/125, true, false ));  //test
+                } else {
+                    prfl2->setKickSpeed(kickSpeed2);  //collect
+                }
 
             }
 
@@ -659,8 +684,12 @@ void CollectProfileData::StartChip(){
         prfl1->setSelectedSkill(roleSkill::Kick);
         prfl1->setChip(true);
         prfl1->setTarget(Vector2D(ChipTrgtX, ChipTrgtY));
-        prfl1->setKickSpeed(knowledge->getProfile(prfl1->getAgentID(), kickSpeed1/300.0, false, false));    //test
-//        prfl1->setKickSpeed(kickSpeed1);  //collect
+
+        if(isTest){
+            prfl1->setKickSpeed(knowledge->getProfile(prfl1->getAgentID(), kickSpeed1/300.0, false, false));    //test
+        } else {
+            prfl1->setKickSpeed(kickSpeed1);  //collect
+        }
         prfl1->setTolerance(0.05);
         prfl1->setDoPass(true);
         prfl1->execute();
@@ -689,13 +718,16 @@ void CollectProfileData::StartChip(){
 
         if (result) // position is found;
         {
-            if(FoundChipPos.dist(ChipStartPoint) > lastAvg){
+            if(FoundChipPos.dist(ChipStartPoint) < lastAvg - 0.2){
+                debug(QString("speed : %1 , cnt : %2    ,   less than lastAvg").arg(kickSpeed1).arg(cnt) , D_FATEMEH);
+            }else if(FoundChipPos.dist(ChipStartPoint) - lastAvg < 1){
                 SavedChipPos.append(ChipStartPoint);
                 SavedChipPos.append(FoundChipPos);
                 cnt++;
-            }else{
-                debug(QString("speed : %1 , cnt : %2    ,   less than lastAvg").arg(kickSpeed1).arg(cnt) , D_FATEMEH);
+            } else {
+                debug("Wrong data", D_FATEMEH);
             }
+
 
 
             if(cnt == repeat) {
@@ -734,17 +766,22 @@ void CollectProfileData::StartChip(){
         }
         SavedChipPos.clear();
 
-//        profiler->robotsProfile[prfl1->getAgentID()].chipMap.insert(kickSpeed1-speedStep , chipRes);    // collect
-        profiler->robotsProfile[prfl1->getAgentID()].chipMap.insert((kickSpeed1-speedStep)/300.0 , chipRes);    // test
+        if(isTest){
+            profiler->robotsProfile[prfl1->getAgentID()].chipMap.insert((kickSpeed1-speedStep)/300.0 , chipRes);    // test
+        } else {
+            profiler->robotsProfile[prfl1->getAgentID()].chipMap.insert(kickSpeed1-speedStep , chipRes);    // collect
+        }
 
-//collect
-//                debug(QString("speed : %1, dist : %2").arg(kickSpeed1-speedStep).arg(
-//                  AvgWithoutOutliers(chipRes , 0.9)), D_FATEMEH);
-
-//test
-        debug(QString("reg : speed : %1 , estimated : %2 , measured : %3").arg(
-                  knowledge->getProfile(prfl1->getAgentID(), (kickSpeed1-speedStep)/300.0, false, false)).arg(
-                  (kickSpeed1-speedStep)/300.0).arg(AvgWithoutOutliers(chipRes , 0.9)) , D_FATEMEH);
+        if(isTest){
+            //test
+            debug(QString("reg : speed : %1 , estimated : %2 , measured : %3").arg(
+                      knowledge->getProfile(prfl1->getAgentID(), (kickSpeed1-speedStep)/300.0, false, false)).arg(
+                      (kickSpeed1-speedStep)/300.0).arg(AvgWithoutOutliers(chipRes , 0.9)) , D_FATEMEH);
+        } else {
+            //collect
+            debug(QString("speed : %1, dist : %2").arg(kickSpeed1-speedStep).arg(
+                      AvgWithoutOutliers(chipRes , 0.9)), D_FATEMEH);
+        }
 
 
         lastAvg = AvgWithoutOutliers(chipRes , 0.9)-0.2;

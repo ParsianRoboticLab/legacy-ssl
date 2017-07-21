@@ -8,6 +8,11 @@
 #include <defensepositioning.h>
 #include <time.h>
 #include <autoballplacement.h>
+#include <proto/multi_team_communication.pb.h>
+#include <mixteamthread.h>
+#include <mixteamsender.h>
+#include <mixteamreader.h>
+
 clock_t t;
 //#define speedTest
 
@@ -19,9 +24,41 @@ struct VectorIndex {
     int index;
 };
 
+
 int id = 2;
+long int a=0;
+
+QList <double> realSpeed,appliedSpeed;
 void CMainApplication::Experimental6()
 {
+
+    static MixTeamSender *sender = new MixTeamSender(true);
+    static MixTeamReader *reader = new MixTeamReader();
+//    static MixTeamThread *mthr = new MixTeamThread();
+
+    multi_team_comm::TeamPlan* example = new multi_team_comm::TeamPlan();
+    multi_team_comm::RobotPlan *rp1 = example->add_plans();
+    multi_team_comm::Pose *pose1 = rp1->mutable_nav_target();
+    multi_team_comm::Location *loc1 = pose1->mutable_loc();
+
+    loc1->set_x(1);loc1->set_y(1);
+    pose1->set_heading(1.2);
+    rp1->set_robot_id(1);
+
+
+    multi_team_comm::RobotPlan *rp2 = example->add_plans();
+    multi_team_comm::Pose *pose2 = rp2->mutable_nav_target();
+    multi_team_comm::Location *loc2 = pose2->mutable_loc();
+
+    loc2->set_x(2);loc2->set_y(2);
+    pose2->set_heading(2.2);
+    rp2->set_robot_id(2);
+
+    sender->packet = example;
+    sender->flag = true;
+
+    return;
+
 #ifdef speedTest
     int agentNum = 7;
     soccer->agents[agentNum]->setRobotAbsVel(1,0,0);
@@ -34,13 +71,13 @@ void CMainApplication::Experimental6()
         stopFlag = false;
     if(knowledge->joystick->getButton4())
         stopFlag = true;
-    int skillAgent = 1;
+    int skillAgent = 7;
 #ifdef kickTest
     static CSkillKick mmkick(soccer->agents[skillAgent]);
     mmkick.setTarget(wm->field->oppGoal());
     mmkick.setShotToEmptySpot(false);
     mmkick.setKickSpeed(1000);
-    mmkick.setSpin(4);
+    mmkick.setSpin(0);
     mmkick.setGoalieMode(false);
     mmkick.setPassProfiler(false);
     mmkick.setKickWithCenterOfDribbler(true);
@@ -49,6 +86,51 @@ void CMainApplication::Experimental6()
         mmkick.execute();
     return;
 #endif
+    if(soccer->agents[5]->pos().y - mousePos.y > 0.01)
+    {
+        soccer->agents[5]->setRobotAbsVel(0,-0.5,0);
+    }
+    else if (soccer->agents[5]->pos().y - mousePos.y <- 0.01)
+    {
+        soccer->agents[5]->setRobotAbsVel(0,0.5,0);
+    }
+    else
+    {
+        soccer->agents[5]->setRobotAbsVel(0,0,0);
+    }
+    return;
+    a++;
+    double _max=0,_maxRS = 0;
+    int maxNum=0,maxNumRS = 0;
+
+    if(a < 180)
+    {
+        soccer->agents[5]->setRobotVel(sin(_DEG2RAD*a),0,0);
+        realSpeed.append(soccer->agents[5]->vel().y);
+        appliedSpeed.append(sin(_DEG2RAD*a));
+    }
+
+    if(a > 180)
+    {
+    for(int i = 0 ; i < appliedSpeed.count() ; i ++)
+    {
+        if(appliedSpeed.at(i) > _max)
+        {
+            _max= appliedSpeed.at(i);
+            maxNum = i;
+        }
+
+        if(realSpeed[i] > _maxRS)
+        {
+            _maxRS= realSpeed.at(i);
+            maxNumRS = i;
+        }
+    }
+
+    debug(QString("this is the true delay : %1 ,%2 ,%3").arg(maxNumRS  - maxNum).arg(maxNumRS).arg(maxNum),D_MHMMD);
+    }
+
+    return;
     static CSkillGotoPointAvoid obstg(soccer->agents[0]);
     static CSkillGotoPointAvoid rrtTest(soccer->agents[5]);
 
