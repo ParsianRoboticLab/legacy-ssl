@@ -1196,7 +1196,6 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     ourAgents.append(defenseAgents);
     if(defExceptions.active){
         if(defExceptions.exepAgentId != -1){
-            debug("darim" , D_AHZ);
             debug(QString("id : %1 ").arg(defExceptions.exepAgentId) , D_AHZ);
             ourAgents.removeOne(knowledge->getAgent(defExceptions.exepAgentId));
         }
@@ -1963,7 +1962,6 @@ void DefensePlan::executeGoalKeeper(){
                 goalKeeperTarget = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
             }
         }
-
     }
 }
 
@@ -2666,7 +2664,7 @@ Vector2D DefensePlan::ballPrediction(bool _isGoalie){
     if(wm->opp.activeAgentsCount() > 0){
         for(int i=0 ; i < wm->opp.activeAgentsCount() ; i++){
             Circle2D oppCircle(wm->opp.active(i)->pos,0.1);
-            if(oppCircle.intersection(ballPosVel,&solu[0],&solu[1]) > 0 && BallVel.length() > 0.5){ //in ejdeha code
+            if(oppCircle.intersection(ballPosVel,&solu[0],&solu[1]) > 0 && BallVel.length() > 0.5){
                 if(wm->opp.active(i)->pos.dist(BallPos) < dist2Ball){
                     dist2Ball = wm->opp.active(i)->pos.dist(BallPos);
                     predictedBall = wm->opp.active(i)->pos;
@@ -2674,7 +2672,7 @@ Vector2D DefensePlan::ballPrediction(bool _isGoalie){
             }
         }
     }
-    if(dist2Ball != 1000) {
+    if(dist2Ball != 1000){
         draw(QString("Def Predicted Level 1"), Vector2D(0,2),"red");
         draw(predictedBall);
         return predictedBall;
@@ -3174,35 +3172,96 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
         goal2Ball.assign(wm->field->ourGoal(),wm->ball->pos);
         Segment2D ballLine = Segment2D(wm->ball->pos , wm->ball->pos + wm->ball->vel*10);
         Segment2D ourWidthField = Segment2D(wm->field->ourCornerL() , wm->field->ourCornerR());
-        if((!ballLine.intersection(ourWidthField).isValid() && wm->ball->vel.length() > 3.5)
-                || knowledge->goalie->pos().dist(AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos())) > 0.3 + thr){
+        if((!ballLine.intersection(ourWidthField).isValid() && wm->ball->vel.length() > 3.5)){
+            knowledge->getEmptyAngle(ballPrediction(true), wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true);
+            AZBisecOpenSeg = Segment2D(ballPrediction(true) , ballPrediction(true) + Vector2D(cos(_PI*(AZBisecOpenAngle)/180),sin(_PI*(AZBisecOpenAngle)/180)).norm()*12);
             target = AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos());
-            thr = 0;
-            if(!wm->field->isInField(target)){
-                target = AZBisecOpenSeg.intersection(goalLine);
-            }
+            debug("aya injas ? ",D_AHZ);
         }
         else{
-            thr = 0.3;
-            if(topFaceLength < bottomFaceLength){
-                aimLessChord = bottomFaceLength_forTalles.nearestPoint(openAngGoalIntersectionTop).dist(openAngGoalIntersectionTop);
-                debug(QString("top koochik tar"),D_SEPEHR);
-                aimLessLine = Line2D(bottomFaceLength_forTalles.nearestPoint(openAngGoalIntersectionTop),openAngGoalIntersectionTop);
+            if(knowledge->goalie->pos().dist(AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos())) > 0.3 + thr){
+                target = AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos());
+                thr = 0;
+                if(!wm->field->isInField(target)){
+                    target = AZBisecOpenSeg.intersection(goalLine);
+                }
             }
             else{
-                aimLessChord = topFaceLength_forTalles.nearestPoint(openAngGoalIntersectionBottom).dist(openAngGoalIntersectionBottom);
-                debug(QString("bottom koochik tar"),D_SEPEHR);
-                aimLessLine = Line2D(topFaceLength_forTalles.nearestPoint(openAngGoalIntersectionBottom),openAngGoalIntersectionBottom);
-                draw(Segment2D(topFaceLength_forTalles.nearestPoint(openAngGoalIntersectionBottom),openAngGoalIntersectionBottom),QColor(Qt::black));
-            }
-            if(aimLessChord > 2 * CRobot::robot_radius_new){
-                debug(QString("chord > 2radius"),D_SEPEHR);
-                aimLessLine = Line2D(Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y),Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y-0.1));
-                draw(Segment2D(Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y),Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y-1)),QColor(Qt::black));
-                if(AZBisecOpenSeg.intersection(aimLessLine).isValid()){
+                thr = 0.3;
+                if(topFaceLength < bottomFaceLength){
+                    aimLessChord = bottomFaceLength_forTalles.nearestPoint(openAngGoalIntersectionTop).dist(openAngGoalIntersectionTop);
+                    debug(QString("top koochik tar"),D_SEPEHR);
+                    aimLessLine = Line2D(bottomFaceLength_forTalles.nearestPoint(openAngGoalIntersectionTop),openAngGoalIntersectionTop);
+                }
+                else{
+                    aimLessChord = topFaceLength_forTalles.nearestPoint(openAngGoalIntersectionBottom).dist(openAngGoalIntersectionBottom);
+                    debug(QString("bottom koochik tar"),D_SEPEHR);
+                    aimLessLine = Line2D(topFaceLength_forTalles.nearestPoint(openAngGoalIntersectionBottom),openAngGoalIntersectionBottom);
+                    draw(Segment2D(topFaceLength_forTalles.nearestPoint(openAngGoalIntersectionBottom),openAngGoalIntersectionBottom),QColor(Qt::black));
+                }
+                if(aimLessChord > 2 * CRobot::robot_radius_new){
+                    debug(QString("chord > 2radius"),D_SEPEHR);
+                    aimLessLine = Line2D(Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y),Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y-0.1));
+                    draw(Segment2D(Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y),Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y-1)),QColor(Qt::black));
+                    if(AZBisecOpenSeg.intersection(aimLessLine).isValid()){
+                        if(defenseCount == 2){
+                            if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 10 + threshOld){
+                                target = AZBisecOpenSeg.intersection(aimLessLine);
+                                threshOld = 0;
+                            }
+                            else{
+                                threshOld = 5;
+                                target = knowledge->getPointInDirection(wm->field->ourGoal() , wm->ball->pos , 0.1);
+                            }
+                        }
+                        else if(defenseCount == 1){
+                            target = getGoaliePositionInOneDef(wm->ball->pos , 1 , 1.5);
+                        }
+                        else{
+                            tempSol.append(wm->field->ourPAreaIntersect(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
+                            if(tempSol.size() == 1){
+                                target = tempSol.at(0);
+                            }
+                            else if(tempSol.size() == 2){
+                                target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
+                            }
+                        }
+                    }
+                    else{
+                        if(defenseCount == 2){
+                            if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 10 + threshOld){
+                                target = AZBisecOpenSeg.intersection(aimLessLine);
+                                threshOld = 0;
+                            }
+                            else{
+                                threshOld = 5;
+                                target = knowledge->getPointInDirection(wm->field->ourGoal() , wm->ball->pos , 0.1);
+                            }
+                        }
+                        else if(defenseCount == 1){
+                            target = getGoaliePositionInOneDef(wm->ball->pos , 1 , 1.5);
+                        }
+                        else{
+                            tempSol.append(wm->field->ourPAreaIntersect(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
+                            if(tempSol.size() == 1){
+                                target = tempSol.at(0);
+                            }
+                            else if(tempSol.size() == 2){
+                                target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
+                            }
+                        }
+                    }
+                }
+                else{
                     if(defenseCount == 2){
                         if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 10 + threshOld){
-                            target = AZBisecOpenSeg.intersection(aimLessLine);
+                            tempSol.append(wm->field->ourPAreaIntersect(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
+                            if(tempSol.size() == 1){
+                                target = tempSol.at(0);
+                            }
+                            else if(tempSol.size() == 2){
+                                target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
+                            }
                             threshOld = 0;
                         }
                         else{
@@ -3214,31 +3273,7 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
                         target = getGoaliePositionInOneDef(wm->ball->pos , 1 , 1.5);
                     }
                     else{
-                        tempSol.append(wm->field->ourPAreaIntersect(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
-                        if(tempSol.size() == 1){
-                            target = tempSol.at(0);
-                        }
-                        else if(tempSol.size() == 2){
-                            target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
-                        }
-                    }
-                }
-                else{
-                    if(defenseCount == 2){
-                        if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 10 + threshOld){
-                            target = AZBisecOpenSeg.intersection(aimLessLine);
-                            threshOld = 0;
-                        }
-                        else{
-                            threshOld = 5;
-                            target = knowledge->getPointInDirection(wm->field->ourGoal() , wm->ball->pos , 0.1);
-                        }
-                    }
-                    else if(defenseCount == 1){
-                        target = getGoaliePositionInOneDef(wm->ball->pos , 1 , 1.5);
-                    }
-                    else{
-                        tempSol.append(wm->field->ourPAreaIntersect(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
+                        tempSol.append(wm->field->ourPAreaIntersect(AZBisecOpenSeg));
                         if(tempSol.size() == 1){
                             target = tempSol.at(0);
                         }
@@ -3248,48 +3283,18 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
                     }
                 }
             }
-            else{
-                if(defenseCount == 2){
-                    if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 10 + threshOld){
-                        tempSol.append(wm->field->ourPAreaIntersect(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
-                        if(tempSol.size() == 1){
-                            target = tempSol.at(0);
-                        }
-                        else if(tempSol.size() == 2){
-                            target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
-                        }
-                        threshOld = 0;
-                    }
-                    else{
-                        threshOld = 5;
-                        target = knowledge->getPointInDirection(wm->field->ourGoal() , wm->ball->pos , 0.1);
-                    }
+            if(!wm->field->isInOurPenaltyArea(target) && defenseCount != 1){
+                tempSol.append(wm->field->ourPAreaIntersect(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
+                if(tempSol.size() == 1){
+                    target = tempSol.at(0);
                 }
-                else if(defenseCount == 1){
-                    target = getGoaliePositionInOneDef(wm->ball->pos , 1 , 1.5);
-                }
-                else{
-                    tempSol.append(wm->field->ourPAreaIntersect(AZBisecOpenSeg));
-                    if(tempSol.size() == 1){
-                        target = tempSol.at(0);
-                    }
-                    else if(tempSol.size() == 2){
-                        target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
-                    }
+                else if(tempSol.size() == 2){
+                    target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
                 }
             }
-        }
-        if(!wm->field->isInOurPenaltyArea(target) && defenseCount != 1){
-            tempSol.append(wm->field->ourPAreaIntersect(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
-            if(tempSol.size() == 1){
-                target = tempSol.at(0);
+            if(!wm->field->isInField(target)){
+                target = knowledge->getPointInDirection(wm->field->ourGoal() , wm->ball->pos , 0.1);
             }
-            else if(tempSol.size() == 2){
-                target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
-            }
-        }
-        if(!wm->field->isInField(target)){
-            target = knowledge->getPointInDirection(wm->field->ourGoal() , wm->ball->pos , 0.1);
         }
     }
     debug(QString("x: %1 , y: %2").arg(target.x).arg(target.y), D_ATOUSA);
