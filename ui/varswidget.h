@@ -64,6 +64,9 @@ public:
     DEF_VALUE(LocalSettings,int,Int,MixTeamPort)
     DEF_VALUE(LocalSettings,std::string,String,MixTeamIDs)
 
+    DEF_VALUE(LocalSettings,bool, Bool, sendRobotStatus)
+    DEF_VALUE(LocalSettings,std::string, String, robotStatusIP)
+    DEF_VALUE(LocalSettings,int, Int, robotStatusPort)
 
     DEF_TREE(Common)
     DEF_VALUE(Common,int,Int,Viewport_Width)

@@ -52,6 +52,7 @@ public:
         bool motorFault[5];
         bool beep;
         bool shotSensorFault;
+        int boardID;
 
     } status;
 

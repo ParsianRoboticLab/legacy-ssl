@@ -169,10 +169,8 @@ private:
     kckMode decideMode();
     kckMode kickMode;
     _PID *angPid;
-    _PID *speedPidX;
-    _PID *speedPidY;
-    _PID *posPidX;
-    _PID *posPidY;
+    _PID *speedPid;
+    _PID *posPid;
 
 
     Vector2D agentPos;

@@ -18,6 +18,7 @@ public:
     int goalieID;
     QList<int> ourAgentIDs;
     int numOfAllOurRobots;
+    bool isMaster;
 
     Vector2D goaliePos;
     Vector2D allPositions[MAX_ROBOTS_IN_FIELD];
@@ -25,6 +26,14 @@ public:
     MixTeamReader *reader;
 
     CSkillGotoPoint *ourRols[MAX_OUR_ROBOTS_IN_FIELD];
+    CSkillKick *kicker;
+    CSkillKickOneTouch *oneToucher;
+    CSkillGotoPointAvoid *gpa;
+
+    int selectedIDS;//slave ID for task3
+    int selectedIDM;//master ID for task3
+    Vector2D selectedPosS;//slave pos for task3
+    Vector2D selectedPosM;//master pos for task3
 
     ////////Constructor/////
     void setOurRobotIDs();
@@ -33,20 +42,25 @@ public:
 
     void master();
     void initialPositioning();
-    void initialSlaveMakePacket();
+    void initialMakePacket();
     void task1positioning();
     void task1MakePacket();
     void task2positioning();
     void task2MakePacket();
     void task3positioning();
     void task3MakePacket();
+    int chooseSlaveID(int);
+    int chooseMasterID(int);
 
     Vector2D getXYByAngleOurGoal(double _angle, double _radius);
 
 
     ////////slave part/////
-    void slave();
+    void slave(bool isM);
     void initialReadPacket();
+    void task3ReadPacket();
+    void executeMasterOffense(int, Vector2D, Vector2D, int);
+    void executeSlaveOffense(int, Vector2D, Vector2D);
 //    void execute();
 //    CAgent **agents;
 };

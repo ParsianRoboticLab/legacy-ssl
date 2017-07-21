@@ -147,6 +147,7 @@ protected:
 
     };
 
+    bool shootOutClearModeSelected = false;
     bool agentEffectOnBallProbabilityRes;
     double shootOutDiam = 2.5;
 

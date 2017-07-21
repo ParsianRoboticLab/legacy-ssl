@@ -1184,10 +1184,10 @@ double CCoach::findMostPossible(Vector2D agentPos)
 void CCoach::updateAttackState()
 {
     Polygon2D robotCritArea;
-    double    safeRegion = 1;
-    double    critLenth = 0.75;
-    Circle2D  critCir;
-    CAgent    *ourNearestAgent;
+    double    safeRegion= 1   ;
+    double    critLenth = 0.4 ;
+    double    critThrsh = 0.45;
+    double    critAng   = 20  ;
     CRobot    *oppNearest;
     if(wm->opp.activeAgentsCount() > 0) {
         oppNearest = wm->opp[knowledge->getNearestOppToPoint(wm->ball->pos)];
@@ -1205,10 +1205,16 @@ void CCoach::updateAttackState()
         CRobot* PMA = wm->our[playmakeId];
         if(PMA != NULL)
         {
-            critCir = Circle2D(PMA->pos, critLenth + 0.2);
+            double critL = critLenth;
+            double critA = 90;
+            if(lastASWasCritical)
+            {
+                critA += critAng;
+                critL += critThrsh;
+            }
             robotCritArea.addVertex(PMA->pos);
-            robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(90) * critLenth);
-            robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(-90)* critLenth);
+            robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(critA )* critLenth);
+            robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critLenth + PMA->dir.norm().rotate(-critA)* critLenth);
         }
     }
 
@@ -1216,7 +1222,6 @@ void CCoach::updateAttackState()
     draw(robotCritArea,QColor(Qt::cyan));
 
     if(robotCritArea.contains(oppNearest->pos)){
-       //|| (ourAttackState == CRITICAL && critCir.contains(oppNearest->pos))) {
         ourAttackState = CRITICAL;
         debug(QString("Attack: critical"),D_MHMMD);
     }
@@ -1228,6 +1233,8 @@ void CCoach::updateAttackState()
         ourAttackState = FAST;
         debug(QString("Attack: fast"),D_MHMMD);
     }
+
+    lastASWasCritical = (ourAttackState == CRITICAL);
 
 }
 void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)

@@ -1,3 +1,4 @@
+package robot_status;
 
 message Fault {
 	required bool shootBoard = 1;
@@ -55,4 +56,8 @@ message Robot_Packet {
 	
 	// detail of failuer
 	optional Fail  failedMessage = 12;
+}
+
+message Status {
+	repeated Robot_Packet robots = 1;
 }
