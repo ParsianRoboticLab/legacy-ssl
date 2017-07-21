@@ -1706,9 +1706,9 @@ QList<Vector2D> CMarkPlan::PassBlockRatio(double ratio, Vector2D opp){
     isInPenaltyArea.assign(opp, wm->ball->pos);
     QList<Vector2D> tempVec;
     tempVec.clear();
-    if(!wm->field->AHZOurPAreaIntersect(isInPenaltyArea).isEmpty())
+    if(!wm->field->AHZOurPAreaIntersectForMark(isInPenaltyArea).isEmpty())
     {
-        tempVec.append(wm->field->AHZOurPAreaIntersect(tempSeg));
+        tempVec.append(wm->field->AHZOurPAreaIntersectForMark(tempSeg));
             if(tempVec.size() == 1)
             {
                 tempQlist.append(tempVec.first());
