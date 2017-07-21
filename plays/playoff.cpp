@@ -495,11 +495,15 @@ void CPlayOff::stayPoistioning() {
     newRoleAgent[5]->setTarget(Vector2D(1, 2.5));
     newRoleAgent[5]->setTargetDir(wm->field->oppGoal());
 
+
+    blockersPenaltyArea.clear();
+
     for(int i=0;i<wm->opp.data->activeAgents.size();i++){
         if(Triangle2D(newRoleAgent[0]->getAgent()->pos()
                       ,wm->field->oppGoal()
                       ,wm->field->oppGoal()/2).contains(wm->opp.active(i)->pos)
-                && Line2D(newRoleAgent[0]->getAgent()->pos(),wm->field->oppGoal()).dist(wm->opp.active(i)->pos)<0.2)
+                && Line2D(newRoleAgent[0]->getAgent()->pos(),newRoleAgent[0]->getAgent()->pos()+newRoleAgent[0]->getAgent()->dir()*5).dist(wm->opp.active(i)->pos)<0.2
+                && wm->opp.active(i)->pos.dist(newRoleAgent[0]->getAgent()->pos())<2)
         {
             if(!blockersPenaltyArea.contains(i)){
                 debug(QString("penaltyAreaID:%1").arg(i),D_NADIA);
@@ -514,7 +518,7 @@ void CPlayOff::stayPoistioning() {
 void CPlayOff::move1Positioning() {
 
     newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(0.3,-0.3));
-    newRoleAgent[0]->setTargetDir(Vector2D(0,0)-wm->ball->pos);
+    newRoleAgent[0]->setTargetDir(wm->field->oppGoal()/4-wm->ball->pos);
     newRoleAgent[1]->setTarget(Vector2D(1, -1.5));
     newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
     newRoleAgent[2]->setTarget(Vector2D(1, .5));
@@ -527,13 +531,14 @@ void CPlayOff::move1Positioning() {
     newRoleAgent[5]->setTargetDir(wm->field->oppGoal());
 
 
-    blockersCentralRegion.clear();
 
+    blockersCentralRegion.clear();
     for(int i=0;i<wm->opp.data->activeAgents.size();i++){
         if(Triangle2D(newRoleAgent[0]->getAgent()->pos()
                       ,wm->field->oppGoal()/2
-                      ,Vector2D(0,newRoleAgent[0]->getAgent()->pos().y/2)).contains(wm->opp.active(i)->pos)
-                && Line2D(newRoleAgent[0]->getAgent()->pos(),Vector2D(0,0)).dist(wm->opp.active(i)->pos)<0.2)
+                      ,Vector2D(0,0)).contains(wm->opp.active(i)->pos)
+                && Line2D(newRoleAgent[0]->getAgent()->pos()
+                          ,newRoleAgent[0]->getAgent()->pos()+newRoleAgent[0]->getAgent()->dir()*5).dist(wm->opp.active(i)->pos)<0.2)
         {
             if(!blockersCentralRegion.contains(i)){
                 debug(QString("centralID:%1").arg(i),D_NADIA);
@@ -548,27 +553,27 @@ void CPlayOff::move1Positioning() {
 
 void CPlayOff::move2Positioning(){
     newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(0.3,0));
-    newRoleAgent[0]->setTargetDir(Vector2D(0,newRoleAgent[0]->getAgent()->pos().y)-wm->ball->pos);
-    newRoleAgent[1]->setTarget(Vector2D(2, -.5));
+    newRoleAgent[0]->setTargetDir(wm->field->ourGoal()/2-wm->ball->pos);
+    newRoleAgent[1]->setTarget(Vector2D(1, -1.5));
     newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
-    newRoleAgent[2]->setTarget(Vector2D(3.5, -1.5));
+    newRoleAgent[2]->setTarget(Vector2D(1, .5));
     newRoleAgent[2]->setTargetDir(wm->field->oppGoal());
-    newRoleAgent[3]->setTarget(Vector2D(0, 1.5));
+    newRoleAgent[3]->setTarget(Vector2D(-.5, 1.5));
     newRoleAgent[3]->setTargetDir(wm->field->oppGoal());
-    newRoleAgent[4]->setTarget(Vector2D(2, -2.5));
+    newRoleAgent[4]->setTarget(Vector2D(2.5, -2.5));
     newRoleAgent[4]->setTargetDir(wm->field->oppGoal());
     newRoleAgent[5]->setTarget(Vector2D(2, 2.5));
     newRoleAgent[5]->setTargetDir(wm->field->oppGoal());
 
 
 
-    blockersRoundRegion.clear();
 
+    blockersRoundRegion.clear();
     for(int i=0;i<wm->opp.data->activeAgents.size();i++){
         if(Triangle2D(newRoleAgent[0]->getAgent()->pos()
                       ,Vector2D(0,0)
-                      ,Vector2D(newRoleAgent[0]->getAgent()->pos().y,0)).contains(wm->opp.active(i)->pos)
-                && Line2D(newRoleAgent[0]->getAgent()->pos(),Vector2D(0,newRoleAgent[0]->getAgent()->pos().y)).dist(wm->opp.active(i)->pos)<0.2)
+                      ,wm->field->ourGoal()).contains(wm->opp.active(i)->pos)
+                && Line2D(newRoleAgent[0]->getAgent()->pos(),newRoleAgent[0]->getAgent()->pos()+newRoleAgent[0]->getAgent()->dir()*5).dist(wm->opp.active(i)->pos)<0.2)
         {
             if(!blockersRoundRegion.contains(i)){
                 debug(QString("RoundId:%1").arg(i),D_NADIA);
@@ -585,22 +590,26 @@ void CPlayOff::move2Positioning(){
     debug(QString("blocker state1:%1").arg(blockerState),D_NADIA);
     for(int i=0;i<blockersPenaltyArea.size();i++){
         debug(QString("penaltyArea:%1").arg(blockersPenaltyArea.at(i)),D_NADIA);
+        //        if(blockersCentralRegion.contains(blockersPenaltyArea.at(i))){
+        blockerState += penaltyAreaBlock;
+        //        }
         if(blockersCentralRegion.contains(blockersPenaltyArea.at(i))){
-            blockerState += penaltyAreaBlock;
             blockerID=i;
         }
     }
 
     for(int i=0;i<blockersCentralRegion.size();i++){
         debug(QString("central:%1").arg(blockersCentralRegion.at(i)),D_NADIA);
-        if(blockersRoundRegion.contains(blockersCentralRegion.at(i)) && i==blockerID)
+        //        if(blockersRoundRegion.contains(blockersCentralRegion.at(i)) && i==blockerID)
+        if(i==blockerID)
             blockerState += centralRegionBlock;
     }
 
 
     for(int i=0;i<blockersRoundRegion.size();i++){
         debug(QString("Rounds:%1").arg(blockersRoundRegion.at(i)),D_NADIA);
-        if(blockersCentralRegion.contains(blockersRoundRegion.at(i)) && i==blockerID)
+        //        if(blockersCentralRegion.contains(blockersRoundRegion.at(i)) && i==blockerID)
+        if(i==blockerID)
             blockerState += RoundRegionBlock;
     }
 
@@ -751,6 +760,7 @@ void CPlayOff::kickOffStopModePlay(int tAgentsize) {
 void CPlayOff::firstPlayForOppCorner(int _agentSize) {
 
 
+    debug(QString("mode :%1").arg(firstStepEnums),D_NADIA);
     for (int i = 0; i < _agentSize; i++) {
         if (newRoleAgent[i]->getRoleUpdate() == false) {
             newRoleAgent[i]->setUpdated(true);
@@ -786,11 +796,16 @@ void CPlayOff::firstPlayForOppCorner(int _agentSize) {
             finisher++;
         }
     }
+
     if (finisher == _agentSize) {
         if (firstStepEnums == Stay) firstStepEnums = Move1;
-        else if (firstStepEnums == Move1) firstStepEnums = Move2;
+        else if(firstStepEnums==Move1);
         else if (firstStepEnums == Move2) firstStepEnums = Done;
         else firstStepEnums = Done;
+    }
+    else if(newRoleAgent[0]->getTarget().dist(newRoleAgent[0]->getAgent()->pos()) < 0.01
+            && finisher == _agentSize-2){
+        if (firstStepEnums == Move1) firstStepEnums = Move2;
     }
 
 }

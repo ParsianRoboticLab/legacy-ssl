@@ -347,6 +347,7 @@ double predictPos(){
 
 void CMainApplication::Experimental3()
 {
+    return;
     static CAgent* agent = knowledge->getAgent(wm->our.activeAgentID(0));
     static CSkillGotoPointAvoid *robot1 = new CSkillGotoPointAvoid(agent);
     robot1->init(knowledge->getChipPredict() - Vector2D(0,0.3),Vector2D(0,1));
