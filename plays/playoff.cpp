@@ -73,11 +73,11 @@ void CPlayOff::globalExecute() {
 
         debug(QString("lastTime : %1").arg(knowledge->getCurrentTime() - lastTime), D_MAHI);
         if (knowledge->getCurrentTime() - lastTime > 1000 && !initial && lastBallPos.dist(wm->ball->pos) > 0.06) {
-            // TODO : write critical play here
-            if (criticalPlay()) {
-                playOnFlag = true;
-            }
-            return;
+             TODO : write critical play here
+                        if (criticalPlay()) {
+                            playOnFlag = true;
+                        }
+                        return;
         }
 
 
@@ -91,14 +91,15 @@ void CPlayOff::globalExecute() {
                 lastTime = knowledge->getCurrentTime();
 
                 if (isBlockDisturbing() && policy()->PlayOff_UseBlockBlocker()) {
-                masterPlan->common.currentSize -= 1;
-                BlockerStopperID = masterPlan->common.matchedID[masterPlan->common.currentSize];
+                    masterPlan->common.currentSize -= 1;
+                    BlockerStopperID = masterPlan->common.matchedID[masterPlan->common.currentSize];
 
 
                 }
                 staticExecute();
 
             }
+            debug(QString("policy:%1").arg(policy()->PlayOff_UseBlockBlocker()),D_NADIA);
             if(isBlockDisturbing() && policy()->PlayOff_UseBlockBlocker()){
                 agentsID.removeOne(BlockerStopperID);
                 if(BlockerExecute(BlockerStopperID)){
@@ -168,12 +169,12 @@ bool CPlayOff::BlockerExecute(int agentID){
     case TurnAndKick:
 
         ID=masterPlan->common.currentSize;
-            newRoleAgent[ID]->setUpdated(true);
-            newRoleAgent[ID]->setAgent(knowledge->getAgent(BlockerStopperID));
-            newRoleAgent[ID]->setRoleUpdate(true);
-            newRoleAgent[ID]->setAvoidBall(true);
-            newRoleAgent[ID]->setAvoidPenaltyArea(true);
-            newRoleAgent[ID]->setSelectedSkill(roleSkill::GotopointAvoid);
+        newRoleAgent[ID]->setUpdated(true);
+        newRoleAgent[ID]->setAgent(knowledge->getAgent(BlockerStopperID));
+        newRoleAgent[ID]->setRoleUpdate(true);
+        newRoleAgent[ID]->setAvoidBall(true);
+        newRoleAgent[ID]->setAvoidPenaltyArea(true);
+        newRoleAgent[ID]->setSelectedSkill(roleSkill::GotopointAvoid);
 
         // Nadia
         Circle2D(wm->ball->pos,0.6).intersection(Segment2D(wm->opp[blockerID]->pos+Vector2D(0.15,0),wm->ball->pos),&pos1,&pos2);
@@ -187,12 +188,12 @@ bool CPlayOff::BlockerExecute(int agentID){
         break;
     case BlockStop:
         ID=masterPlan->common.currentSize;
-            newRoleAgent[ID]->setUpdated(true);
-            newRoleAgent[ID]->setAgent(knowledge->getAgent(BlockerStopperID));
-            newRoleAgent[ID]->setRoleUpdate(true);
-            newRoleAgent[ID]->setAvoidBall(true);
-            newRoleAgent[ID]->setAvoidPenaltyArea(true);
-            newRoleAgent[ID]->setSelectedSkill(roleSkill::GotopointAvoid);
+        newRoleAgent[ID]->setUpdated(true);
+        newRoleAgent[ID]->setAgent(knowledge->getAgent(BlockerStopperID));
+        newRoleAgent[ID]->setRoleUpdate(true);
+        newRoleAgent[ID]->setAvoidBall(true);
+        newRoleAgent[ID]->setAvoidPenaltyArea(true);
+        newRoleAgent[ID]->setSelectedSkill(roleSkill::GotopointAvoid);
 
 
         // Nadia
@@ -205,7 +206,7 @@ bool CPlayOff::BlockerExecute(int agentID){
         else
             blockerStopStates=TurnAndKick;
 
-//        debug(QString("The ID is:%1").arg(newRoleAgent[4]->getAgent()->id()),D_NADIA);
+        //        debug(QString("The ID is:%1").arg(newRoleAgent[4]->getAgent()->id()),D_NADIA);
 
         break;
 
@@ -590,8 +591,7 @@ void CPlayOff::stayPoistioning() {
     int sign;
     sign= wm->ball->pos.y>0 ? 1:-1;
 
-    newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(0,0.3*sign));
-    newRoleAgent[0]->setTargetDir(wm->field->oppGoal()-wm->ball->pos);
+
     newRoleAgent[1]->setTarget(Vector2D(1, .5));
     newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
     newRoleAgent[2]->setTarget(Vector2D(1, -1.5));
@@ -604,20 +604,28 @@ void CPlayOff::stayPoistioning() {
     newRoleAgent[5]->setTargetDir(wm->field->oppGoal());
 
 
-    blockersPenaltyArea.clear();
+    if(policy()->PlayOff_UseBlockBlocker()){
+        newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(0,0.3*sign));
+        newRoleAgent[0]->setTargetDir(wm->field->oppGoal()-wm->ball->pos);
+        blockersPenaltyArea.clear();
 
-    for(int i=0;i<wm->opp.data->activeAgents.size();i++){
-        if(Triangle2D(newRoleAgent[0]->getAgent()->pos()
-                      ,wm->field->oppGoal()
-                      ,wm->field->oppGoal()/2).contains(wm->opp.active(i)->pos)
-                && Line2D(newRoleAgent[0]->getAgent()->pos(),newRoleAgent[0]->getAgent()->pos()+newRoleAgent[0]->getAgent()->dir()*5).dist(wm->opp.active(i)->pos)<0.3
-                && wm->opp.active(i)->pos.dist(newRoleAgent[0]->getAgent()->pos())<2)
-        {
-            if(!blockersPenaltyArea.contains(i)){
-                debug(QString("penaltyAreaID:%1").arg(i),D_NADIA);
-                blockersPenaltyArea.append(i);
+        for(int i=0;i<wm->opp.data->activeAgents.size();i++){
+            if(Triangle2D(newRoleAgent[0]->getAgent()->pos()
+                          ,wm->field->oppGoal()
+                          ,wm->field->oppGoal()/2).contains(wm->opp.active(i)->pos)
+                    && Line2D(newRoleAgent[0]->getAgent()->pos(),newRoleAgent[0]->getAgent()->pos()+newRoleAgent[0]->getAgent()->dir()*5).dist(wm->opp.active(i)->pos)<0.3
+                    && wm->opp.active(i)->pos.dist(newRoleAgent[0]->getAgent()->pos())<2)
+            {
+                if(!blockersPenaltyArea.contains(i)){
+                    debug(QString("penaltyAreaID:%1").arg(i),D_NADIA);
+                    blockersPenaltyArea.append(i);
+                }
             }
         }
+    }
+    else {
+        newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(-0.3,0));
+        newRoleAgent[0]->setTargetDir(wm->field->oppGoal());
     }
 
 
@@ -627,8 +635,6 @@ void CPlayOff::move1Positioning() {
     int sign;
     sign= wm->ball->pos.y>0 ? 1:-1;
 
-    newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(0.3,0.3*sign));
-    newRoleAgent[0]->setTargetDir(wm->field->oppGoal()/4-wm->ball->pos);
     newRoleAgent[1]->setTarget(Vector2D(1, -1.5));
     newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
     newRoleAgent[2]->setTarget(Vector2D(1, .5));
@@ -642,19 +648,30 @@ void CPlayOff::move1Positioning() {
 
 
 
-    blockersCentralRegion.clear();
-    for(int i=0;i<wm->opp.data->activeAgents.size();i++){
-        if(Triangle2D(newRoleAgent[0]->getAgent()->pos()
-                      ,wm->field->oppGoal()/2
-                      ,Vector2D(0,0)).contains(wm->opp.active(i)->pos)
-                && Line2D(newRoleAgent[0]->getAgent()->pos()
-                          ,newRoleAgent[0]->getAgent()->pos()+newRoleAgent[0]->getAgent()->dir()*5).dist(wm->opp.active(i)->pos)<0.3)
-        {
-            if(!blockersCentralRegion.contains(i)){
-                debug(QString("centralID:%1").arg(i),D_NADIA);
-                blockersCentralRegion.append(i);
+    if(policy()->PlayOff_UseBlockBlocker()){
+
+        newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(0.3,0.3*sign));
+        newRoleAgent[0]->setTargetDir(wm->field->oppGoal()/4-wm->ball->pos);
+
+        blockersCentralRegion.clear();
+        for(int i=0;i<wm->opp.data->activeAgents.size();i++){
+            if(Triangle2D(newRoleAgent[0]->getAgent()->pos()
+                          ,wm->field->oppGoal()/2
+                          ,Vector2D(0,0)).contains(wm->opp.active(i)->pos)
+                    && Line2D(newRoleAgent[0]->getAgent()->pos()
+                              ,newRoleAgent[0]->getAgent()->pos()+newRoleAgent[0]->getAgent()->dir()*5).dist(wm->opp.active(i)->pos)<0.3)
+            {
+                if(!blockersCentralRegion.contains(i)){
+                    debug(QString("centralID:%1").arg(i),D_NADIA);
+                    blockersCentralRegion.append(i);
+                }
             }
         }
+    }
+
+    else {
+        newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(-0.3,0));
+        newRoleAgent[0]->setTargetDir(wm->field->oppGoal());
     }
 
 
@@ -663,8 +680,6 @@ void CPlayOff::move1Positioning() {
 
 void CPlayOff::move2Positioning(){
 
-    newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(0.3,0));
-    newRoleAgent[0]->setTargetDir(wm->field->ourGoal()/2-wm->ball->pos);
     newRoleAgent[1]->setTarget(Vector2D(1, -1.5));
     newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
     newRoleAgent[2]->setTarget(Vector2D(1, .5));
@@ -678,20 +693,30 @@ void CPlayOff::move2Positioning(){
 
 
 
+    if(policy()->PlayOff_UseBlockBlocker()){
 
-    blockersRoundRegion.clear();
-    for(int i=0;i<wm->opp.data->activeAgents.size();i++){
-        if(Triangle2D(newRoleAgent[0]->getAgent()->pos()
-                      ,Vector2D(0,0)
-                      ,wm->field->ourGoal()).contains(wm->opp.active(i)->pos)
-                && Line2D(newRoleAgent[0]->getAgent()->pos(),newRoleAgent[0]->getAgent()->pos()+newRoleAgent[0]->getAgent()->dir()*5).dist(wm->opp.active(i)->pos)<0.3)
-        {
-            if(!blockersRoundRegion.contains(i)){
-                debug(QString("RoundId:%1").arg(i),D_NADIA);
-                blockersRoundRegion.append(i);
+        newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(0.3,0));
+        newRoleAgent[0]->setTargetDir(wm->field->ourGoal()-wm->ball->pos);
+
+        blockersRoundRegion.clear();
+        for(int i=0;i<wm->opp.data->activeAgents.size();i++){
+            if(Triangle2D(newRoleAgent[0]->getAgent()->pos()
+                          ,Vector2D(0,0)
+                          ,wm->field->ourGoal()).contains(wm->opp.active(i)->pos)
+                    && Line2D(newRoleAgent[0]->getAgent()->pos(),newRoleAgent[0]->getAgent()->pos()+newRoleAgent[0]->getAgent()->dir()*5).dist(wm->opp.active(i)->pos)<0.3)
+            {
+                if(!blockersRoundRegion.contains(i)){
+                    debug(QString("RoundId:%1").arg(i),D_NADIA);
+                    blockersRoundRegion.append(i);
+                }
             }
         }
     }
+    else {
+        newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(-0.3,0));
+        newRoleAgent[0]->setTargetDir(wm->field->oppGoal());
+    }
+
 
 
 
@@ -730,8 +755,8 @@ void CPlayOff::move2Positioning(){
 }
 
 void CPlayOff::donePositioning() {
-    newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(0,-0.3));
-    newRoleAgent[0]->setTargetDir(wm->field->oppGoal()-wm->ball->pos);
+
+
     newRoleAgent[1]->setTarget(Vector2D(2, -.5));
     newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
     newRoleAgent[2]->setTarget(Vector2D(3.5, -1.5));
@@ -742,6 +767,16 @@ void CPlayOff::donePositioning() {
     newRoleAgent[4]->setTargetDir(wm->field->oppGoal());
     newRoleAgent[5]->setTarget(Vector2D(2, 2.5));
     newRoleAgent[5]->setTargetDir(wm->field->oppGoal());
+
+    if(policy()->PlayOff_UseBlockBlocker()){
+        newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(0.3,0));
+        newRoleAgent[0]->setTargetDir(wm->field->ourGoal()-wm->ball->pos);
+
+    }
+    else {
+        newRoleAgent[0]->setTarget(wm->ball->pos + Vector2D(-0.3,0));
+        newRoleAgent[0]->setTargetDir(wm->field->oppGoal());
+    }
 
 }
 
@@ -906,6 +941,8 @@ void CPlayOff::firstPlayForOppCorner(int _agentSize) {
             finisher++;
         }
     }
+    if(!policy()->PlayOff_UseBlockBlocker() && firstStepEnums==Move1)
+        firstStepEnums==Move2;
 
     if (finisher == _agentSize) {
         if (firstStepEnums == Stay) firstStepEnums = Move1;
@@ -2011,6 +2048,9 @@ bool CPlayOff::criticalPlay() {
         criticalKick->setTolerance(0.5);
     }
     criticalKick->execute();
+    if (wm->ball->vel.length() > 0.5) return true;
+    else return false;
+
 }
 
 void CPlayOff::findThePasserandReciver(const NGameOff::SExecution & _plan,
