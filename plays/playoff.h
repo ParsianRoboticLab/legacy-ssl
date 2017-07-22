@@ -333,6 +333,9 @@ private:
     EMode masterMode;
 
     void globalExecute();
+    bool isBlockDisturbing();
+
+    int BlockerStopperID;
 
     bool isPathClear(Vector2D _pos1, Vector2D _pos2, double _radius, double treshold);
 
@@ -352,6 +355,19 @@ private:
     void firstExecute();
     void kickOffStopModePlay(int tagentSize);
     void firstPlayForOppCorner(int _agentSize);
+
+
+    ////////////////////////////Blocker//////////////////////////////////
+    bool BlockerExecute(int agentID);
+    CAgent* BlockerAgent;
+    CSkillGotoPointAvoid* blockergpa;
+    enum BlockerStop{
+        Diversion,
+        BlockStop,
+        TurnAndKick
+    };
+    BlockerStop blockerStopStates;
+
 
     POMODE getPlayOffMode();
     void getCostRec(double costArr[][6], int arrSize, QList<kkValue> &valueList, kkValue value, int size, int aId = 0);
@@ -393,10 +409,10 @@ private:
     CRolePlayOff *roleAgent[6];
     CRolePlayOff *tempAgent;
     CRolePlayOff *newRoleAgent[6];
-    enum BlockerDeterminer{
-        penaltyAreaBlock=1,
-        centralRegionBlock=2,
-        RoundRegionBlock=4
+    enum BlockerDetector{
+        penaltyAreaBlock   = 0b001,
+        centralRegionBlock = 0b010,
+        RoundRegionBlock   = 0b100
     };
 
     int blockerState;
