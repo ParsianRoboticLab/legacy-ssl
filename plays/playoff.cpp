@@ -73,7 +73,7 @@ void CPlayOff::globalExecute() {
 
         debug(QString("lastTime : %1").arg(knowledge->getCurrentTime() - lastTime), D_MAHI);
         if (knowledge->getCurrentTime() - lastTime > 1000 && !initial && lastBallPos.dist(wm->ball->pos) > 0.06) {
-             TODO : write critical play here
+//             TODO : write critical play here
                         if (criticalPlay()) {
                             playOnFlag = true;
                         }
