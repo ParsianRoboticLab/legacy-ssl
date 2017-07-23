@@ -85,9 +85,11 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
     QList<Segment2D> centerToCenter;
     QList<Vector2D> solvedPosition;
     QList<Vector2D> temp;
+    QList<Vector2D> tempSol;
     QList<int> tempIndexs;
     QList<Vector2D> tempAgentsPosition;
     QList<Vector2D> finalSolvedPosition;
+    QList<Vector2D> solvedPositionsAreNotInThePenaltyArea;
     QList<Vector2D> nonRepetitiveFinalSolvedPosition;
     Vector2D tempPoint = Vector2D(0,0);
     bool isRepeated = false;
@@ -96,6 +98,8 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
     solvedPosition.clear();
     tempAgentsPosition.clear();
     nonRepetitiveFinalSolvedPosition.clear();
+    solvedPositionsAreNotInThePenaltyArea.clear();
+    ///////////////////////////////////////////////////////////////////////////
     for(int i = 0 ; i < stuckPositions.size() ; i++){
         if(i % 2 == 0){
             centerToCenter.append(Segment2D(stuckPositions.at(i) , stuckPositions.at(i+1)));
@@ -108,8 +112,25 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
     for(int i = 0 ; i < stuckPositions.size() ; i++){
         solvedPosition.append(stuckPositions.at(i) + (1.4*CRobot::robot_radius_new - centerToCenter.at(i).length()/2)*((centerToCenter.at(i).a() - centerToCenter.at(i).b()).norm()));
     }
-
-    for(int i = 0 ; i < stuckIndexs.size() ; i++){
+    ///////////// Check the resulted points, don't be in the PArea /////////////
+    for(int i = 0 ; i < solvedPosition.size() ; i++){
+        if(wm->field->isInOurPenaltyArea(solvedPosition.at(i))){
+            debug(QString("stuck position is penalty area") , D_AHZ);
+            solvedPosition.removeAt(i);
+            tempSol.append(wm->field->AHZOurPAreaIntersectForMark(Segment2D(wm->field->ourGoal() , stuckPositions.at(i))));
+            if(tempSol.size() == 2){
+                solvedPositionsAreNotInThePenaltyArea.append(tempSol.at(0).dist(stuckPositions.at(i)) < tempSol.at(1).dist(stuckPositions.at(i)) ? tempSol.at(0) : tempSol.at(1));
+            }
+            else if(tempSol.size() == 1){
+                solvedPositionsAreNotInThePenaltyArea.append(tempSol.at(0));
+            }
+        }
+        else{
+            solvedPositionsAreNotInThePenaltyArea.append(solvedPosition.at(i));
+        }
+    }
+    ////////////////////////////////////////////////////////////////////////////
+    for(int i = 0 ; i < min(stuckIndexs.size(),stuckPositions.size()) ; i++){
         for(int j = 0 ; j < stuckIndexs.size() ; j++){
             if(stuckIndexs.at(i) == stuckIndexs.at(j) && i != j){
                 isRepeated = true;
@@ -120,10 +141,10 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
         if(isRepeated){
             tempIndexs.append(i);
             tempPoint = stuckPositions.at(i);
-            for(int k = 0 ; k < solvedPosition.size() ; k++){
+            for(int k = 0 ; k < solvedPositionsAreNotInThePenaltyArea.size() ; k++){
                 for(int m = 0 ; m < tempIndexs.size() ; m++){
                     if(tempIndexs.at(m) == k){
-                        temp.append(solvedPosition.at(k));
+                        temp.append(solvedPositionsAreNotInThePenaltyArea.at(k));
                     }
                 }
             }
@@ -138,7 +159,7 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
         }
         else{
             tempIndexs.append(i);
-            finalSolvedPosition.append(solvedPosition.at(i));
+            finalSolvedPosition.append(solvedPositionsAreNotInThePenaltyArea.at(i));
         }
         isRepeated = false;
         tempIndexs.clear();
@@ -162,7 +183,8 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
 
     for(int i = 0 ; i < nonRepetitiveFinalSolvedPosition.size() ; i++){
         agentsPosition.append(nonRepetitiveFinalSolvedPosition.at(i));
-    }
+    }    
+
     debug(QString("solved : %1").arg(finalSolvedPosition.size()), D_AHZ);
     debug(QString("match : %1").arg(agentsPosition.size()), D_AHZ);
 }
