@@ -72,7 +72,7 @@ protected:
     bool isAgentsStuckTogether(QList<Vector2D> agentsPosition);
     bool isStateGoingFromIndirectToTransient();
     void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs);    
-    bool isIndirectArea(Vector2D);    
+    bool isInIndirectArea(Vector2D);    
     //atousa
     Vector2D getGoaliePositionInOneDef(Vector2D _ballPos, double _limit1, double _limit2);
     double goalieThr;
