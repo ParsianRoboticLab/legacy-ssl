@@ -1351,7 +1351,9 @@ void DefensePlan::execute(){
         ballPosHistory.removeLast();
     }
     //////////////////////////////////////
-    bool playOn = knowledge->isStart();
+    playOnMode = knowledge->isStart();
+    debug(QString("defense oneTouch mode : %1").arg(knowledge->defenseOneTouchMode) , D_AHZ);
+    debug(QString("defense clear mode : %1").arg(knowledge->defenseClearMode) , D_AHZ);
     if(knowledge->getGameState() == CKnowledge::TheirPenaltyKick && !wm->gs->penalty_shootout()){
         if(goalKeeperAgent != NULL ){
             draw(QString("Penalty") , Vector2D(1,2) , "white");
@@ -1367,7 +1369,8 @@ void DefensePlan::execute(){
         penaltyShootOutMode();
         lastBallPosition = wm->ball->pos;
         return;
-    } else if(knowledge->getGameMode() == CKnowledge::Start && wm->gs->penalty_shootout()){
+    }
+    else if(knowledge->getGameMode() == CKnowledge::Start && wm->gs->penalty_shootout()){
         penaltyShootOutMode();
     }
     else{
@@ -1379,7 +1382,7 @@ void DefensePlan::execute(){
         }
         if(defenseAgents.size() > 0){
             if(wm->our.activeAgentsCount() < 7){
-                if(playOn){
+                if(playOnMode){
                     checkDefenseExeptions();
                     if(defExceptions.active && !knowledge->transientFlag){
                         runDefenseExeptions();
@@ -1389,9 +1392,13 @@ void DefensePlan::execute(){
                         defExceptions.exepAgentId = -1;
                         defExceptions.exeptionMode = NoneExep;
                         defenseCount = defenseAgents.size();
+                        knowledge->defenseClearMode = false;
+                        knowledge->defenseOneTouchMode = false;
                     }
                 }
                 else{
+                    knowledge->defenseOneTouchMode = false;
+                    knowledge->defenseClearMode = false;
                     defenseCount = defenseAgents.size();
                     debug(QString("defense count : %1").arg(defenseCount) , D_AHZ);
                 }
@@ -1812,7 +1819,11 @@ void DefensePlan::executeGoalKeeper(){
     QList<Vector2D> tempSol;
     tempSol.clear();
     if(goalKeeperAgent != NULL){
+        debug(QString("goalKeeper clear mode : %1").arg(knowledge->goalKeeperClearMode) , D_AHZ);
+        debug(QString("goalKeeper oneTouch mode : %1").arg(knowledge->goalKeeperOneTouchMode) , D_AHZ);
         if(playOffMode){
+            knowledge->goalKeeperClearMode = false;
+            knowledge->goalKeeperOneTouchMode = false;
             AHZSkills = gpa[knowledge->goalie->id()];
             debug("Their Indirect" , D_AHZ);
             gpa[goalKeeperAgent->id()]->setADiveMode(false);
@@ -1822,6 +1833,8 @@ void DefensePlan::executeGoalKeeper(){
             gpa[goalKeeperAgent->id()]->init(goalKeeperTarget , wm->ball->pos - wm->field->ourGoal());
         }
         else if(knowledge->transientFlag){
+            knowledge->goalKeeperClearMode = false;
+            knowledge->goalKeeperOneTouchMode = false;
             AHZSkills = gpa[knowledge->goalie->id()];
             debug("TS Mode" , D_AHZ);
             gpa[goalKeeperAgent->id()]->setADiveMode(true);
@@ -1839,6 +1852,8 @@ void DefensePlan::executeGoalKeeper(){
             gpa[goalKeeperAgent->id()]->execute();
         }
         else if(stopMode){
+            knowledge->goalKeeperClearMode = false;
+            knowledge->goalKeeperOneTouchMode = false;
             AHZSkills = gpa[knowledge->goalie->id()];
             debug("Stop Mode" , D_AHZ, "green");
             gpa[goalKeeperAgent->id()]->setADiveMode(false);
@@ -1848,6 +1863,8 @@ void DefensePlan::executeGoalKeeper(){
             gpa[goalKeeperAgent->id()]->init(goalKeeperTarget , wm->ball->pos - wm->field->ourGoal());
         }
         else if(ballIsOutOfField){
+            knowledge->goalKeeperClearMode = false;
+            knowledge->goalKeeperOneTouchMode = false;
             AHZSkills = gpa[knowledge->goalie->id()];
             debug("Ball is out of field" , D_AHZ, "green");
             gpa[goalKeeperAgent->id()]->setADiveMode(false);
@@ -1857,6 +1874,8 @@ void DefensePlan::executeGoalKeeper(){
             gpa[goalKeeperAgent->id()]->init(goalKeeperTarget , wm->ball->pos - wm->field->ourGoal());
         }
         else if(ballBehindGoalie){
+            knowledge->goalKeeperClearMode = false;
+            knowledge->goalKeeperOneTouchMode = false;
             debug("Ball is behind the goalkeeper" , D_AHZ , "red");
             AHZSkills = kickSkill;
             kickSkill->setKickSpeed(1023);
@@ -1870,6 +1889,8 @@ void DefensePlan::executeGoalKeeper(){
             kickSkill->setTarget(wm->field->oppGoal());
         }
         else if(besidePoleFlag){
+            knowledge->goalKeeperClearMode = false;
+            knowledge->goalKeeperOneTouchMode = false;
             Rect2D fieldRect(Vector2D(- _FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0) + Vector2D(-0.005,-0.005),Vector2D(_FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0)+Vector2D(+0.005,+0.005));
             Line2D ballPrGoalLine(wm->ball->pos, Vector2D(wm->ball->pos.x,(wm->ball->pos.y + 0.01)));
             Vector2D solut[2];
@@ -1888,6 +1909,8 @@ void DefensePlan::executeGoalKeeper(){
             kickSkill->setTarget(noKickTarget);
         }
         else if(goalieClearMode && !dangerForGoalieClear){
+            knowledge->goalKeeperClearMode = true;
+            knowledge->goalKeeperOneTouchMode = false;
             if(wm->ball->vel.length() > 0.4 && wm->ball->vel.length() < 1.3){
                 AHZSkills = gpa[knowledge->goalie->id()];
                 debug("Clear slow ball" , D_AHZ, "green");
@@ -1919,6 +1942,8 @@ void DefensePlan::executeGoalKeeper(){
         }
         else{
             if(goalieOneTouch){
+                knowledge->goalKeeperOneTouchMode = true;
+                knowledge->goalKeeperClearMode = false;
                 AHZSkills = gpa[knowledge->goalie->id()];
                 debug("One touch Mode" , D_AHZ , QColor(Qt::blue));
                 gpa[goalKeeperAgent->id()]->setSlowMode(false);
@@ -1931,6 +1956,8 @@ void DefensePlan::executeGoalKeeper(){
             }
             else if(dangerForGoalieClear){
                 if(dangerForInsideOfThePenaltyArea){
+                    knowledge->goalKeeperClearMode = true;
+                    knowledge->goalKeeperOneTouchMode = false;
                     debug("Danger Mode" , D_AHZ);
                     AHZSkills = kickSkill;
                     kickSkill->setTolerance(10);
@@ -1950,6 +1977,8 @@ void DefensePlan::executeGoalKeeper(){
                     kickSkill->setKickSpeed(512);
                 }
                 else{
+                    knowledge->goalKeeperClearMode = false;
+                    knowledge->goalKeeperOneTouchMode = false;
                     AHZSkills = gpa[knowledge->goalie->id()];
                     gpa[goalKeeperAgent->id()]->setSlowMode(false);
                     gpa[goalKeeperAgent->id()]->setADiveMode(false);
@@ -1964,6 +1993,8 @@ void DefensePlan::executeGoalKeeper(){
                 }
             }
             else{
+                knowledge->goalKeeperClearMode = false;
+                knowledge->goalKeeperOneTouchMode = false;
                 //// strict follow
                 AHZSkills = gpa[knowledge->goalie->id()];
                 gpa[goalKeeperAgent->id()]->setSlowMode(false);
@@ -2601,6 +2632,7 @@ void DefensePlan::runDefenseExeptions(){
     if(defenseAgents.size() > 0){
         Vector2D agentTarget;
         if(defExceptions.exeptionMode == defOneTouch){
+            knowledge->defenseOneTouchMode = true;
             agentTarget = runDefenseOneTouch();
             draw(QString("Defense OneTouch"), Vector2D(0,2), "red");
             if(agentTarget.x != -100){
@@ -2612,6 +2644,7 @@ void DefensePlan::runDefenseExeptions(){
             }
         }
         else if(defExceptions.exeptionMode == defClear){
+            knowledge->defenseClearMode = true;
             draw(QString("Defense Clear"), Vector2D(0,2), "red");
             if(defenseClearIndex != -1){
                 if(defExceptions.exepAgentId == -1){
@@ -2625,6 +2658,10 @@ void DefensePlan::runDefenseExeptions(){
                 defenseClearIndex = (defenseAgents.at(0)->id() == defExceptions.exepAgentId) ? 0 : 1;
             }
             runClear();
+        }
+        else{
+            knowledge->defenseOneTouchMode = false;
+            knowledge->defenseClearMode = false;
         }
     }
 }
