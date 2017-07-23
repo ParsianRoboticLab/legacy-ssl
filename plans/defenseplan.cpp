@@ -110,7 +110,12 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
     }
     debug(QString("center : %1").arg(centerToCenter.size()) , D_AHZ);
     for(int i = 0 ; i < stuckPositions.size() ; i++){
-        solvedPosition.append(stuckPositions.at(i) + (1.4*CRobot::robot_radius_new - centerToCenter.at(i).length()/2)*((centerToCenter.at(i).a() - centerToCenter.at(i).b()).norm()));
+        if(stuckPositions.size() == 2){
+            solvedPosition.append(stuckPositions.at(i) + (1.1*CRobot::robot_radius_new - centerToCenter.at(i).length()/2)*((centerToCenter.at(i).a() - centerToCenter.at(i).b()).norm()));
+        }
+        else{
+            solvedPosition.append(stuckPositions.at(i) + (1.4*CRobot::robot_radius_new - centerToCenter.at(i).length()/2)*((centerToCenter.at(i).a() - centerToCenter.at(i).b()).norm()));
+        }
     }
     ///////////// Check the resulted points, don't be in the PArea /////////////
     for(int i = 0 ; i < solvedPosition.size() ; i++){
@@ -183,7 +188,7 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
 
     for(int i = 0 ; i < nonRepetitiveFinalSolvedPosition.size() ; i++){
         agentsPosition.append(nonRepetitiveFinalSolvedPosition.at(i));
-    }    
+    }
 
     debug(QString("solved : %1").arg(finalSolvedPosition.size()), D_AHZ);
     debug(QString("match : %1").arg(agentsPosition.size()), D_AHZ);
@@ -3023,7 +3028,7 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
     debug(QString("Dist %1").arg(distance), D_HAMED);
     if(distance > 1){
         if((pos - wm->ball->pos).length() > 0.7){
-        debug(QString("First"),D_HAMED);
+            debug(QString("First"),D_HAMED);
         }else{
             debug(QString("second"),D_HAMED);
             pos = wm->ball->pos + (opp - wm->ball->pos).norm() * 0.7;
@@ -3086,11 +3091,11 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
     Segment2D oppToGoal;
     oppToGoal.assign(wm->field->ourGoal(), opp);
     if(wm->field->AHZOurPAreaIntersectForMark(oppToGoal).isEmpty()){
-    tempQlist.clear();
-    Vector2D tempPos;
-    tempPos = ShootBlockRatio(1, opp + (wm->ball->pos - opp).norm()*.1).first();
-    tempQlist.append(tempPos);
-    tempQlist.append(wm->ball->pos - tempPos);
+        tempQlist.clear();
+        Vector2D tempPos;
+        tempPos = ShootBlockRatio(1, opp + (wm->ball->pos - opp).norm()*.1).first();
+        tempQlist.append(tempPos);
+        tempQlist.append(wm->ball->pos - tempPos);
     }
     return tempQlist;
 }
