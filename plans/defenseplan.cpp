@@ -613,7 +613,7 @@ void DefensePlan::manToManMarkBlockShotInPlayOff(int _markAgentSize){
             for(int i = markPoses.count() ; i < _markAgentSize; i++){
                 if(markPoses.count() < _markAgentSize){
                     markRoles.append(QString("shotBlocker"));
-                    markPoses.append(Vector2D(0,  count *  4.5/ 6  * pow(-1, count) ));
+                    markPoses.append(Vector2D(-2,  count *  4.5/ 6  * pow(-1, count) ));
                     markAngs.append(Vector2D(1,0));
                 }
                 count++;
@@ -2918,7 +2918,7 @@ bool DefensePlan::isInTheIndirectAreaShoot(Vector2D opp){
     //// This function checks the point that is resulted from block shot plan,
     //// is in the ball circle or not.
 
-    Circle2D indirectAvoidCircle(wm->ball->pos, 0.6);
+    Circle2D indirectAvoidCircle(wm->ball->pos, 0.5 + 0.2);
     if(indirectAvoidCircle.contains(ShootBlockRatio(segmentpershoot, opp).first()) && !knowledge->transientFlag){
         return 1;
     }
@@ -2934,7 +2934,7 @@ QList<Vector2D> DefensePlan::indirectAvoidShoot(Vector2D opp){
 
     Segment2D tempseg;
     tempseg.assign(opp, wm->field->ourGoal());
-    double indirectAvoidRadius = 0.5 + .1;
+    double indirectAvoidRadius = 0.5 + .2;
     Circle2D indirectAvoidCircle(wm->ball->pos,indirectAvoidRadius);
     Vector2D sol1, sol2, sol;
     indirectAvoidCircle.intersection(tempseg, &sol1, &sol2);
@@ -2953,9 +2953,9 @@ QList<Vector2D> DefensePlan::indirectAvoidShoot(Vector2D opp){
 
 bool DefensePlan::isInTheIndirectAreaPass(Vector2D opp){
     //// This function checks the point that is resulted from block pass plan,
-    //// is in the ball circle or not.
-
-    double indirectAvoidRadius = 0.5 + 0.1;
+    //// is in the ball circle or noShootBlockRatiot.
+    debug(QString("IndirectAreaPass"),D_HAMED);
+    double indirectAvoidRadius = 0.5 + 0.2;
     Circle2D indirectAvoidCircle(wm->ball->pos, indirectAvoidRadius);
     if (indirectAvoidCircle.contains(PassBlockRatio(segmentperpass, opp).first()) && !knowledge->transientFlag)
         return 1;
@@ -2971,7 +2971,7 @@ QList<Vector2D> DefensePlan::indirectAvoidPass(Vector2D opp){
 
     Segment2D tempseg;
     tempseg.assign(wm->ball->pos, opp + 10 * (opp - wm->ball->pos));
-    double indirectAvoidRadius = 0.5 + .1;
+    double indirectAvoidRadius = 0.5 + .2;
     Circle2D indirectAvoidCircle(wm->ball->pos,indirectAvoidRadius);
     Vector2D sol1, sol2, sol;
     indirectAvoidCircle.intersection(tempseg, &sol1, &sol2);
@@ -3018,19 +3018,31 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
     isInPenaltyArea.assign(opp, wm->ball->pos);
     QList<Vector2D> tempVec;
     tempVec.clear();
-
-    debug(QString("Dist %1").arg(distance), D_MAHI);
-    if(distance > 0.6){
-        if(ratio * distance > 0.2){
-            debug(QString("First"),D_HAMED);
+    Segment2D posToGoal;
+    posToGoal.assign(pos,wm->field->ourGoal());
+    debug(QString("Dist %1").arg(distance), D_HAMED);
+    if(distance > 1){
+        if((pos - wm->ball->pos).length() > 0.7){
+        debug(QString("First"),D_HAMED);
         }else{
             debug(QString("second"),D_HAMED);
-            pos = wm->ball->pos + (opp - wm->ball->pos) * 0.15 / distance;
+            pos = wm->ball->pos + (opp - wm->ball->pos).norm() * 0.7;
         }
     }
     else{
         debug(QString("Third"),D_HAMED);
-        pos = wm->ball->pos + (opp - wm->ball->pos) * (1 + 0.15 / distance);
+        Vector2D oppAng;
+        oppAng.setLength(opp.length());
+        oppAng.setDir(opp.dir() + 0.2);
+        if(!isInTheIndirectAreaShoot(opp)){
+            tempQlist.append(ShootBlockRatio(0.3, opp).first());
+            tempQlist.append(ShootBlockRatio(0.3, opp).last());
+        }
+        else{
+            tempQlist.append(indirectAvoidShoot(opp).first());
+            tempQlist.append(indirectAvoidShoot(opp).last());
+        }
+        return tempQlist;
     }
 
     if(!wm->field->AHZOurPAreaIntersectForMark(isInPenaltyArea).isEmpty()){
@@ -3047,7 +3059,15 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
             }
             else if ((tempVec.last() - wm->ball->pos).length() > (tempVec.first() - wm->ball->pos).length())
             {
-                sol = tempVec.last();
+                if((tempVec.first() - opp).length() > (tempVec.last() - opp).length())
+                {
+                    sol = tempVec.last();
+                }
+                else if ((tempVec.last() - opp).length() > (tempVec.first() - opp).length())
+                {
+                    sol = tempVec.first();
+                }
+                tempQlist.append(sol);
             }
             tempQlist.append(sol);
         }
@@ -3058,8 +3078,19 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
     }
     else{
         tempQlist.append(pos);
-        tempQlist.append( wm->ball->pos - opp);
+        draw(pos,0,QColor(100,100,100));
+
+        tempQlist.append( wm->ball->pos - pos);
         draw(tempSeg, "red");
+    }
+    Segment2D oppToGoal;
+    oppToGoal.assign(wm->field->ourGoal(), opp);
+    if(wm->field->AHZOurPAreaIntersect(oppToGoal).isEmpty()){
+    tempQlist.clear();
+    Vector2D tempPos;
+    tempPos = ShootBlockRatio(1, opp + (wm->ball->pos - opp).norm()*.1).first();
+    tempQlist.append(tempPos);
+    tempQlist.append(wm->ball->pos - tempPos);
     }
     return tempQlist;
 }
@@ -3544,12 +3575,12 @@ QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2
     double danger;
     /////////////// Polygon
     double radius = .1;
-    double treshold = 1;
+    double treshold = 0.5;
 
     Vector2D sol1,sol2,sol3;
     Vector2D _pos1 = wm->ball->pos;
 
-    Vector2D _pos2 = wm->ball->pos + (10.0  * wm->ball->vel.norm() * knowledge->getRealBallVel());
+    Vector2D _pos2 = wm->ball->pos + (3  * wm->ball->vel.norm() * knowledge->getRealBallVel());
     Line2D _path(_pos1,_pos2);
     Polygon2D _poly;
     Circle2D(_pos2,radius + treshold).
@@ -3635,7 +3666,7 @@ QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2
         if( knowledge->getRealBallVel() < .1)
             danger = danger1;
         else
-            danger = 10* Polycontain * danger2 + danger1;
+            danger = 8* Polycontain * danger2 + danger1;
 
         temp.second = danger;
         output.append(temp);
