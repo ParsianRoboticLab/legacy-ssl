@@ -1256,6 +1256,7 @@ void DefensePlan::matchingDefPos(int _defenseNum){
         debug(QString("stuck index: %1").arg(stuckIndexs.size()),  D_AHZ);
         correctingTheAgentsAreStuckTogether(matchPoints , stuckPositions , stuckIndexs);
     }
+    //////////////////// Added for RC 2017 /////////////////////////////////////
     Vector2D tempMatchPoints[matchPoints.size()];
     if(ourAgents.size() > matchPoints.size()){
         for(int i = 0 ; i < ourAgents.size() - matchPoints.size() ; i++){
@@ -1281,10 +1282,9 @@ void DefensePlan::matchingDefPos(int _defenseNum){
             matchPoints.removeOne(tempMatchPoints[i]);
         }
     }
-    ////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
     knowledge->Matching(ourAgents,matchPoints,matchResult);
     debug(QString("defenseAHZ : %1 ").arg(defenseAgents.size()) , D_AHZ);
-    //////////////////// Added for RC 2017 ///////////////////////////////////
     for(int i = 0; i < defenseCount ; i++){
         defensePoints[i] = matchPoints[i];
     }
