@@ -56,9 +56,8 @@ protected:
     void checkGoalieTarget();    
     void setGoalKeeperState();
     void setGoalKeeperTargetPoint();
-    bool ballIsBehindGoalKeeper, goalKeeperOneTouch,goalKeeperClearMode,ballIsOutOfField, ballIsBesidePoles;
-    double strictfollowThr;
-    double behindBallThr;        
+    bool goalKeeperOneTouch,goalKeeperClearMode,ballIsOutOfField, ballIsBesidePoles;
+    double strictfollowThr;          
     bool dangerForGoalKeeperClear;
     int oneTouchCnt;    
     ////////////////////////////// AHZ ///////////////////    
