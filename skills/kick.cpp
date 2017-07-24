@@ -1331,8 +1331,7 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
                 finalPos = ballPosInFuture - (_target-ballPosInFuture).norm()*0.11;
                 if(CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,true)<= i+0.1)
                 {
-
-                    draw(finalPos,1,QColor(Qt::blue));
+                    //draw(finalPos,1,QColor(Qt::blue));
                     return i;
                 }
             }
