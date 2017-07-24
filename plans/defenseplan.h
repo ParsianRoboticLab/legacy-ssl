@@ -56,7 +56,7 @@ protected:
     void checkGoalieTarget();    
     void setGoalKeeperState();
     void setGoalKeeperTargetPoint();
-    bool ballBehindGoalie, goalieOneTouch,goalieClearMode,ballIsOutOfField;
+    bool ballIsBehindGoalKeeper, goalieOneTouch,goalieClearMode,ballIsOutOfField , ballIsBesidePoles;
     double strictfollowThr;
     double behindBallThr;    
     bool besidePoleFlag;
@@ -109,6 +109,7 @@ protected:
     Vector2D oppNearestToBallPossition;
     Vector2D sumOfLastOpponentDirections;
     Vector2D tempAHZ;
+    Vector2D noKickTarget;
     Vector2D sumOfLastOpponentPosition;
     Vector2D finalOppNearestToBallDirection;
 
