@@ -56,11 +56,10 @@ protected:
     void checkGoalieTarget();    
     void setGoalKeeperState();
     void setGoalKeeperTargetPoint();
-    bool ballIsBehindGoalKeeper, goalieOneTouch,goalieClearMode,ballIsOutOfField , ballIsBesidePoles;
+    bool ballIsBehindGoalKeeper, goalKeeperOneTouch,goalKeeperClearMode,ballIsOutOfField, ballIsBesidePoles;
     double strictfollowThr;
-    double behindBallThr;    
-    bool besidePoleFlag;
-    bool dangerForGoalieClear;
+    double behindBallThr;        
+    bool dangerForGoalKeeperClear;
     int oneTouchCnt;    
     ////////////////////////////// AHZ ///////////////////    
     Line2D getBisectorLine(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
@@ -78,30 +77,27 @@ protected:
     double goalieThr;
     ////////
     int angleDegreeThrNotStop = 0;
+    int lastOpponentAgentsToBeMarkSize;
     double threshOld = 0.0;
     double ballCircleR = 0.5;
-    double xLimitForblockingPass;
-    bool stuckFlag;
+    double xLimitForblockingPass;    
     bool isCrowdedInFrontOfPenaltyAreaByOurAgents;
     bool isCrowdedInFrontOfPenaltyAreaByOppAgents;
     bool ballISInpenaltyAreaAndDangerCircle;
     bool ballIsNotInPenaltyAreaAndIsInDangerCircle;
     bool ballIsInPenaltyAreaAndIsNotInDangerCircle;
-    bool dangerForGoalieClearByOurAgents;
-    bool dangerForGoalieClearByOppAgents;
+    bool dangerForGoalKeeperClearByOurAgents;
+    bool dangerForGoalKeeperClearByOppAgents;
     bool dangerForInsideOfThePenaltyArea;
     bool stopMode;
     bool playOffMode;
     bool playOnMode;
     bool dangerModeThresholdForClear;
-    bool dangerModeThresholdForDanger;
-    bool changeInMarkPlanFlag;
-    bool manToManMarkBlockPassFlag;
-    bool ballBool;
+    bool dangerModeThresholdForDanger;    
+    bool manToManMarkBlockPassFlag;    
     bool goalKeeperPredictionModeInPlayOff;
     QString lastStateForMark;
-    QString stateForMark;
-    int lastOpponentAgentsToBeMarkSize;
+    QString stateForMark;    
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;
     QList <Vector2D> lastOppNearestToBallDirections;
@@ -111,9 +107,7 @@ protected:
     Vector2D tempAHZ;
     Vector2D noKickTarget;
     Vector2D sumOfLastOpponentPosition;
-    Vector2D finalOppNearestToBallDirection;
-
-    int AHZCount;        
+    Vector2D finalOppNearestToBallDirection;         
     ///////////////////////////////////////////////////
     void executeGoalKeeper();    
     Vector2D strictFollowBall(Vector2D _ballPos);    
