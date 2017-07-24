@@ -342,6 +342,10 @@ CPolicyWidget::CPolicyWidget()
     ADD_VALUE(DynamicPlay, Bool, NearForward, false, "Near Forward");
     ADD_VALUE(DynamicPlay, Double, Area, 0.3, "Pass Area");
     ADD_VALUE(DynamicPlay, Double, DirectTrsh, 0.7, "Pass/Shoot trsh");
+    ADD_VALUE(DynamicPlay, Int, SupportPriority, 1, "Supporter Priority");
+    ADD_VALUE(DynamicPlay, Bool, DribbleEveryWhere, false, "Dribble EveryWhere");
+    ADD_VALUE(DynamicPlay, Bool, DribbleInFast, true, "Dribble in fast and critical");
+    ADD_VALUE(DynamicPlay, Bool, ChipForward, true, "Chip Forward not to goal");
 
     ADD_TREE(Mark, "Mark", false);
     ADD_VALUE(Mark, Bool , PlayOffManToMan   , false, "PlayOff Man To Man");
@@ -596,6 +600,10 @@ IMPL_VALUE(CPolicyWidget, DynamicPlay, bool, Bool, FarForward)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, bool, Bool, NearForward)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, double, Double, Area)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, double, Double, DirectTrsh)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , SupportPriority)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, bool, Bool, DribbleEveryWhere)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, bool, Bool, DribbleInFast)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, bool, Bool, ChipForward)
 
 IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , PlayOffManToMan)
 IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , PlayOnManToMan)
