@@ -1491,7 +1491,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
         {
             dynamicAttack->setDirectShot(true);
             if((findMostPossible(wm->our[playmakeId]->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr)))
-                shotToGoalthr = policy()->DynamicPlay_DirectTrsh() - 0.2;
+                shotToGoalthr = max(0, policy()->DynamicPlay_DirectTrsh() - 0.2);
         } else {
             dynamicAttack->setDirectShot(false);
             shotToGoalthr = 0;
