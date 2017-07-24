@@ -602,7 +602,7 @@ void CPlayOff::firstDegree() {
 
     if(policy()->PlayOff_UseBlockBlocker()){
         newRoleAgent[0]->setTargetDir(wm->field->oppGoal()-wm->ball->pos);
-        newRoleAgent[0]->setTarget(wm->ball->pos-newRoleAgent[0]->getTargetDir().norm()*-0.3);
+        newRoleAgent[0]->setTarget(wm->ball->pos-newRoleAgent[0]->getTargetDir().norm()*0.3);
         blockersPenaltyArea.clear();
 
         for(int i=0;i<wm->opp.data->activeAgents.size();i++){
@@ -632,8 +632,8 @@ void CPlayOff::secondDegree() {
 
     if(policy()->PlayOff_UseBlockBlocker()){
 
-        newRoleAgent[0]->setTargetDir(wm->field->oppGoal()/4-wm->ball->pos);
-        newRoleAgent[0]->setTarget(wm->ball->pos-newRoleAgent[0]->getTargetDir().norm()*-0.3);
+        newRoleAgent[0]->setTargetDir(wm->field->oppGoal()/2-wm->ball->pos);
+        newRoleAgent[0]->setTarget(wm->ball->pos-newRoleAgent[0]->getTargetDir().norm()*0.3);
 
         blockersCentralRegion.clear();
         for(int i=0;i<wm->opp.data->activeAgents.size();i++){
@@ -664,7 +664,7 @@ void CPlayOff::thirdDegree() {
     if(policy()->PlayOff_UseBlockBlocker()){
 
         newRoleAgent[0]->setTargetDir(wm->field->ourGoal()-wm->ball->pos);
-        newRoleAgent[0]->setTarget(wm->ball->pos-newRoleAgent[0]->getTargetDir().norm()*-0.3);
+        newRoleAgent[0]->setTarget(wm->ball->pos-newRoleAgent[0]->getTargetDir().norm()*0.3);
 
         blockersRoundRegion.clear();
         for(int i=0;i<wm->opp.data->activeAgents.size();i++){
@@ -736,17 +736,26 @@ void CPlayOff::doneDegree() {
 
 void CPlayOff::stayPoistioning() {
 
+    double x=wm->ball->pos.x;
+    int m;
+    if(x >_FIELD_WIDTH/3)
+        m=0;
+    else if( x > _FIELD_WIDTH /6)
+        m=1;
+    else
+        m=-1;
+
 
 
     newRoleAgent[1]->setTarget(Vector2D(1, .5));
     newRoleAgent[1]->setTargetDir(wm->field->oppGoal());
-    newRoleAgent[2]->setTarget(Vector2D(1, -1.5));
+    newRoleAgent[2]->setTarget(Vector2D(1-m, -1.5));
     newRoleAgent[2]->setTargetDir(wm->field->oppGoal());
-    newRoleAgent[3]->setTarget(Vector2D(1, 1.5));
+    newRoleAgent[3]->setTarget(Vector2D(1+m, 1.5));
     newRoleAgent[3]->setTargetDir(wm->field->oppGoal());
-    newRoleAgent[4]->setTarget(Vector2D(1, -2.5));
+    newRoleAgent[4]->setTarget(Vector2D(1-2*m, -2.5));
     newRoleAgent[4]->setTargetDir(wm->field->oppGoal());
-    newRoleAgent[5]->setTarget(Vector2D(1, 2.5));
+    newRoleAgent[5]->setTarget(Vector2D(1+2*m, 2.5));
     newRoleAgent[5]->setTargetDir(wm->field->oppGoal());
 
 
@@ -968,7 +977,7 @@ void CPlayOff::firstPlayForOppCorner(int _agentSize) {
             blockerStep==S3;
 
         if (finisher == _agentSize-1) {
-            if (firstStepEnums == Stay) firstStepEnums = Done;
+            if (firstStepEnums == Stay && blockerStep=S3) firstStepEnums = Done;
             else firstStepEnums = Done;
         }
         else if(newRoleAgent[0]->getTarget().dist(newRoleAgent[0]->getAgent()->pos()) < 0.1
