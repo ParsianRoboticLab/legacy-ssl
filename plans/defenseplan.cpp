@@ -1256,11 +1256,7 @@ void DefensePlan::matchingDefPos(int _defenseNum){
         debug(QString("stuck index: %1").arg(stuckIndexs.size()),  D_AHZ);
         correctingTheAgentsAreStuckTogether(matchPoints , stuckPositions , stuckIndexs);
     }
-    ////////////////////////////////////////////////////////////////////////
-    knowledge->Matching(ourAgents,matchPoints,matchResult);
-    debug(QString("defenseAHZ : %1 ").arg(defenseAgents.size()) , D_AHZ);
     Vector2D tempMatchPoints[matchPoints.size()];
-    //////////////////// Added for RC 2017 ///////////////////////////////////
     if(ourAgents.size() > matchPoints.size()){
         for(int i = 0 ; i < ourAgents.size() - matchPoints.size() ; i++){
             ourAgents.removeAt(i);
@@ -1285,47 +1281,49 @@ void DefensePlan::matchingDefPos(int _defenseNum){
             matchPoints.removeOne(tempMatchPoints[i]);
         }
     }
-    else{
-        for(int i = 0; i < defenseCount ; i++){
-            defensePoints[i] = matchPoints[i];
+    ////////////////////////////////////////////////////////////////////////
+    knowledge->Matching(ourAgents,matchPoints,matchResult);
+    debug(QString("defenseAHZ : %1 ").arg(defenseAgents.size()) , D_AHZ);
+    //////////////////// Added for RC 2017 ///////////////////////////////////
+    for(int i = 0; i < defenseCount ; i++){
+        defensePoints[i] = matchPoints[i];
+    }
+    for(int i = 0 ; i < matchPoints.count() && i < matchResult.count() ; i++){
+        gpa[ourAgents[i]->id()]->noRelax();
+        for(int j = 0; j < ourAgents.size(); j++){
+            if(j != i){
+                gpa[ourAgents[i]->id()]->ourRelax(ourAgents[j]->id());
+            }
         }
-        for(int i = 0 ; i < matchPoints.count() && i < matchResult.count() ; i++){
-            gpa[ourAgents[i]->id()]->noRelax();
-            for(int j = 0; j < ourAgents.size(); j++){
-                if(j != i){
-                    gpa[ourAgents[i]->id()]->ourRelax(ourAgents[j]->id());
-                }
-            }
-            assignSkill(ourAgents[i] , gpa[ourAgents[i]->id()]);
-            if(ourAgents[i]->pos().dist(matchPoints[matchResult[i]]) > 0.35){
-                matchPoints[matchResult[i]] = checkDefensePoint(ourAgents[i], matchPoints[matchResult[i]]);
-            }
+        assignSkill(ourAgents[i] , gpa[ourAgents[i]->id()]);
+        if(ourAgents[i]->pos().dist(matchPoints[matchResult[i]]) > 0.35){
+            matchPoints[matchResult[i]] = checkDefensePoint(ourAgents[i], matchPoints[matchResult[i]]);
+        }
 
-            draw(Circle2D(matchPoints[matchResult[i]] , 0.05) , 0 , 360 , "black" , true);
-            gpa[ourAgents[i]->id()]->setNoAvoid(true);
+        draw(Circle2D(matchPoints[matchResult[i]] , 0.05) , 0 , 360 , "black" , true);
+        gpa[ourAgents[i]->id()]->setNoAvoid(true);
+        gpa[ourAgents[i]->id()]->setSlowMode(false);
+        gpa[ourAgents[i]->id()]->setAvoidPenaltyArea(false);
+        gpa[ourAgents[i]->id()]->setAvoidBall(false);
+        gpa[ourAgents[i]->id()]->setBallObstacleRadius(0);
+        if(knowledge->getGameState() == CKnowledge::TheirIndirectKick){
+            gpa[ourAgents[i]->id()]->setNoAvoid(false);
             gpa[ourAgents[i]->id()]->setSlowMode(false);
             gpa[ourAgents[i]->id()]->setAvoidPenaltyArea(false);
-            gpa[ourAgents[i]->id()]->setAvoidBall(false);
-            gpa[ourAgents[i]->id()]->setBallObstacleRadius(0);
-            if(knowledge->getGameState() == CKnowledge::TheirIndirectKick){
-                gpa[ourAgents[i]->id()]->setNoAvoid(false);
-                gpa[ourAgents[i]->id()]->setSlowMode(false);
-                gpa[ourAgents[i]->id()]->setAvoidPenaltyArea(false);
-                gpa[ourAgents[i]->id()]->setAvoidBall(true);
-                gpa[ourAgents[i]->id()]->setBallObstacleRadius(0.5);
-            }
-            else if(stopMode){
-                gpa[ourAgents[i]->id()]->setSlowMode(true);
-                gpa[ourAgents[i]->id()]->setADiveMode(false);
-            }
-            //////////// Go To Point Avoid for defense agents //////////////////
-            if(i < _defenseNum){
-                gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , matchPoints[matchResult[i]] - wm->field->ourGoal());
-            }
-            ///////// Go To Point Avoid for mark agents ////////////////////
-            else{
-                gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , markAngs.at(i - _defenseNum));
-            }
+            gpa[ourAgents[i]->id()]->setAvoidBall(true);
+            gpa[ourAgents[i]->id()]->setBallObstacleRadius(0.5);
+        }
+        else if(stopMode){
+            gpa[ourAgents[i]->id()]->setSlowMode(true);
+            gpa[ourAgents[i]->id()]->setADiveMode(false);
+        }
+        //////////// Go To Point Avoid for defense agents //////////////////
+        if(i < _defenseNum){
+            gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , matchPoints[matchResult[i]] - wm->field->ourGoal());
+        }
+        ///////// Go To Point Avoid for mark agents ////////////////////
+        else{
+            gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , markAngs.at(i - _defenseNum));
         }
     }
 }
