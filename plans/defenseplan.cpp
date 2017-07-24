@@ -3085,7 +3085,7 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
     }
     Segment2D oppToGoal;
     oppToGoal.assign(wm->field->ourGoal(), opp);
-    if(wm->field->AHZOurPAreaIntersect(oppToGoal).isEmpty()){
+    if(wm->field->AHZOurPAreaIntersectForMark(oppToGoal).isEmpty()){
     tempQlist.clear();
     Vector2D tempPos;
     tempPos = ShootBlockRatio(1, opp + (wm->ball->pos - opp).norm()*.1).first();

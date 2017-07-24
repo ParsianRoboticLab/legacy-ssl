@@ -368,8 +368,6 @@ private:
     void firstExecute();
     void kickOffStopModePlay(int tagentSize);
     void firstPlayForOppCorner(int _agentSize);
-    void firstPlayForMidField(int _agentSize);
-    void firstPlayForOurCorner(int _agentSize);
 
 
     ////////////////////////////Blocker//////////////////////////////////
