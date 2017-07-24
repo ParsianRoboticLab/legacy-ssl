@@ -291,6 +291,12 @@ public:
     DEF_VALUE(DynamicPlay, bool, Bool, NearForward)
     DEF_VALUE(DynamicPlay, double, Double, Area)
     DEF_VALUE(DynamicPlay, double, Double, DirectTrsh)
+    DEF_VALUE(DynamicPlay, int, Int, SupportPriority)
+    DEF_VALUE(DynamicPlay, bool, Bool, DribbleEveryWhere)
+    DEF_VALUE(DynamicPlay, bool, Bool, DribbleInFast)
+    DEF_VALUE(DynamicPlay, bool, Bool, ChipForward)
+
+
 
     DEF_TREE(Mark)
     DEF_VALUE(Mark, bool , Bool, PlayOffManToMan)
