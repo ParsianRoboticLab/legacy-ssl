@@ -2198,7 +2198,6 @@ void CCoach::execute()
     // place your reset codes about knowledge vars in this function
     knowledge->resetEssentialVars();
 
-
     updateKnowledgeVars();
 
     doIntention();
