@@ -330,6 +330,7 @@ CPolicyWidget::CPolicyWidget()
     ADD_VALUE(PlayOff, Bool, UseFastPlay, false, "Use Fast Play");
     ADD_VALUE(PlayOff, Bool, UseFirstPlay, false, "Use First Play");
     ADD_VALUE(PlayOff, Bool, UseBlockBlocker, false, "Use Blocker Block");
+    ADD_VALUE(PlayOff, Bool, UseForcedBlock, false, "Forced Blocker Block");
 
     ADD_TREE(DynamicPlay, "DynamicPlay", false);
     ADD_VALUE(DynamicPlay, Double , LowSpeedPass   , 0, "Low Speed Pass");
@@ -589,6 +590,8 @@ IMPL_VALUE(CPolicyWidget,PlayOff, int, Int, OneToucherID)
 IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, UseFastPlay)
 IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, UseFirstPlay)
 IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, UseBlockBlocker)
+IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, UseForcedBlock)
+
 
 IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , LowSpeedPass)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , MediumSpeedPass)

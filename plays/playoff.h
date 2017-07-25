@@ -303,7 +303,8 @@ typedef QPair<NGameOff::AgentPoint, NGameOff::AgentPoint> AgentPair;
 
 using namespace NGameOff;
 
-enum FirstStep {Stay, Move1, Move2, Done};
+enum FirstStep {Stay, Move, Done};
+enum BlockerSteps{S0,S1,S2,S3};
 
 class CPlayOff : public CMasterPlay {
 
@@ -367,8 +368,6 @@ private:
     void firstExecute();
     void kickOffStopModePlay(int tagentSize);
     void firstPlayForOppCorner(int _agentSize);
-    void firstPlayForMidField(int _agentSize);
-    void firstPlayForOurCorner(int _agentSize);
 
 
     ////////////////////////////Blocker//////////////////////////////////
@@ -512,11 +511,17 @@ public:
 protected:
 private:
     FirstStep firstStepEnums;
+    BlockerSteps blockerStep;
     int shotSpot;
+    double mx;
     void stayPoistioning();
-    void move1Positioning();
-    void move2Positioning();
+    void movePositioning();
     void donePositioning();
+
+    void firstDegree();
+    void secondDegree();
+    void thirdDegree();
+    void doneDegree();
 
 
 };

@@ -18,7 +18,50 @@
      "kick" : ""
     },
     "kick" : [
-
+      {
+        "kickspeed" : 100,
+        "realspeed" : [2.5, 2.55, 2.45]
+      },
+      {
+        "kickspeed" : 150,
+        "realspeed" : [3.39, 3.2, 3.28, 3.36]
+      },
+      {
+        "kickspeed" : 200,
+        "realspeed" : [4.0, 4.0, 4.01]
+      },
+      {
+        "kickspeed" : 250,
+        "realspeed" : [4.46, 4.68, 5.2, 4.80]
+      },
+      {
+        "kickspeed" : 300,
+        "realspeed" : [5.17, 5.31, 5.00, 5.30]
+      },
+      {
+        "kickspeed" : 350,
+        "realspeed" : [5.69, 6.00, 5.55, 5.52]
+      },
+      {
+        "kickspeed" : 400,
+        "realspeed" : [6.51, 6.22, 6.46, 6.57]
+      },
+      {
+        "kickspeed" : 450,
+        "realspeed" : [6.88, 7.20, 6.92, 6.80]
+      },
+      {
+        "kickspeed" : 500,
+        "realspeed" : [7.32, 7.52, 7.31, 7.46]
+      },
+      {
+        "kickspeed" : 550,
+        "realspeed" : [7.73, 8.00, 7.91, 7.90]
+      },
+      {
+        "kickspeed" : 600,
+        "realspeed" : [8.51, 8.56, 8.24, 8.22]
+      }
     ]
    }
   },
@@ -150,7 +193,42 @@
      "kick" : ""
     },
     "kick" : [
-
+      {
+        "kickspeed" : 100,
+        "realspeed" : [2.7, 2.82, 2.84, 2.72]
+      },
+      {
+        "kickspeed" : 150,
+        "realspeed" : [3.56, 3.63, 4.00, 3.84]
+      },
+      {
+        "kickspeed" : 200,
+        "realspeed" : [5.2, 4.7, 4.8, 4.8]
+      },
+      {
+        "kickspeed" : 250,
+        "realspeed" : [4.91, 5.34, 4.9, 5.00]
+      },
+      {
+        "kickspeed" : 300,
+        "realspeed" : [5.53, 5.62, 5.46, 5.58]
+      },
+      {
+        "kickspeed" : 350,
+        "realspeed" : [6.16, 6.57, 6.80, 6.32]
+      },
+      {
+        "kickspeed" : 400,
+        "realspeed" : [6.91, 7.31, 7.35, 7.67]
+      },
+      {
+        "kickspeed" : 450,
+        "realspeed" : [8.1, 7.63, 7.95, 7.95]
+      },
+      {
+        "kickspeed" : 500,
+        "realspeed" : [8.5, 8.1, 8.2, 8.3]
+      }
     ]
    }
   },
