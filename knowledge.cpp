@@ -165,7 +165,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
     //    RobotsCoeff[7][0] = 800;
 
 
-    profiler->load(JSON, "MRLProfiler_2_6.json");
+    profiler->load(JSON, "MahiProfiler.json");
 
     //    ProfilerResult[robotID][0:kick , 1:chip , 2:SpinKick , 3:SpinChip][10*distance(0-80)] ---> contains needed voltage for this distance
 
