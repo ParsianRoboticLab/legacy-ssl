@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
 
 
     CMainApplication mApp;
-    mApp.setFixedSize(1300,750);
+    //mApp.setFixedSize(1300,750);
     mApp.show();
 
 
