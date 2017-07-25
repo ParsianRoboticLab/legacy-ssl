@@ -8,42 +8,23 @@ using namespace std;
 #define LONG_CHIP_POWER 1023
 
 ///////////////// AHZ is writing, have you my voice? ... ;) //////////////////
-bool DefensePlan::isStateGoingFromIndirectToTransient(){
-    if(LastTS != knowledge->transientFlag && LastTS == 0){
-        return 1;
+bool DefensePlan::isPermissionTargetToChip(Vector2D aPoint){
+    Vector2D tempIntersection0;
+    Vector2D tempIntersection1;
+    for(int i = 0 ; i < wm->our.activeAgentsCount() ; i++){
+        if(Circle2D(wm->our.active(i)->pos , 0.2).intersection(Segment2D(knowledge->goalie->pos() , aPoint) , &tempIntersection0 , &tempIntersection1)){
+            return false;
+        }
     }
-    LastTS = knowledge->transientFlag;
-    return 0;
+    for(int i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
+        if(Circle2D(wm->opp.active(i)->pos , 0.2).intersection(Segment2D(knowledge->goalie->pos() , aPoint) , &tempIntersection0 , &tempIntersection1)){
+            return false;
+        }
+    }
+    return true;
 }
 
-Vector2D DefensePlan::getOppNearestToBallDirInTheirIndirectMode(int lastDirectionSize){
-    Vector2D finalDirection;
-    if(knowledge->isTheirNonPlayOnKick()){
-        oppNearestToBallPossition = wm->opp[knowledge->nearestOppToBall]->pos;
-        lastOppNearestToBallDirections.append(wm->opp[knowledge->nearestOppToBall]->dir);
-        if(lastOppNearestToBallDirections.size() > lastDirectionSize){
-            lastOppNearestToBallDirections.removeFirst();
-        }
-    }
-    if(isStateGoingFromIndirectToTransient()){
-        if(lastOppNearestToBallDirections.size() <= lastDirectionSize){
-            for(int i = lastOppNearestToBallDirections.size() - 1 ; i >= 0 ; i--){
-                sumOfLastOpponentDirections += lastOppNearestToBallDirections.at(i);
-            }
-            finalOppNearestToBallDirection = sumOfLastOpponentDirections / lastOppNearestToBallDirections.size();
-        }
-        else{
-            for(int i = lastOppNearestToBallDirections.size() - 1 ; i > lastOppNearestToBallDirections.size() - lastDirectionSize - 1 ; i--){
-                sumOfLastOpponentDirections += lastOppNearestToBallDirections.at(i);
-            }
-            finalOppNearestToBallDirection = sumOfLastOpponentDirections / lastDirectionSize;
-        }
-    }
-    if(finalDirection.isValid()){
-        globalFinalDirection = finalDirection;
-    }
-    return finalDirection;
-}
+
 
 bool DefensePlan::isAgentsStuckTogether(QList<Vector2D> agentsPosition){
     //// If defense agents stuck together , this function
@@ -261,9 +242,7 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
     markPoses.clear();
     markAngs.clear();
     markRoles.clear();
-    /////////////////// Intelligent mark plan ///////////////////////////////
-    LastTS = knowledge->transientFlag;
-    draw(Segment2D(wm->opp[knowledge->nearestOppToBall]->pos , wm->opp[knowledge->nearestOppToBall]->pos + globalFinalDirection*10));
+    /////////////////// Intelligent mark plan ///////////////////////////////        
     ////////////////////////////////////////////////////////////////////////////
     debug(QString("Mark Agents Count : %1").arg(ourMarkAgentsSize) , D_SEPEHR , QColor(Qt::red));
     ///////// Make Cirlcles around opponent agents /////////////////////////////
@@ -838,8 +817,7 @@ void DefensePlan::setGoalKeeperTargetPoint(){
             return;
         }
         if(stopMode){
-            lastStateForGoalKeeper = QString("no");
-            sumOfLastOpponentDirections = Vector2D(0,0);
+            lastStateForGoalKeeper = QString("no");            
             dangerForGoalKeeperClear = false;
             debug(QString("Stop Mode"),D_SEPEHR);
             ballPos = wm->ball->pos;
@@ -1163,8 +1141,7 @@ DefensePlan::DefensePlan()
     markRadius = 1.6;
     markRadiusStrict = 1.39;
     segmentpershoot = policy()->Mark_ShootRatioBlock() / 100.0;
-    segmentperpass = (100  - policy()->Mark_PassRatioBlock()) / 100.0;
-    LastTS = true;
+    segmentperpass = (100  - policy()->Mark_PassRatioBlock()) / 100.0;    
     dir  = Vector2D(1,0);
     MantoManAllTransientFlag =  policy()->Mark_ManToManAllTransiant();
     predictThresh = 0;
@@ -1188,15 +1165,10 @@ DefensePlan::DefensePlan()
     secondDefenseKickLine = 0;
     goalieKickThreshold = 70;
     /////////// AHZ //////////////
-    lastMarkRoles.append(markRoles);
-    sumOfLastOpponentDirections = Vector2D(0,0);
-    sumOfLastOpponentPosition = Vector2D(0,0);
-    goalKeeperTarget = Vector2D(0,0);
-    lastOpponentAgentsToBeMarkSize = 0;
+    lastMarkRoles.append(markRoles);    
+    goalKeeperTarget = Vector2D(0,0);    
     dangerModeThresholdForClear = 0;
-    dangerModeThresholdForDanger = 0;
-    LastTS = 0;
-    besideCounter = 0;
+    dangerModeThresholdForDanger = 0;        
     /////////////// For Adding TS Mode in Mark ///////////////////////////////
     xLimitForblockingPass = 0;
     manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
@@ -1210,7 +1182,7 @@ DefensePlan::DefensePlan()
     }
     ////////////////////////////////
 
-    striker_Robot=new CSkillGotoPointAvoid(NULL);
+    striker_Robot = new CSkillGotoPointAvoid(NULL);
 
     for (int i = 0; i < _MAX_NUM_PLAYERS; i++){
         lastMarker[i] = -1;
@@ -1892,7 +1864,7 @@ void DefensePlan::executeGoalKeeper(){
     playOnMode = knowledge->isStart();
     stopMode = knowledge->isStop();
     QList<Vector2D> tempSol;
-    tempSol.clear();
+    tempSol.clear();    
     if(goalKeeperAgent != NULL){
         debug(QString("goalKeeper clear mode : %1").arg(knowledge->goalKeeperClearMode) , D_AHZ);
         debug(QString("goalKeeper oneTouch mode : %1").arg(knowledge->goalKeeperOneTouchMode) , D_AHZ);
@@ -2442,7 +2414,7 @@ bool DefensePlan::defenseClearOrNot(){
             }
         }
         else{
-            for(int i = 0; i < wm->our.activeAgentsCount(); i++){
+            for(int i = 0; i < min(wm->our.activeAgentsCount() , defenseAgents.size()); i++){
                 if(defenseAgents[defenseClearIndex]->id() != wm->our.active(i)->id){
                     if(defenseAgents[defenseClearIndex]->distToBall().length() - wm->our.active(i)->pos.dist(ballPos) > 0.3
                             || defenseAgents[defenseClearIndex]->distToBall().length() > 1.5 + defClearThr){
@@ -2450,7 +2422,7 @@ bool DefensePlan::defenseClearOrNot(){
                     }
                 }
             }
-            for(int i = 0; i < wm->opp.activeAgentsCount(); i++){
+            for(int i = 0; i < min(wm->opp.activeAgentsCount() , defenseAgents.size()); i++){
                 if(defenseAgents[defenseClearIndex]->distToBall().length() - wm->opp.active(i)->pos.dist(ballPos) > 0.3
                         || defenseAgents[defenseClearIndex]->distToBall().length() > 1.5 + defClearThr){
                     return false;
