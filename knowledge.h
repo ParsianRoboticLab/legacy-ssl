@@ -218,6 +218,8 @@ public:
     double ballVelLowPass;
     /////////////////////////
     ///////////////////////////////// AHZ //////////////////////////////////////
+    QString stateForMark;
+    QString lastStateForMark;
     Vector2D getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion);
     bool defenseOneTouchMode;
     bool goalKeeperOneTouchMode;

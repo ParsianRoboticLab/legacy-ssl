@@ -1201,12 +1201,12 @@ DefensePlan::DefensePlan()
     xLimitForblockingPass = 0;
     manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
     if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass){
-        lastStateForMark = QString("BlockPass");
-        stateForMark = QString("BlockPass");
+        knowledge->lastStateForMark = QString("BlockPass");
+        knowledge->stateForMark = QString("BlockPass");
     }
     else{
-        lastStateForMark = QString("BlockShot");
-        stateForMark = QString("BlockShot");
+        knowledge->lastStateForMark = QString("BlockShot");
+        knowledge->stateForMark = QString("BlockShot");
     }
     ////////////////////////////////
 
@@ -2957,8 +2957,8 @@ void DefensePlan::findPos(int _markAgentSize){
     markPoses.clear();
     markAngs.clear();
     ///////////////// Man To Man AllTransiant Mode for Mark ////////////////////
-    debug(lastStateForMark , D_AHZ , "red");
-    debug(stateForMark , D_AHZ , "blue");
+    debug(knowledge->lastStateForMark , D_AHZ , "red");
+    debug(knowledge->stateForMark , D_AHZ , "blue");
     if(MantoManAllTransientFlag){
         if(knowledge->transientFlag){
             segmentpershoot = 0.1;
@@ -2975,37 +2975,37 @@ void DefensePlan::findPos(int _markAgentSize){
     //////////////// Determine the plan of mark from GUI ////////////////////
     if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass){
         if(playOff || stopMode){
-            stateForMark = QString("BlockPass");
+            knowledge->stateForMark = QString("BlockPass");
             manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
         }
         else if(knowledge->transientFlag){
-            if(lastStateForMark == QString("BlockPass")){
-                stateForMark = QString("BlockPass");
+            if(knowledge->lastStateForMark == QString("BlockPass")){
+                knowledge->stateForMark = QString("BlockPass");
                 manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
             }
             else{
-                stateForMark = QString("BlockShot");
+                knowledge->stateForMark = QString("BlockShot");
                 manToManMarkBlockShotInPlayOff(_markAgentSize);
             }
         }
     }
     else{
         if(playOff || stopMode){
-            stateForMark = QString("BlockShot");
+            knowledge->stateForMark = QString("BlockShot");
             manToManMarkBlockShotInPlayOff(_markAgentSize);
         }
         else{
-            if(lastStateForMark == QString("BlockShot")){
-                stateForMark = QString("BlockShot");
+            if(knowledge->lastStateForMark == QString("BlockShot")){
+                knowledge->stateForMark = QString("BlockShot");
                 manToManMarkBlockShotInPlayOff(_markAgentSize);
             }
             else{
-                stateForMark = QString("BlockPass");
+                knowledge->stateForMark = QString("BlockPass");
                 manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
             }
         }
     }
-    lastStateForMark = stateForMark;
+    knowledge->lastStateForMark = knowledge->stateForMark;
 }
 
 QList<Vector2D> DefensePlan::ShootBlockRatio(double ratio, Vector2D opp){
