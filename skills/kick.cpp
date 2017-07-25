@@ -998,18 +998,18 @@ void CSkillKick::jTurn()
     if(movementDir <= 70 && movementDir >= -70)
     {
         targetForJturnPos = ballPos + (ballPos - target).norm()*0.11;
-        if(movementDir > 20)
+        if(movementDir > 15)
         {
             if(wm->ball->vel.length() > 0.1)
-                shift = 15 + (1-agentPos.dist(ballPos))*45;
+                shift = 20 + (1-agentPos.dist(ballPos))*45;
             else
                 shift = 0 + (1-agentPos.dist(ballPos))*10;
 
         }
-        else if(movementDir < -20)
+        else if(movementDir < -15)
         {
             if(wm->ball->vel.length() > 0.1)
-                shift = -15 - (1-agentPos.dist(ballPos))*45;
+                shift = -20 - (1-agentPos.dist(ballPos))*45;
 
             else
                 shift = 0 - (1-agentPos.dist(ballPos))*10;
@@ -1400,7 +1400,7 @@ void CSkillKick::findPosToGo()
 
             finalPos = wm->ball->getPosInFuture(i);// - (target-wm->ball->getPosInFuture(i)).norm()*0.15;
             agentTime = CSkillGotoPointAvoid::timeNeeded(agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,!goalieMode,0.2,true);
-            if(agentTime < i )
+            if(agentTime < i -0.5)
             {
                 break;
             }
@@ -1455,6 +1455,8 @@ void CSkillKick::findPosToGo()
     }
 
     Circle2D oppPenalty(wm->field->oppGoal() + Vector2D(0.2 , 0),1.4);
+    gpa->setOneTouchMode(false);
+
     if(oppPenalty.contains(ballPos))
     {
         finalPos = finalPos - (target-finalPos).norm() * 0.15;
@@ -1477,6 +1479,8 @@ void CSkillKick::findPosToGo()
     finalPosArea.assign(ballPos ,0.145);
     if(finalPosArea.intersection(directPath,&s1,&s2))
     {
+        gpa->setOneTouchMode(false);
+
         finalPosArea.assign(ballPos ,0.245);
         finalPosArea.tangent(agentPos,&s1,&s2);
         if(s2.dist(target) >= s1.dist(target))
@@ -1511,7 +1515,6 @@ void CSkillKick::findPosToGo()
 
     gpa->setSlowMode(slow);
     gpa->setADiveMode(false);
-    gpa->setOneTouchMode(false);
     gpa->setAvoidPenaltyArea(true);
     gpa->execute();
 

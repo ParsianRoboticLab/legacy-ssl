@@ -517,7 +517,7 @@ void CAgent::accelerationLimiter(double vf,bool diveMode)
             }
         }
     }
-    debug(QString("vn: %1 , lVn :%2").arg(vnormal).arg(lastVn),D_MHMMD);
+//    debug(QString("vn: %1 , lVn :%2").arg(vnormal).arg(lastVn),D_MHMMD);
     if(vnormal >= 0)
     {
         if(diveMode)
