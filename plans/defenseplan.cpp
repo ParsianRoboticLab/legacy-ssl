@@ -2414,7 +2414,7 @@ bool DefensePlan::defenseClearOrNot(){
             }
         }
         else{
-            for(int i = 0; i < wm->our.activeAgentsCount(); i++){
+            for(int i = 0; i < min(wm->our.activeAgentsCount() , defenseAgents.size()); i++){
                 if(defenseAgents[defenseClearIndex]->id() != wm->our.active(i)->id){
                     if(defenseAgents[defenseClearIndex]->distToBall().length() - wm->our.active(i)->pos.dist(ballPos) > 0.3
                             || defenseAgents[defenseClearIndex]->distToBall().length() > 1.5 + defClearThr){
@@ -2422,7 +2422,7 @@ bool DefensePlan::defenseClearOrNot(){
                     }
                 }
             }
-            for(int i = 0; i < wm->opp.activeAgentsCount(); i++){
+            for(int i = 0; i < min(wm->opp.activeAgentsCount() , defenseAgents.size()); i++){
                 if(defenseAgents[defenseClearIndex]->distToBall().length() - wm->opp.active(i)->pos.dist(ballPos) > 0.3
                         || defenseAgents[defenseClearIndex]->distToBall().length() > 1.5 + defClearThr){
                     return false;
