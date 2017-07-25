@@ -1101,7 +1101,7 @@ void CSkillGotoPointAvoid::execute()
     if(result.size() >= 3)
     {
         alpha = fabs(Vector2D::angleBetween(result[1] - result[0] , result[2] - result[1]).degree());
-        debug(QString("alpha : %1").arg(alpha),D_MHMMD);
+//        debug(QString("alpha : %1").arg(alpha),D_MHMMD);
         lllll = result[1];
         vf = -2 * log(alpha) + 9;
         vf = max(vf , 0.5);
@@ -1241,7 +1241,6 @@ double CSkillGotoPointAvoid::timeNeeded(CAgent *_agentT,Vector2D posT,double vMa
     vMax = min(vMax, vMaxReal);
     xSat = sqrt(((vMax*vMax)-(tAgentVel.length()*tAgentVel.length()))/acc) + sqrt((vMax*vMax)/dec);
     _x3 = ( -1* tAgentVel.length()*tAgentVel.length()) / (-2 * fabs(conf()->BangBang_DecMax())) ;
-    debug(QString("x sat: %1").arg(xSat),D_MHMMD);
 
     if(_agentT->pos().dist(posT) < _x3 ) {
         return max(0,(tAgentVel.length()/conf()->BangBang_DecMax() - offset) * distEffect);
@@ -1249,20 +1248,15 @@ double CSkillGotoPointAvoid::timeNeeded(CAgent *_agentT,Vector2D posT,double vMa
     else if(tAgentVel.length() < (vMax)){
         if(_agentT->pos().dist(posT) > xSat)
         {
-            debug("1",D_MHMMD);
             return max(0, (-1*offset + vMax/dec + (vMax-tAgentVel.length())/acc + (_agentT->pos().dist(posT) - ((vMax*vMax/(2*dec)) + ((vMax+tAgentVel.length())*(vMax-tAgentVel.length())/acc))/2)/vMax) * distEffect);
         }
         else
         {
-            debug("2",D_MHMMD);
-
             return max(0, (vMax/dec + (vMax-tAgentVel.length())/acc - offset)*distEffect);
         }
     }
     else
     {
-        debug("3",D_MHMMD);
-
         return max(0,(vMax/dec + (_agentT->pos().dist(posT) - ((vMax*vMax/(2*dec)) ))/vMax - offset) * distEffect);
     }
 
