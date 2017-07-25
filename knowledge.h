@@ -221,7 +221,13 @@ public:
     double ballVelLowPass;
     /////////////////////////
     ///////////////////////////////// AHZ //////////////////////////////////////
+    QString stateForMark;
+    QString lastStateForMark;
     Vector2D getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion);
+    bool defenseOneTouchMode;
+    bool goalKeeperOneTouchMode;
+    bool defenseClearMode;
+    bool goalKeeperClearMode;
     //////////////////////////////// end of AHZ
     QList<int> oppBlockers;
     QString stateToString(State s);

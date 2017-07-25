@@ -334,6 +334,7 @@ CPolicyWidget::CPolicyWidget()
     ADD_VALUE(PlayOff, Bool, UseFastPlay, false, "Use Fast Play");
     ADD_VALUE(PlayOff, Bool, UseFirstPlay, false, "Use First Play");
     ADD_VALUE(PlayOff, Bool, UseBlockBlocker, false, "Use Blocker Block");
+    ADD_VALUE(PlayOff, Bool, UseForcedBlock, false, "Forced Blocker Block");
 
     ADD_TREE(DynamicPlay, "DynamicPlay", false);
     ADD_VALUE(DynamicPlay, Double , LowSpeedPass   , 0, "Low Speed Pass");
@@ -346,6 +347,10 @@ CPolicyWidget::CPolicyWidget()
     ADD_VALUE(DynamicPlay, Bool, NearForward, false, "Near Forward");
     ADD_VALUE(DynamicPlay, Double, Area, 0.3, "Pass Area");
     ADD_VALUE(DynamicPlay, Double, DirectTrsh, 0.7, "Pass/Shoot trsh");
+    ADD_VALUE(DynamicPlay, Int, SupportPriority, 1, "Supporter Priority");
+    ADD_VALUE(DynamicPlay, Bool, DribbleEveryWhere, false, "Dribble EveryWhere");
+    ADD_VALUE(DynamicPlay, Bool, DribbleInFast, true, "Dribble in fast and critical");
+    ADD_VALUE(DynamicPlay, Bool, ChipForward, true, "Chip Forward not to goal");
 
     ADD_TREE(Mark, "Mark", false);
     ADD_VALUE(Mark, Bool , PlayOffManToMan   , false, "PlayOff Man To Man");
@@ -593,6 +598,8 @@ IMPL_VALUE(CPolicyWidget,PlayOff, int, Int, OneToucherID)
 IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, UseFastPlay)
 IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, UseFirstPlay)
 IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, UseBlockBlocker)
+IMPL_VALUE(CPolicyWidget,PlayOff, bool, Bool, UseForcedBlock)
+
 
 IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , LowSpeedPass)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, double , Double , MediumSpeedPass)
@@ -604,6 +611,10 @@ IMPL_VALUE(CPolicyWidget, DynamicPlay, bool, Bool, FarForward)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, bool, Bool, NearForward)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, double, Double, Area)
 IMPL_VALUE(CPolicyWidget, DynamicPlay, double, Double, DirectTrsh)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, int , Int , SupportPriority)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, bool, Bool, DribbleEveryWhere)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, bool, Bool, DribbleInFast)
+IMPL_VALUE(CPolicyWidget, DynamicPlay, bool, Bool, ChipForward)
 
 IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , PlayOffManToMan)
 IMPL_VALUE(CPolicyWidget, Mark, bool , Bool , PlayOnManToMan)

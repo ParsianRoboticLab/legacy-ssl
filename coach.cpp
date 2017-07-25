@@ -2198,7 +2198,6 @@ void CCoach::execute()
     // place your reset codes about knowledge vars in this function
     knowledge->resetEssentialVars();
 
-
     updateKnowledgeVars();
 
     doIntention();
@@ -2211,7 +2210,7 @@ void CCoach::execute()
     double critAreaRadius = 1.6;
     Circle2D critArea(wm->field->ourGoal(), critAreaRadius);
     playmakeId = -1;
-    if((critArea.contains(wm->ball->pos) && wm->field->isInField(wm->ball->pos))) {
+    if((critArea.contains(wm->ball->pos) && wm->field->isInField(wm->ball->pos)) || transientFlag) {
         decideDefense();
         choosePlaymakeAndSupporter(true);
     } else {

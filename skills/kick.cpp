@@ -997,18 +997,18 @@ void CSkillKick::jTurn()
     if(movementDir <= 50 && movementDir >= -50)
     {
         targetForJturnPos = ballPos + (ballPos - target).norm()*0.08;
-        if(movementDir > 20)
+        if(movementDir > 10)
         {
             if(wm->ball->vel.length() > 0.2)
-                shift = 7 + (1-agentPos.dist(ballPos))*15;
+                shift = 30 + (1-agentPos.dist(ballPos))*25;
             else
                 shift = 10 + (1-agentPos.dist(ballPos))*25;
 
         }
-        else if(movementDir < -20)
+        else if(movementDir < -10)
         {
             if(wm->ball->vel.length() > 0.2)
-                shift = -7 - (1-agentPos.dist(ballPos))*15;
+                shift = -30 - (1-agentPos.dist(ballPos))*25;
 
             else
                 shift = -10 - (1-agentPos.dist(ballPos))*25;
@@ -1052,10 +1052,10 @@ void CSkillKick::jTurn()
 
     if(isFinalController )
     {
-        if(wm->ball->vel.length() > 0.2)
+        if(wm->ball->vel.length() > 0.2 || 1)
         {
-            posPid->kp = 1+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
-            speedPid->kp = 3;// +2.1*agentPos.dist(ballPos) + dirReduce;
+            posPid->kp =0;// 1+(0.001/(agentPos.dist(targetForJturnPos)*agentPos.dist(targetForJturnPos)));
+            speedPid->kp = 4;// +2.1*agentPos.dist(ballPos) + dirReduce;
         }
         else
         {
@@ -1331,8 +1331,7 @@ double CSkillKick::kickTimeEstimation(CAgent *_agent, Vector2D _target)
                 finalPos = ballPosInFuture - (_target-ballPosInFuture).norm()*0.11;
                 if(CSkillGotoPointAvoid::timeNeeded(_agent,finalPos,conf()->BangBang_VelMax(),ourRelax,oppRelax,true,0.2,true)<= i+0.1)
                 {
-
-                    draw(finalPos,1,QColor(Qt::blue));
+                    //draw(finalPos,1,QColor(Qt::blue));
                     return i;
                 }
             }

@@ -81,6 +81,10 @@ CKnowledge::CKnowledge(CAgent** _agents)
     toBeSwitchedAttacker = -1;
     lastFrameSwithed = -1;
     ballVelLowPass = 0;
+    defenseOneTouchMode = false;
+    defenseClearMode = false;
+    goalKeeperOneTouchMode = false;
+    goalKeeperClearMode = false;
     //    variables["khafanmarked"]="false";
     lastPlayExecuted = Stop;
     necessaryDefKick = false;

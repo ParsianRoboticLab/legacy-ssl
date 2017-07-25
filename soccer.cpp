@@ -862,13 +862,6 @@ void CSoccer::refUpdate()
 
     lastCmdCnt = cmdCnt;
     refCommand = gsp.cmd;
-//    qDebug() << "REF: " << referee.stage();
-//    qDebug() << "ref: " << refCommand;
-    QFile file("./REF.dat");
-    if (file.open(QIODevice::WriteOnly|QIODevice::Truncate)) {
-        QTextStream stream( &file );
-        stream << referee.command() << endl;
-    }
 
     wm->gs->transition(refCommand);
     debug(( "Referee : " + QString("%1 (%2)").arg(refCommand).arg((int) refCommand) + "  " + QString::number(wm->gs->get())), D_GAME);

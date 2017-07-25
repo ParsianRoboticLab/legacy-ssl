@@ -62,7 +62,7 @@ public:
     CAgent* getMahiPlayMaker();
 
 private:
-    double thrsh = 0;
+    double thrshDribble = 0;
     bool lastPMInitWasDribble;
     Vector2D oppRob;
     double lastYDrib = 0;
