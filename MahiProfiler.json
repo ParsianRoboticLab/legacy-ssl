@@ -140,7 +140,7 @@
       "kickSpeed" : 200,
       "realSpeed" : [
 4.09,
-4.2
+4.2,
 3.93,
 3.97,
 3.99
@@ -254,7 +254,7 @@
 1.65,
 1.8,
 1.8,
-17
+1.7
 ]
       },
       {
@@ -566,7 +566,7 @@
 8.08,
 8.16
       ]
-     },
+     }
     ]
    }
   },
@@ -591,7 +591,7 @@
       {
 "chipSpeed" : 350,
 "distance" : [
-1.1
+1.1,
 1.05,
 0.97,
 1
@@ -959,7 +959,7 @@
 "chipSpeed" : 400,
 "distance" : [
 0.75,
-0.83
+0.83,
 0.85,
 0.85
 ]
@@ -1291,7 +1291,7 @@
 8.67,
 8.6
       ]
-     },
+     }
     ]
    }
   },
@@ -1520,60 +1520,6 @@
      "kick" : ""
     },
     "kick" : [
-      {
-      "kickSpeed" : 200,
-      "realSpeed" : [
-
-      ]
-     },
-     {
-      "kickSpeed" : 300,
-      "realSpeed" : [
-
-      ]
-     },
-     {
-      "kickSpeed" : 400,
-      "realSpeed" : [
-
-      ]
-     },
-     {
-      "kickSpeed" : 500,
-      "realSpeed" : [
-
-      ]
-     },
-     {
-      "kickSpeed" : 600,
-      "realSpeed" : [
-
-      ]
-     },
-     {
-      "kickSpeed" : 700,
-      "realSpeed" : [
-
-      ]
-     },
-     {
-      "kickSpeed" : 800,
-      "realSpeed" : [
-
-      ]
-     },
-     {
-      "kickSpeed" : 900,
-      "realSpeed" : [
-
-      ]
-     },
-     {
-      "kickSpeed" : 1000,
-      "realSpeed" : [
-
-      ]
-     }
     ]
    }
   }

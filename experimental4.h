@@ -216,11 +216,12 @@ void CMainApplication::Experimental4(){
     if(fff){
         file.open(/*QIODevice::Truncate | */QIODevice::WriteOnly);
 
-        for(int robotID1 = 7; robotID1 < 8; robotID1++){
+        for(int robotID1 = 1; robotID1 < 2; robotID1++){
 
             kick1 = knowledge->profiler->robotsProfile[robotID1].finalKickMap;
             chip1 = knowledge->profiler->robotsProfile[robotID1].finalChipMap;
 
+            // kick
             out << "Final kick data collected for robot " << robotID1 << "\n";
             for(int i=0; i<kick1.keys().size();i++){
                 out << QString("%1   ,   %2\n").arg(kick1.keys().at(i)).arg(kick1.values().at(i));
@@ -231,14 +232,15 @@ void CMainApplication::Experimental4(){
             }
 
 
-            out << "\nFinal chip data collected for robot " << robotID1 << "\n";
-            for(int i=0; i<chip1.keys().size(); i++){
-                out << QString("%1   ,   %2\n").arg(chip1.keys().at(i)).arg(chip1.values().at(i)) ;
-            }
-            out << "\nRegression on chip data for robot " << robotID1 << "\n";
-            for(int i=0; i<40; i++){
-                out << QString("%1 , %2\n").arg(i).arg(knowledge->getProfile(robotID1, i/10.0, false, false));
-            }
+            // chip
+//            out << "\nFinal chip data collected for robot " << robotID1 << "\n";
+//            for(int i=0; i<chip1.keys().size(); i++){
+//                out << QString("%1   ,   %2\n").arg(chip1.keys().at(i)).arg(chip1.values().at(i)) ;
+//            }
+//            out << "\nRegression on chip data for robot " << robotID1 << "\n";
+//            for(int i=0; i<40; i++){
+//                out << QString("%1 , %2\n").arg(i).arg(knowledge->getProfile(robotID1, i/10.0, false, false));
+//            }
         }
 
 //        out << "\nFinal kick data collected for robot " << robotID2 << "\n";
