@@ -2369,7 +2369,7 @@ bool DefensePlan::defenseClearOrNot(){
             && !isBallGoingToOppArea()){
         defenseClearIndex = lastClearID;
         if(knowledge->goalie != NULL){
-            for(int i = 0; i < wm->our.activeAgentsCount(); i++){
+            for(int i = 0; i < min(wm->our.activeAgentsCount() , defenseAgents.count()); i++){
                 if(defenseAgents[defenseClearIndex]->id() && false != wm->our.active(i)->id && wm->our.active(i)->id != knowledge->goalie->id()){
                     if(defenseAgents[defenseClearIndex]->distToBall().length() - wm->our.active(i)->pos.dist(ballPos) > 0.3
                             || defenseAgents[defenseClearIndex]->distToBall().length() > 1.5 + defClearThr){
@@ -3626,34 +3626,31 @@ Vector2D DefensePlan::findBestPointForChipTarget(double &chipDist,bool isGoalie)
 //////////////////////////////////////////////////////////////////////////////
 
 QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2D> oppposdanger){
-    double danger;
+    double danger = 0;
     /////////////// Polygon
     double radius = .1;
-    double treshold = 0.5;
+    double treshold = 2;
 
     Vector2D sol1,sol2,sol3;
     Vector2D _pos1 = wm->ball->pos;
 
-    Vector2D _pos2 = wm->ball->pos + (3  * wm->ball->vel.norm() * knowledge->getRealBallVel());
+    Vector2D _pos2 = wm->ball->pos + (2 * wm->ball->vel.norm() * knowledge->getRealBallVel());
     Line2D _path(_pos1,_pos2);
     Polygon2D _poly;
     Circle2D(_pos2,radius + treshold).
-            intersection(_path.perpendicular(_pos2),&sol1,&sol2);
+            intersection(_path.perpendicular(_pos2), &sol1, &sol2);
 
-
-    _poly.addVertex(sol1);
     sol3 = sol1;
+    _poly.addVertex(sol1);
+    //sol3 = sol1;
     _poly.addVertex(sol2);
-    Circle2D(_pos1,CRobot::robot_radius_new + treshold).
-            intersection(_path.perpendicular(_pos1),&sol1,&sol2);
-
+    Circle2D(_pos1,CRobot::robot_radius_new).
+    intersection(_path.perpendicular(_pos1),&sol1,&sol2);
     _poly.addVertex(sol2);
     _poly.addVertex(sol1);
     _poly.addVertex(sol3);
 
     draw(_poly,"cyan");
-
-
 
     double KAP = 1; //Angle parameter
     double KDBP = 1; //distancetoball
@@ -3665,9 +3662,9 @@ QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2
 
 
     double RangeofAngleP = 90;
+    double RangeofdistanceToIntersectP =  radius + treshold;
     double RangeofdistanceToBallProjectionP = Segment2D(Vector2D(-1.0 * _FIELD_WIDTH / 2, -1.0 * _FIELD_HEIGHT /2 ), Vector2D(_FIELD_WIDTH / 2 , _FIELD_HEIGHT / 2)).length();
-    double RangeofdistanceToIntersectP =  radius;
-    double danger2;
+    double danger2 = 0;
 
 
     /////////////////////
@@ -3685,14 +3682,14 @@ QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2
     double RangeofDistancetoGoal = fabs(Segment2D(Vector2D(_FIELD_WIDTH/2,_FIELD_HEIGHT /2), wm->field->ourGoal()).length());
 
     //double RangeofTempDis = 2;
-    double angle, distancetoball, distancetogoal,danger1;
+    double angle, distancetoball, distancetogoal,danger1  = 0;
 
 
     QPair<Vector2D, double> temp;
     QList<QPair<Vector2D, double> > output;
-    double Polycontain;
+    double Polycontain = 0;
     for(int i = 0; i<oppposdanger.count(); i++) {
-        if(Polycontain == _poly.contains(oppposdanger[i]))
+        if(_poly.contains(oppposdanger[i]))
         {
             Polycontain = 1;
         }
@@ -3711,7 +3708,7 @@ QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2
 
         AngleP = Vector2D::angleOf( oppposdanger[i], wm->ball->pos, _path.projection(oppposdanger[i]) ).degree();
         distanceToIntersectP = _path.dist(oppposdanger[i]); //distanse of opponent to the path
-        distanceToBallProjectionP = _path.projection(oppposdanger[i]).length(); //distance of the ball to the projection of opponent to the path
+        distanceToBallProjectionP = (wm->ball->pos - _path.projection(oppposdanger[i])).length(); //distance of the ball to the projection of opponent to the path
 
         danger1 = (KA * fabs(angle) / RangeofAngle) + ( KDB *( 1 - (distancetoball / RangeofDistancetoBall)) ) + (KDG * (1 -(distancetogoal / RangeofDistancetoGoal)));
         danger2 = KAP * ( 1 - AngleP/RangeofAngleP) + KDBP * (1 - distanceToBallProjectionP/RangeofdistanceToBallProjectionP ) + KDIP * (1 - distanceToIntersectP / RangeofdistanceToIntersectP);
@@ -3720,7 +3717,7 @@ QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2
         if( knowledge->getRealBallVel() < .1)
             danger = danger1;
         else
-            danger = 8* Polycontain * danger2 + danger1;
+            danger = 100.0 * Polycontain + fabs(danger2) + fabs(danger1);
 
         temp.second = danger;
         output.append(temp);
