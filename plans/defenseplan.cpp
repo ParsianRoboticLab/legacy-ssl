@@ -118,7 +118,7 @@ void DefensePlan::correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPos
         }
     }
     ////////////////////////////////////////////////////////////////////////////
-    for(int i = 0 ; i < min(stuckIndexs.size(),stuckPositions.size()) ; i++){
+    for(int i = 0 ; i < stuckPositions.size() && i < stuckIndexs.size() && i < solvedPosition.size() ; i++){
         for(int j = 0 ; j < stuckIndexs.size() ; j++){
             if(stuckIndexs.at(i) == stuckIndexs.at(j) && i != j){
                 isRepeated = true;
@@ -242,7 +242,7 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
     markPoses.clear();
     markAngs.clear();
     markRoles.clear();
-    /////////////////// Intelligent mark plan ///////////////////////////////        
+    /////////////////// Intelligent mark plan ///////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     debug(QString("Mark Agents Count : %1").arg(ourMarkAgentsSize) , D_SEPEHR , QColor(Qt::red));
     ///////// Make Cirlcles around opponent agents /////////////////////////////
@@ -817,7 +817,7 @@ void DefensePlan::setGoalKeeperTargetPoint(){
             return;
         }
         if(stopMode){
-            lastStateForGoalKeeper = QString("no");            
+            lastStateForGoalKeeper = QString("no");
             dangerForGoalKeeperClear = false;
             debug(QString("Stop Mode"),D_SEPEHR);
             ballPos = wm->ball->pos;
@@ -1141,7 +1141,7 @@ DefensePlan::DefensePlan()
     markRadius = 1.6;
     markRadiusStrict = 1.39;
     segmentpershoot = policy()->Mark_ShootRatioBlock() / 100.0;
-    segmentperpass = (100  - policy()->Mark_PassRatioBlock()) / 100.0;    
+    segmentperpass = (100  - policy()->Mark_PassRatioBlock()) / 100.0;
     dir  = Vector2D(1,0);
     MantoManAllTransientFlag =  policy()->Mark_ManToManAllTransiant();
     predictThresh = 0;
@@ -1165,10 +1165,10 @@ DefensePlan::DefensePlan()
     secondDefenseKickLine = 0;
     goalieKickThreshold = 70;
     /////////// AHZ //////////////
-    lastMarkRoles.append(markRoles);    
-    goalKeeperTarget = Vector2D(0,0);    
+    lastMarkRoles.append(markRoles);
+    goalKeeperTarget = Vector2D(0,0);
     dangerModeThresholdForClear = 0;
-    dangerModeThresholdForDanger = 0;        
+    dangerModeThresholdForDanger = 0;
     /////////////// For Adding TS Mode in Mark ///////////////////////////////
     xLimitForblockingPass = 0;
     manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
@@ -1328,7 +1328,7 @@ void DefensePlan::matchingDefPos(int _defenseNum){
     ////////////////////////////////////////////////////////////////////////////
     knowledge->Matching(ourAgents,matchPoints,matchResult);
     debug(QString("defenseAHZ : %1 ").arg(defenseAgents.size()) , D_AHZ);
-    for(int i = 0; i < defenseCount ; i++){
+    for(int i = 0 ; i < defenseCount && i < matchPoints.size(); i++){
         defensePoints[i] = matchPoints[i];
     }
     for(int i = 0 ; i < matchPoints.count() && i < matchResult.count() ; i++){
@@ -1378,6 +1378,7 @@ void DefensePlan::matchingDefPos(int _defenseNum){
         }
     }
 }
+
 void DefensePlan::execute(){
     ///// All of the goalKeeper && defense functions are linked in this function.
     ///// First of all, we determine the behavior of goalKeeper.
@@ -1864,7 +1865,7 @@ void DefensePlan::executeGoalKeeper(){
     playOnMode = knowledge->isStart();
     stopMode = knowledge->isStop();
     QList<Vector2D> tempSol;
-    tempSol.clear();    
+    tempSol.clear();
     if(goalKeeperAgent != NULL){
         debug(QString("goalKeeper clear mode : %1").arg(knowledge->goalKeeperClearMode) , D_AHZ);
         debug(QString("goalKeeper oneTouch mode : %1").arg(knowledge->goalKeeperOneTouchMode) , D_AHZ);
