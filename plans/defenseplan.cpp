@@ -1311,6 +1311,7 @@ void DefensePlan::matchingDefPos(int _defenseNum){
                 gpa[ourAgents[i]->id()]->setBallObstacleRadius(0.5);
             }
             else if(stopMode){
+                gpa[ourAgents[i]->id()]->setNoAvoid(false);
                 gpa[ourAgents[i]->id()]->setSlowMode(true);
                 gpa[ourAgents[i]->id()]->setADiveMode(false);
             }
