@@ -96,7 +96,7 @@ protected:
     bool dangerModeThresholdForClear;
     bool dangerModeThresholdForDanger;    
     bool manToManMarkBlockPassFlag;    
-    bool goalKeeperPredictionModeInPlayOff;
+    bool goalKeeperPredictionModeInPlayOff;    
     QString lastStateForMark;
     QString lastStateForGoalKeeper;
     QString stateForMark;    
@@ -104,6 +104,7 @@ protected:
     QList <QString> lastMarkRoles;
     QList <Vector2D> lastOppNearestToBallDirections;
     Vector2D opponentPasserDirection;
+    Vector2D globalFinalDirection;
     Vector2D tempBallRectanglePoint;
     Vector2D oppNearestToBallPossition;
     Vector2D sumOfLastOpponentDirections;

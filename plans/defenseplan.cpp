@@ -39,6 +39,9 @@ Vector2D DefensePlan::getOppNearestToBallDirInTheirIndirectMode(int lastDirectio
             finalOppNearestToBallDirection = sumOfLastOpponentDirections / lastDirectionSize;
         }
     }
+    if(finalDirection.isValid()){
+        globalFinalDirection = finalDirection;
+    }
     return finalDirection;
 }
 
@@ -260,6 +263,7 @@ void DefensePlan::manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsT
     markRoles.clear();
     /////////////////// Intelligent mark plan ///////////////////////////////
     LastTS = knowledge->transientFlag;
+    draw(Segment2D(wm->opp[knowledge->nearestOppToBall]->pos , wm->opp[knowledge->nearestOppToBall]->pos + globalFinalDirection*10));
     ////////////////////////////////////////////////////////////////////////////
     debug(QString("Mark Agents Count : %1").arg(ourMarkAgentsSize) , D_SEPEHR , QColor(Qt::red));
     ///////// Make Cirlcles around opponent agents /////////////////////////////
