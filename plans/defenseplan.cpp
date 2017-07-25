@@ -1383,30 +1383,29 @@ void DefensePlan::matchingDefPos(int _defenseNum){
             gpa[ourAgents[i]->id()]->setAvoidPenaltyArea(false);
             gpa[ourAgents[i]->id()]->setAvoidBall(false);
             gpa[ourAgents[i]->id()]->setBallObstacleRadius(0);
-            if(knowledge->getGameState() == CKnowledge::TheirIndirectKick){
-                gpa[ourAgents[i]->id()]->setNoAvoid(false);
-                gpa[ourAgents[i]->id()]->setSlowMode(false);
-                gpa[ourAgents[i]->id()]->setAvoidPenaltyArea(false);
-                gpa[ourAgents[i]->id()]->setAvoidBall(true);
-                gpa[ourAgents[i]->id()]->setBallObstacleRadius(0.5);
-            }
-            else if(stopMode){
-                gpa[ourAgents[i]->id()]->setNoAvoid(false);
-                gpa[ourAgents[i]->id()]->setSlowMode(true);
-                gpa[ourAgents[i]->id()]->setADiveMode(false);
-            }
-            //////////// Go To Point Avoid for defense agents //////////////////
-            if(i < _defenseNum){
-                gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , matchPoints[matchResult[i]] - wm->field->ourGoal());
-            }
-            ///////// Go To Point Avoid for mark agents ////////////////////
-            else{
-                gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , markAngs.at(i - _defenseNum));
-            }
+        }
+        if(knowledge->getGameState() == CKnowledge::TheirIndirectKick){
+            gpa[ourAgents[i]->id()]->setNoAvoid(false);
+            gpa[ourAgents[i]->id()]->setSlowMode(false);
+            gpa[ourAgents[i]->id()]->setAvoidPenaltyArea(false);
+            gpa[ourAgents[i]->id()]->setAvoidBall(true);
+            gpa[ourAgents[i]->id()]->setBallObstacleRadius(0.5);
+        }
+        else if(stopMode){
+            gpa[ourAgents[i]->id()]->setNoAvoid(false);
+            gpa[ourAgents[i]->id()]->setSlowMode(true);
+            gpa[ourAgents[i]->id()]->setADiveMode(false);
+        }
+        //////////// Go To Point Avoid for defense agents //////////////////
+        if(i < _defenseNum){
+            gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , matchPoints[matchResult[i]] - wm->field->ourGoal());
+        }
+        ///////// Go To Point Avoid for mark agents ////////////////////
+        else{
+            gpa[ourAgents[i]->id()]->init(matchPoints[matchResult[i]] , markAngs.at(i - _defenseNum));
         }
     }
 }
-
 void DefensePlan::execute(){
     ///// All of the goalKeeper && defense functions are linked in this function.
     ///// First of all, we determine the behavior of goalKeeper.
@@ -3709,7 +3708,7 @@ QList<QPair<Vector2D, double> > DefensePlan::sortdangerpassplayoff(QList<Vector2
     //sol3 = sol1;
     _poly.addVertex(sol2);
     Circle2D(_pos1,CRobot::robot_radius_new).
-    intersection(_path.perpendicular(_pos1),&sol1,&sol2);
+            intersection(_path.perpendicular(_pos1),&sol1,&sol2);
     _poly.addVertex(sol2);
     _poly.addVertex(sol1);
     _poly.addVertex(sol3);
