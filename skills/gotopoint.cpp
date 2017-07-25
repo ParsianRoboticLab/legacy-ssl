@@ -1189,7 +1189,7 @@ double CSkillGotoPointAvoid::timeNeeded(CAgent *_agentT,Vector2D posT,double vMa
     Vector2D tAgentVel = _agentT->vel();
     Vector2D tAgentDir = _agentT->dir();
     double veltan= (tAgentVel.x)*cos(tAgentDir.th().radian()) + (tAgentVel.y)*sin(tAgentDir.th().radian());
-    double offset = 0.15;
+    double offset = 0;
     double velnorm= -1 * (tAgentVel.x)*sin(tAgentDir.th().radian()) + (tAgentVel.y)*cos(tAgentDir.th().radian());
     double distCoef = 1, distEffect = 1, angCoef = 0.003;
     double dist = 0;
@@ -1234,27 +1234,35 @@ double CSkillGotoPointAvoid::timeNeeded(CAgent *_agentT,Vector2D posT,double vMa
         acc = conf()->BangBang_AccMaxForward()*(fabs(veltan)/tAgentVel.length()) + conf()->BangBang_AccMaxNormal()*(fabs(velnorm)/tAgentVel.length());
     }
 
+
+
     double vMaxReal = sqrt(((_agentT->pos().dist(posT) + (tAgentVel.length()*tAgentVel.length()/2*acc))*2*acc*dec)/(acc+dec));
     vMaxReal = min(vMaxReal, 4);
     vMax = min(vMax, vMaxReal);
-    xSat = ((vMax*vMax)-(tAgentVel.length()*tAgentVel.length()))/acc + (vMax*vMax)/dec;
+    xSat = sqrt(((vMax*vMax)-(tAgentVel.length()*tAgentVel.length()))/acc) + sqrt((vMax*vMax)/dec);
     _x3 = ( -1* tAgentVel.length()*tAgentVel.length()) / (-2 * fabs(conf()->BangBang_DecMax())) ;
+    debug(QString("x sat: %1").arg(xSat),D_MHMMD);
 
     if(_agentT->pos().dist(posT) < _x3 ) {
         return max(0,(tAgentVel.length()/conf()->BangBang_DecMax() - offset) * distEffect);
     }
     else if(tAgentVel.length() < (vMax)){
-        if(_agentT->pos().dist(posT) < xSat)
+        if(_agentT->pos().dist(posT) > xSat)
         {
+            debug("1",D_MHMMD);
             return max(0, (-1*offset + vMax/dec + (vMax-tAgentVel.length())/acc + (_agentT->pos().dist(posT) - ((vMax*vMax/(2*dec)) + ((vMax+tAgentVel.length())*(vMax-tAgentVel.length())/acc))/2)/vMax) * distEffect);
         }
         else
         {
+            debug("2",D_MHMMD);
+
             return max(0, (vMax/dec + (vMax-tAgentVel.length())/acc - offset)*distEffect);
         }
     }
     else
     {
+        debug("3",D_MHMMD);
+
         return max(0,(vMax/dec + (_agentT->pos().dist(posT) - ((vMax*vMax/(2*dec)) ))/vMax - offset) * distEffect);
     }
 
