@@ -180,6 +180,9 @@ CKnowledge::CKnowledge(CAgent** _agents)
         KickCoeff.append(ProRes.PolynomialRegression(values , keys, 2));
     }
 
+    for(int i=0; i<KickCoeff.last().size(); i++){
+        debug(QString("coeff: %1").arg(KickCoeff.last().at(i)), D_FATEMEH);
+    }
     for(int q=0; q<16; q++){
         if(profiler->robotsProfile[q].finalKickMap.keys().size() > 0)
             if(KickCoeff.at(q).count()>2)
@@ -217,6 +220,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
             dataSet.append(p);
         }
 
+        debug(QString("data: %1 , %2").arg(profiler->robotsProfile[q].chipMap.size()).arg(values.count()), D_FATEMEH);
         ProRes.fitToDataSet(dataSet , 3);
         tempResult = ProRes.getCoefs();
         for(int i=0; i<tempResult.size(); i++){
@@ -225,9 +229,10 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
         ChipCoeff.append(coeffRes);
 
-        QString("coeff %5 : %1  , %2 , %3 , %4").arg(
+        debug(QString ("coeff %5 : %1  , %2 , %3 , %4").arg(
                     ChipCoeff.at(q).at(0)).arg(ChipCoeff.at(q).at(1)).arg(
-                    ChipCoeff.at(q).at(2)).arg(ChipCoeff.at(q).at(3)).arg(q);
+                    ChipCoeff.at(q).at(2)).arg(ChipCoeff.at(q).at(3)).arg(q), D_FATEMEH);
+
     }
 
     for(int q=0; q<16; q++){
@@ -298,6 +303,7 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
 
         profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
 
+        debug(QString("raw daat: %1").arg(profiledParameter), D_FATEMEH);
         if(profiledParameter != -1000)
         {
             if(profiledParameter > 1023)
@@ -312,6 +318,7 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
         else // no data is saved for this robot
         {
             if(ProfilerResult[refRobotID][type][(int)round(realParameter*10)] != -1000){    // get data from reference robot
+                debug(QString("ref robot: %1").arg(refRobotID), D_FATEMEH);
                 profiledParameter= RobotsCoeff[agentId][type] * knowledge->getProfile(refRobotID , realParameter , isKick , spinOn);
             }
             else{   // Linear
@@ -335,6 +342,7 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
     {
         profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
 
+        debug(QString("raw daat kick: %1").arg(profiledParameter), D_FATEMEH);
         if(realParameter > 8.0)
             return RobotsCoeff[agentId][0];
 
