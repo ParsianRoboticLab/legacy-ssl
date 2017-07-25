@@ -977,7 +977,7 @@ void CPlayOff::firstPlayForOppCorner(int _agentSize) {
             blockerStep==S3;
 
         if (finisher == _agentSize-1) {
-            if (firstStepEnums == Stay && blockerStep=S3) firstStepEnums = Done;
+            if (firstStepEnums == Stay && blockerStep==S3) firstStepEnums = Done;
             else firstStepEnums = Done;
         }
         else if(newRoleAgent[0]->getTarget().dist(newRoleAgent[0]->getAgent()->pos()) < 0.1
