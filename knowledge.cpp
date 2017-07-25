@@ -23,7 +23,10 @@ CKnowledge::CKnowledge(CAgent** _agents)
     kPlans = NULL;
     ssize = 0;
     mixGoaleID = 0;
-
+    ///////////////////////////// AHZ //////////////////////////////////////////
+    sumOfLastOpponentDirections = Vector2D(0,0);
+    sumOfLastOpponentPosition = Vector2D(0,0);
+    ////////////////////////////////////////////////////////////////////////////
     //ABBAS
     refShortcuts = false;
     shirjeBlocking = false;
@@ -384,7 +387,45 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
 
 }
 
+///////////////////////////////// AHZ //////////////////////////////////////////
+bool CKnowledge::isStateGoingFromIndirectToTransient(){
+    if(LastTS != knowledge->transientFlag && LastTS == 0){
+        return 1;
+    }
+    LastTS = knowledge->transientFlag;
+    return 0;
+}
 
+
+Vector2D CKnowledge::getOppNearestToBallDirInTheirIndirectMode(int lastDirectionSize){
+    Vector2D finalDirection;
+    if(knowledge->isTheirNonPlayOnKick()){
+        oppNearestToBallPossition = wm->opp[knowledge->nearestOppToBall]->pos;
+        lastOppNearestToBallDirections.append(wm->opp[knowledge->nearestOppToBall]->dir);
+        if(lastOppNearestToBallDirections.size() > lastDirectionSize){
+            lastOppNearestToBallDirections.removeFirst();
+        }
+    }
+    if(isStateGoingFromIndirectToTransient()){
+        if(lastOppNearestToBallDirections.size() <= lastDirectionSize){
+            for(int i = lastOppNearestToBallDirections.size() - 1 ; i >= 0 ; i--){
+                sumOfLastOpponentDirections += lastOppNearestToBallDirections.at(i);
+            }
+            finalOppNearestToBallDirection = sumOfLastOpponentDirections / lastOppNearestToBallDirections.size();
+        }
+        else{
+            for(int i = lastOppNearestToBallDirections.size() - 1 ; i > lastOppNearestToBallDirections.size() - lastDirectionSize - 1 ; i--){
+                sumOfLastOpponentDirections += lastOppNearestToBallDirections.at(i);
+            }
+            finalOppNearestToBallDirection = sumOfLastOpponentDirections / lastDirectionSize;
+        }
+    }
+    if(finalDirection.isValid()){
+        AHZOppNearestToBallDirection = finalDirection;
+    }
+    return finalDirection;
+}
+////////////////////////////////////////////////////////////////////////////////
 double CKnowledge::chipGoalPropability(bool isOurChip){
     double GoalDistanceToBall;
     double GoalieDistanseToBall;

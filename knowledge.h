@@ -221,10 +221,19 @@ public:
     QString stateForMark;
     QString lastStateForMark;
     Vector2D getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion);
-    bool defenseOneTouchMode;
+    Vector2D getOppNearestToBallDirInTheirIndirectMode(int lastDirectionSize);
+    Vector2D AHZOppNearestToBallDirection;
+    Vector2D oppNearestToBallPossition;
+    Vector2D sumOfLastOpponentDirections;
+    Vector2D sumOfLastOpponentPosition;
+    Vector2D finalOppNearestToBallDirection;
+    QList <Vector2D> lastOppNearestToBallDirections;
+    bool isStateGoingFromIndirectToTransient();
+    bool defenseOneTouchMode;    
     bool goalKeeperOneTouchMode;
     bool defenseClearMode;
     bool goalKeeperClearMode;
+    bool LastTS;
     //////////////////////////////// end of AHZ
     QList<int> oppBlockers;
     QString stateToString(State s);
