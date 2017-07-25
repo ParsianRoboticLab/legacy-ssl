@@ -3060,7 +3060,7 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
     //// This function produces a point that block the pass path.Also if the
     //// resulted point is in the penalty area, this function geneates a suitable
     //// point.
-
+    bool playOff;
     Segment2D tempSeg;
     QList<Vector2D> tempQlist;
     tempQlist.clear();
@@ -3076,30 +3076,32 @@ QList<Vector2D> DefensePlan::PassBlockRatio(double ratio, Vector2D opp){
     Segment2D posToGoal;
     posToGoal.assign(pos,wm->field->ourGoal());
     debug(QString("Dist %1").arg(distance), D_HAMED);
-    if(distance > 1){
-        if((pos - wm->ball->pos).length() > 0.7){
-            debug(QString("First"),D_HAMED);
-        }else{
-            debug(QString("second"),D_HAMED);
-            pos = wm->ball->pos + (opp - wm->ball->pos).norm() * 0.7;
-        }
-    }
-    else{
-        debug(QString("Third"),D_HAMED);
-        Vector2D oppAng;
-        oppAng.setLength(opp.length());
-        oppAng.setDir(opp.dir() + 0.2);
-        if(!isInTheIndirectAreaShoot(opp)){
-            tempQlist.append(ShootBlockRatio(0.3, opp).first());
-            tempQlist.append(ShootBlockRatio(0.3, opp).last());
+    if(knowledge->isTheirNonPlayOnKick() || knowledge->getGameState() == CKnowledge::Stop)
+    {
+        if(distance > 1){
+            if((pos - wm->ball->pos).length() > 0.7){
+                debug(QString("First"),D_HAMED);
+            }else{
+                debug(QString("second"),D_HAMED);
+                pos = wm->ball->pos + (opp - wm->ball->pos).norm() * 0.7;
+            }
         }
         else{
-            tempQlist.append(indirectAvoidShoot(opp).first());
-            tempQlist.append(indirectAvoidShoot(opp).last());
+            debug(QString("Third"),D_HAMED);
+            Vector2D oppAng;
+            oppAng.setLength(opp.length());
+            oppAng.setDir(opp.dir() + 0.2);
+            if(!isInTheIndirectAreaShoot(opp)){
+                tempQlist.append(ShootBlockRatio(0.3, opp).first());
+                tempQlist.append(ShootBlockRatio(0.3, opp).last());
+            }
+            else{
+                tempQlist.append(indirectAvoidShoot(opp).first());
+                tempQlist.append(indirectAvoidShoot(opp).last());
+            }
+            return tempQlist;
         }
-        return tempQlist;
     }
-
     if(!wm->field->AHZOurPAreaIntersectForMark(isInPenaltyArea).isEmpty()){
         tempVec.append(wm->field->AHZOurPAreaIntersectForMark(tempSeg));
         if(tempVec.size() == 1)
