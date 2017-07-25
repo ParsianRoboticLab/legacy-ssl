@@ -63,7 +63,7 @@ protected:
     ////////////////////////////// AHZ ///////////////////    
     Line2D getBisectorLine(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
     Segment2D getBisectorSegment(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
-    Segment2D getOppNearestToBallDirInTheirIndirectMode(int lastDirectionSize);
+    Vector2D getOppNearestToBallDirInTheirIndirectMode(int lastDirectionSize);
     void manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkBlockShotInPlayOff(int _markAgentSize);
     void agentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs);
@@ -76,10 +76,12 @@ protected:
     double goalieThr;
     ////////
     int angleDegreeThrNotStop = 0;
+    double besideCounter;
     int lastOpponentAgentsToBeMarkSize;
     double threshOld = 0.0;
     double ballCircleR = 0.5;
-    double xLimitForblockingPass;    
+    double xLimitForblockingPass;
+    bool isPermissionToKick;
     bool isCrowdedInFrontOfPenaltyAreaByOurAgents;
     bool isCrowdedInFrontOfPenaltyAreaByOppAgents;
     bool ballISInpenaltyAreaAndDangerCircle;
@@ -96,11 +98,13 @@ protected:
     bool manToManMarkBlockPassFlag;    
     bool goalKeeperPredictionModeInPlayOff;
     QString lastStateForMark;
+    QString lastStateForGoalKeeper;
     QString stateForMark;    
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;
     QList <Vector2D> lastOppNearestToBallDirections;
     Vector2D opponentPasserDirection;
+    Vector2D tempBallRectanglePoint;
     Vector2D oppNearestToBallPossition;
     Vector2D sumOfLastOpponentDirections;
     Vector2D tempAHZ;
