@@ -162,6 +162,9 @@ public:
     bool ready = false;
     QList<CAgent*> activesInField;
     int mixGoaleID;
+    QList<int> ourAgentIDsMixTeam;
+
+    void getOurRobotIDsFromGUIMixTeam();
 
 
 

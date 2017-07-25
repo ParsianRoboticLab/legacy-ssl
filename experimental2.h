@@ -19,6 +19,7 @@ enum PenaltyState{
     KICK_CHIP = 2
 };
 
+#define PI 3.141592
 
 int countt = 0;
 Vector2D lastBallPos = Vector2D(0,0);
@@ -26,6 +27,23 @@ bool start = true;
 void CMainApplication::Experimental2()
 {
 
+    static CRolePlayOff *robot = new CRolePlayOff();
+    robot->setAgent(knowledge->getAgent(0));
+    robot->setSelectedSkill(roleSkill::ReceivePass);
+    robot->setTarget(wm->ball->pos + wm->ball->vel);
+    draw(Circle2D(wm->ball->pos + wm->ball->vel, 0.1), "cyan");
+    robot->setAvoidPenaltyArea(true);
+    robot->setReceiveRadius(0.4);
+    robot->execute();
+
+    return;
+    Vector2D vec(-1,0);
+//    qDebug() << "angle : " << vec.angleWith(Vector2D(1,1)).degree();
+    debug(QString("degree : %1").arg(vec.angleWith(Vector2D(0,0)).radian()), D_ATOUSA);
+    vec.dirTo_deg(vec, Vector2D(0,0));
+    debug(QString("degree1 : %1").arg(vec.dirTo_deg(Vector2D(-1,7), vec)), D_ATOUSA);
+
+    return;
     double xp = 0.5;
 
     Vector2D point1(4,-2.5);

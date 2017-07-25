@@ -61,7 +61,7 @@ void MixTeamReader::readyRead()
         qDebug() << "ERROR";
         return;
     }
-    qDebug() << "plan size:" << knowledge->kPlans->plans_size();
+//    qDebug() << "plan size:" << knowledge->kPlans->plans_size();
 
     knowledge->ssize = knowledge->kPlans->plans_size();
     knowledge->ready = true;

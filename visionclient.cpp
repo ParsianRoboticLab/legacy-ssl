@@ -73,8 +73,6 @@ for (int i=0;i<packet.detection().robots_##__COLOR__##_size();i++) \
 
 void CVisionClient::parse(SSL_WrapperPacket& packet)
 {
-
-
     //lastCamera = -1;
     float ourTeamSide=(ourSide==_SIDE_RIGHT)? -1.0f : 1.0f;
     if (packet.has_detection())
@@ -82,17 +80,28 @@ void CVisionClient::parse(SSL_WrapperPacket& packet)
         if(!conf()->BallTracker_cam1on()){
                 if (packet.detection().camera_id()==0) return;
         }
-
         if(!conf()->BallTracker_cam2on()){
                 if (packet.detection().camera_id()==1) return;
         }
         if(!conf()->BallTracker_cam3on()){
                 if (packet.detection().camera_id()==2) return;
         }
-
         if(!conf()->BallTracker_cam4on()){
                 if (packet.detection().camera_id()==3) return;
         }
+        if(!conf()->BallTracker_cam5on()){
+                if (packet.detection().camera_id()==4) return;
+        }
+        if(!conf()->BallTracker_cam6on()){
+                if (packet.detection().camera_id()==5) return;
+        }
+        if(!conf()->BallTracker_cam7on()){
+                if (packet.detection().camera_id()==6) return;
+        }
+        if(!conf()->BallTracker_cam8on()){
+                if (packet.detection().camera_id()==7) return;
+        }
+
         frameCnt ++;
         int id = packet.detection().camera_id();
         lastCamera = id;
@@ -192,16 +201,26 @@ void CVisionClient::countActiveCameras()
     if(!conf()->BallTracker_cam1on()){
         v[0].updated = false;
     }
-
     if(!conf()->BallTracker_cam2on()){
         v[1].updated = false;
     }
     if(!conf()->BallTracker_cam3on()){
         v[2].updated = false;
     }
-
     if(!conf()->BallTracker_cam4on()){
         v[3].updated = false;
+    }
+    if(!conf()->BallTracker_cam5on()){
+        v[4].updated = false;
+    }
+    if(!conf()->BallTracker_cam6on()){
+        v[5].updated = false;
+    }
+    if(!conf()->BallTracker_cam7on()){
+        v[6].updated = false;
+    }
+    if(!conf()->BallTracker_cam8on()){
+        v[7].updated = false;
     }
     int now = vcTimer->elapsed();
     for (int i=0;i<CAMERA_NUM;i++)

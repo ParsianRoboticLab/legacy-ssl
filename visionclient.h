@@ -12,8 +12,8 @@
 #include "movingobject.h"
 
 
-
-#define CAMERA_NUM 4
+//in
+#define CAMERA_NUM 8
 #define OUT_OF_SIGHT_THRESHOLD 40
 
 class QTime;
