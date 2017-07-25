@@ -67,10 +67,11 @@ protected:
     void manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkBlockShotInPlayOff(int _markAgentSize);
     void agentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs);
+    bool isPermissionTargetToChip(Vector2D aPoint);
     bool isAgentsStuckTogether(QList<Vector2D> agentsPosition);
     bool isStateGoingFromIndirectToTransient();
+    bool isInIndirectArea(Vector2D);
     void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs);    
-    bool isInIndirectArea(Vector2D);    
     //atousa
     Vector2D getGoaliePositionInOneDef(Vector2D _ballPos, double _limit1, double _limit2);
     double goalieThr;
@@ -96,7 +97,7 @@ protected:
     bool dangerModeThresholdForClear;
     bool dangerModeThresholdForDanger;    
     bool manToManMarkBlockPassFlag;    
-    bool goalKeeperPredictionModeInPlayOff;        
+    bool goalKeeperPredictionModeInPlayOff;
     QString lastStateForGoalKeeper;
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;

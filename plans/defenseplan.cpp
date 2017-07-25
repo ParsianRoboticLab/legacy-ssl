@@ -8,6 +8,22 @@ using namespace std;
 #define LONG_CHIP_POWER 1023
 
 ///////////////// AHZ is writing, have you my voice? ... ;) //////////////////
+bool DefensePlan::isPermissionTargetToChip(Vector2D aPoint){
+    Vector2D tempIntersection0;
+    Vector2D tempIntersection1;
+    for(int i = 0 ; i < wm->our.activeAgentsCount() ; i++){
+        if(Circle2D(wm->our.active(i)->pos , 0.2).intersection(Segment2D(knowledge->goalie->pos() , aPoint) , &tempIntersection0 , &tempIntersection1)){
+            return false;
+        }
+    }
+    for(int i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
+        if(Circle2D(wm->opp.active(i)->pos , 0.2).intersection(Segment2D(knowledge->goalie->pos() , aPoint) , &tempIntersection0 , &tempIntersection1)){
+            return false;
+        }
+    }
+    return true;
+}
+
 bool DefensePlan::isStateGoingFromIndirectToTransient(){
     if(LastTS != knowledge->transientFlag && LastTS == 0){
         return 1;
