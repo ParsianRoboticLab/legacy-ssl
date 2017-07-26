@@ -93,6 +93,9 @@ public:
     void executeOurPenaltyShootout();
     void theirPenaltyPositioning();
     int choosePenaltyStrategy();
+    void ShootoutSwitching(bool isChip);
+    void firstKickInShootout(bool isChip);
+    void kickInitialShootout();
     int getPenaltychipSpeed();
     double lastBounce();
     bool ShootPenalty();

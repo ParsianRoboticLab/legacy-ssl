@@ -797,7 +797,13 @@ void CPlayOff::firstExecute() {
     if (knowledge->getGameState() == CKnowledge::OurKickOff) {
         //        kickOffStopModePlay(masterPlan->common.currentSize);
     } else {
-        firstPlayForOppCorner(agentsID.size());
+        if (wm->ball->pos.x > _FIELD_WIDTH/2) {
+            firstPlayForOppCorner(agentsID.size());
+        } else if (wm->ball->pos.x < -_FIELD_WIDTH/2) {
+            firstPlayForOurCorner(agentsID.size());
+        } else {
+            firstPlayForMidField(agentsID.size());
+        }
     }
 
     // TODO : a function that calculate opponent mark streategy :D
@@ -955,6 +961,113 @@ void CPlayOff::firstPlayForOppCorner(int _agentSize) {
         if (firstStepEnums == Move1) firstStepEnums = Move2;
     }
 
+}
+
+void CPlayOff::firstPlayForMidField(int _agentSize) {
+    // TODO : fix this for our corner, I just copy opp corner
+
+    debug(QString("mode :%1").arg(firstStepEnums),D_NADIA);
+    for (int i = 0; i < _agentSize; i++) {
+        if (newRoleAgent[i]->getRoleUpdate() == false) {
+            newRoleAgent[i]->setUpdated(true);
+            newRoleAgent[i]->setAgent(knowledge->getAgent(dynamicMatch[i]));
+            newRoleAgent[i]->setRoleUpdate(true);
+            newRoleAgent[i]->setAvoidBall(true);
+            newRoleAgent[i]->setAvoidPenaltyArea(true);
+            newRoleAgent[i]->setSelectedSkill(roleSkill::GotopointAvoid);
+
+        }
+    }
+
+    switch(firstStepEnums) {
+    case Stay:
+        stayPoistioning();
+        break;
+    case Move1:
+        move1Positioning();
+        break;
+    case Move2:
+        move2Positioning();
+        break;
+    case Done:
+        donePositioning();
+        break;
+    default:
+        break;
+    }
+
+    int finisher = 0;
+    for (int i = 0; i < _agentSize; i++) {
+        if (newRoleAgent[i]->getTarget().dist(newRoleAgent[i]->getAgent()->pos()) < 0.4) {
+            finisher++;
+        }
+    }
+    if(!policy()->PlayOff_UseBlockBlocker() && firstStepEnums==Move1)
+        firstStepEnums==Move2;
+
+    if (finisher == _agentSize) {
+        if (firstStepEnums == Stay) firstStepEnums = Move1;
+        else if(firstStepEnums==Move1);
+        else if (firstStepEnums == Move2) firstStepEnums = Done;
+        else firstStepEnums = Done;
+    }
+    else if(newRoleAgent[0]->getTarget().dist(newRoleAgent[0]->getAgent()->pos()) < 0.01
+            && finisher == _agentSize-2){
+        if (firstStepEnums == Move1) firstStepEnums = Move2;
+    }
+}
+
+void CPlayOff::firstPlayForOurCorner(int _agentSize) {
+        // TODO : fix this for our corner, I just copy opp corner
+    debug(QString("mode :%1").arg(firstStepEnums),D_NADIA);
+    for (int i = 0; i < _agentSize; i++) {
+        if (newRoleAgent[i]->getRoleUpdate() == false) {
+            newRoleAgent[i]->setUpdated(true);
+            newRoleAgent[i]->setAgent(knowledge->getAgent(dynamicMatch[i]));
+            newRoleAgent[i]->setRoleUpdate(true);
+            newRoleAgent[i]->setAvoidBall(true);
+            newRoleAgent[i]->setAvoidPenaltyArea(true);
+            newRoleAgent[i]->setSelectedSkill(roleSkill::GotopointAvoid);
+
+        }
+    }
+
+    switch(firstStepEnums) {
+    case Stay:
+        stayPoistioning();
+        break;
+    case Move1:
+        move1Positioning();
+        break;
+    case Move2:
+        move2Positioning();
+        break;
+    case Done:
+        donePositioning();
+        break;
+    default:
+        break;
+    }
+
+    int finisher = 0;
+    for (int i = 0; i < _agentSize; i++) {
+        if (newRoleAgent[i]->getTarget().dist(newRoleAgent[i]->getAgent()->pos()) < 0.4) {
+            finisher++;
+        }
+    }
+    if(!policy()->PlayOff_UseBlockBlocker() && firstStepEnums==Move1)
+        firstStepEnums==Move2;
+
+    if (finisher == _agentSize) {
+        if (firstStepEnums == Stay) firstStepEnums = Move1;
+        else if(firstStepEnums==Move1);
+        else if (firstStepEnums == Move2) firstStepEnums = Done;
+        else firstStepEnums = Done;
+    }
+    else if(newRoleAgent[0]->getTarget().dist(newRoleAgent[0]->getAgent()->pos()) < 0.01
+            && finisher == _agentSize-2){
+        if (firstStepEnums == Move1) firstStepEnums = Move2;
+    }
 }
 
 void CPlayOff::oneBehindBall() {

@@ -11,15 +11,16 @@ public:
     ////////////////////////////// AHZ ///////////////////
     Vector2D getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion);
     Line2D getBisectorLine(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
-    Segment2D getBisectorSegment(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
-    void manToManMarkInPlayOn(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
+    Segment2D getBisectorSegment(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);    
     void manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkInPlayOffBlockShot(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
+    bool isInIndirectArea(Vector2D aPoint);
     int angleDegreeThr = 0;
     int angleDegreeThrNotStop = 0;
     int angleDegreeThrNotStopAHZ = 0;
     QList <QString> markRoles;
     double ballCircleR = 0.5;
+    bool stopMode;
     ///////////////////////////////////////////////////
     ////Filtered Variables
     bool weOwnBall;
