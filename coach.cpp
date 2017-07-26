@@ -370,85 +370,82 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         preferedGoalieAgent = wm->our.data->goalieID;
     }
 
-//     handle stop
+    // handle stop
+    if (knowledge->isStop()) {
         if (wm->ball->pos.x < 0){
             preferedDefenseCounts = agentsCount - 1;
-        }
-        else if (wm->ball->pos.x > 1){
-    preferedDefenseCounts = policy() -> Formation_Defense();
-        }
 
-    if(!policy()->Formation_StrictFormation() || !knowledge->isStart()){
-        bool oppsAttack = false;
+        } else if (wm->ball->pos.x > 1) {
+            preferedDefenseCounts = policy() -> Formation_Defense();
 
-        for(int i = 0 ; i < wm->opp.activeAgentsCount() ; i++) {
-            if(wm->opp.active(i)->pos.x <= 0) oppsAttack = true;
         }
 
-        // TODO : should be fixed :)
-        if( knowledge->isStart() && transientFlag == false) {
-            if (agentsCount == 1) {
-                preferedDefenseCounts = 0; // just one playmake
-            } else if (agentsCount == 2) {
-                preferedDefenseCounts = 1; // one playmake and one defense
-            } else {
-                if (!oppsAttack || checkOverdef()) {
-                    preferedDefenseCounts = 1;
-                } else {
-                    preferedDefenseCounts = 2;
-                }
-            }
-
-
-
-        } else if( knowledge->isOurNonPlayOnKick()){
-            preferedDefenseCounts = 0;
-
-        } else if( knowledge->isTheirNonPlayOnKick() && knowledge->getGameState() != CKnowledge::TheirKickOff) {
-            preferedDefenseCounts = max(agentsCount - 1 - missMatchIds.count(), 0);
-        } else if (transientFlag
-                   &&  knowledge->getGameState() != CKnowledge::TheirKickOff) {
+    } else if (knowledge->isStart()) {
+        if (transientFlag) {
             if (trasientTimeOut.elapsed() > 1000 && !wm->field->isInOurPenaltyArea(wm->ball->pos)) {
                 preferedDefenseCounts = max(0, agentsCount - missMatchIds.count() - 1);
+
             } else {
                 preferedDefenseCounts = agentsCount - missMatchIds.count();
 
             }
-                   }
-        else if(!knowledge->isStop())
-        {
-            if(checkOverdef()){
-                preferedDefenseCounts = 1;
-            }
-            else{
-                preferedDefenseCounts = 2;
+
+        } else { // PLAYON
+            bool oppsAttack = false;
+
+            for(int i = 0 ; i < wm->opp.activeAgentsCount() ; i++) {
+                if(wm->opp.active(i)->pos.x <= 0) oppsAttack = true;
             }
 
+            if (agentsCount == 1) {
+                preferedDefenseCounts = 0; // just one playmake
+
+            } else if (agentsCount == 2) {
+                preferedDefenseCounts = 1; // one playmake and one defense
+
+            } else {
+                if (!oppsAttack || checkOverdef()) {
+                    preferedDefenseCounts = 1;
+
+                } else {
+                    preferedDefenseCounts = 2;
+
+                }
+
+            }
         }
+    } else if (knowledge->isOurNonPlayOnKick()) {
+        if (wm->ball->pos.x < -1)  {
+            preferedDefenseCounts = 0;
+
+        } else if (wm->ball->pos.x > -.5) {
+            preferedDefenseCounts = 2;
+        }
+
+    } else if (knowledge->isTheirNonPlayOnKick()) {
+        if (knowledge->getGameState() == CKnowledge::TheirKickOff) {
+            preferedDefenseCounts = 2;
+        } else {
+            preferedDefenseCounts = max(agentsCount - missMatchIds.count() - 1, 0);
+        }
+    } else {
+        debug("UNKNOWN STATE", D_ERROR, QColor(Qt::red));
     }
 
-    if(knowledge->isOurNonPlayOnKick() && wm->ball->pos.x < -0.5){
-        preferedDefenseCounts = 2;
-    }
-    if(policy()->Formation_StrictFormation()){
-        preferedDefenseCounts = policy()->Formation_Defense();
-    }
-    if(agentsCount == 2){
-        preferedDefenseCounts = 2;
-    }
-    if(policy()->Formation_StrictFormation()){
-        preferedDefenseCounts = policy()->Formation_Defense();
-    }
-    lastPreferredDefenseCounts = preferedDefenseCounts;
+//    if(policy()->Formation_StrictFormation()) {
+//        preferedDefenseCounts = policy()->Formation_Defense();
+//    }
+
     if(knowledge->getGameState()== CKnowledge::HalfTimeLineUp){
         preferedGoalieAgent = -1;
         preferedDefenseCounts = 0;
     }
 
-    if (wm->gs->penalty_shootout())
+    if (wm->gs->penalty_shootout()) {
         preferedDefenseCounts = 0;
-    //    if (knowledge->getGameState() == CKnowledge::OurIndirectKick)
-    //        preferedGoalieAgent = -1;
+    }
+
+    lastPreferredDefenseCounts = preferedDefenseCounts;
 }
 
 void CCoach::calcDesiredMarkCounts()
@@ -1231,7 +1228,7 @@ void CCoach::updateAttackState()
         {
             double critL = critLenth;
             double critA = 90;
-//            if(lastASWasCritical == false)
+            //            if(lastASWasCritical == false)
             if(lastASWasCritical == false)
             {
                 critA += critAng;
@@ -1247,8 +1244,8 @@ void CCoach::updateAttackState()
                 robotCritArea.addVertex(PMA->pos + Vector2D(1.1, 0));
                 robotCritArea.addVertex(PMA->pos - Vector2D(0, 0.8));
                 robotCritArea.addVertex(PMA->pos - Vector2D(0.5, 0));
-//                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(critA )* critL);
-//                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(-critA)* critL);
+                //                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(critA )* critL);
+                //                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(-critA)* critL);
             }
         }
     }
@@ -1297,7 +1294,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
     }
 
     if (ourPlayers.size() == 0) {
-        playmakeId = -1;        
+        playmakeId = -1;
         lastPlayMake = -1;
         return;
     }
@@ -1510,7 +1507,6 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     if(wm->our[playmakeId] != NULL)
     {
         bool goodForKick = ((wm->ball->pos.dist(wm->field->oppGoal()) < 1.5) || (findMostPossible(wm->our[playmakeId]->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr)));
-//        debug(QString(" %1 shotprob ").arg(findMostPossible(wm->our[playmakeId]->pos)), D_PARSA);
         if(goodForKick)
         {
             dynamicAttack->setDirectShot(true);
@@ -1521,7 +1517,6 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
             shotToGoalthr = 0;
         }
 
-        analyze("High Prob",goodForKick,true);
     }
     /////////////////////////////////////////////////////////////////////////
 
@@ -1533,19 +1528,21 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     //////////////////////////////////////////////assign agents
     bool overdef;
     overdef = checkOverdef();
-    double MarkNum = 0;
+    int MarkNum = 0;
     if(ballPState == CKnowledge::WEHAVETHEBALL) {
         MarkNum = 0;
     } else if(ballPState == CKnowledge::WEDONTHAVETHEBALL) {
         MarkNum = (overdef) ? 3 : 2;
 
     } else if(ballPState == CKnowledge::SOSOOUR) {
-        MarkNum = 1;
+        MarkNum = 2;
 
     } else if(ballPState == CKnowledge::SOSOTHEIR) {
-        MarkNum = 1;
+        MarkNum = 2;
 
     }
+
+    MarkNum = min(MarkNum, ourPlayers.count());
 
     selectedPlay->markAgents.clear();
     if(wm->ball->pos.x >= 0
@@ -1556,34 +1553,12 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
 
     } else {
         qSort(ourPlayers.begin(), ourPlayers.end());
-        if(ourPlayers.count()) {
-            if (MarkNum == 3) {
-                selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
-                ourPlayers.removeFirst();
-                if (ourPlayers.count()) {
-                    selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
-                    ourPlayers.removeFirst();
-                }
-                if (ourPlayers.count()) {
-                    selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
-                    ourPlayers.removeFirst();
-                }
-            }
+        for (int i = 0; i < MarkNum; i++) {
+            selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.front()));
+            ourPlayers.removeFirst();
 
-            if (MarkNum == 2) {
-                selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
-                ourPlayers.removeFirst();
-                if (ourPlayers.count()) {
-                    selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
-                    ourPlayers.removeFirst();
-                }
-
-
-            } else if (MarkNum == 1) {
-                selectedPlay->markAgents.append(knowledge->getAgent(ourPlayers.at(0)));
-                ourPlayers.removeFirst();
-            }
         }
+
     }
 }
 
@@ -1942,7 +1917,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     }
 
     /** new plan selector **/
-//            thePlan = chooseMostSuccecfull(validPlans);
+    //            thePlan = chooseMostSuccecfull(validPlans);
     /** new plan selector **/
 
 
@@ -2588,7 +2563,7 @@ void CCoach::checkSensorShootFault() {
         }
 
     }
-//    debug(s, D_MAHI);
+    //    debug(s, D_MAHI);
 
 
 }
