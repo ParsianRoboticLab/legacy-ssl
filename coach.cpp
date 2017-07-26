@@ -113,7 +113,7 @@ CCoach::CCoach(CAgent**_agents)
     defenseTimeForVisionProblem[1].start();
     transientFlag = false;
     trasientTimeOut.start();
-    translationTimeOutTime = 2000;
+    translationTimeOutTime = 1000;
     exeptionPlayMake = NULL;
     exeptionPlayMakeThr = 0;
 
@@ -382,7 +382,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
 
     } else if (knowledge->isStart()) {
         if (transientFlag) {
-            if (trasientTimeOut.elapsed() > 1000 && !wm->field->isInOurPenaltyArea(wm->ball->pos)) {
+            if (trasientTimeOut.elapsed() > 500 && !wm->field->isInOurPenaltyArea(wm->ball->pos)) {
                 preferedDefenseCounts = max(0, agentsCount - missMatchIds.count() - 1);
 
             } else {
@@ -1271,6 +1271,11 @@ void CCoach::updateAttackState()
 }
 void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
 {
+    if(knowledge->isStart() && !transientFlag && lastPlayMake != -1)
+    {
+        playmakeId = lastPlayMake;
+        return;
+    }
     QList<int> ourPlayers = wm->our.data->activeAgents;
     if( ourPlayers.contains(preferedGoalieAgent) ) {
         ourPlayers.removeOne(preferedGoalieAgent);
@@ -2236,7 +2241,7 @@ void CCoach::execute()
     double critAreaRadius = 1.6;
     Circle2D critArea(wm->field->ourGoal(), critAreaRadius);
     playmakeId = -1;
-    if((critArea.contains(wm->ball->pos) && wm->field->isInField(wm->ball->pos)) || (transientFlag && knowledge->stateForMark != "BlockPass")) {
+    if((critArea.contains(wm->ball->pos) && wm->field->isInField(wm->ball->pos)) /*(|| (transientFlag && knowledge->stateForMark != "BlockPass"))*/) {
         decideDefense();
         choosePlaymakeAndSupporter(true);
     } else {

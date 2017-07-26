@@ -47,8 +47,8 @@
                                 {
                                     "flag": false,
                                     "name": "PassSkill",
-                                    "primary": 1000,
-                                    "secondary": 1000,
+                                    "primary": 300,
+                                    "secondary": 150,
                                     "target": {
                                         "agent": 1,
                                         "index": 3
@@ -362,7 +362,7 @@
                 "y": -0.029605263157894735
             },
             "chance": 1,
-            "lastDist": 2.0000000000000004,
+            "lastDist": 1.5,
             "planMode": "KICKOFF",
             "tags": [
                 ""
