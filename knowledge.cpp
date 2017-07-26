@@ -4686,3 +4686,32 @@ Vector2D CKnowledge::getBPPosition(){
 void CKnowledge::setBPPosition(float x, float y){
     bpPosition = Vector2D(x,y);
 }
+
+
+void CKnowledge::getOurRobotIDsFromGUIMixTeam(){
+
+    QString IDs = QString::fromStdString(conf()->LocalSettings_MixTeamIDs());
+
+    for(int i = 0 ; i < IDs.size() ; i++){
+        int num = -1;
+        QString sub = IDs.mid(i, 1);
+        if( sub == "0") num = 0;
+        if( sub == "1") num = 1;
+        if( sub == "2") num = 2;
+        if( sub == "3") num = 3;
+        if( sub == "4") num = 4;
+        if( sub == "5") num = 5;
+        if( sub == "6") num = 6;
+        if( sub == "7") num = 7;
+        if( sub == "8") num = 8;
+        if( sub == "9") num = 9;
+        if( sub == "a") num = 10;
+        if( sub == "b") num = 11;
+        if( sub == "c") num = 12;
+        if( sub == "d") num = 13;
+        if( sub == "e") num = 14;
+        if( sub == "f") num = 15;
+
+        ourAgentIDsMixTeam.append(num);
+    }
+}

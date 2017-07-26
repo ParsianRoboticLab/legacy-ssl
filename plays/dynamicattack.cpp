@@ -166,7 +166,10 @@ void CDynamicAttack::makePlan(int agentSize) {
     if (wm->ball->pos.x < 0) {
         notInFirst = false;
         currentPlan.mode = DynamicEnums::NotWeHaveBall;
-        currentPlan.playmake.init(DynamicEnums::Chip, DynamicEnums::Goal);
+        if(policy()->DynamicPlay_ChipForward() == true)
+            currentPlan.playmake.init(DynamicEnums::Chip, DynamicEnums::Forward);
+        else
+            currentPlan.playmake.init(DynamicEnums::Chip, DynamicEnums::Goal);
         for(size_t i = 0;i < agentSize;i++) {
             currentPlan.positionAgents[i].region = DynamicEnums::Near;
             currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
@@ -212,16 +215,27 @@ void CDynamicAttack::makePlan(int agentSize) {
                 {
                     oppRob = wm->opp.active(i)->pos;
                 }
-                dribbleIntention.restart();
                 notInFirst = false;
-                debug(QString("WOW we are dribbling"), D_PARSA);
-                currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
-                for(size_t i = 0;i < agentSize;i++) {
-                    if(i < 2)
-                        currentPlan.positionAgents[i].region = DynamicEnums::Supporter;
-                    else
+                if(policy()->DynamicPlay_DribbleEveryWhere() == true)
+                {
+                    dribbleIntention.restart();
+                    debug(QString("WOW we are dribbling"), D_PARSA);
+                    currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
+                    for(size_t i = 0;i < agentSize;i++) {
+                        if(i < 2)
+                            currentPlan.positionAgents[i].region = DynamicEnums::Supporter;
+                        else
+                            currentPlan.positionAgents[i].region = DynamicEnums::Best;
+                        currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+                    }
+                }
+                else
+                {
+                    currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
+                    for(size_t i = 0;i < agentSize;i++) {
                         currentPlan.positionAgents[i].region = DynamicEnums::Best;
-                    currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+                        currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+                    }
                 }
                 break;
             }
@@ -235,9 +249,13 @@ void CDynamicAttack::makePlan(int agentSize) {
         if(critical) {
             currentPlan.mode = DynamicEnums::Critical;
             {
+                oppRob = wm->field->oppGoal();
                 lastPMInitWasDribble = true;
                 //            debug(QString("NOOOOOO we are not Dribbling"), D_PARSA);
-                currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
+                if(policy()->DynamicPlay_DribbleInFast() == true)
+                    currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
+                else
+                    currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
                 for(size_t i = 0;i < agentSize;i++) {
                     currentPlan.positionAgents[i].region = DynamicEnums::Best;
                     currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
@@ -262,7 +280,10 @@ void CDynamicAttack::makePlan(int agentSize) {
         else if(fast) {
             oppRob = wm->field->oppGoal();
             currentPlan.mode = DynamicEnums::Fast;
-            currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
+            if(policy()->DynamicPlay_DribbleInFast() == true)
+                currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
+            else
+                currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
             for(size_t i = 0;i < agentSize;i++) {
                 currentPlan.positionAgents[i].region = DynamicEnums::Best;
                 currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
@@ -673,6 +694,7 @@ void CDynamicAttack::chooseBestPositons()
     int agentSize = activeAgents.size();
     int cntD = 0;
     Vector2D ans;
+    bool haveSupporter = false;
     Vector2D passPos;
     guardIndexList.clear();
     for(int i = 0; i < currentPlan.agentSize; i++)
@@ -743,9 +765,27 @@ void CDynamicAttack::chooseBestPositons()
                 y = ballPos.y;
             }
             semiDynamicPosition.append(Vector2D(x, y));
+            if(i == 1)
+            {
+                haveSupporter = true;
+                i = -1;
+                agentSize -= 2;
+                continue;
+            }
         }
-        //if it wants to get the BEST position
-        else if(agentSize == 1)
+
+        //if it wants to get the BEST position :
+            //first if we can have supporter :
+        if(!haveSupporter && policy()->DynamicPlay_SupportPriority() <= agentSize)
+        {
+            haveSupporter = true;
+            semiDynamicPosition.append(Vector2D(ballPos.x - 1, ballPos.y));
+            i--;
+            agentSize--;
+            continue;
+        }
+            //second if we have only one positioning
+        if(agentSize == 1)
         {
             if(ballPos.y > 0.3)
             {
@@ -760,6 +800,7 @@ void CDynamicAttack::chooseBestPositons()
             else
                 semiDynamicPosition.append(guardLocations[agentSize][0][lastGuards[0]]);
         }
+            //third if we have more than one positioning :
         else
         {
             lastYDrib = 10;

@@ -188,8 +188,8 @@ struct GameStatePacket
 
 
 
-#define _STADIUM_WIDTH   10.90
-#define _STADIUM_HEIGHT  7.70
+#define _STADIUM_WIDTH   14.80
+#define _STADIUM_HEIGHT  10.40
 
 /* COM Port Constants */
 #define _SIM_COM_PORT   "/dev/ttyS6"
@@ -201,10 +201,10 @@ struct GameStatePacket
 
 
 /* Field */
-#define _FIELD_WIDTH            9.0
-#define _FIELD_HEIGHT           6.00
-#define _FIELD_MARGIN_HEIGHT    0.675
-#define _FIELD_MARGIN_WIDTH     0.675
+#define _FIELD_WIDTH            13.40
+#define _FIELD_HEIGHT           9.00
+#define _FIELD_MARGIN_HEIGHT    0.700
+#define _FIELD_MARGIN_WIDTH     0.700
 #define _FIELD_PENALTY          1.000
 #define _GOAL_WIDTH             1.000
 #define _GOAL_RAD               1.000
@@ -218,6 +218,8 @@ struct GameStatePacket
 #define _PARSIAN_BOUNDRY         4.40
 #define _MAX_DIST               sqrt(_FIELD_WIDTH * _FIELD_WIDTH + _FIELD_HEIGHT * _FIELD_HEIGHT)
 
+#define _MIXTEAM_FIELD_WIDTH            13.4
+#define _MIXTEAM_FIELD_HEIGHT           9.00
 
 /* Common Includes */
 #include "geom.h"
