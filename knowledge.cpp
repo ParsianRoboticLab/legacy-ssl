@@ -181,11 +181,10 @@ CKnowledge::CKnowledge(CAgent** _agents)
         values.push_front(0);
         keys = profiler->robotsProfile[q].finalKickMap.keys();
         keys.push_front(0);
-        if(q == 0 || q == 1) {
-            for(int i=0; i< keys.size(); i++) {
-//                debug(QString("%1 : key: %2, val: %3").arg(q).arg(keys.at(i)).arg(values.at(i)), D_FATEMEH);
-            }
+        for(int i=0; i< keys.size(); i++) {
+            debug(QString("%1 : key: %2, val: %3").arg(q).arg(keys.at(i)).arg(values.at(i)), D_FATEMEH);
         }
+
         KickCoeff.append(ProRes.PolynomialRegression(values , keys, 2));
     }
 
