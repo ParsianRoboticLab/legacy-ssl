@@ -346,13 +346,13 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         preferedGoalieAgent = wm->our.data->goalieID;
     }
 
-//     handle stop
-        if (wm->ball->pos.x < 0){
-            preferedDefenseCounts = agentsCount - 1;
-        }
-        else if (wm->ball->pos.x > 1){
-    preferedDefenseCounts = policy() -> Formation_Defense();
-        }
+    //     handle stop
+    if (wm->ball->pos.x < 0){
+        preferedDefenseCounts = agentsCount - 1;
+    }
+    else if (wm->ball->pos.x > 1){
+        preferedDefenseCounts = policy() -> Formation_Defense();
+    }
 
     if(!policy()->Formation_StrictFormation() || !knowledge->isStart()){
         bool oppsAttack = false;
@@ -390,7 +390,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
                 preferedDefenseCounts = agentsCount - missMatchIds.count();
 
             }
-                   }
+        }
         else if(!knowledge->isStop())
         {
             if(checkOverdef()){
@@ -1207,7 +1207,7 @@ void CCoach::updateAttackState()
         {
             double critL = critLenth;
             double critA = 90;
-//            if(lastASWasCritical == false)
+            //            if(lastASWasCritical == false)
             if(lastASWasCritical == false)
             {
                 critA += critAng;
@@ -1223,8 +1223,8 @@ void CCoach::updateAttackState()
                 robotCritArea.addVertex(PMA->pos + Vector2D(1.1, 0));
                 robotCritArea.addVertex(PMA->pos - Vector2D(0, 0.8));
                 robotCritArea.addVertex(PMA->pos - Vector2D(0.5, 0));
-//                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(critA )* critL);
-//                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(-critA)* critL);
+                //                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(critA )* critL);
+                //                robotCritArea.addVertex(PMA->pos + PMA->dir.norm() * critL + PMA->dir.norm().rotate(-critA)* critL);
             }
         }
     }
@@ -1273,7 +1273,7 @@ void CCoach::choosePlaymakeAndSupporter(bool defenseFirst)
     }
 
     if (ourPlayers.size() == 0) {
-        playmakeId = -1;        
+        playmakeId = -1;
         lastPlayMake = -1;
         return;
     }
@@ -1486,7 +1486,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
     if(wm->our[playmakeId] != NULL)
     {
         bool goodForKick = ((wm->ball->pos.dist(wm->field->oppGoal()) < 1.5) || (findMostPossible(wm->our[playmakeId]->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr)));
-//        debug(QString(" %1 shotprob ").arg(findMostPossible(wm->our[playmakeId]->pos)), D_PARSA);
+        //        debug(QString(" %1 shotprob ").arg(findMostPossible(wm->our[playmakeId]->pos)), D_PARSA);
         if(goodForKick)
         {
             dynamicAttack->setDirectShot(true);
@@ -1918,7 +1918,7 @@ void CCoach::initStaticPlay(const POMODE _mode, const QList<int>& _ourplayers) {
     }
 
     /** new plan selector **/
-//            thePlan = chooseMostSuccecfull(validPlans);
+    //            thePlan = chooseMostSuccecfull(validPlans);
     /** new plan selector **/
 
 
@@ -2564,7 +2564,7 @@ void CCoach::checkSensorShootFault() {
         }
 
     }
-//    debug(s, D_MAHI);
+    //    debug(s, D_MAHI);
 
 
 }
