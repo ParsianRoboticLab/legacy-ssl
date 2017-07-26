@@ -841,43 +841,34 @@ void DefensePlan::setGoalKeeperTargetPoint(){
             lastStateForGoalKeeper = QString("no");
             dangerForGoalKeeperClear = false;
             debug(QString("TS Mode") , D_AHZ);
-            Segment2D ballLine(wm->ball->pos , wm->ball->pos + wm->ball->vel*10);
-            draw(ballLine);
+            Line2D ballLine(wm->ball->pos , wm->ball->pos + wm->ball->vel*10);
+            //draw(ballLine);
             tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(ballLine));
-            if(tempSol.size()){
-                if(wm->field->isInOurPenaltyArea(wm->ball->pos)){
-                    tempGoalKeeperTarget = tempSol.at(0);
-                    if(CSkillGotoPointAvoid::timeNeeded(knowledge->goalie , tempGoalKeeperTarget , conf()->BangBang_VelMax(),ourRelax , oppRelax,0,0.2,1)  <
-                            wm->ball->vel.length() / wm->ball->pos.dist(tempGoalKeeperTarget)){
-                        goalKeeperPredictionModeInPlayOff = true;
-                        goalKeeperTarget = tempGoalKeeperTarget;
-                    }
-                }
-                else{
-                    if(tempSol.size() == 2){
-                        tempGoalKeeperTarget = tempSol.at(0).dist(oppPasser) > tempSol.at(1).dist(oppPasser) ? tempSol.at(0) : tempSol.at(1);
-                        if(CSkillGotoPointAvoid::timeNeeded(knowledge->goalie , tempGoalKeeperTarget , conf()->BangBang_VelMax(),ourRelax , oppRelax,0,0.2,1) <
-                                wm->ball->vel.length() / wm->ball->pos.dist(tempGoalKeeperTarget)){
-                            goalKeeperPredictionModeInPlayOff = true;
-                            goalKeeperTarget = tempGoalKeeperTarget;
-                        }
-                    }
-                    else{
-                        goalKeeperPredictionModeInPlayOff = false;
-                        goalKeeperTarget = knowledge->getPointInDirection(wm->field->ourGoal() , ballPrediction(true) , 0.5);
-                        if(!wm->field->isInOurPenaltyArea(goalKeeperTarget)){
-                            tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(Segment2D(goalKeeperTarget , wm->field->ourGoal())));
-                            if(tempSol.size() == 1){
-                                goalKeeperTarget = tempSol.at(0);
-                            }
-                            else if(tempSol.size() == 2){
-                                goalKeeperTarget = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
-                            }
-                        }
-                    }
-                }
-            }
-            else{
+//            if(tempSol.size()){
+//                if(tempSol.size() == 2){
+//                    tempGoalKeeperTarget = tempSol.at(0).dist(oppPasser) > tempSol.at(1).dist(oppPasser) ? tempSol.at(0) : tempSol.at(1);
+//                    if(CSkillGotoPointAvoid::timeNeeded(knowledge->goalie , tempGoalKeeperTarget , conf()->BangBang_VelMax(),ourRelax , oppRelax,0,0.2,1) <
+//                            wm->ball->vel.length() / wm->ball->pos.dist(tempGoalKeeperTarget)){
+//                        goalKeeperPredictionModeInPlayOff = true;
+//                        goalKeeperTarget = tempGoalKeeperTarget;
+//                    }
+//                }
+//                else{
+//                    goalKeeperPredictionModeInPlayOff = false;
+//                    goalKeeperTarget = knowledge->getPointInDirection(wm->field->ourGoal() , ballPrediction(true) , 0.5);
+//                    if(!wm->field->isInOurPenaltyArea(goalKeeperTarget)){
+//                        tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(Segment2D(goalKeeperTarget , wm->field->ourGoal())));
+//                        if(tempSol.size() == 1){
+//                            goalKeeperTarget = tempSol.at(0);
+//                        }
+//                        else if(tempSol.size() == 2){
+//                            goalKeeperTarget = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
+//                        }
+//                    }
+//                }
+//                draw(goalKeeperTarget);
+//            }
+//            else{
                 goalKeeperPredictionModeInPlayOff = false;
                 goalKeeperTarget = knowledge->getPointInDirection(wm->field->ourGoal() , ballPrediction(true) , 0.5);
                 if(!wm->field->isInOurPenaltyArea(goalKeeperTarget)){
@@ -889,7 +880,7 @@ void DefensePlan::setGoalKeeperTargetPoint(){
                         goalKeeperTarget = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
                     }
                 }
-            }
+//            }
         }
         else if(goalKeeperOneTouch){
             lastStateForGoalKeeper = QString("no");
@@ -1938,31 +1929,31 @@ void DefensePlan::executeGoalKeeper(){
         else if(ballIsBesidePoles){
             knowledge->goalKeeperClearMode = false;
             knowledge->goalKeeperOneTouchMode = false;
-            if(isPermissionToKick){
-                debug("Ball is beside the poles" , D_AHZ);
-                AHZSkills = kickSkill;
-                kickSkill->setTolerance(1.5);
-                kickSkill->setDontKick(false);
-                kickSkill->setSlow(true);
-                kickSkill->setSpin(0);
-                kickSkill->setKickSpeed(0);
-                kickSkill->setChip(false);
-                kickSkill->setAvoidPenaltyArea(false);
-                kickSkill->setGoalieMode(true);
-                kickSkill->setTarget(noKickTarget);
-            }
-            else{
-                AHZSkills = gpa[knowledge->goalie->id()];
-                debug("Ball is beside the poles" , D_AHZ, "green");
-                gpa[goalKeeperAgent->id()]->setADiveMode(false);
-                gpa[goalKeeperAgent->id()]->setSlowMode(true);
-                gpa[goalKeeperAgent->id()]->setAvoidGoalPosts(true);
-                gpa[goalKeeperAgent->id()]->setAvoidBall(true);
-                goalKeeperAgent->setChip(0);
-                goalKeeperAgent->setKick(0);
-                gpa[goalKeeperAgent->id()]->init(goalKeeperTarget , wm->ball->pos - goalKeeperTarget);
-                gpa[goalKeeperAgent->id()]->execute();
-            }
+            //            if(isPermissionToKick){
+            //                debug("Ball is beside the poles" , D_AHZ);
+            //                AHZSkills = kickSkill;
+            //                kickSkill->setTolerance(1.5);
+            //                kickSkill->setDontKick(false);
+            //                kickSkill->setSlow(true);
+            //                kickSkill->setSpin(0);
+            //                kickSkill->setKickSpeed(0);
+            //                kickSkill->setChip(false);
+            //                kickSkill->setAvoidPenaltyArea(false);
+            //                kickSkill->setGoalieMode(true);
+            //                kickSkill->setTarget(noKickTarget);
+            //            }
+            //            else{
+            AHZSkills = gpa[knowledge->goalie->id()];
+            debug("Ball is beside the poles" , D_AHZ, "green");
+            gpa[goalKeeperAgent->id()]->setADiveMode(false);
+            gpa[goalKeeperAgent->id()]->setSlowMode(true);
+            gpa[goalKeeperAgent->id()]->setAvoidGoalPosts(true);
+            gpa[goalKeeperAgent->id()]->setAvoidBall(true);
+            goalKeeperAgent->setChip(0);
+            goalKeeperAgent->setKick(0);
+            gpa[goalKeeperAgent->id()]->init(goalKeeperTarget , wm->ball->pos - goalKeeperTarget);
+            gpa[goalKeeperAgent->id()]->execute();
+            //            }
         }
         else if(goalKeeperClearMode && !dangerForGoalKeeperClear){
             knowledge->goalKeeperClearMode = true;
