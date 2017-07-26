@@ -416,10 +416,10 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
         }
     } else if (knowledge->isOurNonPlayOnKick()) {
         if (wm->ball->pos.x < -1)  {
-            preferedDefenseCounts = 0;
+            preferedDefenseCounts = (checkOverdef()) ? 1 : 2;
 
         } else if (wm->ball->pos.x > -.5) {
-            preferedDefenseCounts = 2;
+            preferedDefenseCounts = 0;
         }
 
     } else if (knowledge->isTheirNonPlayOnKick()) {
@@ -1371,6 +1371,13 @@ void CCoach::decideAttack()
         }
     }
 
+    defenses.debugAgents("DEF : ");
+    QString str;
+    for( int i=0 ; i<ourPlayers.size() ; i++ )
+        str += QString(" %1").arg(ourPlayers.at(i));
+    debug(QString("%1: Size: %2 --> (%3)").arg("text :").arg(ourPlayers.size()).arg(str) , D_ERROR , "blue");
+
+
     switch (knowledge->getGameState()) { // GAMESTATE
 
     case CKnowledge::Halt:
@@ -1753,6 +1760,8 @@ void CCoach::selectPlayOffMode(int agentSize, NGameOff::EMode &_mode) {
     } else if (knowledge->getGameState() == CKnowledge::OurKickOff
                ||  knowledge->getGameMode()  == CKnowledge::OurKickOff) {
         _mode = NGameOff::StaticPlay;
+    } else if (wm->ball->pos.x < -1) {
+        _mode = NGameOff::DynamicPlay;
 
     } else if (!firstIsFinished && policy()->PlayOff_UseFirstPlay()) {
         _mode = NGameOff::FirstPlay;
@@ -1976,6 +1985,24 @@ void CCoach::initDynamicPlay(QList<int> _ourplayers) {
     } else {
         ourPlayOff->dynamicSelect = KHAFAN;
     }
+
+
+    double dis = 1000000;
+    int id;
+    int swapID;
+    for (int i = 0; i < _ourplayers.size(); i++){
+        double tempDis = knowledge->getAgent(_ourplayers.at(i))->pos().dist(wm->ball->pos) ;
+        if (tempDis < dis) {
+            dis = tempDis;
+            id = _ourplayers.at(i);
+            swapID = i;
+        }
+    }
+
+    int tempID = ourPlayOff->dynamicMatch[0];
+    ourPlayOff->dynamicMatch[0] = id;
+    ourPlayOff->dynamicMatch[swapID] = tempID;
+
 
     ourPlayOff->setInitial(true);
     ourPlayOff->lockAgents = true;
