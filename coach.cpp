@@ -149,15 +149,39 @@ CCoach::~CCoach()
 
 void CCoach::saveGoalie()
 {
-    //    debug((QString("goalie under net timer : %1").arg(goalieTimer.elapsed())),D_MHMMD);
-    if(goalieTimer.elapsed() > 100 && knowledge->goalie != NULL)
+       debug((QString("goalie under net timer : %1").arg(goalieTimer.elapsed())),D_MHMMD);
+
+    if(goalieTimer.elapsed() > 100 )
     {
-        knowledge->goalie->setRobotAbsVel(1,0,0);
+        if(goalieTimer.elapsed() <200)
+        {
+            knowledge->getAgent(preferedGoalieAgent)->setRobotAbsVel(2,0,0);
+        }
+        else if(goalieTimer.elapsed() <300)
+        {
+            knowledge->getAgent(preferedGoalieAgent)->setRobotAbsVel(-2,0,0);
+
+        }
+        else if(goalieTimer.elapsed() < 400)
+        {
+            knowledge->getAgent(preferedGoalieAgent)->setRobotAbsVel(0,2,0);
+
+        }
+        else if(goalieTimer.elapsed() < 500)
+        {
+            knowledge->getAgent(preferedGoalieAgent)->setRobotAbsVel(0,-2,0);
+
+        }
+        else
+        {
+            knowledge->getAgent(preferedGoalieAgent)->setRobotAbsVel(1,1,5);
+
+        }
     }
     return;
     if (goalieTrappedUnderGoalNet && knowledge->goalie != NULL)
     {
-        knowledge->goalie->setRobotAbsVel(1, 0.0, 0.0);
+        knowledge->goalie->setRobotAbsVel(2, 2, 4);
     }
 }
 
@@ -1491,7 +1515,7 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
         {
             dynamicAttack->setDirectShot(true);
             if((findMostPossible(wm->our[playmakeId]->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr)))
-                shotToGoalthr = policy()->DynamicPlay_DirectTrsh() - 0.2;
+                shotToGoalthr = max(0, policy()->DynamicPlay_DirectTrsh() - 0.2);
         } else {
             dynamicAttack->setDirectShot(false);
             shotToGoalthr = 0;

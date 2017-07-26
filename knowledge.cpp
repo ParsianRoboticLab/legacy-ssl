@@ -24,7 +24,10 @@ CKnowledge::CKnowledge(CAgent** _agents)
     kPlans = NULL;
     ssize = 0;
     mixGoaleID = 0;
-
+    ///////////////////////////// AHZ //////////////////////////////////////////
+    sumOfLastOpponentDirections = Vector2D(0,0);
+    sumOfLastOpponentPosition = Vector2D(0,0);
+    ////////////////////////////////////////////////////////////////////////////
     //ABBAS
     refShortcuts = false;
     shirjeBlocking = false;
@@ -376,7 +379,45 @@ int CKnowledge::getProfile(int agentId, double realParameter /*meter*/, bool isK
 
 }
 
+///////////////////////////////// AHZ //////////////////////////////////////////
+bool CKnowledge::isStateGoingFromIndirectToTransient(){
+    if(LastTS != knowledge->transientFlag && LastTS == 0){
+        return 1;
+    }
+    LastTS = knowledge->transientFlag;
+    return 0;
+}
 
+
+Vector2D CKnowledge::getOppNearestToBallDirInTheirIndirectMode(int lastDirectionSize){
+    Vector2D finalDirection;
+    if(knowledge->isTheirNonPlayOnKick()){
+        oppNearestToBallPossition = wm->opp[knowledge->nearestOppToBall]->pos;
+        lastOppNearestToBallDirections.append(wm->opp[knowledge->nearestOppToBall]->dir);
+        if(lastOppNearestToBallDirections.size() > lastDirectionSize){
+            lastOppNearestToBallDirections.removeFirst();
+        }
+    }
+    if(isStateGoingFromIndirectToTransient()){
+        if(lastOppNearestToBallDirections.size() <= lastDirectionSize){
+            for(int i = lastOppNearestToBallDirections.size() - 1 ; i >= 0 ; i--){
+                sumOfLastOpponentDirections += lastOppNearestToBallDirections.at(i);
+            }
+            finalOppNearestToBallDirection = sumOfLastOpponentDirections / lastOppNearestToBallDirections.size();
+        }
+        else{
+            for(int i = lastOppNearestToBallDirections.size() - 1 ; i > lastOppNearestToBallDirections.size() - lastDirectionSize - 1 ; i--){
+                sumOfLastOpponentDirections += lastOppNearestToBallDirections.at(i);
+            }
+            finalOppNearestToBallDirection = sumOfLastOpponentDirections / lastDirectionSize;
+        }
+    }
+    if(finalDirection.isValid()){
+        AHZOppNearestToBallDirection = finalDirection;
+    }
+    return finalDirection;
+}
+////////////////////////////////////////////////////////////////////////////////
 double CKnowledge::chipGoalPropability(bool isOurChip){
     double GoalDistanceToBall;
     double GoalieDistanseToBall;
@@ -4636,4 +4677,33 @@ Vector2D CKnowledge::getBPPosition(){
 }
 void CKnowledge::setBPPosition(float x, float y){
     bpPosition = Vector2D(x,y);
+}
+
+
+void CKnowledge::getOurRobotIDsFromGUIMixTeam(){
+
+    QString IDs = QString::fromStdString(conf()->LocalSettings_MixTeamIDs());
+
+    for(int i = 0 ; i < IDs.size() ; i++){
+        int num = -1;
+        QString sub = IDs.mid(i, 1);
+        if( sub == "0") num = 0;
+        if( sub == "1") num = 1;
+        if( sub == "2") num = 2;
+        if( sub == "3") num = 3;
+        if( sub == "4") num = 4;
+        if( sub == "5") num = 5;
+        if( sub == "6") num = 6;
+        if( sub == "7") num = 7;
+        if( sub == "8") num = 8;
+        if( sub == "9") num = 9;
+        if( sub == "a") num = 10;
+        if( sub == "b") num = 11;
+        if( sub == "c") num = 12;
+        if( sub == "d") num = 13;
+        if( sub == "e") num = 14;
+        if( sub == "f") num = 15;
+
+        ourAgentIDsMixTeam.append(num);
+    }
 }
