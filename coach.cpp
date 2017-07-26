@@ -1371,11 +1371,11 @@ void CCoach::decideAttack()
         }
     }
 
-    defenses.debugAgents("DEF : ");
-    QString str;
-    for( int i=0 ; i<ourPlayers.size() ; i++ )
-        str += QString(" %1").arg(ourPlayers.at(i));
-    debug(QString("%1: Size: %2 --> (%3)").arg("text :").arg(ourPlayers.size()).arg(str) , D_ERROR , "blue");
+//    defenses.debugAgents("DEF : ");
+//    QString str;
+//    for( int i=0 ; i<ourPlayers.size() ; i++ )
+//        str += QString(" %1").arg(ourPlayers.at(i));
+//    debug(QString("%1: Size: %2 --> (%3)").arg("text :").arg(ourPlayers.size()).arg(str) , D_ERROR , "blue");
 
 
     switch (knowledge->getGameState()) { // GAMESTATE
