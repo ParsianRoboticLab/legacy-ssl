@@ -595,7 +595,7 @@ kckMode CSkillKick::decideMode()
     robotKickArea.addVertex(agentPos+agent->dir().norm()*0.08-agent->dir().rotate(90).norm()*distCoef);
 
 
-    if(1 ||(!knowledge->isOurNonPlayOnKick())&&(passProfiler || kickWithCenterOfDribbler)) {
+    if((!knowledge->isOurNonPlayOnKick())&&(passProfiler || kickWithCenterOfDribbler)) {
         if(dribblerArea.contains(ballPos) && robotKickArea.contains(ballPos))
         {
             kickerOn = true;
@@ -786,7 +786,7 @@ void CSkillKick::kDontKick()
     gpa->setBallObstacleRadius(0.4);
     if(fabs((kickFinalDir - agentDir.th()).degree()) < 10)
     {
-        if(wm->ball->pos.x < -1)
+        if(0 && wm->ball->pos.x < -1)
         {
             agent->setRoller(5);
             finalPos=ballPos-(target-ballPos).norm()*0.11;
@@ -796,7 +796,7 @@ void CSkillKick::kDontKick()
             agent->setRoller(0);
             finalPos=ballPos-(target-ballPos).norm()*0.13;
         }
-        gpa->setSlowMode(false);
+        gpa->setSlowMode(true);
         gpa->setBallObstacleRadius(0);
     }
     gpa->setADiveMode(false);
@@ -1046,6 +1046,21 @@ void CSkillKick::jTurn()
         shift = 15 + (1-agentPos.dist(ballPos))*61;
     else if(movementDir < -50)
         shift = -15 - (1-agentPos.dist(ballPos))*61;
+    else if(movementDir > 30) {
+        if(wm->ball->vel.length() < 0.1)
+            shift = 5 + (1-agentPos.dist(ballPos))*10;
+        else
+            shift =5 + (1-agentPos.dist(ballPos))*35;
+        distCoef = 0.17;
+    }
+    else if(movementDir < -30){
+        if(wm->ball->vel.length() < 0.1)
+            shift = -5 - (1-agentPos.dist(ballPos))*10;
+        else
+            shift = -5 - (1-agentPos.dist(ballPos))*35;
+
+        distCoef = 0.17;
+    }
     else if(movementDir > 0) {
         if(wm->ball->vel.length() < 0.1)
             shift = 5 + (1-agentPos.dist(ballPos))*10;
@@ -1503,8 +1518,9 @@ void CSkillKick::findPosToGo()
         finalPosArea.tangent(agentPos,&s1,&s2);
         if(s2.dist(target) >= s1.dist(target))
             s1 = s2;
+        s1 = s1 + (s1 - agentPos).norm()*(finalPos.dist(ballPos))*1.5;
         finalPos = s1;
-        gpa->setAddVel(wm->ball->vel);
+        //gpa->setAddVel(wm->ball->vel);
     }
     else
     {
@@ -1954,7 +1970,7 @@ void CSkillKickOneTouch::execute()
     Vector2D addVec = (agentPos - target).norm()*stopParam;
     Vector2D intersectPos;
     Vector2D sol1,sol2;
-    double onetouchRad =1;
+    double onetouchRad =0.5;
     double onetouchKickRad = 0.5;
     Circle2D oneTouchArea;
     Circle2D oppPenaltyArea(wm->field->oppGoal() + Vector2D(0.15,0),1.45);
