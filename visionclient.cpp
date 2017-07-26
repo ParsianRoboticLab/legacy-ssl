@@ -89,18 +89,7 @@ void CVisionClient::parse(SSL_WrapperPacket& packet)
         if(!conf()->BallTracker_cam4on()){
                 if (packet.detection().camera_id()==3) return;
         }
-        if(!conf()->BallTracker_cam5on()){
-                if (packet.detection().camera_id()==4) return;
-        }
-        if(!conf()->BallTracker_cam6on()){
-                if (packet.detection().camera_id()==5) return;
-        }
-        if(!conf()->BallTracker_cam7on()){
-                if (packet.detection().camera_id()==6) return;
-        }
-        if(!conf()->BallTracker_cam8on()){
-                if (packet.detection().camera_id()==7) return;
-        }
+
 
         frameCnt ++;
         int id = packet.detection().camera_id();
@@ -210,18 +199,7 @@ void CVisionClient::countActiveCameras()
     if(!conf()->BallTracker_cam4on()){
         v[3].updated = false;
     }
-    if(!conf()->BallTracker_cam5on()){
-        v[4].updated = false;
-    }
-    if(!conf()->BallTracker_cam6on()){
-        v[5].updated = false;
-    }
-    if(!conf()->BallTracker_cam7on()){
-        v[6].updated = false;
-    }
-    if(!conf()->BallTracker_cam8on()){
-        v[7].updated = false;
-    }
+
     int now = vcTimer->elapsed();
     for (int i=0;i<CAMERA_NUM;i++)
     {
