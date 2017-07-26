@@ -600,7 +600,7 @@ void DefensePlan::manToManMarkBlockShotInPlayOff(int _markAgentSize){
             for(int i = markPoses.count() ; i < _markAgentSize; i++){
                 if(markPoses.count() < _markAgentSize){
                     markRoles.append(QString("shotBlocker"));
-                    markPoses.append(Vector2D(-2,  count *  4.5/ 6  * pow(-1, count) ));
+                    markPoses.append(Vector2D(-1,  count *  4.5/ 6  * pow(-1, count) ));
                     markAngs.append(Vector2D(1,0));
                 }
                 count++;
