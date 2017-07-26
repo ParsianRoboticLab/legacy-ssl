@@ -268,7 +268,7 @@ public:
     SkillProperty(CSkillKick, double,KickAngTol, kickAngTol);
     SkillProperty(CSkillKick, bool,KickWithCenterOfDribbler, kickWithCenterOfDribbler);
     SkillProperty(CSkillKick, bool,PlayMakeMode, playMakeMode);
-
+    SkillProperty(CSkillKick, bool,FastIntercept, fastIntercept);
 };
 
 

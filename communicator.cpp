@@ -125,7 +125,6 @@ void CBaseCommunicator::readData()
 
     if(wm->getIsSimulMode())
     {
-
         p->serial_port->flush();
         return;
     }
@@ -139,7 +138,7 @@ void CBaseCommunicator::readData()
         recDataFlow.remove(0,recDataFlow.size()/2);
     }
 
-    debug(QString("SIZE : %1").arg(recDataFlow.size()), D_MHMMD);
+//    debug(QString("SIZE : %1").arg(recDataFlow.size()), D_MHMMD);
     if(recDataFlow.size())
     {
 
@@ -152,8 +151,10 @@ void CBaseCommunicator::readData()
 
                     for(int j = 0 ; j <= 12 ; j++)
                     {
-                        robotPacket[recDataFlow[i-12]][j] = recDataFlow[j+i-12];
-                        onlineRobotsTimer[recDataFlow[i-12]].restart();
+                        if(i-12 < 12) {
+                            robotPacket[recDataFlow[i-12]][j] = recDataFlow[j+i-12];
+                            onlineRobotsTimer[recDataFlow[i-12]].restart();
+                        }
                     }
                     if (!recDataFlow.isEmpty())
                     {
@@ -185,7 +186,8 @@ void CBaseCommunicator::readData()
         }
     }
 
-    debug(QString("id : %1").arg((int)robotPacket[4][1]), D_MHMMD);
+//    debug(QString("id : %1").arg((int)robotPacket[4][1]), D_MHMMD);
+
     for (int i = 0; i < _MAX_NUM_PLAYERS; i++) {
         CAgent* tempAgent = knowledge->getAgent(i);
         tempAgent->setShootSensor(robotPacket[i][1] & 0x01);

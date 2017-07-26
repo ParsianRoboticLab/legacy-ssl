@@ -11,6 +11,7 @@ double AvgWithoutOutliers(QList<double> data , double accuracy){
     QList<double> isOutlier;
     double size = data.count() , n=0;
     double avrg=0 , a=0 , b=0 , res=0;
+    bool equal = true;
 
     if(size==1)
         return data.first();
@@ -36,6 +37,17 @@ double AvgWithoutOutliers(QList<double> data , double accuracy){
             n++;
         }
     }
+
+    for(int i=0; i<size-1; i++){    // all equal
+        if(data.at(i) != data.at(i+1)) {
+            equal = false;
+        }
+    }
+
+    if(equal && size > 0) {
+        return data.last();
+    }
+
     return res/n;
 }
 

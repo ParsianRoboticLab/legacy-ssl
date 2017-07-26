@@ -1,3 +1,4 @@
+
 #include "knowledge.h"
 #include "gotopoint.h"
 #include <varswidget.h>
@@ -168,7 +169,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
     //    RobotsCoeff[7][0] = 800;
 
 
-    profiler->load(JSON, "MRLProfiler_2_6.json");
+    profiler->load(JSON, "MahiProfiler.json");
 
     //    ProfilerResult[robotID][0:kick , 1:chip , 2:SpinKick , 3:SpinChip][10*distance(0-80)] ---> contains needed voltage for this distance
 
@@ -177,9 +178,14 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
     for(int q=0; q<16; q++){
         values = profiler->robotsProfile[q].finalKickMap.values();
-        values.insert(0 , 0);
+        values.push_front(0);
         keys = profiler->robotsProfile[q].finalKickMap.keys();
-        keys.insert(0 , 0);
+        keys.push_front(0);
+        if(q == 0 || q == 1) {
+            for(int i=0; i< keys.size(); i++) {
+//                debug(QString("%1 : key: %2, val: %3").arg(q).arg(keys.at(i)).arg(values.at(i)), D_FATEMEH);
+            }
+        }
         KickCoeff.append(ProRes.PolynomialRegression(values , keys, 2));
     }
 
@@ -209,9 +215,9 @@ CKnowledge::CKnowledge(CAgent** _agents)
         tempResult.clear();
 
         values = profiler->robotsProfile[q].finalChipMap.values();
-        values.insert(0 , 0);
+        values.push_front(0);
         keys = profiler->robotsProfile[q].finalChipMap.keys();
-        keys.insert(0 , 0);
+        keys.push_front(0);
 
         for(int i=0; i<values.size(); i++){
             QPair<double, double> p;
@@ -228,9 +234,10 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
         ChipCoeff.append(coeffRes);
 
-        QString("coeff %5 : %1  , %2 , %3 , %4").arg(
+        QString ("coeff %5 : %1  , %2 , %3 , %4").arg(
                     ChipCoeff.at(q).at(0)).arg(ChipCoeff.at(q).at(1)).arg(
                     ChipCoeff.at(q).at(2)).arg(ChipCoeff.at(q).at(3)).arg(q);
+
     }
 
     for(int q=0; q<16; q++){
@@ -266,8 +273,7 @@ Vector2D CKnowledge::getStaticPoses(int num)
 
 }
 
-int CKnowledge::
-getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
+int CKnowledge::getProfile(int agentId, double realParameter /*meter*/, bool isKick, bool spinOn ){
 
     double profiledParameter=0;
     int type;
@@ -297,16 +303,15 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
     ///////////////////////// chip //////////////////////////////////////////////////
     if(type==1)
     {
-        //        realParameter+=RobotsCoeff[agentId][1];
+        //        realParameter+=RobotsCoeff[agentId][1];   // refining
 
         profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
 
-        if(profiledParameter != -1000)
+        if(profiledParameter != -1000)  // validation
         {
             if(profiledParameter > 1023)
                 return 1023;
             else if(profiledParameter > 0){
-                //                debug(QString("func : %1 , %2").arg(realParameter).arg(profiledParameter) , D_FATEMEH);
                 return (int)profiledParameter;
             }
             else
@@ -319,15 +324,14 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
             }
             else{   // Linear
                 profiledParameter= realParameter*128;
-                if(type == 1)
-                    profiledParameter*=2;
+                profiledParameter*=2;
             }
 
-            if(profiledParameter > 1023)
+            if(profiledParameter > 1023) {
                 return 1023;
-            else if(profiledParameter > 0)
+            } else if(profiledParameter > 0) {
                 return (int)profiledParameter;
-            else{
+            } else {
                 return 1;
             }
 
@@ -339,49 +343,37 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
         profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
 
         if(realParameter > 8.0)
-            return RobotsCoeff[agentId][0];
+            realParameter = 8.0;
 
         profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
 
-        if(profiledParameter != -1000)
+        if(profiledParameter != -1000)  // validation
         {
-            if(profiledParameter > 1023)
+            if(profiledParameter > 1023) {
                 return 1023;
-            else if(profiledParameter > 0){
+            } else if(profiledParameter > 0) {
+                debug(QString("kick real data :%1").arg((int)profiledParameter), D_FATEMEH);
                 return (int)profiledParameter;
-            }
-            else
+            } else {
                 return 1;
+            }
         }
         else // no data is saved for this robot
         {
             if(ProfilerResult[refRobotID][type][(int)round(realParameter*10)] != -1000){    // get data from reference robot
-                profiledParameter= RobotsCoeff[agentId][type] * knowledge->getProfile(refRobotID , realParameter , isKick , spinOn);
-            }
-            else{   // Linear
-                profiledParameter= realParameter*128;
+                profiledParameter = RobotsCoeff[agentId][type] * knowledge->getProfile(refRobotID , realParameter , isKick , spinOn);
+            } else{   // Linear
+                profiledParameter = realParameter*128;
             }
 
-            if(profiledParameter > 1023)
+            if(profiledParameter > 1023) {
                 return 1023;
-            else if(profiledParameter > 0)
+            } else if(profiledParameter > 0) {
                 return (int)profiledParameter;
-            else{
+            } else{
                 return 1;
             }
 
-        }
-
-        profiledParameter= realParameter*128;
-
-        if(profiledParameter > 1023)
-            return 1023;
-        else if(profiledParameter > RobotsCoeff[agentId][0])
-            return RobotsCoeff[agentId][0];
-        else if(profiledParameter > 0)
-            return (int)profiledParameter;
-        else{
-            return 12;
         }
     }
 

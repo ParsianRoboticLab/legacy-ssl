@@ -34,7 +34,7 @@ public:
             _I = I_saturate;
 
         _D = error-pError;
-        debug(QString("sag :%1").arg(pError),D_MHMMD);
+//        debug(QString("sag :%1").arg(pError),D_MHMMD);
         return _P + ki*_I + kd*_D;
     }
 };

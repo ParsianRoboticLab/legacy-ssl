@@ -1492,6 +1492,8 @@ void CSkillKick::findPosToGo()
     }
 
     Circle2D oppPenalty(wm->field->oppGoal() + Vector2D(0.2 , 0),1.4);
+    gpa->setOneTouchMode(false);
+
     if(oppPenalty.contains(ballPos))
     {
         finalPos = finalPos - (target-finalPos).norm() * 0.15;
@@ -1514,6 +1516,8 @@ void CSkillKick::findPosToGo()
     finalPosArea.assign(ballPos ,0.145);
     if(finalPosArea.intersection(directPath,&s1,&s2))
     {
+        gpa->setOneTouchMode(false);
+
         finalPosArea.assign(ballPos ,0.245);
         finalPosArea.tangent(agentPos,&s1,&s2);
         if(s2.dist(target) >= s1.dist(target))
@@ -1549,7 +1553,6 @@ void CSkillKick::findPosToGo()
 
     gpa->setSlowMode(slow);
     gpa->setADiveMode(false);
-    gpa->setOneTouchMode(false);
     gpa->setAvoidPenaltyArea(true);
     gpa->execute();
 

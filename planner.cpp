@@ -522,7 +522,7 @@ void CPlanner::runPlanner(){
     if( resultModified.size() == 1)
         resultModified.push_back(temp[0]);
 
-    debug(QString("result size : %1").arg(resultModified.size()),D_MHMMD);
+//    debug(QString("result size : %1").arg(resultModified.size()),D_MHMMD);
 
     if( fff ){
         resultModified.assign(temp.begin() , temp.end());

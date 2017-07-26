@@ -31,7 +31,8 @@ long int a=0;
 QList <double> realSpeed,appliedSpeed;
 void CMainApplication::Experimental6()
 {
-
+ soccer->agents[6]->setRoller(1);
+    return;
     static MixTeamSender *sender = new MixTeamSender(true);
     static MixTeamReader *reader = new MixTeamReader();
 //    static MixTeamThread *mthr = new MixTeamThread();
