@@ -522,7 +522,7 @@ CSkillKick::CSkillKick(CAgent *_agent) : CSkill(_agent)
     goalieMode = false;
     jTurnFromBack = false;
     playMakeMode = false;
-    fastIntercept =false;
+    //fastIntercept =false;
 }
 
 CSkillKick::~CSkillKick()
@@ -1460,7 +1460,7 @@ void CSkillKick::findPosToGo()
             }
         }
 
-        if(!fastIntercept || agentPos.dist(ballPos) < 0.5)
+        if(agentPos.dist(ballPos) < 0.5)
         {
             if((canOneTouch || kickerSeg.intersection(ballPath).isValid()) && !sagMode )
             {
