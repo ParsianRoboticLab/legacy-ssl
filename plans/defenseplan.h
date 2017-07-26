@@ -56,63 +56,56 @@ protected:
     void checkGoalieTarget();    
     void setGoalKeeperState();
     void setGoalKeeperTargetPoint();
-    bool ballBehindGoalie, goalieOneTouch,goalieClearMode,ballIsOutOfField;
-    double strictfollowThr;
-    double behindBallThr;    
-    bool besidePoleFlag;
-    bool dangerForGoalieClear;
+    bool goalKeeperOneTouch,goalKeeperClearMode,ballIsOutOfField, ballIsBesidePoles;
+    double strictfollowThr;          
+    bool dangerForGoalKeeperClear;
     int oneTouchCnt;    
     ////////////////////////////// AHZ ///////////////////    
     Line2D getBisectorLine(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
     Segment2D getBisectorSegment(Vector2D firstPoint , Vector2D originPoint , Vector2D secondPoint);
-    Segment2D getOppNearestToBallDirInTheirIndirectMode(int lastDirectionSize);
+    Vector2D getOppNearestToBallDirInTheirIndirectMode(int lastDirectionSize);
     void manToManMarkBlockPassInPlayOff(QList<Vector2D> opponentAgentsToBeMarkePossition , int ourMarkAgentsSize , double proportionOfDistance);
     void manToManMarkBlockShotInPlayOff(int _markAgentSize);
     void agentsStuckTogether(QList<Vector2D> agentsPosition , QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs);
+    bool isPermissionTargetToChip(Vector2D aPoint);
     bool isAgentsStuckTogether(QList<Vector2D> agentsPosition);
     bool isStateGoingFromIndirectToTransient();
+    bool isInIndirectArea(Vector2D);
     void correctingTheAgentsAreStuckTogether(QList<Vector2D> &agentsPosition,QList<Vector2D> &stuckPositions , QList<int> &stuckIndexs);    
-    bool isIndirectArea(Vector2D);    
     //atousa
     Vector2D getGoaliePositionInOneDef(Vector2D _ballPos, double _limit1, double _limit2);
     double goalieThr;
     ////////
     int angleDegreeThrNotStop = 0;
+    double besideCounter;
+    int lastOpponentAgentsToBeMarkSize;
     double threshOld = 0.0;
     double ballCircleR = 0.5;
     double xLimitForblockingPass;
-    bool stuckFlag;
+    bool isPermissionToKick;
     bool isCrowdedInFrontOfPenaltyAreaByOurAgents;
     bool isCrowdedInFrontOfPenaltyAreaByOppAgents;
     bool ballISInpenaltyAreaAndDangerCircle;
     bool ballIsNotInPenaltyAreaAndIsInDangerCircle;
     bool ballIsInPenaltyAreaAndIsNotInDangerCircle;
-    bool dangerForGoalieClearByOurAgents;
-    bool dangerForGoalieClearByOppAgents;
+    bool dangerForGoalKeeperClearByOurAgents;
+    bool dangerForGoalKeeperClearByOppAgents;
     bool dangerForInsideOfThePenaltyArea;
     bool stopMode;
     bool playOffMode;
     bool playOnMode;
     bool dangerModeThresholdForClear;
-    bool dangerModeThresholdForDanger;
-    bool changeInMarkPlanFlag;
-    bool manToManMarkBlockPassFlag;
-    bool ballBool;
-    bool goalKeeperPredictionModeInPlayOff;
-    QString lastStateForMark;
-    QString stateForMark;
-    int lastOpponentAgentsToBeMarkSize;
+    bool dangerModeThresholdForDanger;    
+    bool manToManMarkBlockPassFlag;    
+    bool goalKeeperPredictionModeInPlayOff;    
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;
-    QList <Vector2D> lastOppNearestToBallDirections;
     Vector2D opponentPasserDirection;
+    Vector2D tempBallRectanglePoint;
     Vector2D oppNearestToBallPossition;
-    Vector2D sumOfLastOpponentDirections;
     Vector2D tempAHZ;
-    Vector2D sumOfLastOpponentPosition;
-    Vector2D finalOppNearestToBallDirection;
-
-    int AHZCount;        
+    Vector2D noKickTarget;    
+    QString lastStateForGoalKeeper;
     ///////////////////////////////////////////////////
     void executeGoalKeeper();    
     Vector2D strictFollowBall(Vector2D _ballPos);    
@@ -178,8 +171,7 @@ public:
       double markRadiusStrict;
       double segmentpershoot;
       double segmentperpass;
-      bool MantoManAllTransientFlag;
-      bool LastTS;
+      bool MantoManAllTransientFlag;      
       Vector2D dir;
     ///////////////////////////////////
 

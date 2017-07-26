@@ -184,6 +184,7 @@ bool CDefPos::isInPenaltyAreaDef(double _tempBestRadius , Vector2D vec){
 
 Vector2D CDefPos::getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Segment2D _seg)
 {
+
     ////////////////////////////////////////////////
     Vector2D ins1[2];
     Vector2D ins2[2];
@@ -203,6 +204,7 @@ Vector2D CDefPos::getIntersectionWithPenaltyAreaDef(double _tempBestRadius , Seg
     ////////////////////////////////////////////////
     r.intersection(_seg,&ins1[0],&ins1[1]);
     if((wm->field->isInField(ins1[0])) && (ins3[0].x >=-3.42) && ins1[0].valid() || ins1[1].valid() && (wm->field->isInField(ins1[1])) && (ins3[1].x >=-3.42)) {
+
         debug(QString("Debug Rect intersection ins1 is %1 %2, ins2 is %3,%4").arg(ins1[0].x).arg(ins1[0].y).arg(ins1[1].x).arg(ins1[1].y),D_HAMED);
         if(ins1[0].x > -3.42 && wm->field->isInField(ins1[0])){
             finter =  ins1[0];

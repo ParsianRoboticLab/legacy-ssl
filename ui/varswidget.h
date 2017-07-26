@@ -279,6 +279,8 @@ public:
             DEF_VALUE(PlayOff, bool, Bool, UseFastPlay)
             DEF_VALUE(PlayOff, bool, Bool, UseFirstPlay)
             DEF_VALUE(PlayOff, bool, Bool, UseBlockBlocker)
+            DEF_VALUE(PlayOff, bool, Bool, UseForcedBlock)
+
 
     DEF_TREE(DynamicPlay)
     DEF_VALUE(DynamicPlay, double , Double , LowSpeedPass)
@@ -291,6 +293,12 @@ public:
     DEF_VALUE(DynamicPlay, bool, Bool, NearForward)
     DEF_VALUE(DynamicPlay, double, Double, Area)
     DEF_VALUE(DynamicPlay, double, Double, DirectTrsh)
+    DEF_VALUE(DynamicPlay, int, Int, SupportPriority)
+    DEF_VALUE(DynamicPlay, bool, Bool, DribbleEveryWhere)
+    DEF_VALUE(DynamicPlay, bool, Bool, DribbleInFast)
+    DEF_VALUE(DynamicPlay, bool, Bool, ChipForward)
+
+
 
     DEF_TREE(Mark)
     DEF_VALUE(Mark, bool , Bool, PlayOffManToMan)

@@ -25,6 +25,9 @@ CRoleDynamic::~CRoleDynamic() {
 void CRoleDynamic::update() {
    updated = false;
 
+   shotSkill->setPlayMakeMode(true);
+   shotSkill->setKickWithCenterOfDribbler(true);
+
    switch(selectedSkill) {
    case DynamicEnums::Dribble:
        dribbleSkill->setAgent(agent);

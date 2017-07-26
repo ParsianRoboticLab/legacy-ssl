@@ -1,3 +1,4 @@
+
 #include "knowledge.h"
 #include "gotopoint.h"
 #include <varswidget.h>
@@ -23,7 +24,10 @@ CKnowledge::CKnowledge(CAgent** _agents)
     kPlans = NULL;
     ssize = 0;
     mixGoaleID = 0;
-
+    ///////////////////////////// AHZ //////////////////////////////////////////
+    sumOfLastOpponentDirections = Vector2D(0,0);
+    sumOfLastOpponentPosition = Vector2D(0,0);
+    ////////////////////////////////////////////////////////////////////////////
     //ABBAS
     refShortcuts = false;
     shirjeBlocking = false;
@@ -81,6 +85,10 @@ CKnowledge::CKnowledge(CAgent** _agents)
     toBeSwitchedAttacker = -1;
     lastFrameSwithed = -1;
     ballVelLowPass = 0;
+    defenseOneTouchMode = false;
+    defenseClearMode = false;
+    goalKeeperOneTouchMode = false;
+    goalKeeperClearMode = false;
     //    variables["khafanmarked"]="false";
     lastPlayExecuted = Stop;
     necessaryDefKick = false;
@@ -161,7 +169,7 @@ CKnowledge::CKnowledge(CAgent** _agents)
     //    RobotsCoeff[7][0] = 800;
 
 
-    profiler->load(JSON, "MRLProfiler_2_6.json");
+    profiler->load(JSON, "MahiProfiler.json");
 
     //    ProfilerResult[robotID][0:kick , 1:chip , 2:SpinKick , 3:SpinChip][10*distance(0-80)] ---> contains needed voltage for this distance
 
@@ -170,9 +178,13 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
     for(int q=0; q<16; q++){
         values = profiler->robotsProfile[q].finalKickMap.values();
-        values.insert(0 , 0);
+        values.push_front(0);
         keys = profiler->robotsProfile[q].finalKickMap.keys();
-        keys.insert(0 , 0);
+        keys.push_front(0);
+        for(int i=0; i< keys.size(); i++) {
+            debug(QString("%1 : key: %2, val: %3").arg(q).arg(keys.at(i)).arg(values.at(i)), D_FATEMEH);
+        }
+
         KickCoeff.append(ProRes.PolynomialRegression(values , keys, 2));
     }
 
@@ -202,9 +214,9 @@ CKnowledge::CKnowledge(CAgent** _agents)
         tempResult.clear();
 
         values = profiler->robotsProfile[q].finalChipMap.values();
-        values.insert(0 , 0);
+        values.push_front(0);
         keys = profiler->robotsProfile[q].finalChipMap.keys();
-        keys.insert(0 , 0);
+        keys.push_front(0);
 
         for(int i=0; i<values.size(); i++){
             QPair<double, double> p;
@@ -221,9 +233,10 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
         ChipCoeff.append(coeffRes);
 
-        QString("coeff %5 : %1  , %2 , %3 , %4").arg(
+        QString ("coeff %5 : %1  , %2 , %3 , %4").arg(
                     ChipCoeff.at(q).at(0)).arg(ChipCoeff.at(q).at(1)).arg(
                     ChipCoeff.at(q).at(2)).arg(ChipCoeff.at(q).at(3)).arg(q);
+
     }
 
     for(int q=0; q<16; q++){
@@ -259,8 +272,7 @@ Vector2D CKnowledge::getStaticPoses(int num)
 
 }
 
-int CKnowledge::
-getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
+int CKnowledge::getProfile(int agentId, double realParameter /*meter*/, bool isKick, bool spinOn ){
 
     double profiledParameter=0;
     int type;
@@ -290,16 +302,15 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
     ///////////////////////// chip //////////////////////////////////////////////////
     if(type==1)
     {
-        //        realParameter+=RobotsCoeff[agentId][1];
+        //        realParameter+=RobotsCoeff[agentId][1];   // refining
 
         profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
 
-        if(profiledParameter != -1000)
+        if(profiledParameter != -1000)  // validation
         {
             if(profiledParameter > 1023)
                 return 1023;
             else if(profiledParameter > 0){
-                //                debug(QString("func : %1 , %2").arg(realParameter).arg(profiledParameter) , D_FATEMEH);
                 return (int)profiledParameter;
             }
             else
@@ -312,15 +323,14 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
             }
             else{   // Linear
                 profiledParameter= realParameter*128;
-                if(type == 1)
-                    profiledParameter*=2;
+                profiledParameter*=2;
             }
 
-            if(profiledParameter > 1023)
+            if(profiledParameter > 1023) {
                 return 1023;
-            else if(profiledParameter > 0)
+            } else if(profiledParameter > 0) {
                 return (int)profiledParameter;
-            else{
+            } else {
                 return 1;
             }
 
@@ -332,55 +342,81 @@ getProfile(int agentId, double realParameter, bool isKick, bool spinOn ){
         profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
 
         if(realParameter > 8.0)
-            return RobotsCoeff[agentId][0];
+            realParameter = 8.0;
 
         profiledParameter = ProfilerResult[agentId][type][(int)round(realParameter*10)];
 
-        if(profiledParameter != -1000)
+        if(profiledParameter != -1000)  // validation
         {
-            if(profiledParameter > 1023)
+            if(profiledParameter > 1023) {
                 return 1023;
-            else if(profiledParameter > 0){
+            } else if(profiledParameter > 0) {
+                debug(QString("kick real data :%1").arg((int)profiledParameter), D_FATEMEH);
                 return (int)profiledParameter;
-            }
-            else
+            } else {
                 return 1;
+            }
         }
         else // no data is saved for this robot
         {
             if(ProfilerResult[refRobotID][type][(int)round(realParameter*10)] != -1000){    // get data from reference robot
-                profiledParameter= RobotsCoeff[agentId][type] * knowledge->getProfile(refRobotID , realParameter , isKick , spinOn);
-            }
-            else{   // Linear
-                profiledParameter= realParameter*128;
+                profiledParameter = RobotsCoeff[agentId][type] * knowledge->getProfile(refRobotID , realParameter , isKick , spinOn);
+            } else{   // Linear
+                profiledParameter = realParameter*128;
             }
 
-            if(profiledParameter > 1023)
+            if(profiledParameter > 1023) {
                 return 1023;
-            else if(profiledParameter > 0)
+            } else if(profiledParameter > 0) {
                 return (int)profiledParameter;
-            else{
+            } else{
                 return 1;
             }
 
-        }
-
-        profiledParameter= realParameter*128;
-
-        if(profiledParameter > 1023)
-            return 1023;
-        else if(profiledParameter > RobotsCoeff[agentId][0])
-            return RobotsCoeff[agentId][0];
-        else if(profiledParameter > 0)
-            return (int)profiledParameter;
-        else{
-            return 12;
         }
     }
 
 }
 
+///////////////////////////////// AHZ //////////////////////////////////////////
+bool CKnowledge::isStateGoingFromIndirectToTransient(){
+    if(LastTS != knowledge->transientFlag && LastTS == 0){
+        return 1;
+    }
+    LastTS = knowledge->transientFlag;
+    return 0;
+}
 
+
+Vector2D CKnowledge::getOppNearestToBallDirInTheirIndirectMode(int lastDirectionSize){
+    Vector2D finalDirection;
+    if(knowledge->isTheirNonPlayOnKick()){
+        oppNearestToBallPossition = wm->opp[knowledge->nearestOppToBall]->pos;
+        lastOppNearestToBallDirections.append(wm->opp[knowledge->nearestOppToBall]->dir);
+        if(lastOppNearestToBallDirections.size() > lastDirectionSize){
+            lastOppNearestToBallDirections.removeFirst();
+        }
+    }
+    if(isStateGoingFromIndirectToTransient()){
+        if(lastOppNearestToBallDirections.size() <= lastDirectionSize){
+            for(int i = lastOppNearestToBallDirections.size() - 1 ; i >= 0 ; i--){
+                sumOfLastOpponentDirections += lastOppNearestToBallDirections.at(i);
+            }
+            finalOppNearestToBallDirection = sumOfLastOpponentDirections / lastOppNearestToBallDirections.size();
+        }
+        else{
+            for(int i = lastOppNearestToBallDirections.size() - 1 ; i > lastOppNearestToBallDirections.size() - lastDirectionSize - 1 ; i--){
+                sumOfLastOpponentDirections += lastOppNearestToBallDirections.at(i);
+            }
+            finalOppNearestToBallDirection = sumOfLastOpponentDirections / lastDirectionSize;
+        }
+    }
+    if(finalDirection.isValid()){
+        AHZOppNearestToBallDirection = finalDirection;
+    }
+    return finalDirection;
+}
+////////////////////////////////////////////////////////////////////////////////
 double CKnowledge::chipGoalPropability(bool isOurChip){
     double GoalDistanceToBall;
     double GoalieDistanseToBall;
@@ -4640,4 +4676,33 @@ Vector2D CKnowledge::getBPPosition(){
 }
 void CKnowledge::setBPPosition(float x, float y){
     bpPosition = Vector2D(x,y);
+}
+
+
+void CKnowledge::getOurRobotIDsFromGUIMixTeam(){
+
+    QString IDs = QString::fromStdString(conf()->LocalSettings_MixTeamIDs());
+
+    for(int i = 0 ; i < IDs.size() ; i++){
+        int num = -1;
+        QString sub = IDs.mid(i, 1);
+        if( sub == "0") num = 0;
+        if( sub == "1") num = 1;
+        if( sub == "2") num = 2;
+        if( sub == "3") num = 3;
+        if( sub == "4") num = 4;
+        if( sub == "5") num = 5;
+        if( sub == "6") num = 6;
+        if( sub == "7") num = 7;
+        if( sub == "8") num = 8;
+        if( sub == "9") num = 9;
+        if( sub == "a") num = 10;
+        if( sub == "b") num = 11;
+        if( sub == "c") num = 12;
+        if( sub == "d") num = 13;
+        if( sub == "e") num = 14;
+        if( sub == "f") num = 15;
+
+        ourAgentIDsMixTeam.append(num);
+    }
 }
