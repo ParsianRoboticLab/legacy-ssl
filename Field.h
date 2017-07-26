@@ -144,6 +144,7 @@ public:
     QList<Vector2D> AHZOurPAreaIntersectForMark(Line2D segment);
     QList<Vector2D> AHZOurPAreaIntersectForGoalKeeper(Segment2D segment);
     QList<Vector2D> AHZOurPAreaIntersectForGoalKeeper(Line2D segment);
+    bool AHZIsInOurPenaltyArea(Vector2D point);
     /////////////////////////////////////////////////////////////////////
     QList<Vector2D> ourPAreaIntersect(Circle2D circle);
     QList<Vector2D> oppPAreaIntersect(Line2D line);
