@@ -404,7 +404,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
                 preferedDefenseCounts = 1; // one playmake and one defense
 
             } else {
-                if (!oppsAttack || checkOverdef()) {
+                if ((!oppsAttack || checkOverdef()) && wm->ball->pos.x > 0) {
                     preferedDefenseCounts = 1;
 
                 } else {
