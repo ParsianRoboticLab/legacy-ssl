@@ -1,3 +1,4 @@
+
 #include "knowledge.h"
 #include "gotopoint.h"
 #include <varswidget.h>
@@ -174,9 +175,14 @@ CKnowledge::CKnowledge(CAgent** _agents)
 
     for(int q=0; q<16; q++){
         values = profiler->robotsProfile[q].finalKickMap.values();
-        values.insert(0 , 0);
+        values.push_front(0);
         keys = profiler->robotsProfile[q].finalKickMap.keys();
-        keys.insert(0 , 0);
+        keys.push_front(0);
+        if(q == 0 || q == 1) {
+            for(int i=0; i< keys.size(); i++) {
+//                debug(QString("%1 : key: %2, val: %3").arg(q).arg(keys.at(i)).arg(values.at(i)), D_FATEMEH);
+            }
+        }
         KickCoeff.append(ProRes.PolynomialRegression(values , keys, 2));
     }
 
@@ -206,9 +212,9 @@ CKnowledge::CKnowledge(CAgent** _agents)
         tempResult.clear();
 
         values = profiler->robotsProfile[q].finalChipMap.values();
-        values.insert(0 , 0);
+        values.push_front(0);
         keys = profiler->robotsProfile[q].finalChipMap.keys();
-        keys.insert(0 , 0);
+        keys.push_front(0);
 
         for(int i=0; i<values.size(); i++){
             QPair<double, double> p;

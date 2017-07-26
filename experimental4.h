@@ -216,7 +216,7 @@ void CMainApplication::Experimental4(){
     if(fff){
         file.open(/*QIODevice::Truncate | */QIODevice::WriteOnly);
 
-        for(int robotID1 = 1; robotID1 < 2; robotID1++){
+        for(int robotID1 = 0; robotID1 < 8; robotID1++){
 
             kick1 = knowledge->profiler->robotsProfile[robotID1].finalKickMap;
             chip1 = knowledge->profiler->robotsProfile[robotID1].finalChipMap;
