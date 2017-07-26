@@ -364,6 +364,7 @@ kkRPMode CSkillReceivePass::decideMode()
 
 void CSkillReceivePass::execute()
 {
+    receiveR = 3;
     ballRealVel = knowledge->getRealBallVel();
     gotopointavoid->setSlowMode(slow);
     gotopointavoid->setAgent(agent);

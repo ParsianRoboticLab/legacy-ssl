@@ -59,8 +59,8 @@
                         },
                         {
                             "angel": 0,
-                            "pos-x": 2.8257107540173054,
-                            "pos-y": -1.3322368421052633,
+                            "pos-x": 4.0160692212608158,
+                            "pos-y": -1.7861842105263159,
                             "skills": [
                                 {
                                     "flag": false,
@@ -73,8 +73,8 @@
                         },
                         {
                             "angel": 0,
-                            "pos-x": 2.6922126081582203,
-                            "pos-y": -1.125,
+                            "pos-x": 3.8158220024721876,
+                            "pos-y": -1.6973684210526314,
                             "skills": [
                                 {
                                     "flag": false,
@@ -84,13 +84,7 @@
                                 },
                                 {
                                     "flag": false,
-                                    "name": "ReceivePassSkill",
-                                    "primary": 1000,
-                                    "secondary": 1000
-                                },
-                                {
-                                    "flag": false,
-                                    "name": "ShotToGoalSkill",
+                                    "name": "OneTouchSkill",
                                     "primary": 1000,
                                     "secondary": 500
                                 }
@@ -144,7 +138,7 @@
                                     }
                                 }
                             ],
-                            "tolerance": 30
+                            "tolerance": 200
                         },
                         {
                             "angel": 0,
