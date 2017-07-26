@@ -188,8 +188,9 @@ struct GameStatePacket
 
 
 
-#define _STADIUM_WIDTH   14.80
-#define _STADIUM_HEIGHT  10.40
+#define _STADIUM_WIDTH   10.90
+#define _STADIUM_HEIGHT  7.70
+
 
 /* COM Port Constants */
 #define _SIM_COM_PORT   "/dev/ttyS6"
@@ -201,10 +202,10 @@ struct GameStatePacket
 
 
 /* Field */
-#define _FIELD_WIDTH            13.40
-#define _FIELD_HEIGHT           9.00
-#define _FIELD_MARGIN_HEIGHT    0.700
-#define _FIELD_MARGIN_WIDTH     0.700
+#define _FIELD_WIDTH            9.0
+#define _FIELD_HEIGHT           6.00
+#define _FIELD_MARGIN_HEIGHT    0.675
+#define _FIELD_MARGIN_WIDTH     0.675
 #define _FIELD_PENALTY          1.000
 #define _GOAL_WIDTH             1.000
 #define _GOAL_RAD               1.000
