@@ -1016,7 +1016,7 @@ void CPlayOffWidget::slt_active() {
                 int j = -1;
                 while (model.child(i, 0).child(++j, 0).data().toString() != "") {
                     m_plans.at(model.child(i, 0).child(j, 0).data().toInt())->gui.active = true;
-                    m_plans.at(model.child(i, 0).child(j, 0).data().toInt())->gui.master = true;
+                    m_plans.at(model.child(i, 0).child(j, 0).data().toInt())->gui.master = false;
 
                 }
             }
@@ -1040,7 +1040,7 @@ void CPlayOffWidget::slt_active() {
 
         active   -> setEnabled(false);
         deactive -> setEnabled(true);
-        master   -> setEnabled(true);
+        master   -> setEnabled(false);
 
     }
 }
