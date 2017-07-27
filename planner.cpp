@@ -789,8 +789,8 @@ void CPlannerThread::createObstacleProb(CObstacles &obs,Vector2D _pos, Vector2D 
     double timeForObs = 0;
     ///TODO: should read from vartypes
     double maxA = 4;
-    double maxObstRad = 1.5;
-    double maxTime = 0.5;
+    double maxObstRad = 0.5;
+    double maxTime = 0.2;
     if(_vel.length() < 0.2)
     {
         _center = _pos;

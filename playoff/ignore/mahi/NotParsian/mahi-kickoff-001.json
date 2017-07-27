@@ -9,24 +9,24 @@
                     "y": -100
                 },
                 {
-                    "x": 0.58961681087762674,
-                    "y": -2.5855263157894735
+                    "x": -0.41161928306551299,
+                    "y": -2.7828947368421053
                 },
                 {
-                    "x": 0.64524103831891222,
-                    "y": -1.2532894736842106
+                    "x": -0.45611866501854137,
+                    "y": 2.6348684210526314
                 },
                 {
-                    "x": 0.67861557478368362,
-                    "y": 1.0263157894736843
+                    "x": -3.1483312731767614,
+                    "y": 0.13815789473684209
                 },
                 {
-                    "x": 0.73423980222496921,
-                    "y": 2.5657894736842106
+                    "x": -3.0704573547589615,
+                    "y": -0.55263157894736836
                 },
                 {
-                    "x": -4.3498145859085291,
-                    "y": -0.05921052631578947
+                    "x": -4.3275648949320145,
+                    "y": -0.098684210526315791
                 }
             ],
             "agents": [
@@ -34,33 +34,33 @@
                     "ID": 0,
                     "positions": [
                         {
-                            "angel": 0,
-                            "pos-x": 3.9715698393077874,
-                            "pos-y": -2.6940789473684212,
+                            "angel": 82.327948544543062,
+                            "pos-x": -0.15574783683559951,
+                            "pos-y": -0.019736842105263157,
                             "skills": [
                                 {
                                     "flag": false,
                                     "name": "MoveSkill",
                                     "primary": 0,
-                                    "secondary": 0
+                                    "secondary": 200
                                 },
                                 {
                                     "flag": false,
                                     "name": "PassSkill",
                                     "primary": -1,
-                                    "secondary": 400,
+                                    "secondary": 150,
                                     "target": {
-                                        "agent": 1,
-                                        "index": 2
+                                        "agent": 4,
+                                        "index": 3
                                     }
                                 }
                             ],
-                            "tolerance": 30
+                            "tolerance": 0
                         },
                         {
                             "angel": 0,
-                            "pos-x": 2.2027194066749072,
-                            "pos-y": -1.4013157894736843,
+                            "pos-x": 0,
+                            "pos-y": 0,
                             "skills": [
                                 {
                                     "flag": false,
@@ -69,12 +69,200 @@
                                     "secondary": 0
                                 }
                             ],
-                            "tolerance": 30
+                            "tolerance": 0
+                        }
+                    ]
+                },
+                {
+                    "ID": 1,
+                    "positions": [
+                        {
+                            "angel": 0,
+                            "pos-x": -0.41161928306551299,
+                            "pos-y": -2.7828947368421053,
+                            "skills": [
+                                {
+                                    "flag": false,
+                                    "name": "MoveSkill",
+                                    "primary": 0,
+                                    "secondary": 0
+                                }
+                            ],
+                            "tolerance": 0
                         },
                         {
                             "angel": 0,
-                            "pos-x": 2.1915945611866503,
-                            "pos-y": -1.4111842105263157,
+                            "pos-x": -0.14462299134734241,
+                            "pos-y": 0.92763157894736847,
+                            "skills": [
+                                {
+                                    "flag": false,
+                                    "name": "MoveSkill",
+                                    "primary": 0,
+                                    "secondary": 0
+                                }
+                            ],
+                            "tolerance": 0
+                        },
+                        {
+                            "angel": 0,
+                            "pos-x": -0.15574783683559951,
+                            "pos-y": 2.7138157894736841,
+                            "skills": [
+                                {
+                                    "flag": false,
+                                    "name": "MoveSkill",
+                                    "primary": 0,
+                                    "secondary": 0
+                                }
+                            ],
+                            "tolerance": 0
+                        }
+                    ]
+                },
+                {
+                    "ID": 2,
+                    "positions": [
+                        {
+                            "angel": 0,
+                            "pos-x": -0.45611866501854137,
+                            "pos-y": 2.6348684210526314,
+                            "skills": [
+                                {
+                                    "flag": false,
+                                    "name": "MoveSkill",
+                                    "primary": 0,
+                                    "secondary": 0
+                                }
+                            ],
+                            "tolerance": 0
+                        },
+                        {
+                            "angel": 0,
+                            "pos-x": -0.15574783683559951,
+                            "pos-y": -2.7828947368421053,
+                            "skills": [
+                                {
+                                    "flag": false,
+                                    "name": "MoveSkill",
+                                    "primary": 0,
+                                    "secondary": 0
+                                }
+                            ],
+                            "tolerance": 0
+                        },
+                        {
+                            "angel": 0,
+                            "pos-x": -0.15574783683559951,
+                            "pos-y": -0.98684210526315796,
+                            "skills": [
+                                {
+                                    "flag": false,
+                                    "name": "MoveSkill",
+                                    "primary": 0,
+                                    "secondary": 0
+                                }
+                            ],
+                            "tolerance": 0
+                        }
+                    ]
+                },
+                {
+                    "ID": 3,
+                    "positions": [
+                        {
+                            "angel": 0,
+                            "pos-x": -3.1483312731767614,
+                            "pos-y": 0.13815789473684209,
+                            "skills": [
+                                {
+                                    "flag": false,
+                                    "name": "MoveSkill",
+                                    "primary": 0,
+                                    "secondary": 0
+                                }
+                            ],
+                            "tolerance": 0
+                        },
+                        {
+                            "angel": 0,
+                            "pos-x": -0.67861557478368362,
+                            "pos-y": 2.5460526315789473,
+                            "skills": [
+                                {
+                                    "flag": false,
+                                    "name": "MoveSkill",
+                                    "primary": 0,
+                                    "secondary": 0
+                                }
+                            ],
+                            "tolerance": 0
+                        },
+                        {
+                            "angel": 0,
+                            "pos-x": -0.65636588380716931,
+                            "pos-y": 0.88815789473684204,
+                            "skills": [
+                                {
+                                    "flag": false,
+                                    "name": "MoveSkill",
+                                    "primary": 0,
+                                    "secondary": 0
+                                }
+                            ],
+                            "tolerance": 0
+                        }
+                    ]
+                },
+                {
+                    "ID": 4,
+                    "positions": [
+                        {
+                            "angel": 0,
+                            "pos-x": -3.0704573547589615,
+                            "pos-y": -0.55263157894736836,
+                            "skills": [
+                                {
+                                    "flag": false,
+                                    "name": "MoveSkill",
+                                    "primary": 0,
+                                    "secondary": 0
+                                }
+                            ],
+                            "tolerance": 0
+                        },
+                        {
+                            "angel": 0,
+                            "pos-x": -0.88998763906056855,
+                            "pos-y": -0.82894736842105265,
+                            "skills": [
+                                {
+                                    "flag": false,
+                                    "name": "MoveSkill",
+                                    "primary": 0,
+                                    "secondary": 0
+                                }
+                            ],
+                            "tolerance": 0
+                        },
+                        {
+                            "angel": 0,
+                            "pos-x": -1.3683559950556241,
+                            "pos-y": -2.6151315789473686,
+                            "skills": [
+                                {
+                                    "flag": false,
+                                    "name": "MoveSkill",
+                                    "primary": 0,
+                                    "secondary": 3000
+                                }
+                            ],
+                            "tolerance": 0
+                        },
+                        {
+                            "angel": 0,
+                            "pos-x": 0.25587144622991348,
+                            "pos-y": -2.6052631578947372,
                             "skills": [
                                 {
                                     "flag": false,
@@ -86,256 +274,10 @@
                                     "flag": false,
                                     "name": "OneTouchSkill",
                                     "primary": 1000,
-                                    "secondary": 100
-                                }
-                            ],
-                            "tolerance": 30
-                        },
-                        {
-                            "angel": 0,
-                            "pos-x": 1.6464771322620519,
-                            "pos-y": -2.4769736842105265,
-                            "skills": [
-                                {
-                                    "flag": false,
-                                    "name": "MoveSkill",
-                                    "primary": 0,
-                                    "secondary": 0
-                                }
-                            ],
-                            "tolerance": 30
-                        }
-                    ]
-                },
-                {
-                    "ID": 1,
-                    "positions": [
-                        {
-                            "angel": 0,
-                            "pos-x": 0.58961681087762674,
-                            "pos-y": -2.5855263157894735,
-                            "skills": [
-                                {
-                                    "flag": false,
-                                    "name": "MoveSkill",
-                                    "primary": 0,
-                                    "secondary": 0
-                                }
-                            ],
-                            "tolerance": 30
-                        },
-                        {
-                            "angel": 0,
-                            "pos-x": 0.11124845488257107,
-                            "pos-y": 2.0723684210526314,
-                            "skills": [
-                                {
-                                    "flag": false,
-                                    "name": "MoveSkill",
-                                    "primary": 0,
-                                    "secondary": 0
-                                }
-                            ],
-                            "tolerance": 30
-                        },
-                        {
-                            "angel": 92.865144056352392,
-                            "pos-x": 3.3374536464771323,
-                            "pos-y": 2.0625,
-                            "skills": [
-                                {
-                                    "flag": false,
-                                    "name": "MoveSkill",
-                                    "primary": 0,
-                                    "secondary": 0
-                                },
-                                {
-                                    "flag": true,
-                                    "name": "ReceivePassSkill",
-                                    "primary": 1000,
-                                    "secondary": 1000
-                                },
-                                {
-                                    "flag": false,
-                                    "name": "PassSkill",
-                                    "primary": 300,
-                                    "secondary": 400,
-                                    "target": {
-                                        "agent": 0,
-                                        "index": 2
-                                    }
+                                    "secondary": 900
                                 }
                             ],
                             "tolerance": 100
-                        },
-                        {
-                            "angel": 0,
-                            "pos-x": 1.6687268232385661,
-                            "pos-y": 0.42434210526315785,
-                            "skills": [
-                                {
-                                    "flag": false,
-                                    "name": "MoveSkill",
-                                    "primary": 0,
-                                    "secondary": 0
-                                }
-                            ],
-                            "tolerance": 30
-                        }
-                    ]
-                },
-                {
-                    "ID": 2,
-                    "positions": [
-                        {
-                            "angel": 0,
-                            "pos-x": 0.64524103831891222,
-                            "pos-y": -1.2532894736842106,
-                            "skills": [
-                                {
-                                    "flag": false,
-                                    "name": "MoveSkill",
-                                    "primary": 0,
-                                    "secondary": 0
-                                }
-                            ],
-                            "tolerance": 30
-                        },
-                        {
-                            "angel": 0,
-                            "pos-x": 2.8034610630407912,
-                            "pos-y": -1.8157894736842106,
-                            "skills": [
-                                {
-                                    "flag": false,
-                                    "name": "MoveSkill",
-                                    "primary": 0,
-                                    "secondary": 0
-                                }
-                            ],
-                            "tolerance": 30
-                        },
-                        {
-                            "angel": 0,
-                            "pos-x": 1.6242274412855375,
-                            "pos-y": 1.4703947368421053,
-                            "skills": [
-                                {
-                                    "flag": false,
-                                    "name": "MoveSkill",
-                                    "primary": 0,
-                                    "secondary": 0
-                                }
-                            ],
-                            "tolerance": 30
-                        }
-                    ]
-                },
-                {
-                    "ID": 3,
-                    "positions": [
-                        {
-                            "angel": 0,
-                            "pos-x": 0.67861557478368362,
-                            "pos-y": 1.0263157894736843,
-                            "skills": [
-                                {
-                                    "flag": false,
-                                    "name": "MoveSkill",
-                                    "primary": 0,
-                                    "secondary": 0
-                                }
-                            ],
-                            "tolerance": 30
-                        },
-                        {
-                            "angel": 0,
-                            "pos-x": 2.9925834363411616,
-                            "pos-y": -1.5394736842105265,
-                            "skills": [
-                                {
-                                    "flag": false,
-                                    "name": "MoveSkill",
-                                    "primary": 0,
-                                    "secondary": 0
-                                }
-                            ],
-                            "tolerance": 30
-                        },
-                        {
-                            "angel": 0,
-                            "pos-x": 2.0024721878862795,
-                            "pos-y": 1.569078947368421,
-                            "skills": [
-                                {
-                                    "flag": false,
-                                    "name": "MoveSkill",
-                                    "primary": 0,
-                                    "secondary": 0
-                                }
-                            ],
-                            "tolerance": 30
-                        }
-                    ]
-                },
-                {
-                    "ID": 4,
-                    "positions": [
-                        {
-                            "angel": 0,
-                            "pos-x": 0.73423980222496921,
-                            "pos-y": 2.5657894736842106,
-                            "skills": [
-                                {
-                                    "flag": false,
-                                    "name": "MoveSkill",
-                                    "primary": 0,
-                                    "secondary": 0
-                                }
-                            ],
-                            "tolerance": 30
-                        },
-                        {
-                            "angel": 0,
-                            "pos-x": 0.99011124845488263,
-                            "pos-y": 0.58223684210526316,
-                            "skills": [
-                                {
-                                    "flag": false,
-                                    "name": "MoveSkill",
-                                    "primary": 0,
-                                    "secondary": 0
-                                }
-                            ],
-                            "tolerance": 30
-                        },
-                        {
-                            "angel": 0,
-                            "pos-x": 3.281829419035847,
-                            "pos-y": -1.2138157894736843,
-                            "skills": [
-                                {
-                                    "flag": false,
-                                    "name": "MoveSkill",
-                                    "primary": 0,
-                                    "secondary": 0
-                                }
-                            ],
-                            "tolerance": 30
-                        },
-                        {
-                            "angel": 0,
-                            "pos-x": 2.3695920889987638,
-                            "pos-y": 1.6480263157894735,
-                            "skills": [
-                                {
-                                    "flag": false,
-                                    "name": "MoveSkill",
-                                    "primary": 0,
-                                    "secondary": 0
-                                }
-                            ],
-                            "tolerance": 30
                         }
                     ]
                 },
@@ -344,8 +286,8 @@
                     "positions": [
                         {
                             "angel": 0,
-                            "pos-x": -4.3498145859085291,
-                            "pos-y": -0.05921052631578947,
+                            "pos-x": -4.3275648949320145,
+                            "pos-y": -0.098684210526315791,
                             "skills": [
                                 {
                                     "flag": false,
@@ -354,12 +296,12 @@
                                     "secondary": 0
                                 }
                             ],
-                            "tolerance": 30
+                            "tolerance": 0
                         },
                         {
                             "angel": 0,
-                            "pos-x": 0.61186650185414093,
-                            "pos-y": -0.05921052631578947,
+                            "pos-x": -1.9468479604449938,
+                            "pos-y": -0.098684210526315791,
                             "skills": [
                                 {
                                     "flag": false,
@@ -368,18 +310,32 @@
                                     "secondary": 0
                                 }
                             ],
-                            "tolerance": 30
+                            "tolerance": 0
+                        },
+                        {
+                            "angel": 0,
+                            "pos-x": -4.0160692212608158,
+                            "pos-y": -0.098684210526315791,
+                            "skills": [
+                                {
+                                    "flag": false,
+                                    "name": "MoveSkill",
+                                    "primary": 0,
+                                    "secondary": 0
+                                }
+                            ],
+                            "tolerance": 0
                         }
                     ]
                 }
             ],
             "ballInitPos": {
-                "x": 3.9715698393077874,
-                "y": -2.6940789473684212
+                "x": -0.15574783683559951,
+                "y": -0.019736842105263157
             },
             "chance": 1,
             "lastDist": 1.5,
-            "planMode": "INDIRECT",
+            "planMode": "KICKOFF",
             "tags": [
                 ""
             ]

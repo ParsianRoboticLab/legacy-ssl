@@ -125,7 +125,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     {
         posPid->kp = (conf()->BangBang_posKP())*(0.04/(agentPos.dist(pos2)*agentPos.dist(pos2)));
 //        debug(QString("kp: %1").arg(posPid->kp),D_MHMMD);
-        posPid->kp = min(posPid->kp,conf()->BangBang_posKP()*3);
+        posPid->kp = min(posPid->kp,conf()->BangBang_posKP()*3.5);
         posPid->kp = max(posPid->kp,conf()->BangBang_posKP());
 
         posPid->kd = 15;
