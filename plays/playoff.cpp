@@ -1916,9 +1916,9 @@ EMode CPlayOff::getMasterMode() {
 */
 bool CPlayOff::isKickDone(CRolePlayOff * _roleAgent) {
 
-    if (Circle2D(_roleAgent->getAgent()->pos(), 0.25).contains(wm->ball->pos)) {
+    if (Circle2D(_roleAgent->getAgent()->pos(), 0.4).contains(wm->ball->pos)) {
         _roleAgent->setBallIsNear(true);
-    } else if ( !Circle2D(_roleAgent->getAgent()->pos(), 0.35).contains(wm->ball->pos)
+    } else if ( !Circle2D(_roleAgent->getAgent()->pos(), 0.6).contains(wm->ball->pos)
                 && _roleAgent->getBallIsNear() ) {
         _roleAgent->setBallIsNear(false);
         if (_roleAgent->getChip()) {
@@ -1945,7 +1945,7 @@ bool CPlayOff::isKickDone(CRolePlayOff * _roleAgent) {
 
 bool CPlayOff::isReceiveDone(const CRolePlayOff * _roleAgent) {
     if(Circle2D(_roleAgent->getAgent()->pos(), 0.3).contains(wm->ball->pos)) {
-        if (wm->ball->vel.length() < 1.5)
+        if (wm->ball->vel.length() < 0.5)
             return true;
     }
     return false;

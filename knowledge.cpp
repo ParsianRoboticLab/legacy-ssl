@@ -351,6 +351,7 @@ int CKnowledge::getProfile(int agentId, double realParameter /*meter*/, bool isK
             if(profiledParameter > 1023) {
                 return 1023;
             } else if(profiledParameter > 0) {
+                debug(QString("kick real data :%1").arg((int)profiledParameter), D_FATEMEH);
                 return (int)profiledParameter;
             } else {
                 return 1;
@@ -375,18 +376,6 @@ int CKnowledge::getProfile(int agentId, double realParameter /*meter*/, bool isK
         }
     }
 
-}
-
-int CKnowledge::getMaxValidKickSpeedProfile(int agentId, bool spinOn){
-    int result;
-
-    if(agentId < 16) {
-        result = knowledge->getProfile(agentId, 7.9, true, spinOn);
-    } else {
-        result = 450;
-    }
-
-    return result;
 }
 
 ///////////////////////////////// AHZ //////////////////////////////////////////
