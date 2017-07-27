@@ -2780,15 +2780,18 @@ Vector2D DefensePlan::ballPrediction(bool _isGoalie){
     Rect2D fieldRect(Vector2D(- _FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0)+Vector2D(-0.005,-0.005),Vector2D(_FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0)+Vector2D(+0.005,+0.005));
     double dist2Ball = 1000;
     if(!_isGoalie){
-        if(BallVel < 1.5 + ballVelThreshOld){
-            ballPosVel = Segment2D(BallPos,BallPos+(3 / BallVel));
-            ballVelThreshOld = 0.5;
-        }
-        else{
-            ballPosVel = Segment2D(BallPos,BallPos+);
-            ballVelThreshOld = 0.0;
-        }
+       ballPosVel = Segment2D(BallPos,BallPos+(BallVel * 1));
     }
+//    if(!_isGoalie){
+//        if(BallVel < 1.5 + ballVelThreshOld){
+//            ballPosVel = Segment2D(BallPos,BallPos+(3 / BallVel));
+//            ballVelThreshOld = 0.5;
+//        }
+//        else{
+//            ballPosVel = Segment2D(BallPos,BallPos+);
+//            ballVelThreshOld = 0.0;
+//        }
+//    }
 
     if(BallVel.x > 0 && BallPos.x > 0){
         return BallPos;
