@@ -279,6 +279,8 @@ public:
             DEF_VALUE(PlayOff, bool, Bool, UseFastPlay)
             DEF_VALUE(PlayOff, bool, Bool, UseFirstPlay)
             DEF_VALUE(PlayOff, bool, Bool, UseBlockBlocker)
+            DEF_VALUE(PlayOff, bool, Bool, UseForcedBlock)
+
 
     DEF_TREE(DynamicPlay)
     DEF_VALUE(DynamicPlay, double , Double , LowSpeedPass)
