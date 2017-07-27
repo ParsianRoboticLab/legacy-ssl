@@ -364,6 +364,7 @@ kkRPMode CSkillReceivePass::decideMode()
 
 void CSkillReceivePass::execute()
 {
+    receiveR = 3;
     ballRealVel = knowledge->getRealBallVel();
     gotopointavoid->setSlowMode(slow);
     gotopointavoid->setAgent(agent);
@@ -1147,12 +1148,12 @@ void CSkillKick::jTurn()
     if(wm->ball->vel.length() < 0.2)
     {
         posPid->kp = 0;
-        speedPid->kp = 5 +15.1*agentPos.dist(ballPos) + dirReduce;
+        speedPid->kp = 5 +7.1*agentPos.dist(ballPos) + dirReduce;
     }
     else
     {
         posPid->kp = 0;
-        speedPid->kp = 4+8.1*agentPos.dist(ballPos) + dirReduce;
+        speedPid->kp = 4+5.1*agentPos.dist(ballPos) + dirReduce;
 
     }
 
@@ -1981,7 +1982,7 @@ void CSkillKickOneTouch::execute()
     Vector2D addVec = (agentPos - target).norm()*stopParam;
     Vector2D intersectPos;
     Vector2D sol1,sol2;
-    double onetouchRad =0.5;
+    double onetouchRad =1;
     double onetouchKickRad = 0.5;
     Circle2D oneTouchArea;
     Circle2D oppPenaltyArea(wm->field->oppGoal() + Vector2D(0.15,0),1.45);
