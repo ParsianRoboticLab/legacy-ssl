@@ -260,10 +260,10 @@ void CPlayOff::staticExecute() {
 void CPlayOff::dynamicExecute() {
 
 
-    if (dynamicSelect == CHIP && false) {
+    if (dynamicSelect == CHIP) {
         dynamicPlayChipToGoal();
         checkEndChipToGoal();
-    } else if (dynamicSelect == KHAFAN || 1) {
+    } else if (dynamicSelect == KHAFAN) {
         dynamicPlayKhafan();
         checkEndKhafan();
     } else if (dynamicSelect == BLOCKER) {
@@ -372,9 +372,20 @@ void CPlayOff::dynamicPlayBlocker() {
 }
 
 void CPlayOff::dynamicPlayKhafan() {
+
+    debug(QString("Mahi Time : %1").arg(knowledge->getCurrentTime() - mahiDynamicTime), D_MAHI);
+    if (knowledge->getCurrentTime() - mahiDynamicTime > 1000 && (mahiDynamicTime != -1) && !initial) {
+        shot    = false;
+        pass    = true;
+        initial = false;
+        ready   = false;
+        playOnFlag = true;
+    }
+
     if (initial) {
         dynamicAssignID();
         ready = true;
+        mahiDynamicTime = -1;
 
     } else if (ready) {
         roleAgent[0] -> setAvoidCenterCircle(false);
@@ -401,6 +412,7 @@ void CPlayOff::dynamicPlayKhafan() {
         }
 
         ready = false;
+        mahiDynamicTime = knowledge->getCurrentTime();
 
     } else if (pass) {
         roleAgent[0] -> setDoPass(true);
@@ -430,6 +442,7 @@ void CPlayOff::dynamicPlayKhafan() {
 
 
     }
+
 
 }
 
