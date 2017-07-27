@@ -1142,7 +1142,7 @@ void CSkillKick::jTurn()
     }
     if(knowledge->isOurNonPlayOnKick())
     {
-        dirReduce -= 1;
+        dirReduce -= 3;
     }
 
     if(wm->ball->vel.length() < 0.2)
@@ -1153,7 +1153,7 @@ void CSkillKick::jTurn()
     else
     {
         posPid->kp = 0;
-        speedPid->kp = 4+5.1*agentPos.dist(ballPos) + dirReduce;
+        speedPid->kp = 5+5.1*agentPos.dist(ballPos) + dirReduce;
 
     }
 
@@ -1427,7 +1427,7 @@ void CSkillKick::findPosToGo()
     double agentTime = 0;
     Vector2D finalDir;
     Segment2D ballPath(ballPos,ballPos + wm->ball->vel.norm()*10);
-    Circle2D dribblerArea(agentPos+agentDir.norm()*0.1,0.25);
+    Circle2D dribblerArea(agentPos+agentDir.norm()*0.1,0.15);
     Circle2D robotArea(agentPos,1);
 
     gpa->setAddVel(Vector2D(0,0));
