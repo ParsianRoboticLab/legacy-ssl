@@ -1431,7 +1431,7 @@ void DefensePlan::execute(){
             if(wm->our.activeAgentsCount() < 7){
                 if(playOnMode){
                     checkDefenseExeptions();
-                    if(defExceptions.active && !knowledge->transientFlag){
+                    if(defExceptions.active ){
                         runDefenseExeptions();
                         defenseCount = defenseAgents.size() - 1;
                     }
@@ -2738,7 +2738,12 @@ int DefensePlan::decideNumOfMarks(){
             return decideNumOfMarksInPlayOff(defenseCount);
         }
         else if(knowledge->transientFlag){
-            return defenseCount;//TO DO:
+            if(defExceptions.active && defenseCount >= 1){
+                return defenseCount - 1;
+            }
+            else{
+                return defenseCount;//TO DO:
+            }
         }
         else if(playOnMode){
             if((Vector2D::angleOf(BallPos,ourGoal,leftCorner).abs() < 20 + overDefThr
@@ -2772,11 +2777,25 @@ Vector2D DefensePlan::ballPrediction(bool _isGoalie){
 
     Vector2D BallPos = wm->ball->pos;
     Vector2D BallVel = wm->ball->vel * 0.5;
-    Segment2D ballPosVel(BallPos,BallPos+(BallVel * 0.5));
     Vector2D predictedBall;
     Vector2D solu[2];
+    Segment2D ballPosVel(BallPos,BallPos+(BallVel * 0.5));
     Rect2D fieldRect(Vector2D(- _FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0)+Vector2D(-0.005,-0.005),Vector2D(_FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0)+Vector2D(+0.005,+0.005));
     double dist2Ball = 1000;
+    if(!_isGoalie){
+       ballPosVel = Segment2D(BallPos,BallPos+(BallVel * 1));
+    }
+//    if(!_isGoalie){
+//        if(BallVel < 1.5 + ballVelThreshOld){
+//            ballPosVel = Segment2D(BallPos,BallPos+(3 / BallVel));
+//            ballVelThreshOld = 0.5;
+//        }
+//        else{
+//            ballPosVel = Segment2D(BallPos,BallPos+);
+//            ballVelThreshOld = 0.0;
+//        }
+//    }
+
     if(BallVel.x > 0 && BallPos.x > 0){
         return BallPos;
     }
