@@ -720,7 +720,7 @@ void DefensePlan::setGoalKeeperState(){
                     goalKeeperOneTouch = true;
                     goalKeeperClearMode = false;
                     ballIsOutOfField = false;
-                    if(!goalLine.intersection(ballLine).valid() || wm->ball->vel.length() <= 1.3){
+                    if(!goalLine.intersection(ballLine).valid()){
                         oneTouchCnt++;
                         return;
                     }

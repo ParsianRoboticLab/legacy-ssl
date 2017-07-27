@@ -365,7 +365,6 @@ public:
     void checkShootDanger();
     void Aminshoot(Vector2D ball, QList<Circle2D> obstacles, double& _empty, Vector2D& _best);
     int getProfile(int agentId, double realParameter, bool isKick=true, bool spinOn=false);
-    int getMaxValidKickSpeedProfile(int agentId, bool spinOn = false);
     double chipGoalPropability(bool isOurChip);
     void calculateCommandFrameRate();
     double lastTimeCommandFPSCalced;
