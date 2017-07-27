@@ -1161,6 +1161,7 @@ DefensePlan::DefensePlan()
     secondDefenseKickLine = 0;
     goalieKickThreshold = 70;
     /////////// AHZ //////////////
+    kickOffThr = 0;
     lastMarkRoles.append(markRoles);
     goalKeeperTarget = Vector2D(0,0);
     dangerModeThresholdForClear = 0;
@@ -1168,7 +1169,9 @@ DefensePlan::DefensePlan()
     /////////////// For Adding TS Mode in Mark ///////////////////////////////
     xLimitForblockingPass = 0;
     manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
+
     if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass){
+
         knowledge->lastStateForMark = QString("BlockPass");
         knowledge->stateForMark = QString("BlockPass");
     }
@@ -1428,7 +1431,7 @@ void DefensePlan::execute(){
             if(wm->our.activeAgentsCount() < 7){
                 if(playOnMode){
                     checkDefenseExeptions();
-                    if(defExceptions.active && !knowledge->transientFlag){
+                    if(defExceptions.active ){
                         runDefenseExeptions();
                         defenseCount = defenseAgents.size() - 1;
                     }
@@ -2735,7 +2738,12 @@ int DefensePlan::decideNumOfMarks(){
             return decideNumOfMarksInPlayOff(defenseCount);
         }
         else if(knowledge->transientFlag){
-            return defenseCount;//TO DO:
+            if(defExceptions.active && defenseCount >= 1){
+                return defenseCount - 1;
+            }
+            else{
+                return defenseCount;//TO DO:
+            }
         }
         else if(playOnMode){
             if((Vector2D::angleOf(BallPos,ourGoal,leftCorner).abs() < 20 + overDefThr
@@ -2769,11 +2777,25 @@ Vector2D DefensePlan::ballPrediction(bool _isGoalie){
 
     Vector2D BallPos = wm->ball->pos;
     Vector2D BallVel = wm->ball->vel * 0.5;
-    Segment2D ballPosVel(BallPos,BallPos+(BallVel * 0.5));
     Vector2D predictedBall;
     Vector2D solu[2];
+    Segment2D ballPosVel(BallPos,BallPos+(BallVel * 0.5));
     Rect2D fieldRect(Vector2D(- _FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0)+Vector2D(-0.005,-0.005),Vector2D(_FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0)+Vector2D(+0.005,+0.005));
     double dist2Ball = 1000;
+    if(!_isGoalie){
+       ballPosVel = Segment2D(BallPos,BallPos+(BallVel * 1));
+    }
+//    if(!_isGoalie){
+//        if(BallVel < 1.5 + ballVelThreshOld){
+//            ballPosVel = Segment2D(BallPos,BallPos+(3 / BallVel));
+//            ballVelThreshOld = 0.5;
+//        }
+//        else{
+//            ballPosVel = Segment2D(BallPos,BallPos+);
+//            ballVelThreshOld = 0.0;
+//        }
+//    }
+
     if(BallVel.x > 0 && BallPos.x > 0){
         return BallPos;
     }
@@ -2943,7 +2965,9 @@ void DefensePlan::findPos(int _markAgentSize){
         segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
     }
     //////////////// Determine the plan of mark from GUI ////////////////////
-    if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass){
+    if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass + kickOffThr){
+        debug(QString("Is here"), D_HAMED);
+        kickOffThr =  0;
         if(playOff || stopMode){
             knowledge->stateForMark = QString("BlockPass");
             manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
@@ -2960,6 +2984,7 @@ void DefensePlan::findPos(int _markAgentSize){
         }
     }
     else{
+        kickOffThr = 0.2;
         if(playOff || stopMode){
             knowledge->stateForMark = QString("BlockShot");
             manToManMarkBlockShotInPlayOff(_markAgentSize);

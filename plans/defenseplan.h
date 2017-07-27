@@ -80,6 +80,8 @@ protected:
     double besideCounter;
     int lastOpponentAgentsToBeMarkSize;
     double threshOld = 0.0;
+    double kickOffThr;
+    double ballVelThreshOld;
     double ballCircleR = 0.5;
     double xLimitForblockingPass;
     bool isPermissionToKick;
