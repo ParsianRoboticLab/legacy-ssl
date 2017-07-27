@@ -1103,7 +1103,7 @@ void CSkillGotoPointAvoid::execute()
         alpha = fabs(Vector2D::angleBetween(result[1] - result[0] , result[2] - result[1]).degree());
 //        debug(QString("alpha : %1").arg(alpha),D_MHMMD);
         lllll = result[1];
-        vf = -2 * log(alpha) + 9;
+        vf = -2 * log(alpha) + 10;
         vf = max(vf , 0.5);
         vf = min (vf,4);
     }

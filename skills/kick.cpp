@@ -1460,6 +1460,26 @@ void CSkillKick::findPosToGo()
         {
             finalDir = Vector2D(cos(kickFinalDir.radian()),sin(kickFinalDir.radian()));
         }
+        if(!wm->field->isInField(finalPos))
+        {
+            if(finalPos.y > _FIELD_HEIGHT /2)
+            {
+                finalPos = Segment2D (Vector2D(_FIELD_WIDTH /-2,_FIELD_HEIGHT/2) ,Vector2D(_FIELD_WIDTH /2,_FIELD_HEIGHT/2)).intersection(ballPath);
+            }
+            else if(finalPos.y < _FIELD_HEIGHT /-2)
+            {
+                finalPos = Segment2D (Vector2D(_FIELD_WIDTH /-2,_FIELD_HEIGHT/-2) ,Vector2D(_FIELD_WIDTH /2,_FIELD_HEIGHT/-2)).intersection(ballPath);
+            }
+            else if(finalPos.x > _FIELD_WIDTH /2)
+            {
+                finalPos = Segment2D (Vector2D(_FIELD_WIDTH /2,_FIELD_HEIGHT/-2) ,Vector2D(_FIELD_WIDTH /2,_FIELD_HEIGHT/2)).intersection(ballPath);
+            }
+            else
+            {
+                finalPos = Segment2D (Vector2D(_FIELD_WIDTH /-2,_FIELD_HEIGHT/-2) ,Vector2D(_FIELD_WIDTH /-2,_FIELD_HEIGHT/2)).intersection(ballPath);
+
+            }
+        }
     }
 
     else
