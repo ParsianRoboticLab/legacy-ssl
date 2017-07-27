@@ -54,11 +54,11 @@ CRoleBlockInfo::CRoleBlockInfo(QString _roleName) : CRoleInfo(_roleName)
 
 void CRoleBlockInfo::findPos(bool blockGoal)
 {
-	double blockDist = 0.5;
+        double blockDist = 0.5;
 
-        if (wm->ball->pos.x > 1) {
-            blockDist = 2.95;
-        }
+//        if (wm->ball->pos.x > 1) {
+//            blockDist = 2.95;
+//        }
 
 	if ( blockGoal ){
 		blockPosition = ( wm->field->ourGoal() - wm->ball->pos).norm()*( blockDist + CRobot::robot_radius_old) + wm->ball->pos;
