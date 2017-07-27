@@ -1167,7 +1167,7 @@ DefensePlan::DefensePlan()
     dangerModeThresholdForClear = 0;
     dangerModeThresholdForDanger = 0;
     /////////////// For Adding TS Mode in Mark ///////////////////////////////
-    xLimitForblockingPass = 0.2;
+    xLimitForblockingPass = 0;
     manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
 
     if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass){
