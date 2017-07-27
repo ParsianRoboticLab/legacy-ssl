@@ -585,9 +585,9 @@ kckMode CSkillKick::decideMode()
     ///////////////////////////////find center of dribbler for pass profiler
     Polygon2D robotKickArea;
 
-    double distCoef =   (2.5/ballPos.dist(target))/100;
+    double distCoef =   (3/ballPos.dist(target))/100;
     distCoef = min(distCoef,0.03);
-    distCoef = max(distCoef,0.02);
+    distCoef = max(distCoef,0.015);
     debug(QString("distCoef: %1").arg(distCoef),D_MHMMD);
 
     robotKickArea.addVertex(agentPos+agent->dir().norm()*0.08+agent->dir().rotate(90).norm()*distCoef);
@@ -1051,29 +1051,37 @@ void CSkillKick::jTurn()
         if(wm->ball->vel.length() < 0.1)
             shift = 5 + (1-agentPos.dist(ballPos))*20;
         else
-            shift =10 + (1-agentPos.dist(ballPos))*45;
+            shift =7 + (1-agentPos.dist(ballPos))*45;
         distCoef = 0.17;
     }
     else if(movementDir < -25){
         if(wm->ball->vel.length() < 0.1)
             shift = -5 - (1-agentPos.dist(ballPos))*20;
         else
-            shift = -10 - (1-agentPos.dist(ballPos))*45;
+            shift = -7 - (1-agentPos.dist(ballPos))*45;
 
         distCoef = 0.17;
     }
     else if(movementDir > 0) {
-        if(wm->ball->vel.length() < 0.1)
-            shift = 5 + (1-agentPos.dist(ballPos))*15;
+        if(wm->field->isInOppPenaltyArea(ballPos + (wm->field->oppGoal() - ballPos).norm()*0.15) && agentPos.dist(ballPos)<0.25)
+        {
+             shift = 15 + (1-agentPos.dist(ballPos))*20;
+        }
+        else if(wm->ball->vel.length() < 0.1)
+            shift = 7 + (1-agentPos.dist(ballPos))*20;
         else
-            shift =5 + (1-agentPos.dist(ballPos))*22;
+            shift =7 + (1-agentPos.dist(ballPos))*30;
         distCoef = 0.17;
     }
     else if(movementDir < 0){
-        if(wm->ball->vel.length() < 0.1)
-            shift = -5 - (1-agentPos.dist(ballPos))*15;
+        if(wm->field->isInOppPenaltyArea(ballPos + (wm->field->oppGoal() - ballPos).norm()*0.15) && agentPos.dist(ballPos)<0.25)
+        {
+             shift = -15 - (1-agentPos.dist(ballPos))*20;
+        }
+        else if(wm->ball->vel.length() < 0.1)
+            shift = -7 - (1-agentPos.dist(ballPos))*20;
         else
-            shift = -5 - (1-agentPos.dist(ballPos))*22;
+            shift = -7 - (1-agentPos.dist(ballPos))*30;
 
         distCoef = 0.17;
     }
@@ -1138,22 +1146,22 @@ void CSkillKick::jTurn()
     dirReduce = (fabs(movementDir)/100)*(fabs(movementDir)/100);
     if(wm->field->isInOppPenaltyArea(ballPos + (wm->field->oppGoal() - ballPos).norm()*0.15) && agentPos.dist(ballPos)<0.25)
     {
-        dirReduce -= 4;
+        dirReduce -= 2;
     }
     if(knowledge->isOurNonPlayOnKick())
     {
-        dirReduce -= 3;
+        dirReduce -= 2;
     }
 
     if(wm->ball->vel.length() < 0.2)
     {
         posPid->kp = 0;
-        speedPid->kp = 5 +6.1*agentPos.dist(ballPos) + dirReduce;
+        speedPid->kp = 4.5 +5.1*agentPos.dist(ballPos) + dirReduce;
     }
     else
     {
         posPid->kp = 0;
-        speedPid->kp = 4+8*agentPos.dist(ballPos) + dirReduce;
+        speedPid->kp = 4.5+5*agentPos.dist(ballPos) + dirReduce;
 
     }
 
