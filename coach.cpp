@@ -113,7 +113,7 @@ CCoach::CCoach(CAgent**_agents)
     defenseTimeForVisionProblem[1].start();
     transientFlag = false;
     trasientTimeOut.start();
-    translationTimeOutTime = 2000;
+    translationTimeOutTime = 1000;
     exeptionPlayMake = NULL;
     exeptionPlayMakeThr = 0;
 
@@ -382,7 +382,7 @@ void CCoach::decidePreferedDefenseAgentsCountAndGoalieAgent() {
 
     } else if (knowledge->isStart()) {
         if (transientFlag) {
-            if (trasientTimeOut.elapsed() > 1000 && !wm->field->isInOurPenaltyArea(wm->ball->pos)) {
+            if (trasientTimeOut.elapsed() > 500 && !wm->field->isInOurPenaltyArea(wm->ball->pos)) {
                 preferedDefenseCounts = max(0, agentsCount - missMatchIds.count() - 1);
 
             } else {
