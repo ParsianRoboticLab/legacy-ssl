@@ -1161,6 +1161,7 @@ DefensePlan::DefensePlan()
     secondDefenseKickLine = 0;
     goalieKickThreshold = 70;
     /////////// AHZ //////////////
+    kickOffThr = 0;
     lastMarkRoles.append(markRoles);
     goalKeeperTarget = Vector2D(0,0);
     dangerModeThresholdForClear = 0;
@@ -1168,7 +1169,9 @@ DefensePlan::DefensePlan()
     /////////////// For Adding TS Mode in Mark ///////////////////////////////
     xLimitForblockingPass = 0;
     manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
+
     if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass){
+
         knowledge->lastStateForMark = QString("BlockPass");
         knowledge->stateForMark = QString("BlockPass");
     }
@@ -2962,7 +2965,9 @@ void DefensePlan::findPos(int _markAgentSize){
         segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
     }
     //////////////// Determine the plan of mark from GUI ////////////////////
-    if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass){
+    if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass + kickOffThr){
+        debug(QString("Is here"), D_HAMED);
+        kickOffThr =  0;
         if(playOff || stopMode){
             knowledge->stateForMark = QString("BlockPass");
             manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
@@ -2979,6 +2984,7 @@ void DefensePlan::findPos(int _markAgentSize){
         }
     }
     else{
+        kickOffThr = 0.2;
         if(playOff || stopMode){
             knowledge->stateForMark = QString("BlockShot");
             manToManMarkBlockShotInPlayOff(_markAgentSize);
