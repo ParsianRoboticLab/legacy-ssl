@@ -252,6 +252,7 @@ void CPlayOff::staticExecute() {
             for (int i = 0; i < masterPlan->common.currentSize; i++) {
                 newRoleAgent[i]->execute();
             }
+            lastTime = knowledge->getCurrentTime();
         }
     }
 }

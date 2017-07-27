@@ -47,7 +47,7 @@
                                 {
                                     "flag": false,
                                     "name": "PassSkill",
-                                    "primary": 300,
+                                    "primary": -1,
                                     "secondary": 150,
                                     "target": {
                                         "agent": 1,
@@ -120,8 +120,8 @@
                         },
                         {
                             "angel": 0,
-                            "pos-x": 0.65636588380716931,
-                            "pos-y": -2.7335526315789473,
+                            "pos-x": 0.31149567367119901,
+                            "pos-y": -2.6151315789473686,
                             "skills": [
                                 {
                                     "flag": false,

@@ -1049,14 +1049,14 @@ void CSkillKick::jTurn()
         shift = -20 - (1-agentPos.dist(ballPos))*61;
     else if(movementDir > 25) {
         if(wm->ball->vel.length() < 0.1)
-            shift = 5 + (1-agentPos.dist(ballPos))*10;
+            shift = 5 + (1-agentPos.dist(ballPos))*20;
         else
             shift =10 + (1-agentPos.dist(ballPos))*45;
         distCoef = 0.17;
     }
     else if(movementDir < -25){
         if(wm->ball->vel.length() < 0.1)
-            shift = -5 - (1-agentPos.dist(ballPos))*10;
+            shift = -5 - (1-agentPos.dist(ballPos))*20;
         else
             shift = -10 - (1-agentPos.dist(ballPos))*45;
 
@@ -1064,14 +1064,14 @@ void CSkillKick::jTurn()
     }
     else if(movementDir > 0) {
         if(wm->ball->vel.length() < 0.1)
-            shift = 5 + (1-agentPos.dist(ballPos))*10;
+            shift = 5 + (1-agentPos.dist(ballPos))*15;
         else
             shift =5 + (1-agentPos.dist(ballPos))*22;
         distCoef = 0.17;
     }
     else if(movementDir < 0){
         if(wm->ball->vel.length() < 0.1)
-            shift = -5 - (1-agentPos.dist(ballPos))*10;
+            shift = -5 - (1-agentPos.dist(ballPos))*15;
         else
             shift = -5 - (1-agentPos.dist(ballPos))*22;
 
@@ -1142,18 +1142,18 @@ void CSkillKick::jTurn()
     }
     if(knowledge->isOurNonPlayOnKick())
     {
-        dirReduce -= 1;
+        dirReduce -= 3;
     }
 
     if(wm->ball->vel.length() < 0.2)
     {
         posPid->kp = 0;
-        speedPid->kp = 5 +7.1*agentPos.dist(ballPos) + dirReduce;
+        speedPid->kp = 5 +6.1*agentPos.dist(ballPos) + dirReduce;
     }
     else
     {
         posPid->kp = 0;
-        speedPid->kp = 4+5.1*agentPos.dist(ballPos) + dirReduce;
+        speedPid->kp = 4+8*agentPos.dist(ballPos) + dirReduce;
 
     }
 
@@ -1427,7 +1427,7 @@ void CSkillKick::findPosToGo()
     double agentTime = 0;
     Vector2D finalDir;
     Segment2D ballPath(ballPos,ballPos + wm->ball->vel.norm()*10);
-    Circle2D dribblerArea(agentPos+agentDir.norm()*0.1,0.25);
+    Circle2D dribblerArea(agentPos+agentDir.norm()*0.1,0.15);
     Circle2D robotArea(agentPos,1);
 
     gpa->setAddVel(Vector2D(0,0));
@@ -1459,6 +1459,26 @@ void CSkillKick::findPosToGo()
         else
         {
             finalDir = Vector2D(cos(kickFinalDir.radian()),sin(kickFinalDir.radian()));
+        }
+        if(!wm->field->isInField(finalPos))
+        {
+            if(finalPos.y > _FIELD_HEIGHT /2)
+            {
+                finalPos = Segment2D (Vector2D(_FIELD_WIDTH /-2,_FIELD_HEIGHT/2) ,Vector2D(_FIELD_WIDTH /2,_FIELD_HEIGHT/2)).intersection(ballPath);
+            }
+            else if(finalPos.y < _FIELD_HEIGHT /-2)
+            {
+                finalPos = Segment2D (Vector2D(_FIELD_WIDTH /-2,_FIELD_HEIGHT/-2) ,Vector2D(_FIELD_WIDTH /2,_FIELD_HEIGHT/-2)).intersection(ballPath);
+            }
+            else if(finalPos.x > _FIELD_WIDTH /2)
+            {
+                finalPos = Segment2D (Vector2D(_FIELD_WIDTH /2,_FIELD_HEIGHT/-2) ,Vector2D(_FIELD_WIDTH /2,_FIELD_HEIGHT/2)).intersection(ballPath);
+            }
+            else
+            {
+                finalPos = Segment2D (Vector2D(_FIELD_WIDTH /-2,_FIELD_HEIGHT/-2) ,Vector2D(_FIELD_WIDTH /-2,_FIELD_HEIGHT/2)).intersection(ballPath);
+
+            }
         }
     }
 
@@ -1982,7 +2002,7 @@ void CSkillKickOneTouch::execute()
     Vector2D addVec = (agentPos - target).norm()*stopParam;
     Vector2D intersectPos;
     Vector2D sol1,sol2;
-    double onetouchRad =1;
+    double onetouchRad =0.5;
     double onetouchKickRad = 0.5;
     Circle2D oneTouchArea;
     Circle2D oppPenaltyArea(wm->field->oppGoal() + Vector2D(0.15,0),1.45);
@@ -2004,7 +2024,7 @@ void CSkillKickOneTouch::execute()
     }
     else if(oneTouchArea.intersection(ballPath,&sol1,&sol2) && wm->ball->vel.length() > 0.1)
     {
-        gotopointavoid->setNoAvoid(false);
+        gotopointavoid->setNoAvoid(true);
         intersectPos = ballPath.nearestPoint(kickerPoint);
         if(wm->field->isInOppPenaltyArea(intersectPos) || oppPenaltyAreaWP.contains(waitpos))
         {
