@@ -144,22 +144,22 @@ void CDynamicAttack::makePlan(int agentSize) {
 
     /// Start Role Assigning
     /// if now is the opportunity of counter attack
-//    int oppCnt = 0;
-//    for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
-//        if(wm->opp.active(i)->pos.x >= 0)
-//            oppCnt++;
-//    if(knowledge->ballPossesion == knowledge->ballPossesionState::isBallOurs() &&
-//            oppCnt < 4)
-//    {
-//        currentPlan.mode = DynamicEnums::CounterAttack;
-//        for (size_t i = 0; i < agentSize; i++) {
-//            currentPlan.positionAgents[i].region = DynamicEnums::CounterAttack;
-//            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
-//        }
-//    }
+    //    int oppCnt = 0;
+    //    for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
+    //        if(wm->opp.active(i)->pos.x >= 0)
+    //            oppCnt++;
+    //    if(knowledge->ballPossesion == knowledge->ballPossesionState::isBallOurs() &&
+    //            oppCnt < 4)
+    //    {
+    //        currentPlan.mode = DynamicEnums::CounterAttack;
+    //        for (size_t i = 0; i < agentSize; i++) {
+    //            currentPlan.positionAgents[i].region = DynamicEnums::CounterAttack;
+    //            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+    //        }
+    //    }
 
-//    if(critical == false)
-//        lastPMInitWasDribble = false;
+    //    if(critical == false)
+    //        lastPMInitWasDribble = false;
     bool notInFirst = true;
 
     // we Don't have the ball -- counter-attack, blocking, move forward
@@ -167,7 +167,7 @@ void CDynamicAttack::makePlan(int agentSize) {
         notInFirst = false;
         currentPlan.mode = DynamicEnums::NotWeHaveBall;
         if(policy()->DynamicPlay_ChipForward() == true)
-            currentPlan.playmake.init(DynamicEnums::Chip, DynamicEnums::Forward);
+            currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Forward);
         else
             currentPlan.playmake.init(DynamicEnums::Chip, DynamicEnums::Goal);
         for(size_t i = 0;i < agentSize;i++) {
@@ -190,62 +190,62 @@ void CDynamicAttack::makePlan(int agentSize) {
     // shot prob isn't more than 50% and
     // there is a critical situation
     else
-    if(wm->opp.activeAgentsCount() > 0 && wm->field->isInField(currentPlan.passPos))
-    {
-        for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
+        if(wm->opp.activeAgentsCount() > 0 && wm->field->isInField(currentPlan.passPos))
         {
-            CRobot*   agent         = wm->opp.active(i);
-            Vector2D  agentPos      = agent->pos, t1, t2;
-            Segment2D temp          = Segment2D(ballPos, currentPlan.passPos);
-            Circle2D  oppRobotArea  = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
-            Circle2D  ourRobotArea  = Circle2D(mahiPlayMaker->pos()
-                                             + mahiPlayMaker->dir().norm()  * 0.08, 0.08);
-            Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
-            Circle2D  bc = Circle2D(ballPos, 0.25);
-
-            if(/*mahiPlayMaker->shootSensor() && */ballPos.x > 1 &&
-                    ((robotKickArea.intersection(temp, &t1, &t2) && oppRobotArea.contains(ballPos))
-                       || (lastPMInitWasDribble && bc.contains(mahiPlayMaker->pos()) && bc.contains(oppRob))))
+            for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
             {
-                if(lastPMInitWasDribble && bc.contains(mahiPlayMaker->pos()) && bc.contains(oppRob))
-                {
+                CRobot*   agent         = wm->opp.active(i);
+                Vector2D  agentPos      = agent->pos, t1, t2;
+                Segment2D temp          = Segment2D(ballPos, currentPlan.passPos);
+                Circle2D  oppRobotArea  = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
+                Circle2D  ourRobotArea  = Circle2D(mahiPlayMaker->pos()
+                                                   + mahiPlayMaker->dir().norm()  * 0.08, 0.08);
+                Circle2D  robotKickArea = Circle2D(agentPos + agent->dir.norm() * 0.08, 0.08);
+                Circle2D  bc = Circle2D(ballPos, 0.25);
 
-                }
-                else if(robotKickArea.intersection(temp, &t1, &t2) && oppRobotArea.contains(ballPos) /*&& ourRobotArea.contains(ballPos)*/)
+                if(/*mahiPlayMaker->shootSensor() && */ballPos.x > 1 &&
+                        ((robotKickArea.intersection(temp, &t1, &t2) && oppRobotArea.contains(ballPos))
+                         || (lastPMInitWasDribble && bc.contains(mahiPlayMaker->pos()) && bc.contains(oppRob))))
                 {
-                    oppRob = wm->opp.active(i)->pos;
-                }
-                notInFirst = false;
-                if(policy()->DynamicPlay_DribbleEveryWhere() == true)
-                {
-                    dribbleIntention.restart();
-                    debug(QString("WOW we are dribbling"), D_PARSA);
-                    currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
-                    for(size_t i = 0;i < agentSize;i++) {
-                        if(i < 2)
-                            currentPlan.positionAgents[i].region = DynamicEnums::Supporter;
-                        else
+                    if(lastPMInitWasDribble && bc.contains(mahiPlayMaker->pos()) && bc.contains(oppRob))
+                    {
+
+                    }
+                    else if(robotKickArea.intersection(temp, &t1, &t2) && oppRobotArea.contains(ballPos) /*&& ourRobotArea.contains(ballPos)*/)
+                    {
+                        oppRob = wm->opp.active(i)->pos;
+                    }
+                    notInFirst = false;
+                    if(policy()->DynamicPlay_DribbleEveryWhere() == true)
+                    {
+                        dribbleIntention.restart();
+                        debug(QString("WOW we are dribbling"), D_PARSA);
+                        currentPlan.playmake.init(DynamicEnums::Dribble, DynamicEnums::Goal);
+                        for(size_t i = 0;i < agentSize;i++) {
+                            if(i < 2)
+                                currentPlan.positionAgents[i].region = DynamicEnums::Supporter;
+                            else
+                                currentPlan.positionAgents[i].region = DynamicEnums::Best;
+                            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+                        }
+                    }
+                    else
+                    {
+                        currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
+                        for(size_t i = 0;i < agentSize;i++) {
                             currentPlan.positionAgents[i].region = DynamicEnums::Best;
-                        currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+                            currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
+                        }
                     }
+                    break;
                 }
-                else
-                {
-                    currentPlan.playmake.init(DynamicEnums::Shot, DynamicEnums::Goal);
-                    for(size_t i = 0;i < agentSize;i++) {
-                        currentPlan.positionAgents[i].region = DynamicEnums::Best;
-                        currentPlan.positionAgents[i].skill  = DynamicEnums::Ready;
-                    }
-                }
-                break;
             }
         }
-    }
     lastPMInitWasDribble = (currentPlan.playmake.skill == DynamicEnums::Dribble);
-//    debug(QString(" %1 ").arg(notInFirst), D_PARSA);
+    //    debug(QString(" %1 ").arg(notInFirst), D_PARSA);
     if(notInFirst == true)
     {
-//        debug(QString(" %1 ").arg(notInFirst), D_PARSA);
+        //        debug(QString(" %1 ").arg(notInFirst), D_PARSA);
         if(critical) {
             currentPlan.mode = DynamicEnums::Critical;
             {
@@ -455,12 +455,12 @@ void CDynamicAttack::playMake() {
 
         roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
 
-/////////////////////////////// I HATE PARSA
-//        for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
-//            if(ballPos.dist(wm->field->oppGoal()) < 0.7 && Circle2D(wm->opp[wm->opp.activeAgentID(i)]->pos + wm->opp[wm->opp.activeAgentID(i)]->dir.norm()*0.08,0.07).contains(ballPos))
-//                roleAgentPM -> setSelectedSkill(DynamicEnums::Dribble); // skill Dribble
-//            else
-//                roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
+        /////////////////////////////// I HATE PARSA
+        //        for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
+        //            if(ballPos.dist(wm->field->oppGoal()) < 0.7 && Circle2D(wm->opp[wm->opp.activeAgentID(i)]->pos + wm->opp[wm->opp.activeAgentID(i)]->dir.norm()*0.08,0.07).contains(ballPos))
+        //                roleAgentPM -> setSelectedSkill(DynamicEnums::Dribble); // skill Dribble
+        //            else
+        //                roleAgentPM -> setSelectedSkill(DynamicEnums::Pass);// Skill Kick
         // TODO : fix this dastan
         /*if(isRightTimeToPass()) {
             roleAgentPM->setNoKick(false); //TEST
@@ -491,13 +491,19 @@ void CDynamicAttack::playMake() {
         break;
     case DynamicEnums::Shot:
     {
-        roleAgentPM->setEmptySpot(true);
+
+        if (currentPlan.playmake.region == DynamicEnums::Forward) {
+            roleAgentPM->setTarget(wm->field->oppGoal());
+            roleAgentPM->setKickSpeed(50);
+
+        } else {
+            roleAgentPM->setEmptySpot(true);
+            roleAgentPM->setTarget(wm->field->oppGoal());
+            roleAgentPM->setKickRealSpeed(7.8); // TODO : 8m/s by profiller
+        }
         roleAgentPM->setChip(false);
         roleAgentPM->setNoKick(false);
-        roleAgentPM->setTarget(wm->field->oppGoal());
-        roleAgentPM->setKickSpeed(1023); // TODO : 8m/s by profiller
         roleAgentPM->setSelectedSkill(DynamicEnums::Shot); // Skill Kick
-
         break;
     }
     default:
@@ -657,7 +663,7 @@ int CDynamicAttack::appropriateChipSpeed() {
     if(mahiPlayMaker != NULL) {
         tempDistance = mahiPlayMaker->pos().dist(currentPlan.passPos);
 
-        if (true) {// dynamic chip Speed
+        if (false) {// dynamic chip Speed
             if (tempDistance < 2) {
                 speed = knowledge->getProfile(mahiPlayMaker->id(), tempDistance, false) + policy()->DynamicPlay_LowSpeedChip();
 
@@ -715,7 +721,7 @@ void CDynamicAttack::chooseBestPositons()
     {
         //if it wants to get a dribble position:
         if(currentPlan.positionAgents[i].region == DynamicEnums::Supporter ||
-           (i <= 1 && dribbleIntention.elapsed() < 3000))
+                (i <= 1 && dribbleIntention.elapsed() < 3000))
         {
             cntD++;
             double x, y;
@@ -775,7 +781,7 @@ void CDynamicAttack::chooseBestPositons()
         }
 
         //if it wants to get the BEST position :
-            //first if we can have supporter :
+        //first if we can have supporter :
         if(!haveSupporter && policy()->DynamicPlay_SupportPriority() <= agentSize)
         {
             haveSupporter = true;
@@ -784,7 +790,7 @@ void CDynamicAttack::chooseBestPositons()
             agentSize--;
             continue;
         }
-            //second if we have only one positioning
+        //second if we have only one positioning
         if(agentSize == 1)
         {
             if(ballPos.y > 0.3)
@@ -800,7 +806,7 @@ void CDynamicAttack::chooseBestPositons()
             else
                 semiDynamicPosition.append(guardLocations[agentSize][0][lastGuards[0]]);
         }
-            //third if we have more than one positioning :
+        //third if we have more than one positioning :
         else
         {
             lastYDrib = 10;
@@ -845,13 +851,13 @@ void CDynamicAttack::chooseBestPositons()
             } while(!(wm->field->isInField(nextPos)) &&
                     (wm->field->isInField(ballPos)));
             if(guards[currentPlan.agentSize][i]
-               .contains(nextPos)) {
+                    .contains(nextPos)) {
                 best = farGuardFromPoint(i, nextPos);
                 farChoice = true;
             }
             //        debug(QString("best is : %1").arg(best), D_PARSA);
             if(agentSize == 3 && best == guardSize - 1 && i == 1
-               && points[best].x > wm->ball->pos.x + 1) //exception for 3 positionings
+                    && points[best].x > wm->ball->pos.x + 1) //exception for 3 positionings
             {
                 Line2D l = Line2D(wm->ball->pos, points[best]);
                 Vector2D dummy;
@@ -888,8 +894,8 @@ void CDynamicAttack::chooseBestPositons()
                 ans = Vector2D(0, 0);
             else
                 ans = guardLocations[currentPlan.agentSize]
-                      [currentPlan.agentSize - 1]
-                      [best];
+                        [currentPlan.agentSize - 1]
+                        [best];
 
             int matchId = -1;
             for(int j = 0; j < guardSize; j++)
@@ -907,7 +913,7 @@ void CDynamicAttack::chooseBestPositons()
             else if (matchId != lastGuards[i])
             {
                 if(lastGuards[i] == -1 || farChoice ||
-                   positioningIntention.msec() > positioningIntentionInterval) {
+                        positioningIntention.msec() > positioningIntentionInterval) {
                     semiDynamicPosition.append(ans);
                     positioningIntention.restart();
                     lastGuards[i] = matchId;
@@ -1176,7 +1182,7 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
     double points[10] = {};
     for (int i = 0; i < _points.size(); i++)
         temp.append(_points.at(i));
-//    debug(QString("DIntention %3").arg(dribbleIntention.elapsed()), D_PARSA);
+    //    debug(QString("DIntention %3").arg(dribbleIntention.elapsed()), D_PARSA);
     //if we are dribbling
     if(dribbleIntention.elapsed() < 3000)
     {
@@ -1187,7 +1193,7 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
     for(int i = 0; i < temp.size(); i++)
     {
         if(lastPassPosLoc == temp[i])
-                points[i] += 2;
+            points[i] += 2;
         debug(QString("%1 %2 point is %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
         double M = 100;
         if(mahiPlayMaker != NULL)
@@ -1201,11 +1207,11 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
             //if(M < 2)
             {
                 double e = mahiPlayMaker->dir().angleOf(temp[i], mahiPlayMaker->pos(),
-                           mahiPlayMaker->dir().norm() * 1 + mahiPlayMaker->pos()).degree();
+                                                        mahiPlayMaker->dir().norm() * 1 + mahiPlayMaker->pos()).degree();
                 double p = (e / 30) / (M + 0.001);
                 points[i] -= p;
                 debug(QString("angle is %1").arg(mahiPlayMaker->dir().angleOf(temp[i], mahiPlayMaker->pos(),
-                                 mahiPlayMaker->dir().norm() * 1 + mahiPlayMaker->pos()).degree()), D_PARSA);
+                                                                              mahiPlayMaker->dir().norm() * 1 + mahiPlayMaker->pos()).degree()), D_PARSA);
             }
         }
         debug(QString("%1 %2 near opp %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
@@ -1217,7 +1223,7 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
         else
             points[i] += 4;
         debug(QString("%1 %2 opptotemp %3").arg(temp.at(i).x).arg(temp.at(i).y).arg(points[i]), D_PARSA);
-//        points[i] -= ballPos.dist(temp[i]) / 2;
+        //        points[i] -= ballPos.dist(temp[i]) / 2;
         M = 100;
         for(int j = 0; j < wm->our.activeAgentsCount(); j++)
             M = min(M, wm->our.active(j)->pos.dist(temp[i]));
@@ -1237,60 +1243,60 @@ void CDynamicAttack::chooseBestPosForPass(QList<Vector2D> _points) {
 
 
     //the old one:
-//    QList <Vector2D> temp;
+    //    QList <Vector2D> temp;
     // TODO : segment mide
-//    for (int i = 0; i < _points.size(); i++) {
-//        temp.append(_points.at(i));
-//        //debug(QString("pass candidates : %1 %2").arg(temp.at(i).x).arg(temp.at(i).y), D_PARSA);
-//    }
-//    int tempIndex = 0;
+    //    for (int i = 0; i < _points.size(); i++) {
+    //        temp.append(_points.at(i));
+    //        //debug(QString("pass candidates : %1 %2").arg(temp.at(i).x).arg(temp.at(i).y), D_PARSA);
+    //    }
+    //    int tempIndex = 0;
 
-//    /*if(mahiPlayMaker != NULL && mahiPlayMaker->pos().dist(ballPos) > 0.15)
-//        return;*/
+    //    /*if(mahiPlayMaker != NULL && mahiPlayMaker->pos().dist(ballPos) > 0.15)
+    //        return;*/
 
-//    //TODO : sharte paiin bayad isBallInOurField bashe amma felan isBallInOurField eshteba por mishe.
-//    if(ballPos.x < 0) {
-//        if(policy()->DynamicPlay_FarForward()) {
-//            tempIndex = minHorizontalDistID(temp);
-//        } else {
-//            tempIndex = maxHorizontalDistID(temp);
-//        }
-//    } else {
-//        QList <Vector2D> valids;
-//        for(int i = 0; i < temp.size(); i++)
-//        {
-//            int matchAgent    = mahiPoisitionAgents.at(i)->id();
-//            Vector2D agentPos = wm->our[matchAgent]->pos;
-//            Vector2D agentVel = wm->our[matchAgent]->vel;
-//            Vector2D nextPos  = agentPos + agentVel * 0.5;
-//            if(nextPos.dist(temp[i]) < policy()->DynamicPlay_Area())
-//                valids.append(temp[i]);
-//            else
-//                valids.append(ballPos);
-//            /*debug(QString("nextPos : %1 %2").arg(nextPos.x).arg(nextPos.y), D_PARSA);
-//            debug(QString("agent is %1").arg(matchAgent), D_PARSA);
-//            debug(QString("valids %1 %2").arg(valids[i].x).arg(valids[i].y), D_PARSA);*/
+    //    //TODO : sharte paiin bayad isBallInOurField bashe amma felan isBallInOurField eshteba por mishe.
+    //    if(ballPos.x < 0) {
+    //        if(policy()->DynamicPlay_FarForward()) {
+    //            tempIndex = minHorizontalDistID(temp);
+    //        } else {
+    //            tempIndex = maxHorizontalDistID(temp);
+    //        }
+    //    } else {
+    //        QList <Vector2D> valids;
+    //        for(int i = 0; i < temp.size(); i++)
+    //        {
+    //            int matchAgent    = mahiPoisitionAgents.at(i)->id();
+    //            Vector2D agentPos = wm->our[matchAgent]->pos;
+    //            Vector2D agentVel = wm->our[matchAgent]->vel;
+    //            Vector2D nextPos  = agentPos + agentVel * 0.5;
+    //            if(nextPos.dist(temp[i]) < policy()->DynamicPlay_Area())
+    //                valids.append(temp[i]);
+    //            else
+    //                valids.append(ballPos);
+    //            /*debug(QString("nextPos : %1 %2").arg(nextPos.x).arg(nextPos.y), D_PARSA);
+    //            debug(QString("agent is %1").arg(matchAgent), D_PARSA);
+    //            debug(QString("valids %1 %2").arg(valids[i].x).arg(valids[i].y), D_PARSA);*/
 
-//        }
-//        if(policy()->DynamicPlay_NearForward()) {
-//            tempIndex = minHorizontalDistID(valids);
-//        } else {
-//            tempIndex = maxHorizontalDistID(valids);
-//        }
-//        if(tempIndex == -1)
-//            for(int i = 0; i < temp.size(); i++)
-//                if(tempIndex == -1 || temp[i].x > temp[tempIndex].x)
-//                    tempIndex = i;
-//            /*currentPlan.passPos = wm->field->oppGoal();*/
-//       /* if(valids.at(tempIndex).dist(ballPos) < 0.2)
-//            roleAgentPM->setNoKick(true);*/
-//    }
+    //        }
+    //        if(policy()->DynamicPlay_NearForward()) {
+    //            tempIndex = minHorizontalDistID(valids);
+    //        } else {
+    //            tempIndex = maxHorizontalDistID(valids);
+    //        }
+    //        if(tempIndex == -1)
+    //            for(int i = 0; i < temp.size(); i++)
+    //                if(tempIndex == -1 || temp[i].x > temp[tempIndex].x)
+    //                    tempIndex = i;
+    //            /*currentPlan.passPos = wm->field->oppGoal();*/
+    //       /* if(valids.at(tempIndex).dist(ballPos) < 0.2)
+    //            roleAgentPM->setNoKick(true);*/
+    //    }
 
-//    if(0 <= tempIndex && tempIndex < temp.size()) {
-//        currentPlan.passPos = _points.at(tempIndex);
-//    }
-//    else
-//        currentPlan.passPos = Vector2D(_FIELD_WIDTH / 2, mahiPlayMaker->pos().y);
+    //    if(0 <= tempIndex && tempIndex < temp.size()) {
+    //        currentPlan.passPos = _points.at(tempIndex);
+    //    }
+    //    else
+    //        currentPlan.passPos = Vector2D(_FIELD_WIDTH / 2, mahiPlayMaker->pos().y);
 }
 
 double CDynamicAttack::getDynamicValue(const Vector2D &_dynamicPos) const {
@@ -1643,9 +1649,9 @@ void CDynamicAttack::assignLocations_2() {
     guardLocations[2][1][0].assign(1.15, -1.15);
     guardLocations[2][1][1].assign(2.1 , -1.65);
     guardLocations[2][1][2].assign(2.95, -2  );
-//    guardLocations[2][1][0].assign(0, 0.3);
-//    guardLocations[2][1][1].assign(0, 0);
-//    guardLocations[2][1][2].assign(0, -0.3);
+    //    guardLocations[2][1][0].assign(0, 0.3);
+    //    guardLocations[2][1][1].assign(0, 0);
+    //    guardLocations[2][1][2].assign(0, -0.3);
 }
 
 void CDynamicAttack::assignLocations_3() {
