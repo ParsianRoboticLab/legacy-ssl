@@ -75,12 +75,16 @@ void CPlayOff::globalExecute() {
     if (masterMode == NGameOff::StaticPlay) {
 
         debug(QString("lastTime : %1").arg(knowledge->getCurrentTime() - lastTime), D_MAHI);
-        if (knowledge->getCurrentTime() - lastTime > 1000 && !initial && lastBallPos.dist(wm->ball->pos) > 0.06) {
+        if (knowledge->getCurrentTime() - lastTime > 1000 && !initial && lastBallPos.dist(wm->ball->pos) < 0.2) {
             //             TODO : write critical play here
             if (criticalPlay()) {
                 playOnFlag = true;
             }
             return;
+        }
+
+        if (!criticalInit && lastBallPos.dist(wm->ball->pos) > 0.1) {
+            playOnFlag = true;
         }
 
 
@@ -375,7 +379,7 @@ void CPlayOff::dynamicPlayBlocker() {
 void CPlayOff::dynamicPlayKhafan() {
 
     debug(QString("Mahi Time : %1").arg(knowledge->getCurrentTime() - mahiDynamicTime), D_MAHI);
-    if (knowledge->getCurrentTime() - mahiDynamicTime > 1000 && (mahiDynamicTime != -1) && !initial) {
+    if (knowledge->getCurrentTime() - mahiDynamicTime > 1200 && (mahiDynamicTime != -1) && !initial) {
         shot    = false;
         pass    = true;
         initial = false;
@@ -1930,9 +1934,9 @@ EMode CPlayOff::getMasterMode() {
 */
 bool CPlayOff::isKickDone(CRolePlayOff * _roleAgent) {
 
-    if (Circle2D(_roleAgent->getAgent()->pos(), 0.25).contains(wm->ball->pos)) {
+    if (Circle2D(_roleAgent->getAgent()->pos(), 0.20).contains(wm->ball->pos)) {
         _roleAgent->setBallIsNear(true);
-    } else if ( !Circle2D(_roleAgent->getAgent()->pos(), 0.35).contains(wm->ball->pos)
+    } else if ( !Circle2D(_roleAgent->getAgent()->pos(), 0.5).contains(wm->ball->pos)
                 && _roleAgent->getBallIsNear() ) {
         _roleAgent->setBallIsNear(false);
         if (_roleAgent->getChip()) {
@@ -2091,20 +2095,24 @@ void CPlayOff::analysePass() {
 
 bool CPlayOff::criticalPlay() {
 
+    int tempKickSpeed = 0;
     if (criticalInit) {
         criticalInit = false;
 
-        criticalKick->setAgent(knowledge->getAgent(masterPlan->execution.passer.id));
+        criticalKick->setAgent(knowledge->getAgent(masterPlan->common.matchedID[masterPlan->execution.passer.id]));
         criticalKick->setTarget(wm->field->oppGoal());
         criticalKick->setChip(false);
         criticalKick->setDontKick(false);
         criticalKick->setPassProfiler(false);
-        criticalKick->setKickSpeed(1000);
+        if (wm->getIsSimulMode()) tempKickSpeed = 3;
+        else                      tempKickSpeed = 500;
+        criticalKick->setKickSpeed(tempKickSpeed);
         criticalKick->setTolerance(0.5);
     }
     criticalKick->execute();
     if (wm->ball->vel.length() > 0.5) return true;
     else return false;
+
 
 }
 
