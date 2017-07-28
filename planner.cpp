@@ -522,7 +522,7 @@ void CPlanner::runPlanner(){
     if( resultModified.size() == 1)
         resultModified.push_back(temp[0]);
 
-    debug(QString("result size : %1").arg(resultModified.size()),D_MHMMD);
+//    debug(QString("result size : %1").arg(resultModified.size()),D_MHMMD);
 
     if( fff ){
         resultModified.assign(temp.begin() , temp.end());
@@ -789,8 +789,8 @@ void CPlannerThread::createObstacleProb(CObstacles &obs,Vector2D _pos, Vector2D 
     double timeForObs = 0;
     ///TODO: should read from vartypes
     double maxA = 4;
-    double maxObstRad = 1.5;
-    double maxTime = 0.5;
+    double maxObstRad = 0.5;
+    double maxTime = 0.2;
     if(_vel.length() < 0.2)
     {
         _center = _pos;

@@ -25,6 +25,9 @@ CRoleDynamic::~CRoleDynamic() {
 void CRoleDynamic::update() {
    updated = false;
 
+   shotSkill->setPlayMakeMode(true);
+   shotSkill->setKickWithCenterOfDribbler(true);
+
    switch(selectedSkill) {
    case DynamicEnums::Dribble:
        dribbleSkill->setAgent(agent);
@@ -69,7 +72,7 @@ void CRoleDynamic::update() {
        if(wm->getIsSimulMode())
            shotSkill->setKickSpeed(kickSpeed / 50);
        else
-           shotSkill->setKickSpeed(max(900, kickSpeed));
+           shotSkill->setKickSpeed(kickSpeed);
        break;
    case DynamicEnums::Chip:
        shotSkill->setAgent(agent);

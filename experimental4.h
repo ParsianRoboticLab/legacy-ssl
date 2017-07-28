@@ -206,48 +206,57 @@ void CMainApplication::Experimental4(){
     out.setDevice(&file);
 
 
-    const int robotID1 = 2, robotID2 = 6;
+    const int /*robotID1 = 4,*/ robotID2 = 6;
 
 
     QMap<int, double> kick1, kick2, chip1;
-    kick1 = knowledge->profiler->robotsProfile[robotID1].finalKickMap;
-    chip1 = knowledge->profiler->robotsProfile[robotID1].finalChipMap;
 
     kick2 = knowledge->profiler->robotsProfile[robotID2].finalKickMap;
 
     if(fff){
         file.open(/*QIODevice::Truncate | */QIODevice::WriteOnly);
 
-        out << "Final kick data collected for robot " << robotID1 << "\n";
-        for(int i=0; i<kick1.keys().size();i++){
-            out << QString("%1   ,   %2\n").arg(kick1.keys().at(i)).arg(kick1.values().at(i));
-        }
-        out << "\nRegression on kick data for robot " << robotID1 << "\n";
-        for(int i=0; i<81; i++){
-            out << QString("%1 , %2\n").arg(i/10.0).arg(knowledge->getProfile(robotID1, i/10.0, true, false));
+        for(int robotID1 = 0; robotID1 < 8; robotID1++){
+
+            kick1 = knowledge->profiler->robotsProfile[robotID1].finalKickMap;
+            chip1 = knowledge->profiler->robotsProfile[robotID1].finalChipMap;
+
+            // kick
+            out << "Final kick data collected for robot " << robotID1 << "\n";
+            for(int i=0; i<kick1.keys().size();i++){
+                out << QString("%1   ,   %2\n").arg(kick1.keys().at(i)).arg(kick1.values().at(i));
+            }
+            out << "\nRegression on kick data for robot " << robotID1 << "\n";
+            for(int i=0; i<81; i++){
+                out << QString("%1 , %2\n").arg(i/10.0).arg(knowledge->getProfile(robotID1, i/10.0, true, false));
+            }
+
+
+            // chip
+//            out << "\nFinal chip data collected for robot " << robotID1 << "\n";
+//            for(int i=0; i<chip1.keys().size(); i++){
+//                out << QString("%1   ,   %2\n").arg(chip1.keys().at(i)).arg(chip1.values().at(i)) ;
+//            }
+//            out << "\nRegression on chip data for robot " << robotID1 << "\n";
+//            for(int i=0; i<40; i++){
+//                out << QString("%1 , %2\n").arg(i).arg(knowledge->getProfile(robotID1, i/10.0, false, false));
+//            }
         }
 
-        out << "\nFinal kick data collected for robot " << robotID2 << "\n";
-        for(int i=0; i<kick2.keys().size();i++){
-            out << QString("%1   ,   %2\n").arg(kick2.keys().at(i)).arg(kick2.values().at(i));
-        }
-        out << "\nRegression on kick data for robot " << robotID2 << "\n";
-        for(int i=0; i<81; i++){
-            out << QString("%1 , %2\n").arg(i/10.0).arg(knowledge->getProfile(robotID2, i/10.0, true, false));
-        }
-
-        out << "\nFinal chip data collected for robot " << robotID1 << "\n";
-        for(int i=0; i<chip1.keys().size(); i++){
-            out << QString("%1   ,   %2\n").arg(chip1.keys().at(i)).arg(chip1.values().at(i)) ;
-        }
-        out << "\nRegression on chip data for robot " << robotID1 << "\n";
-        for(int i=0; i<40; i++){
-            out << QString("%1 , %2\n").arg(i).arg(knowledge->getProfile(robotID1, i/10.0, false, false));
-        }
+//        out << "\nFinal kick data collected for robot " << robotID2 << "\n";
+//        for(int i=0; i<kick2.keys().size();i++){
+//            out << QString("%1   ,   %2\n").arg(kick2.keys().at(i)).arg(kick2.values().at(i));
+//        }
+//        out << "\nRegression on kick data for robot " << robotID2 << "\n";
+//        for(int i=0; i<81; i++){
+//            out << QString("%1 , %2\n").arg(i/10.0).arg(knowledge->getProfile(robotID2, i/10.0, true, false));
+//        }
 
         file.close();
         fff = false;
     }
+
+    return;
 
 //    static double moshtagh2=0;
 //    analyze("kickspeed" , wm->ball->vel.length(),true);

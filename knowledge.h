@@ -162,6 +162,9 @@ public:
     bool ready = false;
     QList<CAgent*> activesInField;
     int mixGoaleID;
+    QList<int> ourAgentIDsMixTeam;
+
+    void getOurRobotIDsFromGUIMixTeam();
 
 
 
@@ -218,7 +221,22 @@ public:
     double ballVelLowPass;
     /////////////////////////
     ///////////////////////////////// AHZ //////////////////////////////////////
+    QString stateForMark;
+    QString lastStateForMark;
     Vector2D getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion);
+    Vector2D getOppNearestToBallDirInTheirIndirectMode(int lastDirectionSize);
+    Vector2D AHZOppNearestToBallDirection;
+    Vector2D oppNearestToBallPossition;
+    Vector2D sumOfLastOpponentDirections;
+    Vector2D sumOfLastOpponentPosition;
+    Vector2D finalOppNearestToBallDirection;
+    QList <Vector2D> lastOppNearestToBallDirections;
+    bool isStateGoingFromIndirectToTransient();
+    bool defenseOneTouchMode;    
+    bool goalKeeperOneTouchMode;
+    bool defenseClearMode;
+    bool goalKeeperClearMode;
+    bool LastTS;
     //////////////////////////////// end of AHZ
     QList<int> oppBlockers;
     QString stateToString(State s);
@@ -347,6 +365,7 @@ public:
     void checkShootDanger();
     void Aminshoot(Vector2D ball, QList<Circle2D> obstacles, double& _empty, Vector2D& _best);
     int getProfile(int agentId, double realParameter, bool isKick=true, bool spinOn=false);
+    int getMaxValidKickSpeedProfile(int agentId, bool spinOn = false);
     double chipGoalPropability(bool isOurChip);
     void calculateCommandFrameRate();
     double lastTimeCommandFPSCalced;

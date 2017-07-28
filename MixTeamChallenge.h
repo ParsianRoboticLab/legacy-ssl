@@ -7,15 +7,31 @@
 
 void CMainApplication::MixTeamChallenge()
 {
+    //ambiguity
     knowledge->updateGameState();
-    static CMixTeamHandler *mstr = new CMixTeamHandler();
-    mstr->master();
+    knowledge->updatePlotterData();
+
+    //update goalieID
+    if (policy()->Formation_GoalieFromGUI()) {
+        knowledge->mixGoaleID = policy()->Formation_Goalie();
+    } else {
+        knowledge->mixGoaleID = wm->our.data->goalieID;
+    }
+
+//    static CMixTeamHandler *mstr = new CMixTeamHandler();
+//    mstr->master();
+
+
+    static CMixTeamCoach* mixCoach = new CMixTeamCoach();
+    mixCoach->goalKeeper = knowledge->getAgent(knowledge->mixGoaleID);
+    mixCoach->testDefense();
+
 
     static CMixTeamHandler *slv = new CMixTeamHandler();
 
-    //if we are master, attribute is true and if we are slave, attribute is true
-    slv->slave(true);
+//    if we are master, attribute is true and if we are slave, attribute is true
 
+    slv->slave(true);
 
 //    slv->execute();
 
