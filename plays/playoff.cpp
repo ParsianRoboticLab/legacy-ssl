@@ -2099,19 +2099,20 @@ bool CPlayOff::criticalPlay() {
     if (criticalInit) {
         criticalInit = false;
 
-        criticalKick->setAgent(knowledge->getAgent(masterPlan->execution.passer.id));
+        criticalKick->setAgent(knowledge->getAgent(masterPlan->common.matchedID[masterPlan->execution.passer.id]));
         criticalKick->setTarget(wm->field->oppGoal());
         criticalKick->setChip(false);
         criticalKick->setDontKick(false);
         criticalKick->setPassProfiler(false);
-        if (wm->getIsSimulMode()) tempKickSpeed = 8;
-        else                      tempKickSpeed = 1000;
+        if (wm->getIsSimulMode()) tempKickSpeed = 3;
+        else                      tempKickSpeed = 500;
         criticalKick->setKickSpeed(tempKickSpeed);
         criticalKick->setTolerance(0.5);
     }
     criticalKick->execute();
     if (wm->ball->vel.length() > 0.5) return true;
     else return false;
+
 
 }
 
