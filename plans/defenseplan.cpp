@@ -1143,7 +1143,7 @@ DefensePlan::DefensePlan()
     dangerModeThresholdForDanger = 0;
     lastTS = 0;
     /////////////// For Adding TS Mode in Mark ///////////////////////////////
-    xLimitForblockingPass = 0;
+    xLimitForblockingPass = 4.5;
     manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
 
     if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass){
@@ -2936,7 +2936,7 @@ void DefensePlan::findPos(int _markAgentSize){
     bool playOn = knowledge->isStart();
     bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)/*|| (knowledge->getGameState() == CKnowledge::TheirKickOff)*/|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     bool MantoManAllTransientFlag = policy()->Mark_ManToManAllTransiant();
-    xLimitForblockingPass = 0;
+    xLimitForblockingPass = 4.5;
     manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
     stopMode = knowledge->isStop();
     markPoses.clear();
