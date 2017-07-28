@@ -1485,13 +1485,14 @@ void CCoach::decidePlayOn(QList<int>& ourPlayers, QList<int>& lastPlayers) {
 
     if(wm->our[playmakeId] != NULL)
     {
-        bool goodForKick = ((wm->ball->pos.dist(wm->field->oppGoal()) < 1.5) || (findMostPossible(wm->our[playmakeId]->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr)));
+        bool goodForKick = ((wm->ball->pos.dist(wm->field->oppGoal()) < 1.5) ||
+                           (findMostPossible(wm->our[playmakeId]->pos) >= (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr)));
 //        debug(QString(" %1 shotprob ").arg(findMostPossible(wm->our[playmakeId]->pos)), D_PARSA);
         if(goodForKick)
         {
             dynamicAttack->setDirectShot(true);
-            if((findMostPossible(wm->our[playmakeId]->pos) > (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr)))
-                shotToGoalthr = policy()->DynamicPlay_DirectTrsh() - 0.2;
+            if((findMostPossible(wm->our[playmakeId]->pos) >= (policy()->DynamicPlay_DirectTrsh() - shotToGoalthr)))
+                shotToGoalthr = max(0.1, policy()->DynamicPlay_DirectTrsh() - 0.2);
         } else {
             dynamicAttack->setDirectShot(false);
             shotToGoalthr = 0;
