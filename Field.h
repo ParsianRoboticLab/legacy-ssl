@@ -140,10 +140,12 @@ public:
     QList<Vector2D> ourPAreaIntersect(Line2D line);
     QList<Vector2D> ourPAreaIntersect(Segment2D segment);
     /////////////////////////////// Added by AHZ ///////////////////////
-    QList<Vector2D> AHZOurPAreaIntersectForMark(Segment2D segment);
-    QList<Vector2D> AHZOurPAreaIntersectForMark(Line2D segment);
-    QList<Vector2D> AHZOurPAreaIntersectForGoalKeeper(Segment2D segment);
-    QList<Vector2D> AHZOurPAreaIntersectForGoalKeeper(Line2D segment);
+    QList<Vector2D> AHZOurPAreaIntersectForMark(Segment2D aSegment);
+    QList<Vector2D> AHZOurPAreaIntersectForMark(Line2D aSegment);
+    QList<Vector2D> AHZOurPAreaIntersectForGoalKeeper(Segment2D aSegment);
+    QList<Vector2D> AHZOurPAreaIntersectForGoalKeeper(Line2D aSegment);
+    QList<Vector2D> AHZOurPAreaIntersectForTransient(Line2D aSegment);
+    QList<Vector2D> AHZOurPAreaIntersectForTransient(Segment2D aSegment);
     bool AHZIsInOurPenaltyArea(Vector2D point);
     /////////////////////////////////////////////////////////////////////
     QList<Vector2D> ourPAreaIntersect(Circle2D circle);
