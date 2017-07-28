@@ -2909,15 +2909,19 @@ Vector2D DefensePlan::posvel(CRobot* opp, double VelReliabiity){
     //// && velocity of the opponent agent.
 
     CDefPos test;
+    Vector2D oppVel = opp->vel;
+    if(oppVel.x > 0){
+        oppVel.x = 0;
+    }
     if(VelReliabiity == 0){
         return opp->pos;
     }
-    if(!opp->vel.length() > 0.5  || opp->vel.x > 0 || wm->field->isInOurPenaltyArea(opp->pos)){
+    if(!oppVel.length() > 0.5  || wm->field->isInOurPenaltyArea(opp->pos)){
         VelReliabiity = 0;
     }
     Segment2D tempseg;
-    Vector2D temppos = opp->pos + VelReliabiity * opp->vel;
-    tempseg.assign(opp->pos, opp->pos + VelReliabiity * opp->vel);
+    Vector2D temppos = opp->pos + VelReliabiity * oppVel;
+    tempseg.assign(opp->pos, opp->pos + VelReliabiity * oppVel);
     draw(tempseg,QColor(Qt::yellow));
     Vector2D penaltyvec;
     penaltyvec.assign(test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).x,test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).y);
@@ -2927,11 +2931,11 @@ Vector2D DefensePlan::posvel(CRobot* opp, double VelReliabiity){
     }
     else if(temppos.x < -4.4){
         //debug(QString("Opp is out"),D_HAMED);
-        return Vector2D(-4.4,(opp->pos + VelReliabiity * opp->vel).y) ;
+        return Vector2D(-4.4,(opp->pos + VelReliabiity * oppVel).y) ;
     }
     else{
         //debug(QString("normal mode"),D_HAMED);
-        return opp->pos + VelReliabiity * opp->vel;
+        return opp->pos + VelReliabiity * oppVel;
     }
 }
 
