@@ -1107,7 +1107,6 @@ bool CPlayOff::isPlanDone() {
         }
     } else if (isFinalShotDone()) {
         debug ("Done By Final Shot !", D_MAHI);
-        // TODO : IF GOAL THEN 10 ELSE 9
         masterPlan->common.addHistory(10); //FULL
         return true;
     }
@@ -1167,7 +1166,7 @@ bool CPlayOff::isTimeOver() {
     if (!Circle2D(lastBallPos, 0.5).contains(wm->ball->pos)) {
         setTimer = false;
         debug(QString("Time That Left: %1").arg(knowledge->getCurrentTime() - tempStart), D_DEBUG);
-        if(knowledge->getCurrentTime() - tempStart > 200*masterPlan->execution.passCount) { // 2 Second
+        if(knowledge->getCurrentTime() - tempStart > 225*masterPlan->execution.passCount) { // 2 Second
             setTimer = true;
             return true;
         }
@@ -1183,9 +1182,9 @@ bool CPlayOff::isBallDirChanged() {
     const int& passer = masterPlan->execution.passer.id;
     const int& recive = masterPlan->execution.reciver.id;
     Vector2D& b  = wm->ball->pos;
-    if (b.dist(lastBallPos) > 0.5 && !roleAgent[passer]->getChip()) {
+    if (b.dist(lastBallPos) > 0.6 && !roleAgent[passer]->getChip()) {
         Vector2D  bv = b + wm->ball->vel.norm()*_MAX_DIST;
-        Circle2D  c(roleAgent[recive]->getWaitPos(), 1); // TODO : CHECK radius
+        Circle2D  c(roleAgent[recive]->getWaitPos(), 1.7);
         Segment2D s(b, bv);
         draw(s, QColor(Qt::blue));
         draw(c, QColor(Qt::red));
