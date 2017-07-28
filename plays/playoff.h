@@ -502,6 +502,7 @@ private:
     bool ready,pass,shot;
     int dynamicState;
     long dynamicStartTime;
+    long mahiDynamicTime;
 
 ////////////First
 public:
