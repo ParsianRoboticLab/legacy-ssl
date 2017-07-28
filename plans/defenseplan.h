@@ -99,10 +99,12 @@ protected:
     bool dangerModeThresholdForDanger;    
     bool manToManMarkBlockPassFlag;    
     bool goalKeeperPredictionModeInPlayOff;    
+    bool lastTS;
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;
-    Vector2D opponentPasserDirection;
-    Vector2D tempBallRectanglePoint;
+
+    Vector2D ballPosInTransientMoment;
+    Vector2D opponentPasserDirection;   
     Vector2D oppNearestToBallPossition;
     Vector2D tempAHZ;
     Vector2D noKickTarget;    
@@ -175,6 +177,11 @@ public:
       bool MantoManAllTransientFlag;      
       Vector2D dir;
     ///////////////////////////////////
+
+    ///////////////ArashZ/////////////
+      Vector2D LastBallPosPO;
+      void saveBallPosPO (bool _isOur);
+    //////////////////////////////////
 
 
 private:
