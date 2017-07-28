@@ -1934,7 +1934,7 @@ EMode CPlayOff::getMasterMode() {
 */
 bool CPlayOff::isKickDone(CRolePlayOff * _roleAgent) {
 
-    if (Circle2D(_roleAgent->getAgent()->pos(), 0.20).contains(wm->ball->pos)) {
+    if (Circle2D(_roleAgent->getAgent()->pos(), 0.).contains(wm->ball->pos)) {
         _roleAgent->setBallIsNear(true);
     } else if ( !Circle2D(_roleAgent->getAgent()->pos(), 0.5).contains(wm->ball->pos)
                 && _roleAgent->getBallIsNear() ) {
@@ -1946,7 +1946,8 @@ bool CPlayOff::isKickDone(CRolePlayOff * _roleAgent) {
             /** Ball gonna touch the target point **/
 
             // check ball speed
-            if (wm->ball->vel.length() / (_roleAgent->getAgent()->pos().dist(_roleAgent->getTarget())) > 1 || true) {
+            /*/ (_roleAgent->getAgent()->pos().dist(_roleAgent->getTarget())) > 1 || true*/
+            if (wm->ball->vel.length()  > 0.2) {
                 debug("[playoff] speed is enough", D_MAHI);
                 // check ball direction
                 Vector2D sol1,sol2;
