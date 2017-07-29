@@ -56,7 +56,7 @@ protected:
     void checkGoalieTarget();    
     void setGoalKeeperState();
     void setGoalKeeperTargetPoint();
-    bool goalKeeperOneTouch,goalKeeperClearMode,ballIsOutOfField, ballIsBesidePoles;
+    bool goalKeeperOneTouch,goalKeeperClearMode,ballIsOutOfField, ballIsBesidePoles , predictionInClearMode;
     double strictfollowThr;          
     bool dangerForGoalKeeperClear;
     int oneTouchCnt;    

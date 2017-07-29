@@ -718,6 +718,7 @@ void DefensePlan::setGoalKeeperState(){
                     goalKeeperOneTouch = true;
                     goalKeeperClearMode = false;
                     ballIsOutOfField = false;
+                    predictionInClearMode = false;
                     if(!goalLine.intersection(ballLine).valid() || wm->ball->vel.length() <= 1.3){
                         oneTouchCnt++;
                         return;
@@ -726,18 +727,30 @@ void DefensePlan::setGoalKeeperState(){
                     return;
                 }
                 else if(wm->field->AHZIsInOurPenaltyArea(wm->ball->pos)){
-                    if(ourLeftPole.contains(wm->ball->pos) || ourRightPole.contains(wm->ball->pos)){
-                        ballIsBesidePoles = true;
-                        goalKeeperOneTouch = false;
-                        goalKeeperClearMode = false;
-                        ballIsOutOfField = false;
-                        return;
+                    if(wm->ball->vel.length() <= 1){
+                        if(ourLeftPole.contains(wm->ball->pos) || ourRightPole.contains(wm->ball->pos)){
+                            ballIsBesidePoles = true;
+                            goalKeeperOneTouch = false;
+                            goalKeeperClearMode = false;
+                            ballIsOutOfField = false;
+                            predictionInClearMode = false;
+                            return;
+                        }
+                        else{
+                            ballIsBesidePoles = false;
+                            goalKeeperOneTouch = false;
+                            goalKeeperClearMode = true;
+                            ballIsOutOfField = false;
+                            predictionInClearMode = false;
+                            return;
+                        }
                     }
                     else{
-                        ballIsBesidePoles = false;
+                        goalKeeperClearMode = false;
                         goalKeeperOneTouch = false;
-                        goalKeeperClearMode = true;
+                        ballIsBesidePoles = false;
                         ballIsOutOfField = false;
+                        predictionInClearMode = true;
                         return;
                     }
                 }
@@ -746,6 +759,7 @@ void DefensePlan::setGoalKeeperState(){
                     goalKeeperOneTouch = false;
                     ballIsBesidePoles = false;
                     ballIsOutOfField = false;
+                    predictionInClearMode = false;
                     return;
                 }
             }
@@ -755,6 +769,7 @@ void DefensePlan::setGoalKeeperState(){
             goalKeeperOneTouch = false;
             goalKeeperClearMode = false;
             ballIsOutOfField = true;
+            predictionInClearMode = false;
             return;
         }
     }
@@ -987,6 +1002,9 @@ void DefensePlan::setGoalKeeperTargetPoint(){
             fieldRect.intersection(ballPrGoalLine, &solut[0], &solut[1]);
             noKickTarget = (solut[0].dist(wm->ball->pos) < solut[1].dist(wm->ball->pos)) ? solut[0] : solut[1];
         }
+        else if(predictionInClearMode){
+            goalKeeperTarget = knowledge->getPointInDirection(wm->field->ourGoal() , wm->ball->pos + wm->ball->vel * 0.5 , 0.9);
+        }
         else{
             lastStateForGoalKeeper = QString("no");
             ////////////// Danger Mode for out of the penalty area /////////////
@@ -1105,7 +1123,7 @@ DefensePlan::DefensePlan()
     goalKeeperOneTouch = false;
     goalKeeperClearMode = false;
     ballIsOutOfField = false;
-
+    predictionInClearMode = false;
     ballIsBesidePoles = false;
 
     oneTouchCnt = 5;
@@ -1943,10 +1961,20 @@ void DefensePlan::executeGoalKeeper(){
             gpa[goalKeeperAgent->id()]->execute();
             //            }
         }
+        else if(predictionInClearMode){
+            AHZSkills = gpa[knowledge->goalie->id()];
+            debug("Prediction in clear mode." , D_AHZ, "green");
+            gpa[goalKeeperAgent->id()]->setADiveMode(false);
+            gpa[goalKeeperAgent->id()]->setSlowMode(false);
+            gpa[goalKeeperAgent->id()]->setAvoidGoalPosts(true);
+            goalKeeperAgent->setChip(0);
+            goalKeeperAgent->setKick(0);
+            gpa[goalKeeperAgent->id()]->init(goalKeeperTarget , wm->ball->pos - wm->field->ourGoal());
+        }
         else if(goalKeeperClearMode && !dangerForGoalKeeperClear){
             knowledge->goalKeeperClearMode = true;
             knowledge->goalKeeperOneTouchMode = false;
-            if(wm->ball->vel.length() > 0.4 && wm->ball->vel.length() < 1.3){
+            if(wm->ball->vel.length() > 0.6 && wm->ball->vel.length() < 1){
                 AHZSkills = gpa[knowledge->goalie->id()];
                 debug("Clear slow ball" , D_AHZ, "green");
                 gpa[goalKeeperAgent->id()]->setADiveMode(false);
