@@ -1051,14 +1051,14 @@ void CSkillKick::jTurn()
         if(wm->ball->vel.length() < 0.1)
             shift = 7 + (1-agentPos.dist(ballPos))*35;
         else
-            shift =5 + (1-agentPos.dist(ballPos))*45+wm->ball->vel.length()*2;
+            shift =5 + (1-agentPos.dist(ballPos))*45+wm->ball->vel.length()*1.2;
         distCoef = 0.17;
     }
     else if(movementDir < -25){
         if(wm->ball->vel.length() < 0.1)
             shift = -7 - (1-agentPos.dist(ballPos))*35;
         else
-            shift = -5 - (1-agentPos.dist(ballPos))*45-wm->ball->vel.length()*2;
+            shift = -5 - (1-agentPos.dist(ballPos))*45-wm->ball->vel.length()*1.2;
 
         distCoef = 0.17;
     }
