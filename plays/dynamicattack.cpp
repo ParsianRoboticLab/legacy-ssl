@@ -189,8 +189,7 @@ void CDynamicAttack::makePlan(int agentSize) {
     // we have ball and
     // shot prob isn't more than 50% and
     // there is a critical situation
-    else
-        if(wm->opp.activeAgentsCount() > 0 && wm->field->isInField(currentPlan.passPos))
+    else if(wm->opp.activeAgentsCount() > 0 && wm->field->isInField(currentPlan.passPos))
         {
             for(int i = 0; i < wm->opp.activeAgentsCount(); i++)
             {
@@ -429,10 +428,6 @@ void CDynamicAttack::playMake() {
     roleAgentPM->setAgent(mahiPlayMaker);
     roleAgentPM->setAgentID(mahiAgentsID[0]);
     roleAgentPM->setAvoidPenaltyArea(true);
-
-    bool flagT = false;
-
-    Vector2D og = wm->ball->pos - wm->field->ourGoal();
 
     switch(currentPlan.playmake.skill) {
     case DynamicEnums::Dribble:
