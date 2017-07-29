@@ -75,7 +75,7 @@ void CPlayOff::globalExecute() {
     if (masterMode == NGameOff::StaticPlay) {
 
         debug(QString("lastTime : %1").arg(knowledge->getCurrentTime() - lastTime), D_MAHI);
-        if (knowledge->getCurrentTime() - lastTime > 1000 && !initial && lastBallPos.dist(wm->ball->pos) < 0.2) {
+        if (knowledge->getCurrentTime() - lastTime > 1300 && !initial && lastBallPos.dist(wm->ball->pos) < 0.2) {
             //             TODO : write critical play here
             if (criticalPlay()) {
                 playOnFlag = true;
@@ -1166,7 +1166,7 @@ bool CPlayOff::isTimeOver() {
     if (!Circle2D(lastBallPos, 0.5).contains(wm->ball->pos)) {
         setTimer = false;
         debug(QString("Time That Left: %1").arg(knowledge->getCurrentTime() - tempStart), D_DEBUG);
-        if(knowledge->getCurrentTime() - tempStart > 225*masterPlan->execution.passCount) { // 2 Second
+        if(knowledge->getCurrentTime() - tempStart > 225 + 150*(masterPlan->execution.passCount - 1)) { // 2 Second
             setTimer = true;
             return true;
         }
@@ -1457,12 +1457,12 @@ void CPlayOff::assignPass(CRolePlayOff* _roleAgent, const SPositioningAgent& _po
     _roleAgent->setAvoidPenaltyArea(true);
     _roleAgent->setChip(chipOrNot(_posAgent.getArgs()));
     if (_roleAgent->getChip()) {
-        //        _roleAgent->setKickSpeed(_posAgent.getArgs().rightData);
         _roleAgent->setKickRealSpeed(static_cast <double> (_posAgent.getArgs().rightData)/200);
+//                _roleAgent->setKickSpeed(_posAgent.getArgs().rightData);
         debug(QString("VALUE : %1").arg(static_cast <double> (_posAgent.getArgs().rightData)/200), D_MAHI);
     } else {
-        _roleAgent->setKickSpeed(_posAgent.getArgs().leftData);
-        //        _roleAgent->setKickRealSpeed(static_cast <double> (_posAgent.getArgs().leftData)/100);
+        _roleAgent->setKickRealSpeed(static_cast <double> (_posAgent.getArgs().leftData)/100);
+//        _roleAgent->setKickSpeed(_posAgent.getArgs().leftData);
 
     }
 
@@ -1487,7 +1487,8 @@ void CPlayOff::assignKick(CRolePlayOff* _roleAgent,
                           const SPositioningAgent& _posAgent, bool _chip) {
 
     _roleAgent->setChip(_chip);
-    _roleAgent->setKickRealSpeed(static_cast<double>(_posAgent.getArgs().leftData)/100);
+    _roleAgent->setKickSpeed(_posAgent.getArgs().leftData);
+//    _roleAgent->setKickRealSpeed(static_cast<double>(_posAgent.getArgs().leftData)/100);
     _roleAgent->setTarget(getGoalTarget(_posAgent.getArgs().rightData));
     _roleAgent->setIntercept(false);
     _roleAgent->setSelectedSkill(roleSkill::Kick);
@@ -1933,7 +1934,7 @@ EMode CPlayOff::getMasterMode() {
 */
 bool CPlayOff::isKickDone(CRolePlayOff * _roleAgent) {
 
-    if (Circle2D(_roleAgent->getAgent()->pos(), 0.).contains(wm->ball->pos)) {
+    if (Circle2D(_roleAgent->getAgent()->pos(), 0.2).contains(wm->ball->pos)) {
         _roleAgent->setBallIsNear(true);
     } else if ( !Circle2D(_roleAgent->getAgent()->pos(), 0.5).contains(wm->ball->pos)
                 && _roleAgent->getBallIsNear() ) {
