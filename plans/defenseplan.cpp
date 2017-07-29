@@ -787,7 +787,7 @@ void DefensePlan::setGoalKeeperTargetPoint(){
     dangerForGoalKeeperClearByOppAgents = false;
     isCrowdedInFrontOfPenaltyAreaByOppAgents = false;
     isCrowdedInFrontOfPenaltyAreaByOurAgents = false;
-    playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick || knowledge->getGameState() == CKnowledge::TheirIndirectKick;
+    playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick || knowledge->getGameState() == CKnowledge::TheirIndirectKick || knowledge->isOurNonPlayOnKick();
     playOnMode = knowledge->isStart();
     stopMode = knowledge->isStop();
     tempSol.clear();
@@ -833,7 +833,7 @@ void DefensePlan::setGoalKeeperTargetPoint(){
             dangerForGoalKeeperClear = false;
             debug(QString("Their Indirect") , D_AHZ);
             oppPasser = wm->opp[knowledge->nearestOppToBall]->pos;
-            if(knowledge->getGameState() == CKnowledge::TheirIndirectKick){
+            if(knowledge->getGameState() == CKnowledge::TheirIndirectKick || knowledge->isOurNonPlayOnKick()){
                 goalKeeperTarget = wm->field->ourGoal() + goalKeeperTargetOffSet;
             }
             else{
@@ -1846,7 +1846,7 @@ void DefensePlan::executeGoalKeeper(){
     //// function. In this function also like the other functions for goalkeeper,
     //// we have some mode for handling the goalkeeper behavior.
 
-    playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick  || knowledge->getGameState() == CKnowledge::TheirIndirectKick;
+    playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick  || knowledge->getGameState() == CKnowledge::TheirIndirectKick || knowledge->isOurNonPlayOnKick();
     playOnMode = knowledge->isStart();
     stopMode = knowledge->isStop();
     QList<Vector2D> tempSol;
