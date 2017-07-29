@@ -45,6 +45,10 @@ CPlayOff::CPlayOff()
 
     criticalInit = true;
     criticalKick = new CSkillKick(NULL);
+    firstPassDone = false;
+    firstPassTime = false;
+    secondLastBallPos.invalidate();
+
 }
 
 CPlayOff::~CPlayOff()
@@ -1166,9 +1170,17 @@ bool CPlayOff::isTimeOver() {
     if (!Circle2D(lastBallPos, 0.5).contains(wm->ball->pos)) {
         setTimer = false;
         debug(QString("Time That Left: %1").arg(knowledge->getCurrentTime() - tempStart), D_DEBUG);
-        if(knowledge->getCurrentTime() - tempStart > 225 + 150*(masterPlan->execution.passCount - 1)) { // 2 Second
-            setTimer = true;
-            return true;
+        if(knowledge->getCurrentTime() - tempStart > 200) { // 2 Second
+            if (firstPassTime) {
+                setTimer = true;
+                return true;
+            } else if (firstPassDone) { // Second Pass
+                setTimer = true;
+                firstPassTime = true;
+            } else {
+                setTimer = true;
+                return true;
+            }
         }
     }
     return false;
@@ -1176,23 +1188,50 @@ bool CPlayOff::isTimeOver() {
 
 bool CPlayOff::isBallDirChanged() {
 
-    if (masterPlan->execution.passCount != 1) return false;
 
     // USE PASSER FORM INITIAL LEVEL
     const int& passer = masterPlan->execution.passer.id;
+    const int& pState = masterPlan->execution.passer.state;
     const int& recive = masterPlan->execution.reciver.id;
+    const int& rState = masterPlan->execution.reciver.state;
+
     Vector2D& b  = wm->ball->pos;
-    if (b.dist(lastBallPos) > 0.6 && !roleAgent[passer]->getChip()) {
-        Vector2D  bv = b + wm->ball->vel.norm()*_MAX_DIST;
-        Circle2D  c(roleAgent[recive]->getWaitPos(), 1.7);
-        Segment2D s(b, bv);
-        draw(s, QColor(Qt::blue));
-        draw(c, QColor(Qt::red));
-        Vector2D v1,v2;
-        if (!c.intersection(s, &v1, &v2)) return true;
-    } else {
+
+    if (positionAgent[recive].stateNumber > rState + 1) { // Second Pass
+        firstPassDone = true;
+        secondLastBallPos = wm->ball->pos;
+
+        if (b.dist(secondLastBallPos) > 0.6 && !roleAgent[recive]->getChip()) {
+            Vector2D  bv = b + wm->ball->vel.norm()*_MAX_DIST;
+            Circle2D  c(roleAgent[recive]->getTarget(), 1.7);
+            Segment2D s(b, bv);
+            draw(s, QColor(Qt::blue));
+            draw(c, QColor(Qt::red));
+            Vector2D v1,v2;
+            if (!c.intersection(s, &v1, &v2)) return true;
+        } else {
+            return false;
+        }
+        debug(QString("Second Pass %1 %2").arg(positionAgent[recive].stateNumber).arg(rState), D_MAHI);
         return false;
+
+    } else { // First Pass
+        debug(QString("First Pass %1 %2").arg(positionAgent[recive].stateNumber).arg(rState), D_MAHI);
+
+        if (b.dist(lastBallPos) > 0.6 && !roleAgent[passer]->getChip()) {
+            Vector2D  bv = b + wm->ball->vel.norm()*_MAX_DIST;
+            Circle2D  c(roleAgent[recive]->getWaitPos(), 1.7);
+            Segment2D s(b, bv);
+            draw(s, QColor(Qt::blue));
+            draw(c, QColor(Qt::red));
+            Vector2D v1,v2;
+            if (!c.intersection(s, &v1, &v2)) return true;
+        } else {
+            return false;
+        }
+
     }
+
 
 }
 
@@ -1869,6 +1908,10 @@ void CPlayOff::reset(){
 
     firstStepEnums = Stay;
     blockerStep = S0;
+    firstPassDone = false;
+    firstPassTime = false;
+    secondLastBallPos.invalidate();
+
 
     debug(QString("reset Plan"),D_MAHI);
 }

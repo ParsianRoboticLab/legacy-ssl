@@ -339,7 +339,9 @@ private:
     bool criticalPlay();
     CSkillKick* criticalKick;
     bool criticalInit;
-
+    bool firstPassDone;
+    Vector2D secondLastBallPos;
+    bool firstPassTime;
     bool initial;
 
     SPlan* masterPlan;
