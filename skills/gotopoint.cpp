@@ -976,7 +976,7 @@ void CSkillGotoPointAvoid::execute()
     bangBang->setDiveMode(diveMode);
     if(slowMode || slow)
     {
-        bangBang->setVelMax(1.4);
+        bangBang->setVelMax(1);
         bangBang->setSlow(true);
     }
     else
