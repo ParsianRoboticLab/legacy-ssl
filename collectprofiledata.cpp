@@ -138,6 +138,7 @@ void CollectProfileData::positioning(double xpos, double ypos){
     prfl1->execute();
 }
 
+
 bool CollectProfileData::BallIsNear(CRolePlayOff * agent, double rad){
     if(Circle2D(knowledge->getAgent(agent->getAgentID())->pos(), rad).contains(wm->ball->pos)){
         kickStat = prfl1_Iskicking;
@@ -146,6 +147,7 @@ bool CollectProfileData::BallIsNear(CRolePlayOff * agent, double rad){
     return false;
     return true;
 }
+
 
 void CollectProfileData::profilerDraws(){
     if(prfl1->getSelectedSkill()==roleSkill::Kick)
@@ -169,7 +171,9 @@ void CollectProfileData::profilerDraws(){
 
 void CollectProfileData::LowSpeed(){
 
-    static Triangle2D upTri = Triangle2D( Vector2D(-_FIELD_WIDTH/2 , _FIELD_HEIGHT/2) ,Vector2D(-_FIELD_WIDTH/2 , 0) , Vector2D(0 , _FIELD_HEIGHT/2) );
+    static Triangle2D downTri = Triangle2D( Vector2D( 0, 0) ,Vector2D(-_FIELD_WIDTH/2, 0), Vector2D(0, _FIELD_HEIGHT/2) );
+    static Triangle2D upTri = Triangle2D( Vector2D(-_FIELD_WIDTH/2, _FIELD_HEIGHT/2) ,Vector2D(-_FIELD_WIDTH/2, 0), Vector2D(0, _FIELD_HEIGHT/2) );
+    static Triangle2D *currTri;
 
     draw(Segment2D(Vector2D(-_FIELD_WIDTH/2 , 0) , Vector2D(0 , _FIELD_HEIGHT/2) ) , QColor(Qt::white));
     draw(Segment2D(Vector2D(0 , 0) , Vector2D(0 , _FIELD_HEIGHT/2) ) , QColor(Qt::white));
@@ -221,6 +225,14 @@ void CollectProfileData::LowSpeed(){
                 prfl1->setKickSpeed(kickSpeed1);
             }
 
+            prfl1->setSelectedSkill(roleSkill::Kick);
+            prfl2->setSelectedSkill(roleSkill::ReceivePass);
+
+            prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.8, _FIELD_HEIGHT/2-0.8));
+            prfl2->setTarget(Vector2D(-_FIELD_WIDTH/2+0.8, _FIELD_HEIGHT/2-0.8));
+            prfl1->setWaitPos(Vector2D(-_FIELD_WIDTH/2+0.8, _FIELD_HEIGHT/2-0.8));
+            prfl2->setWaitPos(Vector2D(-_FIELD_WIDTH/2+0.8, _FIELD_HEIGHT/2-0.8));
+            prfl1->setKickSpeed(kickSpeed1);
             debug(QString("prfl1 kick speed:%1").arg(prfl1->getKickSpeed()),D_NADIA);
 
             if(!Circle2D(prfl1->getTarget() , 0.15).contains(knowledge->getAgent(prfl2->getAgentID())->pos()))  // agent1 wait until agent2 is in its target
@@ -230,11 +242,11 @@ void CollectProfileData::LowSpeed(){
         }
         else if(!Circle2D(kickerPos , 0.2).contains(wm->ball->pos)){    // agent1 kicked the ball and the ball is far enough
             prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
+
             prfl1->setWaitPos(Vector2D(lowPosX1 , lowPosY1));
             prfl1->setTarget( Vector2D(lowPosX1 , lowPosY1));
 
             prfl2->setTargetDir(targetDir2);
-
             prfl1_Kicked = true;
             kickStat = ChangeStat;
         }
@@ -245,9 +257,11 @@ void CollectProfileData::LowSpeed(){
     case prfl2_Iskicking:
         if(wm->ball->vel.length() < 0.1){           // ball is in upTri and its velocity is near 0 so agent2 kicks the ball
 
-            if(kickerWait.elapsed() > 2000){
-                prfl2->setSelectedSkill(roleSkill::Kick);
-                prfl1->setSelectedSkill(roleSkill::ReceivePass);
+            prfl2->setTarget(Vector2D( -0.5, 0.5));
+            prfl1->setTarget(Vector2D( -0.5, 0.5));
+            prfl2->setWaitPos(Vector2D( -0.5, 0.5));
+            prfl1->setWaitPos(Vector2D( -0.5, 0.5));
+            prfl2->setKickSpeed(kickSpeed2);
 
 
 
@@ -435,6 +449,9 @@ void CollectProfileData::saveMaxBallSpeed(){
 
 
 void CollectProfileData::HighSpeed(){
+    static Triangle2D downTri = Triangle2D( Vector2D( 0, 0) ,Vector2D(-_FIELD_WIDTH/2, 0), Vector2D(0, _FIELD_HEIGHT/2) );
+    static Triangle2D upTri = Triangle2D( Vector2D(-_FIELD_WIDTH/2, _FIELD_HEIGHT/2) ,Vector2D(-_FIELD_WIDTH/2, 0), Vector2D(0, _FIELD_HEIGHT/2) );
+    static Triangle2D *currTri;
 
     if(Circle2D(knowledge->getAgent(prfl1->getAgentID())->pos() , 1.3).contains(knowledge->getAgent(prfl2->getAgentID())->pos())
             && wm->ball->vel.length() < 0.1){   // davaa
@@ -460,13 +477,18 @@ void CollectProfileData::HighSpeed(){
         }
     }
 
+    draw(Segment2D(Vector2D(-_FIELD_WIDTH/2, 0), Vector2D(0, _FIELD_HEIGHT/2) ), QColor(Qt::white));
+    draw(Segment2D(Vector2D(0, 0), Vector2D(0, _FIELD_HEIGHT/2) ), QColor(Qt::white));
+    draw(Segment2D(Vector2D(-_FIELD_WIDTH/2, 0), Vector2D(0, 0) ), QColor(Qt::white));
     switch(kickStat){
     case prfl1_Iskicking:
         if(wm->ball->vel.length() < 0.1){           // ball is in downTri and its velocity is near 0 so agent1 kicks the ball
 
-            if(kickerWait.elapsed() > 2000 || kickSpeed1 < waitKickSpeed){
-                prfl1->setSelectedSkill(roleSkill::Kick);
-                prfl2->setSelectedSkill(roleSkill::ReceivePass);
+            prfl1->setTarget(Vector2D(-_FIELD_WIDTH/2+0.8, _FIELD_HEIGHT/2-0.8));
+            prfl2->setTarget(Vector2D(-_FIELD_WIDTH/2+0.8, _FIELD_HEIGHT/2-0.8));
+            prfl1->setWaitPos(Vector2D(-_FIELD_WIDTH/2+0.8, _FIELD_HEIGHT/2-0.8));
+            prfl2->setWaitPos(Vector2D(-_FIELD_WIDTH/2+0.8, _FIELD_HEIGHT/2-0.8));
+            prfl1->setKickSpeed(kickSpeed1);
 
 
 
@@ -489,7 +511,7 @@ void CollectProfileData::HighSpeed(){
             else
                 prfl1->setDoPass(true);
         }
-        else if(!Circle2D(kickerPos , 1).contains(wm->ball->pos)){    // agent1 kicked the ball and the ball is far enough
+        else if(!Circle2D(kickerPos, 0.2).contains(wm->ball->pos)){    // agent1 kicked the ball and the ball is far enough
             prfl1->setSelectedSkill(roleSkill::GotopointAvoid);
             prfl1->setWaitPos(Vector2D(highPosX1 , highPosY1));
 
@@ -879,6 +901,7 @@ void CollectProfileData::start(){
         ChipInit(activeRobots[0]);
         positioning(ChipGtpaX, ChipGtpaY);
         draw(Vector2D(-_FIELD_WIDTH/2+0.6, -_FIELD_HEIGHT/2+0.4));
+
 
         //        positioning(-_FIELD_WIDTH/4, _FIELD_HEIGHT/4);
         //        draw(Vector2D(-_FIELD_WIDTH/4, _FIELD_HEIGHT/4));
