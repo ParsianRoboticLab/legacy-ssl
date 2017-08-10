@@ -26,63 +26,14 @@ CNewBangBang::CNewBangBang()
 
 }
 
-/*
-double CNewBangBang::optimalAccOrDec(double agentDir, bool dec)
-{
-    double Vx = cos(agentDir);
-    double Vy = sin(agentDir);
-    double fWheels[4];
-    double biggest = 0.0;
-    double optimalAcc , optimalDec;
-    double Ff , Fn;
-    //////////////Calculate Jacobian Matrix//////////
-    fWheels[0] = -(Vx * 0.8660) + (Vy * 0.5);
-    fWheels[1] = -(Vx * 0.7071) - (Vy * 0.7071);
-    fWheels[2] =  (Vx * 0.7071) - (Vy * 0.7071);
-    fWheels[3] =  (Vx * 0.8660) + (Vy * 0.5);
-    ////////////////////////////////////////////////
-    ///////////find biggest value in Jacob//////////
-    for(int i = 0; i < 4 ; i++) {
-        if( fabs(fWheels[i]) > biggest ) {
-            biggest = fabs(fWheels[i]);
-        }
-    }
-    /////////////////////////////////////////////////
-    //////////normalize Jacob's Value////////////////
-    for(int i = 0; i < 4 ; i++) {
-
-        fWheels[i] = fWheels[i]/biggest;
-    }
-    /////////////////////////////////////////////////
-    ///////////calculate forward force vector and normal force vector////////////////////
-    Ff = ((fWheels[3]-fWheels[0])*(sqrt(3)/2)) + ((fWheels[2] - fWheels[1])*(sqrt(2)/2));
-    Fn = ((fWheels[3]+fWheels[0])*0.5) + (-1*(fWheels[2] + fWheels[1])*(sqrt(2)/2));
-    ////////////////////////////////////////////////////////////////////////////////////
-    /////////////////2.8868 is max of sum Ff and Fn and this derivation is for nomalization of Max Acc = _Acc/////////
-    optimalAcc = _Acc * sqrt((Ff*Ff) + (Fn*Fn))/2.8868;
-    optimalDec = _Dec * sqrt((Ff*Ff) + (Fn*Fn))/2.8868;
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////if boll dec = true the function return optimal dec///////////
-    if(dec) {
-        return optimalDec;
-    }
-    //////////otherwise return optimal acc//////////
-    return optimalAcc;
-}
-*/
 bangBangMode CNewBangBang::decidePlan()
 {
-
     double _x3;
-
     _x3 = (Vel2*Vel2 - vmax*vmax) / (-2 * fabs(dmax)) ;
-
-//    debug(QString("vel2: %1").arg(Vel2),D_MHMMD);
-    if(((agentPos.dist(pos2) < posPidDist + posPidThr) && (Vel2 == 0) )/* || (agentPos.dist(pos2) < 0.15)*/) {
+    if(((agentPos.dist(pos2) < posPidDist + posPidThr) && (Vel2 == 0))) {
         decThr = 0;
         constThr = 0;
         return _bangBangPosPID;
-
     }
     else {
         posPidThr = 0;
@@ -94,62 +45,36 @@ bangBangMode CNewBangBang::decidePlan()
             constThr = 0;
             return _bangBangAcc;
         }
-
-
     }
 }
 
 void CNewBangBang::trajectoryPlanner()
 {
     velMax = vmax;
-
-//    if(smooth && (decidePlan() != _bangBangPosPID))
-//    {
-//        if(((vDes)*cos(appliedTh) - lastVx) > 1)
-//        {
-//            desiredVx = lastVx + 0.085;
-//        }
-//        else if(((vDes)*cos(appliedTh) - agentVel.x) < -1)
-//        {
-//            desiredVx = lastVx - 0.085;
-//        }
-//        else
-//        {
-//            desiredVx = (vDes)*cos(appliedTh);
-//        }
-
-//        if(((vDes)*sin(appliedTh) - lastVy) > 1)
-//        {
-//            desiredVy = lastVy + 0.1;
-//        }
-//        else if(((vDes)*sin(appliedTh) - lastVy) < -1)
-//        {
-//            desiredVy = lastVy - 0.1;
-//        }
-//        else
-//        {
-//            desiredVy = (vDes)*sin(appliedTh);
-//        }
-
-//    }
-//    else
-//    {
-        desiredVx = (vDes)*cos(appliedTh);
-        desiredVy = (vDes)*sin(appliedTh);
-//    }
+    //    }
     ///////////////////////////////////////////// th pid
-    thPid->kp =0.4;
     thPid->error = (agentMovementTh - agentVel.norm().th()).radian();
-    if(fabs(thPid->error > 1) || currentVel < 0.5 || agentPos.dist(pos2) >3 ||( fabs((agentMovementTh - agentDir.th()).degree()) > 80 && fabs((agentMovementTh - agentDir.th()).degree()) < 100 )   )
-        thPid->error =0;
+    if(agentVel.length() < 0.3)
+        thPid->error = 0;
+
+    double veltan= (cos(agentMovementTh.radian()))*cos(agentDir.th().radian()) + (sin(agentMovementTh.radian()))*sin(agentDir.th().radian());
+    double velnorm= -1*(cos(agentMovementTh.radian()))*sin(agentDir.th().radian()) + (sin(agentMovementTh.radian()))*cos(agentDir.th().radian());
+
+    double thPIDKCoef =  atan(fabs(veltan)/fabs(velnorm))/_PI*2;
+    thPid->kp = conf()->BangBang_thKP() * thPIDKCoef;
+    thPid->ki = conf()->BangBang_thKI();
+    thPid->kd = conf()->BangBang_thKD();
+//    if(fabs(thPid->error > 1) || currentVel < 0.5 || agentPos.dist(pos2) >3 ||( fabs((agentMovementTh - agentDir.th()).degree()) > 80 && fabs((agentMovementTh - agentDir.th()).degree()) < 100 )   )
+//        thPid->error =0;
 
     appliedTh = agentMovementTh.radian() +thPid->PID_OUT();
+    desiredVx = (vDes)*cos(appliedTh);
+    desiredVy = (vDes)*sin(appliedTh);
 
-
+    thPid->pError = thPid->error;
 }
 void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D _agentDir,Vector2D _pos2,Vector2D _dir2,double _V2,double dt,double & _Vx,double & _Vy, double & _W)
 {
-
     pos2 = _pos2;
     dir2 = _dir2;
     Vel2 = _V2;
@@ -166,47 +91,61 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     }
     else
     {
-        angPid->kp = 2;
+        angPid->kp = 4;
     }
     angPid->error = (dir2.th() -  agentDir.th()).radian();
 
-    draw(QString("vel2 : %1").arg(Vel2),Vector2D(2,1.5));
+    draw(QString("vel2 : %1 , realVel : %2").arg(Vel2).arg(agentVel.length()),Vector2D(2,1.5));
     agentMovementTh = movementTh.th();
 
-    if ( fabs((agentMovementTh - agentDir.th()).degree()) > 80 && fabs((agentMovementTh - agentDir.th()).degree()) < 100 )
+    if(oneTouch || diveMode)
     {
-        amax = 70;
+        posPidDist = 0.5;
+    }
+    else
+    {
+        posPidDist = 0.15;
     }
     if(slow)
     {
-        posPid->kp = 2;
-        amax = 10;
+        posPid->kp = (1.5)*(0.001/(agentPos.dist(pos2)*agentPos.dist(pos2)));
+        posPid->kp = min(posPid->kp,2.5);
+        posPid->kp = max(posPid->kp,1.5);
+
         posPid->kd = conf()->BangBang_posKD();
+        posPid->ki = conf()->BangBang_posKI();
+    }
+    else if(diveMode)
+    {
+        posPid->kp = 7;
+        posPid->kd = 20;
         posPid->ki = conf()->BangBang_posKI();
     }
     else if(oneTouch)
     {
-        posPid->kp = 6;
-        amax = 50;
-        posPid->kd = 7;
-        posPid->ki = conf()->BangBang_posKI();
+        posPid->kp = (conf()->BangBang_posKP())*(0.04/(agentPos.dist(pos2)*agentPos.dist(pos2)));
+//        debug(QString("kp: %1").arg(posPid->kp),D_MHMMD);
+        posPid->kp = min(posPid->kp,conf()->BangBang_posKP()*3);
+        posPid->kp = max(posPid->kp,conf()->BangBang_posKP());
+
+        posPid->kd = 15;
+        posPid->ki = 0;
     }
     else
     {
-        posPid->kp = conf()->BangBang_posKP();
+        posPid->kp = (conf()->BangBang_posKP())*(0.02/(agentPos.dist(pos2)*agentPos.dist(pos2)));
+//        debug(QString("kp: %1").arg(posPid->kp),D_MHMMD);
+        posPid->kp = min(posPid->kp,conf()->BangBang_posKP()*2);
+        posPid->kp = max(posPid->kp,conf()->BangBang_posKP());
         posPid->kd = conf()->BangBang_posKD();
         posPid->ki = conf()->BangBang_posKI();
     }
 
-    thPid->kp = conf()->BangBang_thKP();
-    thPid->ki = conf()->BangBang_thKI();
-    thPid->kd = conf()->BangBang_thKD();
+
     //////////////////////// dec calculations
     double vp =(posPidDist*posPid->kp);
-    double moreDec = 0.83;
-    double decOffset = 0.5;
-
-
+    double moreDec = 0.7;
+    double decOffset = 0.6;
 
     switch(decidePlan())
     {
@@ -221,7 +160,7 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
         if(Vel2 == 0 )
             vDes = sqrt(vp*vp + 2*dmax*agentPos.dist(pos2)*moreDec) - decOffset;
         else
-            vDes = sqrt(Vel2*Vel2 + 2*dmax*agentPos.dist(pos2)*moreDec) ;
+            vDes = sqrt(Vel2*Vel2 + 2*dmax*agentPos.dist(pos2)*moreDec)- decOffset ;
         break;
     case _bangBangAcc:
 
@@ -230,14 +169,16 @@ void CNewBangBang::bangBangSpeed(Vector2D _agentPos,Vector2D _agentVel,Vector2D 
     }
     trajectoryPlanner();
     lastPath = agentVel.th();
+
     /////////////////////th pid
-    debug(QString("vdes : %1").arg(vDes),D_MHMMD);
+//    debug(QString("vdes : %1").arg(vDes),D_MHMMD);
     _Vx =  desiredVx;//(vDes)*cos(appliedTh);
     _Vy =  desiredVy;//(vDes)*sin(appliedTh);
     _W = angPid->PID_OUT();
+//    debug(QString("v1: %1 ").arg(_W),D_MHMMD);
 
     lastVx = _Vx;
     lastVy = _Vy;
+    angPid->pError = angPid->error;
     posPid->pError = posPid->error;
-
 }

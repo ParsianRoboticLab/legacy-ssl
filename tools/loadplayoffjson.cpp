@@ -80,16 +80,21 @@ bool CLoadPlayOffJson::readPlan(const QVariantMap &_map, const QString& _file) {
         fillMatching(tempMatching, planMap, &parsedOk);
         fillExecution(tempExecution, planMap, &parsedOk);
         fillGUI(tempGui, fileInfo, &parsedOk);
+
+
+        tempMatching.shotPos = findShotPos(tempPlan);
+
         m_plans.append(tempPlan);
     }
 }
 
 void CLoadPlayOffJson::fillCommon(NGameOff::SCommon& _common, const QVariantMap& _plan, bool* _parsedOk) {
 
-    _common.tags      = _plan.value("tags").toStringList();
-    _common.chance    = _plan.value("chance").toDouble(_parsedOk);
-    _common.lastDist  = _plan.value("lastDist").toDouble(_parsedOk);
-    _common.agentSize = _plan.value("agents").toList().size();
+    _common.tags       = _plan.value("tags").toStringList();
+    _common.chance     = _plan.value("chance").toDouble(_parsedOk);
+    _common.lastDist   = _plan.value("lastDist").toDouble(_parsedOk);
+    _common.agentSize  = _plan.value("agents").toList().size();
+    _common.planRepeat = 0;
 
     QString planMode = _plan.value("planMode").toString();
     if      (planMode == "KICKOFF" ) _common.planMode = KICKOFF;
@@ -111,6 +116,7 @@ void CLoadPlayOffJson::fillMatching(NGameOff::SMatching& _matching, const QVaria
         _matching.initPos.agents.append(Vector2D(initPosMap.value("x").toDouble(_parsedOk),
                                                  initPosMap.value("y").toDouble(_parsedOk)));
     }
+
     if (!_parsedOk) {
         qWarning() << "Agent Init Pos did NOT parsed okey!";
         return;
@@ -173,6 +179,23 @@ QString CLoadPlayOffJson::getPackageName(QString _path) {
     packageName.append(_path);
     //    qDebug() << packageName;
     return packageName;
+}
+
+Vector2D CLoadPlayOffJson::findShotPos(SPlan *&_plan) {
+    QList<POffSkills> finisher;
+    finisher.append(ShotToGoalSkill);
+    finisher.append(ChipToGoalSkill);
+    finisher.append(OneTouchSkill);
+
+    Q_FOREACH(QList<playOffRobot> agentPlan, _plan->execution.AgentPlan) {
+        Q_FOREACH(playOffRobot agentTask, agentPlan) {
+            Q_FOREACH(playOffSkill agentSkill, agentTask.skill) {
+                if (finisher.contains(agentSkill.name)) {
+                    return agentTask.pos;
+                }
+            }
+        }
+    }
 }
 
 POffSkills CLoadPlayOffJson::strToEnum(const QString& _str) {

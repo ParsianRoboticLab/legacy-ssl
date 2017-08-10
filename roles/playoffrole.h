@@ -45,6 +45,10 @@ public:
     ClassProperty(CRolePlayOff, double, EventDist, eventDist, updated);
     ClassProperty(CRolePlayOff, bool, DoPass, doPass, updated);
     ClassProperty(CRolePlayOff, bool, LookForward, lookForward, updated);
+    ClassProperty(CRolePlayOff, bool, NoAvoid, noAvoid, updated);
+
+    ClassProperty(CRolePlayOff, bool, Spin, spin, updated);
+
 
     ////////Not Executive Property
     ClassProperty(CRolePlayOff, long long, Time, time, dont);

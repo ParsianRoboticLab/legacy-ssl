@@ -12,7 +12,9 @@ CSkillAutoBallPlacement::CSkillAutoBallPlacement(CAgent *_agent) : CSkill(_agent
     bangBang = new CNewBangBang();
     agent = _agent;
     ballCounter = 0;
+    state = 0;
     ballCatchFlag = false;
+    isVisionOkArea = false;
 }
 
 double CSkillAutoBallPlacement::progress()
@@ -29,34 +31,50 @@ CSkillAutoBallPlacement::~CSkillAutoBallPlacement()
 void CSkillAutoBallPlacement::gotoBall()
 {
     Circle2D dribblerArea (agent->pos() + agent->dir().norm()*0.09,0.1);
-    kick->setTarget(target);
-    kick->setShotToEmptySpot(false);
-    kick->setSlow(true);
-    kick->setVeryFine(true);
-    kick->setSpin(3);
+
+    kick->setKickSpeed(0);
+    kick->setAvoidOppPenaltyArea(false);
+    if(isVisionOkArea)
+    {
+        kick->setTarget((wm->ball->pos - target).norm()*10 + wm->ball->pos);
+        kick->setShotToEmptySpot(false);
+        kick->setSlow(true);
+        kick->setVeryFine(true);
+        kick->setSpin(2);
+    }
+    else
+    {
+        kick->setTarget(Vector2D(0,0));
+        kick->setShotToEmptySpot(false);
+        kick->setSlow(true);
+        kick->setVeryFine(true);
+        kick->setSpin(2);
+    }
+
+    kick->execute();
+
     if(dribblerArea.contains(wm->ball->pos))
     {
         ballCounter++;
     } else
-         {
-             ballCounter= 0;
-         }
+    {
+        ballCounter= 0;
+    }
 
-    if(ballCounter < 50 && isFinished == false)
+    if(ballCounter < 50)
     {
         kick->setKickSpeed(0);
         kick->setSpin(1);
         kick->execute();
-    } else if(ballCounter < 80 && isFinished == false)
-         {
-             kick->setKickSpeed(0);
-             kick->setSpin(4);
-             kick->execute();
-         } else
-              {
-                  agent->setRoller(3);
-                  gotoTarget();
-              }
+    } else if(ballCounter < 80)
+    {
+        kick->setKickSpeed(0);
+        kick->setSpin(1);
+        kick->execute();
+    } else
+    {
+        state = 2;
+    }
 
 
 }
@@ -64,25 +82,31 @@ void CSkillAutoBallPlacement::gotoBall()
 
 void CSkillAutoBallPlacement::gotoTarget()
 {
+    Circle2D dribblerArea (agent->pos() + agent->dir().norm()*0.09,0.15);
+
     double vx,vy,w;
     draw(target);
-    agent->setRoller(5);////inja
+    agent->setRoller(1);////inja
     bangBang->setAngInPath(true);
     bangBang->setSlow(true);
-    bangBang->setAngKp(2);
+    bangBang->setAngKp(0.5);
     bangBang->setAccMax(0.3);
     bangBang->setDecMax(1);
-    bangBang->setVelMax(1);
+    bangBang->setVelMax(0.5);
     bangBang->bangBangSpeed(agent->pos(),agent->vel(),agent->dir(),
                             target,wm->ball->pos - agent->pos(),0,0.016,vx,vy,w);
 
-
+    agent->accelerationLimiter(0,false);
+    if(!dribblerArea.contains(ballPos))
+    {
+        state = 0;
+    }
     if(target.dist(wm->ball->pos) < 0.25)
-        {
-            agent->setRoller(0);
-            isFinished = true;
+    {
+        agent->setRoller(0);
+        isFinished = true;
 
-        }
+    }
     else
     {
         isFinished = false;
@@ -97,20 +121,35 @@ void CSkillAutoBallPlacement::gotoTarget()
 void CSkillAutoBallPlacement::execute()
 {
     kick->setAgent(agent);
-
-    //added
-    //target = Vector2D(knowledge->getBPPosition().x, knowledge->getBPPosition().y);
-    debug(QString("tar : %1 , %2").arg(knowledge->getBPPosition().x).arg(knowledge->getBPPosition().y), D_MAHMOOD);
-    draw(Circle2D(target, 0.10), QColor(Qt::cyan));
-
-    gotoBall();
-
-    debug(QString("isFinished : %1 ").arg(isFinished), D_MAHMOOD);
-
+    Rect2D okVisionArea (Vector2D(-3,-2),Vector2D(3,2));
+    draw(okVisionArea);
     ballPos = wm->ball->pos;
     agentPos = agent->pos();
+
+    if(state == 0)
+    {
+        if(okVisionArea.contains(ballPos) && wm->ball->vel.length() < 0.1)
+        {
+            isVisionOkArea = true;
+        }
+        else if(wm->ball->vel.length() < 0.1)
+        {
+            isVisionOkArea = false;
+        }
+        state = 1;
+    }
+    else if(state == 1)
+    {
+        gotoBall();
+    }
+    else if(state == 2)
+    {
+        gotoTarget();
+    }
+
+
     Circle2D kickerArea(agentPos + agent->dir().norm()*0.12, 0.12);//0.11/0.1
-    debug(QString("dist: %1").arg(target.dist(wm->ball->pos)),D_MAHMOOD);
+
 }
 
 
@@ -149,6 +188,4 @@ void autoBallPlacement()
         abpm.setTarget(knowledge->getMousePos());
         abpm.execute();
     }
-
-
 }

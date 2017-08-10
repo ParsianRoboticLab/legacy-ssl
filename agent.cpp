@@ -120,7 +120,7 @@ Matrix ANN_forward( Matrix input )
 CAgent::CAgent(short int _ID)
 {
     srand48(time(0));
-
+    packetNum = 0;
     stopTrain=false;wh1=wh2=wh3=wh4=0.0;startTrain=false;
     selfID = _ID;
     skill = NULL;
@@ -173,6 +173,9 @@ CAgent::CAgent(short int _ID)
     _ACC = 0;
     _DEC = 0;
     agentStopTime.start();
+
+    changeIsNeeded = false;
+
 }
 
 void CAgent::loadProfiles()
@@ -424,21 +427,21 @@ bool CAgent::trajectory(double& vf,double& vn,double& va,double w1,double w2,dou
     return false;
 }
 
-void CAgent::accelerationLimiter()
+void CAgent::accelerationLimiter(double vf,bool diveMode)
 {
     ////first Stage Accelerate Limit
     double veltan= (vel().x)*cos(dir().th().radian()) + (vel().y)*sin(dir().th().radian());
     double velnorm= -1*(vel().x)*sin(dir().th().radian()) + (vel().y)*cos(dir().th().radian());
 
 
-//    if(fabs(veltan - lastVf) > 3)
-//    {
-//        lastVf = veltan;
-//    }
-//    if(fabs(velnorm - lastVn) > 3)
-//    {
-//        lastVn = velnorm;
-//    }
+    //    if(fabs(veltan - lastVf) > 3)
+    //    {
+    //        lastVf = veltan;
+    //    }
+    //    if(fabs(velnorm - lastVn) > 3)
+    //    {
+    //        lastVn = velnorm;
+    //    }
 
     if(vel().length() > 0.2)
     {
@@ -456,40 +459,115 @@ void CAgent::accelerationLimiter()
     double lastV,commandV;
     double vCoef = 1;
     double tempVf = vforward , tempVn = vnormal;
+    double decCoef = 1.5;
 
+    if(vf == 0)
+        decCoef = 2.5;
+    ///////////////////////first Stage Acc with true angle
+
+    double accCoef =1,realAcc = 4;
+    accCoef = atan(fabs(vforward)/fabs(vnormal))/_PI*2;
+    if(diveMode)
+    {
+        realAcc = 1.5 * accCoef*conf()->BangBang_AccMaxForward() + (1-accCoef)*conf()->BangBang_AccMaxNormal();
+    }
+    else
+    {
+        realAcc = accCoef*conf()->BangBang_AccMaxForward() + (1-accCoef)*conf()->BangBang_AccMaxNormal();
+
+    }
+
+
+#if 1
     commandV = sqrt((vforward*vforward)+(vnormal*vnormal));
     lastV = sqrt((lastVf*lastVf)+(lastVn*lastVn));
 
-    if(commandV > (lastV + conf()->BangBang_AccMax()* 0.0166667))
+    if(commandV > (lastV + realAcc* 0.0166667))
     {
-        commandV = lastV + (conf()->BangBang_AccMax() * 0.0166667);
+        commandV = lastV + (realAcc * 0.0166667);
     }
     vforward = commandV * sin(atan2(tempVf,tempVn));
     vnormal = commandV * cos(atan2(tempVf,tempVn));
-    debug(QString("command V: %1").arg(commandV),D_MHMMD);
-    debug(QString("vf: %1 , Vn :%2").arg(vforward).arg(vnormal),D_MHMMD);
-    debug(QString("Vvf: %1 , VVn :%2").arg(veltan).arg(velnorm),D_MHMMD);
-    if(vforward - lastVf > 1)
+
+#endif
+
+    /////////////////Second order acc limit for trajectory planning
+    if(!diveMode)
     {
-        vforward = lastVf + 0.085;
+        if(vforward >= 0 )
+        {
+            if(vforward > (lastVf + conf()->BangBang_AccMaxForward()* 0.0166667))
+            {
+                vforward = lastVf + (conf()->BangBang_AccMaxForward()* 0.0166667)*sign(vforward);
+            }
+            if(vforward < (lastVf - decCoef*conf()->BangBang_DecMax()* 0.0166667))
+            {
+                vforward = lastVf - (decCoef*conf()->BangBang_DecMax()* 0.0166667);
+            }
+        }
+        else
+        {
+            if(vforward < (lastVf - conf()->BangBang_AccMaxForward()* 0.0166667))
+            {
+                vforward = lastVf - (conf()->BangBang_AccMaxForward()* 0.0166667);
+            }
+            if(vforward > (lastVf + decCoef*conf()->BangBang_DecMax()* 0.0166667))
+            {
+                vforward = lastVf + (decCoef*conf()->BangBang_DecMax()* 0.0166667);
+            }
+        }
     }
-    else if(vforward - lastVf < - 1)
+//    debug(QString("vn: %1 , lVn :%2").arg(vnormal).arg(lastVn),D_MHMMD);
+    if(vnormal >= 0)
+    {
+        if(diveMode)
+        {
+            if(vnormal > (lastVn + 10* 0.0166667))
+            {
+                vnormal = lastVn + (10* 0.0166667)*sign(vnormal);
+            }
+        }
+        else
+        {
+            if(vnormal > (lastVn + conf()->BangBang_AccMaxNormal()* 0.0166667))
+            {
+                vnormal = lastVn + (conf()->BangBang_AccMaxNormal()* 0.0166667)*sign(vnormal);
+            }
+        }
+
+        if(!diveMode&&(vnormal < (lastVn - decCoef*conf()->BangBang_DecMax()* 0.0166667)))
+        {
+            vnormal = lastVn - (decCoef*conf()->BangBang_DecMax()* 0.0166667);
+        }
+    }
+    else
+    {
+        if(diveMode)
+        {
+            if(vnormal < (lastVn - 10* 0.0166667))
+            {
+                vnormal = lastVn + (10* 0.0166667)*sign(vnormal);
+            }
+        }
+        else
+        {
+            if(vnormal < (lastVn - conf()->BangBang_AccMaxNormal()* 0.0166667))
+            {
+                vnormal = lastVn + (conf()->BangBang_AccMaxNormal()* 0.0166667)*sign(vnormal);
+            }
+        }
+
+        if(!diveMode&&(vnormal > (lastVn + decCoef*conf()->BangBang_DecMax()* 0.0166667)))
+        {
+            vnormal = lastVn + (decCoef*conf()->BangBang_DecMax()* 0.0166667);
+        }
+    }
+
+
+    if(vforward - lastVf < - 1)
     {
         vforward = lastVf - 0.085;
     }
-
-
-//    if(vnormal - lastVn > 1)
-//    {
-//        vnormal = lastVn + 0.085;
-//    }
-//    else if(vnormal - lastVn < - 1)
-//    {
-//        vnormal = lastVn - 0.085;
-//    }
-
-   debug(QString("avf: %1 , aVn :%2").arg(vforward).arg(vnormal),D_MHMMD);
-
 
 
     lastVf = vforward;
@@ -502,7 +580,7 @@ void CAgent::generateRobotCommand()
     //accelerationLimiter();
     double veltan= (vel().x)*cos(dir().th().radian()) + (vel().y)*sin(dir().th().radian());
     double velnorm= -1*(vel().x)*sin(dir().th().radian()) + (vel().y)*cos(dir().th().radian());
-//    debug(QString("vf: %1 , Vn :%2").arg(vforward).arg(vnormal),D_MHMMD);
+    //    debug(QString("vf: %1 , Vn :%2").arg(vforward).arg(vnormal),D_MHMMD);
 
     calibrated++;
     for( int i = 0; i < _PACKET_SIZE; i++)
@@ -573,7 +651,7 @@ void CAgent::generateRobotCommand()
     unsigned int velTanSend = (int)(fabs(veltan)*100);
 
     unsigned int velNormSend = (int)(fabs(velnorm)*100);
-    outputBuffer[11] = velTanSend & 0x3F;
+    outputBuffer[11] = packetNum & 0x07;
     outputBuffer[12] = ((velTanSend >> 6 ) & 0X07) | ((velNormSend & 0x0F) << 3);
     outputBuffer[13] = (velNormSend >> 4) & 0x1F;
 
@@ -586,6 +664,14 @@ void CAgent::generateRobotCommand()
         outputBuffer[13] |= 0x40;
     else
         outputBuffer[13] &= 0xBF;
+    if(packetNum < 8 )
+    {
+        packetNum ++;
+    }
+    else
+    {
+        packetNum = 0;
+    }
 }
 
 char* CAgent::getOutputBuffer()
@@ -619,12 +705,12 @@ Vector2D CAgent::dir()
 
 bool CAgent::shootSensor()
 {
-    return wm->our[selfID]->shootSensor;
+    return 0 ; //wm->our[selfID]->shootSensor;
 }
 
 void CAgent::setShootSensor(bool b)
 {
-    wm->our[selfID]->shootSensor = b;
+    //wm->our[selfID]->shootSensor = b;
 }
 
 double CAgent::angularVel()
@@ -685,9 +771,9 @@ void CAgent::addRobotVel(double _vtan, double _vnorm, double _w)
     double vx , vy , w;
     jacobianInverse(v1 , v2 , v3 , v4 , vx , vy , w);
 
-    vforward = vx;
-    vnormal  = vy;
-    vangular = w*_RAD2DEG;
+    vforward += _vtan;
+    vnormal  += _vnorm;
+    vangular += w*_RAD2DEG;
 }
 
 void CAgent::waitHere()
@@ -802,6 +888,17 @@ double F( double d, double bnd)
 CAgent::Abilities::Abilities()
 {
     hasGyro = canChip = canKick = canSpin = highBattery = true;
+}
+
+CAgent::Status::Status() {
+    spin = shotSensor = fault = faild = halt = shotBoard = false;
+    kickFault = chipFault = false;
+    encoderFault[0] = encoderFault[1] = encoderFault[2] = encoderFault[3] = false;
+    motorFault[0] = motorFault[1] = motorFault[2] = motorFault[3] = motorFault[4] = false;
+    beep = false;
+    shotSensorFault = false;
+    boardID = -1;
+
 }
 
 double CAgent::kickValueSpeed(double value,bool spinner)//for onetouch

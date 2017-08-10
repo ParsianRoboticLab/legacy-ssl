@@ -12,7 +12,6 @@
 #include "movingobject.h"
 
 
-
 #define CAMERA_NUM 4
 #define OUT_OF_SIGHT_THRESHOLD 40
 

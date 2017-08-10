@@ -18,6 +18,7 @@
 #include "tools/planloader.h"
 #include "tools/loadplayoffjson.h"
 #include "util/rng.h"
+#include "chalftimelineup.h"
 
 class CCoach {
 
@@ -30,6 +31,7 @@ public:
     double playOnTime;
     CCoach(CAgent** _agents);
     ~CCoach();
+    static ShotSpot getShotSpot(const Vector2D& _ball, const Vector2D& _shotPos);
     void execute();
     void saveGoalie();
     DefensePlan& getDefense();
@@ -46,6 +48,7 @@ public:
     ClassProperty(CCoach, Vector2D, LastBallPos, lastBallPos, updated);*/
 
 private:
+    bool lastASWasCritical;
     Vector2D passPos;
     bool passPlayMake;
     Vector2D lastBallVelPM;
@@ -64,6 +67,7 @@ private:
     QTime intentionTimePossession;
     QTime playMakeIntention;
     QTime playOnExecTime;
+    QTime playMakeSelectTime;
     double playMakeIntentionInterval;
     double possessionIntentionInterval;
     double playMakeIntended;
@@ -75,6 +79,11 @@ private:
     COurKickOff          *ourKickOff;
     COurIndirect         *ourIndirect;
     COurBallPlacement    *ourBallPlacement;
+    CHalftimeLineup      *halfTimeLineup;
+
+
+
+
     CTheirDirect         *theirDirect;
     CTheirPenalty        *theirPenalty;
     CTheirKickOff        *theirKickOff;
@@ -156,6 +165,10 @@ private:
                          const POMODE _gameMode,
                          const QList<int>& _agentSize);
     void setPlayOff(NGameOff::EMode _mode);
+    int PlayoffLFUPolicy(QList<SPlan*> prevValidPlans, QList<SPlan*> validPlans);
+    int PlayoffShufflePolicy(QList<SPlan*> prevValidPlans, QList<SPlan*> validPlans);
+    int LFUPlan(QList<SPlan*> validPlans);
+    void MinChanceOfValidplans(QList<SPlan*> validPlans);
     void initStaticPlay(const POMODE _mode, const QList<int>& _agentSize);
     void initDynamicPlay(QList<int> _ourplayers);
     void initFastPlay(QList<int> _ourplayers);
@@ -168,6 +181,7 @@ private:
     QList<SPlan*> getValidPlans(const POMODE _mode, const QList<int> &_ourPlayers);
 
     QList<SPlan *> getMatchedPlans(const QStringList& _tags, const QList<SPlan *> &_plans);
+    QList<SPlan *> getMatchedPlans(int _shotSpot, const QList<SPlan*> &_plans);
 
     CLoadPlayOffJson* m_planLoader;
     bool firstTime, firstPlay, firstIsFinished;
@@ -178,9 +192,13 @@ private:
     bool isRegionMatched(const Vector2D& _ball, const double& _radius = 1.0); //circular Matching
     //TODO : squere or Liner matching
     NGameOff::SPlan* chooseMostSuccecfull(const QList<NGameOff::SPlan*>& plans);
+    void LFUInit(QList<NGameOff::SPlan*> allPlans);
+    void saveLFUReapeatData(QList<SPlan*> plans);
+    void ShufflePlanIndexing(QList<SPlan*> Plans);
     void matchPlan(NGameOff::SPlan* _plan, const QList<int>& _ourplayers);
     void checkGUItoRefineMatch(NGameOff::SPlan* _plan, const QList<int> &_ourplayers);
     QStringList currentTags;
+    int preferedShotSpot;
     QStringList guiTags; // TODO : add tags to gui playoffTab
 
     NGameOff::SPlan* lastPlan;
@@ -202,10 +220,28 @@ private:
     void decideStart              (QList<int>&);
     void decideOurBallPlacement   (QList<int>&);
     void decideTheirBallPlacement (QList<int>&);
+    void decideHalfTimeLineUp   (QList<int>&);
     void decideNull               (QList<int>&);
     /////////////////////////////////////
     unsigned int staticPlayoffPlansCounter;
+    unsigned int shuffleCounter, shuffleSize;
+    bool shuffled;
+    double LFUPlanID,maxLFU, LFU;
+    QList<SPlan *> LFUList;
+    bool firstPlanRepeatInit;
+    QTextStream out;
+    QFile playoffPlanSelectionDataFile;
+    QList<int> staticPlayoffPlansShuffleIndexing;
+    int minChance, minChanceRepeat;
+
     bool isFastPlay();
+    ///HMD
+    bool checkOverdef();
+    double overDefThr;
+
+    // inter change
+    void checkSensorShootFault();
+    int  faultDetectionCounter[12];
 };
 
 

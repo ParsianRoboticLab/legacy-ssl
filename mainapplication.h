@@ -27,6 +27,7 @@
 #include <fstream>
 #include <soccer.h>
 #include "collectprofiledata.h"
+#include "robotstatussender.h"
 
 class MySoccer : public CSoccer
 {
@@ -178,7 +179,7 @@ public:
 //    CPolicyLearner* policyLearner;
 //    CPlaysWidget *playsWidget2;
 
-
+      CRobotStatusSender *statusSender;
 
 
 #ifdef DISTURBANCE_MATRIX
@@ -222,6 +223,7 @@ public:
     QAction *setExp6Act;
     QAction *setJsHandy;
     QAction *setAutoBallPlacement;
+    QAction *setTC_chipKick;
     QAction *setFProfiler;
     QAction *setKProfiler;
     QAction *setTechnicalChallengeAct;
@@ -244,6 +246,9 @@ public:
     void Experimental4();
     void Experimental5();
     void Experimental6();
+
+    void MixTeamChallenge();
+
     void JsHandy();
     void kickProfiler();
     bool MergeCamerasExperiment();

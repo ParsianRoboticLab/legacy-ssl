@@ -169,8 +169,10 @@ private:
     kckMode decideMode();
     kckMode kickMode;
     _PID *angPid;
-    _PID *speedPidX;
-    _PID *speedPidY;
+    _PID *speedPid;
+    _PID *posPid;
+
+
     Vector2D agentPos;
     Vector2D agentDir;
     QQueue <Vector2D> dirQueue;
@@ -199,6 +201,7 @@ private:
     void kkIntercept();
     void kkPenalty();
     void avoidOppPenalty();
+    void avoidOurPenalty();
     void waitAndKick();
     void kDontKick();
     void kWaitForTurn();
@@ -208,7 +211,7 @@ private:
     double oneTouchAngle(Vector2D pos,Vector2D vel,Vector2D ballVel,Vector2D ballDir,Vector2D goal,double landa,double gamma);
     Vector2D jTurnStartPos;
     bool isJturn;
-
+    bool jTurnFromBack;
     CSkillGotoPointAvoid *gpa;
     CSkillIntercept *kickIntercept;
     Vector2D getTurnFunc(double ang, double _r, double _angOff = 0);
@@ -234,6 +237,7 @@ public:
     Vector2D findMostPossible();
     virtual void generateFromConfig(CAgent *a);
     virtual CSkillConfigWidget* generateConfigWidget(QWidget *parent);
+    static double kickTimeEstimation(CAgent * _agent, Vector2D target);
     SkillProperty(CSkillKick, double, Tolerance, tol);
     SkillProperty(CSkillKick, bool, Chip, chip);
     SkillProperty(CSkillKick, int, KickSpeed, kickSpeed);
@@ -263,7 +267,8 @@ public:
     SkillProperty(CSkillKick, bool, AlternateMode, alternateMode);
     SkillProperty(CSkillKick, double,KickAngTol, kickAngTol);
     SkillProperty(CSkillKick, bool,KickWithCenterOfDribbler, kickWithCenterOfDribbler);
-
+    SkillProperty(CSkillKick, bool,PlayMakeMode, playMakeMode);
+    SkillProperty(CSkillKick, bool,FastIntercept, fastIntercept);
 };
 
 

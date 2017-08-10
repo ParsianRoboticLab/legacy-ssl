@@ -23,6 +23,7 @@ public:
 class CRolePlayMake : public CRole
 {
 protected:
+    bool goalKeeperForward=false;
     Hyst ballTop;
     Hyst ballLeft;
     int qqHist;
@@ -43,6 +44,7 @@ protected:
     bool indirect, direct, kickoff;
     int penaltyRand;
     Vector2D penaltyTarget;
+    bool firstKick=true;
     int penaltyCounter;
     //decision making
     QList<int> oppBlockers;
@@ -79,22 +81,39 @@ protected:
     int waitBeforePass;
     int orderRushInPlenalty;
     bool orderedRush;
+    QTime changeDirPenaltyStrikerTime;
+    bool timerStartFlag;
+
 public:
     DEF_ROLE(CRolePlayMake)
     void executeOurDirect();
     void executeOurIndirect();
     void executeOurKickOff();
     void executeOurPenalty();
+    void executeOurPenaltyShootout();
+    void theirPenaltyPositioning();
+    int choosePenaltyStrategy();
+    void ShootoutSwitching(bool isChip);
+    void firstKickInShootout(bool isChip);
+    void kickInitialShootout();
+    int getPenaltychipSpeed();
+    double lastBounce();
+    bool ShootPenalty();
     void executeDefault();
     void resetOffPlays();
     void resetPlayMake();
     bool canScoreGoal();
     void kickPass( int kickSpeed );
     enum KickPassMode{KickPassFirst , KickPassSecond};
+    enum penaltyStrategy{pgoaheadShoot , pchipShoot , pshootDirect};
 
     KickPassMode kickPassMode;
     int kickPassCyclesWait;
     Vector2D finalTarget;
+
+    QList<QPair<int, QMap<double, int> > > lastBounceProfileData;
+    QTextStream out;
+    QFile lastBounceDataFile;
 
     virtual void generateFromConfig(CAgent *a);
     virtual CSkillConfigWidget* generateConfigWidget(QWidget *parent);

@@ -9,6 +9,9 @@
 #include <QDebug>
 #include <QVector2D>
 
+#include "defpos.h"
+#include "proto/multi_team_communication.pb.h"
+
 //#include "simulation/simulator.h"
 //#include <widgets.h>
 
@@ -36,13 +39,14 @@ struct NewFastestToBall
         oppF.clear();
     }
     int ourFastest(){
-        if( ourF.size() )
+        if(ourF.size())
             return ourF.first().second;
         return -1;
     }
     double ourFastestTime(){
-        if( ourF.size() )
+        if(ourF.size()){
             return ourF.first().first;
+        }
         return -1;
     }
     int oppFastest(){
@@ -51,7 +55,7 @@ struct NewFastestToBall
         return -1;
     }
     double oppFastestTime(){
-        if( oppF.size() )
+        if(oppF.size())
             return oppF.first().first;
         return -1;
     }
@@ -98,13 +102,8 @@ struct SRAgentArgs {
 };
 
 
-
-
-
 class CKnowledge
 {
-
-
 private:
     //added
     Vector2D bpPosition;
@@ -133,7 +132,8 @@ public:
         NormalStart = 11,
         //added
         OurBallPlacement = 12,
-        TheirBallPlacement = 13
+        TheirBallPlacement = 13,
+        HalfTimeLineUp=14
     };
     enum Support
     {
@@ -155,6 +155,17 @@ public:
     //added
     Vector2D getBPPosition();
     void setBPPosition(float x, float y);
+
+    //added for mixteam TC
+    multi_team_comm::TeamPlan *kPlans;
+    int ssize;
+    bool ready = false;
+    QList<CAgent*> activesInField;
+    int mixGoaleID;
+    QList<int> ourAgentIDsMixTeam;
+
+    void getOurRobotIDsFromGUIMixTeam();
+
 
 
     class PlaymakerSelector
@@ -180,6 +191,7 @@ public:
         void setPassRecvTarget(int id);
     } playmakerSelector;
     bool transientFlag;
+
     int newFastestSelector(QList <CAgent*> _agents);
     int nonPlayOnFastestSelector(QList <CAgent*> _agents);
     void sortByX(QList <CAgent *> &_agents );
@@ -208,18 +220,58 @@ public:
     Vector2D ballPosHis[5];
     double ballVelLowPass;
     /////////////////////////
-    ///////
-
-    ///////
+    ///////////////////////////////// AHZ //////////////////////////////////////
+    QString stateForMark;
+    QString lastStateForMark;
+    Vector2D getPointInDirection(Vector2D firstPoint , Vector2D secondPoint , double proportion);
+    Vector2D getOppNearestToBallDirInTheirIndirectMode(int lastDirectionSize);
+    Vector2D AHZOppNearestToBallDirection;
+    Vector2D oppNearestToBallPossition;
+    Vector2D sumOfLastOpponentDirections;
+    Vector2D sumOfLastOpponentPosition;
+    Vector2D finalOppNearestToBallDirection;
+    QList <Vector2D> lastOppNearestToBallDirections;
+    bool isStateGoingFromIndirectToTransient();
+    bool defenseOneTouchMode;    
+    bool goalKeeperOneTouchMode;
+    bool defenseClearMode;
+    bool goalKeeperClearMode;
+    bool LastTS;
+    //////////////////////////////// end of AHZ
     QList<int> oppBlockers;
     QString stateToString(State s);
     int ourShirjeBlocker;
     int lastFrameShirjeBlock;
     bool isSimulMode;
     void updateGameState();
-    ///////////////AMIN
-    Vector2D getBest();
     //////////////Mahmoud
+    //chip dir predict
+    Vector2D getChipDir();
+    double chipperDistance=100;
+    qint32 chipperIDD=-1,chipperID=-1;
+    bool DirFound=false;
+    Vector2D chipperDir=Vector2D(0,0);
+    Vector2D prevBallPos,chipperPoint=Vector2D(0,0);
+    QMap<qint32,QList<Vector2D> > lastDirs;
+    //chip predict
+    QList<Vector2D> predictedBallPoses;
+    bool flagN = true;
+    QList<double> prev_Ball_pos;
+    Vector2D dir;
+    Vector2D startChipPoint ;
+    double startBallVel;
+    double previousPos=0.0;
+    double prevPos=0.0;
+    double chipPredictCounter = 1;
+    Vector2D predictedPosition=Vector2D(0,0);
+    double refiner=1.3;
+
+    double refine(double x);
+    double predictPos();
+    Vector2D getChipPredict();
+    //
+    int getChipArea(double);
+    //
     Vector2D getBestPosToShootToGoal(Vector2D from, double &regionWidth, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, bool oppGaol);
     Vector2D getBestPosForPassReciever(Rect2D searchRegion, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, Rect2D avoidRect);
     Vector2D getBestPosForPassReciever(QList<Rect2D> searchRegions, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, QList<Rect2D> avoidRects,int passRecieverID, int passSenderID,double angleFactor,double angle0);
@@ -246,23 +298,19 @@ public:
     ////////////////////////////////<Mahi>
     Vector2D getReturnPos(Vector2D _goal);
     ///////////////////////////////////</Mahi>
-
-    //////////////////////////////////<HMD>
-    QList<Vector2D> ToBeMark;
-    //////////////////////////////////</HMD>
     bool canSendPass(int sender, int receiver, Vector2D point, double factor);
     int getBallOwner(bool& ours);
     bool isBallOurs();
     bool isPointClear(Vector2D point, Vector2D from, double radBig, double radSmall, bool considerRelaxedIDs, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, QList<int> ourSmallIDs, QList<int> oppSmallIDs);
     bool isPointClear(Vector2D point, Vector2D from, double rad, bool considerRelaxedIDs=false, QList<int> ourRelaxedIDs=QList<int>(), QList<int> oppRelaxedIDs=QList<int>());
     Vector2D onetouchablity(int agentId, double &goalWidth, double &angle, double &coming,int senderId=-1, double underestimateTheirGoalie=1.0);
+    Vector2D getEmptyPosOnGoalForPenalty(double n, bool oppGoal, double th, CAgent* ourAgent=NULL);
     Vector2D goalVisiblity(int agentId, double &regionWidth, double underestimateTheirGoalie);
     Vector2D getEmptyPosOnGoal(Vector2D from, double &regionWidth, bool oppGoal, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs, double wOpenness = 1.0, bool _draw = false);
     Vector2D getEmptyPosOnPoints(Vector2D from, double &regionWidth, QList<Vector2D> points, QList<int> ourRelaxedIDs, QList<int> oppRelaxedIDs);
     Vector2D findBestPosToCatchTheBall(int agentID, Vector2D& lastBestPos);
     Vector2D getBestShadowPoint(Vector2D pos, Vector2D goal);
     QString getMarkableNumber();
-
     double matchPositions(QList<int> ids, QList<Vector2D> points, QList<int>& bestPermutation);
     int desiredDefCount;
     /* New Simple getOpen() for mani-thesis */
@@ -317,6 +365,7 @@ public:
     void checkShootDanger();
     void Aminshoot(Vector2D ball, QList<Circle2D> obstacles, double& _empty, Vector2D& _best);
     int getProfile(int agentId, double realParameter, bool isKick=true, bool spinOn=false);
+    double chipGoalPropability(bool isOurChip);
     void calculateCommandFrameRate();
     double lastTimeCommandFPSCalced;
     FormationCounts formation;

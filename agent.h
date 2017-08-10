@@ -14,6 +14,11 @@ using namespace std;
 
 #define MAX_KICK_SPEED 1023
 #define new_com_test_robot_id -1
+
+struct Fault {
+
+};
+
 class CSkill;
 class CAgent : public QObject
 {
@@ -29,6 +34,30 @@ public:
         bool hasGyro;
     } abilities;
 
+    class Status {
+    public:
+        Status();
+        double battery;
+        double capCharge; // the charge of shot capacities
+        double dataLost;
+        bool spin;
+        bool shotSensor;
+        bool fault;
+        bool faild;
+        bool halt;
+        bool shotBoard;
+        bool kickFault;
+        bool chipFault;
+        bool encoderFault[4];
+        bool motorFault[5];
+        bool beep;
+        bool shotSensorFault;
+        int boardID;
+
+    } status;
+
+    bool changeIsNeeded;
+
     SoccerIntention *intention;
     IntentionDefense defIntent;
     IntentionMark markIntent;
@@ -36,7 +65,7 @@ public:
     IntentionBlock blockIntent;
     IntentionPosition positionIntent;
     Vector2D homePos;
- void accelerationLimiter();
+    void accelerationLimiter(double vf,bool diveMode = false);
     double goalVisibility;
     QTime agentStopTime;
     bool timerReset;
@@ -62,17 +91,18 @@ public:
     void setOnOffState(bool state);
     void setCommandID  (int ID);
 
+    bool shootSensor();
+    void setShootSensor(bool b);
+    bool canOneTouch();
+
     //position and velocity
     Vector2D pos();
     Vector2D dir();
-    bool shootSensor();
-    void setShootSensor(bool b);
     double dirDegree();
     Vector2D vel();
     double angularVel();
     CRobot* self();
     Vector2D distToBall();
-    bool canOneTouch();
 
     //Low Level Commands
     void setRobotVel(double _vtan, double _vnorm, double _w); //vtan, vnorm in m/s and w in rad/s
@@ -129,11 +159,11 @@ public:
     void initPlanner( const int &_id , const Vector2D &_target , const QList<int> &_ourRelaxList , const QList<int> &_oppRelaxList , const bool &_avoidPenaltyArea , const bool &_avoidCenterCircle , const double &_ballObstacleRadius);
     Vector2D agentAngelForGyro;
     int calibrated;
-private:
     void jacobian(double _vx, double _vy, double _w, double &v1, double &v2, double &v3, double &v4);
+private:
     void jacobianInverse(double _v1, double _v2, double _v3, double _v4,double &_vx, double &_vy, double &_w);
     bool calibrateGyro;
-
+    unsigned int packetNum;
     double lastVf,lastVn;
 
     char outputBuffer[_NEW_PACKET_SIZE];

@@ -19,12 +19,165 @@ enum PenaltyState{
     KICK_CHIP = 2
 };
 
+#define PI 3.141592
 
 int countt = 0;
 Vector2D lastBallPos = Vector2D(0,0);
 bool start = true;
 void CMainApplication::Experimental2()
 {
+
+    static CRolePlayOff *robot = new CRolePlayOff();
+    robot->setAgent(knowledge->getAgent(0));
+    robot->setSelectedSkill(roleSkill::ReceivePass);
+    robot->setTarget(wm->ball->pos + wm->ball->vel);
+    draw(Circle2D(wm->ball->pos + wm->ball->vel, 0.1), "cyan");
+    robot->setAvoidPenaltyArea(true);
+    robot->setReceiveRadius(0.4);
+    robot->execute();
+
+    return;
+    Vector2D vec(-1,0);
+//    qDebug() << "angle : " << vec.angleWith(Vector2D(1,1)).degree();
+    debug(QString("degree : %1").arg(vec.angleWith(Vector2D(0,0)).radian()), D_ATOUSA);
+    vec.dirTo_deg(vec, Vector2D(0,0));
+    debug(QString("degree1 : %1").arg(vec.dirTo_deg(Vector2D(-1,7), vec)), D_ATOUSA);
+
+    return;
+    double xp = 0.5;
+
+    Vector2D point1(4,-2.5);
+    Vector2D point2(point1.x-xp, 2);
+
+    static CSkillKick *kicker = new CSkillKick(NULL);
+    kicker->setAgent(knowledge->getActiveAgents().at(1));
+    kicker->setDontKick(true);
+    kicker->setChip(false);
+    kicker->setTarget(point2);
+    kicker->setKickSpeed(4);
+
+    static CSkillGotoPointAvoid *gpa = new CSkillGotoPointAvoid(NULL);
+    gpa->setAgent(knowledge->getActiveAgents().at(1));
+    gpa->init(point1, Vector2D(0,1));
+
+
+    debug(QString("vel : %1").arg(wm->ball->vel.length()), D_ATOUSA);
+    if(wm->ball->vel.length() > 0.5){
+        gpa->execute();
+    }
+    else{
+        if(Circle2D(point2, 0.3).contains(knowledge->getActiveAgents().at(0)->pos())){
+            kicker->setDontKick(false);
+            kicker->execute();
+        }
+    }
+
+
+    static CSkillKickOneTouch *oneToucher = new CSkillKickOneTouch(NULL);
+    oneToucher->setAgent(knowledge->getActiveAgents().at(0));
+    oneToucher->setTarget(wm->field->oppGoal());
+    oneToucher->setWaitPos(point2);
+    oneToucher->setKickSpeed(5);
+
+    oneToucher->execute();
+
+    return;
+
+
+    static CAgent* myAgent = knowledge->getAgent(wm->our.activeAgentID(0));
+    static CSkillGotoPointAvoid *robot1 = new CSkillGotoPointAvoid(myAgent);
+
+    const float goalLineExtra = 0.03;
+    const double xDiff = 0.10;
+
+    Line2D oppGoalLine(wm->field->ourGoalL() + Vector2D(+xDiff,+goalLineExtra),
+                       wm->field->ourGoalR() + Vector2D(+xDiff,-goalLineExtra));
+
+    Line2D ballRay1(wm->ball->pos, wm->ball->pos + Vector2D(wm->opp[0]->dir.x, wm->opp[0]->dir.y));
+    Vector2D intersectionPoint1 = oppGoalLine.intersection(ballRay1);
+
+    Vector2D tune(wm->opp[0]->dir.x, wm->opp[0]->dir.y /*+ wm->opp[0]->angularVel*/);
+
+    Line2D ballRay2(wm->ball->pos, wm->ball->pos + tune);
+    //    Vector2D intersectionPoint2 = oppGoalLine.intersection(ballRay2);
+
+    Vector2D intersectionPoint2 = intersectionPoint1;
+
+    intersectionPoint2.x = (-_FIELD_WIDTH/2+_GOAL_DEPTH/2);
+
+    double ang = ballRay2.a()*oppGoalLine.b() - ballRay2.b()*oppGoalLine.a();
+    debug(QString("ang: %1 , inter.y: %2").arg(ang).arg(intersectionPoint2.y), D_FATEMEH);
+
+    if(fabs(ang) > 0.01 && fabs(ang) < 0.93){
+        if(ang*intersectionPoint2.y > 0){
+            intersectionPoint2.y = wm->field->oppGoalR().y;
+        }else if(ang*intersectionPoint2.y < 0){
+            intersectionPoint2.y = wm->field->oppGoalL().y;
+        }
+    }
+
+    if(ang <= 0.93)
+        intersectionPoint2.y*=-1;
+
+    intersectionPoint1= intersectionPoint2;
+
+//    intersectionPoint2.y*=(9.0/11.0);
+
+    if(fabs(myAgent->pos().y) < fabs(wm->field->ourGoalL().y))
+        intersectionPoint2.y += 1*myAgent->pos().dist(intersectionPoint2)*myAgent->pos().dist(intersectionPoint2)*
+                (fabs((intersectionPoint2 - myAgent->pos()).y)/(intersectionPoint2 - myAgent->pos()).y);
+
+//    intersectionPoint1.y += 1*myAgent->pos().dist(intersectionPoint1)*(fabs(intersectionPoint1.y)/intersectionPoint1.y);
+
+
+    Vector2D targetDir(-10, 10);
+    targetDir.setDir(AngleDeg(-60));
+    targetDir.setLength(1);
+
+
+    draw(intersectionPoint1, 0, QColor(Qt::red));
+    //    draw(Segment2D(wm->ball->pos, wm->ball->pos + Vector2D(wm->opp[1]->dir.x, wm->opp[1]->dir.y)), QColor(Qt::red));
+
+    draw(intersectionPoint2, 0, QColor(Qt::black));  // adding angularVel
+    //    draw(Segment2D(wm->ball->pos, wm->ball->pos + tune), QColor(Qt::blue));
+
+
+    robot1->init(intersectionPoint1, targetDir);
+    robot1->setGoalieMode(true);
+    robot1->setAvoidPenaltyArea(false);
+    robot1->execute();
+
+    return;
+
+
+    knowledge->getEmptyPosOnGoalForPenalty(1.0/5.5, true, 0.03);
+    return;
+
+    static CSkillKick* k= new CSkillKick(knowledge->getAgent(0));
+    k->setKickSpeed(3);
+    k->setChip(false);
+    k->setTarget(Vector2D(0,0));
+    k->execute();
+    debug(QString("%1").arg(k->getKickSpeed()), D_FATEMEH);
+
+    return;
+
+    Vector2D t=wm->field->oppGoal();
+    QList<int> temp;
+    double width;
+    t.x -= 1;
+    draw(t, 0, QColor(Qt::darkRed));
+
+    Vector2D target = knowledge->getEmptyPosOnGoal(t,width,true,temp, temp, 1.0, true);
+    draw(Segment2D(target, Vector2D(0,0)), QColor(Qt::black));
+
+    double empty;
+    Vector2D best;
+    QList<Circle2D> obs;
+    //    obs.append(Circle2D(wm->opp.active(0)->pos, 0.1));
+    knowledge->Aminshoot(t,obs,empty, best);
+    draw(Segment2D(best, Vector2D(0,0)), QColor(Qt::red));
+    return;
 
     //technicalChalenge Penalty
 
@@ -36,19 +189,19 @@ void CMainApplication::Experimental2()
 
     draw(Circle2D(Vector2D(-1.5, 0), 0.1), "cyan");
 
-//    draw(Segment2D (sol1, wm->field->ourGoal()-Vector2D(2,0)), QColor(Qt::darkYellow));
+    //    draw(Segment2D (sol1, wm->field->ourGoal()-Vector2D(2,0)), QColor(Qt::darkYellow));
 
     if( knowledge->getGameState() == CKnowledge::Stop ){
 
         draw(QString("Stop"), Vector2D(-4, 2.5), "blue");
         Vector2D sol1, sol2;
         Line2D tempLine(wm->ball->pos, wm->field->oppGoal());
-//        draw(Circle2D(wm->ball->pos, 0.6), QColor(Qt::cyan));
+        //        draw(Circle2D(wm->ball->pos, 0.6), QColor(Qt::cyan));
         Circle2D(wm->ball->pos, 0.6).intersection(tempLine, &sol1, &sol2);
-//        draw(Segment2D (sol1, wm->field->oppGoal()), QColor(Qt::darkYellow));
-//        draw(Segment2D (sol2, wm->field->oppGoal()), QColor(Qt::darkYellow));
-//        draw(Circle2D(sol1, 0.2), QColor(Qt::blue));
-//        draw(Circle2D(sol2, 0.2), QColor(Qt::blue));
+        //        draw(Segment2D (sol1, wm->field->oppGoal()), QColor(Qt::darkYellow));
+        //        draw(Segment2D (sol2, wm->field->oppGoal()), QColor(Qt::darkYellow));
+        //        draw(Circle2D(sol1, 0.2), QColor(Qt::blue));
+        //        draw(Circle2D(sol2, 0.2), QColor(Qt::blue));
 
         Vector2D agentPos;
         if( (wm->field->oppGoal()-sol1).length() < (wm->field->oppGoal()-sol2).length() ){
@@ -87,11 +240,11 @@ void CMainApplication::Experimental2()
 
     else if( knowledge->getGameState() == CKnowledge::TheirPenaltyKick ){
         draw(QString("theirPenalty"), Vector2D(-4, 2.5), "blue");
-//        draw(Circle2D(wm->field->ourGoal(), 0.5), QColor(Qt::blue));
+        //        draw(Circle2D(wm->field->ourGoal(), 0.5), QColor(Qt::blue));
         static CSkillGotoPointAvoid *goToOurGoal = new CSkillGotoPointAvoid(knowledge->getAgent(id));
 
-//        goToOurGoal->init(wm->field->ourGoal(), wm->ball->pos);
-//        goToOurGoal->setTargetLook(wm->field->ourGoal(), wm->ball->pos);
+        //        goToOurGoal->init(wm->field->ourGoal(), wm->ball->pos);
+        //        goToOurGoal->setTargetLook(wm->field->ourGoal(), wm->ball->pos);
 
         //what should goalie do?
 
@@ -121,7 +274,7 @@ void CMainApplication::Experimental2()
         */
 
 
-/*
+        /*
         static CRolePlayOn *goalie = new CRolePlayOn();
 
         goalie->setAgent(knowledge->getAgent(id));
@@ -186,39 +339,39 @@ void CMainApplication::Experimental2()
 
             }
             else{ //dar tule darvaze dar jahate felan bashe
-//                if( countt == 10 ){
-                    static CSkillKickOneTouch mOT(knowledge->getAgent(id));
-                    Line2D ourLine(wm->field->ourGoal() + Vector2D(0, 0.5), wm->field->ourGoal() + Vector2D(0, -0.5));
-                    draw(Segment2D(wm->field->ourGoal() + Vector2D(0, 0.5), wm->field->ourGoal() + Vector2D(0, -0.5)), "red");
-                    Line2D ballLine(lastBallPos, wm->ball->pos);
-                    draw(Segment2D(lastBallPos, wm->ball->pos), "red");
-                    Vector2D sol1;
-                    sol1 = ourLine.intersection(ballLine);
-                    draw(Circle2D(sol1, 0.2), "red");
+                //                if( countt == 10 ){
+                static CSkillKickOneTouch mOT(knowledge->getAgent(id));
+                Line2D ourLine(wm->field->ourGoal() + Vector2D(0, 0.5), wm->field->ourGoal() + Vector2D(0, -0.5));
+                draw(Segment2D(wm->field->ourGoal() + Vector2D(0, 0.5), wm->field->ourGoal() + Vector2D(0, -0.5)), "red");
+                Line2D ballLine(lastBallPos, wm->ball->pos);
+                draw(Segment2D(lastBallPos, wm->ball->pos), "red");
+                Vector2D sol1;
+                sol1 = ourLine.intersection(ballLine);
+                draw(Circle2D(sol1, 0.2), "red");
 
-                    Vector2D targetLook;
-                    if( sol1.y > 0.5 ){
-                        targetLook = Vector2D(-4.3, 0.3);
-                    }
-                    else if( sol1.y < -0.5 ){
-                        targetLook = Vector2D(-4.3, -0.3);
-                    }
-                    else{
-                        targetLook = sol1 + Vector2D(0.2, 0);
-                    }
-                    mOT.setWaitPos(targetLook);
-                    mOT.setTarget(Vector2D(10,10));
-                    mOT.setKickSpeed(1000);
-                    mOT.setChip(true);
-                    mOT.execute();
+                Vector2D targetLook;
+                if( sol1.y > 0.5 ){
+                    targetLook = Vector2D(-4.3, 0.3);
+                }
+                else if( sol1.y < -0.5 ){
+                    targetLook = Vector2D(-4.3, -0.3);
+                }
+                else{
+                    targetLook = sol1 + Vector2D(0.2, 0);
+                }
+                mOT.setWaitPos(targetLook);
+                mOT.setTarget(Vector2D(10,10));
+                mOT.setKickSpeed(1000);
+                mOT.setChip(true);
+                mOT.execute();
 
-                    //                }
-//                else
-//                    countt++;
+                //                }
+                //                else
+                //                    countt++;
             }
         }
         else{// is in 6 meters
-//            debug("not in circle", D_ATOUSA);
+            //            debug("not in circle", D_ATOUSA);
             static CSkillGotoPointAvoid *goToOurGoal = new CSkillGotoPointAvoid(knowledge->getAgent(id));
             goToOurGoal->init(wm->field->ourGoal(),Vector2D(1,0));
             goToOurGoal->execute();
@@ -226,72 +379,70 @@ void CMainApplication::Experimental2()
 
     }
 
-//    else if( knowledge->getGameState() == CKnowledge::Halt ){
-//        draw(QString("Halt"), Vector2D(-4, 2.5), "blue");
-//        haltAllRobots();//oke
-//    }
+    //    else if( knowledge->getGameState() == CKnowledge::Halt ){
+    //        draw(QString("Halt"), Vector2D(-4, 2.5), "blue");
+    //        haltAllRobots();//oke
+    //    }
 
-//    else if( knowledge->getGameState() == CKnowledge::NormalStart ){
+    //    else if( knowledge->getGameState() == CKnowledge::NormalStart ){
 
-//        if( knowledge->getGameMode() == CKnowledge::OurPenaltyKick ){
-//            draw(QString("ourPenaltyNormalStart"), Vector2D(-3,-2), "blue");
+    //        if( knowledge->getGameMode() == CKnowledge::OurPenaltyKick ){
+    //            draw(QString("ourPenaltyNormalStart"), Vector2D(-3,-2), "blue");
 
-////            //    KICK, KICK_SHOT, KICK_CHIP
-////            PenaltyState state = KICKK;
-////            switch(state){
+    ////            //    KICK, KICK_SHOT, KICK_CHIP
+    ////            PenaltyState state = KICKK;
+    ////            switch(state){
 
-////            case KICKK:
+    ////            case KICKK:
 
-////                Vector2D targetGoal;
-////                double upY = abs(((wm->field->oppGoal() + Vector2D(0, 0.5))- wm->opp.active(oppActiveIndx)->pos).y);
-////                double downY = abs(((wm->field->oppGoal() + Vector2D(0, -0.5))- wm->opp.active(oppActiveIndx)->pos).y);
-////                if( upY < downY ){
-////                    targetGoal = wm->field->oppGoal() + Vector2D(0, -0.5) + Vector2D(0.05, downY/3);
-////                }
-////                else{
-////                    targetGoal = wm->field->oppGoal() + Vector2D(0,  0.5) + Vector2D(0.05, -1*(upY/3));
-////                }
+    ////                Vector2D targetGoal;
+    ////                double upY = abs(((wm->field->oppGoal() + Vector2D(0, 0.5))- wm->opp.active(oppActiveIndx)->pos).y);
+    ////                double downY = abs(((wm->field->oppGoal() + Vector2D(0, -0.5))- wm->opp.active(oppActiveIndx)->pos).y);
+    ////                if( upY < downY ){
+    ////                    targetGoal = wm->field->oppGoal() + Vector2D(0, -0.5) + Vector2D(0.05, downY/3);
+    ////                }
+    ////                else{
+    ////                    targetGoal = wm->field->oppGoal() + Vector2D(0,  0.5) + Vector2D(0.05, -1*(upY/3));
+    ////                }
 
-////                draw(Segment2D(targetGoal, knowledge->getAgent(id)->pos()), "cyan");
+    ////                draw(Segment2D(targetGoal, knowledge->getAgent(id)->pos()), "cyan");
 
-////                static CSkillKick *kicker = new CSkillKick(knowledge->getAgent(id));
-////                kicker->setTarget(targetGoal);
-////                kicker->setKickSpeed(1000);
-////                //un circle ro chikar konm? ke vagti kck mkone nare donbalesh(??)
-////                if( !Circle2D(Vector2D(-1.5, 0), 0.5).contains(wm->ball->pos) )
-////                    kicker->setDontKick(true);
-////                else
-////                    kicker->setDontKick(false);
-////                kicker->execute();
+    ////                static CSkillKick *kicker = new CSkillKick(knowledge->getAgent(id));
+    ////                kicker->setTarget(targetGoal);
+    ////                kicker->setKickSpeed(1000);
+    ////                //un circle ro chikar konm? ke vagti kck mkone nare donbalesh(??)
+    ////                if( !Circle2D(Vector2D(-1.5, 0), 0.5).contains(wm->ball->pos) )
+    ////                    kicker->setDontKick(true);
+    ////                else
+    ////                    kicker->setDontKick(false);
+    ////                kicker->execute();
 
-////                break;
-
-
-////            case KICK_SHOT:
-////                //
-////                break;
-////            case KICK_CHIP:
-
-////                break;
-////            }
-
-//            static CSkillKick mkick(knowledge->getAgent(id));
-//            mkick.setShotToEmptySpot(true);
-//            if(wm->ball->pos.x < 1)
-//            {
-//                mkick.setKickSpeed(50);
-//            }
-//            else
-//            {
-//                mkick.setKickSpeed(1000);
-//            }
-
-//            mkick.execute();
-//        }
-
-//    }
+    ////                break;
 
 
+    ////            case KICK_SHOT:
+    ////                //
+    ////                break;
+    ////            case KICK_CHIP:
+
+    ////                break;
+    ////            }
+
+    //            static CSkillKick mkick(knowledge->getAgent(id));
+    //            mkick.setShotToEmptySpot(true);
+    //            if(wm->ball->pos.x < 1)
+    //            {
+    //                mkick.setKickSpeed(50);
+    //            }
+    //            else
+    //            {
+    //                mkick.setKickSpeed(1000);
+    //            }
+
+    //            mkick.execute();
+    //        }
+
+    //    }
 
 
 
@@ -310,11 +461,13 @@ void CMainApplication::Experimental2()
 
 
 
-//    static CSkillGotoPointAvoid *stop = new CSkillGotoPointAvoid(knowledge->getAgent(id));
-//    stop->init(Vector2D(0,0), wm->ball->pos);
-//    stop->execute();
 
-/*
+
+    //    static CSkillGotoPointAvoid *stop = new CSkillGotoPointAvoid(knowledge->getAgent(id));
+    //    stop->init(Vector2D(0,0), wm->ball->pos);
+    //    stop->execute();
+
+    /*
     static CRolePlayOn * skiiill= new CRolePlayOn();
 
     id = 5;
@@ -365,33 +518,6 @@ void CMainApplication::Experimental2()
     */
 
     //debug(QString("Hamed %1").arg(policy()->Mark_Test()), D_MAHI);
-    return;
-
-    static CDefPos defPosTest;
-    Vector2D mousePos;
-
-    mousePos = knowledge->getMousePos();
-
-    draw(Circle2D(mousePos, wm->ball->radius), QColor(Qt::red));
-
-
-    //    Circle2D tempCircle(wm->field->ourGoal()-Vector2D(0.2, 0), 1.33);
-    //    draw(tempCircle, QColor(Qt::cyan));
-    //    Vector2D tempVec = defPosTest.getXYByAngle(defAngle, defRadius);
-
-    //    draw(QString::number(defPosTest.getRobotAngle(defRadius)), Vector2D(-1, _FIELD_HEIGHT/2 - 0.2));
-    //    draw(tempVec);
-
-    //    kk2Angles tempAngles = defPosTest.getIntersections(mousePos);
-
-    //    draw(QString("a1:%1, a2: %2").arg(tempAngles.angle1).arg(tempAngles.angle2), Vector2D(-1, _FIELD_HEIGHT/2 - 0.4));
-
-
-    kkDefPos tempDefPos = defPosTest.getDefPositions(mousePos, 2, 1.43, 2.5);
-    draw(QString::number(tempDefPos.overDef), Vector2D(-1, _FIELD_HEIGHT/2 - 0.6));
-    for (int i = 0; i < tempDefPos.size; i++) {
-        draw(Circle2D(tempDefPos.pos[i], CRobot::robot_radius_old), QColor(Qt::blue));
-    }
     return;
     /////////////////////////////////////////////////////////
     //    static CSkillNEWKeep *keepBall = new CSkillNEWKeep( soccer->agents[0] );

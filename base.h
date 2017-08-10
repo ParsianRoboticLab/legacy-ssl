@@ -7,15 +7,7 @@
 
 // TODO : remove this macro
 #define KK_PLAYON
-//#define SIMULATION_MODE
-//#define GAME_MODE
-
-//#define NAVIGATION_CHALLENGE
-//IMP the above line must be comamented
-
 /* Ennumerations */
-//#define velProblem1
-//#define velProblem2
 #include "geom.h"
 
 enum SKILLINITVAL{
@@ -53,6 +45,7 @@ namespace DynamicEnums {
 
 enum DynamicMode {
     NoMode,
+    CounterAttack,
     DefenseClear,
     NoPlanExeption,
     HighProb,
@@ -63,7 +56,6 @@ enum DynamicMode {
     BallInOurField,
     NoPositionAgent,
     BallInOppJaw
-
 };
 
 enum DynamicSkill {
@@ -170,8 +162,8 @@ struct GameStatePacket
 
 /* Defines */
 
-#define _NUM_PLAYERS    16
-#define _MAX_NUM_PLAYERS 16
+#define _NUM_PLAYERS    12
+#define _MAX_NUM_PLAYERS 12
 
 
 /* Mathematical */
@@ -199,9 +191,10 @@ struct GameStatePacket
 #define _STADIUM_WIDTH   10.90
 #define _STADIUM_HEIGHT  7.70
 
+
 /* COM Port Constants */
 #define _SIM_COM_PORT   "/dev/ttyS6"
-#define _REAL_COM_PORT  "/dev/ttyS0"
+#define _REAL_COM_PORT  "/dev/ttyUSB0"
 
 
 /* Skills */
@@ -216,7 +209,8 @@ struct GameStatePacket
 #define _FIELD_PENALTY          1.000
 #define _GOAL_WIDTH             1.000
 #define _GOAL_RAD               1.000
-#define _AHZ_GOAL_RAD           1.150
+#define _AHZ_GOAL_RAD_FOR_MARK  1.150
+#define _AHZ_GOAL_RAD_FOR_GOALKEEPER  0.85
 #define _GOAL_DEPTH             0.250
 #define _PENALTY_WIDTH          2.500
 #define _CENTER_CIRCLE_RAD      0.500
@@ -225,6 +219,8 @@ struct GameStatePacket
 #define _PARSIAN_BOUNDRY         4.40
 #define _MAX_DIST               sqrt(_FIELD_WIDTH * _FIELD_WIDTH + _FIELD_HEIGHT * _FIELD_HEIGHT)
 
+#define _MIXTEAM_FIELD_WIDTH            13.4
+#define _MIXTEAM_FIELD_HEIGHT           9.00
 
 /* Common Includes */
 #include "geom.h"

@@ -33,6 +33,9 @@ void CSkillDribble::spinDribble()
     kick->setTarget(initLook);
     kick->setSlow(false);
     kick->setPassProfiler(false);
+    draw(agentPos + (agentDir).norm()*2);
+    agent->addRobotVel(0,0,0);
+
     if(catchedBall == false)
     {
         kick->execute();
@@ -42,10 +45,13 @@ void CSkillDribble::spinDribble()
     {
         double vx,vy,vw;
         agent->setRoller(5);
-        bangBang->setAngKp(4.1);
+        bangBang->setAngKp(3);
         bangBang->setAngInPath(true);
-        bangBang->bangBangSpeed(agentPos,agent->vel(),agentDir,agentPos + (agentDir).norm()*1,target-agentPos,0,0.016,vx,vy,vw);
+        bangBang->setSlow(false);
+        bangBang->bangBangSpeed(agentPos,agent->vel(),agentDir,agentPos + (agentDir).norm()*2,target-agentPos,0,0.016,vx,vy,vw);
+
         agent->setRobotAbsVel(vx,vy,vw);
+        agent->addRobotVel(1,0,0);
     }
     else
     {
@@ -53,7 +59,6 @@ void CSkillDribble::spinDribble()
         kick->execute();
         kick->setSpin(3);
     }
-
     if(fabs((agentDir.th() - (target- agentPos).th()).degree()) < tol )
         readyForPass = true;
     else

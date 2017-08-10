@@ -441,16 +441,20 @@ void CSoccer::sendPacketToSimulator(){
         command->set_id(i);
         const double gain = 1.013; //to match simulator with code [use parsianNew.ini in simulator 0.845 if you use parsian.ini (old robots)]
         //			const double gain = 2*1.068; //to match simulator with code [use parsianNew.ini in simulator 0.845 if you use parsian.ini (old robots)]
+
         double w1 = agents[i]->v1*gain;
         double w2 = agents[i]->v2*gain;
         double w3 = agents[i]->v3*gain;
         double w4 = agents[i]->v4*gain;
+
+        agents[i]->jacobian(agents[i]->vforward,agents[i]->vnormal,agents[i]->vangular*_DEG2RAD,w1,w2,w3,w4);
 
         command->set_wheelsspeed(true);
         command->set_wheel1(w1);
         command->set_wheel2(w2);
         command->set_wheel3(w3);
         command->set_wheel4(w4);
+
         command->set_velangular(0);
         command->set_velnormal(0);
         command->set_veltangent(0);
@@ -653,7 +657,7 @@ void CSoccer::run()
     double lastMonitorUpdateTime=-1;
     pathPlanner->start(QThread::HighPriority);
 #ifndef NO_JS
-    joystick->start(QThread::LowPriority);
+//    joystick->start(QThread::LowPriority);
 #endif
 
     QTime timer;
@@ -742,8 +746,6 @@ void CSoccer::run()
 
 
             double elapsedTime;
-
-
             ////////////////////////////////////////////////// by mhmmd
             runMainLoop();
             lastMainLoopRunTime = current_time;
@@ -860,13 +862,6 @@ void CSoccer::refUpdate()
 
     lastCmdCnt = cmdCnt;
     refCommand = gsp.cmd;
-    qDebug() << "REF: " << referee.command();
-    qDebug() << "ref: " << refCommand;
-    QFile file("./REF.dat");
-    if (file.open(QIODevice::WriteOnly|QIODevice::Truncate)) {
-        QTextStream stream( &file );
-        stream << referee.command() << endl;
-    }
 
     wm->gs->transition(refCommand);
     debug(( "Referee : " + QString("%1 (%2)").arg(refCommand).arg((int) refCommand) + "  " + QString::number(wm->gs->get())), D_GAME);
@@ -1000,6 +995,14 @@ void CSoccer::refUpdate()
             {
                 wm->refCommand.enqueue("Their BallPlacement");
             }
+            else if (wm->gs->halfTimeLineUp())
+            {
+                wm->refCommand.enqueue("HalfTime LineUp");
+            }
+            else if (wm->gs->penalty_shootout())
+            {
+                wm->refCommand.enqueue("Penalty Shootout");
+            }
 
             else
             {
@@ -1026,7 +1029,7 @@ char CSoccer::map_stage(SSL_Referee::Stage stage){
         case SSL_Referee::EXTRA_SECOND_HALF: return ' ';
         case SSL_Referee::PENALTY_SHOOTOUT_BREAK: return 'h';
         case SSL_Referee::PENALTY_SHOOTOUT: return 'a';
-        case SSL_Referee::POST_GAME: return 'H';
+        case SSL_Referee::POST_GAME: return 'h';
     }
     //return error
 }

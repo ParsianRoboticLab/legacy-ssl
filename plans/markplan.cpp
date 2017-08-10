@@ -52,6 +52,14 @@ CMarkPlan::~CMarkPlan()
 #define Opp_Fastest_History 25
 
 //////////////////////////////// AHZ //////////////////////////////////////////
+bool CMarkPlan::isInIndirectArea(Vector2D aPoint){
+    //// check that a point is in the circle around the ball
+    //// with 50cm radius or not.
+
+    bool localFlag = Circle2D(wm->ball->pos , 0.7).contains(aPoint) ?   1 : 0;
+    return localFlag;
+}
+
 Line2D CMarkPlan::getBisectorLine(Vector2D firstPoint , Vector2D originPoint , Vector2D thirdPoint){
     Line2D bisectorLine (originPoint , AngleDeg::bisect((firstPoint - originPoint).th() , (thirdPoint - originPoint).th()));
     return bisectorLine;
@@ -66,6 +74,11 @@ Vector2D CMarkPlan::getPointInDirection(Vector2D firstPoint , Vector2D secondPoi
     return firstPoint;
 }
 void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBeMarkPossition , int ourMarkAgentsSize , double proportionOfDistance){
+    //// This function blocking the lines that are between ball &&
+    //// opponent agents by a variable ratio along these lines.
+    //// This is one of the mark plan for defending more flexible
+
+
     ////////////////////////// Variables of this function //////////////////////
     int i;
     int j;
@@ -79,23 +92,35 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
     QList<Circle2D> opponentAgentsToBeMarkCircle;
     QList<Circle2D> tempOpponentAgentsToBeMarkedCircle;
     QList<Vector2D> ourMarkAgentsPossition;
-    QList<QPair<Vector2D,double> > sortDangerAgentsToBeMarkBlockPassPlayOn;
-    QList<QPair<Vector2D,double> > tempSortDangerAgentsToBeBlockPassPlayOn;
+    QList<Vector2D> tempOpponentAgentsToBeMarkedPosition;
+    QList<QPair<Vector2D,double> > sortDangerAgentsToBeMarkBlockPassPlayOff;
+    QList<QPair<Vector2D,double> > tempSortDangerAgentsToBeBlockPassPlayOff;
     Circle2D goalCircle(ourCenterOfGoalPossition , 1.43);
     Circle2D penaltyArea(wm->field->ourGoal(),1.28);
     //////////////////// Clear QLists for update the states ////////////////////
+    stopMode = knowledge->isStop();
     ourMarkAgentsPossition.clear();
+    tempOpponentAgentsToBeMarkedPosition.clear();
     markPoses.clear();
     markAngs.clear();
     markRoles.clear();
+    /////////////////// Intelligent mark plan ///////////////////////////////
     ////////////////////////////////////////////////////////////////////////////
     debug(QString("Mark Agents Count : %1").arg(ourMarkAgentsSize) , D_SEPEHR , QColor(Qt::red));
-    debug(QString("Opponent Agents to be mark count : %1").arg(opponentAgentsToBeMarkPossition.size()) , D_SEPEHR , QColor(Qt::red));
     ///////// Make Cirlcles around opponent agents /////////////////////////////
+    debug(QString("Opponent Agents to be mark count : %1").arg(opponentAgentsToBeMarkPossition.size()) , D_SEPEHR , QColor(Qt::green));
+    for(int i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
+        if(!isInIndirectArea(opponentAgentsToBeMarkPossition.at(i))){
+            tempOpponentAgentsToBeMarkedPosition.append(opponentAgentsToBeMarkPossition.at(i));
+        }
+    }
+    opponentAgentsToBeMarkPossition.clear();
+    opponentAgentsToBeMarkPossition = tempOpponentAgentsToBeMarkedPosition;
     for(i = 0 ; i < opponentAgentsToBeMarkPossition.size(); i++){
         opponentAgentsToBeMarkCircle.append(Circle2D(opponentAgentsToBeMarkPossition.at(i) , opponentAgentsCircleR));
         draw(opponentAgentsToBeMarkCircle.at(i) , "Cyan");
     }
+    debug(QString("Opponent Agents to be mark count : %1").arg(opponentAgentsToBeMarkPossition.size()) , D_SEPEHR , QColor(Qt::red));
     ///////////////// Block Pass Plan ////////////////////////////////////
     if(opponentAgentsToBeMarkPossition.size() == ourMarkAgentsSize){
         for(i = 0 ; i < ourMarkAgentsSize ; i++){
@@ -106,7 +131,7 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
                     opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
                     Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol3 , &sol4);
                     penaltyArea.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol5:sol6 ,proportionOfDistance));
+                    markPoses.append(knowledge->getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol5:sol6 ,proportionOfDistance));
                 }
                 else{
                     goalCircle.intersection(Segment2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)) , &sol1 , &sol2);
@@ -116,7 +141,7 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
             else{
                 opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
                 Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol3 , &sol4);
-                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4, proportionOfDistance));
+                markPoses.append(knowledge->getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4, proportionOfDistance));
             }
             markAngs.append(wm->ball->pos - markPoses.at(i));
             draw(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
@@ -128,23 +153,17 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
     }
     else if(opponentAgentsToBeMarkPossition.size() < ourMarkAgentsSize){
         if(opponentAgentsToBeMarkPossition.size() == 0){
-            for(i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
-                if(!wm->field->isInOppPenaltyArea(wm->opp.active(i)->pos) && !Circle2D(wm->ball->pos , ballCircleR).contains(wm->opp.active(i)->pos)){
-                    opponentAgentsCircle.append(Circle2D(wm->opp.active(i)->pos , opponentAgentsCircleR));
-                }
-            }
             for(i = 0 ; i < ourMarkAgentsSize ; i++){
-                if(!wm->field->isInOurPenaltyArea(opponentAgentsCircle.at(i).center())){
-                    opponentAgentsCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()), &sol1 , &sol2);
-                    penaltyArea.intersection(Segment2D(opponentAgentsCircle.at(i).center() , wm->field->ourGoal()), &sol3 , &sol4);
-                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsCircle.at(i).center()).length() < Segment2D(sol4 , opponentAgentsCircle.at(i).center()).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                if(i % 2){
+                    markPoses.append(Vector2D(-3 , i / 1.5));
+                    markAngs.append(Vector2D(0,0));
+                    markRoles.append(QString("shotBlocker"));
                 }
                 else{
-                    penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()) , &sol1 , &sol2);
-                    markPoses.append(Segment2D(wm->field->center() , sol1).length() < Segment2D(wm->field->center() , sol2).length() ? sol1 : sol2);
+                    markPoses.append(Vector2D(-3,-i  / 1.5));
+                    markAngs.append(Vector2D(0,0));
+                    markRoles.append(QString("shotBlocker"));
                 }
-                markAngs.append(opponentAgentsCircle.at(i).center() - wm->field->ourGoal());
-                markRoles.append(QString("shotBlocker"));
             }
         }
         else if(opponentAgentsToBeMarkPossition.size() == 1){
@@ -156,7 +175,7 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
                         opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
                         Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol3 , &sol4);
                         penaltyArea.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                        markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol5:sol6 ,proportionOfDistance));
+                        markPoses.append(knowledge->getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol5:sol6 ,proportionOfDistance));
                     }
                     else{
                         penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)) , &sol1 , &sol2);
@@ -166,7 +185,7 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
                 else{
                     opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
                     Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol3 , &sol4);
-                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4, proportionOfDistance));
+                    markPoses.append(knowledge->getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4, proportionOfDistance));
                 }
                 markAngs.append(wm->ball->pos - markPoses.at(i));
                 draw(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4), QColor(Qt::red));
@@ -176,7 +195,7 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
                 if(!wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkPossition.at(i))){
                     opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
                     penaltyArea.intersection(Segment2D(opponentAgentsToBeMarkPossition.at(i) , wm->field->ourGoal()), &sol3 , &sol4);
-                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                    markPoses.append(knowledge->getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
                 }
                 else{
                     penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)) , &sol1 , &sol2);
@@ -185,26 +204,20 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
                 markAngs.append(opponentAgentsToBeMarkPossition.at(i) - wm->field->ourGoal());
                 markRoles.append(QString("shotBlocker"));
             }
-            for(i = 0 ; i < wm->opp.activeAgentsCount() ; i++){
-                if(!wm->field->isInOppPenaltyArea(wm->opp.active(i)->pos)
-                        && !Circle2D(wm->ball->pos , ballCircleR).contains(wm->opp.active(i)->pos)
-                        && wm->opp.active(i)->pos != opponentAgentsToBeMarkCircle.at(0).center()){
-                    opponentAgentsCircle.append(Circle2D(wm->opp.active(i)->pos , opponentAgentsCircleR));
-                }
-            }
-            for(i = 0 ; i < ourMarkAgentsSize - 2 ; i++){
-                if(!wm->field->isInOurPenaltyArea(opponentAgentsCircle.at(i).center())){
-                    opponentAgentsCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()), &sol1 , &sol2);
-                    penaltyArea.intersection(Segment2D(opponentAgentsCircle.at(i).center() , wm->field->ourGoal()), &sol3 , &sol4);
-                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsCircle.at(i).center()).length() < Segment2D(sol4 , opponentAgentsCircle.at(i).center()).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+            for(i = 0 ; i < ourMarkAgentsSize - markPoses.size() ; i++){
+                if(i % 2){
+                    markPoses.append(Vector2D(-3 , i / 1.5));
+                    markAngs.append(Vector2D(0,0));
+                    markRoles.append(QString("shotBlocker"));
                 }
                 else{
-                    penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()) , &sol1 , &sol2);
-                    markPoses.append(Segment2D(wm->field->center() , sol1).length() < Segment2D(wm->field->center() , sol2).length() ? sol1 : sol2);
+                    markPoses.append(Vector2D(-3,-i  / 1.5));
+                    markAngs.append(Vector2D(0,0));
+                    markRoles.append(QString("shotBlocker"));
                 }
-                markAngs.append(opponentAgentsCircle.at(i).center() - wm->field->ourGoal());
-                markRoles.append(QString("shotBlocker"));
             }
+            debug(QString("mark pos : %1").arg(markPoses.size()) , D_AHZ);
+            debug(QString("our mark : %1").arg(ourMarkAgentsSize) , D_AHZ);
         }
         else{
             for(i = 0 ; i < opponentAgentsToBeMarkPossition.size() ; i++){
@@ -215,7 +228,7 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
                         opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
                         Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol3 , &sol4);
                         penaltyArea.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4) , &sol5 , &sol6);
-                        markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol5:sol6 ,proportionOfDistance));
+                        markPoses.append(knowledge->getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol6 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol5:sol6 ,proportionOfDistance));
                     }
                     else{
                         penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)) , &sol1 , &sol2);
@@ -225,7 +238,7 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
                 else{
                     opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
                     Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , opponentAgentsToBeMarkPossition.at(i)), &sol3 , &sol4);
-                    markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4, proportionOfDistance));
+                    markPoses.append(knowledge->getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4, proportionOfDistance));
                 }
                 markAngs.append(wm->ball->pos - markPoses.at(i));
                 draw(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3 : sol4), QColor(Qt::red));
@@ -241,7 +254,7 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
                     if(!wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkPossition.at(i))){
                         opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
                         penaltyArea.intersection(Segment2D(opponentAgentsToBeMarkPossition.at(i) , wm->field->ourGoal()), &sol3 , &sol4);
-                        markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                        markPoses.append(knowledge->getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
                     }
                     else{
                         penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)) , &sol1 , &sol2);
@@ -252,22 +265,22 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
                 }
             }
             else if(ourMarkAgentsSize - markPoses.size() < opponentAgentsToBeMarkPossition.size()){
-                tempSortDangerAgentsToBeBlockPassPlayOn = sortdangerpassplayoff(opponentAgentsToBeMarkPossition);
-                for(i = 0 ; i < tempSortDangerAgentsToBeBlockPassPlayOn.size() ; i++){
-                    tempOpponentAgentsToBeMarkedCircle.append(Circle2D(tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first , opponentAgentsCircleR));
+                tempSortDangerAgentsToBeBlockPassPlayOff = sortdangerpassplayoff(opponentAgentsToBeMarkPossition);
+                for(i = 0 ; i < tempSortDangerAgentsToBeBlockPassPlayOff.size() ; i++){
+                    tempOpponentAgentsToBeMarkedCircle.append(Circle2D(tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first , opponentAgentsCircleR));
                     draw(tempOpponentAgentsToBeMarkedCircle.at(i),QColor(Qt::yellow));
                 }
                 for(i = 0 ; i < ourMarkAgentsSize - markPoses.size() ; i++){
-                    if(!wm->field->isInOurPenaltyArea(tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first)){
-                        tempOpponentAgentsToBeMarkedCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first), &sol1 , &sol2);
-                        penaltyArea.intersection(Segment2D(tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first , wm->field->ourGoal()), &sol3 , &sol4);
-                        markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                    if(!wm->field->isInOurPenaltyArea(tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first)){
+                        tempOpponentAgentsToBeMarkedCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first), &sol1 , &sol2);
+                        penaltyArea.intersection(Segment2D(tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first , wm->field->ourGoal()), &sol3 , &sol4);
+                        markPoses.append(knowledge->getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first).length() < Segment2D(sol4 , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
                     }
                     else{
-                        penaltyArea.intersection(Line2D(wm->field->ourGoal() , tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first) , &sol1 , &sol2);
+                        penaltyArea.intersection(Line2D(wm->field->ourGoal() , tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first) , &sol1 , &sol2);
                         markPoses.append(Segment2D(wm->field->center() , sol1).length() < Segment2D(wm->field->center() , sol2).length() ? sol1 : sol2);
                     }
-                    markAngs.append(tempSortDangerAgentsToBeBlockPassPlayOn.at(i).first - wm->field->ourGoal());
+                    markAngs.append(tempSortDangerAgentsToBeBlockPassPlayOff.at(i).first - wm->field->ourGoal());
                     markRoles.append(QString("shotBlocker"));
                 }
             }
@@ -279,7 +292,7 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
                     if(!wm->field->isInOurPenaltyArea(opponentAgentsToBeMarkPossition.at(i))){
                         opponentAgentsToBeMarkCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)), &sol1 , &sol2);
                         penaltyArea.intersection(Segment2D(opponentAgentsToBeMarkPossition.at(i) , wm->field->ourGoal()), &sol3 , &sol4);
-                        markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                        markPoses.append(knowledge->getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsToBeMarkPossition.at(i)).length() < Segment2D(sol4 , opponentAgentsToBeMarkPossition.at(i)).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
                     }
                     else{
                         penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsToBeMarkPossition.at(i)) , &sol1 , &sol2);
@@ -308,7 +321,7 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
                         if(!wm->field->isInOurPenaltyArea(opponentAgentsCircle.at(i).center())){
                             opponentAgentsCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()), &sol1 , &sol2);
                             penaltyArea.intersection(Segment2D(opponentAgentsCircle.at(i).center() , wm->field->ourGoal()), &sol3 , &sol4);
-                            markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsCircle.at(i).center()).length() < Segment2D(sol4 , opponentAgentsCircle.at(i).center()).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                            markPoses.append(knowledge->getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsCircle.at(i).center()).length() < Segment2D(sol4 , opponentAgentsCircle.at(i).center()).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
                         }
                         else{
                             penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()) , &sol1 , &sol2);
@@ -323,7 +336,7 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
                         if(!wm->field->isInOurPenaltyArea(opponentAgentsCircle.at(i).center())){
                             opponentAgentsCircle.at(i).intersection(Segment2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()), &sol1 , &sol2);
                             penaltyArea.intersection(Segment2D(opponentAgentsCircle.at(i).center() , wm->field->ourGoal()), &sol3 , &sol4);
-                            markPoses.append(getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsCircle.at(i).center()).length() < Segment2D(sol4 , opponentAgentsCircle.at(i).center()).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
+                            markPoses.append(knowledge->getPointInDirection(Segment2D(sol1 , wm->field->ourGoal()).length() < Segment2D(sol2 , wm->field->ourGoal()).length() ? sol1 : sol2 ,Segment2D(sol3 , opponentAgentsCircle.at(i).center()).length() < Segment2D(sol4 , opponentAgentsCircle.at(i).center()).length() ? sol3:sol4 ,policy()->Mark_ShootRatioBlock() / 100));
                         }
                         else{
                             penaltyArea.intersection(Line2D(wm->field->ourGoal() , opponentAgentsCircle.at(i).center()) , &sol1 , &sol2);
@@ -335,51 +348,56 @@ void CMarkPlan::manToManMarkInPlayOnBlockPass(QList<Vector2D> opponentAgentsToBe
                 }
             }
         }
-    }
-    else if(opponentAgentsToBeMarkPossition.size() > ourMarkAgentsSize){
-        sortDangerAgentsToBeMarkBlockPassPlayOn = sortdangerpassplayon(opponentAgentsToBeMarkPossition);
-        for(i = 0 ; i < ourMarkAgentsSize; i++){
-            //////////// Don't Enter penalty area, mark agents!!! :) ///////////
-            if(penaltyArea.intersection(Segment2D(wm->ball->pos , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first) , &sol7,  &sol8)){
-                if(!wm->field->isInOurPenaltyArea(sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first)){
-                    Circle2D(sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first , opponentAgentsCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first , wm->ball->pos) , &sol1 , &sol2);
-                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first , wm->ball->pos) , &sol3 , &sol4);
-                    penaltyArea.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() ? sol3 : sol4), &sol5 , &sol6);
-                    ///////////// Added for 1st IO 2017 ////////////////////////
-                    if(sol5.isValid() || sol6.isValid()){
-                        markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() < Segment2D(sol6 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() ? sol5:sol6 ,proportionOfDistance));
-                    }
-                    else{
-                        markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol3 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() ? sol3:sol4 ,proportionOfDistance));
-                    }
+        if(ourMarkAgentsSize > markPoses.size()){
+            for(i = 0 ; i < ourMarkAgentsSize - markPoses.size() ; i++){
+                if(i % 2){
+                    markPoses.append(Vector2D(-3 , (i+1) / 0.75));
+                    markAngs.append(Vector2D(0,0));
+                    markRoles.append(QString("shotBlocker"));
                 }
                 else{
-                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first , wm->ball->pos) , &sol1 , &sol2);
-                    penaltyArea.intersection(Segment2D(wm->ball->pos , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first) , &sol5 , &sol6);
-                    markPoses.append(getPointInDirection(Segment2D(sol1 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() < Segment2D(sol2 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() ? sol1 : sol2 ,Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5 :sol6 ,proportionOfDistance));
+                    markPoses.append(Vector2D(-3,(-i-1)  / 0.75));
+                    markAngs.append(Vector2D(0,0));
+                    markRoles.append(QString("shotBlocker"));
+                }
+            }
+        }
+    }
+    else if(opponentAgentsToBeMarkPossition.size() > ourMarkAgentsSize){
+        sortDangerAgentsToBeMarkBlockPassPlayOff = sortdangerpassplayoff(opponentAgentsToBeMarkPossition);
+        for(i = 0 ; i < ourMarkAgentsSize; i++){
+            //////////// Don't Enter penalty area, mark agents!!! :) ///////////
+            if(penaltyArea.intersection(Segment2D(wm->ball->pos , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first) , &sol7,  &sol8)){
+                if(!wm->field->isInOurPenaltyArea(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first)){
+                    Circle2D(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first , opponentAgentsCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first , wm->ball->pos) , &sol1 , &sol2);
+                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first , wm->ball->pos) , &sol3 , &sol4);
+                    penaltyArea.intersection(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() ? sol3 : sol4) , &sol5 , &sol6);
+                    markPoses.append(knowledge->getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2 ,Segment2D(sol5 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() < Segment2D(sol6 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() ? sol5:sol6 ,proportionOfDistance));
+                }
+                else{
+                    Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first , wm->ball->pos) , &sol1 , &sol2);
+                    penaltyArea.intersection(Segment2D(wm->ball->pos , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first) , &sol5 , &sol6);
+                    markPoses.append(knowledge->getPointInDirection(Segment2D(sol1 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() < Segment2D(sol2 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() ? sol1 : sol2 ,Segment2D(sol5 , wm->ball->pos).length() < Segment2D(sol6 , wm->ball->pos).length() ? sol5 :sol6 ,proportionOfDistance));
                 }
             }
             else{
-                Circle2D(sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first , opponentAgentsCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first , wm->ball->pos) , &sol1 , &sol2);
-                Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first), &sol3 , &sol4);
-                markPoses.append(getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() ? sol3 : sol4, proportionOfDistance));
+                Circle2D(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first , opponentAgentsCircleR).intersection(Segment2D(sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first , wm->ball->pos) , &sol1 , &sol2);
+                Circle2D(wm->ball->pos , ballCircleR).intersection(Segment2D(wm->ball->pos , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first), &sol3 , &sol4);
+                markPoses.append(knowledge->getPointInDirection(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,Segment2D(sol3 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() ? sol3 : sol4, proportionOfDistance));
             }
             markAngs.append(wm->ball->pos - markPoses.at(i));
             markRoles.append(QString("passBlocker"));
             draw(Segment2D(Segment2D(sol1 , wm->ball->pos).length() < Segment2D(sol2 , wm->ball->pos).length() ? sol1 : sol2,
-                           Segment2D(sol3 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeMarkBlockPassPlayOn.at(i).first).length() ? sol3 : sol4)
+                           Segment2D(sol3 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() < Segment2D(sol4 , sortDangerAgentsToBeMarkBlockPassPlayOff.at(i).first).length() ? sol3 : sol4)
                  , QColor(Qt::red));
             draw(Circle2D(wm->ball->pos , ballCircleR),QColor(Qt::black));
             debug(QString("Man To Man Mark In PlayOn Mode / BlockPass / opp > our") , D_SEPEHR);
         }
-
     }
     //////////////// Draw Possition of Mark Agents //////////////////////////
-    debug(QString("markposes ahz %1").arg(markPoses.size()) , D_AHZ , "green");
     for(i = 0 ; i < markPoses.size() ; i++){
+        debug(QString("x : %1").arg(markPoses.at(i).x) , D_AHZ);
         draw(markPoses.at(i) ,1, "white");
-        debug(QString("markpos x %1").arg(markPoses.at(i).x) , D_AHZ , "black");
-        debug(QString("markpos y %1").arg(markPoses.at(i).y) , D_AHZ , "black");
         draw(markRoles.at(i) , markPoses.at(i) - Vector2D(0,0.4) , "white");
     }
 }
@@ -1491,6 +1509,26 @@ void CMarkPlan::findOppAgentsToMark()
                 i--;
             }
         }
+
+        if(policy()->Mark_OmmitNearestToBallPlayon())
+        {
+            debug(QString("Ommit nearest to ball"),D_MAHI);
+            int nearestToBall = -1;
+            double nearestToBallDist = 100000;
+
+            for(int i = 0 ; i < oppAgentsToMark.count() ; i++)
+            {
+                if((oppAgentsToMark[i]->pos).dist(wm->ball->pos) < nearestToBallDist)
+                {
+                    nearestToBall = i;
+                    nearestToBallDist = oppAgentsToMark[i]->pos.dist(wm->ball->pos);
+                    debug(QString("the nearest id is:%1").arg(oppAgentsToMark[i]->id),D_MAHI);
+                    draw(oppAgentsToMark[i]->pos + oppAgentsToMark[i]->vel);
+                }
+            }
+            if(nearestToBall != -1)
+                oppAgentsToMark.removeOne(oppAgentsToMark[nearestToBall]);
+        }
     }
     else if(knowledge->getGameState() == CKnowledge::TheirKickOff)
     {
@@ -1522,32 +1560,18 @@ void CMarkPlan::findOppAgentsToMark()
 
     }
 
-    if(policy()->Mark_OmmitNearestToBallPlayon() && knowledge->getGameState()!= CKnowledge::TheirKickOff)
-    {
-        debug(QString("Ommit nearest to ball"),D_MAHI);
-        int nearestToBall = -1;
-        double nearestToBallDist = 100000;
-
-        for(int i = 0 ; i < oppAgentsToMark.count() ; i++)
-        {
-            if((oppAgentsToMark[i]->pos/*+ oppAgentsToMark[i]->vel*/).dist(wm->ball->pos /*+  wm->ball->vel*/) < nearestToBallDist)
-            {
-                nearestToBall = i;
-                nearestToBallDist = oppAgentsToMark[i]->pos.dist(wm->ball->pos);
-                debug(QString("the nearest id is:%1").arg(oppAgentsToMark[i]->id),D_MAHI);
-                draw(oppAgentsToMark[i]->pos + oppAgentsToMark[i]->vel);
-            }
-        }
-        if(nearestToBall != -1)
-            oppAgentsToMark.removeOne(oppAgentsToMark[nearestToBall]);
-    }
-
-
-
+//setting the positions
     for(int i=0; i < oppAgentsToMark.count(); i++)
     {
+        if(knowledge->getGameState() == CKnowledge::Start)
+        {
         oppAgentsToMarkPos.append(oppAgentsToMark[i]->pos);
-        draw(Circle2D(oppAgentsToMarkPos.last(),.1),Qt::yellow);
+        }
+        else if(knowledge->getGameState() == CKnowledge::TheirKickOff)
+        {
+            oppAgentsToMarkPos.append(posvel(oppAgentsToMark[i]));
+        }
+//        draw(Circle2D(oppAgentsToMarkPos.last(),.1),Qt::yellow);
     }
 
 
@@ -1622,7 +1646,7 @@ void CMarkPlan::markPosesRefinePlayon()
             }
         }
         // not invading the opponent field
-        for(int i=0; i<markPoses.count();i++)
+        for(int i=0; i < markPoses.count(); i++)
         {
             if(markPoses[i].x > xKickoff)
                 markPoses[i].x = xKickoff;
@@ -1700,9 +1724,9 @@ QList<Vector2D> CMarkPlan::PassBlockRatio(double ratio, Vector2D opp){
     isInPenaltyArea.assign(opp, wm->ball->pos);
     QList<Vector2D> tempVec;
     tempVec.clear();
-    if(!wm->field->AHZOurPAreaIntersect(isInPenaltyArea).isEmpty())
+    if(!wm->field->AHZOurPAreaIntersectForMark(isInPenaltyArea).isEmpty())
     {
-        tempVec.append(wm->field->AHZOurPAreaIntersect(tempSeg));
+        tempVec.append(wm->field->AHZOurPAreaIntersectForMark(tempSeg));
             if(tempVec.size() == 1)
             {
                 tempQlist.append(tempVec.first());
@@ -1765,127 +1789,6 @@ void CMarkPlan::execute()
         else{
             markPoses.clear();
             markAngs.clear();
-            /*
-            OopPosDanger.clear();
-            QList<QPair<Vector2D, double> > OopPosDanger;
-
-            OopPosDanger = sortdangerpassplayon(oppAgentsToMarkPos);
-
-            for(int i = 0; i < oppAgentsToMarkPos.count(); i++)
-            {
-                draw(Circle2D(oppAgentsToMarkPos[i],.2), QColor("cyan"));
-            }
-
-            QList<QPair<Vector2D, double> > oppPosDangerShoot;
-            oppPosDangerShoot.clear();
-
-            oppPosDangerShoot = sortdangershoot(1,0.2);
-            Segment2D temp;
-            QList<QPair<Vector2D, double>  > temp2; // Qlist of First:MarkAgents     Second:Distance
-            QPair<Vector2D, double> temp3;
-
-            if(agents.count() == 1)
-            {
-                if(!oppPosDangerShoot.isEmpty())
-                {
-
-                    temp.assign(oppPosDangerShoot[0].first,wm->field->ourGoal());
-
-
-                    //draw(temp, QColor(Qt::blue));
-
-                    for(int j=0; j<agents.count(); j++)
-                    {
-                        temp3.first = agents[j]->pos();
-                        temp3.second = temp.dist(agents[j]->pos());
-                        temp2.append(temp3);
-                    }
-
-
-                    /////---- sorting our Robot To find Best one to Go to The Mark Point
-
-
-                    for(int j=0; j<temp2.count(); j++)
-                    {
-                        for(int k=0; k<temp2.count() - 1 ; k++)
-                        {
-                            if(temp2[k].first.length() < temp2[k+1].first.length())
-                                temp2.swap(k, k+1);
-
-                        }
-                    }
-
-
-
-
-                    markPoses.append(temp.nearestPoint(temp2.last().first));
-                    markAngs.append(Vector2D(1,0));
-                    draw(QString("Danger"), oppPosDangerShoot[0].first, QColor(Qt::black));
-                    draw(QString("Here"), temp.nearestPoint(temp2.last().first));
-                }
-                else
-                {
-
-                    ZoneMark(OopPosDanger, 1);
-
-                }
-            }
-            else if(agents.count() == 2)
-            {
-                markPoses.clear();
-                markAngs.clear();
-                if(!oppPosDangerShoot.isEmpty())
-                {
-
-                    temp.assign(oppPosDangerShoot[0].first,wm->field->ourGoal());
-
-
-
-
-
-                    //draw(temp, QColor(Qt::blue));
-
-                    for(int j=0; j < agents.count(); j++)
-                    {
-                        temp3.first = agents[j]->pos();
-                        temp3.second = temp.dist(agents[j]->pos());
-                        temp2.append(temp3);
-                    }
-
-
-                    /////---- sorting our Robot To find Best one to Go to The Mark Point
-
-
-                    for(int j=0; j < temp2.count(); j++)
-                    {
-                        for(int k=0; k < temp2.count() - 1 ; k++)
-                        {
-                            if(temp2[k].first.length() < temp2[k+1].first.length())
-                                temp2.swap(k, k+1);
-
-                        }
-                    }
-
-
-
-
-                    markPoses.append(temp.nearestPoint(temp2.last().first));
-                    markAngs.append(Vector2D(1,0));
-                    draw(QString("Danger"), oppPosDangerShoot[0].first, QColor(Qt::black));
-                    draw(QString("Here"), temp.nearestPoint(temp2.last().first));
-                    ZoneMark(OopPosDanger,1);
-                }
-
-
-                else
-                {
-                    ZoneMark(OopPosDanger, 2);
-                }
-            }
-            //   draw(QString("temp2.last.first pos is %1").arg(temp2.last().first.absY()), Vector2D(0,0), QColor(Qt::blue));
-
-*/
-
             if(agents.count() == oppAgentsToMarkPos.count())
             {
                 for(int i = 0; i < oppAgentsToMarkPos.count(); i++)
@@ -2005,7 +1908,7 @@ void CMarkPlan::execute()
 
         else if(agents.count() < oppAgentsToMarkPos.count())
         {
-            QList<QPair<Vector2D, double> >tempQlistQpair = sortdangerpassplayoff(oppAgentsToMarkPos);
+            QList<QPair<Vector2D, double> >tempQlistQpair = sortdangerpassplayon(oppAgentsToMarkPos);
             for(int i=0; i<agents.count(); i++)
             {
                 markPoses.append(ShootBlockRatio(segmentpershoot, tempQlistQpair[i].first).first());

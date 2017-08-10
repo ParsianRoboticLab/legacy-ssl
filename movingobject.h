@@ -51,14 +51,13 @@ public:
     Vector2D dir;
     Vector2D vel;
     Vector2D acc;
-    bool shootSensor;
 
     double angularVel;    
 
     double inSight;
     double obstacleRadius;
     int cam_id;
-	int lastFrameUpdated;
+    int lastFrameUpdated;
     bool modelObjStopped;
     Vector2D modelObjStopPos;
     Vector2D modelDir,modelCurDir;

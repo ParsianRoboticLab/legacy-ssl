@@ -8,10 +8,15 @@
 #include <defensepositioning.h>
 #include <time.h>
 #include <autoballplacement.h>
+#include <proto/multi_team_communication.pb.h>
+#include <mixteamthread.h>
+#include <mixteamsender.h>
+#include <mixteamreader.h>
+
 clock_t t;
 //#define speedTest
 
-//#define kickTest
+#define kickTest
 QList <Vector2D> agentpath;
 
 struct VectorIndex {
@@ -19,9 +24,42 @@ struct VectorIndex {
     int index;
 };
 
+
 int id = 2;
+long int a=0;
+
+QList <double> realSpeed,appliedSpeed;
 void CMainApplication::Experimental6()
 {
+ soccer->agents[6]->setRoller(1);
+    return;
+    static MixTeamSender *sender = new MixTeamSender(true);
+    static MixTeamReader *reader = new MixTeamReader();
+//    static MixTeamThread *mthr = new MixTeamThread();
+
+    multi_team_comm::TeamPlan* example = new multi_team_comm::TeamPlan();
+    multi_team_comm::RobotPlan *rp1 = example->add_plans();
+    multi_team_comm::Pose *pose1 = rp1->mutable_nav_target();
+    multi_team_comm::Location *loc1 = pose1->mutable_loc();
+
+    loc1->set_x(1);loc1->set_y(1);
+    pose1->set_heading(1.2);
+    rp1->set_robot_id(1);
+
+
+    multi_team_comm::RobotPlan *rp2 = example->add_plans();
+    multi_team_comm::Pose *pose2 = rp2->mutable_nav_target();
+    multi_team_comm::Location *loc2 = pose2->mutable_loc();
+
+    loc2->set_x(2);loc2->set_y(2);
+    pose2->set_heading(2.2);
+    rp2->set_robot_id(2);
+
+    sender->packet = example;
+    sender->flag = true;
+
+    return;
+
 #ifdef speedTest
     int agentNum = 7;
     soccer->agents[agentNum]->setRobotAbsVel(1,0,0);
@@ -34,24 +72,94 @@ void CMainApplication::Experimental6()
         stopFlag = false;
     if(knowledge->joystick->getButton4())
         stopFlag = true;
-    int skillAgent = 6;
-
-
-
-
+    int skillAgent = 7;
 #ifdef kickTest
     static CSkillKick mmkick(soccer->agents[skillAgent]);
     mmkick.setTarget(wm->field->oppGoal());
     mmkick.setShotToEmptySpot(false);
     mmkick.setKickSpeed(1000);
+    mmkick.setSpin(0);
     mmkick.setGoalieMode(false);
     mmkick.setPassProfiler(false);
-    mmkick.setGoalieMode(true);
+    mmkick.setKickWithCenterOfDribbler(true);
 
     if(!stopFlag)
         mmkick.execute();
     return;
 #endif
+    if(soccer->agents[5]->pos().y - mousePos.y > 0.01)
+    {
+        soccer->agents[5]->setRobotAbsVel(0,-0.5,0);
+    }
+    else if (soccer->agents[5]->pos().y - mousePos.y <- 0.01)
+    {
+        soccer->agents[5]->setRobotAbsVel(0,0.5,0);
+    }
+    else
+    {
+        soccer->agents[5]->setRobotAbsVel(0,0,0);
+    }
+    return;
+    a++;
+    double _max=0,_maxRS = 0;
+    int maxNum=0,maxNumRS = 0;
+
+    if(a < 180)
+    {
+        soccer->agents[5]->setRobotVel(sin(_DEG2RAD*a),0,0);
+        realSpeed.append(soccer->agents[5]->vel().y);
+        appliedSpeed.append(sin(_DEG2RAD*a));
+    }
+
+    if(a > 180)
+    {
+    for(int i = 0 ; i < appliedSpeed.count() ; i ++)
+    {
+        if(appliedSpeed.at(i) > _max)
+        {
+            _max= appliedSpeed.at(i);
+            maxNum = i;
+        }
+
+        if(realSpeed[i] > _maxRS)
+        {
+            _maxRS= realSpeed.at(i);
+            maxNumRS = i;
+        }
+    }
+
+    debug(QString("this is the true delay : %1 ,%2 ,%3").arg(maxNumRS  - maxNum).arg(maxNumRS).arg(maxNum),D_MHMMD);
+    }
+
+    return;
+    static CSkillGotoPointAvoid obstg(soccer->agents[0]);
+    static CSkillGotoPointAvoid rrtTest(soccer->agents[5]);
+
+    rrtTest.execute();
+    if(soccer->agents[0]->pos().dist(Vector2D(-0.50,0))<0.5)
+    {
+        obstg.init(Vector2D(-4,0),Vector2D(0,0));
+    }
+
+    if(soccer->agents[0]->pos().dist(Vector2D(-4,0))<0.5)
+    {
+        obstg.init(Vector2D(-0.5,0),Vector2D(0,0));
+    }
+
+    if(soccer->agents[5]->pos().dist(Vector2D(-2,2))<0.5)
+    {
+        rrtTest.init(Vector2D(-2,-2),Vector2D(0,1));
+    }
+
+    if(soccer->agents[5]->pos().dist(Vector2D(-2,-2))<0.5)
+    {
+        rrtTest.init(Vector2D(-2,2),Vector2D(0,1));
+    }
+
+    obstg.setNoAvoid(true);
+    obstg.execute();
+
+    return;
 
     debug(QString("shootSen4 : %1").arg(knowledge->getAgent(4)->shootSensor()),D_MHMMD);
     debug(QString("shootSen7 : %1").arg(knowledge->getAgent(7)->shootSensor()),D_MHMMD);
@@ -61,7 +169,7 @@ void CMainApplication::Experimental6()
     debug(QString("shootSen2 : %1").arg(knowledge->getAgent(2)->shootSensor()),D_MHMMD);
 
     double maxAcc = 4;
-    double maxVel = 4;
+    double maxVel = 3;
     Polygon2D obs;
     Vector2D p0,v0;
     Vector2D acc;
@@ -69,16 +177,16 @@ void CMainApplication::Experimental6()
     v0.assign(1,1);
     double _t = 0.5;
     double ang;
-    for(int i = 0 ; i < 36 ; i ++)
+    for(_t = 0 ;_t <0.6 ; _t+=0.1  )
     {
-        ang = i*10*_DEG2RAD;
-        acc = maxAcc * Vector2D(cos(ang),sin(ang));
-        obs.addVertex(p0 + v0*_t + 0.5*_t*_t*acc);
+        for(int i = 0 ; i < 36 ; i ++)
+        {
+            ang = i*10*_DEG2RAD;
+            acc = maxAcc * Vector2D(cos(ang),sin(ang));
+            obs.addVertex(p0 + v0*_t + 0.5*_t*_t*acc);
+        }
+        draw(obs,QColor(Qt::blue),true);
     }
-
-    draw(mousePos);
-    draw(obs);
-
     return;
     static CSkillDribble mpass(soccer->agents[skillAgent]);
     Circle2D opFak(wm->opp[2]->pos + wm->opp[2]->dir.norm()*0.08,0.07);
@@ -97,7 +205,7 @@ void CMainApplication::Experimental6()
     if(!stopFlag)
     {
         if(opFak.contains(wm->ball->pos))
-        mpass.execute();
+            mpass.execute();
         else
             passKick.execute();
     }
@@ -164,23 +272,6 @@ void CMainApplication::Experimental6()
     {
         draw(knowledge->getStaticPoses(i));
     }
-    //
-    //
-    //
-    //    mgpa.init(wm->ball->pos + (soccer->agents[1]->pos() -wm->ball->pos).norm()*0.11,wm->ball->pos - soccer->agents[1]->pos());
-    //    soccer->agents[1]->setRoller(5);
-    ////    if(soccer->agents[1]->pos().dist(wm->ball->pos) >= 0.11)
-    ////    mgpa.execute();
-    ////    else
-    //        soccer->agents[1]->setRobotVel(-0.5,0.5,3);
-    //    return;
-    //        static CSkillGotoPointAvoid mgpa(soccer->agents[1]);
-    //        mgpa.init(mousePos,Vector2D(0,0));
-    //        mgpa.execute();
-    //    soccer->agents[1]->setRoller(6);
-    //    if(!stopFlag)
-    //    soccer->agents[1]->setRobotVel(-1,0,0);
-    //       return;
 
     return;
 

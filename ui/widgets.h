@@ -872,6 +872,7 @@ public:
     CNewProfilerWidget(QWidget*);
     ~CNewProfilerWidget();
     QCheckBox *chbxProf[10];
+    QCheckBox *chbxChip, *chbxTest;
     QWidget *profilerRobots;
     QWidget *profilerRobotsList;
     QGridLayout *l;

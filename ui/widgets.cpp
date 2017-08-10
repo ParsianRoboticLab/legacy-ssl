@@ -953,12 +953,16 @@ void CPlayOffWidget::updateModel() {
             model->appendRow(pkg);
             qDebug() << "FILE";
             file = new QStandardItem(guiPlan.planFile);
+            QString temp = guiPlan.package;
+            file->setToolTip("<html><img src="+temp.replace(".","/") + "/" + guiPlan.planFile + ".png" +"/></html>");
             pkg->appendRow(file);
         }
         else if (lastGui->planFile != guiPlan.planFile) {
             fileCounter++;
             qDebug() << "PLAN";
             file = new QStandardItem(guiPlan.planFile);
+            QString temp = guiPlan.package;
+            file->setToolTip("<html><img src="+temp.replace(".","/") + "/" + guiPlan.planFile + ".png" +"/></html>");
             pkg->appendRow(file);
         }
         planCounter++;
@@ -969,7 +973,6 @@ void CPlayOffWidget::updateModel() {
         plan->setEditable(false);
         pkg->setEditable(false);
         lastGui = &m_plans.at(i)->gui;
-        qDebug() << guiPlan.package;
 
     }
 }
@@ -1152,6 +1155,8 @@ void CPlayOffWidget::slt_selectionChanged(const QItemSelection & selected, const
             details[3]->setText(QString("Chance     : %1").arg(m_choosen->common.chance));
             details[4]->setText(QString("Last Dist  : %1").arg(m_choosen->common.lastDist));
             details[5]->setText(QString("Tags       : %1").arg(m_choosen->common.tags.join(" - ")));
+            details[6]->setText(QString("ShotPos    : (%1, %2)").arg(m_choosen->matching.shotPos.x).arg(m_choosen->matching.shotPos.y));
+            details[7]->setText(QString("ShotZone   : %1").arg(CCoach::getShotSpot(m_choosen->matching.initPos.ball, m_choosen->matching.shotPos)));
 
             active   -> setEnabled(!m_choosen->gui.active);
             deactive -> setEnabled(m_choosen->gui.active);
@@ -1364,7 +1369,7 @@ CPlotWidget::CPlotWidget()
         cmbXYZ[i]->addItem("Y");
         cmbXYZ[i]->addItem("Lenght");
     }
-    GAIN = 35;
+    GAIN = 30;
 
     graph->graphSize.setWidth(680);
     graph->graphSize.setHeight(300);
@@ -1581,7 +1586,7 @@ void CPlotWidget::pauseClicked(){
 
 void CPlotWidget::savePicClicked()
 {
-    //    graph->save("cycle"+QString::number(cycleCounter)+".jpg",QSize(640,480));
+//        graph->save("plot/cycle"+QString::number(cycleCounter)+".jpg",QSize(640,480));
 }
 
 CMonitorWidget::CMonitorWidget(CDrawer *_drawerBuffer, QWidget *parent)
@@ -3267,7 +3272,7 @@ CLoggerWidget::CLoggerWidget(){
     chbxDebug[19] = new QCheckBox("Erfan" , this);
 
     tcolor.insert(D_ERROR,QColor(Qt::red));
-    tcolor.insert(D_MAHI,QColor(Qt::green));
+//    tcolor.insert(D_MAHI,QColor(Qt::green));
     // TODO:insert color for other Types
     txtFPS = new QLineEdit("60" , this);
     lblFPS = new QLabel("FPS" , this);
@@ -3285,8 +3290,9 @@ CLoggerWidget::CLoggerWidget(){
     txtFPS->setMaximumSize(65 , 30);
     txtFPS->setFocusPolicy(Qt::ClickFocus);
     pause = true;
-    for( int i=0 ; i<8 ; i++ )
-        chbxDebug[i]->setChecked(true);
+    for( int i=0 ; i<20 ; i++ ) {
+        chbxDebug[i]->setChecked(false);
+    }
 
     QGridLayout *l = new QGridLayout(this);
     l->addWidget(btnBrowse , 1  , 0 , 1 , 3);
@@ -3807,6 +3813,8 @@ CNewProfilerWidget::CNewProfilerWidget(QWidget* parent):QDialog(parent){
     repeatNum=new QLineEdit("3",this);
     startProf=new QPushButton("start Profiling",this);
     profilerRobotsList->setLayout(ProfilerLayout);
+    chbxChip=new QCheckBox("Is Chip?",this);
+    chbxTest=new QCheckBox("Is Test?",this);
     chbxProf[0]=new QCheckBox("0",this);
     chbxProf[1]=new QCheckBox("1",this);
     chbxProf[2]=new QCheckBox("2",this);
@@ -3830,11 +3838,10 @@ CNewProfilerWidget::CNewProfilerWidget(QWidget* parent):QDialog(parent){
     l->addWidget(repeatNum,3,2);
     l->addWidget(filenamelable,4,1);
     l->addWidget(fileName,4,2);
-    l->addWidget(startProf,5,1);
+    l->addWidget(chbxChip,5,1);
+    l->addWidget(chbxTest,5,2);
+    l->addWidget(startProf,6,1);
     this->setLayout(l);
-
-
-
 
     connect(startProf , SIGNAL(pressed()) , this , SLOT(startProfFunc()));
 }
@@ -3844,14 +3851,22 @@ CNewProfilerWidget::~CNewProfilerWidget(){
 }
 void CNewProfilerWidget::startProfFunc(){
     int i=0;
+    QString isChip;
     for(int j=0;j<10;j++){
         if(chbxProf[j]->isChecked()){
             collectKickProfile->activeRobots[i]=j;
             i++;
         }
     }
-    collectKickProfile->filename=fileName->text();
     collectKickProfile->repeat=repeatNum->text().toInt();
+    collectKickProfile->isChip=chbxChip->isChecked();
+    collectKickProfile->isTest=chbxTest->isChecked();
+
+    if(chbxChip->isChecked())
+        isChip = QString("chip");
+    else
+        isChip = QString("kick");
+    collectKickProfile->filename=fileName->text();
     this->close();
     ProfilerExecute=true;
 }
