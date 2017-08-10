@@ -4,29 +4,29 @@
 
 CField::CField(void)
 {
-    fCenter = Vector2D(0.0 , 0.0);
-    fOurGoal = Vector2D(- _FIELD_WIDTH/2.0 , 0.0);
-    fOppGoal = Vector2D(_FIELD_WIDTH/2.0 , 0.0);
-    fOurCornerL = Vector2D(- _FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0);
-    fOurCornerR = Vector2D(- _FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0);
-    fOppCornerL = Vector2D(_FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0);
-    fOppCornerR = Vector2D(_FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0);
-    fOurPenalty = Vector2D(_FIELD_PENALTY - _FIELD_WIDTH/2.0 , 0.0);
-    fOppPenalty = Vector2D(_FIELD_WIDTH/2.0 - _FIELD_PENALTY , 0.0);
-    fOurGoalL = Vector2D( - _FIELD_WIDTH/2.0, _GOAL_WIDTH / 2.0);
-    fOurGoalR = Vector2D( - _FIELD_WIDTH/2.0, -_GOAL_WIDTH / 2.0);
-    fOppGoalL = Vector2D(  _FIELD_WIDTH/2.0, _GOAL_WIDTH / 2.0);
-    fOppGoalR = Vector2D(  _FIELD_WIDTH/2.0, -_GOAL_WIDTH / 2.0);
-    fFieldRect = Rect2D(fOurCornerR+Vector2D(-0.005,-0.005),fOppCornerL+Vector2D(+0.005,+0.005));
-    fMarginedFieldRect = Rect2D(fOurCornerR+Vector2D(-0.25,-0.25),fOppCornerL+Vector2D(+0.25,+0.25));
-    fOurPenaltyRect  = Rect2D(Vector2D(ourGoal().x,ourGoal().y + 1.25),
-                              Vector2D(ourGoal().x + _GOAL_RAD,ourGoal().y - 1.25));
-    fOppPenaltyRect  = Rect2D(Vector2D(oppGoal().x - _GOAL_RAD,oppGoal().y + 1.25),
-                              Vector2D(oppGoal().x ,oppGoal().y - 1.25));
-    fOurOneThirdL = Vector2D(-_FIELD_WIDTH / 2.0 + _FIELD_WIDTH / 3.0, _FIELD_HEIGHT / 2.0);
-    fOurOneThirdR = Vector2D(-_FIELD_WIDTH / 2.0 + _FIELD_WIDTH / 3.0, -_FIELD_HEIGHT / 2.0);
-    fOppOneThirdL = Vector2D(+_FIELD_WIDTH / 2.0 - _FIELD_WIDTH / 3.0, _FIELD_HEIGHT / 2.0);
-    fOppOneThirdR = Vector2D(+_FIELD_WIDTH / 2.0 - _FIELD_WIDTH / 3.0, -_FIELD_HEIGHT / 2.0);
+        fCenter = Vector2D(0.0 , 0.0);
+        fOurGoal = Vector2D(- _FIELD_WIDTH/2.0 , 0.0);
+        fOppGoal = Vector2D(_FIELD_WIDTH/2.0 , 0.0);
+        fOurCornerL = Vector2D(- _FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0);
+        fOurCornerR = Vector2D(- _FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0);
+        fOppCornerL = Vector2D(_FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0);
+        fOppCornerR = Vector2D(_FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0);
+        fOurPenalty = Vector2D(_FIELD_PENALTY - _FIELD_WIDTH/2.0 , 0.0);
+        fOppPenalty = Vector2D(_FIELD_WIDTH/2.0 - _FIELD_PENALTY , 0.0);
+        fOurGoalL = Vector2D( - _FIELD_WIDTH/2.0, _GOAL_WIDTH / 2.0);
+        fOurGoalR = Vector2D( - _FIELD_WIDTH/2.0, -_GOAL_WIDTH / 2.0);
+        fOppGoalL = Vector2D(  _FIELD_WIDTH/2.0, _GOAL_WIDTH / 2.0);
+        fOppGoalR = Vector2D(  _FIELD_WIDTH/2.0, -_GOAL_WIDTH / 2.0);
+        fFieldRect = Rect2D(fOurCornerR+Vector2D(-0.005,-0.005),fOppCornerL+Vector2D(+0.005,+0.005));
+        fMarginedFieldRect = Rect2D(fOurCornerR+Vector2D(-0.25,-0.25),fOppCornerL+Vector2D(+0.25,+0.25));
+        fOurPenaltyRect  = Rect2D(Vector2D(ourGoal().x,ourGoal().y + 1.25),
+                             Vector2D(ourGoal().x + _GOAL_RAD,ourGoal().y - 1.25));
+        fOppPenaltyRect  = Rect2D(Vector2D(oppGoal().x - _GOAL_RAD,oppGoal().y + 1.25),
+                             Vector2D(oppGoal().x ,oppGoal().y - 1.25));
+        fOurOneThirdL = Vector2D(-_FIELD_WIDTH / 2.0 + _FIELD_WIDTH / 3.0, _FIELD_HEIGHT / 2.0);
+        fOurOneThirdR = Vector2D(-_FIELD_WIDTH / 2.0 + _FIELD_WIDTH / 3.0, -_FIELD_HEIGHT / 2.0);
+        fOppOneThirdL = Vector2D(+_FIELD_WIDTH / 2.0 - _FIELD_WIDTH / 3.0, _FIELD_HEIGHT / 2.0);
+        fOppOneThirdR = Vector2D(+_FIELD_WIDTH / 2.0 - _FIELD_WIDTH / 3.0, -_FIELD_HEIGHT / 2.0);
 }
 
 CField::~CField(void)
@@ -35,63 +35,63 @@ CField::~CField(void)
 
 Vector2D CField::center()
 {
-    return fCenter;
+	return fCenter;
 }
 Vector2D CField::ourGoal()
 {
-    return fOurGoal;
+	return fOurGoal;
 }
 Vector2D CField::oppGoal()
 {
-    return fOppGoal;
+	return fOppGoal;
 }
 Vector2D CField::ourCornerL()
 {
-    return fOurCornerL;
+	return fOurCornerL;
 }
 Vector2D CField::ourCornerR()
 {
-    return fOurCornerR;
+	return fOurCornerR;
 }
 Vector2D CField::oppCornerL()
 {
-    return fOppCornerL;
+	return fOppCornerL;
 }
 Vector2D CField::oppCornerR()
 {
-    return fOppCornerR;
+	return fOppCornerR;
 }
 Vector2D CField::ourPenalty()
 {
-    return fOurPenalty;
+	return fOurPenalty;
 }
 Vector2D CField::oppPenalty()
 {
-    return fOppPenalty;
+	return fOppPenalty;
 }
 
 Vector2D CField::ourGoalL() {
-    return fOurGoalL;
+	return fOurGoalL;
 }
 
 Vector2D CField::ourGoalR() {
-    return fOurGoalR;
+	return fOurGoalR;
 }
 
 Vector2D CField::oppGoalL() {
-    return fOppGoalL;
+	return fOppGoalL;
 }
 
 Vector2D CField::oppGoalR() {
-    return fOppGoalR;
+	return fOppGoalR;
 }
 
 Rect2D   CField::fieldRect() {
-    return fFieldRect;
+        return fFieldRect;
 }
 
 Rect2D   CField::marginedField(){
-    return fMarginedFieldRect;
+		return fMarginedFieldRect;
 }
 
 bool     CField::isInField(Vector2D point){
@@ -132,9 +132,9 @@ QList<Vector2D> CField::ourPAreaIntersect(Line2D line)
 {
     QList<Vector2D> results;
     results.clear();
-    Circle2D c1(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD);
-    Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD);
-    Segment2D s(fOurGoal + Vector2D(+_GOAL_RAD,-_GOAL_WIDTH/4),fOurGoal + Vector2D(+_GOAL_RAD,+_GOAL_WIDTH/4));
+        Circle2D c1(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD);
+        Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD);
+        Segment2D s(fOurGoal + Vector2D(+_GOAL_RAD,-_GOAL_WIDTH/4),fOurGoal + Vector2D(+_GOAL_RAD,+_GOAL_WIDTH/4));
     draw(c1,0,90,"blue",false);
     draw(c2,90,180,"blue",false);
     draw(s,"blue");
@@ -205,15 +205,15 @@ QList<Vector2D> CField::ourPAreaIntersect(Line2D line)
 QList<Vector2D> CField::ourBigPAreaIntersect(Line2D line, float scale, float bias)
 {
     if (scale < 0)
-        scale = (0.975+0.16) / 0.975;
+		scale = (0.975+0.16) / 0.975;
     QList<Vector2D> results;
-    results.clear();
-    Circle2D c1(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4)*scale,_GOAL_RAD*scale + bias);
-    Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4)*scale,_GOAL_RAD*scale + bias);
-    Segment2D s(fOurGoal + Vector2D(+_GOAL_RAD + bias,-_GOAL_WIDTH/4)*scale,fOurGoal + Vector2D(+_GOAL_RAD + bias,+_GOAL_WIDTH/4)*scale);
-    //    draw(c1,0,90,"blue",false);
-    //    draw(c2,90,180,"blue",false);
-    //    draw(s,"blue");
+    results.clear();    
+        Circle2D c1(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4)*scale,_GOAL_RAD*scale + bias);
+        Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4)*scale,_GOAL_RAD*scale + bias);
+        Segment2D s(fOurGoal + Vector2D(+_GOAL_RAD + bias,-_GOAL_WIDTH/4)*scale,fOurGoal + Vector2D(+_GOAL_RAD + bias,+_GOAL_WIDTH/4)*scale);
+//    draw(c1,0,90,"blue",false);
+//    draw(c2,90,180,"blue",false);
+//    draw(s,"blue");
     int n;
     Vector2D vSol1,vSol2;
     n = c1.intersection(line,&vSol1,&vSol2);
@@ -270,10 +270,10 @@ QList<Vector2D> CField::ourBigPAreaIntersect(Line2D line, float scale, float bia
         results.append(vSol1);
     }
 
-    //    for(int i=0; i<results.count(); i++)
-    //    {
-    //        draw(Circle2D(results[i],0.05),0,360,"purple",true);
-    //    }
+//    for(int i=0; i<results.count(); i++)
+//    {
+//        draw(Circle2D(results[i],0.05),0,360,"purple",true);
+//    }
 
     return results;
 }
@@ -343,14 +343,13 @@ QList<Vector2D> CField::AHZOurPAreaIntersectForGoalKeeper(Segment2D segment){
         results.append(vSol1);
     }
 
-    //    for(int i=0; i<results.count(); i++)
-    //    {
-    //        draw(Circle2D(results[i],0.05),0,360,"purple",true);
-    //    }
+    for(int i=0; i<results.count(); i++)
+    {
+        draw(Circle2D(results[i],0.05),0,360,"purple",true);
+    }
 
     return results;
 }
-
 QList<Vector2D> CField::AHZOurPAreaIntersectForGoalKeeper(Line2D line)
 {
     QList<Vector2D> results;
@@ -417,10 +416,10 @@ QList<Vector2D> CField::AHZOurPAreaIntersectForGoalKeeper(Line2D line)
         results.append(vSol1);
     }
 
-    //    for(int i=0; i<results.count(); i++)
-    //    {
-    //        draw(Circle2D(results[i],0.05),0,360,"purple",true);
-    //    }
+    for(int i=0; i<results.count(); i++)
+    {
+        draw(Circle2D(results[i],0.05),0,360,"purple",true);
+    }
 
     return results;
 }
@@ -493,10 +492,10 @@ QList<Vector2D> CField::AHZOurPAreaIntersectForMark(Segment2D segment)
         results.append(vSol1);
     }
 
-    //    for(int i=0; i<results.count(); i++)
-    //    {
-    //        draw(Circle2D(results[i],0.05),0,360,"purple",true);
-    //    }
+    for(int i=0; i<results.count(); i++)
+    {
+        draw(Circle2D(results[i],0.05),0,360,"purple",true);
+    }
 
     return results;
 }
@@ -567,171 +566,27 @@ QList<Vector2D> CField::AHZOurPAreaIntersectForMark(Line2D line)
         results.append(vSol1);
     }
 
-    //    for(int i=0; i<results.count(); i++)
-    //    {
-    //        draw(Circle2D(results[i],0.05),0,360,"purple",true);
-    //    }
+    for(int i=0; i<results.count(); i++)
+    {
+        draw(Circle2D(results[i],0.05),0,360,"purple",true);
+    }
 
     return results;
 }
 
 
-QList<Vector2D> CField::AHZOurPAreaIntersectForTransient(Segment2D segment){
-    QList<Vector2D> results;
-    results.clear();
-    Circle2D c1(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4),_AHZ_GOAL_RAD_FOR_GOALKEEPER_TS);
-    Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4),_AHZ_GOAL_RAD_FOR_GOALKEEPER_TS);
-    Segment2D s(fOurGoal + Vector2D(+_AHZ_GOAL_RAD_FOR_GOALKEEPER_TS,-_GOAL_WIDTH/4),fOurGoal + Vector2D(+_AHZ_GOAL_RAD_FOR_GOALKEEPER_TS,+_GOAL_WIDTH/4));
-    draw(c1,0,90,"orange",false);
-    draw(c2,90,180,"orange",false);
-    draw(s,"orange");
-    int n;
-    Vector2D vSol1,vSol2;
-    n = c1.intersection(segment,&vSol1,&vSol2);
-    if(n==1)
-    {
 
-        double th = (vSol1 - c1.center()).th().degree();
-        if( (th < 0) && (th > -90) )
-        {
-            results.append(vSol1);
-        }
-    }
-    if(n==2)
-    {
-        double th;
-        th = (vSol1 - c1.center()).th().degree();
-        if( (th < 0) && (th > -90) )
-        {
-            results.append(vSol1);
-        }
-        th = (vSol2 - c1.center()).th().degree();
-        if( (th < 0) && (th > -90) )
-        {
-            results.append(vSol2);
-        }
-    }
 
-    n = c2.intersection(segment,&vSol1,&vSol2);
-    if(n==1)
-    {
-        double th = (vSol1 - c2.center()).th().degree();
-        if( (th > 0) && (th < 90) )
-        {
-            results.append(vSol1);
-        }
-    }
-    if(n==2)
-    {
-        double th;
-        th = (vSol1 - c2.center()).th().degree();
-        if( (th > 0) && (th < 90) )
-        {
-            results.append(vSol1);
-        }
-        th = (vSol2 - c2.center()).th().degree();
-        if( (th > 0) && (th < 90) )
-        {
-            results.append(vSol2);
-        }
-    }
 
-    vSol1 = s.intersection(segment);
-    if(vSol1.valid())
-    {
-        results.append(vSol1);
-    }
-
-    //    for(int i=0; i<results.count(); i++)
-    //    {
-    //        draw(Circle2D(results[i],0.05),0,360,"purple",true);
-    //    }
-
-    return results;
-}
-
-QList<Vector2D> CField::AHZOurPAreaIntersectForTransient(Line2D line)
-{
-    QList<Vector2D> results;
-    results.clear();
-    Circle2D c1(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4),_AHZ_GOAL_RAD_FOR_GOALKEEPER_TS);
-    Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4),_AHZ_GOAL_RAD_FOR_GOALKEEPER_TS);
-    Segment2D s(fOurGoal + Vector2D(+_AHZ_GOAL_RAD_FOR_GOALKEEPER_TS,-_GOAL_WIDTH/4),fOurGoal + Vector2D(+_AHZ_GOAL_RAD_FOR_GOALKEEPER_TS,+_GOAL_WIDTH/4));
-    draw(c1,0,90,"blue",false);
-    draw(c2,90,180,"blue",false);
-    draw(s,"blue");
-    int n;
-    Vector2D vSol1,vSol2;
-    n = c1.intersection(line,&vSol1,&vSol2);
-    if(n==1)
-    {
-        double th = (vSol1 - c1.center()).th().degree();
-        if( (th < 0) && (th > -90) )
-        {
-            results.append(vSol1);
-        }
-    }
-    if(n==2)
-    {
-        double th;
-        th = (vSol1 - c1.center()).th().degree();
-        if( (th < 0) && (th > -90) )
-        {
-            results.append(vSol1);
-        }
-        th = (vSol2 - c1.center()).th().degree();
-        if( (th < 0) && (th > -90) )
-        {
-            results.append(vSol2);
-        }
-    }
-
-    n = c2.intersection(line,&vSol1,&vSol2);
-    if(n==1)
-    {
-        double th = (vSol1 - c2.center()).th().degree();
-        if( (th > 0) && (th < 90) )
-        {
-            results.append(vSol1);
-        }
-    }
-    if(n==2)
-    {
-        double th;
-        th = (vSol1 - c2.center()).th().degree();
-        if( (th > 0) && (th < 90) )
-        {
-            results.append(vSol1);
-        }
-        th = (vSol2 - c2.center()).th().degree();
-        if( (th > 0) && (th < 90) )
-        {
-            results.append(vSol2);
-        }
-    }
-
-    vSol1 = s.intersection(line);
-    if(vSol1.valid())
-    {
-        results.append(vSol1);
-    }
-
-        for(int i=0; i<results.count(); i++)
-        {
-            draw(Circle2D(results[i],0.05),0,360,"purple",true);
-        }
-
-    return results;
-}
 
 
 QList<Vector2D> CField::ourPAreaIntersect(Segment2D segment)
 {
     QList<Vector2D> results;
     results.clear();
-    Circle2D c1(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD);
-    Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD);
-    Segment2D s(fOurGoal + Vector2D(+_GOAL_RAD,-_GOAL_WIDTH/4),fOurGoal + Vector2D(+_GOAL_RAD,+_GOAL_WIDTH/4));
+        Circle2D c1(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD);
+        Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD);
+        Segment2D s(fOurGoal + Vector2D(+_GOAL_RAD,-_GOAL_WIDTH/4),fOurGoal + Vector2D(+_GOAL_RAD,+_GOAL_WIDTH/4));
     draw(c1,0,90,"blue",false);
     draw(c2,90,180,"blue",false);
     draw(s,"blue");
@@ -792,10 +647,10 @@ QList<Vector2D> CField::ourPAreaIntersect(Segment2D segment)
         results.append(vSol1);
     }
 
-    //    for(int i=0; i<results.count(); i++)
-    //    {
-    //        draw(Circle2D(results[i],0.05),0,360,"purple",true);
-    //    }
+    for(int i=0; i<results.count(); i++)
+    {
+        draw(Circle2D(results[i],0.05),0,360,"purple",true);
+    }
 
     return results;
 }
@@ -804,9 +659,9 @@ QList<Vector2D> CField::ourPAreaIntersect(Circle2D circle)
 {
     QList<Vector2D> results;
     results.clear();
-    Circle2D c1(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD);
-    Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD);
-    Segment2D s(fOurGoal + Vector2D(+_GOAL_RAD,-_GOAL_WIDTH/4),fOurGoal + Vector2D(+_GOAL_RAD,+_GOAL_WIDTH/4));
+        Circle2D c1(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD);
+        Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD);
+        Segment2D s(fOurGoal + Vector2D(+_GOAL_RAD,-_GOAL_WIDTH/4),fOurGoal + Vector2D(+_GOAL_RAD,+_GOAL_WIDTH/4));
     draw(c1,0,90,"blue",false);
     draw(c2,90,180,"blue",false);
     draw(s,"blue");
@@ -872,10 +727,10 @@ QList<Vector2D> CField::ourPAreaIntersect(Circle2D circle)
         results.append(vSol2);
     }
 
-    //    for(int i=0; i<results.count(); i++)
-    //    {
-    //        draw(Circle2D(results[i],0.05),0,360,"purple",true);
-    //    }
+    for(int i=0; i<results.count(); i++)
+    {
+        draw(Circle2D(results[i],0.05),0,360,"purple",true);
+    }
 
     return results;
 }
@@ -893,13 +748,13 @@ bool CField::AHZIsInOurPenaltyArea(Vector2D point)
     {
         double th = (point - c1.center()).th().degree();
         if( (th < 0) && (th > -90) )
-            return true;
+        return true;
     }
     if (c2.contains(point))
     {
         double th = (point - c2.center()).th().degree();
         if( (th > 0) && (th < 90) )
-            return true;
+        return true;
     }
     return false;
 }
@@ -918,13 +773,13 @@ bool CField::isInOurPenaltyArea(Vector2D point)
     {
         double th = (point - c1.center()).th().degree();
         if( (th < 0) && (th > -90) )
-            return true;
+        return true;
     }
     if (c2.contains(point))
     {
         double th = (point - c2.center()).th().degree();
         if( (th > 0) && (th < 90) )
-            return true;
+        return true;
     }
     return false;
 }
@@ -933,9 +788,9 @@ QList<Vector2D> CField::oppPAreaIntersect(Line2D line)
 {
     QList<Vector2D> results;
     results.clear();
-    Circle2D c1(fOppGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD);
-    Circle2D c2(fOppGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD);
-    Segment2D s(fOppGoal + Vector2D(-_GOAL_RAD,-_GOAL_WIDTH/4),fOppGoal + Vector2D(-_GOAL_RAD,+_GOAL_WIDTH/4));
+        Circle2D c1(fOppGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD);
+        Circle2D c2(fOppGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD);
+        Segment2D s(fOppGoal + Vector2D(-_GOAL_RAD,-_GOAL_WIDTH/4),fOppGoal + Vector2D(-_GOAL_RAD,+_GOAL_WIDTH/4));
     draw(c1,270,360,"blue",false);
     draw(c2,180,270,"blue",false);
     draw(s,"blue");
@@ -1010,9 +865,9 @@ QList<Vector2D> CField::oppPAreaIntersect(Segment2D segment)
 {
     QList<Vector2D> results;
     results.clear();
-    Circle2D c1(fOppGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD);
-    Circle2D c2(fOppGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD);
-    Segment2D s(fOppGoal + Vector2D(-_GOAL_RAD,-_GOAL_WIDTH/4),fOppGoal + Vector2D(-_GOAL_RAD,+_GOAL_WIDTH/4));
+        Circle2D c1(fOppGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD);
+        Circle2D c2(fOppGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD);
+        Segment2D s(fOppGoal + Vector2D(-_GOAL_RAD,-_GOAL_WIDTH/4),fOppGoal + Vector2D(-_GOAL_RAD,+_GOAL_WIDTH/4));
     draw(c1,270,360,"blue",false);
     draw(c2,180,270,"blue",false);
     draw(s,"blue");
@@ -1085,9 +940,9 @@ QList<Vector2D> CField::oppPAreaIntersect(Circle2D circle)
 {
     QList<Vector2D> results;
     results.clear();
-    Circle2D c1(fOppGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD);
-    Circle2D c2(fOppGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD);
-    Segment2D s(fOppGoal + Vector2D(-_GOAL_RAD,-_GOAL_WIDTH/4),fOppGoal + Vector2D(-_GOAL_RAD,+_GOAL_WIDTH/4));
+        Circle2D c1(fOppGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD);
+        Circle2D c2(fOppGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD);
+        Segment2D s(fOppGoal + Vector2D(-_GOAL_RAD,-_GOAL_WIDTH/4),fOppGoal + Vector2D(-_GOAL_RAD,+_GOAL_WIDTH/4));
     draw(c1,270,360,"blue",false);
     draw(c2,180,270,"blue",false);
     draw(s,"blue");
@@ -1163,12 +1018,12 @@ QList<Vector2D> CField::oppPAreaIntersect(Circle2D circle)
 
 bool CField::isInOppPenaltyArea(Vector2D point)
 {
-    Circle2D c1(fOppGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD);
-    Circle2D c2(fOppGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD);
-    Rect2D r(fOppGoal + Vector2D(-0,-_GOAL_WIDTH/4),fOppGoal + Vector2D(-_GOAL_RAD,+_GOAL_WIDTH/4));
-    Rect2D Back(fOppGoal + Vector2D(-0,-_GOAL_WIDTH/2) + Vector2D(-0,-0.75),fOppGoal + Vector2D(0.05,+_GOAL_WIDTH/2)+Vector2D(-0,+0.75));
-    draw(c1,270,360,"blue",false);
-    draw(c2,180,270,"blue",false);
+	Circle2D c1(fOppGoal + Vector2D(0,-_GOAL_WIDTH/4),_GOAL_RAD);
+	Circle2D c2(fOppGoal + Vector2D(0,+_GOAL_WIDTH/4),_GOAL_RAD);
+        Rect2D r(fOppGoal + Vector2D(-0,-_GOAL_WIDTH/4),fOppGoal + Vector2D(-_GOAL_RAD,+_GOAL_WIDTH/4));
+        Rect2D Back(fOppGoal + Vector2D(-0,-_GOAL_WIDTH/2) + Vector2D(-0,-0.75),fOppGoal + Vector2D(0.05,+_GOAL_WIDTH/2)+Vector2D(-0,+0.75));
+        draw(c1,270,360,"blue",false);
+	draw(c2,180,270,"blue",false);
     draw(r,"blue");
 
     draw(Back,"red");
@@ -1178,13 +1033,13 @@ bool CField::isInOppPenaltyArea(Vector2D point)
     {
         double th = (point - c1.center()).th().degree();
         if( (th < -90) && (th > -180) )
-            return true;
+        return true;
     }
     if (c2.contains(point))
     {
         double th = (point - c2.center()).th().degree();
         if( (th > 90) && (th < 180) )
-            return true;
+        return true;
     }
     if (Back.contains(point))
         return true;
@@ -1196,7 +1051,7 @@ Rect2D   CField::getRegion(Region region, double k)
     Rect2D tmp;
     k *= 0.5;
     double d = 0.33;
-    switch (region)
+    switch (region)            
     {
     case LargeOppCornerTop   : return Rect2D(Vector2D( _FIELD_WIDTH*k, _FIELD_HEIGHT*0.5)*2.0, Vector2D( _FIELD_WIDTH*0.5, _GOAL_WIDTH*0.5 + d)*2.0);
     case LargeOppCornerBottom: return Rect2D(Vector2D( _FIELD_WIDTH*k,-_FIELD_HEIGHT*0.5)*2.0, Vector2D( _FIELD_WIDTH*0.5,-_GOAL_WIDTH*0.5 - d)*2.0);
@@ -1204,126 +1059,126 @@ Rect2D   CField::getRegion(Region region, double k)
     case LargeOppCornerTopLeft    : tmp = getRegion(LargeOppCornerTop);tmp.setLength(tmp.size().length()*0.5);return tmp;
     case LargeOppCornerBottomRight: tmp = getRegion(LargeOppCornerBottom);tmp.setLength(tmp.size().length()*0.5);tmp.assign(tmp.topRight(), tmp.size());return tmp;
     case LargeOppCornerTopRight   : tmp = getRegion(LargeOppCornerTop);tmp.setLength(tmp.size().length()*0.5);tmp.assign(tmp.topRight(), tmp.size());return tmp;
-    case OppCornerTop   : return Rect2D(Vector2D( _FIELD_WIDTH*k, _FIELD_HEIGHT*0.5), Vector2D( _FIELD_WIDTH*0.5, _GOAL_WIDTH*0.5 + d));
-    case OppCornerBottom: return Rect2D(Vector2D( _FIELD_WIDTH*k,-_FIELD_HEIGHT*0.5), Vector2D( _FIELD_WIDTH*0.5,-_GOAL_WIDTH*0.5 - d));
-    case OurCornerBottom: return Rect2D(Vector2D(-_FIELD_WIDTH*k,-_FIELD_HEIGHT*0.5), Vector2D(-_FIELD_WIDTH*0.5,-_GOAL_WIDTH*0.5 - d));
-    case OurCornerTop   : return Rect2D(Vector2D(-_FIELD_WIDTH*k, _FIELD_HEIGHT*0.5), Vector2D(-_FIELD_WIDTH*0.5, _GOAL_WIDTH*0.5 + d));
-    case MidFieldTop    : return Rect2D(Vector2D(-_FIELD_WIDTH*k, _FIELD_HEIGHT*0.5), Vector2D(+_FIELD_WIDTH*k, _GOAL_WIDTH*0.5 + d));
-    case MidFieldBottom : return Rect2D(Vector2D(+_FIELD_WIDTH*k,-_FIELD_HEIGHT*0.5), Vector2D(-_FIELD_WIDTH*k,-_GOAL_WIDTH*0.5 - d));
-    case FrontGoalOpp   : return Rect2D(Vector2D(+_FIELD_WIDTH*k,+_GOAL_WIDTH*0.5 + d), Vector2D(_FIELD_WIDTH*0.5-0.5,-_GOAL_WIDTH*0.5 - d));
-    case FrontGoalOur   : return Rect2D(Vector2D(-_FIELD_WIDTH*0.5+1.5, +_GOAL_WIDTH*0.5 + d), Vector2D(-_FIELD_WIDTH*0.5+2.5,-_GOAL_WIDTH*0.5 - d));
-    case Center         : return Rect2D(Vector2D(-_FIELD_WIDTH*k, +_GOAL_WIDTH*0.5 + d), Vector2D(+_FIELD_WIDTH*k,-_GOAL_WIDTH*0.5 - d));
+        case OppCornerTop   : return Rect2D(Vector2D( _FIELD_WIDTH*k, _FIELD_HEIGHT*0.5), Vector2D( _FIELD_WIDTH*0.5, _GOAL_WIDTH*0.5 + d));
+        case OppCornerBottom: return Rect2D(Vector2D( _FIELD_WIDTH*k,-_FIELD_HEIGHT*0.5), Vector2D( _FIELD_WIDTH*0.5,-_GOAL_WIDTH*0.5 - d));
+        case OurCornerBottom: return Rect2D(Vector2D(-_FIELD_WIDTH*k,-_FIELD_HEIGHT*0.5), Vector2D(-_FIELD_WIDTH*0.5,-_GOAL_WIDTH*0.5 - d));
+        case OurCornerTop   : return Rect2D(Vector2D(-_FIELD_WIDTH*k, _FIELD_HEIGHT*0.5), Vector2D(-_FIELD_WIDTH*0.5, _GOAL_WIDTH*0.5 + d));
+        case MidFieldTop    : return Rect2D(Vector2D(-_FIELD_WIDTH*k, _FIELD_HEIGHT*0.5), Vector2D(+_FIELD_WIDTH*k, _GOAL_WIDTH*0.5 + d));
+        case MidFieldBottom : return Rect2D(Vector2D(+_FIELD_WIDTH*k,-_FIELD_HEIGHT*0.5), Vector2D(-_FIELD_WIDTH*k,-_GOAL_WIDTH*0.5 - d));
+        case FrontGoalOpp   : return Rect2D(Vector2D(+_FIELD_WIDTH*k,+_GOAL_WIDTH*0.5 + d), Vector2D(_FIELD_WIDTH*0.5-0.5,-_GOAL_WIDTH*0.5 - d));
+        case FrontGoalOur   : return Rect2D(Vector2D(-_FIELD_WIDTH*0.5+1.5, +_GOAL_WIDTH*0.5 + d), Vector2D(-_FIELD_WIDTH*0.5+2.5,-_GOAL_WIDTH*0.5 - d));
+        case Center         : return Rect2D(Vector2D(-_FIELD_WIDTH*k, +_GOAL_WIDTH*0.5 + d), Vector2D(+_FIELD_WIDTH*k,-_GOAL_WIDTH*0.5 - d));
     case BigCenter      : return Rect2D(Vector2D(-1.5,-1.5), Vector2D(1.5, 1.5));
-    case OurPenalty     : return fOurPenaltyRect;
-    case OppPenalty     : return fOppPenaltyRect;
-    case OurField       : return Rect2D(Vector2D(-_FIELD_WIDTH*0.5, _FIELD_HEIGHT*0.5), Vector2D(0.0,-_FIELD_HEIGHT*0.5));
-    case OppField       : return Rect2D(Vector2D(0.0, _FIELD_HEIGHT*0.5), Vector2D(_FIELD_WIDTH*0.5,-_FIELD_HEIGHT*0.5));
-    case OppCornerBottomLeft : tmp = getRegion(OppCornerBottom);tmp.setLength(tmp.size().length()*0.5);return tmp;
-    case OppCornerTopLeft    : tmp = getRegion(OppCornerTop);tmp.setLength(tmp.size().length()*0.5);return tmp;
-    case OppCornerBottomRight: tmp = getRegion(OppCornerBottom);tmp.setLength(tmp.size().length()*0.5);tmp.assign(tmp.topRight(), tmp.size());return tmp;
-    case OppCornerTopRight   : tmp = getRegion(OppCornerTop);tmp.setLength(tmp.size().length()*0.5);tmp.assign(tmp.topRight(), tmp.size());return tmp;
-    case OppCornerPointTop    : return Rect2D(Vector2D(oppCornerL().x-0.45, oppCornerL().y - 0.45) , oppCornerL());
-    case OppCornerPointBottom: return Rect2D(Vector2D(oppCornerR().x-0.45, oppCornerR().y + 0.45) , oppCornerR());
-    case OurMidFieldTop      : tmp = getRegion(MidFieldTop);tmp.setLength(tmp.size().length()*0.5);return tmp;
-    case OurMidFieldBottom   : tmp = getRegion(MidFieldBottom);tmp.setLength(tmp.size().length()*0.5);return tmp;
-    case OppMidFieldTop      : tmp = getRegion(MidFieldTop);tmp.setLength(tmp.size().length()*0.5);tmp.assign(tmp.topRight(), tmp.size());return tmp;
-    case OppMidFieldBottom   : tmp = getRegion(MidFieldBottom);tmp.setLength(tmp.size().length()*0.5);tmp.assign(tmp.topRight(), tmp.size());return tmp;
-    case OppFieldBottom      : return Rect2D(Vector2D(0.0, 0.0), Vector2D(_FIELD_WIDTH*0.5,-_FIELD_HEIGHT*0.5));
-    case OppFieldTop         : return Rect2D(Vector2D(0.0, _FIELD_HEIGHT*0.5), Vector2D(_FIELD_WIDTH*0.5,0.0));
-    case OurFieldBottom      : return Rect2D(Vector2D(-_FIELD_WIDTH*0.5, 0.0), Vector2D(0.0,-_FIELD_HEIGHT*0.5));
-    case OurFieldTop         : return Rect2D(Vector2D(-_FIELD_WIDTH*0.5, _FIELD_HEIGHT*0.5), Vector2D(0.0,0.0));
-    case OurMidFieldTopMost    : tmp = getRegion(MidFieldTop);tmp.setLength(tmp.size().length()*0.5);tmp.setWidth(tmp.size().width()*0.5);tmp.assign(tmp.topLeft(), tmp.size());tmp.setTopLeft(tmp.topLeft()+Vector2D(-0.3,0.0));return tmp;
-    case OurMidFieldBottomMost : tmp = getRegion(MidFieldBottom);tmp.setLength(tmp.size().length()*0.5);tmp.setWidth(tmp.size().width()*0.5);tmp.assign(tmp.bottomLeft(), tmp.size());tmp.setTopLeft(tmp.topLeft()+Vector2D(-0.3,0.0));return tmp;
-    case Field1stQuarter     : return Rect2D(Vector2D(-_FIELD_WIDTH*0.5, _FIELD_HEIGHT*0.5), Vector2D(-_FIELD_WIDTH*0.25,-_FIELD_HEIGHT*0.5));
-    case Field2ndQuarter     : return Rect2D(Vector2D(-_FIELD_WIDTH*0.25, _FIELD_HEIGHT*0.5), Vector2D(0.0,-_FIELD_HEIGHT*0.5));
-    case Field3rdQuarter     : return Rect2D(Vector2D(0.0, _FIELD_HEIGHT*0.5), Vector2D(_FIELD_WIDTH*0.25,-_FIELD_HEIGHT*0.5));
-    case Field4thQuarter     : return Rect2D(Vector2D(_FIELD_WIDTH*0.25, _FIELD_HEIGHT*0.5), Vector2D(_FIELD_WIDTH*0.5,-_FIELD_HEIGHT*0.5));
-    case OurMidFieldTopWing  : return Rect2D(Vector2D(-0.2, _FIELD_HEIGHT*0.5), Vector2D(-0.1,1.4));
-    case OurMidFieldBottomWing  : return Rect2D(Vector2D(-0.2, -_FIELD_HEIGHT*0.5), Vector2D(-0.1,-1.4));
-    case OurCornerBottomLeft : tmp = getRegion(OurCornerBottom);tmp.setLength(tmp.size().length()*0.5);return tmp;
-    case OurCornerTopLeft    : tmp = getRegion(OurCornerTop);tmp.setLength(tmp.size().length()*0.5);return tmp;
-    case OurCornerBottomRight: tmp = getRegion(OurCornerBottom);tmp.setLength(tmp.size().length()*0.5);tmp.assign(tmp.topRight(), tmp.size());return tmp;
-    case OurCornerTopRight   : tmp = getRegion(OurCornerTop);tmp.setLength(tmp.size().length()*0.5);tmp.assign(tmp.topRight(), tmp.size());return tmp;
-    case OurCornerPointTop    : return Rect2D(ourCornerL() , Vector2D(ourCornerL().x+0.45, ourCornerL().y - 0.45));
-    case OurCornerPointBottom: return Rect2D(Vector2D(ourCornerR().x, ourCornerR().y + 0.45) , Vector2D(ourCornerR().x+0.45, ourCornerR().y));
+        case OurPenalty     : return fOurPenaltyRect;
+        case OppPenalty     : return fOppPenaltyRect;
+        case OurField       : return Rect2D(Vector2D(-_FIELD_WIDTH*0.5, _FIELD_HEIGHT*0.5), Vector2D(0.0,-_FIELD_HEIGHT*0.5));
+        case OppField       : return Rect2D(Vector2D(0.0, _FIELD_HEIGHT*0.5), Vector2D(_FIELD_WIDTH*0.5,-_FIELD_HEIGHT*0.5));
+        case OppCornerBottomLeft : tmp = getRegion(OppCornerBottom);tmp.setLength(tmp.size().length()*0.5);return tmp;
+        case OppCornerTopLeft    : tmp = getRegion(OppCornerTop);tmp.setLength(tmp.size().length()*0.5);return tmp;
+        case OppCornerBottomRight: tmp = getRegion(OppCornerBottom);tmp.setLength(tmp.size().length()*0.5);tmp.assign(tmp.topRight(), tmp.size());return tmp;
+        case OppCornerTopRight   : tmp = getRegion(OppCornerTop);tmp.setLength(tmp.size().length()*0.5);tmp.assign(tmp.topRight(), tmp.size());return tmp;
+        case OppCornerPointTop    : return Rect2D(Vector2D(oppCornerL().x-0.45, oppCornerL().y - 0.45) , oppCornerL());
+        case OppCornerPointBottom: return Rect2D(Vector2D(oppCornerR().x-0.45, oppCornerR().y + 0.45) , oppCornerR());
+        case OurMidFieldTop      : tmp = getRegion(MidFieldTop);tmp.setLength(tmp.size().length()*0.5);return tmp;
+        case OurMidFieldBottom   : tmp = getRegion(MidFieldBottom);tmp.setLength(tmp.size().length()*0.5);return tmp;
+        case OppMidFieldTop      : tmp = getRegion(MidFieldTop);tmp.setLength(tmp.size().length()*0.5);tmp.assign(tmp.topRight(), tmp.size());return tmp;
+        case OppMidFieldBottom   : tmp = getRegion(MidFieldBottom);tmp.setLength(tmp.size().length()*0.5);tmp.assign(tmp.topRight(), tmp.size());return tmp;
+        case OppFieldBottom      : return Rect2D(Vector2D(0.0, 0.0), Vector2D(_FIELD_WIDTH*0.5,-_FIELD_HEIGHT*0.5));
+        case OppFieldTop         : return Rect2D(Vector2D(0.0, _FIELD_HEIGHT*0.5), Vector2D(_FIELD_WIDTH*0.5,0.0));
+        case OurFieldBottom      : return Rect2D(Vector2D(-_FIELD_WIDTH*0.5, 0.0), Vector2D(0.0,-_FIELD_HEIGHT*0.5));
+        case OurFieldTop         : return Rect2D(Vector2D(-_FIELD_WIDTH*0.5, _FIELD_HEIGHT*0.5), Vector2D(0.0,0.0));
+        case OurMidFieldTopMost    : tmp = getRegion(MidFieldTop);tmp.setLength(tmp.size().length()*0.5);tmp.setWidth(tmp.size().width()*0.5);tmp.assign(tmp.topLeft(), tmp.size());tmp.setTopLeft(tmp.topLeft()+Vector2D(-0.3,0.0));return tmp;
+        case OurMidFieldBottomMost : tmp = getRegion(MidFieldBottom);tmp.setLength(tmp.size().length()*0.5);tmp.setWidth(tmp.size().width()*0.5);tmp.assign(tmp.bottomLeft(), tmp.size());tmp.setTopLeft(tmp.topLeft()+Vector2D(-0.3,0.0));return tmp;
+        case Field1stQuarter     : return Rect2D(Vector2D(-_FIELD_WIDTH*0.5, _FIELD_HEIGHT*0.5), Vector2D(-_FIELD_WIDTH*0.25,-_FIELD_HEIGHT*0.5));
+        case Field2ndQuarter     : return Rect2D(Vector2D(-_FIELD_WIDTH*0.25, _FIELD_HEIGHT*0.5), Vector2D(0.0,-_FIELD_HEIGHT*0.5));
+        case Field3rdQuarter     : return Rect2D(Vector2D(0.0, _FIELD_HEIGHT*0.5), Vector2D(_FIELD_WIDTH*0.25,-_FIELD_HEIGHT*0.5));
+        case Field4thQuarter     : return Rect2D(Vector2D(_FIELD_WIDTH*0.25, _FIELD_HEIGHT*0.5), Vector2D(_FIELD_WIDTH*0.5,-_FIELD_HEIGHT*0.5));
+        case OurMidFieldTopWing  : return Rect2D(Vector2D(-0.2, _FIELD_HEIGHT*0.5), Vector2D(-0.1,1.4));
+        case OurMidFieldBottomWing  : return Rect2D(Vector2D(-0.2, -_FIELD_HEIGHT*0.5), Vector2D(-0.1,-1.4));
+        case OurCornerBottomLeft : tmp = getRegion(OurCornerBottom);tmp.setLength(tmp.size().length()*0.5);return tmp;
+        case OurCornerTopLeft    : tmp = getRegion(OurCornerTop);tmp.setLength(tmp.size().length()*0.5);return tmp;
+        case OurCornerBottomRight: tmp = getRegion(OurCornerBottom);tmp.setLength(tmp.size().length()*0.5);tmp.assign(tmp.topRight(), tmp.size());return tmp;
+        case OurCornerTopRight   : tmp = getRegion(OurCornerTop);tmp.setLength(tmp.size().length()*0.5);tmp.assign(tmp.topRight(), tmp.size());return tmp;
+		case OurCornerPointTop    : return Rect2D(ourCornerL() , Vector2D(ourCornerL().x+0.45, ourCornerL().y - 0.45));
+		case OurCornerPointBottom: return Rect2D(Vector2D(ourCornerR().x, ourCornerR().y + 0.45) , Vector2D(ourCornerR().x+0.45, ourCornerR().y));
 
 
-        // For Mani
-    case OurDeffenseOneThird : return Rect2D(Vector2D( (-_FIELD_WIDTH/2.0)-0.2 , (-_FIELD_HEIGHT/2.0)-0.2), Vector2D( (-_FIELD_WIDTH/2.0)+(_FIELD_WIDTH/3.0) , (_FIELD_HEIGHT/2.0)+0.2));
-    case OurAttackOneThird   : return Rect2D(Vector2D( (_FIELD_WIDTH/2.0)+(-_FIELD_WIDTH/3.0) , (-_FIELD_HEIGHT/2.0)-0.2), Vector2D( (_FIELD_WIDTH/2.0)+0.2 , (_FIELD_HEIGHT/2.0)+0.2));
-    case OurMidOneThird      : return Rect2D(Vector2D( (-_FIELD_WIDTH/2.0)+(_FIELD_WIDTH/3.0) , (-_FIELD_HEIGHT/2.0)-0.2) , Vector2D( (_FIELD_WIDTH/2.0)+(-_FIELD_WIDTH/3.0) , (_FIELD_HEIGHT/2.0)+0.2));
-    case OppMidField         : return Rect2D(Vector2D(0, -_GOAL_WIDTH*0.5 - d), Vector2D(+_FIELD_WIDTH*k, _GOAL_WIDTH*0.5 + d));
-    case OppCornerLineTop    : return Rect2D(Vector2D(_FIELD_WIDTH/2.0 - 0.55, 1.2), Vector2D(_FIELD_WIDTH/2.0 - 0.4, 0.95));
-    case OppCornerLineBottom : return Rect2D(Vector2D(_FIELD_WIDTH/2.0 - 0.55, -0.95), Vector2D(_FIELD_WIDTH/2.0 - 0.4, -1.2));
-    case FieldGrid1Top       : return Rect2D(Vector2D( -1.5, _FIELD_HEIGHT/2.0), Vector2D( -0.75, 0.5));
-    case FieldGrid1Center    : return Rect2D(Vector2D( -1.5, 0.5), Vector2D( -0.75, -0.5));
-    case FieldGrid1Bottom    : return Rect2D(Vector2D( -1.5, -0.5), Vector2D( -0.75, -_FIELD_HEIGHT/2.0));
-    case FieldGrid2Top       : return Rect2D(Vector2D( -0.75, _FIELD_HEIGHT/2.0), Vector2D( 0.0, 0.5));
-    case FieldGrid2Center    : return Rect2D(Vector2D( -0.75, 0.5), Vector2D( 0.0, -0.5));
-    case FieldGrid2Bottom    : return Rect2D(Vector2D( -0.75, -0.5), Vector2D( 0.0, -_FIELD_HEIGHT/2.0));
-    case FieldGrid3Top       : return Rect2D(Vector2D( 0.0, _FIELD_HEIGHT/2.0), Vector2D( 0.75, 0.5));
-    case FieldGrid3Center    : return Rect2D(Vector2D( 0.0, 0.5), Vector2D( 0.75, -0.5));
-    case FieldGrid3Bottom    : return Rect2D(Vector2D( 0.0, -0.5), Vector2D( 0.75, -_FIELD_HEIGHT/2.0));
-    case FieldGrid4Top       : return Rect2D(Vector2D( 0.75, _FIELD_HEIGHT/2.0), Vector2D( 1.5, 0.5));
-    case FieldGrid4Center    : return Rect2D(Vector2D( 0.75, 0.5), Vector2D( 1.5, -0.5));
-    case FieldGrid4Bottom    : return Rect2D(Vector2D( 0.75, -0.5), Vector2D( 1.5, -_FIELD_HEIGHT/2.0));
-    case FieldGrid5Top       : return Rect2D(Vector2D( 1.5, _FIELD_HEIGHT/2.0), Vector2D( 2.25, 0.5));
-    case FieldGrid5Center    : return Rect2D(Vector2D( 1.5, 0.5), Vector2D( 2.25, -0.5));
-    case FieldGrid5Bottom    : return Rect2D(Vector2D( 1.5, -0.5), Vector2D( 2.25, -_FIELD_HEIGHT/2.0));
-    case TheirPenaltyTop     : return Rect2D(Vector2D(2.38349,1.33186),Vector2D(2.71047,1.06512));
-    case TheirPenaltyBottom  : return Rect2D(Vector2D(2.38349,-1.33186),Vector2D(2.71047,-1.06512));
-    case AttackRecCornerTopB : return Rect2D(Vector2D(2.2,wm->field->oppCornerL().y),Vector2D(wm->field->oppGoal().x,0.35));
-    case AttackRecCornerTopP1 : return Rect2D(Vector2D(1.3,-0.2),Vector2D(2.9,-1.7));
-    case AttackRecCornerTopP2 : return Rect2D(Vector2D(0,1.8),Vector2D(2,0));
-    case AttackRecCornerBottomB : return Rect2D(Vector2D(2.2,-0.35),wm->field->oppCornerR());
-    case AttackRecCornerBottomP1 : return Rect2D(Vector2D(1.3,1.9),Vector2D(2.7,0.2));
-    case AttackRecCornerBottomp2 : return Rect2D(Vector2D(0,0),Vector2D(2,-1.8));
-    case AttackRecMidTopB   : return Rect2D(Vector2D(0.9,wm->field->oppCornerL().y),Vector2D(2.2,0));
-    case AttackRecMidTopP1  : return Rect2D(Vector2D(1.8,0),Vector2D(wm->field->oppGoal().x-0.1, wm->field->oppCornerR().y+0.45));
-    case AttackRecMidTopP2  : return Rect2D(Vector2D(0,-0.3),Vector2D(1.5,-1.8));
-    case AttackRecMidBottomB    : return Rect2D(Vector2D(0.9,0),Vector2D(2.2,wm->field->oppCornerR().y));
-    case AttackRecMidBottomP1   : return Rect2D(Vector2D(1.8,wm->field->oppCornerL().y-0.45),Vector2D(wm->field->oppGoal().x-0.1, 0));
-    case AttackRecMidBottomp2   : return Rect2D(Vector2D(0,1.8),Vector2D(1.5,0.3));
-    case TC2012Top1 : return Rect2D(Vector2D(-3 , 2),Vector2D(-1.8 , 0.8));
-    case TC2012Top2 : return Rect2D(Vector2D(-1.8 , 2),Vector2D(-0.6 , 0.8));
-    case TC2012Top3 : return Rect2D(Vector2D(-0.6 , 2),Vector2D(0.6 , 0.8));
-    case TC2012Top4 : return Rect2D(Vector2D(0.6 , 2),Vector2D(2.5 , 0.8));
-    case TC2012Bottom1 : return Rect2D(Vector2D(-3 , -0.8),Vector2D(-1.8 , -2));
-    case TC2012Bottom2 : return Rect2D(Vector2D(-1.8 , -0.8),Vector2D(-0.6 , -2));
-    case TC2012Bottom3 : return Rect2D(Vector2D(-0.6 , -0.8),Vector2D(0.6 , -2));
-    case TC2012Bottom4 : return Rect2D(Vector2D(0.6 , -0.8),Vector2D(2.5 , -2));
-    case TC2012Rect1 : return Rect2D(Vector2D(0,2) , Vector2D(1.5,0));
-    case TC2012Rect2 : return Rect2D(Vector2D(3,2) , Vector2D(1.5,0));
-    case TC2012Rect3 : return Rect2D(Vector2D(1.5,0) , Vector2D(0,-2));
-    case TC2012Rect4 : return Rect2D(Vector2D(1.5,0) , Vector2D(3,-2));
-    }
+            // For Mani
+        case OurDeffenseOneThird : return Rect2D(Vector2D( (-_FIELD_WIDTH/2.0)-0.2 , (-_FIELD_HEIGHT/2.0)-0.2), Vector2D( (-_FIELD_WIDTH/2.0)+(_FIELD_WIDTH/3.0) , (_FIELD_HEIGHT/2.0)+0.2));
+        case OurAttackOneThird   : return Rect2D(Vector2D( (_FIELD_WIDTH/2.0)+(-_FIELD_WIDTH/3.0) , (-_FIELD_HEIGHT/2.0)-0.2), Vector2D( (_FIELD_WIDTH/2.0)+0.2 , (_FIELD_HEIGHT/2.0)+0.2));
+        case OurMidOneThird      : return Rect2D(Vector2D( (-_FIELD_WIDTH/2.0)+(_FIELD_WIDTH/3.0) , (-_FIELD_HEIGHT/2.0)-0.2) , Vector2D( (_FIELD_WIDTH/2.0)+(-_FIELD_WIDTH/3.0) , (_FIELD_HEIGHT/2.0)+0.2));
+        case OppMidField         : return Rect2D(Vector2D(0, -_GOAL_WIDTH*0.5 - d), Vector2D(+_FIELD_WIDTH*k, _GOAL_WIDTH*0.5 + d));
+        case OppCornerLineTop    : return Rect2D(Vector2D(_FIELD_WIDTH/2.0 - 0.55, 1.2), Vector2D(_FIELD_WIDTH/2.0 - 0.4, 0.95));
+        case OppCornerLineBottom : return Rect2D(Vector2D(_FIELD_WIDTH/2.0 - 0.55, -0.95), Vector2D(_FIELD_WIDTH/2.0 - 0.4, -1.2));
+        case FieldGrid1Top       : return Rect2D(Vector2D( -1.5, _FIELD_HEIGHT/2.0), Vector2D( -0.75, 0.5));
+        case FieldGrid1Center    : return Rect2D(Vector2D( -1.5, 0.5), Vector2D( -0.75, -0.5));
+        case FieldGrid1Bottom    : return Rect2D(Vector2D( -1.5, -0.5), Vector2D( -0.75, -_FIELD_HEIGHT/2.0));
+        case FieldGrid2Top       : return Rect2D(Vector2D( -0.75, _FIELD_HEIGHT/2.0), Vector2D( 0.0, 0.5));
+        case FieldGrid2Center    : return Rect2D(Vector2D( -0.75, 0.5), Vector2D( 0.0, -0.5));
+        case FieldGrid2Bottom    : return Rect2D(Vector2D( -0.75, -0.5), Vector2D( 0.0, -_FIELD_HEIGHT/2.0));
+        case FieldGrid3Top       : return Rect2D(Vector2D( 0.0, _FIELD_HEIGHT/2.0), Vector2D( 0.75, 0.5));
+        case FieldGrid3Center    : return Rect2D(Vector2D( 0.0, 0.5), Vector2D( 0.75, -0.5));
+        case FieldGrid3Bottom    : return Rect2D(Vector2D( 0.0, -0.5), Vector2D( 0.75, -_FIELD_HEIGHT/2.0));
+        case FieldGrid4Top       : return Rect2D(Vector2D( 0.75, _FIELD_HEIGHT/2.0), Vector2D( 1.5, 0.5));
+        case FieldGrid4Center    : return Rect2D(Vector2D( 0.75, 0.5), Vector2D( 1.5, -0.5));
+        case FieldGrid4Bottom    : return Rect2D(Vector2D( 0.75, -0.5), Vector2D( 1.5, -_FIELD_HEIGHT/2.0));
+        case FieldGrid5Top       : return Rect2D(Vector2D( 1.5, _FIELD_HEIGHT/2.0), Vector2D( 2.25, 0.5));
+        case FieldGrid5Center    : return Rect2D(Vector2D( 1.5, 0.5), Vector2D( 2.25, -0.5));
+        case FieldGrid5Bottom    : return Rect2D(Vector2D( 1.5, -0.5), Vector2D( 2.25, -_FIELD_HEIGHT/2.0));
+        case TheirPenaltyTop     : return Rect2D(Vector2D(2.38349,1.33186),Vector2D(2.71047,1.06512));
+        case TheirPenaltyBottom  : return Rect2D(Vector2D(2.38349,-1.33186),Vector2D(2.71047,-1.06512));
+        case AttackRecCornerTopB : return Rect2D(Vector2D(2.2,wm->field->oppCornerL().y),Vector2D(wm->field->oppGoal().x,0.35));
+		case AttackRecCornerTopP1 : return Rect2D(Vector2D(1.3,-0.2),Vector2D(2.9,-1.7));
+        case AttackRecCornerTopP2 : return Rect2D(Vector2D(0,1.8),Vector2D(2,0));
+        case AttackRecCornerBottomB : return Rect2D(Vector2D(2.2,-0.35),wm->field->oppCornerR());
+		case AttackRecCornerBottomP1 : return Rect2D(Vector2D(1.3,1.9),Vector2D(2.7,0.2));
+        case AttackRecCornerBottomp2 : return Rect2D(Vector2D(0,0),Vector2D(2,-1.8));
+        case AttackRecMidTopB   : return Rect2D(Vector2D(0.9,wm->field->oppCornerL().y),Vector2D(2.2,0));
+        case AttackRecMidTopP1  : return Rect2D(Vector2D(1.8,0),Vector2D(wm->field->oppGoal().x-0.1, wm->field->oppCornerR().y+0.45));
+        case AttackRecMidTopP2  : return Rect2D(Vector2D(0,-0.3),Vector2D(1.5,-1.8));
+        case AttackRecMidBottomB    : return Rect2D(Vector2D(0.9,0),Vector2D(2.2,wm->field->oppCornerR().y));
+        case AttackRecMidBottomP1   : return Rect2D(Vector2D(1.8,wm->field->oppCornerL().y-0.45),Vector2D(wm->field->oppGoal().x-0.1, 0));
+        case AttackRecMidBottomp2   : return Rect2D(Vector2D(0,1.8),Vector2D(1.5,0.3));
+        case TC2012Top1 : return Rect2D(Vector2D(-3 , 2),Vector2D(-1.8 , 0.8));
+        case TC2012Top2 : return Rect2D(Vector2D(-1.8 , 2),Vector2D(-0.6 , 0.8));
+        case TC2012Top3 : return Rect2D(Vector2D(-0.6 , 2),Vector2D(0.6 , 0.8));
+        case TC2012Top4 : return Rect2D(Vector2D(0.6 , 2),Vector2D(2.5 , 0.8));
+        case TC2012Bottom1 : return Rect2D(Vector2D(-3 , -0.8),Vector2D(-1.8 , -2));
+        case TC2012Bottom2 : return Rect2D(Vector2D(-1.8 , -0.8),Vector2D(-0.6 , -2));
+        case TC2012Bottom3 : return Rect2D(Vector2D(-0.6 , -0.8),Vector2D(0.6 , -2));
+        case TC2012Bottom4 : return Rect2D(Vector2D(0.6 , -0.8),Vector2D(2.5 , -2));
+		case TC2012Rect1 : return Rect2D(Vector2D(0,2) , Vector2D(1.5,0));
+		case TC2012Rect2 : return Rect2D(Vector2D(3,2) , Vector2D(1.5,0));
+		case TC2012Rect3 : return Rect2D(Vector2D(1.5,0) , Vector2D(0,-2));
+		case TC2012Rect4 : return Rect2D(Vector2D(1.5,0) , Vector2D(3,-2));
+	}
     return Rect2D(Vector2D::INVALIDATED,Vector2D::INVALIDATED);
 }
 
 Rect2D  CField::getCircleRegion(int n, int i)
 {	
-    double theta = 45;
-    //	if (knowledge->variables.contains("circle.radius")) rad = knowledge->variables["circle.radius"].toDouble();
-    //    if (knowledge->variables.contains("circle.x")) c.x = knowledge->variables["circle.x"].toDouble();
-    //    if (knowledge->variables.contains("circle.y")) c.y = knowledge->variables["circle.y"].toDouble();
-    //    if (knowledge->variables.contains("circle.theta")) theta = knowledge->variables["circle.theta"].toDouble();
-    //    if (knowledge->variables.contains("circle.diam")) diam.x = diam.y = knowledge->variables["circle.theta"].toDouble();
-    Vector2D c(1.5, 0);
-    Vector2D diam(0.3, 0.3);
-    double rad = 1.5;
+	double theta = 45;
+//	if (knowledge->variables.contains("circle.radius")) rad = knowledge->variables["circle.radius"].toDouble();
+//    if (knowledge->variables.contains("circle.x")) c.x = knowledge->variables["circle.x"].toDouble();
+//    if (knowledge->variables.contains("circle.y")) c.y = knowledge->variables["circle.y"].toDouble();
+//    if (knowledge->variables.contains("circle.theta")) theta = knowledge->variables["circle.theta"].toDouble();
+//    if (knowledge->variables.contains("circle.diam")) diam.x = diam.y = knowledge->variables["circle.theta"].toDouble();
+	Vector2D c(1.5, 0);
+	Vector2D diam(0.3, 0.3);
+	double rad = 1.5;
     Vector2D s = c;
-    s = c + Vector2D::unitVector(i*360.0/n + theta)*rad;
+	s = c + Vector2D::unitVector(i*360.0/n + theta)*rad;
 
-    //TOF for technical challenge iranopen2012
+	//TOF for technical challenge iranopen2012
 
-    if (i==0)
-        s.assign(0.5, 1.4);
-    else if (i==1)
-        s.assign(2.4, 1.4);
-    else if (i==2)
-        s.assign(2.4, -1.4);
-    else if (i==3)
-        s.assign(0.5, -1.4);
+	if (i==0)
+		s.assign(0.5, 1.4);
+	else if (i==1)
+		s.assign(2.4, 1.4);
+	else if (i==2)
+		s.assign(2.4, -1.4);
+	else if (i==3)
+		s.assign(0.5, -1.4);
 
 
     return Rect2D(Vector2D(s-diam), Vector2D(s+diam));
@@ -1407,25 +1262,25 @@ Rect2D  CField::getRegion(QString name, double k)
     else if (name=="attrecmidbottomb") r=CField::AttackRecMidBottomB;
     else if (name=="attrecmidbottomp1") r=CField::AttackRecMidBottomP1;
     else if (name=="attrecmidbottomp2") r=CField::AttackRecMidBottomp2;
-    else if (name=="tc2012top1") r=CField::TC2012Top1;
-    else if (name=="tc2012top2") r=CField::TC2012Top2;
-    else if (name=="tc2012top3") r=CField::TC2012Top3;
-    else if (name=="tc2012top4") r=CField::TC2012Top4;
-    else if (name=="tc2012bottom1") r=CField::TC2012Bottom1;
-    else if (name=="tc2012bottom2") r=CField::TC2012Bottom2;
-    else if (name=="tc2012bottom3") r=CField::TC2012Bottom3;
-    else if (name=="tc2012bottom4") r=CField::TC2012Bottom4;
-    else if (name=="tc2012rect1") r==CField::TC2012Rect1;
-    else if (name=="tc2012rect2") r==CField::TC2012Rect2;
-    else if (name=="tc2012rect3") r==CField::TC2012Rect3;
-    else if (name=="tc2012rect4") r==CField::TC2012Rect4;
-    else if (name=="ourcornerpointtop") r=CField:: OurCornerPointTop;
-    else if (name=="ourcornerpointbottom") r=CField:: OurCornerPointBottom;
-    else if (name=="largeoppcornertopright") r=CField::LargeOppCornerTopRight;
-    else if (name=="largeoppcornertopleft") r=CField::LargeOppCornerTopLeft;
-    else if (name=="largeoppcornerbottomright") r=CField::LargeOppCornerBottomRight;
-    else if (name=="largeoppcornerbottomleft")  r=CField::LargeOppCornerBottomLeft;
-    else if (name.startsWith("circle"))
+	else if (name=="tc2012top1") r=CField::TC2012Top1;
+	else if (name=="tc2012top2") r=CField::TC2012Top2;
+	else if (name=="tc2012top3") r=CField::TC2012Top3;
+	else if (name=="tc2012top4") r=CField::TC2012Top4;
+	else if (name=="tc2012bottom1") r=CField::TC2012Bottom1;
+	else if (name=="tc2012bottom2") r=CField::TC2012Bottom2;
+	else if (name=="tc2012bottom3") r=CField::TC2012Bottom3;
+	else if (name=="tc2012bottom4") r=CField::TC2012Bottom4;
+	else if (name=="tc2012rect1") r==CField::TC2012Rect1;
+	else if (name=="tc2012rect2") r==CField::TC2012Rect2;
+	else if (name=="tc2012rect3") r==CField::TC2012Rect3;
+	else if (name=="tc2012rect4") r==CField::TC2012Rect4;
+	else if (name=="ourcornerpointtop") r=CField:: OurCornerPointTop;
+	else if (name=="ourcornerpointbottom") r=CField:: OurCornerPointBottom;
+        else if (name=="largeoppcornertopright") r=CField::LargeOppCornerTopRight;
+        else if (name=="largeoppcornertopleft") r=CField::LargeOppCornerTopLeft;
+        else if (name=="largeoppcornerbottomright") r=CField::LargeOppCornerBottomRight;
+        else if (name=="largeoppcornerbottomleft")  r=CField::LargeOppCornerBottomLeft;
+	else if (name.startsWith("circle"))
     {
         QStringList q = name.right(name.length()-6).split("_");
         if (q.length() == 2)
@@ -1457,9 +1312,9 @@ Vector2D CField::ourPAreaPerpendicularVector(double angle, Vector2D& intersectpo
     Circle2D c1(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4),0.500);
     Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4),0.500);
     Segment2D s(fOurGoal + Vector2D(+0.500,-_GOAL_WIDTH/4),fOurGoal + Vector2D(+0.500,+_GOAL_WIDTH/4));
-    //    draw(c1,0,90,"blue",false);
-    //    draw(c2,90,180,"blue",false);
-    //    draw(s,"blue");
+//    draw(c1,0,90,"blue",false);
+//    draw(c2,90,180,"blue",false);
+//    draw(s,"blue");
     int n;
     Vector2D vSol1,vSol2;
     n = c1.intersection(l,&vSol1,&vSol2);
@@ -1535,19 +1390,19 @@ Vector2D CField::ourPAreaPerpendicularVector(double angle, Vector2D& intersectpo
         }
     }
     if (k==-1)
-    {
+    {        
         intersectpoint = fOurGoal + Vector2D(1.0, 0.0)*fOurPenaltyRect.size().length();
         return Vector2D(1.0, 0.0);
     }
-    else {
+    else {        
         intersectpoint = results[k];
         if (!fieldRect().contains(p))
         {
             if (p.y < 0)
             {
-                intersectpoint = Vector2D(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4));
-                intersectpoint = (p-intersectpoint).norm() * 0.5 + intersectpoint;
-                return Vector2D(0.0, -1.0);
+               intersectpoint = Vector2D(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4));
+               intersectpoint = (p-intersectpoint).norm() * 0.5 + intersectpoint;
+               return Vector2D(0.0, -1.0);
             }
             else
             {
