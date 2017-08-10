@@ -72,7 +72,7 @@ void CRolePlayOff::update() {
         if (wm->getIsSimulMode())
             kickSkill->setKickSpeed(4);
         else
-            kickSkill->setKickSpeed(kickSpeed);
+            kickSkill->setKickSpeed(min(800,kickSpeed));
         kickSkill->setChip(chip);
         kickSkill->setAgent(agent);
         kickSkill->setDontKick(!doPass);

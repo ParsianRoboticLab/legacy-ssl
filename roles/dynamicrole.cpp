@@ -72,7 +72,7 @@ void CRoleDynamic::update() {
        if(wm->getIsSimulMode())
            shotSkill->setKickSpeed(kickSpeed / 50);
        else
-           shotSkill->setKickSpeed(max(900, kickSpeed));
+           shotSkill->setKickSpeed(kickSpeed);
        break;
    case DynamicEnums::Chip:
        shotSkill->setAgent(agent);

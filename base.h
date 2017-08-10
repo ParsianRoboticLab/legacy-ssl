@@ -210,7 +210,8 @@ struct GameStatePacket
 #define _GOAL_WIDTH             1.000
 #define _GOAL_RAD               1.000
 #define _AHZ_GOAL_RAD_FOR_MARK  1.150
-#define _AHZ_GOAL_RAD_FOR_GOALKEEPER  0.85
+#define _AHZ_GOAL_RAD_FOR_GOALKEEPER  0.95
+#define _AHZ_GOAL_RAD_FOR_GOALKEEPER_TS  0.2
 #define _GOAL_DEPTH             0.250
 #define _PENALTY_WIDTH          2.500
 #define _CENTER_CIRCLE_RAD      0.500

@@ -548,8 +548,6 @@ void DefensePlan::manToManMarkBlockShotInPlayOff(int _markAgentSize){
     bool playOn = knowledge->getGameMode() == CKnowledge::Start;
     bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick) || (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     int count;
-    QList <Vector2D> sol;
-    QList <Vector2D> tempSol;
     oppmarkedpos.clear();
     markPoses.clear();
     markRoles.clear();
@@ -720,7 +718,8 @@ void DefensePlan::setGoalKeeperState(){
                     goalKeeperOneTouch = true;
                     goalKeeperClearMode = false;
                     ballIsOutOfField = false;
-                    if(!goalLine.intersection(ballLine).valid()){
+                    predictionInClearMode = false;
+                    if(!goalLine.intersection(ballLine).valid() || wm->ball->vel.length() <= 1.3){
                         oneTouchCnt++;
                         return;
                     }
@@ -728,18 +727,30 @@ void DefensePlan::setGoalKeeperState(){
                     return;
                 }
                 else if(wm->field->AHZIsInOurPenaltyArea(wm->ball->pos)){
-                    if(ourLeftPole.contains(wm->ball->pos) || ourRightPole.contains(wm->ball->pos)){
-                        ballIsBesidePoles = true;
-                        goalKeeperOneTouch = false;
-                        goalKeeperClearMode = false;
-                        ballIsOutOfField = false;
-                        return;
+                    if(wm->ball->vel.length() <= 1){
+                        if(ourLeftPole.contains(wm->ball->pos) || ourRightPole.contains(wm->ball->pos)){
+                            ballIsBesidePoles = true;
+                            goalKeeperOneTouch = false;
+                            goalKeeperClearMode = false;
+                            ballIsOutOfField = false;
+                            predictionInClearMode = false;
+                            return;
+                        }
+                        else{
+                            ballIsBesidePoles = false;
+                            goalKeeperOneTouch = false;
+                            goalKeeperClearMode = true;
+                            ballIsOutOfField = false;
+                            predictionInClearMode = false;
+                            return;
+                        }
                     }
                     else{
-                        ballIsBesidePoles = false;
+                        goalKeeperClearMode = false;
                         goalKeeperOneTouch = false;
-                        goalKeeperClearMode = true;
+                        ballIsBesidePoles = false;
                         ballIsOutOfField = false;
+                        predictionInClearMode = true;
                         return;
                     }
                 }
@@ -748,6 +759,8 @@ void DefensePlan::setGoalKeeperState(){
                     goalKeeperOneTouch = false;
                     ballIsBesidePoles = false;
                     ballIsOutOfField = false;
+                    predictionInClearMode = false;
+                    return;
                 }
             }
         }
@@ -756,6 +769,7 @@ void DefensePlan::setGoalKeeperState(){
             goalKeeperOneTouch = false;
             goalKeeperClearMode = false;
             ballIsOutOfField = true;
+            predictionInClearMode = false;
             return;
         }
     }
@@ -788,7 +802,7 @@ void DefensePlan::setGoalKeeperTargetPoint(){
     dangerForGoalKeeperClearByOppAgents = false;
     isCrowdedInFrontOfPenaltyAreaByOppAgents = false;
     isCrowdedInFrontOfPenaltyAreaByOurAgents = false;
-    playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick || knowledge->getGameState() == CKnowledge::TheirIndirectKick;
+    playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick || knowledge->getGameState() == CKnowledge::TheirIndirectKick || knowledge->isOurNonPlayOnKick();
     playOnMode = knowledge->isStart();
     stopMode = knowledge->isStop();
     tempSol.clear();
@@ -804,6 +818,11 @@ void DefensePlan::setGoalKeeperTargetPoint(){
         Circle2D dangerCircle1 = Circle2D(Solutions[0].dist(wm->ball->pos) < Solutions[1].dist(wm->ball->pos) ? Solutions[0] : Solutions[1], 0.40);
         draw(dangerCircle , "yellow");
         draw(dangerCircle1 , "yellow");
+        debug(QString("last : %1").arg(lastTS) , D_AHZ);
+        if(lastTS != knowledge->transientFlag && !lastTS){
+            ballPosInTransientMoment = wm->ball->pos;
+        }
+
         for(int i = 0; i < wm->our.activeAgentsCount(); i++){
             if(wm->our.active(i)->id != knowledge->goalie->id()){
                 draw(wm->our.active(i)->pos + wm->our.active(i)->vel , 0 , "blue");
@@ -829,7 +848,7 @@ void DefensePlan::setGoalKeeperTargetPoint(){
             dangerForGoalKeeperClear = false;
             debug(QString("Their Indirect") , D_AHZ);
             oppPasser = wm->opp[knowledge->nearestOppToBall]->pos;
-            if(knowledge->getGameState() == CKnowledge::TheirIndirectKick){
+            if(knowledge->getGameState() == CKnowledge::TheirIndirectKick || knowledge->isOurNonPlayOnKick()){
                 goalKeeperTarget = wm->field->ourGoal() + goalKeeperTargetOffSet;
             }
             else{
@@ -841,46 +860,16 @@ void DefensePlan::setGoalKeeperTargetPoint(){
             lastStateForGoalKeeper = QString("no");
             dangerForGoalKeeperClear = false;
             debug(QString("TS Mode") , D_AHZ);
-            Line2D ballLine(wm->ball->pos , wm->ball->pos + wm->ball->vel*10);
-            //draw(ballLine);
-            tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(ballLine));
-//            if(tempSol.size()){
-//                if(tempSol.size() == 2){
-//                    tempGoalKeeperTarget = tempSol.at(0).dist(oppPasser) > tempSol.at(1).dist(oppPasser) ? tempSol.at(0) : tempSol.at(1);
-//                    if(CSkillGotoPointAvoid::timeNeeded(knowledge->goalie , tempGoalKeeperTarget , conf()->BangBang_VelMax(),ourRelax , oppRelax,0,0.2,1) <
-//                            wm->ball->vel.length() / wm->ball->pos.dist(tempGoalKeeperTarget)){
-//                        goalKeeperPredictionModeInPlayOff = true;
-//                        goalKeeperTarget = tempGoalKeeperTarget;
-//                    }
-//                }
-//                else{
-//                    goalKeeperPredictionModeInPlayOff = false;
-//                    goalKeeperTarget = knowledge->getPointInDirection(wm->field->ourGoal() , ballPrediction(true) , 0.5);
-//                    if(!wm->field->isInOurPenaltyArea(goalKeeperTarget)){
-//                        tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(Segment2D(goalKeeperTarget , wm->field->ourGoal())));
-//                        if(tempSol.size() == 1){
-//                            goalKeeperTarget = tempSol.at(0);
-//                        }
-//                        else if(tempSol.size() == 2){
-//                            goalKeeperTarget = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
-//                        }
-//                    }
-//                }
-//                draw(goalKeeperTarget);
-//            }
-//            else{
-                goalKeeperPredictionModeInPlayOff = false;
-                goalKeeperTarget = knowledge->getPointInDirection(wm->field->ourGoal() , ballPrediction(true) , 0.5);
-                if(!wm->field->isInOurPenaltyArea(goalKeeperTarget)){
-                    tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(Segment2D(goalKeeperTarget , wm->field->ourGoal())));
-                    if(tempSol.size() == 1){
-                        goalKeeperTarget = tempSol.at(0);
-                    }
-                    else if(tempSol.size() == 2){
-                        goalKeeperTarget = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
-                    }
+            goalKeeperTarget = strictFollowBall(ballPrediction(true));
+            if(!wm->field->isInOurPenaltyArea(goalKeeperTarget)){
+                tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(Line2D(goalKeeperTarget , wm->field->ourGoal())));
+                if(tempSol.size() == 1){
+                    goalKeeperTarget = tempSol.at(0);
                 }
-//            }
+                else if(tempSol.size() == 2){
+                    goalKeeperTarget = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
+                }
+            }
         }
         else if(goalKeeperOneTouch){
             lastStateForGoalKeeper = QString("no");
@@ -1013,6 +1002,9 @@ void DefensePlan::setGoalKeeperTargetPoint(){
             fieldRect.intersection(ballPrGoalLine, &solut[0], &solut[1]);
             noKickTarget = (solut[0].dist(wm->ball->pos) < solut[1].dist(wm->ball->pos)) ? solut[0] : solut[1];
         }
+        else if(predictionInClearMode){
+            goalKeeperTarget = knowledge->getPointInDirection(wm->field->ourGoal() , wm->ball->pos + wm->ball->vel * 0.5 , 0.9);
+        }
         else{
             lastStateForGoalKeeper = QString("no");
             ////////////// Danger Mode for out of the penalty area /////////////
@@ -1065,6 +1057,7 @@ void DefensePlan::setGoalKeeperTargetPoint(){
                 goalKeeperTarget = strictFollowBall(predictedBall);
             }
         }
+        lastTS = knowledge->transientFlag;
     }
 }
 
@@ -1130,7 +1123,7 @@ DefensePlan::DefensePlan()
     goalKeeperOneTouch = false;
     goalKeeperClearMode = false;
     ballIsOutOfField = false;
-
+    predictionInClearMode = false;
     ballIsBesidePoles = false;
 
     oneTouchCnt = 5;
@@ -1161,16 +1154,23 @@ DefensePlan::DefensePlan()
     secondDefenseKickLine = 0;
     goalieKickThreshold = 70;
     /////////// AHZ //////////////
+    kickOffThr = 0;
     lastMarkRoles.append(markRoles);
     goalKeeperTarget = Vector2D(0,0);
     dangerModeThresholdForClear = 0;
     dangerModeThresholdForDanger = 0;
+    lastTS = 0;
     /////////////// For Adding TS Mode in Mark ///////////////////////////////
-    xLimitForblockingPass = 0;
+    xLimitForblockingPass = 4.5;
     manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
+
     if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass){
+
         knowledge->lastStateForMark = QString("BlockPass");
         knowledge->stateForMark = QString("BlockPass");
+        ////////////// ArashZ////////////////////////////////////////////////////
+        LastBallPosPO.invalidate();
+        ////////////////////////////////////////////////////////////////////////
     }
     else{
         knowledge->lastStateForMark = QString("BlockShot");
@@ -1384,6 +1384,13 @@ void DefensePlan::execute(){
     ///// points && our agents in defense plan.
     int realDefSize = 0;
     debug(QString("defense agents size %1").arg(defenseAgents.size()), D_HAMED);
+    Vector2D fOurGoal = Vector2D(- _FIELD_WIDTH/2.0 , 0.0);
+    Circle2D c1(fOurGoal + Vector2D(0,-_GOAL_WIDTH/4),_AHZ_GOAL_RAD_FOR_GOALKEEPER_TS);
+    Circle2D c2(fOurGoal + Vector2D(0,+_GOAL_WIDTH/4),_AHZ_GOAL_RAD_FOR_GOALKEEPER_TS);
+    Segment2D s(fOurGoal + Vector2D(+_AHZ_GOAL_RAD_FOR_GOALKEEPER_TS,-_GOAL_WIDTH/4),fOurGoal + Vector2D(+_AHZ_GOAL_RAD_FOR_GOALKEEPER_TS,+_GOAL_WIDTH/4));
+    draw(c1,0,90,"blue",false);
+    draw(c2,90,180,"blue",false);
+    draw(s,"blue");
     ////////////initialize////////////////
     initVars();
     preCalculate();
@@ -1428,7 +1435,7 @@ void DefensePlan::execute(){
             if(wm->our.activeAgentsCount() < 7){
                 if(playOnMode){
                     checkDefenseExeptions();
-                    if(defExceptions.active && !knowledge->transientFlag){
+                    if(defExceptions.active ){
                         runDefenseExeptions();
                         defenseCount = defenseAgents.size() - 1;
                     }
@@ -1685,7 +1692,7 @@ void DefensePlan::penaltyMode(){
     //    if(fabs(knowledge->getAgent(goalKeeperAgent->id())->pos().y) > fabs(wm->field->ourGoalR().y))
     //        intersectionPoint.y += 1*knowledge->getAgent(goalKeeperAgent->id())->pos().dist(intersectionPoint)*knowledge->getAgent(goalKeeperAgent->id())->pos().dist(intersectionPoint)
     //                *(fabs((intersectionPoint-knowledge->getAgent(goalKeeperAgent->id())->pos()).y)/(intersectionPoint-knowledge->getAgent(goalKeeperAgent->id())->pos()).y);   // sign
-    
+
     if(intersectionPoint.valid()){
         target = intersectionPoint;
         draw(target , 0 , "red");
@@ -1857,11 +1864,15 @@ void DefensePlan::executeGoalKeeper(){
     //// function. In this function also like the other functions for goalkeeper,
     //// we have some mode for handling the goalkeeper behavior.
 
-    playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick  || knowledge->getGameState() == CKnowledge::TheirIndirectKick;
+    playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick  || knowledge->getGameState() == CKnowledge::TheirIndirectKick || knowledge->isOurNonPlayOnKick();
     playOnMode = knowledge->isStart();
     stopMode = knowledge->isStop();
     QList<Vector2D> tempSol;
     tempSol.clear();
+    ///////////////// update state for
+    if(lastTS != knowledge->transientFlag && !lastTS){
+        ballPosInTransientMoment = wm->ball->pos;
+    }
     if(goalKeeperAgent != NULL){
         debug(QString("goalKeeper clear mode : %1").arg(knowledge->goalKeeperClearMode) , D_AHZ);
         debug(QString("goalKeeper oneTouch mode : %1").arg(knowledge->goalKeeperOneTouchMode) , D_AHZ);
@@ -1891,12 +1902,7 @@ void DefensePlan::executeGoalKeeper(){
             gpa[goalKeeperAgent->id()]->setAvoidGoalPosts(true);
             goalKeeperAgent->setChip(0);
             goalKeeperAgent->setKick(0);
-            if(goalKeeperPredictionModeInPlayOff){
-                gpa[goalKeeperAgent->id()]->init(goalKeeperTarget , wm->ball->pos - goalKeeperTarget);
-            }
-            else{
-                gpa[goalKeeperAgent->id()]->init(goalKeeperTarget , ballPrediction(true) - wm->field->ourGoal());
-            }
+            gpa[goalKeeperAgent->id()]->init(goalKeeperTarget , ballPrediction(true) - wm->field->ourGoal());
             gpa[goalKeeperAgent->id()]->execute();
         }
         else if(stopMode){
@@ -1955,10 +1961,20 @@ void DefensePlan::executeGoalKeeper(){
             gpa[goalKeeperAgent->id()]->execute();
             //            }
         }
+        else if(predictionInClearMode){
+            AHZSkills = gpa[knowledge->goalie->id()];
+            debug("Prediction in clear mode." , D_AHZ, "green");
+            gpa[goalKeeperAgent->id()]->setADiveMode(false);
+            gpa[goalKeeperAgent->id()]->setSlowMode(false);
+            gpa[goalKeeperAgent->id()]->setAvoidGoalPosts(true);
+            goalKeeperAgent->setChip(0);
+            goalKeeperAgent->setKick(0);
+            gpa[goalKeeperAgent->id()]->init(goalKeeperTarget , wm->ball->pos - wm->field->ourGoal());
+        }
         else if(goalKeeperClearMode && !dangerForGoalKeeperClear){
             knowledge->goalKeeperClearMode = true;
             knowledge->goalKeeperOneTouchMode = false;
-            if(wm->ball->vel.length() > 0.4 && wm->ball->vel.length() < 1.3){
+            if(wm->ball->vel.length() > 0.6 && wm->ball->vel.length() < 1){
                 AHZSkills = gpa[knowledge->goalie->id()];
                 debug("Clear slow ball" , D_AHZ, "green");
                 gpa[goalKeeperAgent->id()]->setADiveMode(false);
@@ -2055,7 +2071,7 @@ void DefensePlan::executeGoalKeeper(){
         }
         debug(QString("beside flag : %1").arg(ballIsBesidePoles) , D_AHZ);
         if(!wm->field->isInOurPenaltyArea(goalKeeperTarget) && !goalKeeperOneTouch && defenseCount != 1){
-            tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(Segment2D(wm->field->ourGoal() , goalKeeperTarget)));
+            tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(Line2D(wm->field->ourGoal() , goalKeeperTarget)));
             if(tempSol.size() == 1){
                 goalKeeperTarget = tempSol.at(0);
             }
@@ -2064,7 +2080,7 @@ void DefensePlan::executeGoalKeeper(){
             }
         }
         if(!wm->field->isInOurPenaltyArea(knowledge->goalie->pos()) && !goalKeeperOneTouch && defenseCount != 1){
-            tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(Segment2D(wm->field->ourGoal() , knowledge->goalie->pos())));
+            tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(Line2D(wm->field->ourGoal() , knowledge->goalie->pos())));
             if(tempSol.size() == 1){
                 goalKeeperTarget = tempSol.at(0);
             }
@@ -2073,6 +2089,7 @@ void DefensePlan::executeGoalKeeper(){
             }
         }
     }
+    lastTS = knowledge->transientFlag;
 }
 
 void DefensePlan::announceClearing(bool state){
@@ -2735,7 +2752,12 @@ int DefensePlan::decideNumOfMarks(){
             return decideNumOfMarksInPlayOff(defenseCount);
         }
         else if(knowledge->transientFlag){
-            return defenseCount;//TO DO:
+            if(defExceptions.active && defenseCount >= 1){
+                return defenseCount - 1;
+            }
+            else{
+                return defenseCount;//TO DO:
+            }
         }
         else if(playOnMode){
             if((Vector2D::angleOf(BallPos,ourGoal,leftCorner).abs() < 20 + overDefThr
@@ -2766,14 +2788,32 @@ Vector2D DefensePlan::ballPrediction(bool _isGoalie){
     //// of field with ballLine.(algorithm is just like when ballLine isn't in the
     //// field).Also , If the ballLine has intersection with opponent agent, we
     //// consider the intersection point for the locaiton of the ball.
-
+    QList<Vector2D> tempSol;
     Vector2D BallPos = wm->ball->pos;
-    Vector2D BallVel = wm->ball->vel * 0.5;
-    Segment2D ballPosVel(BallPos,BallPos+(BallVel * 0.5));
+    Vector2D BallVel = wm->ball->vel;
     Vector2D predictedBall;
     Vector2D solu[2];
+    Segment2D ballPosVel(BallPos,BallPos+(BallVel * 1));
+    Line2D ballLine(wm->ball->pos , wm->ball->pos + wm->ball->vel);
     Rect2D fieldRect(Vector2D(- _FIELD_WIDTH/2.0 , - _FIELD_HEIGHT/2.0)+Vector2D(-0.005,-0.005),Vector2D(_FIELD_WIDTH/2.0 , _FIELD_HEIGHT/2.0)+Vector2D(+0.005,+0.005));
     double dist2Ball = 1000;
+    playOffMode = knowledge->getGameState() == CKnowledge::TheirDirectKick || knowledge->getGameState() == CKnowledge::TheirIndirectKick;
+    playOnMode = knowledge->transientFlag;
+    tempSol.clear();
+    if(!_isGoalie){
+        ballPosVel = Segment2D(BallPos,BallPos+(BallVel * 1));
+    }
+    if(wm->field->ourPAreaIntersect(ballLine).size()){
+        tempSol.append(wm->field->ourPAreaIntersect(ballLine));
+        if(tempSol.size() == 2){
+            predictedBall = tempSol.at(0).dist(ballPosInTransientMoment) < tempSol.at(1).dist(ballPosInTransientMoment) ? tempSol.at(1) : tempSol.at(0);
+            return predictedBall;
+        }
+        else if(tempSol.size() == 1){
+            predictedBall = wm->ball->pos;
+            return predictedBall;
+        }
+    }
     if(BallVel.x > 0 && BallPos.x > 0){
         return BallPos;
     }
@@ -2818,7 +2858,6 @@ Vector2D DefensePlan::ballPrediction(bool _isGoalie){
         predictedBall = BallPos;
         draw(QString("Def follow"), Vector2D(0,2),"red");
     }
-    draw(predictedBall);
     return predictedBall;
 }
 
@@ -2858,7 +2897,7 @@ void DefensePlan::findOppAgentsToMark(){
                 oppAgentsToMark.removeOne(oppAgentsToMark[i]);
                 // TODO: chage the transeint this flag
                 /*if(oppAgentsToMark[i]->vel.length() > 1)
-                    HMDtransient = 1;*/
+                                            HMDtransient = 1;*/
                 i--;
             }
         }
@@ -2870,7 +2909,7 @@ void DefensePlan::findOppAgentsToMark(){
                 // a minor change
                 // TODO: chage the transeint this flag
                 /*if(oppAgentsToMark[i]->vel.length() > 1)
-                HMDtransient = 1;*/
+                                        HMDtransient = 1;*/
                 i--;
             }
         }
@@ -2887,15 +2926,19 @@ Vector2D DefensePlan::posvel(CRobot* opp, double VelReliabiity){
     //// && velocity of the opponent agent.
 
     CDefPos test;
+    Vector2D oppVel = opp->vel;
+    if(oppVel.x > 0){
+        oppVel.x = 0;
+    }
     if(VelReliabiity == 0){
         return opp->pos;
     }
-    if(!opp->vel.length() > 0.5  || opp->vel.x > 0 || wm->field->isInOurPenaltyArea(opp->pos)){
+    if(!oppVel.length() > 0.5  || wm->field->isInOurPenaltyArea(opp->pos)){
         VelReliabiity = 0;
     }
     Segment2D tempseg;
-    Vector2D temppos = opp->pos + VelReliabiity * opp->vel;
-    tempseg.assign(opp->pos, opp->pos + VelReliabiity * opp->vel);
+    Vector2D temppos = opp->pos + VelReliabiity * oppVel;
+    tempseg.assign(opp->pos, opp->pos + VelReliabiity * oppVel);
     draw(tempseg,QColor(Qt::yellow));
     Vector2D penaltyvec;
     penaltyvec.assign(test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).x,test.getIntersectionWithPenaltyAreaDef(1.37,tempseg).y);
@@ -2905,11 +2948,11 @@ Vector2D DefensePlan::posvel(CRobot* opp, double VelReliabiity){
     }
     else if(temppos.x < -4.4){
         //debug(QString("Opp is out"),D_HAMED);
-        return Vector2D(-4.4,(opp->pos + VelReliabiity * opp->vel).y) ;
+        return Vector2D(-4.4,(opp->pos + VelReliabiity * oppVel).y) ;
     }
     else{
         //debug(QString("normal mode"),D_HAMED);
-        return opp->pos + VelReliabiity * opp->vel;
+        return opp->pos + VelReliabiity * oppVel;
     }
 }
 
@@ -2921,7 +2964,7 @@ void DefensePlan::findPos(int _markAgentSize){
     bool playOn = knowledge->isStart();
     bool playOff = ((knowledge->getGameState() == CKnowledge::TheirDirectKick)/*|| (knowledge->getGameState() == CKnowledge::TheirKickOff)*/|| (knowledge->getGameState() == CKnowledge::TheirIndirectKick));
     bool MantoManAllTransientFlag = policy()->Mark_ManToManAllTransiant();
-    xLimitForblockingPass = 0;
+    xLimitForblockingPass = 4.5;
     manToManMarkBlockPassFlag = policy()->Mark_PlayOffManToMan();
     stopMode = knowledge->isStop();
     markPoses.clear();
@@ -2943,7 +2986,9 @@ void DefensePlan::findPos(int _markAgentSize){
         segmentperpass = (100 - policy()->Mark_PassRatioBlock()) / 100;
     }
     //////////////// Determine the plan of mark from GUI ////////////////////
-    if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass){
+    if(manToManMarkBlockPassFlag || wm->ball->pos.x > xLimitForblockingPass + kickOffThr){
+        debug(QString("Is here"), D_HAMED);
+        kickOffThr =  0;
         if(playOff || stopMode){
             knowledge->stateForMark = QString("BlockPass");
             manToManMarkBlockPassInPlayOff(oppAgentsToMarkPos,_markAgentSize , policy()->Mark_PassRatioBlock() / 100);
@@ -2960,6 +3005,7 @@ void DefensePlan::findPos(int _markAgentSize){
         }
     }
     else{
+        kickOffThr = 0.2;
         if(playOff || stopMode){
             knowledge->stateForMark = QString("BlockShot");
             manToManMarkBlockShotInPlayOff(_markAgentSize);
@@ -3320,44 +3366,121 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
         Line2D aimLessLine(Vector2D(0,0),Vector2D(-1,-1));
         draw(AZBisecOpenSeg,"red");
         goal2Ball.assign(wm->field->ourGoal(),wm->ball->pos);
-        if(Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourGoalL()).degree() < 15 + angleDegreeThrNotStop){
+        if((Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourGoalL()).degree() < 15 + angleDegreeThrNotStop) && !knowledge->transientFlag){
             target = wm->field->ourGoalL() + goalKeeperTargetOffSet;
             angleDegreeThrNotStop = 2;
         }
-        else if(Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourGoalR()).degree() < 15 + angleDegreeThrNotStop){
+        else if((Vector2D::angleOf(wm->ball->pos,wm->field->ourGoal(),wm->field->ourGoalR()).degree() < 15 + angleDegreeThrNotStop) && !knowledge->transientFlag){
             target = wm->field->ourGoalR() + goalKeeperTargetOffSet;
             angleDegreeThrNotStop = 2;
         }
-        else {
+        else{
             angleDegreeThrNotStop = 0;
-            if(knowledge->goalie->pos().dist(AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos())) > 0.3 + thr){
-                target = AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos());
-                thr = 0;
-                if(!wm->field->isInField(target)){
-                    target = AZBisecOpenSeg.intersection(goalLine);
+            Line2D ballLine = Line2D(wm->ball->pos , wm->ball->pos + wm->ball->vel);
+            if(wm->field->ourPAreaIntersect(ballLine).size() && knowledge->transientFlag){
+                if(wm->ball->pos.dist(ballPosInTransientMoment) >= 0.5){
+                    tempSol.append(wm->field->ourPAreaIntersect(ballLine));
+                    if(tempSol.size() == 2){
+                        target = tempSol.at(0).dist(ballPosInTransientMoment) > tempSol.at(1).dist(ballPosInTransientMoment) ? tempSol.at(0) : tempSol.at(1);
+                    }
+                    else if(tempSol.size() == 1){
+                        target = tempSol.at(0);
+                    }
+                }
+                else{
+                    tempSol.append(wm->field->AHZOurPAreaIntersectForTransient(ballLine));
+                    if(tempSol.size() == 2){
+                        target = tempSol.at(0).dist(ballPosInTransientMoment) > tempSol.at(1).dist(ballPosInTransientMoment) ? tempSol.at(0) : tempSol.at(1);
+                    }
+                    else if(tempSol.size() == 1){
+                        target = tempSol.at(0);
+                    }
                 }
             }
             else{
-                thr = 0.3;
-                if(topFaceLength < bottomFaceLength){
-                    aimLessChord = bottomFaceLength_forTalles.nearestPoint(openAngGoalIntersectionTop).dist(openAngGoalIntersectionTop);
-                    debug(QString("top koochik tar"),D_SEPEHR);
-                    aimLessLine = Line2D(bottomFaceLength_forTalles.nearestPoint(openAngGoalIntersectionTop),openAngGoalIntersectionTop);
+                if(knowledge->goalie->pos().dist(AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos())) > 0.3 + thr){
+                    target = AZBisecOpenSeg.nearestPoint(knowledge->goalie->pos());
+                    thr = 0;
+                    if(!wm->field->isInField(target)){
+                        target = AZBisecOpenSeg.intersection(goalLine);
+                    }
                 }
                 else{
-                    aimLessChord = topFaceLength_forTalles.nearestPoint(openAngGoalIntersectionBottom).dist(openAngGoalIntersectionBottom);
-                    debug(QString("bottom koochik tar"),D_SEPEHR);
-                    aimLessLine = Line2D(topFaceLength_forTalles.nearestPoint(openAngGoalIntersectionBottom),openAngGoalIntersectionBottom);
-                    draw(Segment2D(topFaceLength_forTalles.nearestPoint(openAngGoalIntersectionBottom),openAngGoalIntersectionBottom),QColor(Qt::black));
-                }
-                if(aimLessChord > 2 * CRobot::robot_radius_new){
-                    debug(QString("chord > 2radius"),D_SEPEHR);
-                    aimLessLine = Line2D(Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y),Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y-0.1));
-                    draw(Segment2D(Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y),Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y-1)),QColor(Qt::black));
-                    if(AZBisecOpenSeg.intersection(aimLessLine).isValid()){
+                    thr = 0.3;
+                    if(topFaceLength < bottomFaceLength){
+                        aimLessChord = bottomFaceLength_forTalles.nearestPoint(openAngGoalIntersectionTop).dist(openAngGoalIntersectionTop);
+                        debug(QString("top koochik tar"),D_SEPEHR);
+                        aimLessLine = Line2D(bottomFaceLength_forTalles.nearestPoint(openAngGoalIntersectionTop),openAngGoalIntersectionTop);
+                    }
+                    else{
+                        aimLessChord = topFaceLength_forTalles.nearestPoint(openAngGoalIntersectionBottom).dist(openAngGoalIntersectionBottom);
+                        debug(QString("bottom koochik tar"),D_SEPEHR);
+                        aimLessLine = Line2D(topFaceLength_forTalles.nearestPoint(openAngGoalIntersectionBottom),openAngGoalIntersectionBottom);
+                        draw(Segment2D(topFaceLength_forTalles.nearestPoint(openAngGoalIntersectionBottom),openAngGoalIntersectionBottom),QColor(Qt::black));
+                    }
+                    if(aimLessChord > 2 * CRobot::robot_radius_new){
+                        debug(QString("chord > 2radius"),D_SEPEHR);
+                        aimLessLine = Line2D(Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y),Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y-0.1));
+                        draw(Segment2D(Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y),Vector2D(ballPos.x-(.18*ballheight/aimLessChord),ballPos.y-1)),QColor(Qt::black));
+                        if(AZBisecOpenSeg.intersection(aimLessLine).isValid()){
+                            if(defenseCount == 2){
+                                if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 10 + threshOld){
+                                    target = AZBisecOpenSeg.intersection(aimLessLine);
+                                    threshOld = 0;
+                                }
+                                else{
+                                    threshOld = 5;
+                                    target = knowledge->getPointInDirection(wm->field->ourGoal() , wm->ball->pos , 0.1);
+                                }
+                            }
+                            else if(defenseCount == 1){
+                                target = getGoaliePositionInOneDef(wm->ball->pos , 0.1 , 1.5);
+                            }
+                            else{
+                                tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
+                                if(tempSol.size() == 1){
+                                    target = tempSol.at(0);
+                                }
+                                else if(tempSol.size() == 2){
+                                    target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
+                                }
+                            }
+                        }
+                        else{
+                            if(defenseCount == 2){
+                                if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 10 + threshOld){
+                                    target = AZBisecOpenSeg.intersection(aimLessLine);
+                                    threshOld = 0;
+                                }
+                                else{
+                                    threshOld = 5;
+                                    target = knowledge->getPointInDirection(wm->field->ourGoal() , wm->ball->pos , 0.1);
+                                }
+                            }
+                            else if(defenseCount == 1){
+                                target = getGoaliePositionInOneDef(wm->ball->pos , 0.1 , 1.5);
+                            }
+                            else{
+                                tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
+                                if(tempSol.size() == 1){
+                                    target = tempSol.at(0);
+                                }
+                                else if(tempSol.size() == 2){
+                                    target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
+                                }
+                            }
+                        }
+                    }
+                    else{
                         if(defenseCount == 2){
                             if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 10 + threshOld){
-                                target = AZBisecOpenSeg.intersection(aimLessLine);
+                                tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
+                                if(tempSol.size() == 1){
+                                    target = tempSol.at(0);
+                                }
+                                else if(tempSol.size() == 2){
+                                    target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
+                                }
                                 threshOld = 0;
                             }
                             else{
@@ -3366,70 +3489,16 @@ Vector2D DefensePlan::strictFollowBall(Vector2D _ballPos){
                             }
                         }
                         else if(defenseCount == 1){
-                            target = getGoaliePositionInOneDef(wm->ball->pos , 1 , 1.5);
+                            target = getGoaliePositionInOneDef(wm->ball->pos , 0.1 , 1.5);
                         }
                         else{
-                            tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
+                            tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(AZBisecOpenSeg));
                             if(tempSol.size() == 1){
                                 target = tempSol.at(0);
                             }
                             else if(tempSol.size() == 2){
                                 target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
                             }
-                        }
-                    }
-                    else{
-                        if(defenseCount == 2){
-                            if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 10 + threshOld){
-                                target = AZBisecOpenSeg.intersection(aimLessLine);
-                                threshOld = 0;
-                            }
-                            else{
-                                threshOld = 5;
-                                target = knowledge->getPointInDirection(wm->field->ourGoal() , wm->ball->pos , 0.1);
-                            }
-                        }
-                        else if(defenseCount == 1){
-                            target = getGoaliePositionInOneDef(wm->ball->pos , 1 , 1.5);
-                        }
-                        else{
-                            tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
-                            if(tempSol.size() == 1){
-                                target = tempSol.at(0);
-                            }
-                            else if(tempSol.size() == 2){
-                                target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
-                            }
-                        }
-                    }
-                }
-                else{
-                    if(defenseCount == 2){
-                        if(knowledge->getEmptyAngle(ballPos, wm->field->ourGoalL(), wm->field->ourGoalR(), defs, AZDangerPercent, AZBisecOpenAngle, AZBigestOpenAngle,true) > 10 + threshOld){
-                            tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(Segment2D(wm->field->ourGoal() , wm->ball->pos)));
-                            if(tempSol.size() == 1){
-                                target = tempSol.at(0);
-                            }
-                            else if(tempSol.size() == 2){
-                                target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
-                            }
-                            threshOld = 0;
-                        }
-                        else{
-                            threshOld = 5;
-                            target = knowledge->getPointInDirection(wm->field->ourGoal() , wm->ball->pos , 0.1);
-                        }
-                    }
-                    else if(defenseCount == 1){
-                        target = getGoaliePositionInOneDef(wm->ball->pos , 1 , 1.5);
-                    }
-                    else{
-                        tempSol.append(wm->field->AHZOurPAreaIntersectForGoalKeeper(AZBisecOpenSeg));
-                        if(tempSol.size() == 1){
-                            target = tempSol.at(0);
-                        }
-                        else if(tempSol.size() == 2){
-                            target = tempSol.at(0).dist(wm->ball->pos) < tempSol.at(1).dist(wm->ball->pos) ? tempSol.at(0) : tempSol.at(1);
                         }
                     }
                 }

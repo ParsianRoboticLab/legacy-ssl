@@ -56,7 +56,7 @@ protected:
     void checkGoalieTarget();    
     void setGoalKeeperState();
     void setGoalKeeperTargetPoint();
-    bool goalKeeperOneTouch,goalKeeperClearMode,ballIsOutOfField, ballIsBesidePoles;
+    bool goalKeeperOneTouch,goalKeeperClearMode,ballIsOutOfField, ballIsBesidePoles , predictionInClearMode;
     double strictfollowThr;          
     bool dangerForGoalKeeperClear;
     int oneTouchCnt;    
@@ -80,6 +80,8 @@ protected:
     double besideCounter;
     int lastOpponentAgentsToBeMarkSize;
     double threshOld = 0.0;
+    double kickOffThr;
+    double ballVelThreshOld;
     double ballCircleR = 0.5;
     double xLimitForblockingPass;
     bool isPermissionToKick;
@@ -98,10 +100,12 @@ protected:
     bool dangerModeThresholdForDanger;    
     bool manToManMarkBlockPassFlag;    
     bool goalKeeperPredictionModeInPlayOff;    
+    bool lastTS;
     QList <QString> markRoles;
     QList <QString> lastMarkRoles;
-    Vector2D opponentPasserDirection;
-    Vector2D tempBallRectanglePoint;
+
+    Vector2D ballPosInTransientMoment;
+    Vector2D opponentPasserDirection;   
     Vector2D oppNearestToBallPossition;
     Vector2D tempAHZ;
     Vector2D noKickTarget;    
@@ -174,6 +178,11 @@ public:
       bool MantoManAllTransientFlag;      
       Vector2D dir;
     ///////////////////////////////////
+
+    ///////////////ArashZ/////////////
+      Vector2D LastBallPosPO;
+      void saveBallPosPO (bool _isOur);
+    //////////////////////////////////
 
 
 private:
