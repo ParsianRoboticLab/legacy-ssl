@@ -1,8 +1,8 @@
 #!/bin/bash
 # These are the packages required for install on Ubuntu systems.
-sudo apt-get --assume-yes install g++ libqt4-dev libeigen3-dev libdc1394-22 libdc1394-22-dev cmake libv4l-0  #SSL-VISION
-sudo apt-get --assume-yes install build-essential libqjson-dev libode-dev libboost-dev libgl1-mesa-dev freeglut3-dev #PARSIAN AI
-sudo apt-get --assume-yes install libprotobuf-dev protobuf-compiler protobuf-c-compiler libprotoc-dev #Protobuf
+sudo apt-get install g++ libqt4-dev libeigen3-dev libdc1394-22 libdc1394-22-dev cmake libv4l-0  #SSL-VISION
+sudo apt-get install build-essential libqjson-dev libode-dev libboost-dev libgl1-mesa-dev freeglut3-dev #PARSIAN AI
+sudo apt-get install libprotobuf-dev protobuf-compiler protobuf-c-compiler libprotoc-dev #Protobuf
 
 # INSTALL VARTYPES
 mkdir temp
