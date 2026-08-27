@@ -1,4 +1,0 @@
-[submodule "ssl-visual-planner"]
-	path = ssl-visual-planner
-	url = https://github.com/mahi97/ssl-visual-planner.git
-	branch = master
